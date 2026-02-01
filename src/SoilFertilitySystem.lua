@@ -1,5 +1,5 @@
 -- =========================================================
--- FS25 Realistic Soil & Fertilizer (version 1.0.0.0)
+-- FS25 Realistic Soil & Fertilizer (version 1.0.0.5)
 -- =========================================================
 -- Realistic soil fertility and fertilizer management
 -- =========================================================
@@ -30,8 +30,23 @@ function SoilFertilitySystem:initialize()
         return
     end
     
+    -- Check for PF compatibility
+    if self:checkPFCompatibility() then
+        self.isInitialized = true
+        self:log("Initialized in PF compatibility mode")
+        return
+    end
+    
+    -- Normal initialization
     if g_currentMission and g_currentMission.fieldGroundSystem then
         self:scanFields()
+        
+        -- FIX: Ensure fieldData is initialized even if scanFields fails
+        if not self.fieldData or type(self.fieldData) ~= "table" then
+            self.fieldData = {}
+            self:log("Field data initialized as empty table")
+        end
+        
         self.isInitialized = true
         self:log("Soil Fertility System initialized successfully")
         self:log("Fertility System: %s, Nutrient Cycles: %s", 
@@ -41,6 +56,9 @@ function SoilFertilitySystem:initialize()
         if self.settings.enabled and self.settings.showNotifications then
             self:showNotification("Soil & Fertilizer Mod Active", "Type 'soilfertility' for commands")
         end
+    else
+        self:log("WARNING: Could not initialize - fieldGroundSystem not available")
+        self.fieldData = {}  -- FIX: Initialize empty to prevent nil errors
     end
 end
 
@@ -62,8 +80,73 @@ function SoilFertilitySystem:showNotification(title, message)
     self:log("%s: %s", title, message)
 end
 
+-- Add this function to SoilFertilitySystem class
+function SoilFertilitySystem:checkPFCompatibility()
+    -- Check if Precision Farming is active
+    if g_precisionFarming or _G["g_precisionFarming"] then
+        self:log("WARNING: Precision Farming detected - running in compatibility mode")
+        
+        -- Auto-disable conflicting features
+        if self.settings.fertilitySystem then
+            self.settings.fertilitySystem = false
+            self:log("Auto-disabled fertility system for PF compatibility")
+        end
+        
+        if self.settings.nutrientCycles then
+            self.settings.nutrientCycles = false
+            self:log("Auto-disabled nutrient cycles for PF compatibility")
+        end
+        
+        if self.settings.fertilizerCosts then
+            self.settings.fertilizerCosts = false
+            self:log("Auto-disabled fertilizer costs for PF compatibility")
+        end
+        
+        self.settings:save()
+        
+        if self.settings.showNotifications then
+            self:showNotification("PF Compatibility", 
+                "Some features disabled for Precision Farming compatibility")
+        end
+        
+        return true
+    end
+    
+    return false
+end
+
+-- Modify the initialize function:
+function SoilFertilitySystem:initialize()
+    if self.isInitialized then
+        return
+    end
+    
+    -- Check for PF compatibility
+    if self:checkPFCompatibility() then
+        self.isInitialized = true
+        self:log("Initialized in PF compatibility mode")
+        return
+    end
+    
+    -- Normal initialization
+    if g_currentMission and g_currentMission.fieldGroundSystem then
+        self:scanFields()
+        self.isInitialized = true
+        self:log("Soil Fertility System initialized successfully")
+        self:log("Fertility System: %s, Nutrient Cycles: %s", 
+            tostring(self.settings.fertilitySystem),
+            tostring(self.settings.nutrientCycles))
+        
+        if self.settings.enabled and self.settings.showNotifications then
+            self:showNotification("Soil & Fertilizer Mod Active", "Type 'soilfertility' for commands")
+        end
+    end
+end
+
 function SoilFertilitySystem:scanFields()
     if not g_currentMission or not g_currentMission.fieldGroundSystem then
+        self.fieldData = {}
+        self:log("WARNING: Could not scan fields - returning empty table")
         return
     end
     
@@ -226,13 +309,16 @@ function SoilFertilitySystem:update(dt)
         self.lastUpdate = 0
         
         -- Natural nutrient replenishment over time
-        if self.settings.nutrientCycles then
+        -- FIX: Check if fieldData exists and is a table before iterating
+        if self.settings.nutrientCycles and self.fieldData and type(self.fieldData) == "table" then
             for fieldId, field in pairs(self.fieldData) do
-                if g_currentMission.environment.currentDay - field.lastHarvest > 30 then
-                    -- Natural recovery when fields are fallow
-                    field.nitrogen = math.min(100, field.nitrogen + 0.5)
-                    field.phosphorus = math.min(100, field.phosphorus + 0.3)
-                    field.potassium = math.min(100, field.potassium + 0.4)
+                if field and g_currentMission and g_currentMission.environment then
+                    if g_currentMission.environment.currentDay - field.lastHarvest > 30 then
+                        -- Natural recovery when fields are fallow
+                        field.nitrogen = math.min(100, field.nitrogen + 0.5)
+                        field.phosphorus = math.min(100, field.phosphorus + 0.3)
+                        field.potassium = math.min(100, field.potassium + 0.4)
+                    end
                 end
             end
         end
