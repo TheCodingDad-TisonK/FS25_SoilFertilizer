@@ -29,7 +29,7 @@ The **Realistic Soil & Fertilizer Mod** adds depth and realism to soil managemen
 - Costs scale with difficulty level
 - Strategic fertilizer planning becomes essential
 
-### ⚙️ **Customizable Settings**
+### ⚙️ **Customizable Settings** --> Disabled
 - **Difficulty Levels:**
   - Simple: Reduced nutrient depletion, lower costs
   - Realistic: Balanced gameplay, standard settings
