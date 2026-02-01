@@ -56,19 +56,6 @@ The **Realistic Soil & Fertilizer Mod** adds depth and realism to soil managemen
    - **Mac:** `~/Documents/My Games/FarmingSimulator25/mods/`
    - **Linux:** `~/.local/share/FarmingSimulator25/mods/`
 
-### Manual Installation
-1. Create a folder named `FS25_SoilFertilizer` in your mods directory
-2. Copy all files from the mod archive into this folder
-3. Ensure the folder structure matches:
-   ```
-   FS25_SoilFertilizer/
-   ├── modDesc.xml
-   ├── icon.dds
-   └── src/
-       ├── main.lua
-       ├── ...
-   ```
-
 ## Configuration
 
 ### In-Game Settings
