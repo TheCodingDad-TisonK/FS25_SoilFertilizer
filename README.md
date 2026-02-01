@@ -168,21 +168,10 @@ While this is a personal project, suggestions and feedback are welcome on the Ki
 ### Credits
 - **Author:** TisonK
 
-## License
-This mod is provided free of charge. You may:
-- Use the mod for personal gameplay
-- Share the mod with proper attribution
-- Create videos/streams featuring the mod
-
-You may NOT:
-- Redistribute modified versions without permission
-- Claim the mod as your own work
-- Use code for commercial purposes without permission
-
 ## Support
 For support, questions, or feedback:
 - Comment on the KingMods page
-- Check the FAQ section
+- Create a issue on the github repo
 - Review troubleshooting guide above
 
 
