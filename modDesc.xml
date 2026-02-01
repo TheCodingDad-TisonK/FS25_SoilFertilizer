@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<modDesc descVersion="92">
+    <author>TisonK</author>
+    <version>1.0.0.0</version>
+    <modName>FS25_SoilFertilizer</modName>
+    <title>
+        <en>Realistic Soil & Fertilizer</en>
+        <de>Realistischer Boden & Dünger</de>
+        <fr>Sol & Engrais Réalistes</fr>
+        <pl>Realistyczna Gleba & Nawóz</pl>
+        <es>Suelo & Fertilizante Realistas</es>
+        <it>Suolo & Fertilizzante Realistici</it>
+        <cz>Realistická Půda & Hnojivo</cz>
+        <br>Solo & Fertilizante Realistas</br>
+        <uk>Реалістичний грунт та добриво</uk>
+        <ru>Реалистичная почва и удобрение</ru>
+    </title>
+    <description>
+        <en>Adds realistic soil fertility mechanics, fertilizer requirements, and nutrient cycles.</en>
+        <de>Fügt realistische Bodenfruchtbarkeitsmechaniken, Düngeranforderungen und Nährstoffkreisläufe hinzu.</de>
+        <fr>Ajoute des mécaniques de fertilité du sol réalistes, des exigences en engrais et des cycles de nutriments.</fr>
+        <pl>Dodaje realistyczne mechaniki żyzności gleby, wymagania nawozowe i cykle składników odżywczych.</pl>
+        <es>Añade mecánicas realistas de fertilidad del suelo, requisitos de fertilizante y ciclos de nutrientes.</es>
+        <it>Aggiunge meccaniche realistiche di fertilità del suolo, requisiti di fertilizzante e cicli nutrizionali.</it>
+        <cz>Přidává realistické mechanismy úrodnosti půdy, požadavky na hnojivo a nutriční cykly.</cz>
+        <br>Adiciona mecânicas realistas de fertilidade do solo, requisitos de fertilizante e ciclos de nutrientes.</br>
+        <uk>Додає реалістичні механіки родючості ґрунту, вимоги до добрив та циклів поживних речовин.</uk>
+        <ru>Добавляет реалистичные механизмы плодородия почвы, требования к удобрениям и циклы питательных веществ.</ru>
+    </description>
+    <iconFilename>icon.dds</iconFilename>
+    
+    <multiplayer supported="true"/>
+    
+    <extraSourceFiles>
+        <sourceFile filename="src/main.lua" />
+    </extraSourceFiles>
+
+    <l10n>
+        <text name="sf_section">
+            <en>Soil & Fertilizer</en>
+            <de>Boden & Dünger</de>
+            <fr>Sol & Engrais</fr>
+            <pl>Gleba & Nawóz</pl>
+            <es>Suelo & Fertilizante</es>
+            <it>Suolo & Fertilizzante</it>
+            <cz>Půda & Hnojivo</cz>
+            <br>Solo & Fertilizante</br>
+            <uk>Грунт та добриво</uk>
+            <ru>Почва и удобрение</ru>
+        </text>
+        
+        <text name="sf_enabled_short">
+            <en>Enable Mod</en>
+            <de>Mod aktivieren</de>
+            <fr>Activer le mod</fr>
+            <pl>Włącz mod</pl>
+            <es>Activar mod</es>
+            <it>Attiva mod</it>
+            <cz>Povolit mod</cz>
+            <br>Ativar mod</br>
+            <uk>Увімкнути мод</uk>
+            <ru>Включить мод</ru>
+        </text>
+        
+        <text name="sf_enabled_long">
+            <en>Enable or disable the soil & fertilizer mod</en>
+            <de>Boden- & Dünger-Mod aktivieren oder deaktivieren</de>
+            <fr>Activer ou désactiver le module sol & engrais</fr>
+            <pl>Włącz lub wyłącz mod gleby i nawozu</pl>
+            <es>Activar o desactivar el módulo suelo & fertilizante</es>
+            <it>Attiva o disattiva il modulo suolo & fertilizzante</it>
+            <cz>Povolit nebo zakázat mod půda & hnojivo</cz>
+            <br>Ativar ou desativar o mod solo & fertilizante</br>
+            <uk>Увімкнути або вимкнути мод грунту та добрива</uk>
+            <ru>Включить или выключить мод почвы и удобрения</ru>
+        </text>
+        
+        <text name="sf_debug_short">
+            <en>DEBUG Mode</en>
+            <de>DEBUG-Modus</de>
+            <fr>Mode DEBUG</fr>
+            <pl>Tryb DEBUG</pl>
+            <es>Modo DEBUG</es>
+            <it>Modalità DEBUG</it>
+            <cz>DEBUG režim</cz>
+            <br>Modo DEBUG</br>
+            <uk>Режим DEBUG</uk>
+            <ru>Режим DEBUG</ru>
+        </text>
+        
+        <text name="sf_debug_long">
+            <en>Enable/disable debug mode (extra logging)</en>
+            <de>DEBUG-Modus ein-/ausschalten (zusätzliche Protokollierung)</de>
+            <fr>Activer/désactiver le mode DEBUG (journalisation supplémentaire)</fr>
+            <pl>Włącz/wyłącz tryb DEBUG (dodatkowe logowanie)</pl>
+            <es>Activar/desactivar modo DEBUG (registro adicional)</es>
+            <it>Attiva/disattiva modalità DEBUG (registrazione aggiuntiva)</it>
+            <cz>Povolit/zakázat DEBUG režim (dodatečné logování)</cz>
+            <br>Ativar/desativar modo DEBUG (registro adicional)</br>
+            <uk>Увімкнути/вимкнути режим DEBUG (додаткове логування)</uk>
+            <ru>Включить/выключить режим DEBUG (дополнительное логирование)</ru>
+        </text>
+        
+        <text name="sf_fertility_short">
+            <en>Fertility System</en>
+            <de>Fruchtbarkeitssystem</de>
+            <fr>Système de Fertilité</fr>
+            <pl>System Żyzności</pl>
+            <es>Sistema Fertilidad</es>
+            <it>Sistema Fertilità</it>
+            <cz>Systém Úrodnosti</cz>
+            <br>Sistema Fertilidade</br>
+            <uk>Система родючості</uk>
+            <ru>Система плодородия</ru>
+        </text>
+        
+        <text name="sf_fertility_long">
+            <en>Enable/disable dynamic soil fertility system</en>
+            <de>Dynamisches Bodenfruchtbarkeitssystem ein-/ausschalten</de>
+            <fr>Activer/désactiver le système de fertilité du sol dynamique</fr>
+            <pl>Włącz/wyłącz dynamiczny system żyzności gleby</pl>
+            <es>Activar/desactivar sistema dinámico de fertilidad del suelo</es>
+            <it>Attiva/disattiva sistema dinamico fertilità del suolo</it>
+            <cz>Povolit/zakázat dynamický systém úrodnosti půdy</cz>
+            <br>Ativar/desativar sistema dinâmico de fertilidade do solo</br>
+            <uk>Увімкнути/вимкнути динамічну систему родючості ґрунту</uk>
+            <ru>Включить/выключить динамическую систему плодородия почвы</ru>
+        </text>
+        
+        <text name="sf_nutrients_short">
+            <en>Nutrient Cycles</en>
+            <de>Nährstoffkreisläufe</de>
+            <fr>Cycles Nutriments</fr>
+            <pl>Cykle Składników</pl>
+            <es>Ciclos Nutrientes</es>
+            <it>Cicli Nutrienti</it>
+            <cz>Nutriční Cykly</cz>
+            <br>Ciclos Nutrientes</br>
+            <uk>Цикли поживних речовин</uk>
+            <ru>Циклы питательных веществ</ru>
+        </text>
+        
+        <text name="sf_nutrients_long">
+            <en>Enable/disable realistic nutrient depletion and replenishment</en>
+            <de>Realistische Nährstoffverarmung und -auffüllung ein-/ausschalten</de>
+            <fr>Activer/désactiver l'épuisement et le réapprovisionnement réalistes des nutriments</fr>
+            <pl>Włącz/wyłącz realistyczne wyczerpywanie i uzupełnianie składników</pl>
+            <es>Activar/desactivar agotamiento y reposición realistas de nutrientes</es>
+            <it>Attiva/disattiva esaurimento e reintegro realistici nutrienti</it>
+            <cz>Povolit/zakázat realistické vyčerpání a doplňování živin</cz>
+            <br>Ativar/desativar esgotamento e reposição realistas de nutrientes</br>
+            <uk>Увімкнути/вимкнути реалістичне виснаження та відновлення поживних речовин</uk>
+            <ru>Включить/выключить реалистичное истощение и восстановление питательных веществ</ru>
+        </text>
+        
+        <text name="sf_difficulty_short">
+            <en>Difficulty</en>
+            <de>Schwierigkeit</de>
+            <fr>Difficulté</fr>
+            <pl>Trudność</pl>
+            <es>Dificultad</es>
+            <it>Difficoltà</it>
+            <cz>Obtížnost</cz>
+            <br>Dificuldade</br>
+            <uk>Складність</uk>
+            <ru>Сложность</ru>
+        </text>
+        
+        <text name="sf_difficulty_long">
+            <en>Set difficulty level: Simple, Realistic, Hardcore</en>
+            <de>Schwierigkeitsgrad festlegen: Einfach, Realistisch, Hardcore</de>
+            <fr>Définir le niveau de difficulté : Simple, Réaliste, Hardcore</fr>
+            <pl>Ustaw poziom trudności: Prosty, Realistyczny, Hardcore</pl>
+            <es>Establecer nivel dificultad: Simple, Realista, Hardcore</es>
+            <it>Imposta livello difficoltà: Semplice, Realistico, Hardcore</it>
+            <cz>Nastavit úroveň obtížnosti: Jednoduchý, Realistický, Hardcore</cz>
+            <br>Definir nível dificuldade: Simples, Realista, Hardcore</br>
+            <uk>Встановити рівень складності: Простий, Реалістичний, Хардкор</uk>
+            <ru>Установить уровень сложности: Простой, Реалистичный, Хардкор</ru>
+        </text>
+        
+        <text name="sf_diff_1">
+            <en>Simple</en>
+            <de>Einfach</de>
+            <fr>Simple</fr>
+            <pl>Prosty</pl>
+            <es>Simple</es>
+            <it>Semplice</it>
+            <cz>Jednoduchý</cz>
+            <br>Simples</br>
+            <uk>Простий</uk>
+            <ru>Простой</ru>
+        </text>
+        
+        <text name="sf_diff_2">
+            <en>Realistic</en>
+            <de>Realistisch</de>
+            <fr>Réaliste</fr>
+            <pl>Realistyczny</pl>
+            <es>Realista</es>
+            <it>Realistico</it>
+            <cz>Realistický</cz>
+            <br>Realista</br>
+            <uk>Реалістичний</uk>
+            <ru>Реалистичный</ru>
+        </text>
+        
+        <text name="sf_diff_3">
+            <en>Hardcore</en>
+            <de>Hardcore</de>
+            <fr>Hardcore</fr>
+            <pl>Hardcore</pl>
+            <es>Hardcore</es>
+            <it>Hardcore</it>
+            <cz>Hardcore</cz>
+            <br>Hardcore</br>
+            <uk>Хардкор</uk>
+            <ru>Хардкор</ru>
+        </text>
+        
+        <text name="sf_fertilizer_cost_short">
+            <en>Fertilizer Costs</en>
+            <de>Düngerkosten</de>
+            <fr>Coûts Engrais</fr>
+            <pl>Koszty Nawozu</pl>
+            <es>Costes Fertilizante</es>
+            <it>Costi Fertilizzante</it>
+            <cz>Náklady Hnojiva</cz>
+            <br>Custos Fertilizante</br>
+            <uk>Вартість добрив</uk>
+            <ru>Стоимость удобрений</ru>
+        </text>
+        
+        <text name="sf_fertilizer_cost_long">
+            <en>Enable/disable realistic fertilizer purchase costs</en>
+            <de>Realistische Düngerkaufkosten ein-/ausschalten</de>
+            <fr>Activer/désactiver les coûts d'achat d'engrais réalistes</fr>
+            <pl>Włącz/wyłącz realistyczne koszty zakupu nawozu</pl>
+            <es>Activar/desactivar costes realistas de compra de fertilizante</es>
+            <it>Attiva/disattiva costi realistici acquisto fertilizzante</it>
+            <cz>Povolit/zakázat realistické nákupní náklady hnojiva</cz>
+            <br>Ativar/desativar custos realistas de compra de fertilizante</br>
+            <uk>Увімкнути/вимкнути реалістичну вартість покупки добрив</uk>
+            <ru>Включить/выключить реалистичную стоимость покупки удобрений</ru>
+        </text>
+        
+        <text name="sf_notifications_short">
+            <en>Notifications</en>
+            <de>Benachrichtigungen</de>
+            <fr>Notifications</fr>
+            <pl>Powiadomienia</pl>
+            <es>Notificaciones</es>
+            <it>Notifiche</it>
+            <cz>Upozornění</cz>
+            <br>Notificações</br>
+            <uk>Сповіщення</uk>
+            <ru>Уведомления</ru>
+        </text>
+        
+        <text name="sf_notifications_long">
+            <en>Enable/disable soil and fertilizer notifications</en>
+            <de>Boden- und Düngerbenachrichtigungen ein-/ausschalten</de>
+            <fr>Activer/désactiver les notifications de sol et d'engrais</fr>
+            <pl>Włącz/wyłącz powiadomienia o glebie i nawozie</pl>
+            <es>Activar/desactivar notificaciones de suelo y fertilizante</es>
+            <it>Attiva/disattiva notifiche suolo e fertilizzante</it>
+            <cz>Povolit/zakázat upozornění na půdu a hnojivo</cz>
+            <br>Ativar/desativar notificações de solo e fertilizante</br>
+            <uk>Увімкнути/вимкнути сповіщення про ґрунт і добрива</uk>
+            <ru>Включить/выключить уведомления о почве и удобрениях</ru>
+        </text>
+        
+        <text name="sf_reset">
+            <en>Reset Soil Settings</en>
+            <de>Bodeneinstellungen zurücksetzen</de>
+            <fr>Réinitialiser paramètres sol</fr>
+            <pl>Resetuj ustawienia gleby</pl>
+            <es>Restablecer config. suelo</es>
+            <it>Ripristina impostazioni suolo</it>
+            <cz>Resetovat nastavení půdy</cz>
+            <br>Restaurar configurações solo</br>
+            <uk>Скинути налаштування ґрунту</uk>
+            <ru>Сбросить настройки почвы</ru>
+        </text>
+    </l10n>
+</modDesc>
