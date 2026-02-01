@@ -62,7 +62,7 @@ The **Realistic Soil & Fertilizer Mod** adds depth and realism to soil managemen
 
 ## Configuration
 
-### In-Game Settings
+### In-Game Settings --> This does nothing at the moment!
 1. Open the game menu
 2. Navigate to **Settings → General**
 3. Find the **"Soil & Fertilizer"** section
