@@ -1,6 +1,7 @@
 # Realistic Soil & Fertilizer Mod for Farming Simulator 25
 
-## Temporarily disabled settings via the pause menu
+## NOTE FROM THE DEVELOPER
+**Temporarily** disabled settings via the pause menu!!!
 
 ## Overview
 The **Realistic Soil & Fertilizer Mod** adds depth and realism to soil management and fertilization in Farming Simulator 25. This mod introduces dynamic soil fertility, nutrient cycles, and realistic fertilizer economics, making farming more challenging and rewarding.
