@@ -1,5 +1,6 @@
 ## READ THIS FIRST PLEASE
 **Temporarily** disabled settings via the pause menu!
+Thank you, now continue with reading :)
 
 # Realistic Soil & Fertilizer Mod for Farming Simulator 25
 
