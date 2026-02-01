@@ -135,7 +135,7 @@ Open the console with `~` key and use these commands:
    - Check spelling of commands
    - Verify mod initialized properly
 
-### Error Reporting
+### Error Reporting (same usage for Github Issue)
 If you encounter issues:
 1. Check the `game.log` file for error messages
 2. Note what you were doing when the issue occurred
