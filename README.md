@@ -102,7 +102,7 @@ Open the console with `~` key and use these commands:
 - **Game Version:** Farming Simulator 25 (v1.0 or higher)
 - **Platform:** PC, Mac, Linux
 - **Multiplayer:** Fully supported
-- **Mod Conflicts:** None known
+- **Mod Conflicts:** Shop screen conflict
 
 ### Performance Impact
 - Minimal performance impact
