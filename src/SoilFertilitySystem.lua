@@ -1,5 +1,5 @@
 -- =========================================================
--- FS25 Realistic Soil & Fertilizer (version 1.0.0.5)
+-- FS25 Realistic Soil & Fertilizer (version 1.0.1.0)
 -- =========================================================
 -- Realistic soil fertility and fertilizer management
 -- =========================================================
@@ -19,7 +19,7 @@ function SoilFertilitySystem.new(settings)
     self.settings = settings
     self.fieldData = {}
     self.lastUpdate = 0
-    self.updateInterval = 30000 -- 30 seconds
+    self.updateInterval = 30000
     self.isInitialized = false
     
     return self
@@ -30,23 +30,18 @@ function SoilFertilitySystem:initialize()
         return
     end
     
-    -- Check for PF compatibility
     if self:checkPFCompatibility() then
         self.isInitialized = true
         self:log("Initialized in PF compatibility mode")
         return
     end
     
-    -- Normal initialization
+    if not self.fieldData then
+        self.fieldData = {}
+    end
+    
     if g_currentMission and g_currentMission.fieldGroundSystem then
         self:scanFields()
-        
-        -- FIX: Ensure fieldData is initialized even if scanFields fails
-        if not self.fieldData or type(self.fieldData) ~= "table" then
-            self.fieldData = {}
-            self:log("Field data initialized as empty table")
-        end
-        
         self.isInitialized = true
         self:log("Soil Fertility System initialized successfully")
         self:log("Fertility System: %s, Nutrient Cycles: %s", 
@@ -57,8 +52,8 @@ function SoilFertilitySystem:initialize()
             self:showNotification("Soil & Fertilizer Mod Active", "Type 'soilfertility' for commands")
         end
     else
-        self:log("WARNING: Could not initialize - fieldGroundSystem not available")
-        self.fieldData = {}  -- FIX: Initialize empty to prevent nil errors
+        self.isInitialized = true 
+        self:log("WARNING: Could not fully initialize - running in limited mode")
     end
 end
 
@@ -80,13 +75,10 @@ function SoilFertilitySystem:showNotification(title, message)
     self:log("%s: %s", title, message)
 end
 
--- Add this function to SoilFertilitySystem class
 function SoilFertilitySystem:checkPFCompatibility()
-    -- Check if Precision Farming is active
     if g_precisionFarming or _G["g_precisionFarming"] then
         self:log("WARNING: Precision Farming detected - running in compatibility mode")
         
-        -- Auto-disable conflicting features
         if self.settings.fertilitySystem then
             self.settings.fertilitySystem = false
             self:log("Auto-disabled fertility system for PF compatibility")
@@ -115,53 +107,32 @@ function SoilFertilitySystem:checkPFCompatibility()
     return false
 end
 
--- Modify the initialize function:
-function SoilFertilitySystem:initialize()
-    if self.isInitialized then
-        return
-    end
-    
-    -- Check for PF compatibility
-    if self:checkPFCompatibility() then
-        self.isInitialized = true
-        self:log("Initialized in PF compatibility mode")
-        return
-    end
-    
-    -- Normal initialization
-    if g_currentMission and g_currentMission.fieldGroundSystem then
-        self:scanFields()
-        self.isInitialized = true
-        self:log("Soil Fertility System initialized successfully")
-        self:log("Fertility System: %s, Nutrient Cycles: %s", 
-            tostring(self.settings.fertilitySystem),
-            tostring(self.settings.nutrientCycles))
-        
-        if self.settings.enabled and self.settings.showNotifications then
-            self:showNotification("Soil & Fertilizer Mod Active", "Type 'soilfertility' for commands")
-        end
-    end
-end
-
 function SoilFertilitySystem:scanFields()
+    self.fieldData = {}
+    
     if not g_currentMission or not g_currentMission.fieldGroundSystem then
-        self.fieldData = {}
         self:log("WARNING: Could not scan fields - returning empty table")
         return
     end
     
-    self.fieldData = {}
+    if not g_currentMission.fieldGroundSystem.fields then
+        self:log("WARNING: fields table is nil - returning empty table")
+        self.fieldData = {}
+        return
+    end
+    
     local fieldCount = 0
     
+    -- Safe iteration with nil check
     for _, field in pairs(g_currentMission.fieldGroundSystem.fields) do
         if field and field.fieldId then
             self.fieldData[field.fieldId] = {
                 fieldId = field.fieldId,
-                nitrogen = 80, -- Start with good nitrogen levels (0-100)
+                nitrogen = 80,
                 phosphorus = 75,
                 potassium = 70,
-                organicMatter = 3.5, -- Percentage
-                pH = 6.5, -- Neutral pH
+                organicMatter = 3.5,
+                pH = 6.5,
                 lastCrop = nil,
                 lastHarvest = 0,
                 fertilizerApplied = 0
@@ -173,6 +144,30 @@ function SoilFertilitySystem:scanFields()
     self:log("Scanned %d fields for soil data", fieldCount)
 end
 
+function SoilFertilitySystem:update(dt)
+    if not self.settings.enabled or not self.isInitialized then
+        return
+    end
+    
+    self.lastUpdate = self.lastUpdate + dt
+    
+    if self.lastUpdate >= self.updateInterval then
+        self.lastUpdate = 0
+        
+        if self.settings.nutrientCycles and self.fieldData and type(self.fieldData) == "table" then
+            for fieldId, field in pairs(self.fieldData) do
+                if field and type(field) == "table" and g_currentMission and g_currentMission.environment then
+                    if g_currentMission.environment.currentDay - (field.lastHarvest or 0) > 30 then
+                        field.nitrogen = math.min(100, (field.nitrogen or 0) + 0.5)
+                        field.phosphorus = math.min(100, (field.phosphorus or 0) + 0.3)
+                        field.potassium = math.min(100, (field.potassium or 0) + 0.4)
+                    end
+                end
+            end
+        end
+    end
+end
+
 function SoilFertilitySystem:updateFieldNutrients(fieldId, cropType, yieldMultiplier)
     if not self.fieldData[fieldId] or not self.settings.nutrientCycles then
         return
@@ -180,19 +175,16 @@ function SoilFertilitySystem:updateFieldNutrients(fieldId, cropType, yieldMultip
     
     local field = self.fieldData[fieldId]
     
-    -- Different crops extract different nutrients
     local nutrientExtraction = {
-        nitrogen = 15, -- Base nutrient extraction
+        nitrogen = 15,
         phosphorus = 8,
         potassium = 12
     }
     
-    -- Adjust based on yield
     nutrientExtraction.nitrogen = nutrientExtraction.nitrogen * yieldMultiplier
     nutrientExtraction.phosphorus = nutrientExtraction.phosphorus * yieldMultiplier
     nutrientExtraction.potassium = nutrientExtraction.potassium * yieldMultiplier
     
-    -- Deplete nutrients
     field.nitrogen = math.max(0, field.nitrogen - nutrientExtraction.nitrogen)
     field.phosphorus = math.max(0, field.phosphorus - nutrientExtraction.phosphorus)
     field.potassium = math.max(0, field.potassium - nutrientExtraction.potassium)
@@ -217,7 +209,6 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fertilizerType, amount)
     local field = self.fieldData[fieldId]
     local effectiveness = 1.0
     
-    -- Different fertilizer types have different effects
     if fertilizerType == "LIQUID_FERTILIZER" then
         field.nitrogen = math.min(100, field.nitrogen + (30 * effectiveness))
         field.phosphorus = math.min(100, field.phosphorus + (15 * effectiveness))
@@ -259,7 +250,6 @@ function SoilFertilitySystem:calculateFertilizerCost(fertilizerType, amount)
         costPerLiter = 0.8
     end
     
-    -- Adjust cost based on difficulty
     if self.settings.difficulty == Settings.DIFFICULTY_HARD then
         costPerLiter = costPerLiter * 1.5
     elseif self.settings.difficulty == Settings.DIFFICULTY_EASY then
@@ -307,9 +297,7 @@ function SoilFertilitySystem:update(dt)
     
     if self.lastUpdate >= self.updateInterval then
         self.lastUpdate = 0
-        
-        -- Natural nutrient replenishment over time
-        -- FIX: Check if fieldData exists and is a table before iterating
+
         if self.settings.nutrientCycles and self.fieldData and type(self.fieldData) == "table" then
             for fieldId, field in pairs(self.fieldData) do
                 if field and g_currentMission and g_currentMission.environment then
