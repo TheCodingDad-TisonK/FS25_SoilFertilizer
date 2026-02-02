@@ -1,5 +1,5 @@
-![Downloads](https://img.shields.io/github/downloads/TheCodingDad-TisonK/FS22_SoilFertilizer/total?style=for-the-badge)
-![Release](https://img.shields.io/github/v/release/TheCodingDad-TisonK/FS22_SoilFertilizer?style=for-the-badge)
+![Downloads](https://img.shields.io/github/downloads/TheCodingDad-TisonK/FS25_SoilFertilizer/total?style=for-the-badge)
+![Release](https://img.shields.io/github/v/release/TheCodingDad-TisonK/FS25_SoilFertilizer?style=for-the-badge)
 ![License](https://img.shields.io/badge/license-All%20Rights%20Reserved-red?style=for-the-badge)
 
 ## READ THIS FIRST PLEASE
