@@ -1,5 +1,5 @@
 -- =========================================================
--- FS25 Realistic Soil & Fertilizer (version 1.0.0.5)
+-- FS25 Realistic Soil & Fertilizer (version 1.0.1.0)
 -- =========================================================
 -- Realistic soil fertility and fertilizer management
 -- =========================================================
@@ -22,13 +22,33 @@ source(modDirectory .. "src/SoilFertilitySystem.lua")
 source(modDirectory .. "src/SoilFertilityManager.lua")
 
 local sfm
-local SAFE_MODE = false  -- Set to true if having GUI issues
+local SAFE_MODE = false 
 local initTimer = 0
 local guiInjected = false
 
 local function isEnabled()
     return sfm ~= nil
 end
+
+local function checkModCompatibility()
+    if g_modIsLoaded then
+        for modName, _ in pairs(g_modIsLoaded) do
+            if string.lower(tostring(modName)):find("tyre") or 
+               string.lower(tostring(modName)):find("tire") then
+                print("Soil Mod: Tyre-related mod detected - enabling compatibility mode")
+                SAFE_MODE = true
+                break
+            end
+        end
+    end
+    
+    if g_currentMission and g_currentMission:getIsServer() and not g_currentMission:getIsClient() then
+        print("Soil Mod: Dedicated server detected - enabling compatibility mode")
+        SAFE_MODE = true
+    end
+end
+
+checkModCompatibility()
 
 local function loadedMission(mission, node)
     if not isEnabled() then
@@ -43,27 +63,23 @@ local function loadedMission(mission, node)
 end
 
 local function load(mission)
-    if SAFE_MODE then
-        print("Soil Mod: Running in SAFE MODE - GUI features disabled")
-        -- Still initialize core functionality without GUI
-        if sfm == nil then
-            print("Soil & Fertilizer Mod: Initializing in SAFE MODE...")
-            sfm = SoilFertilityManager.new(mission, modDirectory, modName)
-            getfenv(0)["g_SoilFertilityManager"] = sfm
-            -- Force disable GUI injection
-            if sfm.settingsUI then
-                sfm.settingsUI.injected = true  -- Mark as already injected to prevent actual injection
-            end
-            print("Soil & Fertilizer Mod: Initialized in SAFE MODE")
-        end
-        return
+    local isDedicatedServer = mission:getIsServer() and not mission:getIsClient()
+    local disableGUI = isDedicatedServer or SAFE_MODE or not mission:getIsClient()
+    
+    if disableGUI then
+        print("Soil Mod: Running in server/console-only mode - GUI features disabled")
     end
     
     if sfm == nil then
         print("Soil & Fertilizer Mod: Initializing...")
-        sfm = SoilFertilityManager.new(mission, modDirectory, modName)
+        sfm = SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
         getfenv(0)["g_SoilFertilityManager"] = sfm
-        print("Soil & Fertilizer Mod: Initialized successfully")
+        
+        if disableGUI and sfm.settingsUI then
+            sfm.settingsUI.injected = true 
+        end
+        
+        print("Soil & Fertilizer Mod: Initialized in " .. (disableGUI and "server/console" or "full") .. " mode")
     end
 end
 
@@ -75,21 +91,18 @@ local function unload()
     end
 end
 
--- Safe GUI injection with delay
 local function delayedGUISetup()
     if SAFE_MODE or guiInjected then
         return
     end
     
     if g_gui and g_SoilFertilityManager and g_SoilFertilityManager.settingsUI then
-        -- Only inject when game is truly ready
         if g_currentMission and g_currentMission.isClient and 
            g_currentMission.controlledVehicle and 
            g_gui.screenControllers and g_gui.screenControllers[InGameMenu] then
             
             print("Soil Mod: Attempting safe GUI injection...")
             
-            -- Try to inject on next settings frame open
             local success, errorMsg = pcall(function()
                 if not g_SoilFertilityManager.settingsUI.injected then
                     g_SoilFertilityManager.settingsUI:inject()
@@ -99,7 +112,7 @@ local function delayedGUISetup()
             
             if not success then
                 print("Soil Mod: GUI injection failed: " .. tostring(errorMsg))
-                SAFE_MODE = true  -- Switch to safe mode
+                SAFE_MODE = true 
             end
             
             guiInjected = true
@@ -112,10 +125,9 @@ Mission00.loadMission00Finished = Utils.appendedFunction(Mission00.loadMission00
 FSBaseMission.delete = Utils.appendedFunction(FSBaseMission.delete, unload)
 
 FSBaseMission.update = Utils.appendedFunction(FSBaseMission.update, function(mission, dt)
-    -- Delayed GUI initialization
-    if not guiInjected and initTimer < 10000 then  -- Wait up to 10 seconds
+    if not guiInjected and initTimer < 10000 then 
         initTimer = initTimer + dt
-        if initTimer >= 3000 then  -- Start trying after 3 seconds
+        if initTimer >= 3000 then  
             delayedGUISetup()
         end
     end
