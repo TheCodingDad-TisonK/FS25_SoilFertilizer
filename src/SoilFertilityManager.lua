@@ -1,5 +1,5 @@
 -- =========================================================
--- FS25 Realistic Soil & Fertilizer (version 1.0.1.0)
+-- FS25 Realistic Soil & Fertilizer (version 1.0.1.1)
 -- =========================================================
 -- Realistic soil fertility and fertilizer management
 -- =========================================================
@@ -16,53 +16,49 @@ local SoilFertilityManager_mt = Class(SoilFertilityManager)
 
 function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
     local self = setmetatable({}, SoilFertilityManager_mt)
-    
+
     self.mission = mission
     self.modDirectory = modDirectory
     self.modName = modName
     self.disableGUI = disableGUI or false
-    
+
+    -- Settings
+    assert(SettingsManager, "SettingsManager not loaded")
     self.settingsManager = SettingsManager.new()
     self.settings = Settings.new(self.settingsManager)
-    
+
+    -- Soil system
+    assert(SoilFertilitySystem, "SoilFertilitySystem not loaded")
     self.soilSystem = SoilFertilitySystem.new(self.settings)
-    
-    -- Check if we should initialize GUI
-    local shouldInitializeGUI = not self.disableGUI and 
-                               mission:getIsClient() and 
-                               g_gui and 
-                               not g_safeMode
-    
-    -- Only create GUI elements if not disabled and client
-    if shouldInitializeGUI then
+
+    -- GUI initialization (client only)
+    local shouldInitGUI = not self.disableGUI and mission:getIsClient() and g_gui and not g_safeMode
+    if shouldInitGUI then
         print("Soil Mod: Initializing GUI elements...")
-        self.settingsUI = SettingsUI.new(self.settings)
-        
-        -- Hook into settings frame with safe error handling
+        self.settingsUI = SoilSettingsUI.new(self.settings)
+
+        -- Inject GUI safely
         InGameMenuSettingsFrame.onFrameOpen = Utils.appendedFunction(
-            InGameMenuSettingsFrame.onFrameOpen, 
+            InGameMenuSettingsFrame.onFrameOpen,
             function(frame)
                 if self.settingsUI and not self.settingsUI.injected then
-                    local success = pcall(function() 
-                        return self.settingsUI:inject() 
+                    local success = pcall(function()
+                        self.settingsUI:inject()
                     end)
-                    
                     if not success then
                         print("Soil Mod: GUI injection failed - switching to console-only mode")
-                        self.settingsUI.injected = true 
+                        self.settingsUI.injected = true
                         self.disableGUI = true
                     end
                 end
-                
-                -- Always try to add reset button
                 if self.settingsUI then
                     self.settingsUI:ensureResetButton(frame)
                 end
             end
         )
-        
+
         InGameMenuSettingsFrame.updateButtons = Utils.appendedFunction(
-            InGameMenuSettingsFrame.updateButtons, 
+            InGameMenuSettingsFrame.updateButtons,
             function(frame)
                 if self.settingsUI then
                     self.settingsUI:ensureResetButton(frame)
@@ -73,86 +69,86 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
         print("Soil Mod: GUI initialization skipped (Server/Console mode)")
         self.settingsUI = nil
     end
-    
-    -- Console commands always available
-    self.settingsGUI = SettingsGUI.new()
+
+    -- Console commands
+    self.settingsGUI = SoilSettingsGUI.new()
     self.settingsGUI:registerConsoleCommands()
-    
+
     -- Load settings
     self.settings:load()
-    
-    -- Auto-disable certain features if Precision Farming detected
+
+    -- Compatibility with other mods
     self:checkAndApplyCompatibility()
-    
+
     return self
 end
 
--- Add this new method to the class
 function SoilFertilityManager:checkAndApplyCompatibility()
-    -- Check for Precision Farming
-    if g_precisionFarming or _G["g_precisionFarming"] then
-        print("Soil Mod: Precision Farming detected - adjusting settings for compatibility")
-        
-        if self.settings.fertilitySystem then
-            self.settings.fertilitySystem = false
-            print("Soil Mod: Auto-disabled fertility system for PF compatibility")
-        end
-        
-        if self.settings.nutrientCycles then
-            self.settings.nutrientCycles = false
-            print("Soil Mod: Auto-disabled nutrient cycles for PF compatibility")
-        end
-        
-        if self.settings.fertilizerCosts then
-            self.settings.fertilizerCosts = false
-            print("Soil Mod: Auto-disabled fertilizer costs for PF compatibility")
-        end
-        
-        self.settings:save()
-    end
-    
-    -- Check for Used Tyres mod
-    local hasUsedTyres = false
+    -- Precision Farming
+    local pfDetected = false
     if g_modIsLoaded then
         for modName, _ in pairs(g_modIsLoaded) do
             local lowerName = string.lower(tostring(modName))
-            if lowerName:find("tyre") or lowerName:find("tire") or 
-               lowerName:find("used") then
-                hasUsedTyres = true
+            if lowerName:find("precisionfarming") then
+                pfDetected = true
                 break
             end
         end
     end
-    
-    if hasUsedTyres then
-        print("Soil Mod: Used Tyres mod detected - enabling UI compatibility mode")
-        if self.settingsUI then
-            self.settingsUI.compatibilityMode = true
+
+    if pfDetected then
+        print("Soil Mod: Precision Farming detected - enabling read-only mode")
+        self.soilSystem.PFActive = true
+        if self.settings.showNotifications then
+            -- Use blinking warning instead of showNotification if needed
+            if g_currentMission and g_currentMission.hud then
+                g_currentMission.hud:showBlinkingWarning(
+                    "PF Detected - Soil & Fertilizer Mod running in read-only mode",
+                    4000
+                )
+            else
+                self.soilSystem:log("PF Detected - Soil & Fertilizer Mod running in read-only mode")
+            end
+        end
+    else
+        self.soilSystem.PFActive = false
+    end
+
+    -- Used Tyres mod
+    if g_modIsLoaded then
+        for modName, _ in pairs(g_modIsLoaded) do
+            local lowerName = string.lower(tostring(modName))
+            if lowerName:find("tyre") or lowerName:find("tire") or lowerName:find("used") then
+                if self.settingsUI then
+                    self.settingsUI.compatibilityMode = true
+                end
+                print("Soil Mod: Used Tyres mod detected - UI compatibility mode enabled")
+                break
+            end
         end
     end
 end
 
+
 function SoilFertilityManager:onMissionLoaded()
-    if self.settings.enabled then
-        local success, errorMsg = pcall(function()
-            if self.soilSystem then
-                self.soilSystem:initialize()
-            end
-            
-            if self.settings.showNotifications and g_currentMission and g_currentMission.hud then
-                g_currentMission.hud:showBlinkingWarning(
-                    "Soil & Fertilizer Mod Active - Type 'soilfertility' for commands",
-                    4000
-                )
-            end
-        end)
-        
-        if not success then
-            print("Soil Mod: Error during mission load - " .. tostring(errorMsg))
-            print("Soil Mod: Disabling to prevent game crashes")
-            self.settings.enabled = false
-            self.settings:save()
+    if not self.settings.enabled then return end
+
+    local success, errorMsg = pcall(function()
+        if self.soilSystem then
+            self.soilSystem:initialize()
         end
+        if self.settings.showNotifications and g_currentMission and g_currentMission.hud then
+            g_currentMission.hud:showBlinkingWarning(
+                "Soil & Fertilizer Mod Active - Type 'soilfertility' for commands",
+                4000
+            )
+        end
+    end)
+
+    if not success then
+        print("Soil Mod: Error during mission load - " .. tostring(errorMsg))
+        self.settings.enabled = false
+        self.settings:save()
     end
 end
 
@@ -163,9 +159,11 @@ function SoilFertilityManager:update(dt)
 end
 
 function SoilFertilityManager:delete()
+    if self.soilSystem then
+        self.soilSystem.fieldData = nil
+    end
     if self.settings then
         self.settings:save()
     end
-    
     print("Soil & Fertilizer Mod: Shutting down")
 end
