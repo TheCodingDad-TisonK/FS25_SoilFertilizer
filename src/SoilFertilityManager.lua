@@ -1,14 +1,9 @@
 -- =========================================================
--- FS25 Realistic Soil & Fertilizer (version 1.0.1.1)
--- =========================================================
--- Realistic soil fertility and fertilizer management
+-- FS25 Realistic Soil & Fertilizer (FarmlandManager version)
 -- =========================================================
 -- Author: TisonK
 -- =========================================================
--- COPYRIGHT NOTICE:
--- All rights reserved. Unauthorized redistribution, copying,
--- or claiming this code as your own is strictly prohibited.
--- Original author: TisonK
+-- COPYRIGHT NOTICE: All rights reserved.
 -- =========================================================
 ---@class SoilFertilityManager
 SoilFertilityManager = {}
@@ -76,6 +71,9 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
 
     -- Load settings
     self.settings:load()
+    
+    -- Load saved soil data
+    self:loadSoilData()
 
     -- Compatibility with other mods
     self:checkAndApplyCompatibility()
@@ -100,7 +98,6 @@ function SoilFertilityManager:checkAndApplyCompatibility()
         print("Soil Mod: Precision Farming detected - enabling read-only mode")
         self.soilSystem.PFActive = true
         if self.settings.showNotifications then
-            -- Use blinking warning instead of showNotification if needed
             if g_currentMission and g_currentMission.hud then
                 g_currentMission.hud:showBlinkingWarning(
                     "PF Detected - Soil & Fertilizer Mod running in read-only mode",
@@ -129,7 +126,6 @@ function SoilFertilityManager:checkAndApplyCompatibility()
     end
 end
 
-
 function SoilFertilityManager:onMissionLoaded()
     if not self.settings.enabled then return end
 
@@ -152,6 +148,48 @@ function SoilFertilityManager:onMissionLoaded()
     end
 end
 
+-- Save soil data
+function SoilFertilityManager:saveSoilData()
+    if not self.soilSystem or not g_currentMission or not g_currentMission.missionInfo then
+        return
+    end
+    
+    local savegamePath = g_currentMission.missionInfo.savegameDirectory
+    if not savegamePath then return end
+    
+    local xmlPath = savegamePath .. "/soilData.xml"
+    local xmlFile = createXMLFile("soilData", xmlPath, "soilData")
+    
+    if xmlFile then
+        self.soilSystem:saveToXMLFile(xmlFile, "soilData")
+        saveXMLFile(xmlFile)
+        delete(xmlFile)
+        print("Soil Mod: Soil data saved to " .. xmlPath)
+    end
+end
+
+-- Load soil data
+function SoilFertilityManager:loadSoilData()
+    if not self.soilSystem or not g_currentMission or not g_currentMission.missionInfo then
+        return
+    end
+    
+    local savegamePath = g_currentMission.missionInfo.savegameDirectory
+    if not savegamePath then return end
+    
+    local xmlPath = savegamePath .. "/soilData.xml"
+    if fileExists(xmlPath) then
+        local xmlFile = loadXMLFile("soilData", xmlPath)
+        if xmlFile then
+            self.soilSystem:loadFromXMLFile(xmlFile, "soilData")
+            delete(xmlFile)
+            print("Soil Mod: Soil data loaded from " .. xmlPath)
+        end
+    else
+        print("Soil Mod: No saved soil data found, using defaults")
+    end
+end
+
 function SoilFertilityManager:update(dt)
     if self.soilSystem then
         self.soilSystem:update(dt)
@@ -159,6 +197,9 @@ function SoilFertilityManager:update(dt)
 end
 
 function SoilFertilityManager:delete()
+    -- Save soil data before shutdown
+    self:saveSoilData()
+    
     if self.soilSystem then
         self.soilSystem.fieldData = nil
     end
