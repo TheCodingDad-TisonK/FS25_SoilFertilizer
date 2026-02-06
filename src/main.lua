@@ -1,15 +1,15 @@
 -- =========================================================
--- FS25 Realistic Soil & Fertilizer (version 1.0.1.0)
+-- FS25 Realistic Soil & Fertilizer (version 1.0.1.2)
 -- =========================================================
 -- Realistic soil fertility and fertilizer management
 -- =========================================================
--- Author: TisonK
+-- Author: TisonK (modified)
 -- =========================================================
 -- COPYRIGHT NOTICE:
 -- All rights reserved. Unauthorized redistribution, copying,
 -- or claiming this code as your own is strictly prohibited.
--- Original author: TisonK
 -- =========================================================
+
 local modDirectory = g_currentModDirectory
 local modName = g_currentModName
 
@@ -117,6 +117,33 @@ local function delayedGUISetup()
     end
 end
 
+-- Hook save/load events
+local function hookSaveLoadEvents()
+    -- Hook mission save
+    if Mission00.saveToXMLFile then
+        Mission00.saveToXMLFile = Utils.prependedFunction(
+            Mission00.saveToXMLFile,
+            function(mission, xmlFile, key, usedModNames)
+                if g_SoilFertilityManager then
+                    g_SoilFertilityManager:saveSoilData()
+                end
+            end
+        )
+    end
+    
+    -- Hook mission load
+    if Mission00.loadFromXMLFile then
+        Mission00.loadFromXMLFile = Utils.appendedFunction(
+            Mission00.loadFromXMLFile,
+            function(mission, xmlFile, key)
+                if g_SoilFertilityManager then
+                    g_SoilFertilityManager:loadSoilData()
+                end
+            end
+        )
+    end
+end
+
 -- Hook into FS25 mission events
 Mission00.load = Utils.prependedFunction(Mission00.load, load)
 Mission00.loadMission00Finished = Utils.appendedFunction(Mission00.loadMission00Finished, loadedMission)
@@ -135,6 +162,9 @@ FSBaseMission.update = Utils.appendedFunction(FSBaseMission.update, function(mis
     end
 end)
 
+-- Install save/load hooks
+hookSaveLoadEvents()
+
 -- Console commands
 function soilfertility()
     if g_SoilFertilityManager and g_SoilFertilityManager.soilSettingsGUI then
@@ -150,6 +180,8 @@ function soilfertility()
         print("SoilSetFertilizerCosts true|false - Toggle fertilizer costs")
         print("SoilSetNotifications true|false - Toggle notifications")
         print("SoilResetSettings - Reset to defaults")
+        print("SoilFieldInfo <fieldId> - Show field soil info")
+        print("SoilSaveData - Force save soil data")
         print("================================")
         return "Soil & Fertilizer Mod commands listed above"
     end
@@ -167,6 +199,17 @@ function soilStatus()
         print("Soil & Fertilizer Mod not initialized")
     end
 end
+
+-- Additional console command for saving data
+addConsoleCommand("SoilSaveData", "Force save soil data", "consoleCommandSaveData", 
+    function()
+        if g_SoilFertilityManager then
+            g_SoilFertilityManager:saveSoilData()
+            return "Soil data saved"
+        end
+        return "Soil Mod not initialized"
+    end
+)
 
 -- Expose global console functions
 getfenv(0)["soilfertility"] = soilfertility
@@ -188,4 +231,5 @@ print("========================================")
 print("  FS25 Soil & Fertilizer Mod LOADED     ")
 print("  Realistic soil management system      ")
 print("  Type 'soilfertility' for commands     ")
+print("  With full real event hooks installed  ")
 print("========================================")
