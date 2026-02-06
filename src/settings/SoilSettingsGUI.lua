@@ -1,14 +1,7 @@
 -- =========================================================
--- FS25 Realistic Soil & Fertilizer (version 1.0.0.0)
+-- FS25 Realistic Soil & Fertilizer (Settings GUI)
 -- =========================================================
--- Realistic soil fertility and fertilizer management
--- =========================================================
--- Author: TisonK
--- =========================================================
--- COPYRIGHT NOTICE:
--- All rights reserved. Unauthorized redistribution, copying,
--- or claiming this code as your own is strictly prohibited.
--- Original author: TisonK
+-- Author: TisonK (modified)
 -- =========================================================
 ---@class SoilSettingsGUI
 
@@ -31,6 +24,8 @@ function SoilSettingsGUI:registerConsoleCommands()
     addConsoleCommand("SoilShowSettings", "Show current settings", "consoleCommandShowSettings", self)
     addConsoleCommand("SoilFieldInfo", "Show field soil information (fieldId)", "consoleCommandFieldInfo", self)
     addConsoleCommand("SoilResetSettings", "Reset all settings to defaults", "consoleCommandResetSettings", self)
+    addConsoleCommand("SoilSaveData", "Force save soil data", "consoleCommandSaveData", self)
+    addConsoleCommand("SoilDebug", "Toggle debug mode", "consoleCommandDebug", self)
     addConsoleCommand("soilfertility", "Show all soil commands", "consoleCommandHelp", self)
 
     Logging.info("Soil & Fertilizer Mod console commands registered")
@@ -48,6 +43,8 @@ function SoilSettingsGUI:consoleCommandHelp()
     print("SoilShowSettings - Show current settings")
     print("SoilFieldInfo <fieldId> - Show soil info for field")
     print("SoilResetSettings - Reset to defaults")
+    print("SoilSaveData - Force save soil data")
+    print("SoilDebug - Toggle debug mode")
     print("==============================================")
     return "Type 'soilfertility' for more info"
 end
@@ -135,16 +132,36 @@ function SoilSettingsGUI:consoleCommandSetNotifications(enabled)
     return "Error: Soil Mod not initialized"
 end
 
+function SoilSettingsGUI:consoleCommandDebug()
+    if g_SoilFertilityManager and g_SoilFertilityManager.settings then
+        g_SoilFertilityManager.settings.debugMode = not g_SoilFertilityManager.settings.debugMode
+        g_SoilFertilityManager.settings:save()
+        return string.format("Debug mode %s", g_SoilFertilityManager.settings.debugMode and "enabled" or "disabled")
+    end
+    return "Error: Soil Mod not initialized"
+end
+
+function SoilSettingsGUI:consoleCommandSaveData()
+    if g_SoilFertilityManager then
+        g_SoilFertilityManager:saveSoilData()
+        return "Soil data saved"
+    end
+    return "Error: Soil Mod not initialized"
+end
+
 function SoilSettingsGUI:consoleCommandShowSettings()
     if g_SoilFertilityManager and g_SoilFertilityManager.settings then
         local s = g_SoilFertilityManager.settings
         local info = string.format(
             "=== Soil & Fertilizer Mod Settings ===\n" ..
             "Enabled: %s\nDebug Mode: %s\nFertility System: %s\nNutrient Cycles: %s\nFertilizer Costs: %s\nDifficulty: %s\nNotifications: %s\n" ..
+            "PF Active: %s\nFields Tracked: %d\n" ..
             "================================",
             tostring(s.enabled), tostring(s.debugMode), tostring(s.fertilitySystem),
             tostring(s.nutrientCycles), tostring(s.fertilizerCosts),
-            s:getDifficultyName(), tostring(s.showNotifications)
+            s:getDifficultyName(), tostring(s.showNotifications),
+            tostring(g_SoilFertilityManager.soilSystem and g_SoilFertilityManager.soilSystem.PFActive or false),
+            g_SoilFertilityManager.soilSystem and #g_SoilFertilityManager.soilSystem.fieldData or 0
         )
         print(info)
         return info
@@ -159,13 +176,21 @@ function SoilSettingsGUI:consoleCommandFieldInfo(fieldId)
         local info = g_SoilFertilityManager.soilSystem:getFieldInfo(fid)
         if info then
             local fInfo = string.format(
-                "=== Field %d Soil Information ===\nNitrogen: %d (%s)\nPhosphorus: %d (%s)\nPotassium: %d (%s)\nOrganic Matter: %.1f%%\npH: %.1f\nNeeds Fertilization: %s\n================================",
+                "=== Field %d Soil Information ===\n" ..
+                "Nitrogen: %d (%s)\nPhosphorus: %d (%s)\nPotassium: %d (%s)\n" ..
+                "Organic Matter: %.1f%%\npH: %.1f\n" ..
+                "Last Crop: %s\nDays Since Harvest: %d\nFertilizer Applied: %.0fL\n" ..
+                "Needs Fertilization: %s\n" ..
+                "================================",
                 fid,
                 info.nitrogen.value, info.nitrogen.status,
                 info.phosphorus.value, info.phosphorus.status,
                 info.potassium.value, info.potassium.status,
                 info.organicMatter,
                 info.pH,
+                info.lastCrop or "None",
+                info.daysSinceHarvest,
+                info.fertilizerApplied,
                 info.needsFertilization and "Yes" or "No"
             )
             print(fInfo)
