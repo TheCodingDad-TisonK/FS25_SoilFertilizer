@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <modDesc descVersion="92">
     <author>TisonK</author>
-    <version>1.0.1.1</version>
+    <version>1.0.1.3</version>
     <modName>FS25_SoilFertilizer</modName>
     <title>
         <en>Realistic Soil & Fertilizer</en>
@@ -101,6 +101,87 @@
             <ru>Включить/выключить режим DEBUG (дополнительное логирование)</ru>
         </text>
         
+        <!-- NEW SETTING 1: Seasonal Effects -->
+        <text name="sf_seasonal_effects_short">
+            <en>Seasonal Effects</en>
+            <de>Saisoneffekte</de>
+            <fr>Effets Saisonniers</fr>
+            <pl>Efekty Sezonowe</pl>
+            <es>Efectos Estacionales</es>
+            <it>Effetti Stagionali</it>
+            <cz>Sezónní Efekty</cz>
+            <br>Efeitos Sazonais</br>
+            <uk>Сезонні ефекти</uk>
+            <ru>Сезонные эффекты</ru>
+        </text>
+        
+        <text name="sf_seasonal_effects_long">
+            <en>Enable/disable seasonal impact on soil nutrients (spring growth boost, fall slowdown)</en>
+            <de>Saisonale Auswirkungen auf Bodennährstoffe ein-/ausschalten (Frühjahrswachstumsschub, Herbstverlangsamung)</de>
+            <fr>Activer/désactiver l'impact saisonnier sur les nutriments du sol (stimulation printanière, ralentissement automnal)</fr>
+            <pl>Włącz/wyłącz sezonowy wpływ na składniki gleby (wzrost wiosenny, spowolnienie jesienne)</pl>
+            <es>Activar/desactivar impacto estacional en nutrientes del suelo (impulso primaveral, ralentización otoñal)</es>
+            <it>Attiva/disattiva impatto stagionale sui nutrienti del suolo (spinta primaverile, rallentamento autunnale)</it>
+            <cz>Povolit/zakázat sezónní vliv na půdní živiny (jarní růstový impuls, podzimní zpomalení)</cz>
+            <br>Ativar/desativar impacto sazonal nos nutrientes do solo (impulso primaveril, desaceleração outonal)</br>
+            <uk>Увімкнути/вимкнути сезонний вплив на поживні речовини ґрунту (весняне зростання, осіннє сповільнення)</uk>
+            <ru>Включить/выключить сезонное влияние на питательные вещества почвы (весенний рост, осеннее замедление)</ru>
+        </text>
+        
+        <!-- NEW SETTING 2: Rain Effects -->
+        <text name="sf_rain_effects_short">
+            <en>Rain Effects</en>
+            <de>Regeneffekte</de>
+            <fr>Effets Pluie</fr>
+            <pl>Efekty Deszczu</pl>
+            <es>Efectos Lluvia</es>
+            <it>Effetti Pioggia</it>
+            <cz>Dešťové Efekty</cz>
+            <br>Efeitos Chuva</br>
+            <uk>Ефекти дощу</uk>
+            <ru>Эффекты дождя</ru>
+        </text>
+        
+        <text name="sf_rain_effects_long">
+            <en>Enable/disable rain impact on soil (nutrient leaching, pH changes)</en>
+            <de>Regenauswirkungen auf Boden ein-/ausschalten (Nährstoffauswaschung, pH-Änderungen)</de>
+            <fr>Activer/désactiver l'impact de la pluie sur le sol (lessivage des nutriments, changements de pH)</fr>
+            <pl>Włącz/wyłącz wpływ deszczu na glebę (wypłukiwanie składników, zmiany pH)</pl>
+            <es>Activar/desactivar impacto lluvia en suelo (lixiviación nutrientes, cambios pH)</es>
+            <it>Attiva/disattiva impatto pioggia su suolo (lisciviazione nutrienti, cambiamenti pH)</it>
+            <cz>Povolit/zakázat vliv deště na půdu (vymývání živin, změny pH)</cz>
+            <br>Ativar/desativar impacto chuva no solo (lixiviação nutrientes, alterações pH)</br>
+            <uk>Увімкнути/вимкнути вплив дощу на ґрунт (вилуговування поживних речовин, зміни pH)</uk>
+            <ru>Включить/выключить влияние дождя на почву (вымывание питательных веществ, изменения pH)</ru>
+        </text>
+        
+        <!-- NEW SETTING 3: Plowing Bonus -->
+        <text name="sf_plowing_bonus_short">
+            <en>Plowing Bonus</en>
+            <de>Pflugbonus</de>
+            <fr>Bonus Labour</fr>
+            <pl>Bonus Orki</pl>
+            <es>Bonus Labranza</es>
+            <it>Bonus Aratura</it>
+            <cz>Bonus Orby</cz>
+            <br>Bônus Aração</br>
+            <uk>Бонус оранки</uk>
+            <ru>Бонус вспашки</ru>
+        </text>
+        
+        <text name="sf_plowing_bonus_long">
+            <en>Enable/disable plowing benefits to soil fertility (improved nitrogen and organic matter)</en>
+            <de>Pflugvorteile für Bodenfruchtbarkeit ein-/ausschalten (verbesserter Stickstoff und organische Substanz)</de>
+            <fr>Activer/désactiver les avantages du labour pour la fertilité du sol (amélioration de l'azote et de la matière organique)</fr>
+            <pl>Włącz/wyłącz korzyści orki dla żyzności gleby (poprawiony azot i materia organiczna)</pl>
+            <es>Activar/desactivar beneficios labranza para fertilidad suelo (mejor nitrógeno y materia orgánica)</es>
+            <it>Attiva/disattiva benefici aratura per fertilità suolo (miglior azoto e materia organica)</it>
+            <cz>Povolit/zakázat výhody orby pro úrodnost půdy (zlepšený dusík a organická hmota)</cz>
+            <br>Ativar/desativar benefícios aração para fertilidade solo (melhor nitrogênio e matéria orgânica)</br>
+            <uk>Увімкнути/вимкнути переваги оранки для родючості ґрунту (покращений азот та органічна речовина)</uk>
+            <ru>Включить/выключить преимущества вспашки для плодородия почвы (улучшенный азот и органическое вещество)</ru>
+        </text>
+
         <text name="sf_fertility_short">
             <en>Fertility System</en>
             <de>Fruchtbarkeitssystem</de>
@@ -283,7 +364,4 @@
             <ru>Сбросить настройки почвы</ru>
         </text>
     </l10n>
-
 </modDesc>
-
-
