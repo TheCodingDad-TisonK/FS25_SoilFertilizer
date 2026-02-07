@@ -1,5 +1,5 @@
 -- =========================================================
--- FS25 Realistic Soil & Fertilizer (version 1.0.1.2)
+-- FS25 Realistic Soil & Fertilizer (version 1.0.1.3)
 -- =========================================================
 -- Realistic soil fertility and fertilizer management
 -- =========================================================
