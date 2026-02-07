@@ -101,7 +101,7 @@ function SoilFertilityManager:checkAndApplyCompatibility()
             if g_currentMission and g_currentMission.hud then
                 g_currentMission.hud:showBlinkingWarning(
                     "PF Detected - Soil & Fertilizer Mod running in read-only mode",
-                    4000
+                    8000
                 )
             else
                 self.soilSystem:log("PF Detected - Soil & Fertilizer Mod running in read-only mode")
@@ -136,7 +136,7 @@ function SoilFertilityManager:onMissionLoaded()
         if self.settings.showNotifications and g_currentMission and g_currentMission.hud then
             g_currentMission.hud:showBlinkingWarning(
                 "Soil & Fertilizer Mod Active - Type 'soilfertility' for commands",
-                4000
+                8000
             )
         end
     end)
