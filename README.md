@@ -1,6 +1,3 @@
-## READ THIS FIRST PLEASE
-**Temporarily** disabled settings via the pause menu due to GUI conflict with other mods!
-
 # Realistic Soil & Fertilizer Mod for Farming Simulator 25
 ![Downloads](https://img.shields.io/github/downloads/TheCodingDad-TisonK/FS25_SoilFertilizer/total?style=for-the-badge)
 ![Release](https://img.shields.io/github/v/release/TheCodingDad-TisonK/FS25_SoilFertilizer?style=for-the-badge)
