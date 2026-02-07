@@ -1,5 +1,5 @@
 -- =========================================================
--- FS25 Realistic Soil & Fertilizer (version 1.0.0.0)
+-- FS25 Realistic Soil & Fertilizer (version 1.0.1.2)
 -- =========================================================
 -- Realistic soil fertility and fertilizer management
 -- =========================================================
@@ -84,6 +84,10 @@ function Settings:validateSettings()
     self.nutrientCycles = not not self.nutrientCycles
     self.fertilizerCosts = not not self.fertilizerCosts
     self.showNotifications = not not self.showNotifications
+    -- NEW SETTINGS
+    self.seasonalEffects = not not self.seasonalEffects
+    self.rainEffects = not not self.rainEffects
+    self.plowingBonus = not not self.plowingBonus
 end
 
 function Settings:save()
@@ -108,6 +112,10 @@ function Settings:resetToDefaults(saveImmediately)
     self.nutrientCycles = true
     self.fertilizerCosts = true
     self.showNotifications = true
+    -- NEW SETTINGS DEFAULT VALUES
+    self.seasonalEffects = true
+    self.rainEffects = true
+    self.plowingBonus = true
     
     if saveImmediately then
         self:save()
