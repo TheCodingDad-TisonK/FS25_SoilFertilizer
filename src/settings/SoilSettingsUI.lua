@@ -1,14 +1,7 @@
 -- =========================================================
--- FS25 Realistic Soil & Fertilizer (version 1.0.1.1)
+-- FS25 Realistic Soil & Fertilizer (Settings UI)
 -- =========================================================
--- Realistic soil fertility and fertilizer management
--- =========================================================
--- Author: TisonK
--- =========================================================
--- COPYRIGHT NOTICE:
--- All rights reserved. Unauthorized redistribution, copying,
--- or claiming this code as your own is strictly prohibited.
--- Original author: TisonK
+-- Author: TisonK (modified)
 -- =========================================================
 ---@class SoilSettingsUI
 
@@ -72,7 +65,11 @@ function SoilSettingsUI:inject()
         {id="sf_fertility", value=self.settings.fertilitySystem, callback=function(val) self:togglePFProtected("fertilitySystem", val) end, disabled=pfActive},
         {id="sf_nutrients", value=self.settings.nutrientCycles, callback=function(val) self:togglePFProtected("nutrientCycles", val) end, disabled=pfActive},
         {id="sf_fertilizer_cost", value=self.settings.fertilizerCosts, callback=function(val) self:togglePFProtected("fertilizerCosts", val) end, disabled=pfActive},
-        {id="sf_notifications", value=self.settings.showNotifications, callback=function(val) self.settings.showNotifications=val; self.settings:save() end}
+        {id="sf_notifications", value=self.settings.showNotifications, callback=function(val) self.settings.showNotifications=val; self.settings:save() end},
+        -- NEW SETTINGS
+        {id="sf_seasonal_effects", value=self.settings.seasonalEffects, callback=function(val) self:togglePFProtected("seasonalEffects", val) end, disabled=pfActive},
+        {id="sf_rain_effects", value=self.settings.rainEffects, callback=function(val) self:togglePFProtected("rainEffects", val) end, disabled=pfActive},
+        {id="sf_plowing_bonus", value=self.settings.plowingBonus, callback=function(val) self:togglePFProtected("plowingBonus", val) end, disabled=pfActive}
     }
 
     for _, opt in ipairs(options) do
@@ -139,7 +136,7 @@ function SoilSettingsUI:ensureResetButton(settingsFrame)
         self._resetButton = {
             inputAction = InputAction.MENU_EXTRA_1,
             text = "Reset Settings",
-            callback = function()
+            callback = function() 
                 if g_SoilFertilityManager and g_SoilFertilityManager.settings then
                     g_SoilFertilityManager.settings:resetToDefaults()
                     if g_SoilFertilityManager.soilSettingsUI then
