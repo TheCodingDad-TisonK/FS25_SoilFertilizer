@@ -21,6 +21,10 @@ function SoilSettingsGUI:registerConsoleCommands()
     addConsoleCommand("SoilSetNutrients", "Enable/disable nutrient cycles (true/false)", "consoleCommandSetNutrients", self)
     addConsoleCommand("SoilSetFertilizerCosts", "Enable/disable fertilizer costs (true/false)", "consoleCommandSetFertilizerCosts", self)
     addConsoleCommand("SoilSetNotifications", "Enable/disable notifications (true/false)", "consoleCommandSetNotifications", self)
+    -- NEW CONSOLE COMMANDS
+    addConsoleCommand("SoilSetSeasonalEffects", "Enable/disable seasonal effects (true/false)", "consoleCommandSetSeasonalEffects", self)
+    addConsoleCommand("SoilSetRainEffects", "Enable/disable rain effects (true/false)", "consoleCommandSetRainEffects", self)
+    addConsoleCommand("SoilSetPlowingBonus", "Enable/disable plowing bonus (true/false)", "consoleCommandSetPlowingBonus", self)
     addConsoleCommand("SoilShowSettings", "Show current settings", "consoleCommandShowSettings", self)
     addConsoleCommand("SoilFieldInfo", "Show field soil information (fieldId)", "consoleCommandFieldInfo", self)
     addConsoleCommand("SoilResetSettings", "Reset all settings to defaults", "consoleCommandResetSettings", self)
@@ -40,6 +44,10 @@ function SoilSettingsGUI:consoleCommandHelp()
     print("SoilSetNutrients true|false - Toggle nutrient cycles")
     print("SoilSetFertilizerCosts true|false - Toggle fertilizer costs")
     print("SoilSetNotifications true|false - Toggle notifications")
+    -- NEW COMMANDS IN HELP
+    print("SoilSetSeasonalEffects true|false - Toggle seasonal effects")
+    print("SoilSetRainEffects true|false - Toggle rain effects")
+    print("SoilSetPlowingBonus true|false - Toggle plowing bonus")
     print("SoilShowSettings - Show current settings")
     print("SoilFieldInfo <fieldId> - Show soil info for field")
     print("SoilResetSettings - Reset to defaults")
@@ -132,6 +140,43 @@ function SoilSettingsGUI:consoleCommandSetNotifications(enabled)
     return "Error: Soil Mod not initialized"
 end
 
+-- NEW CONSOLE COMMAND FUNCTIONS
+function SoilSettingsGUI:consoleCommandSetSeasonalEffects(enabled)
+    if enabled == nil then return "Usage: SoilSetSeasonalEffects true|false" end
+    local enable = enabled:lower()
+    if enable ~= "true" and enable ~= "false" then return "Invalid value. Use 'true' or 'false'" end
+    if g_SoilFertilityManager and g_SoilFertilityManager.settings then
+        g_SoilFertilityManager.settings.seasonalEffects = (enable == "true")
+        g_SoilFertilityManager.settings:save()
+        return string.format("Seasonal effects %s", g_SoilFertilityManager.settings.seasonalEffects and "enabled" or "disabled")
+    end
+    return "Error: Soil Mod not initialized"
+end
+
+function SoilSettingsGUI:consoleCommandSetRainEffects(enabled)
+    if enabled == nil then return "Usage: SoilSetRainEffects true|false" end
+    local enable = enabled:lower()
+    if enable ~= "true" and enable ~= "false" then return "Invalid value. Use 'true' or 'false'" end
+    if g_SoilFertilityManager and g_SoilFertilityManager.settings then
+        g_SoilFertilityManager.settings.rainEffects = (enable == "true")
+        g_SoilFertilityManager.settings:save()
+        return string.format("Rain effects %s", g_SoilFertilityManager.settings.rainEffects and "enabled" or "disabled")
+    end
+    return "Error: Soil Mod not initialized"
+end
+
+function SoilSettingsGUI:consoleCommandSetPlowingBonus(enabled)
+    if enabled == nil then return "Usage: SoilSetPlowingBonus true|false" end
+    local enable = enabled:lower()
+    if enable ~= "true" and enable ~= "false" then return "Invalid value. Use 'true' or 'false'" end
+    if g_SoilFertilityManager and g_SoilFertilityManager.settings then
+        g_SoilFertilityManager.settings.plowingBonus = (enable == "true")
+        g_SoilFertilityManager.settings:save()
+        return string.format("Plowing bonus %s", g_SoilFertilityManager.settings.plowingBonus and "enabled" or "disabled")
+    end
+    return "Error: Soil Mod not initialized"
+end
+
 function SoilSettingsGUI:consoleCommandDebug()
     if g_SoilFertilityManager and g_SoilFertilityManager.settings then
         g_SoilFertilityManager.settings.debugMode = not g_SoilFertilityManager.settings.debugMode
@@ -155,11 +200,15 @@ function SoilSettingsGUI:consoleCommandShowSettings()
         local info = string.format(
             "=== Soil & Fertilizer Mod Settings ===\n" ..
             "Enabled: %s\nDebug Mode: %s\nFertility System: %s\nNutrient Cycles: %s\nFertilizer Costs: %s\nDifficulty: %s\nNotifications: %s\n" ..
+            -- NEW SETTINGS IN SHOW SETTINGS
+            "Seasonal Effects: %s\nRain Effects: %s\nPlowing Bonus: %s\n" ..
             "PF Active: %s\nFields Tracked: %d\n" ..
             "================================",
             tostring(s.enabled), tostring(s.debugMode), tostring(s.fertilitySystem),
             tostring(s.nutrientCycles), tostring(s.fertilizerCosts),
             s:getDifficultyName(), tostring(s.showNotifications),
+            -- NEW SETTINGS VALUES
+            tostring(s.seasonalEffects), tostring(s.rainEffects), tostring(s.plowingBonus),
             tostring(g_SoilFertilityManager.soilSystem and g_SoilFertilityManager.soilSystem.PFActive or false),
             g_SoilFertilityManager.soilSystem and #g_SoilFertilityManager.soilSystem.fieldData or 0
         )
