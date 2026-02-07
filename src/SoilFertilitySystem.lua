@@ -346,10 +346,12 @@ function SoilFertilitySystem:updateDailySoil()
     
     for fieldId, field in pairs(self.fieldData) do
         if field then
-            -- Natural nutrient changes based on season
+            -- Natural nutrient changes based on season (if seasonal effects enabled)
             local seasonFactor = 1.0
-            if season == 1 then seasonFactor = 1.2 end -- Spring: faster nutrient release
-            if season == 3 then seasonFactor = 0.8 end -- Fall: slower changes
+            if self.settings.seasonalEffects then
+                if season == 1 then seasonFactor = 1.2 end -- Spring: faster nutrient release
+                if season == 3 then seasonFactor = 0.8 end -- Fall: slower changes
+            end
             
             -- Temperature effects
             local temp = g_currentMission.environment.currentTemperature or 15
@@ -384,6 +386,16 @@ function SoilFertilitySystem:updateDailySoil()
             elseif field.pH > 7.5 then
                 field.pH = field.pH - 0.001
             end
+            
+            -- Plowing bonus (if enabled)
+            if self.settings.plowingBonus and field.lastPlowed then
+                local daysSincePlowed = currentDay - field.lastPlowed
+                if daysSincePlowed <= 7 then  -- Plowing benefits last 7 days
+                    local plowBonus = 1.0 - (daysSincePlowed / 7)  -- Fades over time
+                    field.nitrogen = math.min(100, field.nitrogen + (0.1 * plowBonus))
+                    field.organicMatter = math.min(10, field.organicMatter + (0.01 * plowBonus))
+                end
+            end
         end
     end
     
@@ -392,7 +404,7 @@ end
 
 -- Rain effects on soil
 function SoilFertilitySystem:applyRainEffects(dt, rainIntensity)
-    if not self.settings.nutrientCycles or self.PFActive then return end
+    if not self.settings.nutrientCycles or self.PFActive or not self.settings.rainEffects then return end
     
     local rainFactor = rainIntensity * dt / 1000
     
