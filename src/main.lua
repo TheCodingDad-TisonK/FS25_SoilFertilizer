@@ -1,9 +1,9 @@
 -- =========================================================
--- FS25 Realistic Soil & Fertilizer (version 1.0.1.3)
+-- FS25 Realistic Soil & Fertilizer (FIXED FOR MULTIPLAYER)
 -- =========================================================
 -- Realistic soil fertility and fertilizer management
 -- =========================================================
--- Author: TisonK (modified)
+-- Author: TisonK (Multiplayer fix applied)
 -- =========================================================
 -- COPYRIGHT NOTICE:
 -- All rights reserved. Unauthorized redistribution, copying,
@@ -21,6 +21,7 @@ source(modDirectory .. "src/settings/Settings.lua")
 source(modDirectory .. "src/settings/SoilSettingsGUI.lua")
 source(modDirectory .. "src/utils/UIHelper.lua")
 source(modDirectory .. "src/settings/SoilSettingsUI.lua")
+source(modDirectory .. "src/network/NetworkEvents.lua")  -- NEW: Multiplayer support
 
 -- Globals
 local sfm = nil
@@ -57,6 +58,17 @@ checkModCompatibility()
 local function loadedMission(mission, node)
     if not isEnabled() or mission.cancelLoading then return end
     sfm:onMissionLoaded()
+    
+    -- MULTIPLAYER FIX: Request settings sync from server if client
+    if g_client and not g_server and SoilNetworkEvents_RequestFullSync then
+        -- Delay sync request to ensure server is ready
+        mission.environment.addDayChangeListener = Utils.appendedFunction(
+            mission.environment.addDayChangeListener,
+            function()
+                SoilNetworkEvents_RequestFullSync()
+            end
+        )
+    end
 end
 
 -- Load handler
@@ -70,12 +82,24 @@ local function load(mission)
 
     if sfm == nil then
         print("Soil & Fertilizer Mod: Initializing...")
+        
+        -- Log multiplayer status
+        if mission.missionDynamicInfo.isMultiplayer then
+            if mission:getIsServer() then
+                print("Soil Mod: Running as MULTIPLAYER SERVER")
+            else
+                print("Soil Mod: Running as MULTIPLAYER CLIENT")
+            end
+        else
+            print("Soil Mod: Running in SINGLEPLAYER mode")
+        end
+        
         sfm = SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
         getfenv(0)["g_SoilFertilityManager"] = sfm
 
         -- Ensure GUI flagged as injected in server mode
-        if disableGUI and sfm.soilSettingsUI then
-            sfm.soilSettingsUI.injected = true
+        if disableGUI and sfm.settingsUI then
+            sfm.settingsUI.injected = true
         end
 
         print("Soil & Fertilizer Mod: Initialized in " .. (disableGUI and "server/console" or "full") .. " mode")
@@ -94,15 +118,15 @@ end
 -- Delayed GUI injection for safe client
 local function delayedGUISetup()
     if SAFE_MODE or guiInjected then return end
-    if g_gui and g_SoilFertilityManager and g_SoilFertilityManager.soilSettingsUI then
+    if g_gui and g_SoilFertilityManager and g_SoilFertilityManager.settingsUI then
         if g_currentMission and g_currentMission.isClient and 
            g_currentMission.controlledVehicle and 
            g_gui.screenControllers and g_gui.screenControllers[InGameMenu] then
 
             print("Soil Mod: Attempting safe GUI injection...")
             local success, errorMsg = pcall(function()
-                if not g_SoilFertilityManager.soilSettingsUI.injected then
-                    g_SoilFertilityManager.soilSettingsUI:inject()
+                if not g_SoilFertilityManager.settingsUI.injected then
+                    g_SoilFertilityManager.settingsUI:inject()
                     print("Soil Mod: GUI injected successfully")
                 end
             end)
@@ -119,13 +143,16 @@ end
 
 -- Hook save/load events
 local function hookSaveLoadEvents()
-    -- Hook mission save
+    -- Hook mission save (SERVER ONLY)
     if Mission00.saveToXMLFile then
         Mission00.saveToXMLFile = Utils.prependedFunction(
             Mission00.saveToXMLFile,
             function(mission, xmlFile, key, usedModNames)
-                if g_SoilFertilityManager then
-                    g_SoilFertilityManager:saveSoilData()
+                -- Only server should save
+                if g_server or not mission.missionDynamicInfo.isMultiplayer then
+                    if g_SoilFertilityManager then
+                        g_SoilFertilityManager:saveSoilData()
+                    end
                 end
             end
         )
@@ -138,6 +165,12 @@ local function hookSaveLoadEvents()
             function(mission, xmlFile, key)
                 if g_SoilFertilityManager then
                     g_SoilFertilityManager:loadSoilData()
+                    
+                    -- If multiplayer client, request sync
+                    if g_client and not g_server and SoilNetworkEvents_RequestFullSync then
+                        -- Small delay to let server finish loading
+                        mission.loadingDelay = 2000
+                    end
                 end
             end
         )
@@ -167,8 +200,8 @@ hookSaveLoadEvents()
 
 -- Console commands
 function soilfertility()
-    if g_SoilFertilityManager and g_SoilFertilityManager.soilSettingsGUI then
-        return g_SoilFertilityManager.soilSettingsGUI:consoleCommandHelp()
+    if g_SoilFertilityManager and g_SoilFertilityManager.settingsGUI then
+        return g_SoilFertilityManager.settingsGUI:consoleCommandHelp()
     else
         print("=== Soil & Fertilizer Mod Commands ===")
         print("Type these commands in console (~):")
@@ -179,9 +212,14 @@ function soilfertility()
         print("SoilSetNutrients true|false - Toggle nutrient cycles")
         print("SoilSetFertilizerCosts true|false - Toggle fertilizer costs")
         print("SoilSetNotifications true|false - Toggle notifications")
+        print("SoilSetSeasonalEffects true|false - Toggle seasonal effects")
+        print("SoilSetRainEffects true|false - Toggle rain effects")
+        print("SoilSetPlowingBonus true|false - Toggle plowing bonus")
         print("SoilResetSettings - Reset to defaults")
         print("SoilFieldInfo <fieldId> - Show field soil info")
         print("SoilSaveData - Force save soil data")
+        print("")
+        print("NOTE: In multiplayer, only server admins can change settings")
         print("================================")
         return "Soil & Fertilizer Mod commands listed above"
     end
@@ -190,10 +228,35 @@ end
 function soilStatus()
     if g_SoilFertilityManager and g_SoilFertilityManager.settings then
         local s = g_SoilFertilityManager.settings
+        local isMultiplayer = g_currentMission and g_currentMission.missionDynamicInfo.isMultiplayer
+        local isServer = g_server ~= nil
+        local isClient = g_client ~= nil
+        
         print(string.format(
-            "Enabled: %s\nFertility System: %s\nNutrient Cycles: %s\nFertilizer Costs: %s\nDifficulty: %s\nNotifications: %s",
-            tostring(s.enabled), tostring(s.fertilitySystem), tostring(s.nutrientCycles),
-            tostring(s.fertilizerCosts), s:getDifficultyName(), tostring(s.showNotifications)
+            "=== Soil & Fertilizer Status ===\n" ..
+            "Mode: %s\n" ..
+            "Role: %s\n" ..
+            "Enabled: %s\n" ..
+            "Fertility System: %s\n" ..
+            "Nutrient Cycles: %s\n" ..
+            "Fertilizer Costs: %s\n" ..
+            "Difficulty: %s\n" ..
+            "Notifications: %s\n" ..
+            "Seasonal Effects: %s\n" ..
+            "Rain Effects: %s\n" ..
+            "Plowing Bonus: %s\n" ..
+            "================================",
+            isMultiplayer and "Multiplayer" or "Singleplayer",
+            isServer and "Server" or (isClient and "Client" or "Unknown"),
+            tostring(s.enabled),
+            tostring(s.fertilitySystem),
+            tostring(s.nutrientCycles),
+            tostring(s.fertilizerCosts),
+            s:getDifficultyName(),
+            tostring(s.showNotifications),
+            tostring(s.seasonalEffects),
+            tostring(s.rainEffects),
+            tostring(s.plowingBonus)
         ))
     else
         print("Soil & Fertilizer Mod not initialized")
@@ -215,14 +278,14 @@ addConsoleCommand("SoilSaveData", "Force save soil data", "consoleCommandSaveDat
 getfenv(0)["soilfertility"] = soilfertility
 getfenv(0)["soilStatus"] = soilStatus
 getfenv(0)["soilEnable"] = function() 
-    if g_SoilFertilityManager and g_SoilFertilityManager.soilSettingsGUI then
-        return g_SoilFertilityManager.soilSettingsGUI:consoleCommandSoilEnable()
+    if g_SoilFertilityManager and g_SoilFertilityManager.settingsGUI then
+        return g_SoilFertilityManager.settingsGUI:consoleCommandSoilEnable()
     end
     return "Soil & Fertilizer Mod not initialized"
 end
 getfenv(0)["soilDisable"] = function() 
-    if g_SoilFertilityManager and g_SoilFertilityManager.soilSettingsGUI then
-        return g_SoilFertilityManager.soilSettingsGUI:consoleCommandSoilDisable()
+    if g_SoilFertilityManager and g_SoilFertilityManager.settingsGUI then
+        return g_SoilFertilityManager.settingsGUI:consoleCommandSoilDisable()
     end
     return "Soil & Fertilizer Mod not initialized"
 end
@@ -231,5 +294,4 @@ print("========================================")
 print("  FS25 Soil & Fertilizer Mod LOADED     ")
 print("  Realistic soil management system      ")
 print("  Type 'soilfertility' for commands     ")
-print("  With full real event hooks installed  ")
 print("========================================")
