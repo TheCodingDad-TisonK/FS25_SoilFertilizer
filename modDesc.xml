@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <modDesc descVersion="92">
     <author>TisonK</author>
-    <version>1.0.1.5</version>
+    <version>1.0.1.6</version>
     <modName>FS25_SoilFertilizer</modName>
     <title>
         <en>Realistic Soil & Fertilizer</en>
@@ -365,4 +365,5 @@
         </text>
     </l10n>
 </modDesc>
+
 
