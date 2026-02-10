@@ -1,0 +1,4 @@
+DISABLE_GUI=false
+DISABLE_MOD=false
+PF_COMPATIBILITY=true
+DEBUG=false
