@@ -6,6 +6,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 FS25_SoilFertilizer is a Farming Simulator 25 mod (Lua) that adds realistic soil nutrient management. It tracks Nitrogen, Phosphorus, Potassium, Organic Matter, and pH per field, with crop-specific depletion, fertilizer replenishment, weather effects, and seasonal cycles. Fully supports multiplayer with admin-only settings enforcement.
 
+## Git Workflow
+
+- **Work branch:** `development` — all commits and pushes go here.
+- **Stable branch:** `main` — only updated via pull requests from `development`.
+- Never commit or push directly to `main`. Always work on `development` and PR to `main`.
+
+## Commit Rules
+
+- Do NOT include `Co-Authored-By` lines or any AI/Claude Code advertisement in commit messages.
+- Keep commit messages concise and focused on what changed.
+
 ## Development & Deployment
 
 There is no build system. The mod is loaded directly by FS25 from the mod folder:
