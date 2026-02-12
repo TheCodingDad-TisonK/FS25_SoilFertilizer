@@ -14,6 +14,7 @@
         <br>Solo & Fertilizante Realistas</br>
         <uk>Реалістичний грунт та добриво</uk>
         <ru>Реалистичная почва и удобрение</ru>
+        <hu>Realisztikus Talaj & Műtrágya</hu>
     </title>
     <description>
         <en>Adds realistic soil fertility mechanics, fertilizer requirements, and nutrient cycles.</en>
@@ -26,6 +27,7 @@
         <br>Adiciona mecânicas realistas de fertilidade do solo, requisitos de fertilizante e ciclos de nutrientes.</br>
         <uk>Додає реалістичні механіки родючості ґрунту, вимоги до добрив та циклів поживних речовин.</uk>
         <ru>Добавляет реалистичные механизмы плодородия почвы, требования к удобрениям и циклы питательных веществ.</ru>
+        <hu>Hozzáadja a talaj termékenységének realisztikus mechanikáit, a műtrágyaigényeket és a tápanyagciklusokat.</hu>
     </description>
     <iconFilename>icon.dds</iconFilename>
     
@@ -47,6 +49,7 @@
             <br>Solo & Fertilizante</br>
             <uk>Грунт та добриво</uk>
             <ru>Почва и удобрение</ru>
+            <hu>Talaj & Műtrágya</hu>
         </text>
         
         <text name="sf_enabled_short">
@@ -60,6 +63,7 @@
             <br>Ativar mod</br>
             <uk>Увімкнути мод</uk>
             <ru>Включить мод</ru>
+            <hu>Mod engedélyezése</hu>
         </text>
         
         <text name="sf_enabled_long">
@@ -73,6 +77,7 @@
             <br>Ativar ou desativar o mod solo & fertilizante</br>
             <uk>Увімкнути або вимкнути мод грунту та добрива</uk>
             <ru>Включить или выключить мод почвы и удобрения</ru>
+            <hu>A talaj és műtrágya mod engedélyezése vagy tiltása</hu>
         </text>
         
         <text name="sf_debug_short">
@@ -86,6 +91,7 @@
             <br>Modo DEBUG</br>
             <uk>Режим DEBUG</uk>
             <ru>Режим DEBUG</ru>
+            <hu>DEBUG mód</hu>
         </text>
         
         <text name="sf_debug_long">
@@ -99,6 +105,7 @@
             <br>Ativar/desativar modo DEBUG (registro adicional)</br>
             <uk>Увімкнути/вимкнути режим DEBUG (додаткове логування)</uk>
             <ru>Включить/выключить режим DEBUG (дополнительное логирование)</ru>
+            <hu>DEBUG mód engedélyezése/tiltása (további naplózás)</hu>
         </text>
         
         <!-- NEW SETTING 1: Seasonal Effects -->
@@ -113,6 +120,7 @@
             <br>Efeitos Sazonais</br>
             <uk>Сезонні ефекти</uk>
             <ru>Сезонные эффекты</ru>
+            <hu>Évszak Hatások</hu>
         </text>
         
         <text name="sf_seasonal_effects_long">
@@ -126,6 +134,7 @@
             <br>Ativar/desativar impacto sazonal nos nutrientes do solo (impulso primaveril, desaceleração outonal)</br>
             <uk>Увімкнути/вимкнути сезонний вплив на поживні речовини ґрунту (весняне зростання, осіннє сповільнення)</uk>
             <ru>Включить/выключить сезонное влияние на питательные вещества почвы (весенний рост, осеннее замедление)</ru>
+            <hu>Évszak hatásának engedélyezése/tiltása a talaj tápanyagaira (tavaszi növekedési gyorsítás, őszi lassítás)</hu>
         </text>
         
         <!-- NEW SETTING 2: Rain Effects -->
@@ -140,6 +149,7 @@
             <br>Efeitos Chuva</br>
             <uk>Ефекти дощу</uk>
             <ru>Эффекты дождя</ru>
+            <hu>Eső Hatások</hu>
         </text>
         
         <text name="sf_rain_effects_long">
@@ -153,9 +163,9 @@
             <br>Ativar/desativar impacto chuva no solo (lixiviação nutrientes, alterações pH)</br>
             <uk>Увімкнути/вимкнути вплив дощу на ґрунт (вилуговування поживних речовин, зміни pH)</uk>
             <ru>Включить/выключить влияние дождя на почву (вымывание питательных веществ, изменения pH)</ru>
+            <hu>Engedélyezze/tiltsa az eső hatását a talajra (tápanyag kimosódás, pH-változások)</hu>
         </text>
         
-        <!-- NEW SETTING 3: Plowing Bonus -->
         <text name="sf_plowing_bonus_short">
             <en>Plowing Bonus</en>
             <de>Pflugbonus</de>
@@ -167,6 +177,7 @@
             <br>Bônus Aração</br>
             <uk>Бонус оранки</uk>
             <ru>Бонус вспашки</ru>
+            <hu>Szántás Bónusz</hu>
         </text>
         
         <text name="sf_plowing_bonus_long">
@@ -180,8 +191,9 @@
             <br>Ativar/desativar benefícios aração para fertilidade solo (melhor nitrogênio e matéria orgânica)</br>
             <uk>Увімкнути/вимкнути переваги оранки для родючості ґрунту (покращений азот та органічна речовина)</uk>
             <ru>Включить/выключить преимущества вспашки для плодородия почвы (улучшенный азот и органическое вещество)</ru>
+            <hu>A szántás előnyeinek engedélyezése/tiltása a talaj termékenységére (javított nitrogén és szerves anyag)</hu>
         </text>
-
+        
         <text name="sf_fertility_short">
             <en>Fertility System</en>
             <de>Fruchtbarkeitssystem</de>
@@ -193,6 +205,7 @@
             <br>Sistema Fertilidade</br>
             <uk>Система родючості</uk>
             <ru>Система плодородия</ru>
+            <hu>Termékenységi Rendszer</hu>
         </text>
         
         <text name="sf_fertility_long">
@@ -206,6 +219,7 @@
             <br>Ativar/desativar sistema dinâmico de fertilidade do solo</br>
             <uk>Увімкнути/вимкнути динамічну систему родючості ґрунту</uk>
             <ru>Включить/выключить динамическую систему плодородия почвы</ru>
+            <hu>Dinamikus talajtermékenységi rendszer engedélyezése/tiltása</hu>
         </text>
         
         <text name="sf_nutrients_short">
@@ -219,6 +233,7 @@
             <br>Ciclos Nutrientes</br>
             <uk>Цикли поживних речовин</uk>
             <ru>Циклы питательных веществ</ru>
+            <hu>Tápanyagciklusok</hu>
         </text>
         
         <text name="sf_nutrients_long">
@@ -232,6 +247,7 @@
             <br>Ativar/desativar esgotamento e reposição realistas de nutrientes</br>
             <uk>Увімкнути/вимкнути реалістичне виснаження та відновлення поживних речовин</uk>
             <ru>Включить/выключить реалистичное истощение и восстановление питательных веществ</ru>
+            <hu>Realisztikus tápanyagkimerülés és feltöltés engedélyezése/tiltása</hu>
         </text>
         
         <text name="sf_difficulty_short">
@@ -245,6 +261,7 @@
             <br>Dificuldade</br>
             <uk>Складність</uk>
             <ru>Сложность</ru>
+            <hu>Nehézség</hu>
         </text>
         
         <text name="sf_difficulty_long">
@@ -258,6 +275,7 @@
             <br>Definir nível dificuldade: Simples, Realista, Hardcore</br>
             <uk>Встановити рівень складності: Простий, Реалістичний, Хардкор</uk>
             <ru>Установить уровень сложности: Простой, Реалистичный, Хардкор</ru>
+            <hu>Nehézségi szint beállítása: Egyszerű, Realisztikus, Hardcore</hu>
         </text>
         
         <text name="sf_diff_1">
@@ -271,6 +289,7 @@
             <br>Simples</br>
             <uk>Простий</uk>
             <ru>Простой</ru>
+            <hu>Egyszerű</hu>
         </text>
         
         <text name="sf_diff_2">
@@ -284,6 +303,7 @@
             <br>Realista</br>
             <uk>Реалістичний</uk>
             <ru>Реалистичный</ru>
+            <hu>Realisztikus</hu>
         </text>
         
         <text name="sf_diff_3">
@@ -297,6 +317,7 @@
             <br>Hardcore</br>
             <uk>Хардкор</uk>
             <ru>Хардкор</ru>
+            <hu>Hardcore</hu>
         </text>
         
         <text name="sf_fertilizer_cost_short">
@@ -310,6 +331,7 @@
             <br>Custos Fertilizante</br>
             <uk>Вартість добрив</uk>
             <ru>Стоимость удобрений</ru>
+            <hu>Műtrágya Költségek</hu>
         </text>
         
         <text name="sf_fertilizer_cost_long">
@@ -323,6 +345,7 @@
             <br>Ativar/desativar custos realistas de compra de fertilizante</br>
             <uk>Увімкнути/вимкнути реалістичну вартість покупки добрив</uk>
             <ru>Включить/выключить реалистичную стоимость покупки удобрений</ru>
+            <hu>Realisztikus műtrágya-vásárlási költségek engedélyezése/tiltása</hu>
         </text>
         
         <text name="sf_notifications_short">
@@ -336,6 +359,7 @@
             <br>Notificações</br>
             <uk>Сповіщення</uk>
             <ru>Уведомления</ru>
+            <hu>Értesítések</hu>
         </text>
         
         <text name="sf_notifications_long">
@@ -349,6 +373,7 @@
             <br>Ativar/desativar notificações de solo e fertilizante</br>
             <uk>Увімкнути/вимкнути сповіщення про ґрунт і добрива</uk>
             <ru>Включить/выключить уведомления о почве и удобрениях</ru>
+            <hu>Talaj és műtrágya értesítések engedélyezése/tiltása</hu>
         </text>
         
         <text name="sf_reset">
@@ -362,6 +387,7 @@
             <br>Restaurar configurações solo</br>
             <uk>Скинути налаштування ґрунту</uk>
             <ru>Сбросить настройки почвы</ru>
+            <hu>Talajbeállítások alaphelyzetbe állítása</hu>
         </text>
     </l10n>
 </modDesc>
