@@ -1,0 +1,16 @@
+# Claude Code files
+.claude/
+
+# Temporary files
+*.tmp
+*.bak
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Build artifacts
+*.zip.old
+*_temp/
