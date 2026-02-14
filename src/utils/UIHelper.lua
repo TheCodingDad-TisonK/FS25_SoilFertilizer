@@ -1,5 +1,5 @@
 -- =========================================================
--- FS25 Realistic Soil & Fertilizer (version 1.0.3.1)
+-- FS25 Realistic Soil & Fertilizer (version 1.0.4.1)
 -- =========================================================
 -- Realistic soil fertility and fertilizer management
 -- =========================================================
@@ -41,7 +41,7 @@ local function getTextSafe(key)
 
     local text = g_i18n:getText(key)
     if text == nil or text == "" then
-        Logging.warning("[SoilFertilizer] Missing translation for key: " .. tostring(key))
+        SoilLogger.warning("[SoilFertilizer] Missing translation for key: " .. tostring(key))
         return key
     end
     return text
@@ -225,19 +225,19 @@ end
 
 function UIHelper.createSection(layout, textId)
     if not layout or not layout.elements then
-        Logging.error("[SoilFertilizer] Invalid layout passed to createSection")
+        SoilLogger.error("[SoilFertilizer] Invalid layout passed to createSection")
         return nil
     end
 
     local template = findSectionTemplate(layout)
     if not template then
-        Logging.error("[SoilFertilizer] No valid section template found")
+        SoilLogger.error("[SoilFertilizer] No valid section template found")
         return nil
     end
 
     local success, section = pcall(function() return template:clone(layout) end)
     if not success or not section then
-        Logging.error("[SoilFertilizer] Failed to clone section template: %s", tostring(success))
+        SoilLogger.error("[SoilFertilizer] Failed to clone section template: %s", tostring(success))
         return nil
     end
 
@@ -247,30 +247,42 @@ function UIHelper.createSection(layout, textId)
         section:setText(getTextSafe(textId))
     end
 
+    -- Defensive styling: ensure visibility
+    if section.setVisible then
+        section:setVisible(true)
+    end
+    section.visible = true
+
+    -- Ensure text color is not white-on-white
+    if section.textColor then
+        section.textColor = {0.95, 0.95, 0.95, 1.0}
+    end
+
     local addSuccess = pcall(function() layout:addElement(section) end)
     if not addSuccess then
-        Logging.error("[SoilFertilizer] Failed to add section to layout")
+        SoilLogger.error("[SoilFertilizer] Failed to add section to layout")
         return nil
     end
 
+    SoilLogger.info("Created section header: %s (visible=%s)", textId, tostring(section.visible))
     return section
 end
 
 function UIHelper.createDescription(layout, textId)
     if not layout or not layout.elements then
-        Logging.error("[SoilFertilizer] Invalid layout passed to createDescription")
+        SoilLogger.error("[SoilFertilizer] Invalid layout passed to createDescription")
         return nil
     end
 
     local template = findDescriptionTemplate(layout)
     if not template then
-        Logging.error("[SoilFertilizer] No valid description template found")
+        SoilLogger.error("[SoilFertilizer] No valid description template found")
         return nil
     end
 
     local success, desc = pcall(function() return template:clone(layout) end)
     if not success or not desc then
-        Logging.error("[SoilFertilizer] Failed to clone description template: %s", tostring(success))
+        SoilLogger.error("[SoilFertilizer] Failed to clone description template: %s", tostring(success))
         return nil
     end
 
@@ -284,40 +296,52 @@ function UIHelper.createDescription(layout, textId)
         desc.textSize = desc.textSize * 0.85
     end
 
+    -- Defensive styling: explicit colors and visibility
     if desc.textColor then
-        desc.textColor = {0.7, 0.7, 0.7, 1}
+        desc.textColor = {0.7, 0.7, 0.7, 1.0}
+    end
+
+    if desc.setVisible then
+        desc:setVisible(true)
+    end
+    desc.visible = true
+
+    -- Ensure alpha is not 0
+    if desc.alpha ~= nil then
+        desc.alpha = 1.0
     end
 
     local addSuccess = pcall(function() layout:addElement(desc) end)
     if not addSuccess then
-        Logging.error("[SoilFertilizer] Failed to add description to layout")
+        SoilLogger.error("[SoilFertilizer] Failed to add description to layout")
         return nil
     end
 
+    SoilLogger.info("Created description: %s (visible=%s)", textId, tostring(desc.visible))
     return desc
 end
 
 function UIHelper.createBinaryOption(layout, id, textId, state, callback)
     if not layout or not layout.elements then
-        Logging.error("[SoilFertilizer] Invalid layout passed to createBinaryOption")
+        SoilLogger.error("[SoilFertilizer] Invalid layout passed to createBinaryOption")
         return nil
     end
 
     local template = findBinaryTemplate(layout)
     if not template then
-        Logging.error("[SoilFertilizer] No valid binary option template found")
+        SoilLogger.error("[SoilFertilizer] No valid binary option template found")
         return nil
     end
 
     local success, row = pcall(function() return template:clone(layout) end)
     if not success or not row then
-        Logging.error("[SoilFertilizer] Failed to clone binary option template: %s", tostring(success))
+        SoilLogger.error("[SoilFertilizer] Failed to clone binary option template: %s", tostring(success))
         return nil
     end
 
     -- Validate cloned structure
     if not row.elements or #row.elements < 2 then
-        Logging.error("[SoilFertilizer] Cloned binary option has invalid structure")
+        SoilLogger.error("[SoilFertilizer] Cloned binary option has invalid structure")
         return nil
     end
 
@@ -328,7 +352,7 @@ function UIHelper.createBinaryOption(layout, id, textId, state, callback)
 
     -- Additional validation of cloned elements
     if not opt or not lbl or not opt.setState or not lbl.setText then
-        Logging.error("[SoilFertilizer] Cloned binary option elements missing required methods")
+        SoilLogger.error("[SoilFertilizer] Cloned binary option elements missing required methods")
         return nil
     end
 
@@ -338,6 +362,27 @@ function UIHelper.createBinaryOption(layout, id, textId, state, callback)
 
     if opt and opt.toolTipText then opt.toolTipText = "" end
     if lbl and lbl.toolTipText then lbl.toolTipText = "" end
+
+    -- Defensive styling: ensure visibility and proper colors
+    if row.setVisible then
+        row:setVisible(true)
+    end
+    row.visible = true
+
+    if opt then
+        if opt.setVisible then opt:setVisible(true) end
+        opt.visible = true
+        if opt.alpha ~= nil then opt.alpha = 1.0 end
+    end
+
+    if lbl then
+        if lbl.setVisible then lbl:setVisible(true) end
+        lbl.visible = true
+        if lbl.textColor then
+            lbl.textColor = {0.9, 0.9, 0.9, 1.0} -- Light gray, clearly visible
+        end
+        if lbl.alpha ~= nil then lbl.alpha = 1.0 end
+    end
 
     if opt then
         opt.onClickCallback = function(newState, element)
@@ -354,7 +399,7 @@ function UIHelper.createBinaryOption(layout, id, textId, state, callback)
 
     local addSuccess = pcall(function() layout:addElement(row) end)
     if not addSuccess then
-        Logging.error("[SoilFertilizer] Failed to add binary option to layout")
+        SoilLogger.error("[SoilFertilizer] Failed to add binary option to layout")
         return nil
     end
 
@@ -391,30 +436,34 @@ function UIHelper.createBinaryOption(layout, id, textId, state, callback)
         opt.elements[1]:setText(tooltipText)
     end
 
+    SoilLogger.info("Created binary option: %s (state=%s, visible=%s, lblColor=%s)",
+        textId, tostring(state), tostring(row.visible),
+        lbl.textColor and string.format("%.1f,%.1f,%.1f", lbl.textColor[1], lbl.textColor[2], lbl.textColor[3]) or "nil")
+
     return opt
 end
 
 function UIHelper.createMultiOption(layout, id, textId, options, state, callback)
     if not layout or not layout.elements then
-        Logging.error("[SoilFertilizer] Invalid layout passed to createMultiOption")
+        SoilLogger.error("[SoilFertilizer] Invalid layout passed to createMultiOption")
         return nil
     end
 
     local template = findMultiTemplate(layout)
     if not template then
-        Logging.error("[SoilFertilizer] No valid multi option template found")
+        SoilLogger.error("[SoilFertilizer] No valid multi option template found")
         return nil
     end
 
     local success, row = pcall(function() return template:clone(layout) end)
     if not success or not row then
-        Logging.error("[SoilFertilizer] Failed to clone multi option template: %s", tostring(success))
+        SoilLogger.error("[SoilFertilizer] Failed to clone multi option template: %s", tostring(success))
         return nil
     end
 
     -- Validate cloned structure
     if not row.elements or #row.elements < 2 then
-        Logging.error("[SoilFertilizer] Cloned multi option has invalid structure")
+        SoilLogger.error("[SoilFertilizer] Cloned multi option has invalid structure")
         return nil
     end
 
@@ -425,7 +474,7 @@ function UIHelper.createMultiOption(layout, id, textId, options, state, callback
 
     -- Additional validation of cloned elements
     if not opt or not lbl or not opt.setTexts or not opt.setState or not lbl.setText then
-        Logging.error("[SoilFertilizer] Cloned multi option elements missing required methods")
+        SoilLogger.error("[SoilFertilizer] Cloned multi option elements missing required methods")
         return nil
     end
 
@@ -435,6 +484,27 @@ function UIHelper.createMultiOption(layout, id, textId, options, state, callback
 
     if opt and opt.toolTipText then opt.toolTipText = "" end
     if lbl and lbl.toolTipText then lbl.toolTipText = "" end
+
+    -- Defensive styling: ensure visibility and proper colors
+    if row.setVisible then
+        row:setVisible(true)
+    end
+    row.visible = true
+
+    if opt then
+        if opt.setVisible then opt:setVisible(true) end
+        opt.visible = true
+        if opt.alpha ~= nil then opt.alpha = 1.0 end
+    end
+
+    if lbl then
+        if lbl.setVisible then lbl:setVisible(true) end
+        lbl.visible = true
+        if lbl.textColor then
+            lbl.textColor = {0.9, 0.9, 0.9, 1.0} -- Light gray, clearly visible
+        end
+        if lbl.alpha ~= nil then lbl.alpha = 1.0 end
+    end
 
     if opt and opt.setTexts then
         opt:setTexts(options)
@@ -458,7 +528,7 @@ function UIHelper.createMultiOption(layout, id, textId, options, state, callback
 
     local addSuccess = pcall(function() layout:addElement(row) end)
     if not addSuccess then
-        Logging.error("[SoilFertilizer] Failed to add multi option to layout")
+        SoilLogger.error("[SoilFertilizer] Failed to add multi option to layout")
         return nil
     end
 
@@ -482,6 +552,10 @@ function UIHelper.createMultiOption(layout, id, textId, options, state, callback
     if opt and opt.elements and opt.elements[1] and opt.elements[1].setText then
         opt.elements[1]:setText(tooltipText)
     end
+
+    SoilLogger.info("Created multi option: %s (state=%s, visible=%s, lblColor=%s)",
+        textId, tostring(state), tostring(row.visible),
+        lbl.textColor and string.format("%.1f,%.1f,%.1f", lbl.textColor[1], lbl.textColor[2], lbl.textColor[3]) or "nil")
 
     return opt
 end

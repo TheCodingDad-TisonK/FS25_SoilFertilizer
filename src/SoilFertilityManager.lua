@@ -123,6 +123,15 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
     self.settingsGUI = SoilSettingsGUI.new()
     self.settingsGUI:registerConsoleCommands()
 
+    -- HUD (client only)
+    if shouldInitGUI then
+        assert(SoilHUD, "SoilHUD not loaded")
+        self.soilHUD = SoilHUD.new(self.soilSystem, self.settings)
+        SoilLogger.info("Soil HUD created")
+    else
+        self.soilHUD = nil
+    end
+
     -- Load settings
     self.settings:load()
 
@@ -187,9 +196,14 @@ function SoilFertilityManager:onMissionLoaded()
         if self.soilSystem then
             self.soilSystem:initialize()
         end
+        if self.soilHUD then
+            self.soilHUD:initialize()
+            -- Register F8 toggle keybind
+            self:registerInputActions()
+        end
         if self.settings.showNotifications and g_currentMission and g_currentMission.hud then
             g_currentMission.hud:showBlinkingWarning(
-                "Soil & Fertilizer Mod Active - Type 'soilfertility' for commands",
+                "Soil & Fertilizer Mod Active - Type 'soilfertility' for commands | Press F8 for Soil HUD",
                 8000
             )
         end
@@ -199,6 +213,35 @@ function SoilFertilityManager:onMissionLoaded()
         SoilLogger.error("Error during mission load - %s", tostring(errorMsg))
         self.settings.enabled = false
         self.settings:save()
+    end
+end
+
+-- Register input actions for HUD toggle
+function SoilFertilityManager:registerInputActions()
+    if not self.soilHUD then return end
+
+    local _, eventId = g_inputBinding:registerActionEvent(
+        InputAction.SF_TOGGLE_HUD,
+        self,
+        self.onToggleHUDInput,
+        false,  -- triggerUp
+        true,   -- triggerDown
+        false,  -- triggerAlways
+        true    -- startActive
+    )
+
+    if eventId then
+        self.toggleHUDEventId = eventId
+        SoilLogger.info("F8 HUD toggle registered")
+    else
+        SoilLogger.warning("Failed to register F8 HUD toggle")
+    end
+end
+
+-- Input callback for HUD toggle (F8)
+function SoilFertilityManager:onToggleHUDInput()
+    if self.soilHUD then
+        self.soilHUD:toggleVisibility()
     end
 end
 
@@ -253,6 +296,17 @@ function SoilFertilityManager:update(dt)
     if self.guiRetryHandler then
         self.guiRetryHandler:update(dt)
     end
+
+    -- Update HUD
+    if self.soilHUD then
+        self.soilHUD:update(dt)
+    end
+end
+
+function SoilFertilityManager:draw()
+    if self.soilHUD then
+        self.soilHUD:draw()
+    end
 end
 
 function SoilFertilityManager:delete()
@@ -263,6 +317,17 @@ function SoilFertilityManager:delete()
     if self.guiRetryHandler then
         self.guiRetryHandler:reset()
         self.guiRetryHandler = nil
+    end
+
+    -- Clean up HUD and input actions
+    if self.toggleHUDEventId then
+        g_inputBinding:removeActionEvent(self.toggleHUDEventId)
+        self.toggleHUDEventId = nil
+    end
+
+    if self.soilHUD then
+        self.soilHUD:delete()
+        self.soilHUD = nil
     end
 
     if self.soilSystem then

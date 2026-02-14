@@ -123,6 +123,57 @@ function SoilFertilitySystem:onFieldOwnershipChanged(fieldId, farmlandId, farmId
     end
 end
 
+-- Hook delegate: called by HookManager when plowing occurs
+function SoilFertilitySystem:onPlowing(fieldId)
+    if not fieldId or fieldId <= 0 then return end
+    if not self.settings.plowingBonus then return end
+
+    local field = self:getOrCreateField(fieldId, true)
+    if not field then return end
+
+    local changed = false
+
+    -- Plowing benefit 1: Increase organic matter by 5% (mixing in crop residue)
+    local omBefore = field.organicMatter or SoilConstants.FIELD_DEFAULTS.organicMatter
+    local omIncrease = 5.0
+    local omAfter = math.min(omBefore + omIncrease, SoilConstants.NUTRIENT_LIMITS.organicMatter.max)
+
+    if omAfter > omBefore then
+        field.organicMatter = omAfter
+        changed = true
+    end
+
+    -- Plowing benefit 2: pH normalization (0.1 units toward 7.0)
+    local phBefore = field.pH or SoilConstants.FIELD_DEFAULTS.pH
+    local phTarget = 7.0
+    local phNormalization = 0.1
+    local phAfter = phBefore
+
+    if phBefore < phTarget then
+        phAfter = math.min(phBefore + phNormalization, phTarget)
+    elseif phBefore > phTarget then
+        phAfter = math.max(phBefore - phNormalization, phTarget)
+    end
+
+    if phAfter ~= phBefore then
+        field.pH = phAfter
+        changed = true
+    end
+
+    -- Debug logging
+    if self.settings.debugMode and changed then
+        SoilLogger.info("[Plowing] Field %d: OM %.1f->%.1f, pH %.2f->%.2f",
+            fieldId, omBefore, omAfter, phBefore, phAfter)
+    end
+
+    -- Broadcast to clients if server in multiplayer
+    if changed and g_server and g_currentMission and g_currentMission.missionDynamicInfo.isMultiplayer then
+        if field and SoilFieldUpdateEvent then
+            g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
+        end
+    end
+end
+
 -- Hook delegate: called by HookManager on environment update
 function SoilFertilitySystem:onEnvironmentUpdate(env, dt)
     -- Daily soil updates

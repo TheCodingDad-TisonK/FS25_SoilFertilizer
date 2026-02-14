@@ -56,6 +56,22 @@ SettingsSchema.definitions = {
         pfProtected = false,
     },
     {
+        id = "showHUD",
+        type = "boolean",
+        default = true,
+        uiId = "sf_show_hud",
+        pfProtected = false,
+    },
+    {
+        id = "hudPosition",
+        type = "number",
+        default = 1,  -- 1=Top Right, 2=Top Left, 3=Bottom Right, 4=Bottom Left, 5=Center Right
+        min = 1,
+        max = 5,
+        uiId = "sf_hud_position",
+        pfProtected = false,
+    },
+    {
         id = "seasonalEffects",
         type = "boolean",
         default = true,

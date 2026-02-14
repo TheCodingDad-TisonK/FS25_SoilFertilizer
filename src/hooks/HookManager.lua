@@ -32,6 +32,7 @@ function HookManager:installAll(soilSystem)
     self:installSprayerHook()
     self:installOwnershipHook()
     self:installWeatherHook()
+    self:installPlowingHook()
 
     self.installed = true
     print("[SoilFertilizer] All hooks installation complete")
@@ -203,4 +204,55 @@ function HookManager:installWeatherHook()
     )
     self:register(env, "update", original, "environment.update")
     print("[SoilFertilizer] Weather hook installed")
+end
+
+-- Hook 5: Plowing operations (Cultivator)
+function HookManager:installPlowingHook()
+    if not Cultivator or not Cultivator.processCultivatorArea then
+        print("[SoilFertilizer WARNING] Could not install plowing hook - Cultivator not available")
+        return
+    end
+
+    local original = Cultivator.processCultivatorArea
+    Cultivator.processCultivatorArea = Utils.appendedFunction(
+        original,
+        function(cultivatorSelf, superFunc, workArea, dt)
+            if not g_SoilFertilityManager or
+               not g_SoilFertilityManager.soilSystem or
+               not g_SoilFertilityManager.settings.enabled or
+               not g_SoilFertilityManager.settings.plowingBonus then
+                return
+            end
+
+            -- Check if this is actual plowing (not just cultivation)
+            local workAreaSpec = cultivatorSelf.spec_workArea
+            if not workAreaSpec then return end
+
+            local success, errorMsg = pcall(function()
+                -- Get field ID from work area
+                local x = (workArea[1] + workArea[4]) / 2
+                local z = (workArea[2] + workArea[5]) / 2
+
+                if g_farmlandManager then
+                    local farmlandId = g_farmlandManager:getFarmlandIdAtWorldPosition(x, z)
+                    if farmlandId and farmlandId > 0 and g_fieldManager then
+                        local field = g_fieldManager:getFieldByFarmland(farmlandId)
+                        if field and field.fieldId then
+                            -- Check if this is a plow (not just cultivator)
+                            local isPlow = cultivatorSelf.spec_plow ~= nil
+                            if isPlow then
+                                g_SoilFertilityManager.soilSystem:onPlowing(field.fieldId)
+                            end
+                        end
+                    end
+                end
+            end)
+
+            if not success then
+                print("[SoilFertilizer ERROR] Plowing hook failed: " .. tostring(errorMsg))
+            end
+        end
+    )
+    self:register(Cultivator, "processCultivatorArea", original, "Cultivator.processCultivatorArea")
+    print("[SoilFertilizer] Plowing hook installed")
 end

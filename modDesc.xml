@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <modDesc descVersion="105">
     <author>TisonK</author>
-    <version>1.0.3.1</version>
+    <version>1.0.4.1</version>
     <modName>FS25_SoilFertilizer</modName>
     <title>
         <en>Realistic Soil & Fertilizer</en>
@@ -375,7 +375,133 @@
             <ru>Включить/выключить уведомления о почве и удобрениях</ru>
             <hu>Talaj és műtrágya értesítések engedélyezése/tiltása</hu>
         </text>
-        
+
+        <text name="sf_show_hud_short">
+            <en>Show HUD</en>
+            <de>HUD anzeigen</de>
+            <fr>Afficher HUD</fr>
+            <pl>Pokaż HUD</pl>
+            <es>Mostrar HUD</es>
+            <it>Mostra HUD</it>
+            <cz>Zobrazit HUD</cz>
+            <br>Mostrar HUD</br>
+            <uk>Показати HUD</uk>
+            <ru>Показать HUD</ru>
+            <hu>HUD megjelenítése</hu>
+        </text>
+
+        <text name="sf_show_hud_long">
+            <en>Show/hide the soil info HUD overlay (F8 to toggle temporarily)</en>
+            <de>Boden-Info-HUD ein-/ausblenden (F8 zum temporären Umschalten)</de>
+            <fr>Afficher/masquer l'HUD d'info sol (F8 pour basculer temporairement)</fr>
+            <pl>Pokaż/ukryj nakładkę HUD informacji o glebie (F8 aby przełączyć tymczasowo)</pl>
+            <es>Mostrar/ocultar la superposición HUD de info de suelo (F8 para alternar temporalmente)</es>
+            <it>Mostra/nascondi overlay HUD info suolo (F8 per alternare temporaneamente)</it>
+            <cz>Zobrazit/skrýt HUD s informacemi o půdě (F8 pro dočasné přepnutí)</cz>
+            <br>Mostrar/ocultar sobreposição HUD de info de solo (F8 para alternar temporariamente)</br>
+            <uk>Показати/сховати накладку HUD інформації про ґрунт (F8 для тимчасового перемикання)</uk>
+            <ru>Показать/скрыть наложение HUD информации о почве (F8 для временного переключения)</ru>
+            <hu>Talajinformáció HUD átfedés megjelenítése/elrejtése (F8 az ideiglenes váltáshoz)</hu>
+        </text>
+
+        <text name="sf_hud_position_short">
+            <en>HUD Position</en>
+            <de>HUD-Position</de>
+            <fr>Position HUD</fr>
+            <pl>Pozycja HUD</pl>
+            <es>Posición HUD</es>
+            <it>Posizione HUD</it>
+            <cz>Pozice HUD</cz>
+            <br>Posição HUD</br>
+            <uk>Позиція HUD</uk>
+            <ru>Позиция HUD</ru>
+            <hu>HUD pozíció</hu>
+        </text>
+
+        <text name="sf_hud_position_long">
+            <en>Choose where the soil info HUD appears on screen</en>
+            <de>Wählen Sie, wo das Boden-Info-HUD auf dem Bildschirm erscheint</de>
+            <fr>Choisir où l'HUD d'info sol apparaît à l'écran</fr>
+            <pl>Wybierz, gdzie na ekranie pojawia się HUD informacji o glebie</pl>
+            <es>Elegir dónde aparece el HUD de info de suelo en pantalla</es>
+            <it>Scegli dove appare l'HUD info suolo sullo schermo</it>
+            <cz>Vyberte, kde se na obrazovce zobrazí HUD s informacemi o půdě</cz>
+            <br>Escolha onde o HUD de info de solo aparece na tela</br>
+            <uk>Виберіть, де на екрані з'являється HUD інформації про ґрунт</uk>
+            <ru>Выберите, где на экране появляется HUD информации о почве</ru>
+            <hu>Válassza ki, hol jelenjen meg a talajinformáció HUD a képernyőn</hu>
+        </text>
+
+        <text name="sf_hud_pos_1">
+            <en>Top Right</en>
+            <de>Oben rechts</de>
+            <fr>En haut à droite</fr>
+            <pl>Góra prawa</pl>
+            <es>Arriba derecha</es>
+            <it>In alto a destra</it>
+            <cz>Vpravo nahoře</cz>
+            <br>Canto superior direito</br>
+            <uk>Верхній правий</uk>
+            <ru>Верхний правый</ru>
+            <hu>Jobb felső</hu>
+        </text>
+
+        <text name="sf_hud_pos_2">
+            <en>Top Left</en>
+            <de>Oben links</de>
+            <fr>En haut à gauche</fr>
+            <pl>Góra lewa</pl>
+            <es>Arriba izquierda</es>
+            <it>In alto a sinistra</it>
+            <cz>Vlevo nahoře</cz>
+            <br>Canto superior esquerdo</br>
+            <uk>Верхній лівий</uk>
+            <ru>Верхний левый</ru>
+            <hu>Bal felső</hu>
+        </text>
+
+        <text name="sf_hud_pos_3">
+            <en>Bottom Right</en>
+            <de>Unten rechts</de>
+            <fr>En bas à droite</fr>
+            <pl>Dół prawa</pl>
+            <es>Abajo derecha</es>
+            <it>In basso a destra</it>
+            <cz>Vpravo dole</cz>
+            <br>Canto inferior direito</br>
+            <uk>Нижній правий</uk>
+            <ru>Нижний правый</ru>
+            <hu>Jobb alsó</hu>
+        </text>
+
+        <text name="sf_hud_pos_4">
+            <en>Bottom Left</en>
+            <de>Unten links</de>
+            <fr>En bas à gauche</fr>
+            <pl>Dół lewa</pl>
+            <es>Abajo izquierda</es>
+            <it>In basso a sinistra</it>
+            <cz>Vlevo dole</cz>
+            <br>Canto inferior esquerdo</br>
+            <uk>Нижній лівий</uk>
+            <ru>Нижний левый</ru>
+            <hu>Bal alsó</hu>
+        </text>
+
+        <text name="sf_hud_pos_5">
+            <en>Center Right</en>
+            <de>Mitte rechts</de>
+            <fr>Centre droit</fr>
+            <pl>Środek prawa</pl>
+            <es>Centro derecha</es>
+            <it>Centro destra</it>
+            <cz>Střed vpravo</cz>
+            <br>Centro direito</br>
+            <uk>Центр правий</uk>
+            <ru>Центр правый</ru>
+            <hu>Középen jobbra</hu>
+        </text>
+
         <text name="sf_reset">
             <en>Reset Soil Settings</en>
             <de>Bodeneinstellungen zurücksetzen</de>
@@ -389,5 +515,24 @@
             <ru>Сбросить настройки почвы</ru>
             <hu>Talajbeállítások alaphelyzetbe állítása</hu>
         </text>
+        <text name="input_SF_TOGGLE_HUD">
+            <en>Toggle Soil HUD</en>
+            <de>Boden-HUD umschalten</de>
+            <fr>Activer/désactiver HUD sol</fr>
+            <pl>Przełącz HUD gleby</pl>
+            <es>Alternar HUD de suelo</es>
+            <it>Attiva/disattiva HUD suolo</it>
+            <cz>Přepnout HUD půdy</cz>
+            <br>Alternar HUD de solo</br>
+            <uk>Перемкнути HUD ґрунту</uk>
+            <ru>Переключить HUD почвы</ru>
+            <hu>Talaj HUD váltása</hu>
+        </text>
     </l10n>
+
+    <inputBinding>
+        <actionBinding action="SF_TOGGLE_HUD">
+            <binding device="KB_MOUSE_DEFAULT" input="KEY_F8" />
+        </actionBinding>
+    </inputBinding>
 </modDesc>
