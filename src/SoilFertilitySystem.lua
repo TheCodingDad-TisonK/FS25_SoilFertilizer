@@ -18,6 +18,14 @@ function SoilFertilitySystem.new(settings)
     self.PFActive = false
     self.lastUpdateDay = 0
     self.hookManager = HookManager.new()
+
+    -- Field scan retry mechanism (for delayed initialization)
+    self.fieldsScanPending = true
+    self.fieldsScanAttempts = 0
+    self.fieldsScanMaxAttempts = 10  -- Try up to 10 times
+    self.fieldsScanNextRetry = 0
+    self.fieldsScanRetryInterval = 2000  -- 2 seconds between attempts
+
     return self
 end
 
@@ -241,6 +249,27 @@ end
 function SoilFertilitySystem:update(dt)
     if not self.settings.enabled then return end
 
+    -- Delayed field scanning retry (fields might not be ready at initialization)
+    if self.fieldsScanPending and self.fieldsScanAttempts < self.fieldsScanMaxAttempts then
+        local currentTime = g_currentMission and g_currentMission.time or 0
+        if currentTime >= self.fieldsScanNextRetry then
+            self.fieldsScanAttempts = self.fieldsScanAttempts + 1
+            self:log("Retrying field scan (attempt %d/%d)...", self.fieldsScanAttempts, self.fieldsScanMaxAttempts)
+
+            local success = self:scanFields()
+            if success then
+                self:info("Delayed field scan successful!")
+            else
+                -- Schedule next retry
+                self.fieldsScanNextRetry = currentTime + self.fieldsScanRetryInterval
+                if self.fieldsScanAttempts >= self.fieldsScanMaxAttempts then
+                    self:warning("Field scan failed after %d attempts - fields may not be available yet", self.fieldsScanMaxAttempts)
+                    self.fieldsScanPending = false  -- Stop retrying
+                end
+            end
+        end
+    end
+
     self.lastUpdate = self.lastUpdate + dt
 
     if self.lastUpdate >= self.updateInterval then
@@ -277,10 +306,11 @@ function SoilFertilitySystem:checkPFCompatibility()
 end
 
 -- Scan all fields from FieldManager
+---@return boolean True if successfully scanned fields, false if fields not ready yet
 function SoilFertilitySystem:scanFields()
     if not g_fieldManager or not g_fieldManager.fields then
         self:warning("FieldManager or fields not available")
-        return
+        return false
     end
 
     self:log("Scanning fields from FieldManager...")
@@ -294,6 +324,15 @@ function SoilFertilitySystem:scanFields()
     end
 
     self:info("Scanned and initialized %d fields", count)
+
+    -- Mark scan as complete if we found fields
+    if count > 0 then
+        self.fieldsScanPending = false
+        return true
+    end
+
+    -- If no fields found, might still be loading
+    return false
 end
 
 -- Get or create field data

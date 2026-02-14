@@ -80,50 +80,123 @@ end
 
 -- Get current field ID based on player/vehicle position
 function SoilHUD:getCurrentFieldId()
-    if not g_currentMission then return nil end
-    if not g_fieldManager then return nil end
+    if not g_currentMission then
+        if self.settings.debugMode then
+            SoilLogger.debug("[HUD] getCurrentFieldId: g_currentMission is nil")
+        end
+        return nil
+    end
+    if not g_fieldManager then
+        if self.settings.debugMode then
+            SoilLogger.debug("[HUD] getCurrentFieldId: g_fieldManager is nil")
+        end
+        return nil
+    end
 
     local x, z
+    local source = "unknown"
 
     -- Try player first
     local player = g_currentMission.player
     if player and player.rootNode then
         local px, _, pz = getWorldTranslation(player.rootNode)
         x, z = px, pz
+        source = "player"
     else
         -- Try controlled vehicle
         local vehicle = g_currentMission.controlledVehicle
         if vehicle and vehicle.rootNode then
             local vx, _, vz = getWorldTranslation(vehicle.rootNode)
             x, z = vx, vz
+            source = "vehicle"
         else
+            if self.settings.debugMode then
+                SoilLogger.debug("[HUD] getCurrentFieldId: No player or vehicle position available")
+            end
             return nil
         end
+    end
+
+    if self.settings.debugMode then
+        SoilLogger.debug("[HUD] getCurrentFieldId: Position from %s: x=%.1f, z=%.1f", source, x, z)
     end
 
     -- Try direct field position lookup first (most accurate)
     if g_fieldManager.getFieldAtWorldPosition then
         local field = g_fieldManager:getFieldAtWorldPosition(x, z)
+        if self.settings.debugMode then
+            SoilLogger.debug("[HUD] getFieldAtWorldPosition returned: %s", field and "field object" or "nil")
+            if field then
+                SoilLogger.debug("[HUD] field.fieldId = %s", tostring(field.fieldId))
+            end
+        end
         if field and field.fieldId then
+            if self.settings.debugMode then
+                SoilLogger.debug("[HUD] getCurrentFieldId: Found field %d via getFieldAtWorldPosition", field.fieldId)
+            end
             return field.fieldId
+        end
+    else
+        if self.settings.debugMode then
+            SoilLogger.debug("[HUD] getFieldAtWorldPosition API not available")
         end
     end
 
-    -- Fallback: Use farmland-based search (less precise but more compatible)
+    -- Fallback: Use farmland-based lookup (same pattern as HookManager)
     if g_farmlandManager then
         local farmlandId = g_farmlandManager:getFarmlandIdAtWorldPosition(x, z)
+        if self.settings.debugMode then
+            SoilLogger.debug("[HUD] farmlandId at position: %s", tostring(farmlandId))
+        end
+
         if farmlandId and farmlandId > 0 then
-            local fields = g_fieldManager:getFields()
-            if fields and type(fields) == "table" then
-                for _, field in pairs(fields) do
-                    if field and field.farmland and field.farmland.id == farmlandId and field.fieldId then
-                        return field.fieldId
+            -- Use the proper API (same as HookManager uses)
+            if g_fieldManager.getFieldByFarmland then
+                local field = g_fieldManager:getFieldByFarmland(farmlandId)
+                if self.settings.debugMode then
+                    SoilLogger.debug("[HUD] getFieldByFarmland(%d) returned: %s", farmlandId, field and "field object" or "nil")
+                    if field then
+                        SoilLogger.debug("[HUD] field.fieldId = %s", tostring(field.fieldId))
+                    end
+                end
+                if field and field.fieldId then
+                    if self.settings.debugMode then
+                        SoilLogger.debug("[HUD] getCurrentFieldId: Found field %d via getFieldByFarmland", field.fieldId)
+                    end
+                    return field.fieldId
+                end
+            else
+                if self.settings.debugMode then
+                    SoilLogger.debug("[HUD] getFieldByFarmland API not available, using manual search")
+                end
+                -- Last resort: manual search through fields array
+                if g_fieldManager.fields then
+                    if self.settings.debugMode then
+                        SoilLogger.debug("[HUD] Searching through %d fields manually", #g_fieldManager.fields)
+                    end
+                    for _, field in ipairs(g_fieldManager.fields) do
+                        if field and field.farmland and field.farmland.id == farmlandId and field.fieldId then
+                            if self.settings.debugMode then
+                                SoilLogger.debug("[HUD] getCurrentFieldId: Found field %d via manual search", field.fieldId)
+                            end
+                            return field.fieldId
+                        end
+                    end
+                    if self.settings.debugMode then
+                        SoilLogger.debug("[HUD] Manual search: No field found with farmlandId %d", farmlandId)
                     end
                 end
             end
         end
+    else
+        if self.settings.debugMode then
+            SoilLogger.debug("[HUD] g_farmlandManager not available")
+        end
     end
 
+    if self.settings.debugMode then
+        SoilLogger.debug("[HUD] getCurrentFieldId: No field detected at position")
+    end
     return nil
 end
 
