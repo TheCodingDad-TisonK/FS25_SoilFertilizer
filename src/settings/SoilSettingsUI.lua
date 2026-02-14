@@ -93,7 +93,7 @@ function SoilSettingsUI:togglePFProtected(settingKey, val)
 end
 
 function SoilSettingsUI:inject()
-    if self.injected then return end
+    if self.injected then return true end
     if not g_gui or not g_gui.screenControllers then
         Logging.warning("[SoilFertilizer] GUI unavailable")
         return false
@@ -106,6 +106,12 @@ function SoilSettingsUI:inject()
     end
 
     local layout = inGameMenu.pageSettings.generalSettingsLayout
+
+    -- Clear any existing elements to prevent duplicates on retry
+    if #self.uiElements > 0 then
+        SoilLogger.info("Clearing %d existing UI elements before retry", #self.uiElements)
+        self.uiElements = {}
+    end
 
     -- Section header
     local section = UIHelper.createSection(layout, "sf_section")
@@ -201,6 +207,12 @@ function SoilSettingsUI:inject()
         end
     end
 
+    -- Validate injection before marking as complete
+    if not self:validateInjection() then
+        SoilLogger.warning("GUI injection failed validation")
+        return false
+    end
+
     self.injected = true
 
     local statusMsg = string.format(
@@ -209,7 +221,7 @@ function SoilSettingsUI:inject()
         tostring(pfActive),
         tostring(g_currentMission.missionDynamicInfo.isMultiplayer)
     )
-    print("[SoilFertilizer] " .. statusMsg)
+    SoilLogger.info(statusMsg)
 
     return true
 end
@@ -244,6 +256,61 @@ function SoilSettingsUI:refreshUI()
     end
 
     print("[SoilFertilizer] UI refreshed with current settings")
+end
+
+-- Validate that UI elements were successfully injected
+function SoilSettingsUI:validateInjection()
+    -- Check that we have UI elements
+    if not self.uiElements or #self.uiElements == 0 then
+        SoilLogger.warning("Validation failed: No UI elements created")
+        return false
+    end
+
+    -- Check that g_gui is available
+    if not g_gui or not g_gui.screenControllers then
+        SoilLogger.warning("Validation failed: g_gui not available")
+        return false
+    end
+
+    -- Check that InGameMenu exists
+    local inGameMenu = g_gui.screenControllers[InGameMenu]
+    if not inGameMenu or not inGameMenu.pageSettings then
+        SoilLogger.warning("Validation failed: InGameMenu not available")
+        return false
+    end
+
+    -- Check that settings layout exists
+    local layout = inGameMenu.pageSettings.generalSettingsLayout
+    if not layout or not layout.elements then
+        SoilLogger.warning("Validation failed: Settings layout not available")
+        return false
+    end
+
+    -- Simplified validation: Trust UIHelper's built-in pcall validation
+    -- UIHelper functions only return non-nil elements that were successfully created and added
+    -- Strict layout array verification is fragile when multiple mods inject UI elements
+    local hasValidElements = false
+    for _, elem in ipairs(self.uiElements) do
+        if elem and type(elem) == "table" then
+            hasValidElements = true
+            break
+        end
+    end
+
+    if not hasValidElements then
+        SoilLogger.warning("Validation failed: No valid UI elements created")
+        return false
+    end
+
+    local modeText = ""
+    if g_currentMission and g_currentMission.missionDynamicInfo.isMultiplayer then
+        modeText = g_server and " (MP server)" or " (MP client)"
+    else
+        modeText = " (SP)"
+    end
+
+    SoilLogger.info("GUI validation passed%s: %d elements created", modeText, #self.uiElements)
+    return true
 end
 
 function SoilSettingsUI:ensureResetButton(settingsFrame)

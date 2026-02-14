@@ -16,6 +16,7 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
     self.modDirectory = modDirectory
     self.modName = modName
     self.disableGUI = disableGUI or false
+    self.guiRetryHandler = nil
 
     -- Settings
     assert(SettingsManager, "SettingsManager not loaded")
@@ -32,34 +33,87 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
         SoilLogger.info("Initializing GUI elements...")
         self.settingsUI = SoilSettingsUI.new(self.settings)
 
-        -- Inject GUI safely
+        -- Create retry handler for GUI injection
+        self.guiRetryHandler = AsyncRetryHandler.new({
+            name = "GUI_Injection",
+            maxAttempts = 3,
+            delays = {2000, 4000, 8000},  -- 2s, 4s, 8s - exponential backoff
+
+            -- Attempt injection
+            onAttempt = function()
+                if not self.settingsUI or self.settingsUI.injected then return end
+
+                local success, result = pcall(function()
+                    return self.settingsUI:inject()
+                end)
+
+                if success and result then
+                    -- Injection succeeded and validated
+                    self.guiRetryHandler:markSuccess()
+                end
+            end,
+
+            -- Check if already injected (manual success marker)
+            condition = function()
+                return self.settingsUI and self.settingsUI.injected
+            end,
+
+            -- Success callback
+            onSuccess = function()
+                SoilLogger.info("GUI injection completed successfully")
+            end,
+
+            -- Failure callback - show user dialog
+            onFailure = function()
+                SoilLogger.warning("GUI injection failed after all retry attempts")
+                self:showGUIFailureDialog()
+            end
+        })
+
+        -- Hook: Lazy injection when settings frame opens (primary path)
         InGameMenuSettingsFrame.onFrameOpen = Utils.appendedFunction(
             InGameMenuSettingsFrame.onFrameOpen,
             function(frame)
                 if self.settingsUI and not self.settingsUI.injected then
-                    local success = pcall(function()
-                        self.settingsUI:inject()
+                    -- Try immediate injection
+                    local success, result = pcall(function()
+                        return self.settingsUI:inject()
                     end)
-                    if not success then
-                        SoilLogger.warning("GUI injection failed - switching to console-only mode")
-                        self.settingsUI.injected = true
-                        self.disableGUI = true
+
+                    if success and result then
+                        -- Success! Cancel any pending retries
+                        if self.guiRetryHandler then
+                            self.guiRetryHandler:markSuccess()
+                        end
+                    elseif not self.guiRetryHandler or not self.guiRetryHandler:isPending() then
+                        -- Failed and no retry in progress - start retry sequence
+                        SoilLogger.info("Initial GUI injection failed, starting retry sequence")
+                        if self.guiRetryHandler then
+                            self.guiRetryHandler:start()
+                        end
                     end
                 end
-                if self.settingsUI then
+
+                -- Ensure reset button exists
+                if self.settingsUI and self.settingsUI.injected then
                     self.settingsUI:ensureResetButton(frame)
                 end
             end
         )
 
+        -- Hook: Update buttons
         InGameMenuSettingsFrame.updateButtons = Utils.appendedFunction(
             InGameMenuSettingsFrame.updateButtons,
             function(frame)
-                if self.settingsUI then
+                if self.settingsUI and self.settingsUI.injected then
                     self.settingsUI:ensureResetButton(frame)
                 end
             end
         )
+
+        -- Start background retry sequence (backup path)
+        SoilLogger.info("Starting GUI injection retry handler")
+        self.guiRetryHandler:start()
     else
         SoilLogger.info("GUI initialization skipped (Server/Console mode)")
         self.settingsUI = nil
@@ -194,11 +248,22 @@ function SoilFertilityManager:update(dt)
     if self.soilSystem then
         self.soilSystem:update(dt)
     end
+
+    -- Update GUI retry handler if active
+    if self.guiRetryHandler then
+        self.guiRetryHandler:update(dt)
+    end
 end
 
 function SoilFertilityManager:delete()
     -- Save soil data before shutdown
     self:saveSoilData()
+
+    -- Clean up retry handler
+    if self.guiRetryHandler then
+        self.guiRetryHandler:reset()
+        self.guiRetryHandler = nil
+    end
 
     if self.soilSystem then
         self.soilSystem:delete()
@@ -207,4 +272,78 @@ function SoilFertilityManager:delete()
         self.settings:save()
     end
     SoilLogger.info("Shutting down")
+end
+
+-- Show GUI failure dialog with retry option
+function SoilFertilityManager:showGUIFailureDialog()
+    if not g_gui then return end
+
+    -- Don't show dialog if we're already shutting down
+    if not g_currentMission or g_currentMission.cancelLoading then return end
+
+    local dialogText = "Soil & Fertilizer Mod: Settings UI unavailable.\n\n" ..
+                      "The mod is active and working, but the settings menu couldn't be loaded.\n" ..
+                      "This can happen when other mods interfere with menu initialization.\n\n" ..
+                      "The mod is still tracking soil nutrients and all features are active.\n\n" ..
+                      "Would you like to:\n" ..
+                      "• Try loading the UI again, or\n" ..
+                      "• Use console commands instead?\n\n" ..
+                      "(Console: Press ~ and type 'soilfertility' for commands)"
+
+    g_gui:showYesNoDialog({
+        text = dialogText,
+        title = "Settings UI Failed to Load",
+        yesText = "Try Again",
+        noText = "Use Console",
+        callback = function(retry)
+            if retry then
+                -- User wants to retry
+                SoilLogger.info("User requested manual GUI injection retry")
+
+                if self.settingsUI and not self.settingsUI.injected then
+                    -- Reset and try again
+                    local success, result = pcall(function()
+                        return self.settingsUI:inject()
+                    end)
+
+                    if success and result then
+                        g_gui:showInfoDialog({
+                            text = "Settings UI loaded successfully!\n\nYou can now access Soil & Fertilizer settings in the game menu.",
+                            title = "Success"
+                        })
+                        SoilLogger.info("Manual GUI injection succeeded")
+                    else
+                        g_gui:showInfoDialog({
+                            text = "Settings UI still unavailable.\n\nPlease use console commands instead:\n\n" ..
+                                  "Press ~ to open console\n" ..
+                                  "Type 'soilfertility' for command list\n" ..
+                                  "Type 'SoilShowSettings' to view current settings\n\n" ..
+                                  "The mod is working normally, only the UI menu is affected.",
+                            title = "Console Mode"
+                        })
+                        SoilLogger.warning("Manual GUI injection failed again")
+                    end
+                else
+                    g_gui:showInfoDialog({
+                        text = "Settings UI is now available!\n\nCheck your game menu.",
+                        title = "Already Loaded"
+                    })
+                end
+            else
+                -- User chose console mode
+                SoilLogger.info("User chose console-only mode")
+                g_gui:showInfoDialog({
+                    text = "Console Commands for Soil & Fertilizer Mod:\n\n" ..
+                          "Press ~ to open console, then type:\n\n" ..
+                          "• soilfertility - Show all commands\n" ..
+                          "• SoilShowSettings - View current settings\n" ..
+                          "• SoilEnable/SoilDisable - Toggle mod\n" ..
+                          "• SoilSetDifficulty 1|2|3 - Change difficulty\n" ..
+                          "• SoilFieldInfo <id> - Show field details\n\n" ..
+                          "The mod is working normally!",
+                    title = "Console Commands"
+                })
+            end
+        end
+    })
 end

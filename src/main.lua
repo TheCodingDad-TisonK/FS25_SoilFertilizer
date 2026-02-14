@@ -16,6 +16,7 @@ local modName = g_currentModName
 -- Source all required files (order matters: dependencies first)
 -- 1. Utilities and config (no dependencies)
 source(modDirectory .. "src/utils/Logger.lua")
+source(modDirectory .. "src/utils/AsyncRetryHandler.lua")
 source(modDirectory .. "src/config/Constants.lua")
 source(modDirectory .. "src/config/SettingsSchema.lua")
 
@@ -39,8 +40,6 @@ source(modDirectory .. "src/network/NetworkEvents.lua")
 -- Globals
 local sfm = nil
 local SAFE_MODE = false
-local initTimer = 0
-local guiInjected = false
 
 -- Helper: check if mod is initialized
 local function isEnabled()
@@ -110,11 +109,6 @@ local function load(mission)
         sfm = SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
         getfenv(0)["g_SoilFertilityManager"] = sfm
 
-        -- Ensure GUI flagged as injected in server mode
-        if disableGUI and sfm.settingsUI then
-            sfm.settingsUI.injected = true
-        end
-
         SoilLogger.info("Initialized in %s mode", disableGUI and "server/console" or "full")
     end
 end
@@ -128,31 +122,6 @@ local function unload()
     end
 end
 
--- Delayed GUI injection for safe client
-local function delayedGUISetup()
-    if SAFE_MODE or guiInjected then return end
-    if g_gui and g_SoilFertilityManager and g_SoilFertilityManager.settingsUI then
-        if g_currentMission and g_currentMission.isClient and
-           g_currentMission.controlledVehicle and
-           g_gui.screenControllers and g_gui.screenControllers[InGameMenu] then
-
-            SoilLogger.info("Attempting safe GUI injection...")
-            local success, errorMsg = pcall(function()
-                if not g_SoilFertilityManager.settingsUI.injected then
-                    g_SoilFertilityManager.settingsUI:inject()
-                    SoilLogger.info("GUI injected successfully")
-                end
-            end)
-
-            if not success then
-                SoilLogger.warning("GUI injection failed: %s", tostring(errorMsg))
-                SAFE_MODE = true
-            end
-
-            guiInjected = true
-        end
-    end
-end
 
 -- Hook save/load events
 local function hookSaveLoadEvents()
@@ -196,13 +165,6 @@ Mission00.loadMission00Finished = Utils.appendedFunction(Mission00.loadMission00
 FSBaseMission.delete = Utils.appendedFunction(FSBaseMission.delete, unload)
 
 FSBaseMission.update = Utils.appendedFunction(FSBaseMission.update, function(mission, dt)
-    if not guiInjected and initTimer < 10000 then
-        initTimer = initTimer + dt
-        if initTimer >= 3000 then
-            delayedGUISetup()
-        end
-    end
-
     if sfm then
         sfm:update(dt)
     end
