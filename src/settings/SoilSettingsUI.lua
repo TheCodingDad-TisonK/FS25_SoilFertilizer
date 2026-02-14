@@ -111,6 +111,8 @@ function SoilSettingsUI:inject()
     if #self.uiElements > 0 then
         SoilLogger.info("Clearing %d existing UI elements before retry", #self.uiElements)
         self.uiElements = {}
+        -- Also reset template cache on retry to handle mod load order changes
+        UIHelper.resetTemplateCache()
     end
 
     -- Section header

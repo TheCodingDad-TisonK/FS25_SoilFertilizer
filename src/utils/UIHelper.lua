@@ -1,5 +1,5 @@
 -- =========================================================
--- FS25 Realistic Soil & Fertilizer (version 1.0.2.0)
+-- FS25 Realistic Soil & Fertilizer (version 1.0.3.1)
 -- =========================================================
 -- Realistic soil fertility and fertilizer management
 -- =========================================================
@@ -13,148 +13,332 @@
 ---@class UIHelper
 UIHelper = {}
 
+-- Template cache to avoid repeated searches and ensure consistency
+UIHelper.templateCache = {
+    sectionHeader = nil,
+    description = nil,
+    binaryOption = nil,
+    multiOption = nil,
+    initialized = false
+}
+
+-- Reset template cache (called on mission load/unload)
+function UIHelper.resetTemplateCache()
+    UIHelper.templateCache = {
+        sectionHeader = nil,
+        description = nil,
+        binaryOption = nil,
+        multiOption = nil,
+        initialized = false
+    }
+    SoilLogger.info("UI template cache reset")
+end
+
 local function getTextSafe(key)
     if not g_i18n then
         return key
     end
-    
+
     local text = g_i18n:getText(key)
     if text == nil or text == "" then
-        Logging.warning("[SoilFertilizer]Missing translation for key: " .. tostring(key))
+        Logging.warning("[SoilFertilizer] Missing translation for key: " .. tostring(key))
         return key
     end
     return text
 end
 
-function UIHelper.createSection(layout, textId)
+-- Validate that an element has the expected structure for section headers
+local function validateSectionTemplate(element)
+    return element and
+           element.name == "sectionHeader" and
+           type(element.clone) == "function" and
+           type(element.setText) == "function"
+end
+
+-- Validate that an element has the expected structure for descriptions
+local function validateDescriptionTemplate(element)
+    return element and
+           type(element.clone) == "function" and
+           type(element.setText) == "function"
+end
+
+-- Validate that an element has the expected structure for binary options
+local function validateBinaryTemplate(element)
+    if not element or not element.elements or #element.elements < 2 then
+        return false
+    end
+
+    local opt = element.elements[1]
+    local lbl = element.elements[2]
+
+    -- Verify structure
+    return opt and lbl and
+           type(element.clone) == "function" and
+           type(opt.setState) == "function" and
+           type(lbl.setText) == "function"
+end
+
+-- Validate that an element has the expected structure for multi options
+local function validateMultiTemplate(element)
+    if not element or not element.elements or #element.elements < 2 then
+        return false
+    end
+
+    local opt = element.elements[1]
+    local lbl = element.elements[2]
+
+    -- Verify structure
+    return opt and lbl and
+           type(element.clone) == "function" and
+           type(opt.setTexts) == "function" and
+           type(opt.setState) == "function" and
+           type(lbl.setText) == "function"
+end
+
+-- Find and cache section header template
+local function findSectionTemplate(layout)
+    if UIHelper.templateCache.sectionHeader then
+        return UIHelper.templateCache.sectionHeader
+    end
+
     if not layout or not layout.elements then
-        Logging.error("[SoilFertilizer]Invalid layout passed to createSection")
         return nil
     end
-    
-    local section = nil
+
     for _, el in ipairs(layout.elements) do
-        if el and el.name == "sectionHeader" then
-            local success, cloned = pcall(function() return el:clone(layout) end)
-            if success and cloned then
-                section = cloned
-                section.id = nil
-                if section.setText then
-                    section:setText(getTextSafe(textId))
-                end
-                local addSuccess = pcall(function() layout:addElement(section) end)
-                if not addSuccess then
-                    Logging.error("[SoilFertilizer]Failed to add section to layout")
-                    return nil
-                end
-            end
-            break
+        if validateSectionTemplate(el) then
+            SoilLogger.info("Found and cached section header template")
+            UIHelper.templateCache.sectionHeader = el
+            return el
         end
     end
+
+    SoilLogger.warning("Section header template not found in layout")
+    return nil
+end
+
+-- Find and cache description template
+local function findDescriptionTemplate(layout)
+    if UIHelper.templateCache.description then
+        return UIHelper.templateCache.description
+    end
+
+    if not layout or not layout.elements then
+        return nil
+    end
+
+    for _, el in ipairs(layout.elements) do
+        if el and el.elements and #el.elements >= 2 then
+            local secondChild = el.elements[2]
+            if validateDescriptionTemplate(secondChild) then
+                SoilLogger.info("Found and cached description template")
+                UIHelper.templateCache.description = secondChild
+                return secondChild
+            end
+        end
+    end
+
+    SoilLogger.warning("Description template not found in layout")
+    return nil
+end
+
+-- Find and cache binary option template with improved matching
+local function findBinaryTemplate(layout)
+    if UIHelper.templateCache.binaryOption then
+        return UIHelper.templateCache.binaryOption
+    end
+
+    if not layout or not layout.elements then
+        return nil
+    end
+
+    -- Search for valid checkbox templates
+    -- Try multiple strategies to handle different mod configurations
+    local candidates = {}
+
+    for _, el in ipairs(layout.elements) do
+        if el and el.elements and #el.elements >= 2 then
+            local firstChild = el.elements[1]
+
+            -- Strategy 1: Look for elements with "check" in ID (original approach)
+            if firstChild and firstChild.id then
+                local id = tostring(firstChild.id)
+                if string.find(id, "check") or string.find(id, "Check") then
+                    table.insert(candidates, el)
+                end
+            end
+        end
+    end
+
+    -- Validate candidates in order and use the first valid one
+    for _, candidate in ipairs(candidates) do
+        if validateBinaryTemplate(candidate) then
+            SoilLogger.info("Found and cached binary option template (checked %d candidates)", #candidates)
+            UIHelper.templateCache.binaryOption = candidate
+            return candidate
+        end
+    end
+
+    SoilLogger.warning("Binary option template not found (checked %d candidates)", #candidates)
+    return nil
+end
+
+-- Find and cache multi option template with improved matching
+local function findMultiTemplate(layout)
+    if UIHelper.templateCache.multiOption then
+        return UIHelper.templateCache.multiOption
+    end
+
+    if not layout or not layout.elements then
+        return nil
+    end
+
+    -- Search for valid multi-option templates
+    local candidates = {}
+
+    for _, el in ipairs(layout.elements) do
+        if el and el.elements and #el.elements >= 2 then
+            local firstChild = el.elements[1]
+
+            -- Look for elements with "multi" in ID
+            if firstChild and firstChild.id then
+                local id = tostring(firstChild.id)
+                if string.find(id, "multi") then
+                    table.insert(candidates, el)
+                end
+            end
+        end
+    end
+
+    -- Validate candidates in order and use the first valid one
+    for _, candidate in ipairs(candidates) do
+        if validateMultiTemplate(candidate) then
+            SoilLogger.info("Found and cached multi option template (checked %d candidates)", #candidates)
+            UIHelper.templateCache.multiOption = candidate
+            return candidate
+        end
+    end
+
+    SoilLogger.warning("Multi option template not found (checked %d candidates)", #candidates)
+    return nil
+end
+
+function UIHelper.createSection(layout, textId)
+    if not layout or not layout.elements then
+        Logging.error("[SoilFertilizer] Invalid layout passed to createSection")
+        return nil
+    end
+
+    local template = findSectionTemplate(layout)
+    if not template then
+        Logging.error("[SoilFertilizer] No valid section template found")
+        return nil
+    end
+
+    local success, section = pcall(function() return template:clone(layout) end)
+    if not success or not section then
+        Logging.error("[SoilFertilizer] Failed to clone section template: %s", tostring(success))
+        return nil
+    end
+
+    section.id = nil
+
+    if section.setText then
+        section:setText(getTextSafe(textId))
+    end
+
+    local addSuccess = pcall(function() layout:addElement(section) end)
+    if not addSuccess then
+        Logging.error("[SoilFertilizer] Failed to add section to layout")
+        return nil
+    end
+
     return section
 end
 
 function UIHelper.createDescription(layout, textId)
     if not layout or not layout.elements then
-        Logging.error("[SoilFertilizer]Invalid layout passed to createDescription")
+        Logging.error("[SoilFertilizer] Invalid layout passed to createDescription")
         return nil
     end
 
-    local template = nil
-
-    for _, el in ipairs(layout.elements) do
-        if el and el.elements and #el.elements >= 2 then
-            local secondChild = el.elements[2]
-            if secondChild and secondChild.setText then
-                template = secondChild
-                break
-            end
-        end
-    end
-    
+    local template = findDescriptionTemplate(layout)
     if not template then
-        Logging.warning("[SoilFertilizer]Description template not found!")
+        Logging.error("[SoilFertilizer] No valid description template found")
         return nil
     end
-    
+
     local success, desc = pcall(function() return template:clone(layout) end)
     if not success or not desc then
-        Logging.error("[SoilFertilizer]Failed to clone description template")
+        Logging.error("[SoilFertilizer] Failed to clone description template: %s", tostring(success))
         return nil
     end
-    
+
     desc.id = nil
-    
+
     if desc.setText then
         desc:setText(getTextSafe(textId))
     end
-    
+
     if desc.textSize then
         desc.textSize = desc.textSize * 0.85
     end
-    
+
     if desc.textColor then
         desc.textColor = {0.7, 0.7, 0.7, 1}
     end
-    
+
     local addSuccess = pcall(function() layout:addElement(desc) end)
     if not addSuccess then
-        Logging.error("[SoilFertilizer]Failed to add description to layout")
+        Logging.error("[SoilFertilizer] Failed to add description to layout")
         return nil
     end
-    
+
     return desc
 end
 
 function UIHelper.createBinaryOption(layout, id, textId, state, callback)
     if not layout or not layout.elements then
-        Logging.error("[SoilFertilizer]Invalid layout passed to createBinaryOption")
+        Logging.error("[SoilFertilizer] Invalid layout passed to createBinaryOption")
         return nil
     end
-    
-    local template = nil
-    
-    for _, el in ipairs(layout.elements) do
-        if el and el.elements and #el.elements >= 2 then
-            local firstChild = el.elements[1]
-            if firstChild and firstChild.id and (
-                string.find(firstChild.id, "^check") or 
-                string.find(firstChild.id, "Check")
-            ) then
-                template = el
-                break
-            end
-        end
+
+    local template = findBinaryTemplate(layout)
+    if not template then
+        Logging.error("[SoilFertilizer] No valid binary option template found")
+        return nil
     end
-    
-    if not template then 
-        Logging.warning("[SoilFertilizer]BinaryOption template not found!")
-        return nil 
-    end
-    
+
     local success, row = pcall(function() return template:clone(layout) end)
     if not success or not row then
-        Logging.error("[SoilFertilizer]Failed to clone binary option template")
+        Logging.error("[SoilFertilizer] Failed to clone binary option template: %s", tostring(success))
         return nil
     end
-    
-    row.id = nil
-    
+
+    -- Validate cloned structure
     if not row.elements or #row.elements < 2 then
-        Logging.error("[SoilFertilizer]Cloned row has invalid elements")
+        Logging.error("[SoilFertilizer] Cloned binary option has invalid structure")
         return nil
     end
-    
+
+    row.id = nil
+
     local opt = row.elements[1]
     local lbl = row.elements[2]
-    
+
+    -- Additional validation of cloned elements
+    if not opt or not lbl or not opt.setState or not lbl.setText then
+        Logging.error("[SoilFertilizer] Cloned binary option elements missing required methods")
+        return nil
+    end
+
     if opt then opt.id = nil end
     if opt then opt.target = nil end
     if lbl then lbl.id = nil end
-    
+
     if opt and opt.toolTipText then opt.toolTipText = "" end
     if lbl and lbl.toolTipText then lbl.toolTipText = "" end
-    
+
     if opt then
         opt.onClickCallback = function(newState, element)
             local isChecked = (newState == 2)
@@ -163,21 +347,21 @@ function UIHelper.createBinaryOption(layout, id, textId, state, callback)
             end
         end
     end
-    
+
     if lbl and lbl.setText then
         lbl:setText(getTextSafe(textId .. "_short"))
     end
-    
+
     local addSuccess = pcall(function() layout:addElement(row) end)
     if not addSuccess then
-        Logging.error("[SoilFertilizer]Failed to add binary option to layout")
+        Logging.error("[SoilFertilizer] Failed to add binary option to layout")
         return nil
     end
-    
+
     if opt and opt.setState then
         opt:setState(1)
     end
-    
+
     if state and opt then
         if opt.setIsChecked then
             opt:setIsChecked(true)
@@ -185,85 +369,81 @@ function UIHelper.createBinaryOption(layout, id, textId, state, callback)
             opt:setState(2)
         end
     end
-    
+
     local tooltipText = getTextSafe(textId .. "_long")
-    
+
     if opt and opt.setToolTipText then
         opt:setToolTipText(tooltipText)
     end
     if lbl and lbl.setToolTipText then
         lbl:setToolTipText(tooltipText)
     end
-    
+
     if opt then opt.toolTipText = tooltipText end
     if lbl then lbl.toolTipText = tooltipText end
-    
+
     if row.setToolTipText then
         row:setToolTipText(tooltipText)
     end
     row.toolTipText = tooltipText
-    
+
     if opt and opt.elements and opt.elements[1] and opt.elements[1].setText then
         opt.elements[1]:setText(tooltipText)
     end
-    
+
     return opt
 end
 
 function UIHelper.createMultiOption(layout, id, textId, options, state, callback)
     if not layout or not layout.elements then
-        Logging.error("[SoilFertilizer]Invalid layout passed to createMultiOption")
+        Logging.error("[SoilFertilizer] Invalid layout passed to createMultiOption")
         return nil
     end
-    
-    local template = nil
-    
-    for _, el in ipairs(layout.elements) do
-        if el and el.elements and #el.elements >= 2 then
-            local firstChild = el.elements[1]
-            if firstChild and firstChild.id and string.find(firstChild.id, "^multi") then
-                template = el
-                break
-            end
-        end
+
+    local template = findMultiTemplate(layout)
+    if not template then
+        Logging.error("[SoilFertilizer] No valid multi option template found")
+        return nil
     end
-    
-    if not template then 
-        Logging.warning("[SoilFertilizer]MultiOption template not found!")
-        return nil 
-    end
-    
+
     local success, row = pcall(function() return template:clone(layout) end)
     if not success or not row then
-        Logging.error("[SoilFertilizer]Failed to clone multi option template")
+        Logging.error("[SoilFertilizer] Failed to clone multi option template: %s", tostring(success))
         return nil
     end
-    
-    row.id = nil
-    
+
+    -- Validate cloned structure
     if not row.elements or #row.elements < 2 then
-        Logging.error("[SoilFertilizer]Cloned row has invalid elements")
+        Logging.error("[SoilFertilizer] Cloned multi option has invalid structure")
         return nil
     end
-    
+
+    row.id = nil
+
     local opt = row.elements[1]
     local lbl = row.elements[2]
+
+    -- Additional validation of cloned elements
+    if not opt or not lbl or not opt.setTexts or not opt.setState or not lbl.setText then
+        Logging.error("[SoilFertilizer] Cloned multi option elements missing required methods")
+        return nil
+    end
 
     if opt then opt.id = nil end
     if opt then opt.target = nil end
     if lbl then lbl.id = nil end
-    
+
     if opt and opt.toolTipText then opt.toolTipText = "" end
     if lbl and lbl.toolTipText then lbl.toolTipText = "" end
-    
+
     if opt and opt.setTexts then
         opt:setTexts(options)
     end
-    
+
     if opt and opt.setState then
         opt:setState(state)
     end
-    
+
     if opt then
         opt.onClickCallback = function(newState, element)
             if callback then
@@ -271,26 +451,26 @@ function UIHelper.createMultiOption(layout, id, textId, options, state, callback
             end
         end
     end
-    
+
     if lbl and lbl.setText then
         lbl:setText(getTextSafe(textId .. "_short"))
     end
-    
+
     local addSuccess = pcall(function() layout:addElement(row) end)
     if not addSuccess then
-        Logging.error("[SoilFertilizer]Failed to add multi option to layout")
+        Logging.error("[SoilFertilizer] Failed to add multi option to layout")
         return nil
     end
-    
+
     local tooltipText = getTextSafe(textId .. "_long")
-    
+
     if opt and opt.setToolTipText then
         opt:setToolTipText(tooltipText)
     end
     if lbl and lbl.setToolTipText then
         lbl:setToolTipText(tooltipText)
     end
-    
+
     if opt then opt.toolTipText = tooltipText end
     if lbl then lbl.toolTipText = tooltipText end
 
@@ -298,10 +478,10 @@ function UIHelper.createMultiOption(layout, id, textId, options, state, callback
         row:setToolTipText(tooltipText)
     end
     row.toolTipText = tooltipText
-    
+
     if opt and opt.elements and opt.elements[1] and opt.elements[1].setText then
         opt.elements[1]:setText(tooltipText)
     end
-    
+
     return opt
 end
