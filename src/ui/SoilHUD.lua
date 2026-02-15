@@ -302,9 +302,11 @@ function SoilHUD:draw()
         end
     end
 
-    -- Don't draw when large map is open
+    -- Only hide for fullscreen/large map - overlay map is fine
     if g_currentMission and g_currentMission.hud and g_currentMission.hud.ingameMap then
         local mapState = g_currentMission.hud.ingameMap.state
+        -- STATE_LARGE_MAP = fullscreen map that covers everything
+        -- Other states (minimap, overlay) are small and don't conflict with corner HUD
         if mapState == IngameMap.STATE_LARGE_MAP then
             return
         end
@@ -338,13 +340,8 @@ function SoilHUD:draw()
             end
         end
 
-        -- Don't hide for context help - it's usually small and our HUD can coexist
-        -- Comment out this block to always show HUD even with context help
-        if g_currentMission.hud and g_currentMission.hud.contextActionDisplay then
-            if g_currentMission.hud.contextActionDisplay.visible then
-                return
-            end
-        end
+        -- Context help (small popup showing key bindings) doesn't conflict with corner HUD
+        -- Removed aggressive hiding - context help is usually at bottom center, HUD is in corner
     end
 
     -- FIX: Make mod compatibility checks optional via setting
@@ -430,12 +427,22 @@ function SoilHUD:drawPanel(farmlandId)
         -- Check if soil system has initialized any fields yet
         local fieldCount = self.soilSystem:getFieldCount()
         if fieldCount == 0 then
-            -- Soil system still initializing fields
+            -- Soil system still initializing fields - show progress
             renderText(screenX, screenY, 0.012 * fontMult, string.format("Farmland %d", farmlandId))
             screenY = screenY - lineHeight
-            renderText(screenX, screenY, 0.011 * fontMult, "System initializing...")
+
+            -- Show scanning progress if available
+            if self.soilSystem.fieldsScanPending and self.soilSystem.fieldsScanAttempts then
+                local attempts = self.soilSystem.fieldsScanAttempts
+                local maxAttempts = self.soilSystem.fieldsScanMaxAttempts
+                renderText(screenX, screenY, 0.011 * fontMult,
+                    string.format("Scanning fields... (%d/%d)", attempts, maxAttempts))
+            else
+                renderText(screenX, screenY, 0.011 * fontMult, "System initializing...")
+            end
+
             screenY = screenY - lineHeight
-            renderText(screenX, screenY, 0.010 * fontMult, string.format("(%d fields ready)", fieldCount))
+            renderText(screenX, screenY, 0.010 * fontMult, string.format("%d fields ready", fieldCount))
             setTextAlignment(RenderText.ALIGN_LEFT)
             setTextBold(false)
             setTextColor(1, 1, 1, 1)
@@ -453,53 +460,58 @@ function SoilHUD:drawPanel(farmlandId)
         local field = nil
         
         if worldX and worldZ then
-            -- Method 1: Use FieldManager's getFieldAtWorldPosition if available
+            -- Method 1: Use FieldManager's getFieldAtWorldPosition if available (most accurate)
             if g_fieldManager and g_fieldManager.getFieldAtWorldPosition then
                 field = g_fieldManager:getFieldAtWorldPosition(worldX, worldZ)
                 if field and field.fieldId then
                     fieldId = field.fieldId
+                    if self.settings.debugMode then
+                        SoilLogger.debug("[HUD] Field detected via getFieldAtWorldPosition: %d", fieldId)
+                    end
                 end
             end
-            
+
             -- Method 2: Fallback - iterate through fields and check if position is in field polygon
             if not fieldId and g_fieldManager and g_fieldManager.fields then
                 for _, f in pairs(g_fieldManager.fields) do
                     if f and f.fieldId and f.getContainsPoint then
-                        -- Check if this field contains our position
-                        if f:getContainsPoint(worldX, worldZ) then
+                        local success, contains = pcall(f.getContainsPoint, f, worldX, worldZ)
+                        if success and contains then
                             fieldId = f.fieldId
                             field = f
+                            if self.settings.debugMode then
+                                SoilLogger.debug("[HUD] Field detected via getContainsPoint: %d", fieldId)
+                            end
                             break
                         end
                     end
                 end
             end
-            
-            -- Method 3: Last resort - find first field that belongs to this farmland
-            if not fieldId and g_fieldManager and g_fieldManager.fields then
-                for _, f in pairs(g_fieldManager.fields) do
-                    if f and f.farmland and f.farmland.id == farmlandId and f.fieldId then
-                        fieldId = f.fieldId
-                        field = f
-                        break
-                    end
-                end
-            end
+
+            -- If position is available but no field contains it, player is not in a field
+            -- Don't fall back to "first field in farmland" as that would show wrong data
         else
-            -- Can't get position, fall back to farmland-to-field mapping
+            -- Can't get position - use farmland-to-field mapping as best guess
+            -- Note: This may show wrong field if multiple fields exist on this farmland
             if g_fieldManager and g_fieldManager.getFieldByFarmland then
                 field = g_fieldManager:getFieldByFarmland(farmlandId)
                 if field and field.fieldId then
                     fieldId = field.fieldId
+                    if self.settings.debugMode then
+                        SoilLogger.debug("[HUD] Field via farmland mapping (no position): %d", fieldId)
+                    end
                 end
             end
-            
+
             -- If still no field, find first field in this farmland
             if not fieldId and g_fieldManager and g_fieldManager.fields then
                 for _, f in pairs(g_fieldManager.fields) do
                     if f and f.farmland and f.farmland.id == farmlandId and f.fieldId then
                         fieldId = f.fieldId
                         field = f
+                        if self.settings.debugMode then
+                            SoilLogger.debug("[HUD] Field via first-in-farmland fallback: %d", fieldId)
+                        end
                         break
                     end
                 end

@@ -151,13 +151,14 @@ function SoilFertilitySystem:onPlowing(fieldId)
 
     local changed = false
 
-    -- Plowing benefit 1: Increase organic matter by 5% (mixing in crop residue)
+    -- Plowing benefit 1: Increase organic matter (mixing in crop residue)
     -- Why: Plowing turns over the top soil layer, mixing in crop residue (stems, roots, chaff)
     -- This incorporates organic material into the soil, increasing organic matter content
     -- Organic matter improves soil structure, water retention, and microbial activity
+    -- Scale: 0-10 OM scale, +0.5 per plowing (~14% boost from default 3.5)
     local omBefore = field.organicMatter or SoilConstants.FIELD_DEFAULTS.organicMatter
-    local omIncrease = 5.0
-    local omAfter = math.min(omBefore + omIncrease, SoilConstants.NUTRIENT_LIMITS.organicMatter.max)
+    local omIncrease = 0.5  -- Balanced increase: ~3-4 plowings to reach near-maximum OM
+    local omAfter = math.min(omBefore + omIncrease, SoilConstants.NUTRIENT_LIMITS.ORGANIC_MATTER_MAX)
 
     if omAfter > omBefore then
         field.organicMatter = omAfter
@@ -520,21 +521,29 @@ function SoilFertilitySystem:updateFieldNutrients(fieldId, fruitTypeIndex, harve
     local name = string.lower(fruitDesc.name or "unknown")
     local rates = SoilConstants.CROP_EXTRACTION[name] or SoilConstants.CROP_EXTRACTION_DEFAULT
 
-    -- Calculate depletion factor based on harvest volume
+    -- NUTRIENT DEPLETION CALCULATION EXPLAINED:
+    --
+    -- Step 1: Calculate depletion factor
     -- Formula: factor = harvested liters / 1000
-    -- Why: Extraction rates are calibrated per 1000L of harvested crop
+    -- Why: Extraction rates in Constants.lua are calibrated per 1000L of harvested crop
+    -- Example: 80,000L wheat harvest → factor = 80
     local factor = harvestedLiters / 1000
 
-    -- Apply difficulty multiplier to depletion rate
-    -- Simple (0.7x): Slower depletion, easier to maintain soil
-    -- Realistic (1.0x): Normal depletion based on real-world rates
-    -- Hardcore (1.5x): Faster depletion, requires more fertilizer management
+    -- Step 2: Apply difficulty multiplier
+    -- Simple (0.7x): 30% less depletion, easier for new players
+    -- Realistic (1.0x): Balanced depletion based on real agricultural rates
+    -- Hardcore (1.5x): 50% more depletion, challenging management
+    -- Example: factor 80 × 0.7 (Simple) = 56, or × 1.5 (Hardcore) = 120
     local diffMultiplier = SoilConstants.DIFFICULTY.MULTIPLIERS[self.settings.difficulty]
     if diffMultiplier then
         factor = factor * diffMultiplier
     end
 
-    -- Deplete nutrients from soil, floor at MIN (can't go negative)
+    -- Step 3: Deplete nutrients from field
+    -- Formula: new_value = max(0, current_value - (extraction_rate × factor))
+    -- Scale: 0-100 nutrient points
+    -- Example: N=50, wheat extraction=0.20, factor=80
+    --          → 50 - (0.20 × 80) = 50 - 16 = 34 nitrogen remaining (~32% depletion)
     -- Only N/P/K deplete from harvest; pH and organic matter change through other means
     local limits = SoilConstants.NUTRIENT_LIMITS
     field.nitrogen   = math.max(limits.MIN, field.nitrogen   - rates.N * factor)
@@ -579,18 +588,26 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
 
     local limits = SoilConstants.NUTRIENT_LIMITS
 
-    -- Calculate nutrient addition factor
-    -- Formula: factor = liters / 1000
-    -- Why: Fertilizer profiles are calibrated per 1000L
-    -- Example: 500L of fertilizer with N:20 adds 500/1000 * 20 = 10 points of nitrogen
+    -- FERTILIZER RESTORATION CALCULATION EXPLAINED:
+    --
+    -- Step 1: Calculate application factor
+    -- Formula: factor = liters applied / 1000
+    -- Why: Fertilizer profiles in Constants.lua are calibrated per 1000L
+    -- Example: 2,000L liquid fertilizer → factor = 2.0
     local factor = liters / 1000
 
-    -- Apply nutrients from fertilizer profile, capping at max limits
-    -- Each fertilizer type has different N/P/K ratios (see FERTILIZER_PROFILES in Constants)
-    -- Liquid fertilizer: High N, moderate P/K
-    -- Solid fertilizer: Balanced N/P/K
-    -- Manure/Slurry: Moderate N/P/K, adds organic matter
-    -- Lime: Raises pH, no nutrients
+    -- Step 2: Apply nutrients from fertilizer profile, capping at maximum limits
+    -- Scale: 0-100 nutrient points (N/P/K), 5.0-7.5 pH, 0-10 organic matter
+    -- Example: Liquid fertilizer N=0.50 per 1000L, factor=2.0
+    --          → Current N=34, Add: 34 + (0.50 × 2.0) = 34 + 1.0 = 35 nitrogen
+    --
+    -- Fertilizer type characteristics (see FERTILIZER_PROFILES in Constants):
+    -- - LIQUIDFERTILIZER: High N, moderate P/K, fast-acting
+    -- - FERTILIZER (solid): Very high N/P, balanced granular NPK
+    -- - MANURE: Lower NPK, adds organic matter (slow-release)
+    -- - SLURRY: Moderate N/K, adds organic matter (liquid organic)
+    -- - DIGESTATE: Good all-around, adds organic matter (biogas byproduct)
+    -- - LIME: Only affects pH (raises toward neutral/alkaline)
     if entry.N then field.nitrogen   = math.min(limits.MAX, field.nitrogen   + entry.N * factor) end
     if entry.P then field.phosphorus = math.min(limits.MAX, field.phosphorus + entry.P * factor) end
     if entry.K then field.potassium  = math.min(limits.MAX, field.potassium  + entry.K * factor) end

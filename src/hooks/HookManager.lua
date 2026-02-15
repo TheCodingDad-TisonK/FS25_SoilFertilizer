@@ -240,9 +240,23 @@ function HookManager:installPlowingHook()
                     if farmlandId and farmlandId > 0 and g_fieldManager then
                         local field = g_fieldManager:getFieldByFarmland(farmlandId)
                         if field and field.fieldId then
-                            -- Check if this is a plow (not just cultivator)
-                            local isPlow = cultivatorSelf.spec_plow ~= nil
-                            if isPlow then
+                            -- Check if this is a plowing implement (various types trigger soil benefits)
+                            -- spec_plow: Traditional plows, moldboard plows
+                            -- spec_subsoiler: Deep loosening tools (improve OM mixing)
+                            -- spec_cultivator with deep work: Some cultivators act as plows
+                            local isPlowingTool = cultivatorSelf.spec_plow ~= nil or
+                                                  cultivatorSelf.spec_subsoiler ~= nil
+
+                            -- Some cultivators work deep enough to act as plows
+                            if not isPlowingTool and cultivatorSelf.spec_cultivator then
+                                local cultivatorSpec = cultivatorSelf.spec_cultivator
+                                -- Check if working depth is significant (>15cm = plowing depth)
+                                if cultivatorSpec.workingDepth and cultivatorSpec.workingDepth > 0.15 then
+                                    isPlowingTool = true
+                                end
+                            end
+
+                            if isPlowingTool then
                                 g_SoilFertilityManager.soilSystem:onPlowing(field.fieldId)
                             end
                         end

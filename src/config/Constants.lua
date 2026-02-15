@@ -58,19 +58,21 @@ SoilConstants.NUTRIENT_LIMITS = {
 -- ========================================
 -- NUTRIENT RECOVERY RATES (per day, fallow fields)
 -- ========================================
+-- Adjusted for 0-100 scale (slower natural recovery rate)
 SoilConstants.FALLOW_RECOVERY = {
-    nitrogen = 0.2,
-    phosphorus = 0.1,
-    potassium = 0.15,
-    organicMatter = 0.01,
+    nitrogen = 0.07,      -- ~1 year to recover 25 points
+    phosphorus = 0.03,    -- Phosphorus recovers slower
+    potassium = 0.05,     -- Moderate recovery
+    organicMatter = 0.01, -- Organic matter accumulates very slowly
 }
 
 -- ========================================
 -- SEASONAL EFFECTS (per day)
 -- ========================================
+-- Adjusted for 0-100 scale (subtle seasonal changes)
 SoilConstants.SEASONAL_EFFECTS = {
-    SPRING_NITROGEN_BOOST = 0.1,
-    FALL_NITROGEN_LOSS = 0.05,
+    SPRING_NITROGEN_BOOST = 0.03,  -- Small spring boost from biological activity
+    FALL_NITROGEN_LOSS = 0.02,     -- Gradual fall depletion
     SPRING_SEASON = 1,
     FALL_SEASON = 3,
 }
@@ -85,48 +87,54 @@ SoilConstants.PH_NORMALIZATION = {
 -- ========================================
 -- RAIN EFFECTS
 -- ========================================
+-- Adjusted for 0-100 nutrient scale
 SoilConstants.RAIN = {
-    LEACH_BASE_FACTOR = 0.000001,  -- base leach per dt per rainScale
-    NITROGEN_MULTIPLIER = 5,       -- nitrogen leaches most
-    POTASSIUM_MULTIPLIER = 2,      -- potassium moderate
-    PHOSPHORUS_MULTIPLIER = 0.5,   -- phosphorus binds to soil
-    PH_ACIDIFICATION = 0.1,       -- rain acidification multiplier
-    MIN_RAIN_THRESHOLD = 0.1,     -- minimum rainScale to trigger effects
+    LEACH_BASE_FACTOR = 0.00000008,  -- base leach per dt per rainScale (÷12 for scale adjustment)
+    NITROGEN_MULTIPLIER = 5,         -- nitrogen leaches most (mobile nutrient)
+    POTASSIUM_MULTIPLIER = 2,        -- potassium moderate leaching
+    PHOSPHORUS_MULTIPLIER = 0.5,     -- phosphorus binds to soil (least mobile)
+    PH_ACIDIFICATION = 0.1,          -- rain acidification multiplier
+    MIN_RAIN_THRESHOLD = 0.1,        -- minimum rainScale to trigger effects
 }
 
 -- ========================================
 -- CROP EXTRACTION RATES (per 1,000 liters harvested)
 -- ========================================
+-- Calibrated for 0-100 nutrient scale
+-- Typical 10-hectare field yields ~80,000L, resulting in 15-25% nutrient depletion
+-- Example: 80,000L wheat depletes 16N, 6.4P, 12K (from defaults 50N, 40P, 45K)
 SoilConstants.CROP_EXTRACTION = {
-    wheat      = { N=2.3, P=1.0, K=1.8 },
-    barley     = { N=2.1, P=0.9, K=1.7 },
-    maize      = { N=2.8, P=1.2, K=2.4 },
-    canola     = { N=3.2, P=1.4, K=2.6 },
-    soybean    = { N=3.8, P=1.6, K=2.0 },
-    sunflower  = { N=3.0, P=1.3, K=2.8 },
-    potato     = { N=4.5, P=2.0, K=6.5 },
-    sugarbeet  = { N=4.0, P=1.8, K=7.0 },
-    oats       = { N=2.2, P=1.1, K=1.9 },
-    rye        = { N=2.4, P=1.0, K=2.1 },
-    triticale  = { N=2.5, P=1.2, K=2.3 },
-    sorghum    = { N=2.7, P=1.1, K=2.2 },
-    peas       = { N=3.5, P=1.3, K=2.4 },
-    beans      = { N=3.6, P=1.4, K=2.5 },
+    wheat      = { N=0.20, P=0.08, K=0.15 },  -- Moderate N demand, standard grain
+    barley     = { N=0.18, P=0.08, K=0.14 },  -- Similar to wheat, slightly less
+    maize      = { N=0.23, P=0.10, K=0.20 },  -- High N/P demand, large biomass
+    canola     = { N=0.27, P=0.12, K=0.22 },  -- High N demand, oilseed
+    soybean    = { N=0.32, P=0.13, K=0.17 },  -- Highest N (compensates for fixation)
+    sunflower  = { N=0.25, P=0.11, K=0.23 },  -- Moderate-high demand
+    potato     = { N=0.38, P=0.17, K=0.54 },  -- Very high K demand (tuber crop)
+    sugarbeet  = { N=0.33, P=0.15, K=0.58 },  -- Extreme K demand (root crop)
+    oats       = { N=0.18, P=0.09, K=0.16 },  -- Light feeder
+    rye        = { N=0.20, P=0.08, K=0.18 },  -- Moderate demand
+    triticale  = { N=0.21, P=0.10, K=0.19 },  -- Hybrid characteristics
+    sorghum    = { N=0.23, P=0.09, K=0.18 },  -- Efficient nutrient user
+    peas       = { N=0.29, P=0.11, K=0.20 },  -- Legume, moderate demand
+    beans      = { N=0.30, P=0.12, K=0.21 },  -- Legume, similar to peas
 }
 
--- Default extraction for unknown crops
-SoilConstants.CROP_EXTRACTION_DEFAULT = { N=2.5, P=1.1, K=2.0 }
+-- Default extraction for unknown crops (average cereal)
+SoilConstants.CROP_EXTRACTION_DEFAULT = { N=0.21, P=0.09, K=0.17 }
 
 -- ========================================
 -- FERTILIZER PROFILES (per 1,000 liters applied)
 -- ========================================
+-- Calibrated for 0-100 nutrient scale
+-- Example: 2,000L liquid fertilizer restores ~13N, ~5.6P, ~10.7K
 SoilConstants.FERTILIZER_PROFILES = {
-    LIQUIDFERTILIZER = { N=6.0, P=2.5, K=4.0 },
-    FERTILIZER       = { N=8.0, P=4.0, K=3.0 },
-    MANURE           = { N=3.0, P=2.0, K=3.5, OM=0.05 },
-    SLURRY           = { N=4.0, P=2.0, K=5.0, OM=0.03 },
-    DIGESTATE        = { N=5.0, P=2.2, K=5.5, OM=0.04 },
-    LIME             = { pH=0.4 },
+    LIQUIDFERTILIZER = { N=0.50, P=0.21, K=0.33 },  -- Balanced liquid NPK
+    FERTILIZER       = { N=0.67, P=0.33, K=0.25 },  -- Solid granular, high N/P
+    MANURE           = { N=0.25, P=0.17, K=0.29, OM=0.05 },  -- Organic, slow-release
+    SLURRY           = { N=0.33, P=0.17, K=0.42, OM=0.03 },  -- Liquid organic, high K
+    DIGESTATE        = { N=0.42, P=0.18, K=0.46, OM=0.04 },  -- Biogas byproduct
+    LIME             = { pH=0.4 },  -- pH adjustment (not on nutrient scale)
 }
 
 -- List of recognized fertilizer fill type names

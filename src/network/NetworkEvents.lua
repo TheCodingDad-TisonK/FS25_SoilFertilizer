@@ -195,12 +195,37 @@ function SoilRequestFullSyncEvent:run(connection)
     if not g_server or not connection then return end
 
     if g_SoilFertilityManager and g_SoilFertilityManager.settings then
-        print("[SoilFertilizer] Server: Sending full sync to client")
+        -- Validate that soil system has initialized field data
+        local soilSystem = g_SoilFertilityManager.soilSystem
+        local fieldData = soilSystem and soilSystem.fieldData or {}
 
-        -- Send settings
+        -- Count actual fields (not just empty table)
+        local fieldCount = 0
+        if fieldData then
+            for _ in pairs(fieldData) do
+                fieldCount = fieldCount + 1
+            end
+        end
+
+        -- If soil system is still initializing (no fields yet), log warning
+        -- Client will retry automatically via retry handler
+        if soilSystem and soilSystem.fieldsScanPending then
+            print(string.format(
+                "[SoilFertilizer] Server: Sync requested but field scan still pending (%d fields ready) - client will retry",
+                fieldCount
+            ))
+        else
+            print(string.format(
+                "[SoilFertilizer] Server: Sending full sync to client (%d fields)",
+                fieldCount
+            ))
+        end
+
+        -- Send sync event (even if empty - client needs settings)
+        -- Empty field data is valid for new saves or dedicated servers
         connection:sendEvent(SoilFullSyncEvent.new(
             g_SoilFertilityManager.settings,
-            g_SoilFertilityManager.soilSystem and g_SoilFertilityManager.soilSystem.fieldData or {}
+            fieldData
         ))
     end
 end
