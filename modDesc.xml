@@ -812,7 +812,7 @@
 
     <inputBinding>
         <actionBinding action="SF_TOGGLE_HUD">
-            <binding device="KB_MOUSE_DEFAULT" input="KEY_F8" />
+            <binding device="KB_MOUSE_DEFAULT" input="KEY_J" />
         </actionBinding>
     </inputBinding>
 </modDesc>

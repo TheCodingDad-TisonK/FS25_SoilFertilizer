@@ -108,23 +108,73 @@ function SoilHUD:getCurrentFieldId()
             vehicle and tostring(vehicle.rootNode ~= nil) or "N/A")
     end
 
-    -- Try player first (standard method)
-    local player = g_currentMission.player
-    if player and player.rootNode then
-        local px, _, pz = getWorldTranslation(player.rootNode)
-        x, z = px, pz
-        source = "player"
-    -- Fallback: Try player position from baseInformation (FS25 multiplayer)
-    elseif player and player.baseInformation and player.baseInformation.lastPositionX then
-        x = player.baseInformation.lastPositionX
-        z = player.baseInformation.lastPositionZ
-        source = "player.baseInformation"
-        if self.settings.debugMode then
-            SoilLogger.debug("[HUD] Using player.baseInformation for position")
+    -- Tier 0: Try g_localPlayer first (most reliable - from FS25 API)
+    if g_localPlayer then
+        local success, px, py, pz = pcall(function()
+            -- Try getPosition() method first
+            if g_localPlayer.getPosition then
+                return g_localPlayer:getPosition()
+            -- Fallback to rootNode
+            elseif g_localPlayer.rootNode and g_localPlayer.rootNode ~= 0 then
+                return getWorldTranslation(g_localPlayer.rootNode)
+            end
+            return nil, nil, nil
+        end)
+
+        if success and px then
+            x, z = px, pz
+            source = "g_localPlayer"
+        -- Check if player is in vehicle
+        elseif g_localPlayer.getIsInVehicle and g_localPlayer:getIsInVehicle() then
+            local vehicle = g_localPlayer:getCurrentVehicle()
+            if vehicle and vehicle.rootNode and vehicle.rootNode ~= 0 then
+                success, px, py, pz = pcall(getWorldTranslation, vehicle.rootNode)
+                if success and px then
+                    x, z = px, pz
+                    source = "g_localPlayer.vehicle"
+                end
+            end
         end
-    -- Fallback: Try getting position from camera (when player is active but rootNode unavailable)
-    elseif g_currentMission.camera then
-        -- Try camera position (different methods depending on camera type)
+
+        if self.settings.debugMode and x then
+            SoilLogger.debug("[HUD] Using g_localPlayer for position")
+        end
+    end
+
+    -- Tier 1: Try g_currentMission.player (standard method)
+    if not x then
+        local player = g_currentMission.player
+        if player and player.rootNode then
+            local success, px, _, pz = pcall(getWorldTranslation, player.rootNode)
+            if success and px then
+                x, z = px, pz
+                source = "player"
+            end
+        -- Fallback: Try player position from baseInformation (FS25 multiplayer)
+        elseif player and player.baseInformation and player.baseInformation.lastPositionX then
+            x = player.baseInformation.lastPositionX
+            z = player.baseInformation.lastPositionZ
+            source = "player.baseInformation"
+            if self.settings.debugMode then
+                SoilLogger.debug("[HUD] Using player.baseInformation for position")
+            end
+        end
+    end
+
+    -- Tier 2: Try controlled vehicle
+    if not x then
+        local vehicle = g_currentMission.controlledVehicle
+        if vehicle and vehicle.rootNode then
+            local success, vx, _, vz = pcall(getWorldTranslation, vehicle.rootNode)
+            if success and vx then
+                x, z = vx, vz
+                source = "vehicle"
+            end
+        end
+    end
+
+    -- Tier 3: Try camera position (last resort)
+    if not x and g_currentMission.camera then
         local success, cx, cy, cz = pcall(function()
             if g_currentMission.camera.cameraNode then
                 return getWorldTranslation(g_currentMission.camera.cameraNode)
@@ -134,33 +184,17 @@ function SoilHUD:getCurrentFieldId()
             x, z = cx, cz
             source = "camera"
             if self.settings.debugMode then
-                SoilLogger.debug("[HUD] Using camera position as fallback")
+                SoilLogger.debug("[HUD] Using camera position as last resort")
             end
         end
-    else
-        -- Try controlled vehicle
-        local vehicle = g_currentMission.controlledVehicle
-        if vehicle and vehicle.rootNode then
-            local vx, _, vz = getWorldTranslation(vehicle.rootNode)
-            x, z = vx, vz
-            source = "vehicle"
-        else
-            if self.settings.debugMode then
-                SoilLogger.debug("[HUD] getCurrentFieldId: No player or vehicle position available")
-                -- Try alternative position sources
-                if player then
-                    -- Log all properties of player object to find the right one
-                    SoilLogger.debug("[HUD] Player object exists but rootNode is nil - checking alternatives...")
-                    if player.baseInformation and player.baseInformation.lastPositionX then
-                        SoilLogger.debug("[HUD] Found baseInformation.lastPositionX/Z")
-                    end
-                    if player.networkInformation and player.networkInformation.interpolatorPosition then
-                        SoilLogger.debug("[HUD] Found networkInformation.interpolatorPosition")
-                    end
-                end
-            end
-            return nil
+    end
+
+    -- No position available
+    if not x then
+        if self.settings.debugMode then
+            SoilLogger.debug("[HUD] getCurrentFieldId: No position available from any source")
         end
+        return nil
     end
 
     if self.settings.debugMode then
@@ -277,6 +311,15 @@ function SoilHUD:draw()
     if not self.settings.enabled then return end
     if not self.settings.showHUD then return end  -- Check persistent HUD setting
     if not self.visible then return end  -- Check runtime visibility toggle (F8)
+
+    -- Don't draw if mission objects aren't ready yet (prevents errors during loading/transitions)
+    if not g_currentMission then return end
+
+    -- Don't draw if player/vehicle don't exist yet (early game states, loading, etc)
+    -- This prevents unnecessary position detection attempts and debug spam
+    if not g_currentMission.player and not g_currentMission.controlledVehicle then
+        return
+    end
 
     -- Don't draw over menus/dialogs (critical - prevents rendering over pause menu, shop, etc)
     if g_gui and (g_gui:getIsGuiVisible() or g_gui:getIsDialogVisible()) then

@@ -211,7 +211,7 @@ function SoilFertilityManager:onMissionLoaded()
         end
         if self.settings.showNotifications and g_currentMission and g_currentMission.hud then
             g_currentMission.hud:showBlinkingWarning(
-                "Soil & Fertilizer Mod Active - Type 'soilfertility' for commands | Press F8 for Soil HUD",
+                "Soil & Fertilizer Mod Active - Type 'soilfertility' for commands | Press J for Soil HUD",
                 8000
             )
         end
@@ -240,13 +240,13 @@ function SoilFertilityManager:registerInputActions()
 
     if eventId then
         self.toggleHUDEventId = eventId
-        SoilLogger.info("F8 HUD toggle registered")
+        SoilLogger.info("J HUD toggle registered")
     else
-        SoilLogger.warning("Failed to register F8 HUD toggle")
+        SoilLogger.warning("Failed to register J HUD toggle")
     end
 end
 
--- Input callback for HUD toggle (F8)
+-- Input callback for HUD toggle (J)
 function SoilFertilityManager:onToggleHUDInput()
     if self.soilHUD then
         self.soilHUD:toggleVisibility()
