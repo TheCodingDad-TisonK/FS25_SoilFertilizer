@@ -168,6 +168,33 @@ While this is a personal project, suggestions and feedback are welcome.
 ### Credits
 - **Author:** TisonK
 
+## Version History
+
+### v1.0.3.1 (2026-02-14)
+**Bug Fixes:**
+- Fixed mod compatibility issues with multiple mods installed (Issues #20, #21)
+- Improved UI template search with validation and caching
+- Added defensive element cloning to prevent crashes when other mods modify the layout
+- Fixed white screen/broken display menu when used with CropRotation, RealisticHarvesting, and other UI mods
+- Better error messages for debugging template search failures
+
+**Technical Improvements:**
+- Template validation before caching
+- Template caching for consistency across multi-mod environments
+- Post-clone validation to catch structural issues
+- Cache reset on retry to handle mod load order changes
+
+### v1.0.3.0 (2026-02-14)
+- Improved GUI injection reliability
+- Fixed multiplayer settings synchronization
+- Fixed packaging structure
+
+### v1.0.2.0
+- Initial stable release
+- Full multiplayer support
+- 10-language localization
+- Precision Farming compatibility
+
 ## Support
 For support, questions, or feedback:
 - Comment on the KingMods page

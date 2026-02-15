@@ -17,9 +17,10 @@ function HookManager.new()
     return self
 end
 
---- Install all game hooks for the soil system.
---- Stores references for proper cleanup on uninstall.
----@param soilSystem table The SoilFertilitySystem instance
+--- Install all game hooks for the soil system
+--- Installs hooks for harvest, fertilizer, plowing, ownership, and weather
+--- Stores references for proper cleanup on uninstall
+---@param soilSystem SoilFertilitySystem The soil system instance to connect hooks to
 function HookManager:installAll(soilSystem)
     if self.installed then
         print("[SoilFertilizer] Hooks already installed, skipping re-installation")
@@ -32,12 +33,14 @@ function HookManager:installAll(soilSystem)
     self:installSprayerHook()
     self:installOwnershipHook()
     self:installWeatherHook()
+    self:installPlowingHook()
 
     self.installed = true
     print("[SoilFertilizer] All hooks installation complete")
 end
 
---- Uninstall all hooks and restore original functions.
+--- Uninstall all hooks and restore original functions
+--- Called on mod unload to prevent hook accumulation
 function HookManager:uninstallAll()
     if not self.installed then return end
 
@@ -203,4 +206,69 @@ function HookManager:installWeatherHook()
     )
     self:register(env, "update", original, "environment.update")
     print("[SoilFertilizer] Weather hook installed")
+end
+
+-- Hook 5: Plowing operations (Cultivator)
+function HookManager:installPlowingHook()
+    if not Cultivator or not Cultivator.processCultivatorArea then
+        print("[SoilFertilizer WARNING] Could not install plowing hook - Cultivator not available")
+        return
+    end
+
+    local original = Cultivator.processCultivatorArea
+    Cultivator.processCultivatorArea = Utils.appendedFunction(
+        original,
+        function(cultivatorSelf, superFunc, workArea, dt)
+            if not g_SoilFertilityManager or
+               not g_SoilFertilityManager.soilSystem or
+               not g_SoilFertilityManager.settings.enabled or
+               not g_SoilFertilityManager.settings.plowingBonus then
+                return
+            end
+
+            -- Check if this is actual plowing (not just cultivation)
+            local workAreaSpec = cultivatorSelf.spec_workArea
+            if not workAreaSpec then return end
+
+            local success, errorMsg = pcall(function()
+                -- Get field ID from work area
+                local x = (workArea[1] + workArea[4]) / 2
+                local z = (workArea[2] + workArea[5]) / 2
+
+                if g_farmlandManager then
+                    local farmlandId = g_farmlandManager:getFarmlandIdAtWorldPosition(x, z)
+                    if farmlandId and farmlandId > 0 and g_fieldManager then
+                        local field = g_fieldManager:getFieldByFarmland(farmlandId)
+                        if field and field.fieldId then
+                            -- Check if this is a plowing implement (various types trigger soil benefits)
+                            -- spec_plow: Traditional plows, moldboard plows
+                            -- spec_subsoiler: Deep loosening tools (improve OM mixing)
+                            -- spec_cultivator with deep work: Some cultivators act as plows
+                            local isPlowingTool = cultivatorSelf.spec_plow ~= nil or
+                                                  cultivatorSelf.spec_subsoiler ~= nil
+
+                            -- Some cultivators work deep enough to act as plows
+                            if not isPlowingTool and cultivatorSelf.spec_cultivator then
+                                local cultivatorSpec = cultivatorSelf.spec_cultivator
+                                -- Check if working depth is significant (>15cm = plowing depth)
+                                if cultivatorSpec.workingDepth and cultivatorSpec.workingDepth > 0.15 then
+                                    isPlowingTool = true
+                                end
+                            end
+
+                            if isPlowingTool then
+                                g_SoilFertilityManager.soilSystem:onPlowing(field.fieldId)
+                            end
+                        end
+                    end
+                end
+            end)
+
+            if not success then
+                print("[SoilFertilizer ERROR] Plowing hook failed: " .. tostring(errorMsg))
+            end
+        end
+    )
+    self:register(Cultivator, "processCultivatorArea", original, "Cultivator.processCultivatorArea")
+    print("[SoilFertilizer] Plowing hook installed")
 end

@@ -95,13 +95,13 @@ end
 function SoilSettingsUI:inject()
     if self.injected then return true end
     if not g_gui or not g_gui.screenControllers then
-        Logging.warning("[SoilFertilizer] GUI unavailable")
+        SoilLogger.warning("[SoilFertilizer] GUI unavailable")
         return false
     end
 
     local inGameMenu = g_gui.screenControllers[InGameMenu]
     if not inGameMenu or not inGameMenu.pageSettings or not inGameMenu.pageSettings.generalSettingsLayout then
-        Logging.warning("[SoilFertilizer] Settings page not ready")
+        SoilLogger.warning("[SoilFertilizer] Settings page not ready")
         return false
     end
 
@@ -111,6 +111,8 @@ function SoilSettingsUI:inject()
     if #self.uiElements > 0 then
         SoilLogger.info("Clearing %d existing UI elements before retry", #self.uiElements)
         self.uiElements = {}
+        -- Also reset template cache on retry to handle mod load order changes
+        UIHelper.resetTemplateCache()
     end
 
     -- Section header
@@ -204,6 +206,34 @@ function SoilSettingsUI:inject()
 
             self.uiElements[diffDef.uiId] = diffElement
             table.insert(self.uiElements, diffElement)
+        end
+    end
+
+    -- HUD Position dropdown
+    local hudPosDef = SettingsSchema.byId["hudPosition"]
+    if hudPosDef then
+        local hudPosOptions = {
+            g_i18n:getText("sf_hud_pos_1") or "Top Right",
+            g_i18n:getText("sf_hud_pos_2") or "Top Left",
+            g_i18n:getText("sf_hud_pos_3") or "Bottom Right",
+            g_i18n:getText("sf_hud_pos_4") or "Bottom Left",
+            g_i18n:getText("sf_hud_pos_5") or "Center Right"
+        }
+
+        local success, hudPosElement = pcall(UIHelper.createMultiOption, layout, hudPosDef.uiId, "sf_hud_position", hudPosOptions, self.settings.hudPosition or 1, function(val)
+            self:requestSettingChange("hudPosition", val)
+        end)
+
+        if success and hudPosElement then
+            if not isAdmin and hudPosElement.setIsEnabled then
+                hudPosElement:setIsEnabled(false)
+                if hudPosElement.setToolTipText then
+                    hudPosElement:setToolTipText("Admin only")
+                end
+            end
+
+            self.uiElements[hudPosDef.uiId] = hudPosElement
+            table.insert(self.uiElements, hudPosElement)
         end
     end
 

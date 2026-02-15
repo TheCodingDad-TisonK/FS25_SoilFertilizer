@@ -77,7 +77,7 @@ At these stages, Claude and Samantha MUST have explicit dialog:
 
 ## Project Overview
 
-**FS25_SoilFertilizer** is a Farming Simulator 25 mod that adds realistic soil nutrient management. It tracks Nitrogen, Phosphorus, Potassium, Organic Matter, and pH per field, with crop-specific depletion, fertilizer replenishment, weather effects, and seasonal cycles. Current version: **1.0.2.0**. Fully supports multiplayer with admin-only settings enforcement. 10-language localization inline in `modDesc.xml`.
+**FS25_SoilFertilizer** is a Farming Simulator 25 mod that adds realistic soil nutrient management. It tracks Nitrogen, Phosphorus, Potassium, Organic Matter, and pH per field, with crop-specific depletion, fertilizer replenishment, weather effects, and seasonal cycles. Current version: **1.0.4.1**. Fully supports multiplayer with admin-only settings enforcement. 10-language localization inline in `modDesc.xml`.
 
 ---
 
@@ -173,6 +173,39 @@ Global reference: `g_SoilFertilityManager` (set via `getfenv(0)`).
 
 All hooks use `Utils.appendedFunction` for mod compatibility. `HookManager:uninstallAll()` is called on mod unload to prevent hook accumulation.
 
+### Field Detection & Player Position
+
+#### Field vs Farmland Concepts
+
+**Field**: A specific crop polygon (managed by `g_fieldManager`). Fields have unique `fieldId` values and represent the actual planted area.
+
+**Farmland**: A purchasable land parcel (managed by `g_farmlandManager`). One farmland can contain multiple fields.
+
+#### Field Detection Pattern (Production-Proven)
+
+`SoilHUD.lua:getCurrentFieldId()` uses a 3-tier fallback for field detection:
+
+| Tier | Method | Reliability |
+|------|--------|-------------|
+| **1** | `g_fieldManager:getFieldAtWorldPosition(x, z)` | ⭐⭐⭐⭐⭐ Most accurate - returns exact field at position |
+| **2** | `g_farmlandManager:getFarmlandIdAtWorldPosition(x, z)` → `getFieldByFarmland(farmlandId)` | ⭐⭐⭐⭐ Good fallback - may return wrong field if multiple fields in farmland |
+| **3** | Manual iteration through `g_fieldManager.fields[]` | ⭐⭐⭐ Last resort - returns first matching field |
+
+Always prefer Tier 1. Tiers 2-3 exist for compatibility with older FS25 API versions.
+
+#### Player Position Detection (Enhanced Pattern)
+
+`SoilHUD.lua:getCurrentFieldId()` uses a 4-tier fallback for position detection (enhanced with NPCFavor patterns):
+
+| Tier | Source | Notes |
+|------|--------|-------|
+| **0** | `g_localPlayer` | Most reliable - includes `getPosition()`, `rootNode`, and `getIsInVehicle()` + `getCurrentVehicle()` vehicle handling |
+| **1** | `g_currentMission.player.rootNode` | Standard fallback - also checks `player.baseInformation` for multiplayer |
+| **2** | `g_currentMission.controlledVehicle.rootNode` | Vehicle position when player object unavailable |
+| **3** | `g_currentMission.camera.cameraNode` | Last resort - camera position |
+
+All `getWorldTranslation()` calls wrapped in `pcall()` for crash prevention. Pattern proven in NPCFavor mod.
+
 ### Settings System
 
 `SettingsSchema.lua` is the **single source of truth** for all settings. Each setting is defined once with `{id, type, default, uiId, pfProtected}`. This drives:
@@ -225,6 +258,26 @@ All tunable values live in `src/config/Constants.lua` (`SoilConstants` global). 
 | `Slider` widgets | Unreliable events | Use quick buttons or `MultiTextOption` |
 | `DialogElement` base | Deprecated | Use `MessageDialog` pattern |
 | Dialog XML naming callbacks `onClose`/`onOpen` | System lifecycle conflict | Use different callback names |
+
+---
+
+## Naming Conventions
+
+This project follows standard Lua naming conventions with FS25-specific adaptations:
+
+| Type | Convention | Examples |
+|------|------------|----------|
+| **Classes** | PascalCase | `SoilLogger`, `HookManager`, `AsyncRetryHandler` |
+| **Variables/Fields** | camelCase | `fieldData`, `soilSystem`, `panelWidth` |
+| **Functions (methods)** | camelCase | `getCurrentFieldId()`, `updatePosition()`, `markSuccess()` |
+| **Functions (global)** | PascalCase_camelCase | `SoilNetworkEvents_RequestFullSync()` (namespace prefix) |
+| **Constants** | UPPER_SNAKE_CASE | `MAX_ATTEMPTS`, `PANEL_WIDTH`, `VALUE_TYPE` |
+| **Boolean flags** | Descriptive prefix OK | `pfActive` (Precision Farming active), `initialized` |
+| **File handles** | Descriptive prefix OK | `xmlFile` (XML file handle) |
+
+**Global Function Naming**: Global functions use `ModuleName_functionName` pattern to avoid conflicts in the global namespace. This is a FS25 modding best practice.
+
+**Descriptive Prefixes**: Prefixes like `pf` (Precision Farming) and `xml` are acceptable when they add clarity and context.
 
 ---
 

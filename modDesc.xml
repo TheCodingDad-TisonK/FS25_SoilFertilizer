@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <modDesc descVersion="105">
     <author>TisonK</author>
-    <version>1.0.3.0</version>
+    <version>1.0.4.1</version>
     <modName>FS25_SoilFertilizer</modName>
     <title>
         <en>Realistic Soil & Fertilizer</en>
@@ -375,7 +375,413 @@
             <ru>Включить/выключить уведомления о почве и удобрениях</ru>
             <hu>Talaj és műtrágya értesítések engedélyezése/tiltása</hu>
         </text>
-        
+
+        <text name="sf_show_hud_short">
+            <en>Show HUD</en>
+            <de>HUD anzeigen</de>
+            <fr>Afficher HUD</fr>
+            <pl>Pokaż HUD</pl>
+            <es>Mostrar HUD</es>
+            <it>Mostra HUD</it>
+            <cz>Zobrazit HUD</cz>
+            <br>Mostrar HUD</br>
+            <uk>Показати HUD</uk>
+            <ru>Показать HUD</ru>
+            <hu>HUD megjelenítése</hu>
+        </text>
+
+        <text name="sf_show_hud_long">
+            <en>Show/hide the soil info HUD overlay (F8 to toggle temporarily)</en>
+            <de>Boden-Info-HUD ein-/ausblenden (F8 zum temporären Umschalten)</de>
+            <fr>Afficher/masquer l'HUD d'info sol (F8 pour basculer temporairement)</fr>
+            <pl>Pokaż/ukryj nakładkę HUD informacji o glebie (F8 aby przełączyć tymczasowo)</pl>
+            <es>Mostrar/ocultar la superposición HUD de info de suelo (F8 para alternar temporalmente)</es>
+            <it>Mostra/nascondi overlay HUD info suolo (F8 per alternare temporaneamente)</it>
+            <cz>Zobrazit/skrýt HUD s informacemi o půdě (F8 pro dočasné přepnutí)</cz>
+            <br>Mostrar/ocultar sobreposição HUD de info de solo (F8 para alternar temporariamente)</br>
+            <uk>Показати/сховати накладку HUD інформації про ґрунт (F8 для тимчасового перемикання)</uk>
+            <ru>Показать/скрыть наложение HUD информации о почве (F8 для временного переключения)</ru>
+            <hu>Talajinformáció HUD átfedés megjelenítése/elrejtése (F8 az ideiglenes váltáshoz)</hu>
+        </text>
+
+        <text name="sf_hud_position_short">
+            <en>HUD Position</en>
+            <de>HUD-Position</de>
+            <fr>Position HUD</fr>
+            <pl>Pozycja HUD</pl>
+            <es>Posición HUD</es>
+            <it>Posizione HUD</it>
+            <cz>Pozice HUD</cz>
+            <br>Posição HUD</br>
+            <uk>Позиція HUD</uk>
+            <ru>Позиция HUD</ru>
+            <hu>HUD pozíció</hu>
+        </text>
+
+        <text name="sf_hud_position_long">
+            <en>Choose where the soil info HUD appears on screen</en>
+            <de>Wählen Sie, wo das Boden-Info-HUD auf dem Bildschirm erscheint</de>
+            <fr>Choisir où l'HUD d'info sol apparaît à l'écran</fr>
+            <pl>Wybierz, gdzie na ekranie pojawia się HUD informacji o glebie</pl>
+            <es>Elegir dónde aparece el HUD de info de suelo en pantalla</es>
+            <it>Scegli dove appare l'HUD info suolo sullo schermo</it>
+            <cz>Vyberte, kde se na obrazovce zobrazí HUD s informacemi o půdě</cz>
+            <br>Escolha onde o HUD de info de solo aparece na tela</br>
+            <uk>Виберіть, де на екрані з'являється HUD інформації про ґрунт</uk>
+            <ru>Выберите, где на экране появляется HUD информации о почве</ru>
+            <hu>Válassza ki, hol jelenjen meg a talajinformáció HUD a képernyőn</hu>
+        </text>
+
+        <text name="sf_hud_pos_1">
+            <en>Top Right</en>
+            <de>Oben rechts</de>
+            <fr>En haut à droite</fr>
+            <pl>Góra prawa</pl>
+            <es>Arriba derecha</es>
+            <it>In alto a destra</it>
+            <cz>Vpravo nahoře</cz>
+            <br>Canto superior direito</br>
+            <uk>Верхній правий</uk>
+            <ru>Верхний правый</ru>
+            <hu>Jobb felső</hu>
+        </text>
+
+        <text name="sf_hud_pos_2">
+            <en>Top Left</en>
+            <de>Oben links</de>
+            <fr>En haut à gauche</fr>
+            <pl>Góra lewa</pl>
+            <es>Arriba izquierda</es>
+            <it>In alto a sinistra</it>
+            <cz>Vlevo nahoře</cz>
+            <br>Canto superior esquerdo</br>
+            <uk>Верхній лівий</uk>
+            <ru>Верхний левый</ru>
+            <hu>Bal felső</hu>
+        </text>
+
+        <text name="sf_hud_pos_3">
+            <en>Bottom Right</en>
+            <de>Unten rechts</de>
+            <fr>En bas à droite</fr>
+            <pl>Dół prawa</pl>
+            <es>Abajo derecha</es>
+            <it>In basso a destra</it>
+            <cz>Vpravo dole</cz>
+            <br>Canto inferior direito</br>
+            <uk>Нижній правий</uk>
+            <ru>Нижний правый</ru>
+            <hu>Jobb alsó</hu>
+        </text>
+
+        <text name="sf_hud_pos_4">
+            <en>Bottom Left</en>
+            <de>Unten links</de>
+            <fr>En bas à gauche</fr>
+            <pl>Dół lewa</pl>
+            <es>Abajo izquierda</es>
+            <it>In basso a sinistra</it>
+            <cz>Vlevo dole</cz>
+            <br>Canto inferior esquerdo</br>
+            <uk>Нижній лівий</uk>
+            <ru>Нижний левый</ru>
+            <hu>Bal alsó</hu>
+        </text>
+
+        <text name="sf_hud_pos_5">
+            <en>Center Right</en>
+            <de>Mitte rechts</de>
+            <fr>Centre droit</fr>
+            <pl>Środek prawa</pl>
+            <es>Centro derecha</es>
+            <it>Centro destra</it>
+            <cz>Střed vpravo</cz>
+            <br>Centro direito</br>
+            <uk>Центр правий</uk>
+            <ru>Центр правый</ru>
+            <hu>Középen jobbra</hu>
+        </text>
+
+        <text name="sf_hud_color_theme_short">
+            <en>HUD Color Theme</en>
+            <de>HUD-Farbthema</de>
+            <fr>Thème de couleur HUD</fr>
+            <pl>Motyw kolorów HUD</pl>
+            <es>Tema de color HUD</es>
+            <it>Tema colore HUD</it>
+            <cz>Barevný motiv HUD</cz>
+            <br>Tema de cor HUD</br>
+            <uk>Колірна тема HUD</uk>
+            <ru>Цветовая тема HUD</ru>
+            <hu>HUD színtéma</hu>
+        </text>
+
+        <text name="sf_hud_color_theme_long">
+            <en>Choose the color scheme for soil info display</en>
+            <de>Wählen Sie das Farbschema für die Boden-Info-Anzeige</de>
+            <fr>Choisir le schéma de couleurs pour l'affichage des infos sol</fr>
+            <pl>Wybierz schemat kolorów dla wyświetlania informacji o glebie</pl>
+            <es>Elegir el esquema de color para mostrar info de suelo</es>
+            <it>Scegli lo schema colore per la visualizzazione info suolo</it>
+            <cz>Vyberte barevné schéma pro zobrazení informací o půdě</cz>
+            <br>Escolher o esquema de cores para exibição de info do solo</br>
+            <uk>Виберіть колірну схему для відображення інформації про ґрунт</uk>
+            <ru>Выберите цветовую схему для отображения информации о почве</ru>
+            <hu>Válassza ki a talajinformáció megjelenítésének színsémáját</hu>
+        </text>
+
+        <text name="sf_hud_theme_1">
+            <en>Green</en>
+            <de>Grün</de>
+            <fr>Vert</fr>
+            <pl>Zielony</pl>
+            <es>Verde</es>
+            <it>Verde</it>
+            <cz>Zelený</cz>
+            <br>Verde</br>
+            <uk>Зелений</uk>
+            <ru>Зелёный</ru>
+            <hu>Zöld</hu>
+        </text>
+
+        <text name="sf_hud_theme_2">
+            <en>Blue</en>
+            <de>Blau</de>
+            <fr>Bleu</fr>
+            <pl>Niebieski</pl>
+            <es>Azul</es>
+            <it>Blu</it>
+            <cz>Modrý</cz>
+            <br>Azul</br>
+            <uk>Синій</uk>
+            <ru>Синий</ru>
+            <hu>Kék</hu>
+        </text>
+
+        <text name="sf_hud_theme_3">
+            <en>Amber</en>
+            <de>Bernstein</de>
+            <fr>Ambre</fr>
+            <pl>Bursztynowy</pl>
+            <es>Ámbar</es>
+            <it>Ambra</it>
+            <cz>Jantarový</cz>
+            <br>Âmbar</br>
+            <uk>Бурштиновий</uk>
+            <ru>Янтарный</ru>
+            <hu>Borostyán</hu>
+        </text>
+
+        <text name="sf_hud_theme_4">
+            <en>Mono</en>
+            <de>Mono</de>
+            <fr>Mono</fr>
+            <pl>Mono</pl>
+            <es>Mono</es>
+            <it>Mono</it>
+            <cz>Mono</cz>
+            <br>Mono</br>
+            <uk>Моно</uk>
+            <ru>Моно</ru>
+            <hu>Mono</hu>
+        </text>
+
+        <text name="sf_hud_font_size_short">
+            <en>HUD Font Size</en>
+            <de>HUD-Schriftgröße</de>
+            <fr>Taille police HUD</fr>
+            <pl>Rozmiar czcionki HUD</pl>
+            <es>Tamaño fuente HUD</es>
+            <it>Dimensione carattere HUD</it>
+            <cz>Velikost písma HUD</cz>
+            <br>Tamanho da fonte HUD</br>
+            <uk>Розмір шрифту HUD</uk>
+            <ru>Размер шрифта HUD</ru>
+            <hu>HUD betűméret</hu>
+        </text>
+
+        <text name="sf_hud_font_size_long">
+            <en>Adjust text size for better readability</en>
+            <de>Textgröße für bessere Lesbarkeit anpassen</de>
+            <fr>Ajuster la taille du texte pour une meilleure lisibilité</fr>
+            <pl>Dostosuj rozmiar tekstu dla lepszej czytelności</pl>
+            <es>Ajustar tamaño texto para mejor legibilidad</es>
+            <it>Regola dimensione testo per migliore leggibilità</it>
+            <cz>Upravte velikost textu pro lepší čitelnost</cz>
+            <br>Ajustar tamanho do texto para melhor legibilidade</br>
+            <uk>Налаштуйте розмір тексту для кращої читабельності</uk>
+            <ru>Отрегулируйте размер текста для лучшей читаемости</ru>
+            <hu>Állítsa be a szöveg méretét a jobb olvashatóság érdekében</hu>
+        </text>
+
+        <text name="sf_hud_font_1">
+            <en>Small</en>
+            <de>Klein</de>
+            <fr>Petit</fr>
+            <pl>Mały</pl>
+            <es>Pequeño</es>
+            <it>Piccolo</it>
+            <cz>Malý</cz>
+            <br>Pequeno</br>
+            <uk>Малий</uk>
+            <ru>Маленький</ru>
+            <hu>Kicsi</hu>
+        </text>
+
+        <text name="sf_hud_font_2">
+            <en>Medium</en>
+            <de>Mittel</de>
+            <fr>Moyen</fr>
+            <pl>Średni</pl>
+            <es>Medio</es>
+            <it>Medio</it>
+            <cz>Střední</cz>
+            <br>Médio</br>
+            <uk>Середній</uk>
+            <ru>Средний</ru>
+            <hu>Közepes</hu>
+        </text>
+
+        <text name="sf_hud_font_3">
+            <en>Large</en>
+            <de>Groß</de>
+            <fr>Grand</fr>
+            <pl>Duży</pl>
+            <es>Grande</es>
+            <it>Grande</it>
+            <cz>Velký</cz>
+            <br>Grande</br>
+            <uk>Великий</uk>
+            <ru>Большой</ru>
+            <hu>Nagy</hu>
+        </text>
+
+        <text name="sf_hud_transparency_short">
+            <en>HUD Transparency</en>
+            <de>HUD-Transparenz</de>
+            <fr>Transparence HUD</fr>
+            <pl>Przezroczystość HUD</pl>
+            <es>Transparencia HUD</es>
+            <it>Trasparenza HUD</it>
+            <cz>Průhlednost HUD</cz>
+            <br>Transparência HUD</br>
+            <uk>Прозорість HUD</uk>
+            <ru>Прозрачность HUD</ru>
+            <hu>HUD átlátszóság</hu>
+        </text>
+
+        <text name="sf_hud_transparency_long">
+            <en>Set background transparency level (Clear = see-through, Solid = opaque)</en>
+            <de>Hintergrundtransparenz festlegen (Klar = durchsichtig, Fest = undurchsichtig)</de>
+            <fr>Définir niveau transparence fond (Clair = transparent, Solide = opaque)</fr>
+            <pl>Ustaw poziom przezroczystości tła (Przezroczysty = przejrzysty, Solidny = nieprzezroczysty)</pl>
+            <es>Establecer nivel transparencia fondo (Claro = transparente, Sólido = opaco)</es>
+            <it>Imposta livello trasparenza sfondo (Chiaro = trasparente, Solido = opaco)</it>
+            <cz>Nastavte úroveň průhlednosti pozadí (Čirý = průhledný, Plný = neprůhledný)</cz>
+            <br>Definir nível transparência fundo (Claro = transparente, Sólido = opaco)</br>
+            <uk>Встановити рівень прозорості фону (Прозорий = прозорий, Суцільний = непрозорий)</uk>
+            <ru>Установить уровень прозрачности фона (Прозрачный = прозрачный, Сплошной = непрозрачный)</ru>
+            <hu>Háttér átlátszósági szint beállítása (Átlátszó = áttetsző, Tömör = átlátszatlan)</hu>
+        </text>
+
+        <text name="sf_hud_trans_1">
+            <en>Clear</en>
+            <de>Klar</de>
+            <fr>Clair</fr>
+            <pl>Przezroczysty</pl>
+            <es>Claro</es>
+            <it>Chiaro</it>
+            <cz>Čirý</cz>
+            <br>Claro</br>
+            <uk>Прозорий</uk>
+            <ru>Прозрачный</ru>
+            <hu>Átlátszó</hu>
+        </text>
+
+        <text name="sf_hud_trans_2">
+            <en>Light</en>
+            <de>Leicht</de>
+            <fr>Léger</fr>
+            <pl>Lekki</pl>
+            <es>Ligero</es>
+            <it>Leggero</it>
+            <cz>Lehký</cz>
+            <br>Leve</br>
+            <uk>Легкий</uk>
+            <ru>Лёгкий</ru>
+            <hu>Könnyű</hu>
+        </text>
+
+        <text name="sf_hud_trans_3">
+            <en>Medium</en>
+            <de>Mittel</de>
+            <fr>Moyen</fr>
+            <pl>Średni</pl>
+            <es>Medio</es>
+            <it>Medio</it>
+            <cz>Střední</cz>
+            <br>Médio</br>
+            <uk>Середній</uk>
+            <ru>Средний</ru>
+            <hu>Közepes</hu>
+        </text>
+
+        <text name="sf_hud_trans_4">
+            <en>Dark</en>
+            <de>Dunkel</de>
+            <fr>Sombre</fr>
+            <pl>Ciemny</pl>
+            <es>Oscuro</es>
+            <it>Scuro</it>
+            <cz>Tmavý</cz>
+            <br>Escuro</br>
+            <uk>Темний</uk>
+            <ru>Тёмный</ru>
+            <hu>Sötét</hu>
+        </text>
+
+        <text name="sf_hud_trans_5">
+            <en>Solid</en>
+            <de>Fest</de>
+            <fr>Solide</fr>
+            <pl>Solidny</pl>
+            <es>Sólido</es>
+            <it>Solido</it>
+            <cz>Plný</cz>
+            <br>Sólido</br>
+            <uk>Суцільний</uk>
+            <ru>Сплошной</ru>
+            <hu>Tömör</hu>
+        </text>
+
+        <text name="sf_hud_compact_mode_short">
+            <en>Compact Mode</en>
+            <de>Kompaktmodus</de>
+            <fr>Mode compact</fr>
+            <pl>Tryb kompaktowy</pl>
+            <es>Modo compacto</es>
+            <it>Modalità compatta</it>
+            <cz>Kompaktní režim</cz>
+            <br>Modo compacto</br>
+            <uk>Компактний режим</uk>
+            <ru>Компактный режим</ru>
+            <hu>Kompakt mód</hu>
+        </text>
+
+        <text name="sf_hud_compact_mode_long">
+            <en>Reduce HUD vertical space by combining lines (saves screen space)</en>
+            <de>Reduzieren Sie den vertikalen HUD-Raum durch Kombination von Zeilen (spart Bildschirmplatz)</de>
+            <fr>Réduire l'espace vertical du HUD en combinant les lignes (économise l'espace écran)</fr>
+            <pl>Zmniejsz pionową przestrzeń HUD łącząc linie (oszczędza miejsce na ekranie)</pl>
+            <es>Reducir espacio vertical HUD combinando líneas (ahorra espacio pantalla)</es>
+            <it>Riduci spazio verticale HUD combinando righe (risparmia spazio schermo)</it>
+            <cz>Snižte vertikální prostor HUD kombinováním řádků (šetří místo na obrazovce)</cz>
+            <br>Reduzir espaço vertical HUD combinando linhas (economiza espaço na tela)</br>
+            <uk>Зменште вертикальний простір HUD об'єднанням ліній (економить місце на екрані)</uk>
+            <ru>Уменьшить вертикальное пространство HUD объединением строк (экономит место на экране)</ru>
+            <hu>Csökkentse a HUD vertikális terét sorok kombinálásával (képernyőhelyet takarít meg)</hu>
+        </text>
+
         <text name="sf_reset">
             <en>Reset Soil Settings</en>
             <de>Bodeneinstellungen zurücksetzen</de>
@@ -389,5 +795,24 @@
             <ru>Сбросить настройки почвы</ru>
             <hu>Talajbeállítások alaphelyzetbe állítása</hu>
         </text>
+        <text name="input_SF_TOGGLE_HUD">
+            <en>Toggle Soil HUD</en>
+            <de>Boden-HUD umschalten</de>
+            <fr>Activer/désactiver HUD sol</fr>
+            <pl>Przełącz HUD gleby</pl>
+            <es>Alternar HUD de suelo</es>
+            <it>Attiva/disattiva HUD suolo</it>
+            <cz>Přepnout HUD půdy</cz>
+            <br>Alternar HUD de solo</br>
+            <uk>Перемкнути HUD ґрунту</uk>
+            <ru>Переключить HUD почвы</ru>
+            <hu>Talaj HUD váltása</hu>
+        </text>
     </l10n>
+
+    <inputBinding>
+        <actionBinding action="SF_TOGGLE_HUD">
+            <binding device="KB_MOUSE_DEFAULT" input="KEY_J" />
+        </actionBinding>
+    </inputBinding>
 </modDesc>

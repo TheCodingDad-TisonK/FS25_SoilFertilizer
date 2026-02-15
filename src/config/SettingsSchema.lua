@@ -56,6 +56,56 @@ SettingsSchema.definitions = {
         pfProtected = false,
     },
     {
+        id = "showHUD",
+        type = "boolean",
+        default = true,
+        uiId = "sf_show_hud",
+        pfProtected = false,
+    },
+    {
+        id = "hudPosition",
+        type = "number",
+        default = 1,  -- 1=Top Right, 2=Top Left, 3=Bottom Right, 4=Bottom Left, 5=Center Right
+        min = 1,
+        max = 5,
+        uiId = "sf_hud_position",
+        pfProtected = false,
+    },
+    {
+        id = "hudColorTheme",
+        type = "number",
+        default = 1,  -- 1=Green, 2=Blue, 3=Amber, 4=Mono
+        min = 1,
+        max = 4,
+        uiId = "sf_hud_color_theme",
+        pfProtected = false,
+    },
+    {
+        id = "hudFontSize",
+        type = "number",
+        default = 2,  -- 1=Small, 2=Medium, 3=Large
+        min = 1,
+        max = 3,
+        uiId = "sf_hud_font_size",
+        pfProtected = false,
+    },
+    {
+        id = "hudTransparency",
+        type = "number",
+        default = 3,  -- 1=Clear (25%), 2=Light (50%), 3=Medium (70%), 4=Dark (85%), 5=Solid (100%)
+        min = 1,
+        max = 5,
+        uiId = "sf_hud_transparency",
+        pfProtected = false,
+    },
+    {
+        id = "hudCompactMode",
+        type = "boolean",
+        default = false,
+        uiId = "sf_hud_compact_mode",
+        pfProtected = false,
+    },
+    {
         id = "seasonalEffects",
         type = "boolean",
         default = true,

@@ -33,6 +33,7 @@ source(modDirectory .. "src/settings/SoilSettingsGUI.lua")
 -- 4. UI
 source(modDirectory .. "src/utils/UIHelper.lua")
 source(modDirectory .. "src/settings/SoilSettingsUI.lua")
+source(modDirectory .. "src/ui/SoilHUD.lua")
 
 -- 5. Network
 source(modDirectory .. "src/network/NetworkEvents.lua")
@@ -71,16 +72,7 @@ local function loadedMission(mission, node)
     if not isEnabled() or mission.cancelLoading then return end
     sfm:onMissionLoaded()
 
-    -- MULTIPLAYER FIX: Request settings sync from server if client
-    if g_client and not g_server and SoilNetworkEvents_RequestFullSync then
-        -- Delay sync request to ensure server is ready
-        mission.environment.addDayChangeListener = Utils.appendedFunction(
-            mission.environment.addDayChangeListener,
-            function()
-                SoilNetworkEvents_RequestFullSync()
-            end
-        )
-    end
+    -- Note: Multiplayer sync is handled in loadFromXMLFile hook
 end
 
 -- Load handler
@@ -170,6 +162,13 @@ FSBaseMission.update = Utils.appendedFunction(FSBaseMission.update, function(mis
     end
 end)
 
+-- Hook draw for HUD (always-on overlay)
+FSBaseMission.draw = Utils.appendedFunction(FSBaseMission.draw, function(mission)
+    if sfm and sfm.soilHUD then
+        sfm.soilHUD:draw()
+    end
+end)
+
 -- Install save/load hooks
 hookSaveLoadEvents()
 
@@ -237,17 +236,6 @@ function soilStatus()
         print("Soil & Fertilizer Mod not initialized")
     end
 end
-
--- Additional console command for saving data
-addConsoleCommand("SoilSaveData", "Force save soil data", "consoleCommandSaveData",
-    function()
-        if g_SoilFertilityManager then
-            g_SoilFertilityManager:saveSoilData()
-            return "Soil data saved"
-        end
-        return "Soil Mod not initialized"
-    end
-)
 
 -- Expose global console functions
 getfenv(0)["soilfertility"] = soilfertility

@@ -9,6 +9,12 @@
 SoilFertilityManager = {}
 local SoilFertilityManager_mt = Class(SoilFertilityManager)
 
+--- Create new SoilFertilityManager instance
+---@param mission table The mission object
+---@param modDirectory string Path to mod directory
+---@param modName string Name of the mod
+---@param disableGUI boolean Whether to disable GUI elements
+---@return SoilFertilityManager
 function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
     local self = setmetatable({}, SoilFertilityManager_mt)
 
@@ -123,6 +129,15 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
     self.settingsGUI = SoilSettingsGUI.new()
     self.settingsGUI:registerConsoleCommands()
 
+    -- HUD (client only)
+    if shouldInitGUI then
+        assert(SoilHUD, "SoilHUD not loaded")
+        self.soilHUD = SoilHUD.new(self.soilSystem, self.settings)
+        SoilLogger.info("Soil HUD created")
+    else
+        self.soilHUD = nil
+    end
+
     -- Load settings
     self.settings:load()
 
@@ -180,6 +195,8 @@ function SoilFertilityManager:checkAndApplyCompatibility()
     end
 end
 
+--- Called after mission is loaded
+--- Initializes soil system, HUD, and requests multiplayer sync if needed
 function SoilFertilityManager:onMissionLoaded()
     if not self.settings.enabled then return end
 
@@ -187,9 +204,17 @@ function SoilFertilityManager:onMissionLoaded()
         if self.soilSystem then
             self.soilSystem:initialize()
         end
+        
+        -- FIX: Only initialize HUD if it exists
+        if self.soilHUD then
+            self.soilHUD:initialize()
+            -- Register F8 toggle keybind
+            self:registerInputActions()
+        end
+        
         if self.settings.showNotifications and g_currentMission and g_currentMission.hud then
             g_currentMission.hud:showBlinkingWarning(
-                "Soil & Fertilizer Mod Active - Type 'soilfertility' for commands",
+                "Soil & Fertilizer Mod Active - Type 'soilfertility' for commands | Press J for Soil HUD",
                 8000
             )
         end
@@ -202,7 +227,41 @@ function SoilFertilityManager:onMissionLoaded()
     end
 end
 
--- Save soil data
+-- Register input actions for HUD toggle
+function SoilFertilityManager:registerInputActions()
+    if not self.soilHUD then 
+        SoilLogger.info("HUD not available - input actions skipped")
+        return 
+    end
+
+    local _, eventId = g_inputBinding:registerActionEvent(
+        InputAction.SF_TOGGLE_HUD,
+        self,
+        self.onToggleHUDInput,
+        false,  -- triggerUp
+        true,   -- triggerDown
+        false,  -- triggerAlways
+        true    -- startActive
+    )
+
+    if eventId then
+        self.toggleHUDEventId = eventId
+        SoilLogger.info("J HUD toggle registered")
+    else
+        SoilLogger.warning("Failed to register J HUD toggle")
+    end
+end
+
+-- Input callback for HUD toggle (J)
+function SoilFertilityManager:onToggleHUDInput()
+    if self.soilHUD then
+        self.soilHUD:toggleVisibility()
+    end
+end
+
+--- Save soil data to XML file
+--- Only runs on server in multiplayer, always in singleplayer
+--- Saves to {savegame}/soilData.xml
 function SoilFertilityManager:saveSoilData()
     if not self.soilSystem or not g_currentMission or not g_currentMission.missionInfo then
         return
@@ -222,7 +281,9 @@ function SoilFertilityManager:saveSoilData()
     end
 end
 
--- Load soil data
+--- Load soil data from XML file
+--- Reads from {savegame}/soilData.xml if exists
+--- Falls back to defaults if file not found
 function SoilFertilityManager:loadSoilData()
     if not self.soilSystem or not g_currentMission or not g_currentMission.missionInfo then
         return
@@ -244,7 +305,10 @@ function SoilFertilityManager:loadSoilData()
     end
 end
 
+--- Update loop called every frame
+---@param dt number Delta time in milliseconds
 function SoilFertilityManager:update(dt)
+    -- Always update soil system (server side)
     if self.soilSystem then
         self.soilSystem:update(dt)
     end
@@ -253,8 +317,34 @@ function SoilFertilityManager:update(dt)
     if self.guiRetryHandler then
         self.guiRetryHandler:update(dt)
     end
+
+    -- FIX: Only update HUD if it exists (client side only)
+    if self.soilHUD then
+        -- Add pcall to prevent crashes if HUD has issues
+        local success, err = pcall(function()
+            self.soilHUD:update(dt)
+        end)
+        if not success and self.settings and self.settings.debugMode then
+            print("[SoilFertilizer DEBUG] HUD update error: " .. tostring(err))
+        end
+    end
 end
 
+--- Draw loop called every frame for rendering
+function SoilFertilityManager:draw()
+    -- FIX: Only draw HUD if it exists (client side only)
+    if self.soilHUD then
+        local success, err = pcall(function()
+            self.soilHUD:draw()
+        end)
+        if not success and self.settings and self.settings.debugMode then
+            print("[SoilFertilizer DEBUG] HUD draw error: " .. tostring(err))
+        end
+    end
+end
+
+--- Cleanup on mod unload
+--- Saves soil data and uninstalls hooks
 function SoilFertilityManager:delete()
     -- Save soil data before shutdown
     self:saveSoilData()
@@ -263,6 +353,17 @@ function SoilFertilityManager:delete()
     if self.guiRetryHandler then
         self.guiRetryHandler:reset()
         self.guiRetryHandler = nil
+    end
+
+    -- Clean up HUD and input actions
+    if self.toggleHUDEventId then
+        g_inputBinding:removeActionEvent(self.toggleHUDEventId)
+        self.toggleHUDEventId = nil
+    end
+
+    if self.soilHUD then
+        self.soilHUD:delete()
+        self.soilHUD = nil
     end
 
     if self.soilSystem then

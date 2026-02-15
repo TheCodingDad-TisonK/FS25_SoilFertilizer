@@ -1,5 +1,5 @@
 -- =========================================================
--- FS25 Realistic Soil & Fertilizer (version 1.0.2.0)
+-- FS25 Realistic Soil & Fertilizer (version 1.0.4.1)
 -- =========================================================
 -- Settings domain object - uses SettingsSchema for defaults/validation
 -- =========================================================
@@ -20,7 +20,7 @@ function Settings.new(manager)
 
     self:resetToDefaults(false)
 
-    Logging.info("[SoilFertilizer] Settings initialized")
+    SoilLogger.info("[SoilFertilizer] Settings initialized")
 
     return self
 end
@@ -37,7 +37,7 @@ function Settings:setDifficulty(difficulty)
             difficultyName = "Hardcore"
         end
 
-        Logging.info("[SoilFertilizer]Difficulty changed to: %s", difficultyName)
+        SoilLogger.info("[SoilFertilizer]Difficulty changed to: %s", difficultyName)
     end
 end
 
@@ -54,7 +54,7 @@ end
 
 function Settings:load()
     if type(self.difficulty) ~= "number" then
-        Logging.warning("[SoilFertilizer]difficulty is not a number! Type: %s, Value: %s",
+        SoilLogger.warning("[SoilFertilizer]difficulty is not a number! Type: %s, Value: %s",
             type(self.difficulty), tostring(self.difficulty))
         self.difficulty = Settings.DIFFICULTY_NORMAL
     end
@@ -63,7 +63,7 @@ function Settings:load()
 
     self:validateSettings()
 
-    Logging.info("[SoilFertilizer]Settings Loaded. Enabled: %s, Difficulty: %s",
+    SoilLogger.info("[SoilFertilizer]Settings Loaded. Enabled: %s, Difficulty: %s",
         tostring(self.enabled), self:getDifficultyName())
 end
 
@@ -76,13 +76,13 @@ end
 
 function Settings:save()
     if type(self.difficulty) ~= "number" then
-        Logging.warning("[SoilFertilizer]difficulty is not a number! Type: %s, Value: %s",
+        SoilLogger.warning("[SoilFertilizer]difficulty is not a number! Type: %s, Value: %s",
             type(self.difficulty), tostring(self.difficulty))
         self.difficulty = Settings.DIFFICULTY_NORMAL
     end
 
     self.manager:saveSettings(self)
-    Logging.info("[SoilFertilizer]Settings Saved. Difficulty: %s", self:getDifficultyName())
+    SoilLogger.info("[SoilFertilizer]Settings Saved. Difficulty: %s", self:getDifficultyName())
 end
 
 ---@param saveImmediately boolean

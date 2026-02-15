@@ -18,6 +18,14 @@ function SoilFertilitySystem.new(settings)
     self.PFActive = false
     self.lastUpdateDay = 0
     self.hookManager = HookManager.new()
+
+    -- Field scan retry mechanism (for delayed initialization)
+    self.fieldsScanPending = true
+    self.fieldsScanAttempts = 0
+    self.fieldsScanMaxAttempts = 10  -- Try up to 10 times
+    self.fieldsScanNextRetry = 0
+    self.fieldsScanRetryInterval = 2000  -- 2 seconds between attempts
+
     return self
 end
 
@@ -61,7 +69,11 @@ function SoilFertilitySystem:delete()
     self.isInitialized = false
 end
 
--- Hook delegate: called by HookManager when harvest occurs
+--- Hook delegate: called by HookManager when harvest occurs
+--- Depletes soil nutrients based on crop type and difficulty
+---@param fieldId number The field being harvested
+---@param fruitTypeIndex number FS25 fruit type index
+---@param liters number Amount harvested in liters
 function SoilFertilitySystem:onHarvest(fieldId, fruitTypeIndex, liters)
     self:updateFieldNutrients(fieldId, fruitTypeIndex, liters)
 
@@ -79,7 +91,11 @@ function SoilFertilitySystem:onHarvest(fieldId, fruitTypeIndex, liters)
     end
 end
 
--- Hook delegate: called by HookManager when fertilizer applied
+--- Hook delegate: called by HookManager when fertilizer applied
+--- Restores soil nutrients based on fertilizer type
+---@param fieldId number The field being fertilized
+---@param fillTypeIndex number FS25 fill type index for fertilizer
+---@param liters number Amount applied in liters
 function SoilFertilitySystem:onFertilizerApplied(fieldId, fillTypeIndex, liters)
     self:applyFertilizer(fieldId, fillTypeIndex, liters)
 
@@ -120,6 +136,70 @@ function SoilFertilitySystem:onFieldOwnershipChanged(fieldId, farmlandId, farmId
         field.pH = defaults.pH
         field.initialized = true
         self:info("Field %d initialized for new owner", fieldId)
+    end
+end
+
+--- Hook delegate: called by HookManager when plowing occurs
+--- Increases organic matter and normalizes pH
+---@param fieldId number The field being plowed
+function SoilFertilitySystem:onPlowing(fieldId)
+    if not fieldId or fieldId <= 0 then return end
+    if not self.settings.plowingBonus then return end
+
+    local field = self:getOrCreateField(fieldId, true)
+    if not field then return end
+
+    local changed = false
+
+    -- Plowing benefit 1: Increase organic matter (mixing in crop residue)
+    -- Why: Plowing turns over the top soil layer, mixing in crop residue (stems, roots, chaff)
+    -- This incorporates organic material into the soil, increasing organic matter content
+    -- Organic matter improves soil structure, water retention, and microbial activity
+    -- Scale: 0-10 OM scale, +0.5 per plowing (~14% boost from default 3.5)
+    local omBefore = field.organicMatter or SoilConstants.FIELD_DEFAULTS.organicMatter
+    local omIncrease = 0.5  -- Balanced increase: ~3-4 plowings to reach near-maximum OM
+    local omAfter = math.min(omBefore + omIncrease, SoilConstants.NUTRIENT_LIMITS.ORGANIC_MATTER_MAX)
+
+    if omAfter > omBefore then
+        field.organicMatter = omAfter
+        changed = true
+    end
+
+    -- Plowing benefit 2: pH normalization (0.1 units toward 7.0)
+    -- Why: Plowing aerates soil and exposes deeper layers to weathering
+    -- Acidic soils (pH < 7): Aeration promotes oxidation and mineral weathering, raising pH slightly
+    -- Alkaline soils (pH > 7): Aeration and organic matter decomposition produce mild acids, lowering pH
+    -- Result: pH gradually moves toward neutral (7.0) over time with regular plowing
+    -- This mimics real-world soil chemistry where plowing improves pH buffering capacity
+    local phBefore = field.pH or SoilConstants.FIELD_DEFAULTS.pH
+    local phTarget = 7.0  -- Neutral pH is optimal for most crops
+    local phNormalization = 0.1  -- Small adjustment per plowing event
+    local phAfter = phBefore
+
+    if phBefore < phTarget then
+        -- Acidic soil: Move toward neutral (increase pH)
+        phAfter = math.min(phBefore + phNormalization, phTarget)
+    elseif phBefore > phTarget then
+        -- Alkaline soil: Move toward neutral (decrease pH)
+        phAfter = math.max(phBefore - phNormalization, phTarget)
+    end
+
+    if phAfter ~= phBefore then
+        field.pH = phAfter
+        changed = true
+    end
+
+    -- Debug logging
+    if self.settings.debugMode and changed then
+        SoilLogger.info("[Plowing] Field %d: OM %.1f->%.1f, pH %.2f->%.2f",
+            fieldId, omBefore, omAfter, phBefore, phAfter)
+    end
+
+    -- Broadcast to clients if server in multiplayer
+    if changed and g_server and g_currentMission and g_currentMission.missionDynamicInfo.isMultiplayer then
+        if field and SoilFieldUpdateEvent then
+            g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
+        end
     end
 end
 
@@ -170,6 +250,27 @@ end
 function SoilFertilitySystem:update(dt)
     if not self.settings.enabled then return end
 
+    -- Delayed field scanning retry (fields might not be ready at initialization)
+    if self.fieldsScanPending and self.fieldsScanAttempts < self.fieldsScanMaxAttempts then
+        local currentTime = g_currentMission and g_currentMission.time or 0
+        if currentTime >= self.fieldsScanNextRetry then
+            self.fieldsScanAttempts = self.fieldsScanAttempts + 1
+            self:log("Retrying field scan (attempt %d/%d)...", self.fieldsScanAttempts, self.fieldsScanMaxAttempts)
+
+            local success = self:scanFields()
+            if success then
+                self:info("Delayed field scan successful!")
+            else
+                -- Schedule next retry
+                self.fieldsScanNextRetry = currentTime + self.fieldsScanRetryInterval
+                if self.fieldsScanAttempts >= self.fieldsScanMaxAttempts then
+                    self:warning("Field scan failed after %d attempts - fields may not be available yet", self.fieldsScanMaxAttempts)
+                    self.fieldsScanPending = false  -- Stop retrying
+                end
+            end
+        end
+    end
+
     self.lastUpdate = self.lastUpdate + dt
 
     if self.lastUpdate >= self.updateInterval then
@@ -206,26 +307,81 @@ function SoilFertilitySystem:checkPFCompatibility()
 end
 
 -- Scan all fields from FieldManager
+---@return boolean True if successfully scanned fields, false if fields not ready yet
 function SoilFertilitySystem:scanFields()
     if not g_fieldManager or not g_fieldManager.fields then
-        self:warning("FieldManager or fields not available")
-        return
+        self:warning("FieldManager not available yet")
+        return false
     end
 
-    self:log("Scanning fields from FieldManager...")
-    local count = 0
+    if next(g_fieldManager.fields) == nil then
+        self:log("FieldManager fields table empty - not ready yet")
+        return false
+    end
 
-    for _, field in ipairs(g_fieldManager.fields) do
-        if field and field.fieldId and field.fieldId > 0 then
-            self:getOrCreateField(field.fieldId, true)
-            count = count + 1
+    self:log("Scanning fields via FieldManager...")
+
+    local fieldCount = 0
+    local farmlandCount = 0
+
+    -- Count farmlands (for logging only)
+    if g_farmlandManager and g_farmlandManager.farmlands then
+        for _ in pairs(g_farmlandManager.farmlands) do
+            farmlandCount = farmlandCount + 1
         end
     end
 
-    self:info("Scanned and initialized %d fields", count)
+    -- TRUE FS25 SOURCE OF TRUTH - FIXED: Fields might be stored differently
+    -- Some maps store fields with numeric indices, others with string keys
+    for fieldId, field in pairs(g_fieldManager.fields) do
+        -- Convert fieldId to number if it's a string
+        local numericFieldId = tonumber(fieldId) or fieldId
+        
+        -- Check if this is a valid field object
+        if field and type(field) == "table" then
+            -- Try to get field ID from various possible locations
+            local actualFieldId = nil
+            
+            if field.fieldId and field.fieldId > 0 then
+                actualFieldId = field.fieldId
+            elseif type(numericFieldId) == "number" and numericFieldId > 0 then
+                actualFieldId = numericFieldId
+            elseif field.id and field.id > 0 then
+                actualFieldId = field.id
+            elseif field.index and field.index > 0 then
+                actualFieldId = field.index
+            end
+            
+            -- Also check if this field has a valid farmland (some entries might be metadata)
+            local hasFarmland = false
+            if field.farmland and field.farmland.id and field.farmland.id > 0 then
+                hasFarmland = true
+            elseif field.farmlandId and field.farmlandId > 0 then
+                hasFarmland = true
+            end
+            
+            if actualFieldId and actualFieldId > 0 and hasFarmland then
+                self:getOrCreateField(actualFieldId, true)
+                fieldCount = fieldCount + 1
+                
+                if self.settings.debugMode then
+                    print(string.format("[SoilFertilizer DEBUG] Found field %d with farmland", actualFieldId))
+                end
+            end
+        end
+    end
+
+    self:info("Scanned %d farmlands and initialized %d fields", farmlandCount, fieldCount)
+
+    if fieldCount > 0 then
+        self.fieldsScanPending = false
+        return true
+    end
+
+    return false
 end
 
--- Get or create field data
+-- Get or create field data - FIXED: Better PF integration and validation
 function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing)
     if not fieldId or fieldId <= 0 then return nil end
 
@@ -261,7 +417,7 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing)
         end
     end
 
-    -- Create new field with default values
+    -- Allow lazy creation (HUD-safe)
     local defaults = SoilConstants.FIELD_DEFAULTS
     self.fieldData[fieldId] = {
         nitrogen = defaults.nitrogen,
@@ -276,7 +432,7 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing)
         fromPF = false
     }
 
-    self:log("Created new field data for field %d", fieldId)
+    self:log("Lazy-created field %d", fieldId)
     return self.fieldData[fieldId]
 end
 
@@ -356,16 +512,39 @@ function SoilFertilitySystem:updateFieldNutrients(fieldId, fruitTypeIndex, harve
         return
     end
 
+    -- Look up crop-specific extraction rates (how much N/P/K this crop removes from soil)
+    -- Different crops have different nutrient demands:
+    -- - Wheat/Barley: High nitrogen demand (leafy growth)
+    -- - Corn/Maize: Very high N/P demand (large biomass)
+    -- - Soybeans: Low nitrogen (fixes own N), moderate P/K
+    -- - Potatoes/Sugar beets: High potassium demand (root/tuber crops)
     local name = string.lower(fruitDesc.name or "unknown")
     local rates = SoilConstants.CROP_EXTRACTION[name] or SoilConstants.CROP_EXTRACTION_DEFAULT
+
+    -- NUTRIENT DEPLETION CALCULATION EXPLAINED:
+    --
+    -- Step 1: Calculate depletion factor
+    -- Formula: factor = harvested liters / 1000
+    -- Why: Extraction rates in Constants.lua are calibrated per 1000L of harvested crop
+    -- Example: 80,000L wheat harvest → factor = 80
     local factor = harvestedLiters / 1000
 
-    -- Apply difficulty multiplier
+    -- Step 2: Apply difficulty multiplier
+    -- Simple (0.7x): 30% less depletion, easier for new players
+    -- Realistic (1.0x): Balanced depletion based on real agricultural rates
+    -- Hardcore (1.5x): 50% more depletion, challenging management
+    -- Example: factor 80 × 0.7 (Simple) = 56, or × 1.5 (Hardcore) = 120
     local diffMultiplier = SoilConstants.DIFFICULTY.MULTIPLIERS[self.settings.difficulty]
     if diffMultiplier then
         factor = factor * diffMultiplier
     end
 
+    -- Step 3: Deplete nutrients from field
+    -- Formula: new_value = max(0, current_value - (extraction_rate × factor))
+    -- Scale: 0-100 nutrient points
+    -- Example: N=50, wheat extraction=0.20, factor=80
+    --          → 50 - (0.20 × 80) = 50 - 16 = 34 nitrogen remaining (~32% depletion)
+    -- Only N/P/K deplete from harvest; pH and organic matter change through other means
     local limits = SoilConstants.NUTRIENT_LIMITS
     field.nitrogen   = math.max(limits.MIN, field.nitrogen   - rates.N * factor)
     field.phosphorus = math.max(limits.MIN, field.phosphorus - rates.P * factor)
@@ -400,6 +579,7 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
         return
     end
 
+    -- Look up fertilizer profile from constants (defines N/P/K/pH/OM values per type)
     local entry = SoilConstants.FERTILIZER_PROFILES[fillType.name]
     if not entry then
         self:log("Fertilizer type %s not recognized", fillType.name)
@@ -407,8 +587,27 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
     end
 
     local limits = SoilConstants.NUTRIENT_LIMITS
+
+    -- FERTILIZER RESTORATION CALCULATION EXPLAINED:
+    --
+    -- Step 1: Calculate application factor
+    -- Formula: factor = liters applied / 1000
+    -- Why: Fertilizer profiles in Constants.lua are calibrated per 1000L
+    -- Example: 2,000L liquid fertilizer → factor = 2.0
     local factor = liters / 1000
 
+    -- Step 2: Apply nutrients from fertilizer profile, capping at maximum limits
+    -- Scale: 0-100 nutrient points (N/P/K), 5.0-7.5 pH, 0-10 organic matter
+    -- Example: Liquid fertilizer N=0.50 per 1000L, factor=2.0
+    --          → Current N=34, Add: 34 + (0.50 × 2.0) = 34 + 1.0 = 35 nitrogen
+    --
+    -- Fertilizer type characteristics (see FERTILIZER_PROFILES in Constants):
+    -- - LIQUIDFERTILIZER: High N, moderate P/K, fast-acting
+    -- - FERTILIZER (solid): Very high N/P, balanced granular NPK
+    -- - MANURE: Lower NPK, adds organic matter (slow-release)
+    -- - SLURRY: Moderate N/K, adds organic matter (liquid organic)
+    -- - DIGESTATE: Good all-around, adds organic matter (biogas byproduct)
+    -- - LIME: Only affects pH (raises toward neutral/alkaline)
     if entry.N then field.nitrogen   = math.min(limits.MAX, field.nitrogen   + entry.N * factor) end
     if entry.P then field.phosphorus = math.min(limits.MAX, field.phosphorus + entry.P * factor) end
     if entry.K then field.potassium  = math.min(limits.MAX, field.potassium  + entry.K * factor) end
@@ -454,7 +653,9 @@ function SoilFertilitySystem:readPFFieldData(fieldId)
     return nil
 end
 
--- Get field info for display
+--- Get field info for display (HUD, console, etc)
+---@param fieldId number The field ID to query
+---@return table|nil Field info with nutrient values and status, or nil if not found
 function SoilFertilitySystem:getFieldInfo(fieldId)
     if not fieldId or fieldId <= 0 then return nil end
 
@@ -509,24 +710,50 @@ end
 function SoilFertilitySystem:saveToXMLFile(xmlFile, key)
     if not xmlFile then return end
 
+    -- SAFETY: ensure fieldData is valid
+    if not self or type(self) ~= "table" then
+        print("[SoilFertilizer ERROR] saveToXMLFile called with invalid self")
+        return
+    end
+
+    if not self.fieldData or type(self.fieldData) ~= "table" then
+        print(string.format(
+            "[SoilFertilizer WARNING] Cannot save - fieldData invalid (type: %s)",
+            type(self.fieldData)
+        ))
+        return
+    end
+
     local defaults = SoilConstants.FIELD_DEFAULTS
     local index = 0
+
     for fieldId, field in pairs(self.fieldData) do
-        local fieldKey = string.format("%s.field(%d)", key, index)
-        setXMLInt(xmlFile, fieldKey .. "#id", fieldId)
-        setXMLFloat(xmlFile, fieldKey .. "#nitrogen", field.nitrogen or defaults.nitrogen)
-        setXMLFloat(xmlFile, fieldKey .. "#phosphorus", field.phosphorus or defaults.phosphorus)
-        setXMLFloat(xmlFile, fieldKey .. "#potassium", field.potassium or defaults.potassium)
-        setXMLFloat(xmlFile, fieldKey .. "#organicMatter", field.organicMatter or defaults.organicMatter)
-        setXMLFloat(xmlFile, fieldKey .. "#pH", field.pH or defaults.pH)
-        setXMLString(xmlFile, fieldKey .. "#lastCrop", field.lastCrop or "")
-        setXMLInt(xmlFile, fieldKey .. "#lastHarvest", field.lastHarvest or 0)
-        setXMLFloat(xmlFile, fieldKey .. "#fertilizerApplied", field.fertilizerApplied or 0)
-        index = index + 1
+        if type(field) == "table" then
+            local fieldKey = string.format("%s.field(%d)", key, index)
+
+            setXMLInt(xmlFile, fieldKey .. "#id", fieldId)
+            setXMLFloat(xmlFile, fieldKey .. "#nitrogen", field.nitrogen or defaults.nitrogen)
+            setXMLFloat(xmlFile, fieldKey .. "#phosphorus", field.phosphorus or defaults.phosphorus)
+            setXMLFloat(xmlFile, fieldKey .. "#potassium", field.potassium or defaults.potassium)
+            setXMLFloat(xmlFile, fieldKey .. "#organicMatter", field.organicMatter or defaults.organicMatter)
+            setXMLFloat(xmlFile, fieldKey .. "#pH", field.pH or defaults.pH)
+            setXMLString(xmlFile, fieldKey .. "#lastCrop", field.lastCrop or "")
+            setXMLInt(xmlFile, fieldKey .. "#lastHarvest", field.lastHarvest or 0)
+            setXMLFloat(xmlFile, fieldKey .. "#fertilizerApplied", field.fertilizerApplied or 0)
+
+            index = index + 1
+        else
+            print(string.format(
+                "[SoilFertilizer WARNING] Skipping corrupted field entry %s (type: %s)",
+                tostring(fieldId),
+                type(field)
+            ))
+        end
     end
 
     self:info("Saved data for %d fields", index)
 end
+
 
 -- Load from XML file
 function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
@@ -577,7 +804,7 @@ function SoilFertilitySystem:listAllFields()
 
     if g_fieldManager and g_fieldManager.fields then
         print("\nFields in FieldManager:")
-        for _, field in ipairs(g_fieldManager.fields) do
+        for _, field in pairs(g_fieldManager.fields) do
             print(string.format("  Field %d: Name=%s", field.fieldId, tostring(field.name or "Unknown")))
         end
     end

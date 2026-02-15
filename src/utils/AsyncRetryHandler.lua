@@ -12,7 +12,9 @@
 AsyncRetryHandler = {}
 local AsyncRetryHandler_mt = Class(AsyncRetryHandler)
 
--- Create new retry handler
+--- Create new retry handler for async operations
+---@param config table Configuration with maxAttempts, delays, onAttempt, onSuccess, onFailure, condition, name
+---@return AsyncRetryHandler
 function AsyncRetryHandler.new(config)
     local self = setmetatable({}, AsyncRetryHandler_mt)
 
@@ -34,7 +36,9 @@ function AsyncRetryHandler.new(config)
     return self
 end
 
--- Start retry sequence
+--- Start retry sequence
+--- Begins attempting the operation with exponential backoff
+---@return boolean True if started, false if already running
 function AsyncRetryHandler:start()
     if self.state == "pending" then
         SoilLogger.debug("[%s] Already running", self.name)
@@ -75,7 +79,8 @@ function AsyncRetryHandler:checkCondition()
     end
 end
 
--- Mark operation successful
+--- Mark operation as successful
+--- Stops retry attempts and calls onSuccess callback
 function AsyncRetryHandler:markSuccess()
     if self.state ~= "pending" then return end
 
@@ -91,7 +96,8 @@ function AsyncRetryHandler:markSuccess()
     end
 end
 
--- Update loop (call from main update)
+--- Update loop - call from main update loop
+---@param dt number Delta time in milliseconds
 function AsyncRetryHandler:update(dt)
     if self.state ~= "pending" then return end
 
