@@ -247,10 +247,16 @@ function SoilHUD:update(dt)
     end
 end
 
--- Toggle HUD visibility (called by F8 key)
+-- Toggle HUD visibility (called by J key)
 function SoilHUD:toggleVisibility()
     self.visible = not self.visible
-    SoilLogger.info("Soil HUD %s", self.visible and "shown" or "hidden")
+    local message = self.visible and "Soil HUD shown" or "Soil HUD hidden"
+    SoilLogger.info(message)
+
+    -- Show in-game notification so user sees the toggle
+    if g_currentMission and g_currentMission.hud and g_currentMission.hud.showBlinkingWarning then
+        g_currentMission.hud:showBlinkingWarning(message, 2000)
+    end
 end
 
 --- Draw HUD (called every frame from main update loop)

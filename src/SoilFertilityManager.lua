@@ -207,9 +207,9 @@ function SoilFertilityManager:onMissionLoaded()
         if self.settings.showNotifications and g_currentMission and g_currentMission.hud then
             local message
             if self.soilSystem.PFActive then
-                message = "Soil Mod: Viewer Mode (Precision Farming active) | Press J for HUD"
+                message = "Soil Mod: Viewer Mode (Precision Farming active) | Press J to toggle HUD"
             else
-                message = "Soil & Fertilizer Mod Active | Press J for HUD | Type 'soilfertility' for commands"
+                message = "Soil & Fertilizer Mod Active | Press J to toggle HUD | Type 'soilfertility' for commands"
             end
             g_currentMission.hud:showBlinkingWarning(message, 8000)
         end
