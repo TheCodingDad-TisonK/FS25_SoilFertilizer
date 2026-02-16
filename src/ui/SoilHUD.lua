@@ -464,65 +464,21 @@ function SoilHUD:drawPanel(farmlandId)
             return
         end
         
-        -- FIX: Get the current position first - use different variable names
+        -- Get current position and find which field contains it
         local worldX, worldZ = self:getCurrentPosition()
-        
-        -- Then find which field contains this position
         local fieldId = nil
-        local field = nil
-        
+
         if worldX and worldZ then
-            -- Method 1: Use FieldManager's getFieldAtWorldPosition if available (most accurate)
-            if g_fieldManager and g_fieldManager.getFieldAtWorldPosition then
-                field = g_fieldManager:getFieldAtWorldPosition(worldX, worldZ)
-                if field and field.fieldId then
-                    fieldId = field.fieldId
-                    if self.settings.debugMode then
-                        SoilLogger.debug("[HUD] Field detected via getFieldAtWorldPosition: %d", fieldId)
-                    end
-                end
-            end
-
-            -- Method 2: Fallback - iterate through fields and check if position is in field polygon
-            if not fieldId and g_fieldManager and g_fieldManager.fields then
-                for _, f in pairs(g_fieldManager.fields) do
-                    if f and f.fieldId and f.getContainsPoint then
-                        local success, contains = pcall(f.getContainsPoint, f, worldX, worldZ)
-                        if success and contains then
-                            fieldId = f.fieldId
-                            field = f
-                            if self.settings.debugMode then
-                                SoilLogger.debug("[HUD] Field detected via getContainsPoint: %d", fieldId)
-                            end
-                            break
-                        end
-                    end
-                end
-            end
-
-            -- If position is available but no field contains it, player is not in a field
-            -- Don't fall back to "first field in farmland" as that would show wrong data
+            -- Use reliable field detection (NPCFavor pattern)
+            fieldId = self:findFieldAtPosition(worldX, worldZ)
         else
-            -- Can't get position - use farmland-to-field mapping as best guess
-            -- Note: This may show wrong field if multiple fields exist on this farmland
-            if g_fieldManager and g_fieldManager.getFieldByFarmland then
-                field = g_fieldManager:getFieldByFarmland(farmlandId)
-                if field and field.fieldId then
-                    fieldId = field.fieldId
-                    if self.settings.debugMode then
-                        SoilLogger.debug("[HUD] Field via farmland mapping (no position): %d", fieldId)
-                    end
-                end
-            end
-
-            -- If still no field, find first field in this farmland
-            if not fieldId and g_fieldManager and g_fieldManager.fields then
+            -- Fallback: Can't get position, find first field in this farmland
+            if g_fieldManager and g_fieldManager.fields then
                 for _, f in pairs(g_fieldManager.fields) do
                     if f and f.farmland and f.farmland.id == farmlandId and f.fieldId then
                         fieldId = f.fieldId
-                        field = f
                         if self.settings.debugMode then
-                            SoilLogger.debug("[HUD] Field via first-in-farmland fallback: %d", fieldId)
+                            SoilLogger.debug("[HUD] Field via first-in-farmland fallback (no position): %d", fieldId)
                         end
                         break
                     end
@@ -737,4 +693,76 @@ function SoilHUD:getCurrentPosition()
     end
 
     return nil, nil
+end
+
+--- Find which field contains a world position
+--- Uses NPCFavor's proven pattern: manual iteration through fields
+---@param x number World X coordinate
+---@param z number World Z coordinate
+---@return number|nil fieldId The field ID, or nil if not in any field
+function SoilHUD:findFieldAtPosition(x, z)
+    if not x or not z then return nil end
+    if not g_fieldManager or not g_fieldManager.fields then return nil end
+
+    -- Method 1: Try to find field that contains the position
+    -- Check if field has boundary data and test if point is inside
+    for _, field in pairs(g_fieldManager.fields) do
+        if field and field.fieldId and field.fieldId > 0 then
+            -- Try getContainsPoint if available (FS25 API)
+            if field.getContainsPoint then
+                local success, contains = pcall(field.getContainsPoint, field, x, z)
+                if success and contains then
+                    if self.settings.debugMode then
+                        SoilLogger.debug("[HUD] Field %d contains position (%.1f, %.1f)", field.fieldId, x, z)
+                    end
+                    return field.fieldId
+                end
+            end
+        end
+    end
+
+    -- Method 2: Find nearest field (fallback for edge cases)
+    -- This ensures we always return a field ID even if position detection is imperfect
+    local nearestFieldId = nil
+    local nearestDist = math.huge
+
+    for _, field in pairs(g_fieldManager.fields) do
+        if field and field.fieldId and field.fieldId > 0 then
+            -- Try multiple field center location patterns (from NPCFavor)
+            local cx, cz = nil, nil
+
+            if field.fieldArea and field.fieldArea.fieldCenterX then
+                cx = field.fieldArea.fieldCenterX
+                cz = field.fieldArea.fieldCenterZ
+            elseif field.posX and field.posZ then
+                cx = field.posX
+                cz = field.posZ
+            elseif field.rootNode then
+                local ok, fx, _, fz = pcall(getWorldTranslation, field.rootNode)
+                if ok and fx then
+                    cx = fx
+                    cz = fz
+                end
+            end
+
+            if cx and cz then
+                local dx = cx - x
+                local dz = cz - z
+                local dist = math.sqrt(dx * dx + dz * dz)
+
+                -- Only consider fields within reasonable distance (500m)
+                -- This prevents showing data for far-away fields
+                if dist < nearestDist and dist < 500 then
+                    nearestDist = dist
+                    nearestFieldId = field.fieldId
+                end
+            end
+        end
+    end
+
+    if nearestFieldId and self.settings.debugMode then
+        SoilLogger.debug("[HUD] Nearest field %d at distance %.1fm", nearestFieldId, nearestDist)
+    end
+
+    return nearestFieldId
 end

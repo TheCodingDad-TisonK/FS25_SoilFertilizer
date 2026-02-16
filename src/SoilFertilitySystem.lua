@@ -454,6 +454,15 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing)
         return nil
     end
 
+    -- MULTIPLAYER SAFETY: Only server should create new fields
+    -- Clients must wait for sync to avoid desync issues with randomized initial values
+    if g_currentMission and g_currentMission.missionDynamicInfo.isMultiplayer then
+        if not g_server then
+            -- Client in multiplayer - return nil and wait for server sync
+            return nil
+        end
+    end
+
     -- Check if PF is active and try to read from it
     if self.PFActive then
         local pfData = self:readPFFieldData(fieldId)
@@ -476,14 +485,25 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing)
         end
     end
 
-    -- Allow lazy creation (HUD-safe)
+    -- Allow lazy creation (HUD-safe, server-only in multiplayer)
+    -- Add natural soil variation: ±10% for nutrients, ±0.5 for pH, ±0.5% for OM
+    -- This reflects real-world soil diversity across a map
     local defaults = SoilConstants.FIELD_DEFAULTS
+
+    -- Use fieldId as deterministic seed for consistent randomization
+    -- Same field always gets same values, even after save/load
+    math.randomseed(fieldId * 67890)
+
+    local function randomize(baseValue, variation)
+        return baseValue + (math.random() * 2 - 1) * variation
+    end
+
     self.fieldData[fieldId] = {
-        nitrogen = defaults.nitrogen,
-        phosphorus = defaults.phosphorus,
-        potassium = defaults.potassium,
-        organicMatter = defaults.organicMatter,
-        pH = defaults.pH,
+        nitrogen = math.floor(randomize(defaults.nitrogen, defaults.nitrogen * 0.10)),
+        phosphorus = math.floor(randomize(defaults.phosphorus, defaults.phosphorus * 0.10)),
+        potassium = math.floor(randomize(defaults.potassium, defaults.potassium * 0.10)),
+        organicMatter = math.max(1.0, math.min(10.0, randomize(defaults.organicMatter, 0.5))),
+        pH = math.max(5.0, math.min(8.5, randomize(defaults.pH, 0.5))),
         lastCrop = nil,
         lastHarvest = 0,
         fertilizerApplied = 0,
@@ -491,7 +511,7 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing)
         fromPF = false
     }
 
-    self:log("Lazy-created field %d", fieldId)
+    self:log("Lazy-created field %d with natural soil variation", fieldId)
     return self.fieldData[fieldId]
 end
 
@@ -916,7 +936,9 @@ function SoilFertilitySystem:listAllFields()
     if g_fieldManager and g_fieldManager.fields then
         print("\nFields in FieldManager:")
         for _, field in pairs(g_fieldManager.fields) do
-            print(string.format("  Field %d: Name=%s", field.fieldId, tostring(field.name or "Unknown")))
+            local fieldIdStr = tostring(field.fieldId or "?")
+            local nameStr = tostring(field.name or "Unknown")
+            print(string.format("  Field %s: Name=%s", fieldIdStr, nameStr))
         end
     end
 

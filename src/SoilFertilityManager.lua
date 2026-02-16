@@ -316,22 +316,29 @@ end
 
 -- Register input actions for HUD toggle
 function SoilFertilityManager:registerInputActions()
-    if not self.soilHUD then 
+    if not self.soilHUD then
         SoilLogger.info("HUD not available - input actions skipped")
-        return 
+        return
     end
 
-    local _, eventId = g_inputBinding:registerActionEvent(
+    -- Use proper RVB pattern (Register-Validate-Bind) for FS25 input system
+    g_inputBinding:beginActionEventsModification("PLAYER")
+
+    local success, eventId = g_inputBinding:registerActionEvent(
         InputAction.SF_TOGGLE_HUD,
         self,
         self.onToggleHUDInput,
         false,  -- triggerUp
         true,   -- triggerDown
         false,  -- triggerAlways
-        true    -- startActive
+        true,   -- startActive
+        nil,    -- callbackState
+        true    -- textVisibility
     )
 
-    if eventId then
+    g_inputBinding:endActionEventsModification()
+
+    if success and eventId then
         self.toggleHUDEventId = eventId
         SoilLogger.info("J HUD toggle registered")
     else

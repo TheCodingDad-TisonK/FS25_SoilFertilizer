@@ -37,6 +37,10 @@
         <sourceFile filename="src/main.lua" />
     </extraSourceFiles>
 
+    <actions>
+        <action name="SF_TOGGLE_HUD" category="ONFOOT" />
+    </actions>
+
     <l10n>
         <text name="sf_section">
             <en>Soil & Fertilizer</en>
