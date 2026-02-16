@@ -187,38 +187,102 @@ function SoilFertilityManager:checkAndApplyCompatibility()
 end
 
 --- Called after mission is loaded
---- Initializes soil system, HUD, and requests multiplayer sync if needed
+--- Initializes HUD and sets up deferred hook installation
 function SoilFertilityManager:onMissionLoaded()
     if not self.settings.enabled then return end
 
     local success, errorMsg = pcall(function()
-        if self.soilSystem then
-            self.soilSystem:initialize()
-        end
-        
-        -- FIX: Only initialize HUD if it exists
+        -- Initialize HUD immediately (client-side only)
         if self.soilHUD then
             self.soilHUD:initialize()
-            -- Register F8 toggle keybind
             self:registerInputActions()
         end
-        
-        -- Show single consolidated notification (different message if PF is active)
-        if self.settings.showNotifications and g_currentMission and g_currentMission.hud then
-            local message
-            if self.soilSystem.PFActive then
-                message = "Soil Mod: Viewer Mode (Precision Farming active) | Press J for HUD"
-            else
-                message = "Soil & Fertilizer Mod Active | Press J for HUD | Type 'soilfertility' for commands"
-            end
-            g_currentMission.hud:showBlinkingWarning(message, 8000)
-        end
+
+        -- Defer soil system initialization (hook installation) until game is ready
+        -- This fixes the timing issue where FruitUtil, Sprayer, g_farmlandManager aren't loaded yet
+        self:deferredSoilSystemInit()
     end)
 
     if not success then
         SoilLogger.error("Error during mission load - %s", tostring(errorMsg))
         self.settings.enabled = false
         self.settings:save()
+    end
+end
+
+--- Deferred initialization of soil system using updater pattern
+--- Waits for game to be fully ready before installing hooks
+function SoilFertilityManager:deferredSoilSystemInit()
+    if not self.soilSystem then return end
+
+    SoilLogger.info("Scheduling deferred soil system initialization...")
+
+    local hookInstaller = {
+        sfm = self,
+        installed = false,
+        attempts = 0,
+        maxAttempts = 30,  -- 30 attempts at 1 update/frame = ~1 second max wait
+
+        update = function(self, dt)
+            if self.installed then
+                return true  -- Remove updater - job done
+            end
+
+            self.attempts = self.attempts + 1
+
+            -- Guard 1: Mission must be started
+            if not g_currentMission or not g_currentMission.isMissionStarted then
+                if self.attempts >= self.maxAttempts then
+                    SoilLogger.warning("Deferred init timeout: Mission not started after %d attempts", self.attempts)
+                    return true  -- Give up and remove updater
+                end
+                return false  -- Keep waiting
+            end
+
+            -- Guard 2: Field manager must be ready
+            if not g_fieldManager or not g_fieldManager.fields then
+                if self.attempts >= self.maxAttempts then
+                    SoilLogger.warning("Deferred init timeout: FieldManager not ready after %d attempts", self.attempts)
+                    return true  -- Give up and remove updater
+                end
+                return false  -- Keep waiting
+            end
+
+            -- All guards passed - initialize soil system now
+            SoilLogger.info("Game ready after %d update cycles - initializing soil system...", self.attempts)
+
+            local initSuccess, initError = pcall(function()
+                self.sfm.soilSystem:initialize()
+
+                -- Show consolidated notification (different message if PF is active)
+                if self.sfm.settings.showNotifications and g_currentMission and g_currentMission.hud then
+                    local message
+                    if self.sfm.soilSystem.PFActive then
+                        message = "Soil Mod: Viewer Mode (Precision Farming active) | Press J to toggle HUD"
+                    else
+                        message = "Soil & Fertilizer Mod Active | Press J to toggle HUD | Type 'soilfertility' for commands"
+                    end
+                    g_currentMission.hud:showBlinkingWarning(message, 8000)
+                end
+            end)
+
+            if not initSuccess then
+                SoilLogger.error("Deferred soil system init failed: %s", tostring(initError))
+            end
+
+            self.installed = true
+            return true  -- Remove updater
+        end
+    }
+
+    -- Register updater with mission
+    if g_currentMission and g_currentMission.addUpdateable then
+        g_currentMission:addUpdateable(hookInstaller)
+        SoilLogger.info("Deferred init updater registered - waiting for game readiness...")
+    else
+        -- Fallback: try immediate initialization
+        SoilLogger.warning("Mission.addUpdateable not available - attempting immediate init")
+        self.soilSystem:initialize()
     end
 end
 

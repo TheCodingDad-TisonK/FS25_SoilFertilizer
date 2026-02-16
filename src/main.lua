@@ -144,6 +144,7 @@ local function hookSaveLoadEvents()
                     if g_client and not g_server and SoilNetworkEvents_RequestFullSync then
                         -- Small delay to let server finish loading
                         mission.loadingDelay = 2000
+                        SoilNetworkEvents_RequestFullSync()
                     end
                 end
             end

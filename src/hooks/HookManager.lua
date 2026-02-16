@@ -29,19 +29,39 @@ function HookManager:installAll(soilSystem, pfActive)
         return
     end
 
+    local successCount = 0
+    local failCount = 0
+
     if pfActive then
         print("[SoilFertilizer] Viewer Mode (Precision Farming active) - installing minimal hooks...")
         -- Only install ownership hook for field cleanup - skip all nutrient-modifying hooks
-        self:installOwnershipHook()
-        print("[SoilFertilizer] Viewer Mode hooks installation complete (1 hook)")
+        local success = self:installOwnershipHook()
+        if success then successCount = successCount + 1 else failCount = failCount + 1 end
+        print(string.format("[SoilFertilizer] Viewer Mode hooks: %d installed, %d failed", successCount, failCount))
     else
         print("[SoilFertilizer] Installing event hooks...")
-        self:installHarvestHook()
-        self:installSprayerHook()
-        self:installOwnershipHook()
-        self:installWeatherHook()
-        self:installPlowingHook()
-        print("[SoilFertilizer] All hooks installation complete (5 hooks)")
+
+        local harvestOk = self:installHarvestHook()
+        if harvestOk then successCount = successCount + 1 else failCount = failCount + 1 end
+
+        local sprayerOk = self:installSprayerHook()
+        if sprayerOk then successCount = successCount + 1 else failCount = failCount + 1 end
+
+        local ownershipOk = self:installOwnershipHook()
+        if ownershipOk then successCount = successCount + 1 else failCount = failCount + 1 end
+
+        local weatherOk = self:installWeatherHook()
+        if weatherOk then successCount = successCount + 1 else failCount = failCount + 1 end
+
+        local plowingOk = self:installPlowingHook()
+        if plowingOk then successCount = successCount + 1 else failCount = failCount + 1 end
+
+        print(string.format("[SoilFertilizer] Hook installation complete: %d/%d successful, %d failed",
+            successCount, successCount + failCount, failCount))
+
+        if failCount > 0 then
+            print("[SoilFertilizer WARNING] Some hooks failed to install - mod functionality may be limited")
+        end
     end
 
     self.installed = true
@@ -80,10 +100,11 @@ function HookManager:register(target, key, original, name)
 end
 
 -- Hook 1: Harvest events (FruitUtil)
+---@return boolean success True if hook installed successfully
 function HookManager:installHarvestHook()
     if not FruitUtil or not FruitUtil.fruitPickupEvent then
         print("[SoilFertilizer WARNING] Could not install harvest hook - FruitUtil not available")
-        return
+        return false
     end
 
     local original = FruitUtil.fruitPickupEvent
@@ -108,14 +129,16 @@ function HookManager:installHarvestHook()
         end
     )
     self:register(FruitUtil, "fruitPickupEvent", original, "FruitUtil.fruitPickupEvent")
-    print("[SoilFertilizer] Harvest hook installed")
+    print("[SoilFertilizer] ✓ Harvest hook installed successfully")
+    return true
 end
 
 -- Hook 2: Fertilizer application (Sprayer) - converted from direct replacement to appended
+---@return boolean success True if hook installed successfully
 function HookManager:installSprayerHook()
     if not Sprayer or not Sprayer.spray then
         print("[SoilFertilizer WARNING] Could not install fertilizer hook - Sprayer not available")
-        return
+        return false
     end
 
     local original = Sprayer.spray
@@ -146,14 +169,16 @@ function HookManager:installSprayerHook()
         end
     )
     self:register(Sprayer, "spray", original, "Sprayer.spray")
-    print("[SoilFertilizer] Fertilizer hook installed")
+    print("[SoilFertilizer] ✓ Fertilizer hook installed successfully")
+    return true
 end
 
 -- Hook 3: Field ownership changes
+---@return boolean success True if hook installed successfully
 function HookManager:installOwnershipHook()
     if not g_farmlandManager or not g_farmlandManager.fieldOwnershipChanged then
         print("[SoilFertilizer WARNING] Could not install ownership hook - farmlandManager not available")
-        return
+        return false
     end
 
     local original = g_farmlandManager.fieldOwnershipChanged
@@ -176,20 +201,22 @@ function HookManager:installOwnershipHook()
         end
     )
     self:register(g_farmlandManager, "fieldOwnershipChanged", original, "farmlandManager.fieldOwnershipChanged")
-    print("[SoilFertilizer] Field ownership hook installed")
+    print("[SoilFertilizer] ✓ Field ownership hook installed successfully")
+    return true
 end
 
 -- Hook 4: Weather/environment updates - converted from direct replacement to appended
+---@return boolean success True if hook installed successfully
 function HookManager:installWeatherHook()
     if not g_currentMission or not g_currentMission.environment then
         print("[SoilFertilizer WARNING] Could not install weather hook - environment not available")
-        return
+        return false
     end
 
     local env = g_currentMission.environment
     if not env.update then
         print("[SoilFertilizer WARNING] Could not install weather hook - environment.update not found")
-        return
+        return false
     end
 
     local original = env.update
@@ -213,14 +240,16 @@ function HookManager:installWeatherHook()
         end
     )
     self:register(env, "update", original, "environment.update")
-    print("[SoilFertilizer] Weather hook installed")
+    print("[SoilFertilizer] ✓ Weather hook installed successfully")
+    return true
 end
 
 -- Hook 5: Plowing operations (Cultivator)
+---@return boolean success True if hook installed successfully
 function HookManager:installPlowingHook()
     if not Cultivator or not Cultivator.processCultivatorArea then
         print("[SoilFertilizer WARNING] Could not install plowing hook - Cultivator not available")
-        return
+        return false
     end
 
     local original = Cultivator.processCultivatorArea
@@ -278,5 +307,6 @@ function HookManager:installPlowingHook()
         end
     )
     self:register(Cultivator, "processCultivatorArea", original, "Cultivator.processCultivatorArea")
-    print("[SoilFertilizer] Plowing hook installed")
+    print("[SoilFertilizer] ✓ Plowing hook installed successfully")
+    return true
 end
