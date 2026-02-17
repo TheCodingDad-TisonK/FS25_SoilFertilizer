@@ -107,6 +107,16 @@ function SoilSettingsUI:inject()
 
     local layout = inGameMenu.pageSettings.generalSettingsLayout
 
+    -- Non-admin MP clients cannot change settings and must not inject UI elements.
+    -- Template cloning on dedicated server clients can corrupt other settings pages
+    -- (Graphics, Server Settings, Better Contracts, etc.) by reparenting shared elements.
+    local isMP = g_currentMission.missionDynamicInfo.isMultiplayer
+    if isMP and not self:isPlayerAdmin() then
+        self.injected = true
+        SoilLogger.info("Non-admin MP client: UI injection skipped (admin-only settings)")
+        return true
+    end
+
     -- Clear any existing elements to prevent duplicates on retry
     if #self.uiElements > 0 then
         SoilLogger.info("Clearing %d existing UI elements before retry", #self.uiElements)
@@ -121,18 +131,6 @@ function SoilSettingsUI:inject()
 
     local isAdmin = self:isPlayerAdmin()
     local pfActive = g_SoilFertilityManager and g_SoilFertilityManager.soilSystem and g_SoilFertilityManager.soilSystem.PFActive
-
-    -- Add info text if not admin
-    if not isAdmin and g_currentMission and g_currentMission.missionDynamicInfo.isMultiplayer then
-        local infoText = UIHelper.createDescription(layout, "sf_admin_only_info")
-        if infoText and infoText.setText then
-            infoText:setText("(Admin only - contact server owner to change these settings)")
-            if infoText.textColor then
-                infoText.textColor = {1.0, 0.6, 0.0, 1.0}
-            end
-        end
-        table.insert(self.uiElements, infoText)
-    end
 
     -- Add Viewer Mode banner if Precision Farming is active
     if pfActive then

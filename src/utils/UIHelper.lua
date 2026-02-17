@@ -258,12 +258,6 @@ function UIHelper.createSection(layout, textId)
         section.textColor = {0.95, 0.95, 0.95, 1.0}
     end
 
-    local addSuccess = pcall(function() layout:addElement(section) end)
-    if not addSuccess then
-        SoilLogger.error("[SoilFertilizer] Failed to add section to layout")
-        return nil
-    end
-
     SoilLogger.info("Created section header: %s (visible=%s)", textId, tostring(section.visible))
     return section
 end
@@ -309,12 +303,6 @@ function UIHelper.createDescription(layout, textId)
     -- Ensure alpha is not 0
     if desc.alpha ~= nil then
         desc.alpha = 1.0
-    end
-
-    local addSuccess = pcall(function() layout:addElement(desc) end)
-    if not addSuccess then
-        SoilLogger.error("[SoilFertilizer] Failed to add description to layout")
-        return nil
     end
 
     SoilLogger.info("Created description: %s (visible=%s)", textId, tostring(desc.visible))
@@ -395,12 +383,6 @@ function UIHelper.createBinaryOption(layout, id, textId, state, callback)
 
     if lbl and lbl.setText then
         lbl:setText(getTextSafe(textId .. "_short"))
-    end
-
-    local addSuccess = pcall(function() layout:addElement(row) end)
-    if not addSuccess then
-        SoilLogger.error("[SoilFertilizer] Failed to add binary option to layout")
-        return nil
     end
 
     if opt and opt.setState then
@@ -524,12 +506,6 @@ function UIHelper.createMultiOption(layout, id, textId, options, state, callback
 
     if lbl and lbl.setText then
         lbl:setText(getTextSafe(textId .. "_short"))
-    end
-
-    local addSuccess = pcall(function() layout:addElement(row) end)
-    if not addSuccess then
-        SoilLogger.error("[SoilFertilizer] Failed to add multi option to layout")
-        return nil
     end
 
     local tooltipText = getTextSafe(textId .. "_long")
