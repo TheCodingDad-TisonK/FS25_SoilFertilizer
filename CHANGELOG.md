@@ -7,6 +7,78 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.7.0] - 2026-02-18
+
+### Changed
+
+#### SoilHUD — Converted to Legend/Reference Panel
+- **CHANGED**: `SoilHUD` is now a static **legend/reference panel** instead of a live per-field data display
+  - The full-detail field view is now properly served by the Soil Report dialog (K key)
+  - The HUD no longer needs player position, farmland detection, or field polling each frame
+  - Eliminates all timing-sensitive field-detection code that could crash or return stale data
+
+#### New HUD Content
+- **Keys section**: `J = Toggle HUD` and `K = Soil Report` always visible for discoverability
+- **Color-coded nutrient legend**: Good / Fair / Poor thresholds (N>50/P>45/K>40, N>30/P>25/K>20) matching `STATUS_THRESHOLDS` in Constants exactly
+- **pH reference**: `pH ideal: 6.5 - 7.0` as a quick agronomic reminder
+
+#### Code Cleanup (`src/ui/SoilHUD.lua`)
+- **REMOVED**: `getCurrentPosition()` — position detection no longer needed
+- **REMOVED**: `getFarmlandIdAtPosition()` — farmland lookup no longer needed
+- **REMOVED**: `findFieldAtPosition()` with 3-tier field detection fallback — no longer needed
+- **SIMPLIFIED**: `draw()` reduced to basic visibility guards only (no player/vehicle checks)
+- **SIMPLIFIED**: `drawPanel()` is now a pure static renderer — no field data, no PF integration, no farmland fallback logic
+- File reduced from 719 lines to 202 lines
+
+### Fixed
+- **FIXED**: `self:getActionName("SF_SOIL_REPORT")` call in `drawPanel()` that would have caused a runtime error (method did not exist on SoilHUD)
+
+---
+
+## [1.0.6.5] - 2026-02-17
+
+### Summary
+Polish pass by XelaNull (PR #33). Localization improvements, dialog stacking fixes, pagination cleanup, and mod compatibility corrections.
+
+### Fixed
+- Mod compatibility: settings tab integration, J-key binding race condition, slow-server field initialization (Issue #21)
+- Settings corruption on dedicated servers with 100+ mods loaded
+
+### Changed
+- Localization string improvements across all 10 supported languages
+- Dialog stacking and close-order correctness for `SoilReportDialog`
+- Pagination layout and display for the Soil Report
+
+---
+
+## [1.0.6.0] - 2026-02-16
+
+### Changed
+- Version bump to 1.0.6.0 consolidating v1.0.5.x hotfixes as stable baseline
+
+### Fixed
+- Settings corruption when 100+ mods are loaded on dedicated servers
+
+---
+
+## [1.0.5.2] - 2026-02-16
+
+### Fixed
+- Settings UI corruption on dedicated server clients
+
+---
+
+## [1.0.5.1] - 2026-02-16
+
+### Fixed
+- 6 critical HUD and multiplayer issues identified post-1.0.5.0 release
+
+### Changed
+- Improved HUD field detection accuracy
+- Added status-enriched (color-coded Good/Fair/Poor) soil display in HUD
+
+---
+
 ## [1.0.5.0] - 2026-02-16
 
 ### Summary

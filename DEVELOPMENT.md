@@ -1,7 +1,7 @@
 # FS25_SoilFertilizer - Developer Guide
 
-**Version**: 1.0.4.1
-**Last Updated**: 2026-02-14
+**Version**: 1.0.7.0
+**Last Updated**: 2026-02-18
 
 ---
 
@@ -70,7 +70,8 @@ FS25_SoilFertilizer/
 │   ├── network/
 │   │   └── NetworkEvents.lua       # Multiplayer sync
 │   ├── ui/
-│   │   └── SoilHUD.lua             # Always-on HUD overlay
+│   │   ├── SoilHUD.lua             # Always-on legend/reference HUD overlay
+│   │   └── SoilReportDialog.lua    # Full-farm soil report dialog (K key)
 │   └── utils/
 │       ├── Logger.lua              # Centralized logging
 │       ├── AsyncRetryHandler.lua   # Retry pattern utility
@@ -403,89 +404,55 @@ end
 
 ### Architecture
 
-The HUD is an always-on overlay (like Precision Farming's HUD):
+The HUD is a **static legend/reference panel** always rendered in a corner of the screen.
+Per-field soil data is shown in the **Soil Report dialog** (`SoilReportDialog`, opened with K).
 
-- **SoilHUD** (`src/ui/SoilHUD.lua`): Renders overlay
-- **Position**: User-configurable (5 presets)
-- **Visibility**: Settings-based + F8 runtime toggle + context-aware
+| File | Role |
+|------|------|
+| `src/ui/SoilHUD.lua` | Renders the static legend overlay |
+| `src/ui/SoilReportDialog.lua` | Full paginated soil report (K key) |
+
+### What the HUD Shows
+
+```
+SOIL LEGEND
+J = Toggle HUD
+K = Soil Report
+Good: N>50, P>45, K>40   ← green
+Fair: N>30, P>25, K>20   ← yellow
+Poor: needs fertilizer    ← red
+pH ideal: 6.5 - 7.0
+```
+
+- **Position**: User-configurable (5 presets in `SoilConstants.HUD.POSITIONS`)
+- **Appearance**: Color theme, font size, and transparency all respect user settings
+- **Visibility**: `settings.showHUD` (persistent) and `self.visible` (J key runtime toggle)
 
 ### HUD Visibility Logic
 
-The HUD hides when:
+The HUD hides automatically when:
 1. Mod disabled (`settings.enabled = false`)
 2. Show HUD setting off (`settings.showHUD = false`)
-3. F8 toggled off (`self.visible = false`)
-4. Menu/dialog open
-5. Large map open
-6. Tutorial messages visible
-7. Construction mode active
-8. Special camera modes
+3. J key toggled off (`self.visible = false`)
+4. Menu or dialog open (`g_gui:getIsGuiVisible()` / `getIsDialogVisible()`)
+5. Fullscreen map open (`IngameMap.STATE_LARGE_MAP`)
 
-### Adding HUD Elements
+### Modifying the Legend Content
 
-Edit `SoilHUD:drawPanel()` in `src/ui/SoilHUD.lua`:
+Edit `SoilHUD:drawPanel()` in `src/ui/SoilHUD.lua`. The method is a simple top-to-bottom text renderer:
 
 ```lua
-function SoilHUD:drawPanel(fieldId)
-    -- ... existing drawing code
-
-    -- Add your new element
-    setTextColor(1.0, 1.0, 1.0, 1.0)
-    renderText(x, y, 0.012, string.format("Your Data: %d", yourValue))
-    y = y - lineHeight  -- Move down for next line
-end
+-- Pattern: render text, then step Y down by lineH
+setTextColor(r, g, b, 1.0)
+renderText(x, y, 0.011 * fontMult, "Your line here")
+y = y - lineH
 ```
 
-### Render Order and UI Conflicts
+Threshold values come from `SoilConstants.STATUS_THRESHOLDS` — if you change the thresholds there, update the legend text to match.
 
-**Important**: FS25's Giants Engine does NOT provide explicit Z-order/layer APIs for Overlays (no `setRenderOrder()`, no Z-index).
+### Render Order Note
 
-#### How Render Order Works
-
-Overlays render in **call order** within a frame phase:
-1. Game initializes core UI (menus, HUD elements)
-2. Mods render overlays during their `draw()` callbacks
-3. Order depends on: mod load order + callback registration order
-4. Last rendered = top-most on screen
-
-#### Our Strategy
-
-**Timing**: We render during standard `FSBaseMission.update()` callback, which executes AFTER game UI initialization but BEFORE debug overlays.
-
-**Defensive Visibility Checks** (prevent rendering over critical UI):
-- Game menus/dialogs (`g_gui:getIsGuiVisible()`)
-- Large map overlay (`IngameMap.STATE_LARGE_MAP`)
-- Construction mode (placeable placement)
-- Tutorial messages
-- Context help display
-- Courseplay full HUD mode (if detected)
-
-**Position Flexibility**: Users can choose from 5 HUD presets if conflicts occur with other mods.
-
-#### Testing for Conflicts
-
-Load these popular UI mods and verify no overlap:
-- **Courseplay**: HUD should not overlap course UI
-- **AutoDrive**: HUD should not overlap route display
-- **GPS Mod**: HUD should not overlap guidance lines UI
-- **Precision Farming**: HUD disabled (PF read-only mode)
-
-**If conflict detected:**
-1. Check logs for which mod loaded first
-2. Adjust HUD position via settings (Top Right → Top Left, etc.)
-3. Enable compact mode to reduce vertical space
-4. Report incompatibility if settings can't resolve it
-
-#### Advanced: Debugging Render Order
-
-Enable debug mode and check render timing:
-```lua
-if self.settings.debugMode then
-    SoilLogger.info("[HUD] Rendering at position (%0.3f, %0.3f)", self.panelX, self.panelY)
-end
-```
-
-Check `log.txt` to see when HUD renders relative to other mod messages.
+FS25 does not expose Z-order APIs for Overlays. Render order is determined by callback registration order. The HUD renders via `FSBaseMission.draw`, which runs after core UI initialization. If a mod conflict causes overlap, players can move the HUD via the position preset setting.
 
 ---
 
