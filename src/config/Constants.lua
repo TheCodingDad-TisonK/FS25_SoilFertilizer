@@ -174,6 +174,19 @@ SoilConstants.FERTILIZATION_THRESHOLDS = {
 }
 
 -- ========================================
+-- REPORT COLOR THRESHOLDS
+-- ========================================
+-- pH/OM ranges for color-coded report display
+SoilConstants.REPORT_COLORS = {
+    PH_GOOD_LOW  = 6.0,
+    PH_GOOD_HIGH = 7.0,
+    PH_FAIR_LOW  = 5.5,
+    PH_FAIR_HIGH = 7.5,
+    OM_GOOD      = 4.0,
+    OM_FAIR      = 2.5,
+}
+
+-- ========================================
 -- HUD DISPLAY
 -- ========================================
 SoilConstants.HUD = {

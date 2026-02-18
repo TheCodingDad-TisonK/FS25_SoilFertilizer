@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<GUI onOpen="onOpen" onClose="onClose" onCreate="onCreate">
+    <GuiElement profile="newLayer" />
+    <Bitmap profile="dialogFullscreenBg" id="dialogBg" />
+
+    <GuiElement profile="dialogBg" id="dialogElement" size="760px 520px">
+        <ThreePartBitmap profile="fs25_dialogBgMiddle" />
+        <ThreePartBitmap profile="fs25_dialogBgTop" />
+        <ThreePartBitmap profile="fs25_dialogBgBottom" />
+
+        <GuiElement profile="fs25_dialogContentContainer">
+
+            <!-- Title -->
+            <Text profile="fs25_dialogTitle" id="dialogTitleElement" position="0px -25px" text="$l10n_sf_report_title"/>
+
+            <!-- ===== SUMMARY SECTION ===== -->
+            <GuiElement profile="srSectionContainer" position="0px -60px">
+                <Bitmap profile="srSectionBg" position="0px 0px"/>
+                <Text profile="srSummaryLabel" position="-310px -8px" text="$l10n_sf_report_fields_tracked"/>
+                <Text profile="srSummaryValue" id="fieldCountText" position="-210px -8px" text="0"/>
+                <Text profile="srSummaryLabel" position="-100px -8px" text="$l10n_sf_report_need_fert"/>
+                <Text profile="srSummaryWarnValue" id="needFertText" position="10px -8px" text="0"/>
+                <Text profile="srSummaryLabel" position="120px -8px" text="$l10n_sf_report_difficulty"/>
+                <Text profile="srSummaryValue" id="difficultyText" position="210px -8px" text="Realistic"/>
+            </GuiElement>
+
+            <!-- ===== TABLE HEADER ===== -->
+            <GuiElement profile="srRowSection" position="0px -100px">
+                <Bitmap profile="srHeaderBg" position="0px 0px"/>
+                <Text profile="srHeaderText" position="-310px -4px" text="$l10n_sf_report_col_field"/>
+                <Text profile="srHeaderText" position="-230px -4px" text="N"/>
+                <Text profile="srHeaderText" position="-155px -4px" text="P"/>
+                <Text profile="srHeaderText" position="-80px -4px" text="K"/>
+                <Text profile="srHeaderText" position="0px -4px" text="pH"/>
+                <Text profile="srHeaderText" position="80px -4px" text="OM%"/>
+                <Text profile="srHeaderText" position="170px -4px" text="$l10n_sf_report_col_last_crop"/>
+                <Text profile="srHeaderText" position="280px -4px" text="$l10n_sf_report_col_fert"/>
+            </GuiElement>
+
+            <!-- Row 0 -->
+            <GuiElement id="fieldRow0" profile="srRowSection" position="0px -124px" visible="false">
+                <Bitmap profile="srRowBg" id="fieldRow0Bg" position="0px 0px"/>
+                <Text profile="srRowText" id="fieldRow0Id" position="-310px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow0N" position="-230px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow0P" position="-155px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow0K" position="-80px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow0pH" position="0px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow0OM" position="80px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow0Crop" position="170px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow0Fert" position="280px -4px" text=""/>
+            </GuiElement>
+
+            <!-- Row 1 -->
+            <GuiElement id="fieldRow1" profile="srRowSection" position="0px -148px" visible="false">
+                <Bitmap profile="srRowBgAlt" id="fieldRow1Bg" position="0px 0px"/>
+                <Text profile="srRowText" id="fieldRow1Id" position="-310px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow1N" position="-230px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow1P" position="-155px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow1K" position="-80px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow1pH" position="0px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow1OM" position="80px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow1Crop" position="170px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow1Fert" position="280px -4px" text=""/>
+            </GuiElement>
+
+            <!-- Row 2 -->
+            <GuiElement id="fieldRow2" profile="srRowSection" position="0px -172px" visible="false">
+                <Bitmap profile="srRowBg" id="fieldRow2Bg" position="0px 0px"/>
+                <Text profile="srRowText" id="fieldRow2Id" position="-310px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow2N" position="-230px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow2P" position="-155px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow2K" position="-80px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow2pH" position="0px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow2OM" position="80px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow2Crop" position="170px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow2Fert" position="280px -4px" text=""/>
+            </GuiElement>
+
+            <!-- Row 3 -->
+            <GuiElement id="fieldRow3" profile="srRowSection" position="0px -196px" visible="false">
+                <Bitmap profile="srRowBgAlt" id="fieldRow3Bg" position="0px 0px"/>
+                <Text profile="srRowText" id="fieldRow3Id" position="-310px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow3N" position="-230px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow3P" position="-155px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow3K" position="-80px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow3pH" position="0px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow3OM" position="80px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow3Crop" position="170px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow3Fert" position="280px -4px" text=""/>
+            </GuiElement>
+
+            <!-- Row 4 -->
+            <GuiElement id="fieldRow4" profile="srRowSection" position="0px -220px" visible="false">
+                <Bitmap profile="srRowBg" id="fieldRow4Bg" position="0px 0px"/>
+                <Text profile="srRowText" id="fieldRow4Id" position="-310px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow4N" position="-230px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow4P" position="-155px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow4K" position="-80px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow4pH" position="0px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow4OM" position="80px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow4Crop" position="170px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow4Fert" position="280px -4px" text=""/>
+            </GuiElement>
+
+            <!-- Row 5 -->
+            <GuiElement id="fieldRow5" profile="srRowSection" position="0px -244px" visible="false">
+                <Bitmap profile="srRowBgAlt" id="fieldRow5Bg" position="0px 0px"/>
+                <Text profile="srRowText" id="fieldRow5Id" position="-310px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow5N" position="-230px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow5P" position="-155px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow5K" position="-80px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow5pH" position="0px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow5OM" position="80px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow5Crop" position="170px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow5Fert" position="280px -4px" text=""/>
+            </GuiElement>
+
+            <!-- Row 6 -->
+            <GuiElement id="fieldRow6" profile="srRowSection" position="0px -268px" visible="false">
+                <Bitmap profile="srRowBg" id="fieldRow6Bg" position="0px 0px"/>
+                <Text profile="srRowText" id="fieldRow6Id" position="-310px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow6N" position="-230px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow6P" position="-155px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow6K" position="-80px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow6pH" position="0px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow6OM" position="80px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow6Crop" position="170px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow6Fert" position="280px -4px" text=""/>
+            </GuiElement>
+
+            <!-- Row 7 -->
+            <GuiElement id="fieldRow7" profile="srRowSection" position="0px -292px" visible="false">
+                <Bitmap profile="srRowBgAlt" id="fieldRow7Bg" position="0px 0px"/>
+                <Text profile="srRowText" id="fieldRow7Id" position="-310px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow7N" position="-230px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow7P" position="-155px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow7K" position="-80px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow7pH" position="0px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow7OM" position="80px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow7Crop" position="170px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow7Fert" position="280px -4px" text=""/>
+            </GuiElement>
+
+            <!-- Row 8 -->
+            <GuiElement id="fieldRow8" profile="srRowSection" position="0px -316px" visible="false">
+                <Bitmap profile="srRowBg" id="fieldRow8Bg" position="0px 0px"/>
+                <Text profile="srRowText" id="fieldRow8Id" position="-310px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow8N" position="-230px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow8P" position="-155px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow8K" position="-80px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow8pH" position="0px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow8OM" position="80px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow8Crop" position="170px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow8Fert" position="280px -4px" text=""/>
+            </GuiElement>
+
+            <!-- Row 9 -->
+            <GuiElement id="fieldRow9" profile="srRowSection" position="0px -340px" visible="false">
+                <Bitmap profile="srRowBgAlt" id="fieldRow9Bg" position="0px 0px"/>
+                <Text profile="srRowText" id="fieldRow9Id" position="-310px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow9N" position="-230px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow9P" position="-155px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow9K" position="-80px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow9pH" position="0px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow9OM" position="80px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow9Crop" position="170px -4px" text=""/>
+                <Text profile="srRowText" id="fieldRow9Fert" position="280px -4px" text=""/>
+            </GuiElement>
+
+            <!-- Pagination Info -->
+            <Text profile="srPageInfo" id="pageInfoText" position="0px -370px" text=""/>
+
+            <!-- No Data Message -->
+            <Text profile="srNoData" id="noDataText" position="0px -220px" visible="false" text="$l10n_sf_report_no_data"/>
+
+        </GuiElement>
+
+        <BoxLayout profile="fs25_dialogButtonBox">
+            <Button profile="buttonActivate" id="prevButton" text="$l10n_sf_report_prev" onClick="onPrevPage"/>
+            <Bitmap profile="fs25_dialogButtonBoxSeparator"/>
+            <Button profile="buttonActivate" id="nextButton" text="$l10n_sf_report_next" onClick="onNextPage"/>
+            <Bitmap profile="fs25_dialogButtonBoxSeparator"/>
+            <Button profile="buttonBack" id="closeButton" text="$l10n_button_close" onClick="onCloseDialog"/>
+        </BoxLayout>
+
+    </GuiElement>
+
+    <GUIProfiles>
+        <!-- ========== SECTION CONTAINERS ========== -->
+        <Profile name="srSectionContainer" extends="emptyPanel" with="anchorTopCenter">
+            <size value="700px 30px"/>
+        </Profile>
+
+        <Profile name="srRowSection" extends="emptyPanel" with="anchorTopCenter">
+            <size value="700px 24px"/>
+        </Profile>
+
+        <!-- ========== BACKGROUNDS ========== -->
+        <Profile name="srSectionBg" extends="baseReference" with="anchorTopCenter">
+            <size value="700px 30px"/>
+            <imageColor value="0.08 0.08 0.12 0.9"/>
+        </Profile>
+
+        <Profile name="srHeaderBg" extends="baseReference" with="anchorTopCenter">
+            <size value="700px 24px"/>
+            <imageColor value="0.15 0.15 0.2 1"/>
+        </Profile>
+
+        <Profile name="srRowBg" extends="baseReference" with="anchorTopCenter">
+            <size value="700px 24px"/>
+            <imageColor value="0.1 0.1 0.1 1"/>
+        </Profile>
+
+        <Profile name="srRowBgAlt" extends="baseReference" with="anchorTopCenter">
+            <size value="700px 24px"/>
+            <imageColor value="0.12 0.12 0.14 1"/>
+        </Profile>
+
+        <!-- ========== TEXT PROFILES ========== -->
+        <Profile name="srSummaryLabel" extends="fs25_textDefault" with="anchorTopCenter">
+            <size value="110px 18px"/>
+            <textSize value="12px"/>
+            <textColor value="0.6 0.6 0.6 1"/>
+        </Profile>
+
+        <Profile name="srSummaryValue" extends="fs25_textDefault" with="anchorTopCenter">
+            <size value="80px 18px"/>
+            <textSize value="13px"/>
+            <textBold value="true"/>
+            <textColor value="0.8 0.9 1 1"/>
+        </Profile>
+
+        <Profile name="srSummaryWarnValue" extends="fs25_textDefault" with="anchorTopCenter">
+            <size value="80px 18px"/>
+            <textSize value="13px"/>
+            <textBold value="true"/>
+            <textColor value="1 0.6 0.3 1"/>
+        </Profile>
+
+        <Profile name="srHeaderText" extends="fs25_textDefault" with="anchorTopCenter">
+            <size value="80px 18px"/>
+            <textSize value="11px"/>
+            <textBold value="true"/>
+            <textColor value="0.8 0.8 0.8 1"/>
+        </Profile>
+
+        <Profile name="srRowText" extends="fs25_textDefault" with="anchorTopCenter">
+            <size value="80px 18px"/>
+            <textSize value="11px"/>
+            <textColor value="1 1 1 1"/>
+        </Profile>
+
+        <Profile name="srPageInfo" extends="fs25_textDefault" with="anchorTopCenter">
+            <size value="700px 20px"/>
+            <textSize value="12px"/>
+            <textColor value="0.6 0.6 0.6 1"/>
+            <textAlignment value="center"/>
+        </Profile>
+
+        <Profile name="srNoData" extends="fs25_textDefault" with="anchorTopCenter">
+            <size value="700px 30px"/>
+            <textSize value="14px"/>
+            <textColor value="0.6 0.6 0.6 1"/>
+            <textAlignment value="center"/>
+        </Profile>
+    </GUIProfiles>
+</GUI>

@@ -303,7 +303,7 @@ function SoilFertilitySystem:update(dt)
 
             -- Timeout after max frames
             if self.fieldsScanFrameCounter >= self.fieldsScanMaxFrames then
-                self:error("Field initialization failed after all retry attempts (time + frame-based)")
+                self:warning("Field initialization failed after all retry attempts (time + frame-based)")
                 self.fieldsScanStage = 3
 
                 -- Show error dialog and disable mod gracefully

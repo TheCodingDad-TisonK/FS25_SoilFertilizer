@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <modDesc descVersion="105">
     <author>TisonK</author>
-    <version>1.0.5.2</version>
+    <version>1.0.6.5</version>
     <modName>FS25_SoilFertilizer</modName>
     <title>
         <en>Realistic Soil & Fertilizer</en>
@@ -39,6 +39,7 @@
 
     <actions>
         <action name="SF_TOGGLE_HUD" category="ONFOOT" />
+        <action name="SF_SOIL_REPORT" category="ONFOOT" />
     </actions>
 
     <l10n>
@@ -812,11 +813,211 @@
             <ru>Переключить HUD почвы</ru>
             <hu>Talaj HUD váltása</hu>
         </text>
+        <text name="input_SF_SOIL_REPORT">
+            <en>Soil Report</en>
+            <de>Bodenbericht</de>
+            <fr>Rapport Sol</fr>
+            <pl>Raport Gleby</pl>
+            <es>Informe Suelo</es>
+            <it>Rapporto Suolo</it>
+            <cz>Zpráva o půdě</cz>
+            <br>Relatório Solo</br>
+            <uk>Звіт про ґрунт</uk>
+            <ru>Отчёт о почве</ru>
+            <hu>Talajjelentés</hu>
+        </text>
+
+        <!-- Soil Report Dialog (K key) -->
+        <text name="sf_report_title">
+            <en>Soil &amp; Fertilizer Report</en>
+            <de>Boden- &amp; Düngerbericht</de>
+            <fr>Rapport Sol &amp; Engrais</fr>
+            <pl>Raport Gleby &amp; Nawozu</pl>
+            <es>Informe Suelo &amp; Fertilizante</es>
+            <it>Rapporto Suolo &amp; Fertilizzante</it>
+            <cz>Zpráva o Půdě &amp; Hnojivu</cz>
+            <br>Relatório Solo &amp; Fertilizante</br>
+            <uk>Звіт про ґрунт та добриво</uk>
+            <ru>Отчёт о почве и удобрении</ru>
+            <hu>Talaj &amp; Műtrágya Jelentés</hu>
+        </text>
+        <text name="sf_report_fields_tracked">
+            <en>Fields Tracked:</en>
+            <de>Verfolgte Felder:</de>
+            <fr>Champs Suivis:</fr>
+            <pl>Śledzone Pola:</pl>
+            <es>Campos Rastreados:</es>
+            <it>Campi Tracciati:</it>
+            <cz>Sledovaná Pole:</cz>
+            <br>Campos Rastreados:</br>
+            <uk>Відстежувані поля:</uk>
+            <ru>Отслеживаемые поля:</ru>
+            <hu>Követett Mezők:</hu>
+        </text>
+        <text name="sf_report_need_fert">
+            <en>Need Fertilizer:</en>
+            <de>Brauchen Dünger:</de>
+            <fr>Besoin d'Engrais:</fr>
+            <pl>Potrzebują Nawozu:</pl>
+            <es>Necesitan Fertilizante:</es>
+            <it>Necessitano Fertilizzante:</it>
+            <cz>Potřebují Hnojivo:</cz>
+            <br>Precisam Fertilizante:</br>
+            <uk>Потребують добрива:</uk>
+            <ru>Нужно удобрение:</ru>
+            <hu>Műtrágya Szükséges:</hu>
+        </text>
+        <text name="sf_report_difficulty">
+            <en>Difficulty:</en>
+            <de>Schwierigkeit:</de>
+            <fr>Difficulté:</fr>
+            <pl>Trudność:</pl>
+            <es>Dificultad:</es>
+            <it>Difficoltà:</it>
+            <cz>Obtížnost:</cz>
+            <br>Dificuldade:</br>
+            <uk>Складність:</uk>
+            <ru>Сложность:</ru>
+            <hu>Nehézség:</hu>
+        </text>
+        <text name="sf_report_col_field">
+            <en>Field</en>
+            <de>Feld</de>
+            <fr>Champ</fr>
+            <pl>Pole</pl>
+            <es>Campo</es>
+            <it>Campo</it>
+            <cz>Pole</cz>
+            <br>Campo</br>
+            <uk>Поле</uk>
+            <ru>Поле</ru>
+            <hu>Mező</hu>
+        </text>
+        <text name="sf_report_col_last_crop">
+            <en>Last Crop</en>
+            <de>Letzte Ernte</de>
+            <fr>Dernière Récolte</fr>
+            <pl>Ostatni Plon</pl>
+            <es>Último Cultivo</es>
+            <it>Ultimo Raccolto</it>
+            <cz>Poslední Plodina</cz>
+            <br>Última Colheita</br>
+            <uk>Остання культура</uk>
+            <ru>Последний урожай</ru>
+            <hu>Utolsó Termény</hu>
+        </text>
+        <text name="sf_report_col_fert">
+            <en>Fert?</en>
+            <de>Düng?</de>
+            <fr>Eng?</fr>
+            <pl>Naw?</pl>
+            <es>Fert?</es>
+            <it>Fert?</it>
+            <cz>Hnoj?</cz>
+            <br>Fert?</br>
+            <uk>Добр?</uk>
+            <ru>Удоб?</ru>
+            <hu>Műtr?</hu>
+        </text>
+        <text name="sf_report_no_data">
+            <en>No soil data available. Walk onto a field to start tracking.</en>
+            <de>Keine Bodendaten verfügbar. Gehen Sie auf ein Feld, um die Verfolgung zu starten.</de>
+            <fr>Aucune donnée de sol disponible. Marchez sur un champ pour commencer le suivi.</fr>
+            <pl>Brak danych o glebie. Wejdź na pole, aby rozpocząć śledzenie.</pl>
+            <es>No hay datos de suelo disponibles. Camina sobre un campo para empezar el seguimiento.</es>
+            <it>Nessun dato del suolo disponibile. Cammina su un campo per iniziare il tracciamento.</it>
+            <cz>Nejsou k dispozici údaje o půdě. Projděte se po poli a začněte sledovat.</cz>
+            <br>Sem dados de solo disponíveis. Caminhe sobre um campo para começar o rastreamento.</br>
+            <uk>Дані про ґрунт відсутні. Пройдіть по полю, щоб почати відстеження.</uk>
+            <ru>Данные о почве недоступны. Пройдите по полю, чтобы начать отслеживание.</ru>
+            <hu>Nincsenek talajadatok. Sétáljon egy mezőre a követés elindításához.</hu>
+        </text>
+        <text name="sf_report_prev">
+            <en>Prev</en>
+            <de>Zurück</de>
+            <fr>Préc</fr>
+            <pl>Poprz</pl>
+            <es>Ant</es>
+            <it>Prec</it>
+            <cz>Předch</cz>
+            <br>Ant</br>
+            <uk>Попер</uk>
+            <ru>Назад</ru>
+            <hu>Előző</hu>
+        </text>
+        <text name="sf_report_next">
+            <en>Next</en>
+            <de>Weiter</de>
+            <fr>Suiv</fr>
+            <pl>Nast</pl>
+            <es>Sig</es>
+            <it>Succ</it>
+            <cz>Další</cz>
+            <br>Próx</br>
+            <uk>Наст</uk>
+            <ru>Далее</ru>
+            <hu>Köv</hu>
+        </text>
+        <text name="sf_report_yes">
+            <en>YES</en>
+            <de>JA</de>
+            <fr>OUI</fr>
+            <pl>TAK</pl>
+            <es>SÍ</es>
+            <it>SÌ</it>
+            <cz>ANO</cz>
+            <br>SIM</br>
+            <uk>ТАК</uk>
+            <ru>ДА</ru>
+            <hu>IGEN</hu>
+        </text>
+        <text name="sf_report_ok">
+            <en>OK</en>
+            <de>OK</de>
+            <fr>OK</fr>
+            <pl>OK</pl>
+            <es>OK</es>
+            <it>OK</it>
+            <cz>OK</cz>
+            <br>OK</br>
+            <uk>OK</uk>
+            <ru>OK</ru>
+            <hu>OK</hu>
+        </text>
+        <text name="sf_report_none">
+            <en>None</en>
+            <de>Keine</de>
+            <fr>Aucun</fr>
+            <pl>Brak</pl>
+            <es>Ninguno</es>
+            <it>Nessuno</it>
+            <cz>Žádná</cz>
+            <br>Nenhum</br>
+            <uk>Немає</uk>
+            <ru>Нет</ru>
+            <hu>Nincs</hu>
+        </text>
+        <text name="sf_report_page_info">
+            <en>Fields %d-%d of %d  |  Page %d of %d</en>
+            <de>Felder %d-%d von %d  |  Seite %d von %d</de>
+            <fr>Champs %d-%d sur %d  |  Page %d sur %d</fr>
+            <pl>Pola %d-%d z %d  |  Strona %d z %d</pl>
+            <es>Campos %d-%d de %d  |  Página %d de %d</es>
+            <it>Campi %d-%d di %d  |  Pagina %d di %d</it>
+            <cz>Pole %d-%d z %d  |  Strana %d z %d</cz>
+            <br>Campos %d-%d de %d  |  Página %d de %d</br>
+            <uk>Поля %d-%d з %d  |  Сторінка %d з %d</uk>
+            <ru>Поля %d-%d из %d  |  Страница %d из %d</ru>
+            <hu>Mezők %d-%d / %d  |  Oldal %d / %d</hu>
+        </text>
     </l10n>
 
     <inputBinding>
         <actionBinding action="SF_TOGGLE_HUD">
             <binding device="KB_MOUSE_DEFAULT" input="KEY_J" />
+        </actionBinding>
+        <actionBinding action="SF_SOIL_REPORT">
+            <binding device="KB_MOUSE_DEFAULT" input="KEY_K" />
         </actionBinding>
     </inputBinding>
 </modDesc>

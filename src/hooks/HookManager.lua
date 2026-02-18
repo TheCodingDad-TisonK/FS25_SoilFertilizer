@@ -102,8 +102,8 @@ end
 -- Hook 1: Harvest events (FruitUtil)
 ---@return boolean success True if hook installed successfully
 function HookManager:installHarvestHook()
-    if not FruitUtil or not FruitUtil.fruitPickupEvent then
-        print("[SoilFertilizer WARNING] Could not install harvest hook - FruitUtil not available")
+    if not FruitUtil or type(FruitUtil.fruitPickupEvent) ~= "function" then
+        print("[SoilFertilizer WARNING] Could not install harvest hook - FruitUtil.fruitPickupEvent not available or replaced")
         return false
     end
 
@@ -138,8 +138,8 @@ end
 -- Hook 2: Fertilizer application (Sprayer) - converted from direct replacement to appended
 ---@return boolean success True if hook installed successfully
 function HookManager:installSprayerHook()
-    if not Sprayer or not Sprayer.spray then
-        print("[SoilFertilizer WARNING] Could not install fertilizer hook - Sprayer not available")
+    if not Sprayer or type(Sprayer.spray) ~= "function" then
+        print("[SoilFertilizer WARNING] Could not install fertilizer hook - Sprayer.spray not available or replaced")
         return false
     end
 
@@ -251,8 +251,8 @@ end
 -- Hook 5: Plowing operations (Cultivator)
 ---@return boolean success True if hook installed successfully
 function HookManager:installPlowingHook()
-    if not Cultivator or not Cultivator.processCultivatorArea then
-        print("[SoilFertilizer WARNING] Could not install plowing hook - Cultivator not available")
+    if not Cultivator or type(Cultivator.processCultivatorArea) ~= "function" then
+        print("[SoilFertilizer WARNING] Could not install plowing hook - Cultivator.processCultivatorArea not available or replaced")
         return false
     end
 

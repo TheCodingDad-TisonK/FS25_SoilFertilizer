@@ -1,5 +1,5 @@
 -- =========================================================
--- FS25 Realistic Soil & Fertilizer (version 1.0.4.1)
+-- FS25 Realistic Soil & Fertilizer (version 1.0.6.0)
 -- =========================================================
 -- Soil HUD Overlay - always-on display (like Precision Farming)
 -- =========================================================
@@ -312,17 +312,19 @@ function SoilHUD:drawPanel(farmlandId, worldX, worldZ)
 
         if worldX and worldZ then
             fieldId = self:findFieldAtPosition(worldX, worldZ)
-        else
-            -- Fallback: Can't get position, find first field in this farmland
-            if g_fieldManager and g_fieldManager.fields then
-                for _, f in pairs(g_fieldManager.fields) do
-                    if f and f.farmland and f.farmland.id == farmlandId and f.fieldId then
-                        fieldId = f.fieldId
-                        if self.settings.debugMode then
-                            SoilLogger.debug("[HUD] Field via first-in-farmland fallback (no position): %d", fieldId)
-                        end
-                        break
+        end
+
+        -- Farmland-based fallback: if position-based detection failed (or no position),
+        -- find any field belonging to this farmland. This covers FS25 builds where
+        -- getFieldAtWorldPosition/getContainsPoint APIs are unavailable.
+        if not fieldId and farmlandId and g_fieldManager and g_fieldManager.fields then
+            for _, f in pairs(g_fieldManager.fields) do
+                if f and f.farmland and f.farmland.id == farmlandId and f.fieldId then
+                    fieldId = f.fieldId
+                    if self.settings.debugMode then
+                        SoilLogger.debug("[HUD] Field via farmland fallback: field %d on farmland %d", fieldId, farmlandId)
                     end
+                    break
                 end
             end
         end

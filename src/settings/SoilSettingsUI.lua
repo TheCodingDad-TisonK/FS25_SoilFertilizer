@@ -1,9 +1,13 @@
 -- =========================================================
--- FS25 Realistic Soil & Fertilizer (FIXED FOR MULTIPLAYER)
+-- FS25 Realistic Soil & Fertilizer
 -- =========================================================
--- Settings UI - auto-generated from SettingsSchema
+-- Settings UI - profile-based element creation
+-- Pattern from: FS25_UsedPlus/src/gui/UsedPlusSettingsMenuExtension.lua
 -- =========================================================
--- Author: TisonK (Multiplayer fix applied)
+-- Hooks InGameMenuSettingsFrame at file-load time (runs once).
+-- Elements are created via FS25 profiles, not clone().
+-- This eliminates the white settings page bug on dedicated
+-- server clients (GitHub #21).
 -- =========================================================
 ---@class SoilSettingsUI
 
@@ -13,10 +17,7 @@ local SoilSettingsUI_mt = Class(SoilSettingsUI)
 function SoilSettingsUI.new(settings)
     local self = setmetatable({}, SoilSettingsUI_mt)
     self.settings = settings
-    self.injected = false
-    self.uiElements = {}
     self._resetButton = nil
-    self.compatibilityMode = false
     return self
 end
 
@@ -92,96 +93,86 @@ function SoilSettingsUI:togglePFProtected(settingKey, val)
     self:requestSettingChange(settingKey, val)
 end
 
-function SoilSettingsUI:inject()
-    if self.injected then return true end
-    if not g_gui or not g_gui.screenControllers then
-        SoilLogger.warning("[SoilFertilizer] GUI unavailable")
-        return false
-    end
-
+-- Refresh UI elements to match current settings values
+function SoilSettingsUI:refreshUI()
+    -- Find the current settings frame
+    if not g_gui or not g_gui.screenControllers then return end
     local inGameMenu = g_gui.screenControllers[InGameMenu]
-    if not inGameMenu or not inGameMenu.pageSettings or not inGameMenu.pageSettings.generalSettingsLayout then
-        SoilLogger.warning("[SoilFertilizer] Settings page not ready")
-        return false
+    if not inGameMenu or not inGameMenu.pageSettings then return end
+    local frame = inGameMenu.pageSettings
+    if not frame.soilFertilizer_initDone then return end
+
+    for _, def in ipairs(SettingsSchema.definitions) do
+        local element = frame["soilFertilizer_" .. def.uiId]
+        if element then
+            local val = self.settings[def.id]
+            if def.type == "boolean" then
+                if element.setIsChecked then
+                    element:setIsChecked(val == true, false, false)
+                end
+            elseif def.type == "number" and element.setState then
+                element:setState(val or def.default)
+            end
+        end
+    end
+end
+
+--- Called when InGameMenuSettingsFrame opens.
+--- Creates all settings elements using profile-based factory functions.
+function SoilSettingsUI:onFrameOpen(frame)
+    if frame.soilFertilizer_initDone then
+        return
     end
 
-    local layout = inGameMenu.pageSettings.generalSettingsLayout
-
-    -- Non-admin MP clients cannot change settings and must not inject UI elements.
-    -- Template cloning on dedicated server clients can corrupt other settings pages
-    -- (Graphics, Server Settings, Better Contracts, etc.) by reparenting shared elements.
-    local isMP = g_currentMission.missionDynamicInfo.isMultiplayer
-    if isMP and not self:isPlayerAdmin() then
-        self.injected = true
-        SoilLogger.info("Non-admin MP client: UI injection skipped (admin-only settings)")
-        return true
+    local layout = frame.gameSettingsLayout
+    if not layout then
+        SoilLogger.warning("[SoilFertilizer] gameSettingsLayout not found on frame")
+        return
     end
-
-    -- Clear any existing elements to prevent duplicates on retry
-    if #self.uiElements > 0 then
-        SoilLogger.info("Clearing %d existing UI elements before retry", #self.uiElements)
-        self.uiElements = {}
-        -- Also reset template cache on retry to handle mod load order changes
-        UIHelper.resetTemplateCache()
-    end
-
-    -- Section header
-    local section = UIHelper.createSection(layout, "sf_section")
-    table.insert(self.uiElements, section)
 
     local isAdmin = self:isPlayerAdmin()
     local pfActive = g_SoilFertilityManager and g_SoilFertilityManager.soilSystem and g_SoilFertilityManager.soilSystem.PFActive
 
-    -- Add Viewer Mode banner if Precision Farming is active
+    -- Section header
+    local ok, err = pcall(UIHelper.createSectionHeader, layout, g_i18n:getText("sf_section") or "Soil & Fertilizer")
+    if not ok then
+        SoilLogger.warning("[SoilFertilizer] Failed to create section header: %s", tostring(err))
+    end
+
+    -- PF viewer-mode notice
     if pfActive then
-        local pfInfoText = UIHelper.createDescription(layout, "sf_pf_viewer_mode_info")
-        if pfInfoText and pfInfoText.setText then
-            pfInfoText:setText("VIEWER MODE: Precision Farming is managing soil data - settings locked")
-            if pfInfoText.textColor then
-                pfInfoText.textColor = {0.4, 0.8, 1.0, 1.0}  -- Blue color to match info theme
-            end
+        local ok2, pfHeader = pcall(UIHelper.createSectionHeader, layout, "[ VIEWER MODE: Precision Farming active ]")
+        if ok2 and pfHeader and pfHeader.textColor then
+            pfHeader.textColor = {0.4, 0.8, 1.0, 1.0}
         end
-        table.insert(self.uiElements, pfInfoText)
     end
 
     -- Auto-generate boolean toggle options from schema
     for _, def in ipairs(SettingsSchema.getBooleanSettings()) do
-        local callback
-        if def.pfProtected then
-            callback = function(val)
-                self:togglePFProtected(def.id, val)
-            end
-        else
-            callback = function(val)
-                self:requestSettingChange(def.id, val)
-            end
-        end
+        local callbackName = "on_" .. def.id .. "_Changed"
+        local title = g_i18n:getText(def.uiId .. "_short") or def.id
+        local tooltip = g_i18n:getText(def.uiId .. "_long") or ""
 
-        local disabled = def.pfProtected and pfActive or false
-
-        local success, element = pcall(UIHelper.createBinaryOption, layout, def.uiId, def.uiId, self.settings[def.id], callback)
-        if success and element then
+        local ok3, element = pcall(UIHelper.createBinaryOption, layout, SoilSettingsUI, callbackName, title, tooltip)
+        if ok3 and element then
+            local disabled = def.pfProtected and pfActive or false
             local shouldDisable = (not isAdmin) or disabled
 
             if shouldDisable and element.setIsEnabled then
                 element:setIsEnabled(false)
-
-                local tooltip = "Admin only"
-                if disabled then
-                    tooltip = "Viewer Mode - Precision Farming manages this"
-                end
-
+                local tipText = disabled and "Viewer Mode - Precision Farming manages this" or "Admin only"
                 if element.setToolTipText then
-                    element:setToolTipText(tooltip)
+                    element:setToolTipText(tipText)
                 end
             end
 
-            self.uiElements[def.uiId] = element
-            table.insert(self.uiElements, element)
+            frame["soilFertilizer_" .. def.uiId] = element
+        else
+            SoilLogger.warning("[SoilFertilizer] Failed to create toggle for %s: %s", def.id, tostring(element))
         end
     end
 
-    -- Difficulty dropdown (the only non-boolean setting)
+    -- Difficulty dropdown
     local diffDef = SettingsSchema.byId["difficulty"]
     if diffDef then
         local diffOptions = {
@@ -190,32 +181,18 @@ function SoilSettingsUI:inject()
             g_i18n:getText("sf_diff_3") or "Hardcore"
         }
 
-        local success, diffElement = pcall(UIHelper.createMultiOption, layout, diffDef.uiId, "sf_difficulty", diffOptions, self.settings.difficulty, function(val)
-            if pfActive then
-                if g_currentMission and g_currentMission.hud then
-                    g_currentMission.hud:showBlinkingWarning(
-                        "Viewer Mode: Precision Farming is managing soil data - difficulty locked",
-                        5000
-                    )
-                end
-                self:refreshUI()
-                return
-            end
-
-            self:requestSettingChange("difficulty", val)
-        end)
-
-        if success and diffElement then
+        local ok4, diffElement = pcall(UIHelper.createMultiOption, layout, SoilSettingsUI, "onDifficultyChanged", diffOptions,
+            g_i18n:getText("sf_difficulty_short") or "Difficulty",
+            g_i18n:getText("sf_difficulty_long") or "Soil management difficulty level")
+        if ok4 and diffElement then
             if (not isAdmin or pfActive) and diffElement.setIsEnabled then
                 diffElement:setIsEnabled(false)
-                local tooltip = pfActive and "Viewer Mode - Precision Farming manages this" or "Admin only"
+                local tipText = pfActive and "Viewer Mode - Precision Farming manages this" or "Admin only"
                 if diffElement.setToolTipText then
-                    diffElement:setToolTipText(tooltip)
+                    diffElement:setToolTipText(tipText)
                 end
             end
-
-            self.uiElements[diffDef.uiId] = diffElement
-            table.insert(self.uiElements, diffElement)
+            frame["soilFertilizer_" .. diffDef.uiId] = diffElement
         end
     end
 
@@ -230,127 +207,109 @@ function SoilSettingsUI:inject()
             g_i18n:getText("sf_hud_pos_5") or "Center Right"
         }
 
-        local success, hudPosElement = pcall(UIHelper.createMultiOption, layout, hudPosDef.uiId, "sf_hud_position", hudPosOptions, self.settings.hudPosition or 1, function(val)
-            self:requestSettingChange("hudPosition", val)
-        end)
-
-        if success and hudPosElement then
+        local ok5, hudPosElement = pcall(UIHelper.createMultiOption, layout, SoilSettingsUI, "onHudPositionChanged", hudPosOptions,
+            g_i18n:getText("sf_hud_position_short") or "HUD Position",
+            g_i18n:getText("sf_hud_position_long") or "Position of the soil HUD overlay")
+        if ok5 and hudPosElement then
             if not isAdmin and hudPosElement.setIsEnabled then
                 hudPosElement:setIsEnabled(false)
                 if hudPosElement.setToolTipText then
                     hudPosElement:setToolTipText("Admin only")
                 end
             end
-
-            self.uiElements[hudPosDef.uiId] = hudPosElement
-            table.insert(self.uiElements, hudPosElement)
+            frame["soilFertilizer_" .. hudPosDef.uiId] = hudPosElement
         end
     end
 
-    -- Validate injection before marking as complete
-    if not self:validateInjection() then
-        SoilLogger.warning("GUI injection failed validation")
-        return false
+    -- HUD Color Theme dropdown
+    local hudColorDef = SettingsSchema.byId["hudColorTheme"]
+    if hudColorDef then
+        local hudColorOptions = {
+            g_i18n:getText("sf_hud_color_1") or "Green",
+            g_i18n:getText("sf_hud_color_2") or "Blue",
+            g_i18n:getText("sf_hud_color_3") or "Amber",
+            g_i18n:getText("sf_hud_color_4") or "Mono"
+        }
+
+        local ok6, hudColorElement = pcall(UIHelper.createMultiOption, layout, SoilSettingsUI, "onHudColorThemeChanged", hudColorOptions,
+            g_i18n:getText("sf_hud_color_theme_short") or "HUD Color Theme",
+            g_i18n:getText("sf_hud_color_theme_long") or "Color theme for the soil HUD")
+        if ok6 and hudColorElement then
+            frame["soilFertilizer_" .. hudColorDef.uiId] = hudColorElement
+        end
     end
 
-    self.injected = true
+    -- HUD Font Size dropdown
+    local hudFontDef = SettingsSchema.byId["hudFontSize"]
+    if hudFontDef then
+        local hudFontOptions = {
+            g_i18n:getText("sf_hud_font_1") or "Small",
+            g_i18n:getText("sf_hud_font_2") or "Medium",
+            g_i18n:getText("sf_hud_font_3") or "Large"
+        }
 
-    local statusMsg = string.format(
-        "Settings UI injected (Admin: %s, PF: %s, Multiplayer: %s)",
-        tostring(isAdmin),
-        tostring(pfActive),
-        tostring(g_currentMission.missionDynamicInfo.isMultiplayer)
-    )
-    SoilLogger.info(statusMsg)
+        local ok7, hudFontElement = pcall(UIHelper.createMultiOption, layout, SoilSettingsUI, "onHudFontSizeChanged", hudFontOptions,
+            g_i18n:getText("sf_hud_font_size_short") or "HUD Font Size",
+            g_i18n:getText("sf_hud_font_size_long") or "Font size for the soil HUD")
+        if ok7 and hudFontElement then
+            frame["soilFertilizer_" .. hudFontDef.uiId] = hudFontElement
+        end
+    end
 
-    return true
+    -- HUD Transparency dropdown
+    local hudTransDef = SettingsSchema.byId["hudTransparency"]
+    if hudTransDef then
+        local hudTransOptions = {
+            g_i18n:getText("sf_hud_trans_1") or "Clear (25%)",
+            g_i18n:getText("sf_hud_trans_2") or "Light (50%)",
+            g_i18n:getText("sf_hud_trans_3") or "Medium (70%)",
+            g_i18n:getText("sf_hud_trans_4") or "Dark (85%)",
+            g_i18n:getText("sf_hud_trans_5") or "Solid (100%)"
+        }
+
+        local ok8, hudTransElement = pcall(UIHelper.createMultiOption, layout, SoilSettingsUI, "onHudTransparencyChanged", hudTransOptions,
+            g_i18n:getText("sf_hud_transparency_short") or "HUD Transparency",
+            g_i18n:getText("sf_hud_transparency_long") or "Background transparency of the soil HUD")
+        if ok8 and hudTransElement then
+            frame["soilFertilizer_" .. hudTransDef.uiId] = hudTransElement
+        end
+    end
+
+    -- Finalize layout
+    layout:invalidateLayout()
+    if frame.updateAlternatingElements then
+        frame:updateAlternatingElements(layout)
+    end
+    if frame.updateGeneralSettings then
+        frame:updateGeneralSettings(layout)
+    end
+
+    frame.soilFertilizer_initDone = true
+
+    -- Sync UI state from current settings
+    self:updateGameSettings(frame)
+
+    SoilLogger.info("Settings UI injected via profile-based creation (Admin: %s, PF: %s)",
+        tostring(isAdmin), tostring(pfActive))
 end
 
-function SoilSettingsUI:refreshUI()
-    if not self.injected then return end
+--- Sync UI elements with current settings values. Called on frame refresh.
+function SoilSettingsUI:updateGameSettings(frame)
+    if not frame.soilFertilizer_initDone then return end
 
-    for id, element in pairs(self.uiElements) do
-        if type(id) == "string" then
-            local def = nil
-            -- Find schema definition by uiId
-            for _, d in ipairs(SettingsSchema.definitions) do
-                if d.uiId == id then
-                    def = d
-                    break
+    for _, def in ipairs(SettingsSchema.definitions) do
+        local element = frame["soilFertilizer_" .. def.uiId]
+        if element then
+            local val = self.settings[def.id]
+            if def.type == "boolean" then
+                if element.setIsChecked then
+                    element:setIsChecked(val == true, false, false)
                 end
-            end
-
-            if def then
-                local val = self.settings[def.id]
-                if def.type == "boolean" then
-                    if element.setIsChecked then
-                        element:setIsChecked(val)
-                    elseif element.setState then
-                        element:setState(val and 2 or 1)
-                    end
-                elseif def.type == "number" and element.setState then
-                    element:setState(val)
-                end
+            elseif def.type == "number" and element.setState then
+                element:setState(val or def.default)
             end
         end
     end
-
-    print("[SoilFertilizer] UI refreshed with current settings")
-end
-
--- Validate that UI elements were successfully injected
-function SoilSettingsUI:validateInjection()
-    -- Check that we have UI elements
-    if not self.uiElements or #self.uiElements == 0 then
-        SoilLogger.warning("Validation failed: No UI elements created")
-        return false
-    end
-
-    -- Check that g_gui is available
-    if not g_gui or not g_gui.screenControllers then
-        SoilLogger.warning("Validation failed: g_gui not available")
-        return false
-    end
-
-    -- Check that InGameMenu exists
-    local inGameMenu = g_gui.screenControllers[InGameMenu]
-    if not inGameMenu or not inGameMenu.pageSettings then
-        SoilLogger.warning("Validation failed: InGameMenu not available")
-        return false
-    end
-
-    -- Check that settings layout exists
-    local layout = inGameMenu.pageSettings.generalSettingsLayout
-    if not layout or not layout.elements then
-        SoilLogger.warning("Validation failed: Settings layout not available")
-        return false
-    end
-
-    -- Simplified validation: Trust UIHelper's built-in pcall validation
-    -- UIHelper functions only return non-nil elements that were successfully created and added
-    -- Strict layout array verification is fragile when multiple mods inject UI elements
-    local hasValidElements = false
-    for _, elem in ipairs(self.uiElements) do
-        if elem and type(elem) == "table" then
-            hasValidElements = true
-            break
-        end
-    end
-
-    if not hasValidElements then
-        SoilLogger.warning("Validation failed: No valid UI elements created")
-        return false
-    end
-
-    local modeText = ""
-    if g_currentMission and g_currentMission.missionDynamicInfo.isMultiplayer then
-        modeText = g_server and " (MP server)" or " (MP client)"
-    else
-        modeText = " (SP)"
-    end
-
-    SoilLogger.info("GUI validation passed%s: %d elements created", modeText, #self.uiElements)
-    return true
 end
 
 function SoilSettingsUI:ensureResetButton(settingsFrame)
@@ -386,9 +345,7 @@ function SoilSettingsUI:ensureResetButton(settingsFrame)
                         end
                     else
                         g_SoilFertilityManager.settings:resetToDefaults()
-                        if self then
-                            self:refreshUI()
-                        end
+                        self:refreshUI()
                         g_gui:showInfoDialog({text="Soil & Fertilizer settings reset to defaults"})
                     end
                 end
@@ -412,3 +369,99 @@ function SoilSettingsUI:ensureResetButton(settingsFrame)
         end
     end
 end
+
+-- Dynamic callback generation from schema (boolean toggles)
+for _, def in ipairs(SettingsSchema.getBooleanSettings()) do
+    SoilSettingsUI["on_" .. def.id .. "_Changed"] = function(self, state)
+        if not g_SoilFertilityManager or not g_SoilFertilityManager.settingsUI then return end
+        local settingsUI = g_SoilFertilityManager.settingsUI
+        local isChecked = (state == BinaryOptionElement.STATE_RIGHT)
+        if def.pfProtected then
+            settingsUI:togglePFProtected(def.id, isChecked)
+        else
+            settingsUI:requestSettingChange(def.id, isChecked)
+        end
+    end
+end
+
+-- Difficulty dropdown callback
+function SoilSettingsUI:onDifficultyChanged(state)
+    if not g_SoilFertilityManager or not g_SoilFertilityManager.settingsUI then return end
+    local settingsUI = g_SoilFertilityManager.settingsUI
+    local pfActive = g_SoilFertilityManager.soilSystem and g_SoilFertilityManager.soilSystem.PFActive
+    if pfActive then
+        if g_currentMission and g_currentMission.hud then
+            g_currentMission.hud:showBlinkingWarning(
+                "Viewer Mode: Precision Farming is managing soil data - difficulty locked",
+                5000
+            )
+        end
+        settingsUI:refreshUI()
+        return
+    end
+    settingsUI:requestSettingChange("difficulty", state)
+end
+
+-- HUD Position dropdown callback
+function SoilSettingsUI:onHudPositionChanged(state)
+    if not g_SoilFertilityManager or not g_SoilFertilityManager.settingsUI then return end
+    g_SoilFertilityManager.settingsUI:requestSettingChange("hudPosition", state)
+end
+
+-- HUD Color Theme dropdown callback
+function SoilSettingsUI:onHudColorThemeChanged(state)
+    if not g_SoilFertilityManager or not g_SoilFertilityManager.settingsUI then return end
+    g_SoilFertilityManager.settingsUI:requestSettingChange("hudColorTheme", state)
+end
+
+-- HUD Font Size dropdown callback
+function SoilSettingsUI:onHudFontSizeChanged(state)
+    if not g_SoilFertilityManager or not g_SoilFertilityManager.settingsUI then return end
+    g_SoilFertilityManager.settingsUI:requestSettingChange("hudFontSize", state)
+end
+
+-- HUD Transparency dropdown callback
+function SoilSettingsUI:onHudTransparencyChanged(state)
+    if not g_SoilFertilityManager or not g_SoilFertilityManager.settingsUI then return end
+    g_SoilFertilityManager.settingsUI:requestSettingChange("hudTransparency", state)
+end
+
+-- Install hooks at file-load time (runs once, never accumulates on level reload)
+local function init()
+    InGameMenuSettingsFrame.onFrameOpen = Utils.appendedFunction(
+        InGameMenuSettingsFrame.onFrameOpen,
+        function(frame)
+            if g_SoilFertilityManager and g_SoilFertilityManager.settingsUI then
+                g_SoilFertilityManager.settingsUI:onFrameOpen(frame)
+                -- Ensure reset button
+                if frame.soilFertilizer_initDone then
+                    g_SoilFertilityManager.settingsUI:ensureResetButton(frame)
+                end
+            end
+        end
+    )
+
+    InGameMenuSettingsFrame.updateGameSettings = Utils.appendedFunction(
+        InGameMenuSettingsFrame.updateGameSettings,
+        function(frame)
+            if g_SoilFertilityManager and g_SoilFertilityManager.settingsUI then
+                g_SoilFertilityManager.settingsUI:updateGameSettings(frame)
+            end
+        end
+    )
+
+    InGameMenuSettingsFrame.updateButtons = Utils.appendedFunction(
+        InGameMenuSettingsFrame.updateButtons,
+        function(frame)
+            if g_SoilFertilityManager and g_SoilFertilityManager.settingsUI then
+                if frame.soilFertilizer_initDone then
+                    g_SoilFertilityManager.settingsUI:ensureResetButton(frame)
+                end
+            end
+        end
+    )
+
+    SoilLogger.info("Settings UI hooks installed (file-load time)")
+end
+
+init()

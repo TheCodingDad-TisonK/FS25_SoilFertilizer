@@ -34,6 +34,7 @@ source(modDirectory .. "src/settings/SoilSettingsGUI.lua")
 source(modDirectory .. "src/utils/UIHelper.lua")
 source(modDirectory .. "src/settings/SoilSettingsUI.lua")
 source(modDirectory .. "src/ui/SoilHUD.lua")
+source(modDirectory .. "src/ui/SoilReportDialog.lua")
 
 -- 5. Network
 source(modDirectory .. "src/network/NetworkEvents.lua")

@@ -267,8 +267,8 @@ function SoilSettingsGUI:consoleCommandResetSettings()
         if g_SoilFertilityManager.soilSystem then
             g_SoilFertilityManager.soilSystem:initialize()
         end
-        if g_SoilFertilityManager.soilSettingsUI then
-            g_SoilFertilityManager.soilSettingsUI:refreshUI()
+        if g_SoilFertilityManager.settingsUI then
+            g_SoilFertilityManager.settingsUI:refreshUI()
         end
         return "Soil Mod settings reset to default!"
     end

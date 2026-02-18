@@ -1,5 +1,5 @@
 -- =========================================================
--- FS25 Realistic Soil & Fertilizer (version 1.0.4.1)
+-- FS25 Realistic Soil & Fertilizer (version 1.0.6.0)
 -- =========================================================
 -- Settings domain object - uses SettingsSchema for defaults/validation
 -- =========================================================
@@ -37,7 +37,7 @@ function Settings:setDifficulty(difficulty)
             difficultyName = "Hardcore"
         end
 
-        SoilLogger.info("[SoilFertilizer]Difficulty changed to: %s", difficultyName)
+        SoilLogger.info("[SoilFertilizer] Difficulty changed to: %s", difficultyName)
     end
 end
 
