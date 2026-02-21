@@ -98,7 +98,7 @@ def build_mod():
 if __name__ == '__main__':
     try:
         output = build_mod()
-        print("\n✓ Mod built successfully!")
+        print("\nMod built successfully!")
     except Exception as e:
-        print(f"\n✗ Build failed: {e}")
+        print(f"\nBuild failed: {e}")
         exit(1)

@@ -229,7 +229,7 @@ function SoilFertilityManager:deferredSoilSystemInit()
         sfm = self,
         installed = false,
         attempts = 0,
-        maxAttempts = 600,  -- ~10s at 60fps — covers 100+ mod servers where field population is slow
+        maxAttempts = 3000,  -- ~50s at 60fps — covers very heavy modded servers
 
         update = function(self, dt)
             if self.installed then
@@ -238,10 +238,17 @@ function SoilFertilityManager:deferredSoilSystemInit()
 
             self.attempts = self.attempts + 1
 
-            -- Guard 1: Mission must be started
-            if not g_currentMission or not g_currentMission.isMissionStarted then
+            -- Guard 1: Mission must exist and be in a started state.
+            -- FS25 does not reliably expose isMissionStarted; instead check missionDynamicInfo.isStarted
+            -- which is set once the loading screen completes, with a fallback to checking that hud
+            -- exists (initialized late in the load sequence) for older or modded builds.
+            local missionReady = g_currentMission ~= nil and (
+                (g_currentMission.missionDynamicInfo ~= nil and g_currentMission.missionDynamicInfo.isStarted) or
+                (g_currentMission.hud ~= nil)
+            )
+            if not missionReady then
                 if self.attempts >= self.maxAttempts then
-                    SoilLogger.warning("Deferred init timeout: Mission not started after %d attempts", self.attempts)
+                    SoilLogger.warning("Deferred init timeout: Mission not ready after %d attempts", self.attempts)
                     return true  -- Give up and remove updater
                 end
                 return false  -- Keep waiting
@@ -438,4 +445,3 @@ function SoilFertilityManager:delete()
     end
     SoilLogger.info("Shutting down")
 end
-

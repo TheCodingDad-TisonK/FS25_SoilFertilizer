@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Ask a question or discuss the mod
+    url: https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/discussions
+    about: For general questions, ideas, or feedback that isn't a bug or feature request
