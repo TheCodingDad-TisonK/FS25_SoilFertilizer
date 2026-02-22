@@ -1,9 +1,10 @@
 -- =========================================================
--- FS25 Realistic Soil & Fertilizer - Constants
+-- FS25 Realistic Soil & Fertilizer - Enhanced Constants
 -- =========================================================
--- Single source of truth for all tunable values
+-- Configuration values and constants for the mod
+-- Enhanced with enterprise-grade monitoring and reliability features
 -- =========================================================
--- Author: TisonK
+-- Author: TisonK (Enhanced Version)
 -- =========================================================
 
 ---@class SoilConstants
@@ -260,3 +261,216 @@ SoilConstants.NETWORK = {
 }
 
 print("[SoilFertilizer] Constants loaded")
+
+-- ========================================
+-- ENHANCED ENTERPRISE CONFIGURATION
+-- ========================================
+-- Additional constants for enterprise-grade features
+-- Circuit breaker, monitoring, and reliability patterns
+-- ========================================
+
+-- Circuit breaker configuration
+SoilConstants.CIRCUIT_BREAKER = {
+    FAILURE_THRESHOLD = 5,           -- Number of failures before opening
+    RECOVERY_TIMEOUT = 30000,        -- Time in ms before attempting half-open
+    HALF_OPEN_MAX_CALLS = 3,         -- Max calls in half-open state
+    FAILURE_RATE_THRESHOLD = 0.5,    -- Failure rate to trigger opening
+}
+
+-- Health monitoring configuration
+SoilConstants.HEALTH_MONITORING = {
+    CHECK_INTERVAL = 10000,          -- Run health checks every 10 seconds
+    CRITICAL_FAILURE_THRESHOLD = 3,  -- Failures before critical status
+    WARNING_FAILURE_THRESHOLD = 2,   -- Failures before warning status
+    MEMORY_LEAK_THRESHOLD = 1000,    -- Max field count before memory warning
+    CACHE_SIZE_THRESHOLD = 500,      -- Max cache entries before warning
+    CORRUPTION_THRESHOLD = 0.05,     -- 5% corruption rate before failure
+    LATENCY_THRESHOLD = 1000,        -- Max average latency in ms
+    SUCCESS_RATE_THRESHOLD = 0.8,    -- Minimum sync success rate (80%)
+}
+
+-- Network optimization configuration
+SoilConstants.NETWORK_OPTIMIZATION = {
+    COMPRESSION_ENABLED = true,      -- Enable field data compression
+    CACHE_TTL = 5000,               -- Cache field data for 5 seconds
+    BANDWIDTH_LIMIT = 102400,       -- Max bandwidth usage per second (100KB)
+    BATCH_SIZE = 10,                -- Number of fields to send in batch
+    RETRY_DELAY = 2000,             -- Delay between retry attempts
+    MAX_RETRIES = 3,                -- Maximum retry attempts
+}
+
+-- Performance monitoring configuration
+SoilConstants.PERFORMANCE_MONITORING = {
+    METRICS_RETENTION = 100,         -- Keep last 100 metric samples
+    LATENCY_WINDOW = 60000,          -- 1 minute latency window
+    BANDWIDTH_WINDOW = 60000,        -- 1 minute bandwidth window
+    ALERT_COOLDOWN = 300000,         -- 5 minutes between duplicate alerts
+}
+
+-- Client connection tracking
+SoilConstants.CLIENT_TRACKING = {
+    CONNECTION_TIMEOUT = 600000,     -- 10 minutes connection timeout
+    HEARTBEAT_INTERVAL = 30000,      -- 30 seconds heartbeat
+    MAX_CONNECTIONS = 100,           -- Maximum tracked connections
+    SYNC_TIMEOUT = 15000,            -- 15 seconds sync timeout
+}
+
+-- Predictive loading configuration
+SoilConstants.PREDICTIVE_LOADING = {
+    PREDICTION_WINDOW = 30000,       -- 30 seconds prediction window
+    PROXIMITY_THRESHOLD = 500,       -- 500m proximity threshold
+    PREFETCH_RADIUS = 1000,          -- 1km prefetch radius
+    LOAD_PRIORITY = 10,              -- Priority for predictive loads
+}
+
+-- Error handling configuration
+SoilConstants.ERROR_HANDLING = {
+    MAX_ERROR_LOGS = 100,            -- Maximum error logs to keep
+    ERROR_COOLDOWN = 5000,           -- 5 seconds between duplicate error logs
+    CRITICAL_ERROR_THRESHOLD = 10,   -- Critical errors before shutdown
+    RECOVERY_ATTEMPTS = 3,           -- Recovery attempts before giving up
+}
+
+-- Memory management configuration
+SoilConstants.MEMORY_MANAGEMENT = {
+    GC_THRESHOLD = 1000000,          -- Force GC at 1MB memory usage
+    CACHE_CLEANUP_INTERVAL = 60000,  -- 1 minute cache cleanup
+    FIELD_DATA_MAX_AGE = 3600000,    -- 1 hour max field data age
+    MAX_FIELD_COUNT = 1000,          -- Maximum fields to track
+}
+
+-- Logging configuration
+SoilConstants.LOGGING = {
+    LOG_LEVEL = "INFO",              -- DEBUG, INFO, WARNING, ERROR, CRITICAL
+    LOG_RETENTION = 1000,            -- Maximum log entries to keep
+    LOG_FLUSH_INTERVAL = 60000,      -- 1 minute log flush interval
+    LOG_FILE_SIZE = 10485760,        -- 10MB max log file size
+    LOG_COMPRESSION = true,          -- Compress old log files
+}
+
+-- ========================================
+-- ENHANCED NETWORK CONSTANTS
+-- ========================================
+-- Extended network configuration for enterprise features
+-- ========================================
+
+-- Enhanced network value types
+SoilConstants.NETWORK.VALUE_TYPE = {
+    BOOLEAN = 0,
+    NUMBER = 1,
+    STRING = 2,
+    COMPRESSED = 3,                  -- Compressed field data
+    METRICS = 4,                     -- Performance metrics
+    HEALTH = 5,                      -- Health check data
+    PREDICTIVE = 6,                  -- Predictive loading data
+}
+
+-- Enhanced network operations
+SoilConstants.NETWORK.OPERATIONS = {
+    FULL_SYNC = "FULL_SYNC",
+    FIELD_UPDATE = "FIELD_UPDATE",
+    HEALTH_CHECK = "HEALTH_CHECK",
+    METRICS_REPORT = "METRICS_REPORT",
+    PREDICTIVE_LOAD = "PREDICTIVE_LOAD",
+    CIRCUIT_BREAKER = "CIRCUIT_BREAKER",
+}
+
+-- Network bandwidth optimization
+SoilConstants.NETWORK.BANDWIDTH = {
+    COMPRESSION_RATIO = 0.5,         -- 50% compression ratio expected
+    BATCH_THRESHOLD = 1000,          -- Batch when more than 1000 bytes
+    PRIORITY_HIGH = 1,               -- High priority (health checks)
+    PRIORITY_MEDIUM = 2,             -- Medium priority (field updates)
+    PRIORITY_LOW = 3,                -- Low priority (metrics, logs)
+}
+
+-- ========================================
+-- ENHANCED MONITORING CONSTANTS
+-- ========================================
+-- Constants for Google-style SRE patterns
+-- ========================================
+
+-- Service Level Indicators (SLIs)
+SoilConstants.SLI = {
+    AVAILABILITY = "availability",   -- Percentage of successful requests
+    LATENCY = "latency",             -- Response time percentiles
+    THROUGHPUT = "throughput",       -- Requests per second
+    ERROR_RATE = "error_rate",       -- Percentage of failed requests
+}
+
+-- Service Level Objectives (SLOs)
+SoilConstants.SLO = {
+    AVAILABILITY_TARGET = 0.99,      -- 99% availability
+    LATENCY_P95_TARGET = 500,        -- 95th percentile under 500ms
+    ERROR_RATE_TARGET = 0.01,        -- Error rate under 1%
+    THROUGHPUT_MIN = 10,             -- Minimum 10 requests per second
+}
+
+-- Service Level Agreements (SLAs)
+SoilConstants.SLA = {
+    RESPONSE_TIME = 1000,            -- Maximum response time (1 second)
+    RECOVERY_TIME = 300000,          -- Maximum recovery time (5 minutes)
+    MAINTENANCE_WINDOW = 3600000,    -- 1 hour maintenance window
+}
+
+-- Alert thresholds
+SoilConstants.ALERTS = {
+    AVAILABILITY_WARNING = 0.95,     -- Warn at 95% availability
+    AVAILABILITY_CRITICAL = 0.90,    -- Critical at 90% availability
+    LATENCY_WARNING = 1000,          -- Warn at 1 second latency
+    LATENCY_CRITICAL = 2000,         -- Critical at 2 seconds latency
+    ERROR_RATE_WARNING = 0.05,       -- Warn at 5% error rate
+    ERROR_RATE_CRITICAL = 0.10,      -- Critical at 10% error rate
+}
+
+-- ========================================
+-- ENHANCED PREDICTIVE ANALYTICS
+-- ========================================
+-- Constants for predictive failure detection
+-- ========================================
+
+-- Predictive thresholds
+SoilConstants.PREDICTIVE = {
+    FAILURE_PROBABILITY_THRESHOLD = 0.8,  -- 80% probability triggers alert
+    TREND_WINDOW = 300000,               -- 5 minutes trend analysis
+    ANOMALY_THRESHOLD = 2.0,             -- 2 standard deviations
+    PREDICTION_CONFIDENCE = 0.7,         -- 70% confidence required
+}
+
+-- Machine learning parameters (simplified)
+SoilConstants.ML = {
+    LEARNING_RATE = 0.01,                -- Learning rate for anomaly detection
+    MEMORY_FACTOR = 0.9,                 -- How much past data to remember
+    SMOOTHING_FACTOR = 0.1,              -- Exponential smoothing factor
+    OUTLIER_SENSITIVITY = 1.5,           -- Sensitivity to outliers
+}
+
+-- ========================================
+-- ENHANCED RECOVERY MECHANISMS
+-- ========================================
+-- Constants for automated recovery
+-- ========================================
+
+-- Recovery strategies
+SoilConstants.RECOVERY = {
+    STRATEGY_IMMEDIATE = "IMMEDIATE",    -- Immediate retry
+    STRATEGY_EXPONENTIAL = "EXPONENTIAL", -- Exponential backoff
+    STRATEGY_CIRCUIT_BREAKER = "CIRCUIT_BREAKER", -- Circuit breaker pattern
+    STRATEGY_GRACEFUL_DEGRADATION = "GRACEFUL_DEGRADATION", -- Reduce functionality
+}
+
+-- Recovery timing
+SoilConstants.RECOVERY_TIMING = {
+    IMMEDIATE_RETRY_DELAY = 1000,        -- 1 second immediate retry
+    EXPONENTIAL_BASE = 2,                -- Base for exponential backoff
+    MAX_RETRY_DELAY = 300000,            -- 5 minutes max retry delay
+    DEGRADATION_TIMEOUT = 600000,        -- 10 minutes degradation timeout
+}
+
+-- Recovery thresholds
+SoilConstants.RECOVERY_THRESHOLDS = {
+    MAX_RECOVERY_ATTEMPTS = 5,           -- Maximum recovery attempts
+    RECOVERY_SUCCESS_RATE = 0.8,         -- 80% success rate required
+    DEGRADATION_TRIGGER = 0.5,           -- 50% failure rate triggers degradation
+    FULL_RECOVERY_THRESHOLD = 0.1,       -- 10% failure rate allows full recovery
+}
