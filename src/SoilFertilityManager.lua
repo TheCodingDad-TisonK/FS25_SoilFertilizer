@@ -9,6 +9,21 @@
 SoilFertilityManager = {}
 local SoilFertilityManager_mt = Class(SoilFertilityManager)
 
+-- Enhanced health monitoring system
+local HealthMonitor = {
+    status = "HEALTHY",
+    lastCheck = 0,
+    checks = {},
+    alerts = {},
+    metrics = {
+        uptime = 0,
+        memoryUsage = 0,
+        errorCount = 0,
+        syncFailures = 0,
+        fieldCount = 0
+    }
+}
+
 --- Create new SoilFertilityManager instance
 ---@param mission table The mission object
 ---@param modDirectory string Path to mod directory
@@ -444,4 +459,333 @@ function SoilFertilityManager:delete()
         self.settings:save()
     end
     SoilLogger.info("Shutting down")
+end
+
+-- ========================================
+-- ENHANCED HEALTH MONITORING SYSTEM
+-- ========================================
+
+--- Initialize health monitoring system
+function SoilFertilityManager:initializeHealthMonitoring()
+    if not self.settings then return end
+
+    -- Register health checks
+    self:registerHealthCheck("system_integrity", function()
+        return self:checkSystemIntegrity()
+    end)
+
+    self:registerHealthCheck("field_data_integrity", function()
+        return self:checkFieldDataIntegrity()
+    end)
+
+    self:registerHealthCheck("network_reliability", function()
+        return self:checkNetworkReliability()
+    end)
+
+    self:registerHealthCheck("memory_usage", function()
+        return self:checkMemoryUsage()
+    end)
+
+    self:registerHealthCheck("performance_metrics", function()
+        return self:checkPerformanceMetrics()
+    end)
+
+    SoilLogger.info("Health monitoring system initialized")
+end
+
+--- Register a health check function
+function SoilFertilityManager:registerHealthCheck(name, checkFunction)
+    HealthMonitor.checks[name] = {
+        name = name,
+        function = checkFunction,
+        lastRun = 0,
+        lastResult = nil,
+        failures = 0
+    }
+end
+
+--- Run all health checks
+function SoilFertilityManager:runHealthChecks()
+    if not self.settings or not self.settings.enabled then return end
+
+    local currentTime = g_currentMission and g_currentMission.time or 0
+    local checkInterval = 10000  -- Run checks every 10 seconds
+
+    if currentTime - HealthMonitor.lastCheck < checkInterval then
+        return
+    end
+
+    HealthMonitor.lastCheck = currentTime
+
+    local overallStatus = "HEALTHY"
+    local failedChecks = {}
+
+    for name, check in pairs(HealthMonitor.checks) do
+        local success, result = pcall(check.function)
+        
+        if success and result then
+            check.failures = 0
+            check.lastResult = "PASS"
+        else
+            check.failures = check.failures + 1
+            check.lastResult = "FAIL"
+            table.insert(failedChecks, name)
+            
+            if check.failures >= 3 then
+                overallStatus = "CRITICAL"
+            elseif check.failures >= 2 then
+                overallStatus = "WARNING"
+            elseif overallStatus == "HEALTHY" then
+                overallStatus = "WARNING"
+            end
+        end
+    end
+
+    -- Update overall status
+    HealthMonitor.status = overallStatus
+
+    -- Log results if any checks failed
+    if #failedChecks > 0 then
+        SoilLogger.warning("Health check failures: %s", table.concat(failedChecks, ", "))
+    end
+
+    -- Show alert if critical
+    if overallStatus == "CRITICAL" and self.settings.showNotifications then
+        self:showHealthAlert("CRITICAL", "System health is critical. Please check the mod status.")
+    end
+end
+
+--- Check system integrity
+function SoilFertilityManager:checkSystemIntegrity()
+    -- Check if core systems are loaded
+    if not self.soilSystem then
+        SoilLogger.error("Health check failed: SoilFertilitySystem not loaded")
+        return false
+    end
+
+    if not self.settings then
+        SoilLogger.error("Health check failed: Settings not loaded")
+        return false
+    end
+
+    -- Check if required modules exist
+    if not SoilLogger then
+        SoilLogger.error("Health check failed: Logger module missing")
+        return false
+    end
+
+    -- Check if field manager is available
+    if not g_fieldManager then
+        SoilLogger.warning("Health check warning: FieldManager not available")
+        return false
+    end
+
+    return true
+end
+
+--- Check field data integrity
+function SoilFertilityManager:checkFieldDataIntegrity()
+    if not self.soilSystem or not self.soilSystem.fieldData then
+        return false
+    end
+
+    local fieldCount = 0
+    local corruptionCount = 0
+
+    for fieldId, field in pairs(self.soilSystem.fieldData) do
+        fieldCount = fieldCount + 1
+
+        -- Check for invalid values
+        if field.nitrogen < 0 or field.nitrogen > 100 then
+            corruptionCount = corruptionCount + 1
+        end
+        if field.phosphorus < 0 or field.phosphorus > 100 then
+            corruptionCount = corruptionCount + 1
+        end
+        if field.potassium < 0 or field.potassium > 100 then
+            corruptionCount = corruptionCount + 1
+        end
+        if field.pH < 4.0 or field.pH > 9.0 then
+            corruptionCount = corruptionCount + 1
+        end
+    end
+
+    -- Allow up to 5% corruption before failing
+    local corruptionRate = fieldCount > 0 and (corruptionCount / (fieldCount * 4)) or 0
+
+    if corruptionRate > 0.05 then
+        SoilLogger.warning("Field data corruption detected: %.1f%%", corruptionRate * 100)
+        return false
+    end
+
+    HealthMonitor.metrics.fieldCount = fieldCount
+    return true
+end
+
+--- Check network reliability
+function SoilFertilityManager:checkNetworkReliability()
+    if not g_currentMission or not g_currentMission.missionDynamicInfo.isMultiplayer then
+        return true  -- Single player, no network issues
+    end
+
+    -- Check if we have connected clients
+    if g_server then
+        local clientCount = 0
+        for _ in pairs(self.soilSystem.connectedClients or {}) do
+            clientCount = clientCount + 1
+        end
+
+        -- If we have clients but no connections tracked, there's an issue
+        if clientCount > 0 and #self.soilSystem.connectedClients == 0 then
+            SoilLogger.warning("Network check failed: Clients connected but not tracked")
+            return false
+        end
+    end
+
+    -- Check circuit breaker status
+    if self.soilSystem and self.soilSystem.circuitBreaker then
+        local cb = self.soilSystem.circuitBreaker
+        if cb.state == "OPEN" then
+            SoilLogger.warning("Network check failed: Circuit breaker is open")
+            return false
+        end
+    end
+
+    return true
+end
+
+--- Check memory usage
+function SoilFertilityManager:checkMemoryUsage()
+    -- Simple memory usage check by monitoring field data size
+    if not self.soilSystem or not self.soilSystem.fieldData then
+        return true
+    end
+
+    local fieldCount = 0
+    for _ in pairs(self.soilSystem.fieldData) do
+        fieldCount = fieldCount + 1
+    end
+
+    -- If we have too many fields (indicating potential memory leak)
+    if fieldCount > 1000 then
+        SoilLogger.warning("Memory check warning: Excessive field count (%d)", fieldCount)
+        return false
+    end
+
+    -- Check cache size
+    if self.soilSystem.fieldDataCache then
+        local cacheSize = 0
+        for _ in pairs(self.soilSystem.fieldDataCache) do
+            cacheSize = cacheSize + 1
+        end
+
+        if cacheSize > 500 then
+            SoilLogger.warning("Memory check warning: Excessive cache size (%d)", cacheSize)
+            return false
+        end
+    end
+
+    return true
+end
+
+--- Check performance metrics
+function SoilFertilityManager:checkPerformanceMetrics()
+    if not self.soilSystem or not self.soilSystem.performanceMetrics then
+        return true
+    end
+
+    local metrics = self.soilSystem.performanceMetrics
+
+    -- Check sync success rate
+    if metrics.syncSuccessRate and metrics.syncSuccessRate < 0.8 then
+        SoilLogger.warning("Performance check failed: Low sync success rate (%.1f%%)",
+            metrics.syncSuccessRate * 100)
+        return false
+    end
+
+    -- Check average latency
+    if #metrics.syncLatency > 0 then
+        local avgLatency = 0
+        for _, latency in ipairs(metrics.syncLatency) do
+            avgLatency = avgLatency + latency
+        end
+        avgLatency = avgLatency / #metrics.syncLatency
+
+        if avgLatency > 1000 then  -- More than 1 second average
+            SoilLogger.warning("Performance check failed: High average latency (%.0fms)", avgLatency)
+            return false
+        end
+    end
+
+    return true
+end
+
+--- Show health alert to user
+function SoilFertilityManager:showHealthAlert(severity, message)
+    if not g_currentMission or not g_currentMission.hud then return end
+
+    local title = string.format("Soil Mod Health Alert (%s)", severity)
+    g_currentMission.hud:showBlinkingWarning(title .. ": " .. message, 8000)
+end
+
+--- Get health status report
+function SoilFertilityManager:getHealthReport()
+    local report = {
+        status = HealthMonitor.status,
+        uptime = HealthMonitor.metrics.uptime,
+        fieldCount = HealthMonitor.metrics.fieldCount,
+        errorCount = HealthMonitor.metrics.errorCount,
+        syncFailures = HealthMonitor.metrics.syncFailures,
+        checks = {}
+    }
+
+    for name, check in pairs(HealthMonitor.checks) do
+        table.insert(report.checks, {
+            name = name,
+            status = check.lastResult,
+            failures = check.failures
+        })
+    end
+
+    return report
+end
+
+--- Reset health monitoring metrics
+function SoilFertilityManager:resetHealthMetrics()
+    HealthMonitor.metrics = {
+        uptime = 0,
+        memoryUsage = 0,
+        errorCount = 0,
+        syncFailures = 0,
+        fieldCount = 0
+    }
+
+    for _, check in pairs(HealthMonitor.checks) do
+        check.failures = 0
+        check.lastResult = nil
+    end
+
+    HealthMonitor.status = "HEALTHY"
+    SoilLogger.info("Health monitoring metrics reset")
+end
+
+--- Enhanced update loop with health monitoring
+function SoilFertilityManager:updateEnhanced(dt)
+    -- Run regular update
+    self:update(dt)
+
+    -- Update health monitoring
+    if self.settings and self.settings.enabled then
+        -- Update uptime
+        HealthMonitor.metrics.uptime = (HealthMonitor.metrics.uptime or 0) + dt
+
+        -- Run health checks periodically
+        self:runHealthChecks()
+
+        -- Update performance metrics from soil system
+        if self.soilSystem and self.soilSystem.performanceMetrics then
+            local metrics = self.soilSystem.performanceMetrics
+            HealthMonitor.metrics.syncFailures = metrics.totalFailures
+        end
+    end
 end
