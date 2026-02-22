@@ -33,7 +33,7 @@ function SoilSettingsGUI:registerConsoleCommands()
     addConsoleCommand("SoilDebug", "Toggle debug mode", "consoleCommandDebug", self)
     addConsoleCommand("soilfertility", "Show all soil commands", "consoleCommandHelp", self)
 
-    Logging.info("[SoilFertilizer] Console commands registered")
+    SoilLogger.info("[SoilFertilizer] Console commands registered")
 end
 
 function SoilSettingsGUI:consoleCommandHelp()
@@ -62,7 +62,7 @@ end
 function SoilSettingsGUI:consoleCommandSetDifficulty(difficulty)
     local diff = tonumber(difficulty)
     if not diff or diff < 1 or diff > 3 then
-        Logging.warning("Invalid difficulty. Use 1 (Simple), 2 (Realistic), or 3 (Hardcore)")
+        SoilLogger.warning("Invalid difficulty. Use 1 (Simple), 2 (Realistic), or 3 (Hardcore)")
         return "Invalid difficulty"
     end
     if g_SoilFertilityManager and g_SoilFertilityManager.settings then

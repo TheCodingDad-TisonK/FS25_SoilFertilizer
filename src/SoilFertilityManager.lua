@@ -497,7 +497,7 @@ end
 function SoilFertilityManager:registerHealthCheck(name, checkFunction)
     HealthMonitor.checks[name] = {
         name = name,
-        function = checkFunction,
+        checkFunc = checkFunction,
         lastRun = 0,
         lastResult = nil,
         failures = 0
@@ -521,7 +521,7 @@ function SoilFertilityManager:runHealthChecks()
     local failedChecks = {}
 
     for name, check in pairs(HealthMonitor.checks) do
-        local success, result = pcall(check.function)
+        local success, result = pcall(check.checkFunc)
         
         if success and result then
             check.failures = 0
@@ -769,20 +769,24 @@ function SoilFertilityManager:resetHealthMetrics()
     SoilLogger.info("Health monitoring metrics reset")
 end
 
---- Enhanced update loop with health monitoring
+--- Enhanced update loop with health monitoring.
+--- Called instead of the plain update() when health monitoring is active.
+--- Tracks uptime, runs periodic health checks, and mirrors sync-failure
+--- counts from the soil system into the HealthMonitor metrics table.
+---@param dt number Delta time in milliseconds
 function SoilFertilityManager:updateEnhanced(dt)
     -- Run regular update
     self:update(dt)
 
     -- Update health monitoring
     if self.settings and self.settings.enabled then
-        -- Update uptime
+        -- Accumulate uptime (milliseconds since mod was enabled)
         HealthMonitor.metrics.uptime = (HealthMonitor.metrics.uptime or 0) + dt
 
-        -- Run health checks periodically
+        -- Run health checks periodically (interval defined inside runHealthChecks)
         self:runHealthChecks()
 
-        -- Update performance metrics from soil system
+        -- Mirror sync-failure count from soil system into health metrics
         if self.soilSystem and self.soilSystem.performanceMetrics then
             local metrics = self.soilSystem.performanceMetrics
             HealthMonitor.metrics.syncFailures = metrics.totalFailures
