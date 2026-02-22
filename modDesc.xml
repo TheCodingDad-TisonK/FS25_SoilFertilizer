@@ -16,18 +16,18 @@
         <ru>Реалистичная почва и удобрение</ru>
         <hu>Realisztikus Talaj & Műtrágya</hu>
     </title>
-    <description>
-        <en>Adds realistic soil fertility mechanics, fertilizer requirements, and nutrient cycles.</en>
-        <de>Fügt realistische Bodenfruchtbarkeitsmechaniken, Düngeranforderungen und Nährstoffkreisläufe hinzu.</de>
-        <fr>Ajoute des mécaniques de fertilité du sol réalistes, des exigences en engrais et des cycles de nutriments.</fr>
-        <pl>Dodaje realistyczne mechaniki żyzności gleby, wymagania nawozowe i cykle składników odżywczych.</pl>
-        <es>Añade mecánicas realistas de fertilidad del suelo, requisitos de fertilizante y ciclos de nutrientes.</es>
-        <it>Aggiunge meccaniche realistiche di fertilità del suolo, requisiti di fertilizzante e cicli nutrizionali.</it>
-        <cz>Přidává realistické mechanismy úrodnosti půdy, požadavky na hnojivo a nutriční cykly.</cz>
-        <br>Adiciona mecânicas realistas de fertilidade do solo, requisitos de fertilizante e ciclos de nutrientes.</br>
-        <uk>Додає реалістичні механіки родючості ґрунту, вимоги до добрив та циклів поживних речовин.</uk>
-        <ru>Добавляет реалистичные механизмы плодородия почвы, требования к удобрениям и циклы питательных веществ.</ru>
-        <hu>Hozzáadja a talaj termékenységének realisztikus mechanikáit, a műtrágyaigényeket és a tápanyagciklusokat.</hu>
+<description>
+        <en>Enterprise-grade realistic soil and fertilizer system for Farming Simulator 25. Features include soil nutrient tracking, crop-specific depletion, fertilizer application, weather effects, circuit breaker pattern, advanced health monitoring, performance monitoring, client connection tracking, bandwidth optimization, predictive loading, and Google-style SRE patterns.</en>
+        <de>Enterprise-fähiges realistisches Boden- und Düngersystem für Farming Simulator 25. Enthält Bodennährstoff-Tracking, erntespezifische Ausschöpfung, Düngeraufbringung, Wettereffekte, Circuit-Breaker-Muster, erweiterte Gesundheitsüberwachung, Leistungsüberwachung, Client-Verbindungsverfolgung, Bandbreitenoptimierung, prädiktives Laden und Google-Style-SRE-Muster.</de>
+        <fr>Système de sol et d'engrais de niveau entreprise pour Farming Simulator 25. Fonctionnalités incluant le suivi des nutriments du sol, l'épuisement spécifique aux cultures, l'application d'engrais, les effets météorologiques, le pattern de circuit breaker, la surveillance de santé avancée, la surveillance des performances, le suivi des connexions clients, l'optimisation de la bande passante, le chargement prédictif et les patterns SRE de style Google.</fr>
+        <pl>System gleby i nawozów na poziomie przedsiębiorstwa dla Farming Simulator 25. Funkcje obejmują śledzenie składników odżywczych gleby, wyczerpywanie specyficzne dla upraw, aplikację nawozów, efekty pogodowe, wzorzec circuit breaker, zaawansowane monitorowanie zdrowia, monitorowanie wydajności, śledzenie połączeń klientów, optymalizację przepustowości, ładowanie predykcyjne i wzorce SRE w stylu Google.</pl>
+        <es>Sistema de suelo y fertilizante de nivel empresarial para Farming Simulator 25. Incluye seguimiento de nutrientes del suelo, agotamiento específico de cultivos, aplicación de fertilizantes, efectos climáticos, patrón de circuito interruptor, monitoreo de salud avanzado, monitoreo de rendimiento, seguimiento de conexiones de clientes, optimización de ancho de banda, carga predictiva y patrones SRE estilo Google.</es>
+        <it>Sistema di suolo e fertilizzante di livello enterprise per Farming Simulator 25. Include il monitoraggio dei nutrienti del suolo, l'esaurimento specifico per coltura, l'applicazione di fertilizzanti, effetti meteorologici, pattern di circuit breaker, monitoraggio sanitario avanzato, monitoraggio delle prestazioni, tracciamento delle connessioni client, ottimizzazione della larghezza di banda, caricamento predittivo e pattern SRE in stile Google.</it>
+        <cz>Podnikový realistický systém půdy a hnojiv pro Farming Simulator 25. Funkce zahrnují sledování živin v půdě, vyčerpání specifické pro plodiny, aplikaci hnojiv, počasí, vzorek obvodového vypínače, pokročilé monitorování zdraví, monitorování výkonu, sledování připojení klientů, optimalizaci šířky pásma, prediktivní načítání a Google-stylové SRE vzory.</cz>
+        <br>Sistema de solo e fertilizante de nível empresarial para Farming Simulator 25. Inclui rastreamento de nutrientes do solo, esgotamento específico da cultura, aplicação de fertilizantes, efeitos climáticos, padrão de circuito interrompido, monitoramento de saúde avançado, monitoramento de desempenho, rastreamento de conexões de clientes, otimização de largura de banda, carregamento preditivo e padrões SRE estilo Google.</br>
+        <uk>Система ґрунту та добрив корпоративного рівня для Farming Simulator 25. Функції включають відстеження поживних речовин у ґрунті, виснаження, специфічне для культур, застосування добрив, погодні ефекти, шаблон розриву кола, розширене моніторинг здоров'я, моніторинг продуктивності, відстеження підключень клієнтів, оптимізацію пропускної здатності, прогностичне завантаження та Google-стиль SRE шаблони.</uk>
+        <ru>Система почвы и удобрений корпоративного уровня для Farming Simulator 25. Включает отслеживание питательных веществ в почве, истощение, специфичное для культур, внесение удобрений, погодные эффекты, шаблон разрывания цепи, расширенный мониторинг состояния здоровья, мониторинг производительности, отслеживание подключений клиентов, оптимизацию пропускной способности, прогностическую загрузку и Google-стиль SRE шаблоны.</ru>
+        <hu>Vállalati szintű realisztikus talaj- és műtrágya rendszer Farming Simulator 25-höz. Funkciók: talaj tápanyagok nyomon követése, növényfajta specifikus kimerülés, műtrágya alkalmazás, időjárási hatások, circuit breaker minta, fejlett egészségmonitorozás, teljesítményfigyelés, klienskapcsolat-nyomon követés, sávszélesség-optimalizálás, prediktív betöltés és Google-stílusú SRE minták.</hu>
     </description>
     <iconFilename>icon.dds</iconFilename>
     
