@@ -91,14 +91,27 @@ def build_mod():
 
     # Get file size
     size_kb = output_file.stat().st_size / 1024
-    print(f"\n✓ Build complete: {output_file.name} ({size_kb:.1f} KB)")
+    print(f"\n[OK] Build complete: {output_file.name} ({size_kb:.1f} KB)")
 
     return output_file
 
 if __name__ == '__main__':
+    import sys
+    deploy = '--deploy' in sys.argv
+
     try:
         output = build_mod()
         print("\nMod built successfully!")
+
+        if deploy:
+            import shutil
+            deploy_dir = Path.home() / 'Documents' / 'My Games' / 'FarmingSimulator2025' / 'mods'
+            if deploy_dir.exists():
+                dest = deploy_dir / output.name
+                shutil.copy2(output, dest)
+                print(f"[OK] Deployed to: {dest}")
+            else:
+                print(f"[WARN] Deploy path not found: {deploy_dir}")
     except Exception as e:
         print(f"\nBuild failed: {e}")
         exit(1)
