@@ -281,6 +281,17 @@ function SoilFertilityManager:deferredSoilSystemInit()
                 return false  -- Keep waiting
             end
 
+            -- Guard 3: FarmlandManager must be available for ownership hook installation.
+            -- Without this, the ownership hook fails on heavily modded servers where
+            -- farmlandManager loads after fieldManager.
+            if not g_farmlandManager then
+                if self.attempts >= self.maxAttempts then
+                    SoilLogger.warning("Deferred init timeout: FarmlandManager not available after %d attempts", self.attempts)
+                    return true  -- Give up and remove updater
+                end
+                return false  -- Keep waiting
+            end
+
             -- All guards passed - initialize soil system now
             SoilLogger.info("Game ready after %d update cycles - initializing soil system...", self.attempts)
 
