@@ -131,7 +131,7 @@ function HookManager:installHarvestHook()
         end
     )
     self:register(FruitUtil, "fruitPickupEvent", original, "FruitUtil.fruitPickupEvent")
-    print("[SoilFertilizer] ✓ Harvest hook installed successfully")
+    print("[SoilFertilizer] [OK] Harvest hook installed successfully")
     return true
 end
 
@@ -173,7 +173,7 @@ function HookManager:installSprayerHook()
         end
     )
     self:register(Sprayer, "spray", original, "Sprayer.spray")
-    print("[SoilFertilizer] ✓ Fertilizer hook installed successfully")
+    print("[SoilFertilizer] [OK] Fertilizer hook installed successfully")
     return true
 end
 
@@ -205,7 +205,7 @@ function HookManager:installOwnershipHook()
         end
     )
     self:register(g_farmlandManager, "fieldOwnershipChanged", original, "farmlandManager.fieldOwnershipChanged")
-    print("[SoilFertilizer] ✓ Field ownership hook installed successfully")
+    print("[SoilFertilizer] [OK] Field ownership hook installed successfully")
     return true
 end
 
@@ -244,7 +244,7 @@ function HookManager:installWeatherHook()
         end
     )
     self:register(env, "update", original, "environment.update")
-    print("[SoilFertilizer] ✓ Weather hook installed successfully")
+    print("[SoilFertilizer] [OK] Weather hook installed successfully")
     return true
 end
 
@@ -316,6 +316,6 @@ function HookManager:installPlowingHook()
         end
     )
     self:register(Cultivator, "processCultivatorArea", original, "Cultivator.processCultivatorArea")
-    print("[SoilFertilizer] ✓ Plowing hook installed successfully")
+    print("[SoilFertilizer] [OK] Plowing hook installed successfully")
     return true
 end
