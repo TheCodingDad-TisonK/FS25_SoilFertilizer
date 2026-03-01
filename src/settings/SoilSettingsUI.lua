@@ -60,6 +60,14 @@ end
 
 -- Request setting change via network (or apply directly if server/singleplayer)
 function SoilSettingsUI:requestSettingChange(settingName, value)
+    -- Local-only settings (HUD display prefs) bypass admin check and network sync entirely
+    local def = SettingsSchema.byId[settingName]
+    if def and def.localOnly then
+        self.settings[settingName] = value
+        self.settings:save()
+        return
+    end
+
     if not self:isPlayerAdmin() then
         self:showAdminOnlyWarning()
         self:refreshUI()
@@ -117,10 +125,44 @@ function SoilSettingsUI:refreshUI()
     end
 end
 
+--- Re-enable/disable all settings elements based on current admin status.
+--- Called on every frame open so that players who gain admin after first open are handled.
+function SoilSettingsUI:updateAdminState(frame)
+    if not frame.soilFertilizer_initDone then return end
+    local isAdmin = self:isPlayerAdmin()
+    local pfActive = g_SoilFertilityManager and g_SoilFertilityManager.soilSystem and g_SoilFertilityManager.soilSystem.PFActive
+
+    for _, def in ipairs(SettingsSchema.definitions) do
+        local element = frame["soilFertilizer_" .. def.uiId]
+        if element and element.setIsEnabled then
+            if def.localOnly then
+                -- Per-player HUD settings: always enabled regardless of admin status
+                element:setIsEnabled(true)
+                if element.setToolTipText then element:setToolTipText("") end
+            else
+                local pfLocked = def.pfProtected and pfActive or false
+                element:setIsEnabled(isAdmin and not pfLocked)
+                if element.setToolTipText then
+                    if pfLocked then
+                        element:setToolTipText("Viewer Mode - Precision Farming manages this")
+                    elseif not isAdmin then
+                        element:setToolTipText("Admin only")
+                    else
+                        element:setToolTipText("")
+                    end
+                end
+            end
+        end
+    end
+end
+
 --- Called when InGameMenuSettingsFrame opens.
 --- Creates all settings elements using profile-based factory functions.
 function SoilSettingsUI:onFrameOpen(frame)
     if frame.soilFertilizer_initDone then
+        -- Frame already built — just refresh admin state and values (fixes stale disabled state)
+        self:updateAdminState(frame)
+        self:updateGameSettings(frame)
         return
     end
 
@@ -156,7 +198,8 @@ function SoilSettingsUI:onFrameOpen(frame)
         local ok3, element = pcall(UIHelper.createBinaryOption, layout, SoilSettingsUI, callbackName, title, tooltip)
         if ok3 and element then
             local disabled = def.pfProtected and pfActive or false
-            local shouldDisable = (not isAdmin) or disabled
+            -- localOnly settings (HUD prefs) are always accessible; only gate server-wide settings
+            local shouldDisable = (not def.localOnly and not isAdmin) or disabled
 
             if shouldDisable and element.setIsEnabled then
                 element:setIsEnabled(false)
@@ -211,12 +254,7 @@ function SoilSettingsUI:onFrameOpen(frame)
             g_i18n:getText("sf_hud_position_short") or "HUD Position",
             g_i18n:getText("sf_hud_position_long") or "Position of the soil HUD overlay")
         if ok5 and hudPosElement then
-            if not isAdmin and hudPosElement.setIsEnabled then
-                hudPosElement:setIsEnabled(false)
-                if hudPosElement.setToolTipText then
-                    hudPosElement:setToolTipText("Admin only")
-                end
-            end
+            -- hudPosition is localOnly — all players can adjust their own HUD position
             frame["soilFertilizer_" .. hudPosDef.uiId] = hudPosElement
         end
     end
