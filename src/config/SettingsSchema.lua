@@ -61,6 +61,7 @@ SettingsSchema.definitions = {
         default = true,
         uiId = "sf_show_hud",
         pfProtected = false,
+        localOnly = true,  -- per-player HUD visibility, not synced to server
     },
     {
         id = "hudPosition",
@@ -70,6 +71,7 @@ SettingsSchema.definitions = {
         max = 5,
         uiId = "sf_hud_position",
         pfProtected = false,
+        localOnly = true,  -- per-player display preference, not synced to server
     },
     {
         id = "hudColorTheme",
@@ -79,6 +81,7 @@ SettingsSchema.definitions = {
         max = 4,
         uiId = "sf_hud_color_theme",
         pfProtected = false,
+        localOnly = true,  -- per-player display preference, not synced to server
     },
     {
         id = "hudFontSize",
@@ -88,6 +91,7 @@ SettingsSchema.definitions = {
         max = 3,
         uiId = "sf_hud_font_size",
         pfProtected = false,
+        localOnly = true,  -- per-player display preference, not synced to server
     },
     {
         id = "hudTransparency",
@@ -97,6 +101,7 @@ SettingsSchema.definitions = {
         max = 5,
         uiId = "sf_hud_transparency",
         pfProtected = false,
+        localOnly = true,  -- per-player display preference, not synced to server
     },
     {
         id = "hudCompactMode",
@@ -104,6 +109,7 @@ SettingsSchema.definitions = {
         default = false,
         uiId = "sf_hud_compact_mode",
         pfProtected = false,
+        localOnly = true,  -- per-player display preference, not synced to server
     },
     {
         id = "seasonalEffects",

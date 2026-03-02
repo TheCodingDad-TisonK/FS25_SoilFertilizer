@@ -60,6 +60,10 @@ function SoilSettingChangeEvent:run(connection)
     -- SERVER ONLY: Validate and apply setting change
     if not g_server then return end
 
+    -- Local-only settings should never be routed through the server; reject silently
+    local def = SettingsSchema and SettingsSchema.byId and SettingsSchema.byId[self.settingName]
+    if def and def.localOnly then return end
+
     -- Validate player is admin (master user)
     if not connection:getIsServer() then
         local user = g_currentMission.userManager:getUserByConnection(connection)
@@ -152,6 +156,10 @@ end
 function SoilSettingSyncEvent:run(connection)
     -- CLIENT ONLY: Receive setting update from server
     if not g_client then return end
+
+    -- Local-only settings are never synced from server; keep each player's own value
+    local def = SettingsSchema and SettingsSchema.byId and SettingsSchema.byId[self.settingName]
+    if def and def.localOnly then return end
 
     if g_SoilFertilityManager and g_SoilFertilityManager.settings then
         local oldValue = g_SoilFertilityManager.settings[self.settingName]
@@ -552,6 +560,16 @@ end
 
 -- Send setting change request
 function SoilNetworkEvents_RequestSettingChange(settingName, value)
+    -- Local-only settings are applied on this client only — never sent to server
+    local def = SettingsSchema and SettingsSchema.byId and SettingsSchema.byId[settingName]
+    if def and def.localOnly then
+        if g_SoilFertilityManager and g_SoilFertilityManager.settings then
+            g_SoilFertilityManager.settings[settingName] = value
+            g_SoilFertilityManager.settings:save()
+        end
+        return
+    end
+
     if g_client then
         -- Client: send request to server
         g_client:getServerConnection():sendEvent(
