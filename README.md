@@ -1,268 +1,237 @@
-# FS25_SoilFertilizer
+<div align="center">
 
-**Enterprise-Grade Realistic Soil and Fertilizer System for Farming Simulator 25**
+# 🌾 FS25 Soil & Fertilizer
+### *Realistic Nutrient Management*
 
-This mod adds dynamic soil nutrient tracking, crop-specific depletion, fertilizer application effects, weather impacts, and enterprise-grade reliability features to create a production-ready farming experience suitable for large multiplayer servers and enterprise environments.
+[![Downloads](https://img.shields.io/github/downloads/TheCodingDad-TisonK/FS25_SoilFertilizer/total?style=for-the-badge&logo=github&color=4caf50&logoColor=white)](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/releases)
+[![Release](https://img.shields.io/github/v/release/TheCodingDad-TisonK/FS25_SoilFertilizer?style=for-the-badge&logo=tag&color=76c442&logoColor=white)](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/releases/latest)
+[![License](https://img.shields.io/badge/license-CC%20BY--NC--ND%204.0-lightgrey?style=for-the-badge&logo=creativecommons&logoColor=white)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
 
-## 🚀 **Enterprise Features**
+<br>
 
-### **Reliability & Monitoring**
-- **Circuit Breaker Pattern**: Prevents cascading failures with automatic recovery
-- **Advanced Health Monitoring**: Real-time system health checks with configurable thresholds
-- **Performance Monitoring**: Comprehensive metrics collection and SLI/SLO tracking
-- **Client Connection Tracking**: Enhanced multiplayer connection management
-- **Bandwidth Optimization**: Field data compression and intelligent batching
-- **Predictive Loading**: Proximity-based field data loading for better performance
+> *"Applied liquid fertilizer three seasons straight because the yield looked fine. Then I checked the pH — it was sitting at 5.4. The nutrients I'd been pouring in couldn't even be absorbed. One application of lime later and the next harvest told the whole story."*
 
-### **Google-Style SRE Patterns**
-- **Service Level Indicators (SLIs)**: Availability, latency, throughput, error rate tracking
-- **Service Level Objectives (SLOs)**: 99% availability, 500ms P95 latency targets
-- **Error Budgets**: Controlled failure rates with automated responses
-- **Alert System**: Configurable thresholds with cooldown periods
+<br>
 
-## 🎯 **Core Features**
+**In base FS25, every field is born equal and stays that way forever. This mod remembers.**
 
-- **Dynamic Soil Fertility**: Track soil nutrients (Nitrogen, Phosphorus, Potassium) across all fields
-- **Crop-Specific Depletion**: Different crops extract nutrients at varying rates
-- **Fertilizer Application**: Apply fertilizers to replenish soil nutrients with realistic effects
-- **Weather Effects**: Rain and temperature impact soil nutrient levels and fertilizer effectiveness
-- **Multiplayer Support**: Full multiplayer compatibility with synchronized soil data
-- **Precision Farming Integration**: Compatible with Precision Farming mod (read-only mode)
-- **Configurable Difficulty**: Three difficulty levels (Simple, Realistic, Hardcore)
-- **HUD Display**: On-screen soil information display with customizable position and appearance
-- **In-Game Settings**: Comprehensive settings menu with real-time preview
-- **Console Commands**: Debug and management commands for advanced users
+Each field builds its own history. Nitrogen drops after a heavy wheat crop. Rain washes potassium out of sandy ground. Fallow fields slowly breathe back to life. The numbers you see in the HUD aren't arbitrary — they're the consequence of every harvest, every storm, and every bag of fertilizer you did or didn't apply.
 
-## 📊 **Performance Improvements**
+`Singleplayer` • `Multiplayer (server-authoritative)` • `Persistent saves` • `10 languages`
 
-| Metric | Improvement | Benefit |
-|--------|-------------|---------|
-| **Bandwidth Usage** | 50% reduction | Faster multiplayer sync |
-| **Network Failures** | 90% reduction | Enterprise-grade reliability |
-| **Loading Time** | 30% faster | Better responsiveness |
-| **Memory Usage** | Stable | No memory leaks |
-| **Multiplayer Stability** | Excellent | Production-ready |
+</div>
 
-## 🛠 **New Console Commands**
-
-### **Health Monitoring**
-```bash
-soilfertility health          # Show current health status
-soilfertility health reset    # Reset health metrics
-soilfertility health report   # Detailed health report
-```
-
-### **Performance Monitoring**
-```bash
-soilfertility metrics         # Show performance metrics
-soilfertility network         # Show network status
-```
-
-### **Circuit Breaker Control**
-```bash
-soilfertility circuit status  # Check circuit breaker status
-soilfertility circuit reset   # Reset circuit breaker
-```
-
-### **Field Data Management**
-```bash
-soilfertility fields list     # List all tracked fields
-soilfertility fields sync     # Force field data sync
-```
-
-## 🔧 **Enterprise Configuration**
-
-### **Circuit Breaker Settings**
-```lua
-SoilConstants.CIRCUIT_BREAKER = {
-    FAILURE_THRESHOLD = 5,           -- Number of failures before opening
-    RECOVERY_TIMEOUT = 30000,        -- Time in ms before attempting half-open
-    HALF_OPEN_MAX_CALLS = 3,         -- Max calls in half-open state
-    FAILURE_RATE_THRESHOLD = 0.5,    -- Failure rate to trigger opening
-}
-```
-
-### **Health Monitoring Settings**
-```lua
-SoilConstants.HEALTH_MONITORING = {
-    CHECK_INTERVAL = 10000,          -- Run health checks every 10 seconds
-    CRITICAL_FAILURE_THRESHOLD = 3,  -- Failures before critical status
-    WARNING_FAILURE_THRESHOLD = 2,   -- Failures before warning status
-    MEMORY_LEAK_THRESHOLD = 1000,    -- Max field count before memory warning
-}
-```
-
-### **Network Optimization Settings**
-```lua
-SoilConstants.NETWORK_OPTIMIZATION = {
-    COMPRESSION_ENABLED = true,      -- Enable field data compression
-    CACHE_TTL = 5000,               -- Cache field data for 5 seconds
-    BANDWIDTH_LIMIT = 102400,       -- Max bandwidth usage per second (100KB)
-    BATCH_SIZE = 10,                -- Number of fields to send in batch
-}
-```
-
-## 📁 **File Structure**
-
-```
-FS25_SoilFertilizer/
-├── modDesc.xml              # Mod manifest & translations
-├── icon.dds                 # Mod icon
-├── README.md               # This file
-├── CLAUDE.md               # Project architecture guide
-├── DEVELOPMENT.md          # Developer guide
-├── TESTING.md              # Testing procedures
-├── CHANGELOG.md            # Version history
-├── src/
-│   ├── main.lua            # Entry point & lifecycle hooks
-│   ├── SoilFertilityManager.lua    # Central coordinator
-│   ├── SoilFertilitySystem.lua     # Core soil simulation logic
-│   ├── config/
-│   │   ├── Constants.lua           # All tunable values
-│   │   └── SettingsSchema.lua      # Settings definitions
-│   ├── settings/
-│   │   ├── Settings.lua            # Settings domain object
-│   │   ├── SettingsManager.lua     # XML save/load
-│   │   ├── SoilSettingsUI.lua      # In-game UI generation
-│   │   └── SoilSettingsGUI.lua     # Console commands
-│   ├── hooks/
-│   │   └── HookManager.lua         # Game engine hooks
-│   ├── network/
-│   │   └── NetworkEvents.lua       # Multiplayer sync
-│   ├── ui/
-│   │   ├── SoilHUD.lua             # Always-on legend/reference HUD overlay
-│   │   └── SoilReportDialog.lua    # Full-farm soil report dialog (K key)
-│   └── utils/
-│       ├── Logger.lua              # Centralized logging
-│       ├── AsyncRetryHandler.lua   # Retry pattern utility
-│       └── UIHelper.lua            # UI element creation
-```
-
-## 🎮 **Installation**
-
-### **Automatic Installation (Recommended)**
-1. Download the mod archive from KingMods or ModHub
-2. Extract the `FS25_SoilFertilizer` folder to your mods directory:
-   - **Windows:** `Documents/My Games/FarmingSimulator25/mods/`
-   - **Mac:** `~/Documents/My Games/FarmingSimulator25/mods/`
-   - **Linux:** `~/.local/share/FarmingSimulator25/mods/`
-
-### **Manual Installation**
-1. Create a folder named `FS25_SoilFertilizer` in your mods directory
-2. Copy all files from the mod archive into this folder
-3. Ensure the folder structure matches the above
-
-## ⚙️ **Configuration**
-
-### **In-Game Settings**
-1. Open the game menu
-2. Navigate to **Settings → General**
-3. Find the **"Soil & Fertilizer"** section
-4. Adjust settings to your preference
-
-### **Console Commands**
-Open the console with `~` key and use these commands:
-
-| Command | Description |
-|---------|-------------|
-| `soilfertility` | Show all available commands |
-| `SoilEnable/Disable` | Toggle the mod on/off |
-| `SoilSetDifficulty 1/2/3` | Set difficulty (1=Simple, 2=Realistic, 3=Hardcore) |
-| `SoilSetFertility true/false` | Toggle fertility system |
-| `SoilSetNutrients true/false` | Toggle nutrient cycles |
-| `SoilSetFertilizerCosts true/false` | Toggle fertilizer costs |
-| `SoilSetNotifications true/false` | Toggle notifications |
-| `SoilFieldInfo <fieldId>` | Show soil info for specific field |
-| `SoilShowSettings` | Display current settings |
-| `SoilResetSettings` | Reset to default settings |
-
-## 🧪 **Testing & Quality Assurance**
-
-### **Reliability Testing**
-- Circuit breaker behavior under failure conditions
-- Health monitoring accuracy and alerting
-- Graceful degradation scenarios
-- Recovery mechanism validation
-
-### **Performance Testing**
-- Large map performance (100+ fields)
-- Memory usage over extended periods
-- Network bandwidth optimization
-- Predictive loading effectiveness
-
-### **Multiplayer Testing**
-- Client connection tracking accuracy
-- Field data synchronization reliability
-- Network failure scenario handling
-- Circuit breaker behavior in multiplayer
-
-### **Stress Testing**
-- Memory leak detection and prevention
-- Garbage collection effectiveness
-- System performance under high load
-- Error handling under stress conditions
-
-## 🔒 **Security Considerations**
-
-### **Enhanced Security Features**
-- **Input Validation**: Enhanced validation for all network data
-- **Error Sanitization**: Prevents information leakage in error messages
-- **Circuit Breaker Security**: Prevents resource exhaustion attacks
-- **Memory Protection**: Prevents memory leaks and excessive usage
-
-## 📋 **Migration Guide**
-
-### **For Existing Users**
-✅ **No Action Required** - Fully backwards compatible
-
-- All existing savegames work without modification
-- All existing settings and configurations are preserved
-- No breaking changes to existing functionality
-- Enhanced features can be enabled/disabled via configuration
-
-### **For Developers**
-- New enterprise features are optional and can be disabled
-- Enhanced logging provides better debugging capabilities
-- New console commands for monitoring and management
-- Comprehensive documentation for integration
-
-## 🎉 **Impact & Benefits**
-
-### **For Large Multiplayer Servers**
-- **99% uptime** through circuit breaker and health monitoring
-- **50% reduction** in bandwidth usage for large maps
-- **Enterprise-grade reliability** for mission-critical operations
-- **Real-time monitoring** for system administrators
-
-### **For Mod Developers**
-- **Comprehensive documentation** for enterprise patterns
-- **Best practices** for reliability and monitoring
-- **Template implementations** for circuit breaker and health checks
-- **Performance optimization** techniques
-
-### **For End Users**
-- **Stable operation** even under network failures
-- **Faster loading** through predictive loading
-- **Better performance** on large maps
-- **Enhanced debugging** through detailed logging
-
-## 📞 **Support**
-
-For support, questions, or feedback:
-- Comment on the KingMods page
-- Create an issue on this GitHub repository
-- Review troubleshooting guide in DEVELOPMENT.md
-
-## 🏷 **License**
-
-All Rights Reserved © 2026 TisonK
-
-## 🎯 **Version**
-
-**Version**: 2.0.0  
-**Type**: Major Feature Enhancement  
-**Breaking Changes**: None (Fully Backwards Compatible)
+> [!TIP]
+> Want to be part of our community? Share tips, report issues, and chat with other farmers on the **[FS25 Modding Community Discord](https://discord.gg/Th2pnq36)**!
 
 ---
 
-**This mod is now ready for production use in enterprise environments and large multiplayer servers.**
+## ✨ Features
+
+### 🧪 Per-Field Soil Chemistry
+
+Five values tracked independently for every field on the map:
+
+| | Nutrient | Role | Depleted By |
+|---|---|---|---|
+| 🟢 | **Nitrogen (N)** | Growth and leaf mass | Harvest, rain leaching, fall season |
+| 🔵 | **Phosphorus (P)** | Root development and energy | Harvest |
+| 🟡 | **Potassium (K)** | Water regulation and yield quality | Harvest, rain leaching |
+| 🟤 | **Organic Matter (OM)** | Soil structure and nutrient buffering | Builds slowly via manure and plowing |
+| ⚗️ | **pH** | Unlocks nutrient availability | Rain acidification — raised by lime and plowing |
+
+All five values persist in your save. A field that's been growing canola for three seasons without lime will feel different from one you've been managing carefully.
+
+### 🌾 Crop-Specific Extraction
+
+Different crops take different amounts from your soil. Push the same field too hard and it shows.
+
+| Crop | N drain | P drain | K drain | Notes |
+|---|---|---|---|---|
+| 🥔 Potato | ●●●●● | ●●●● | ●●●●● | Extreme K demand — must rotate |
+| 🟣 Sugar Beet | ●●●●○ | ●●●○○ | ●●●●● | Heaviest K of any crop |
+| 🌻 Sunflower | ●●●●○ | ●●●○○ | ●●●●○ | Moderate-high all round |
+| 🌼 Canola | ●●●●○ | ●●●○○ | ●●●●○ | High N demand, oilseed crop |
+| 🫘 Soybean | ●●●●● | ●●●○○ | ●●●○○ | Highest N — partial fixation assumed |
+| 🌽 Maize | ●●●●○ | ●●●○○ | ●●●●○ | Large biomass, needs N and K |
+| 🌾 Wheat | ●●●○○ | ●●○○○ | ●●●○○ | Moderate — manageable with rotation |
+| 🌾 Barley / Oats / Rye | ●●●○○ | ●●○○○ | ●●●○○ | Light feeders, good rotation crops |
+| 🫛 Peas / Beans | ●●●●○ | ●●●○○ | ●●●●○ | Legumes — still need balanced soil |
+
+### 💊 Fertilizer Types
+
+Six products, each with a different job:
+
+| Fertilizer | N | P | K | Organic Matter | Notes |
+|---|---|---|---|---|---|
+| **Liquid Fertilizer** | ●●●○○ | ●●○○○ | ●●●○○ | — | Fast-acting, balanced NPK |
+| **Solid Fertilizer** | ●●●●○ | ●●●○○ | ●●●○○ | — | Higher N/P, granular |
+| **Manure** | ●●○○○ | ●●○○○ | ●●●○○ | ✓ builds | Slow-release, builds OM over time |
+| **Slurry** | ●●●○○ | ●●○○○ | ●●●●○ | ✓ builds | Liquid organic, strong K |
+| **Digestate** | ●●●○○ | ●●○○○ | ●●●●○ | ✓ builds | Biogas byproduct, well-rounded |
+| **Lime** | — | — | — | — | Only raises pH — but nothing else works properly without it |
+
+> [!NOTE]
+> Organic matter builds slowly with manure, slurry, and digestate — it takes many seasons to accumulate meaningfully. Soil with high OM buffers pH swings and slows nutrient loss from rain.
+
+### 🌦️ Environmental Effects
+
+The mod isn't just about what you put in — it's about what the world takes out.
+
+| Effect | What happens |
+|---|---|
+| 🌧️ **Rain leaching** | Nitrogen and potassium wash out during heavy rain. Phosphorus binds tightly and barely moves. |
+| 🍂 **Fall nitrogen loss** | Biological activity slows in autumn, pulling N levels down naturally. |
+| 🌱 **Spring nitrogen boost** | Microbial activity picks back up in spring, recovering a small amount of N. |
+| 🌧️ **pH acidification** | Rain is slightly acidic. Ignore liming long enough and your soil will show it. |
+| 🌾 **Fallow recovery** | Fields left unplanted for 7+ days slowly recover nutrients on their own. |
+| 🚜 **Plowing bonus** | Aerates soil, nudging pH toward neutral and boosting organic matter mixing. |
+
+### 📊 Soil HUD
+
+A compact overlay shows the current field's soil status while you're working. Colour-coded indicators make problems visible at a glance:
+
+🟢 **Green** — healthy, no action needed &nbsp;|&nbsp; 🟡 **Amber** — getting low, plan ahead &nbsp;|&nbsp; 🔴 **Red** — depleted, yield is being affected
+
+Fully customisable: 5 positions, 4 colour themes, 5 transparency levels, 3 font sizes, and a compact mode that shrinks to one line per nutrient.
+
+### 📋 Full Farm Soil Report
+
+Press **`K`** to open a field-by-field breakdown of every nutrient, pH, organic matter level, and last crop across your whole farm. Fields flagged red need attention now.
+
+---
+
+## ⚙️ Settings
+
+Open via **ESC → Settings → Game Settings → Soil & Fertilizer**.
+
+| Setting | Options | What it does |
+|---|---|---|
+| **Enable mod** | On / Off | Stops all simulation when off |
+| **Fertility system** | On / Off | Toggles the entire nutrient and pH simulation |
+| **Nutrient cycles** | On / Off | Enables crop depletion and natural recovery |
+| **Fertilizer costs** | On / Off | Adds running costs to fertilizer application |
+| **Notifications** | On / Off | Pop-up alerts when fields get critically low |
+| **Seasonal effects** | On / Off | Spring boost and fall nitrogen loss |
+| **Rain effects** | On / Off | Leaching and pH acidification from rain |
+| **Plowing bonus** | On / Off | Whether plowing improves OM and pH |
+| **Difficulty** | Simple / Realistic / Hardcore | Scales depletion rate — 0.7× / 1× / 1.5× |
+| **HUD enabled** | On / Off | Show or hide the soil overlay |
+| **HUD position** | 5 presets | Top-right, top-left, bottom-right, bottom-left, centre-right |
+| **HUD colour theme** | 4 themes | Green / Blue / Amber / Mono |
+| **HUD transparency** | Clear → Solid | 5 levels from 25% to 100% opacity |
+| **HUD font size** | Small / Medium / Large | Scales all HUD text |
+| **Compact mode** | On / Off | One line per nutrient instead of full bars |
+
+> [!NOTE]
+> In multiplayer, settings are **server-authoritative** — the host's settings are pushed to all clients on join. Clients cannot override locked settings.
+
+---
+
+## 🖥️ Console Commands
+
+Open the developer console with **`~`** and type `soilfertility` for the full list.
+
+| Command | Arguments | Description |
+|---|---|---|
+| `SoilEnable` / `SoilDisable` | — | Toggle the mod on or off |
+| `SoilSetDifficulty` | `1` `2` `3` | Simple / Realistic / Hardcore |
+| `SoilSetFertility` | `true` / `false` | Toggle fertility simulation |
+| `SoilSetNutrients` | `true` / `false` | Toggle nutrient cycles |
+| `SoilSetFertilizerCosts` | `true` / `false` | Toggle fertilizer costs |
+| `SoilSetNotifications` | `true` / `false` | Toggle alert popups |
+| `SoilSetSeasonalEffects` | `true` / `false` | Toggle seasonal N changes |
+| `SoilSetRainEffects` | `true` / `false` | Toggle rain leaching and acidification |
+| `SoilSetPlowingBonus` | `true` / `false` | Toggle plowing OM/pH bonus |
+| `SoilFieldInfo` | `<fieldId>` | Detailed soil readout for one field |
+| `SoilShowSettings` | — | Print current settings to log |
+| `SoilResetSettings` | — | Reset everything to defaults |
+| `SoilSaveData` | — | Force-save soil state now |
+| `SoilDebug` | — | Toggle verbose debug logging |
+
+---
+
+## 🔌 Mod Integrations
+
+All integrations are detected automatically at runtime and fail gracefully if the mod isn't installed.
+
+| Mod | Behaviour |
+|---|---|
+| **Precision Farming DLC** | Auto-detected. Enters read-only mode — your PF soil data is displayed in the HUD without modification. No double-tracking, no conflicts. |
+| **FS25_SeasonalCropStress** | Soil pH and organic matter influence evapotranspiration rates per field. |
+| **FS25_NPCFavor** | NPC neighbour favour quests can reference your fields' soil state. |
+
+---
+
+## 🛠️ Installation
+
+**1. Download** `FS25_SoilFertilizer.zip` from the [latest release](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/releases/latest).
+
+**2. Copy** the ZIP (do not extract) to your mods folder:
+
+| Platform | Path |
+|---|---|
+| 🪟 Windows | `%USERPROFILE%\Documents\My Games\FarmingSimulator2025\mods\` |
+| 🍎 macOS | `~/Library/Application Support/FarmingSimulator2025/mods/` |
+
+**3. Enable** *Realistic Soil & Fertilizer* in the in-game mod manager.
+
+**4. Load** any career save — soil data initialises automatically on first load.
+
+---
+
+## 🎮 Quick Start
+
+```
+1. Load your farm — the soil HUD appears in the top-right corner
+2. Drive to any field — nutrient values update as you move
+3. Amber or red values → that field needs fertilizer or lime
+4. Apply lime first — it unlocks the full value of everything else
+5. Apply fertilizer → watch N/P/K climb in real time
+6. Press K → open the full farm soil report sorted by urgency
+7. Let a field go fallow for a season → it slowly recovers on its own
+8. At harvest → healthy soil means the full yield you worked for
+```
+
+> [!TIP]
+> Fields start slightly acidic and with moderate nutrients — matching the base game's starting state. Lime first, then fertilize. Nutrients in acidic soil have reduced availability no matter how much product you apply.
+
+---
+
+## ⚠️ Known Limitations
+
+| Issue | Details |
+|---|---|
+| 🌱 **Base game lime indicator** | The base game's "needs liming" flag is a separate system from our pH tracking. Both update when you apply lime through the sprayer, but the indicators can show different states until the field is treated. Workaround: disable the base game's liming requirement in **Settings → Farming → Liming** to rely solely on our HUD. |
+| 🌐 **Multiplayer** | Soil simulation runs on the server only. Clients receive synced state on join and after each harvest or fertiliser event. |
+| 🔬 **Precision Farming** | When PF is detected, the mod enters read-only mode. All nutrient modification hooks are skipped to avoid conflict — PF data is displayed, not overwritten. |
+
+---
+
+## 🤝 Contributing
+
+Found a bug? [Open an issue](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/new/choose) — the template will walk you through what to include.
+
+Want to contribute code? PRs are welcome on the `development` branch. See `CLAUDE.md` in the repo root for architecture notes and naming conventions.
+
+---
+
+## 📝 License
+
+This mod is licensed under **[CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/)**.
+
+You may share it in its original form with attribution. You may not sell it, modify and redistribute it, or reupload it under a different name or authorship. Contributions via pull request are explicitly permitted and encouraged.
+
+**Author:** TisonK &nbsp;·&nbsp; **Version:** 1.0.8.1
+
+© 2026 TisonK — See [LICENSE](LICENSE) for full terms.
+
+---
+
+<div align="center">
+
+*Farming Simulator 25 is published by GIANTS Software. This is an independent fan creation, not affiliated with or endorsed by GIANTS Software.*
+
+*Your soil remembers everything.* 🌱
+
+</div>
