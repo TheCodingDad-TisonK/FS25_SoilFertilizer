@@ -35,12 +35,18 @@ SoilConstants.DIFFICULTY = {
 -- ========================================
 -- DEFAULT FIELD VALUES
 -- ========================================
+-- These defaults are calibrated to match the base game's initial field state:
+--   pH 6.0  → "slightly acidic" in our system, consistent with base game "needs liming" at game start
+--   N/P/K   → "fair" range (below optimal), consistent with base game "needs fertilizing" at game start
+-- Players address both systems simultaneously: apply lime → base game lime state + our pH both rise;
+-- apply fertilizer → base game fertilizer state + our N/P/K both rise.
+-- Fields already saved in soilData.xml are not affected; only new/untracked fields use these values.
 SoilConstants.FIELD_DEFAULTS = {
-    nitrogen = 50,
-    phosphorus = 40,
-    potassium = 45,
+    nitrogen = 40,
+    phosphorus = 30,
+    potassium = 35,
     organicMatter = 3.5,
-    pH = 6.5,
+    pH = 6.0,
 }
 
 -- ========================================
