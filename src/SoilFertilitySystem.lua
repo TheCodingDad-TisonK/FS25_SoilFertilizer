@@ -463,7 +463,12 @@ function SoilFertilitySystem:scanFields()
     -- TRUE FS25 SOURCE OF TRUTH
     -- field.fieldId / field.id / field.index do NOT exist in FS25 — all return nil.
     -- The correct field identifier is field.farmland.id (confirmed in-game).
-    local fields = g_currentMission.fieldManager:getFields()
+    -- g_currentMission.fieldManager does not exist; use the global g_fieldManager.fields table directly.
+    if not g_fieldManager or not g_fieldManager.fields then
+        self:warn("g_fieldManager.fields not available — scan deferred")
+        return false
+    end
+    local fields = g_fieldManager.fields
     for _, field in ipairs(fields) do
         if field and type(field) == "table" then
             local actualFieldId = field.farmland and field.farmland.id

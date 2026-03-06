@@ -159,16 +159,18 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
             SoilLogger.info("PlayerInputComponent hook installed for J/K keys")
         end
 
-        -- Hook Sprayer.registerActionEvents to inject rate up/down keys in vehicle context.
-        -- Fires when the player enters any sprayer — registers SF_RATE_UP / SF_RATE_DOWN
-        -- into the vehicle's input context so they work while driving.
-        if Sprayer and type(Sprayer.registerActionEvents) == "function" then
-            local origSprayerActions = Sprayer.registerActionEvents
-            self._sprayerActionHookOriginal = origSprayerActions
-            Sprayer.registerActionEvents = Utils.appendedFunction(
-                origSprayerActions,
+        -- Hook Vehicle.registerActionEvents to inject rate up/down keys when the player
+        -- enters any vehicle that has a sprayer specialization (spec_sprayer present).
+        -- Sprayer.registerActionEvents does not exist in FS25 as a static method.
+        if Vehicle and type(Vehicle.registerActionEvents) == "function" then
+            local origVehicleActions = Vehicle.registerActionEvents
+            self._sprayerActionHookOriginal = origVehicleActions
+            Vehicle.registerActionEvents = Utils.appendedFunction(
+                origVehicleActions,
                 function(vehicle, isActiveForInput, isSelected)
+                    -- Only inject for sprayer vehicles when they become the controlled vehicle
                     if not isActiveForInput then return end
+                    if not vehicle or not vehicle.spec_sprayer then return end
                     if not g_SoilFertilityManager then return end
 
                     local _, upId = g_inputBinding:registerActionEvent(
@@ -192,9 +194,9 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
                     end
                 end
             )
-            SoilLogger.info("Sprayer action hook installed for rate up/down keys")
+            SoilLogger.info("Vehicle action hook installed for sprayer rate up/down keys")
         else
-            SoilLogger.warning("Sprayer.registerActionEvents not available — rate keys disabled")
+            SoilLogger.warning("Vehicle.registerActionEvents not available — rate keys disabled")
         end
     else
         self.soilHUD = nil
@@ -500,11 +502,11 @@ function SoilFertilityManager:delete()
         SoilLogger.info("PlayerInputComponent hook restored")
     end
 
-    -- Restore Sprayer.registerActionEvents hook
-    if self._sprayerActionHookOriginal and Sprayer then
-        Sprayer.registerActionEvents = self._sprayerActionHookOriginal
+    -- Restore Vehicle.registerActionEvents hook
+    if self._sprayerActionHookOriginal and Vehicle then
+        Vehicle.registerActionEvents = self._sprayerActionHookOriginal
         self._sprayerActionHookOriginal = nil
-        SoilLogger.info("Sprayer action hook restored")
+        SoilLogger.info("Vehicle action hook restored")
     end
 
     -- Clean up sprayer rate state
