@@ -1,0 +1,110 @@
+name: Issue — Auto-close on No Response
+
+on:
+  schedule:
+    # Runs every 6 hours — checks for issues open > 24h with no author reply
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+    # Allow manual trigger for testing
+
+jobs:
+  close-unresponded:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+
+    steps:
+      - name: Close issues with no author response after 24h
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const now             = Date.now();
+            const twentyFourHours = 24 * 60 * 60 * 1000;
+
+            // Fetch all open issues with the waiting-on-author label
+            const issues = await github.paginate(
+              github.rest.issues.listForRepo,
+              {
+                owner: context.repo.owner,
+                repo:  context.repo.repo,
+                state: 'open',
+                labels: 'waiting-on-author',
+                per_page: 100
+              }
+            );
+
+            for (const issue of issues) {
+              // Skip pull requests
+              if (issue.pull_request) continue;
+
+              const openedAt = new Date(issue.created_at).getTime();
+              const age      = now - openedAt;
+
+              // Only act on issues older than 24 hours
+              if (age < twentyFourHours) continue;
+
+              const author = issue.user.login;
+
+              // Check comments — if the author has replied since the issue opened, skip
+              const comments = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo:  context.repo.repo,
+                issue_number: issue.number,
+                per_page: 100
+              });
+
+              const authorReplied = comments.data.some(c =>
+                c.user.login === author &&
+                new Date(c.created_at).getTime() > openedAt
+              );
+
+              if (authorReplied) {
+                // Author did respond — remove waiting-on-author if still present, add in-progress
+                try {
+                  await github.rest.issues.removeLabel({
+                    owner: context.repo.owner,
+                    repo:  context.repo.repo,
+                    issue_number: issue.number,
+                    name: 'waiting-on-author'
+                  });
+                  await github.rest.issues.addLabels({
+                    owner: context.repo.owner,
+                    repo:  context.repo.repo,
+                    issue_number: issue.number,
+                    labels: ['in-progress']
+                  });
+                } catch (e) { /* already updated */ }
+                continue;
+              }
+
+              // No author reply within 24h — post closing comment and close
+              const closeBody = [
+                `Hey @${author} — this issue has been automatically closed because no additional information was received within **24 hours**.`,
+                ``,
+                `This is not a rejection. If you still have the problem, please **reopen this issue** and include:`,
+                ``,
+                `- The relevant \`[SoilFertilizer]\` lines from your \`log.txt\``,
+                `  - Location: \`Documents/My Games/FarmingSimulator2025/log.txt\``,
+                `- Your mod version (visible in the mod manager)`,
+                `- Steps to reproduce the issue`,
+                ``,
+                `Without a log snippet it is very difficult to investigate issues. We look forward to helping you once we have the details!`,
+              ].join('\n');
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo:  context.repo.repo,
+                issue_number: issue.number,
+                body: closeBody
+              });
+
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo:  context.repo.repo,
+                issue_number: issue.number,
+                state: 'closed',
+                state_reason: 'not_planned'
+              });
+
+              core.info(`Closed issue #${issue.number} (${issue.title}) — no author response in 24h`);
+            }
