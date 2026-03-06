@@ -461,34 +461,16 @@ function SoilFertilitySystem:scanFields()
     end
 
     -- TRUE FS25 SOURCE OF TRUTH
-    -- Field ID priority: field.fieldId → field.id → field.index → loop key (last resort)
-    -- The loop key is an internal table index that may not match the in-game field ID
-    -- on all maps, so it is only used as a fallback.
-    -- NOTE: hasFarmland is logged for debug but no longer gates initialization —
-    -- unowned fields are valid and must be tracked so data is ready when ownership changes.
-    for fieldId, field in pairs(g_fieldManager.fields) do
-        local numericFieldId = tonumber(fieldId) or fieldId
-
+    -- field.fieldId / field.id / field.index do NOT exist in FS25 — all return nil.
+    -- The correct field identifier is field.farmland.id (confirmed in-game).
+    local fields = g_currentMission.fieldManager:getFields()
+    for _, field in ipairs(fields) do
         if field and type(field) == "table" then
-            local actualFieldId = nil
-
-            if field.fieldId and field.fieldId > 0 then
-                actualFieldId = field.fieldId
-            elseif field.id and field.id > 0 then
-                actualFieldId = field.id
-            elseif field.index and field.index > 0 then
-                actualFieldId = field.index
-            elseif type(numericFieldId) == "number" and numericFieldId > 0 then
-                actualFieldId = numericFieldId  -- last resort
-            end
+            local actualFieldId = field.farmland and field.farmland.id
 
             if actualFieldId and actualFieldId > 0 then
-                -- Log farmland status for debug but don't gate on it
                 if self.settings.debugMode then
-                    local hasFarmland = (field.farmland and field.farmland.id and field.farmland.id > 0)
-                                     or (field.farmlandId and field.farmlandId > 0)
-                    print(string.format("[SoilFertilizer DEBUG] Found field %d (farmland: %s)",
-                        actualFieldId, tostring(hasFarmland)))
+                    print(string.format("[SoilFertilizer DEBUG] Found field %d", actualFieldId))
                 end
 
                 self:getOrCreateField(actualFieldId, true)
