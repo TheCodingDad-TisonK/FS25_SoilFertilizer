@@ -348,26 +348,30 @@ function SoilHUD:detectCurrentFieldId()
 
     if not x then return nil end
 
-    -- Tier 1: direct field lookup
+    -- Tier 1: direct field lookup via position
     -- NOTE: do NOT guard with g_fieldManager.getFieldAtWorldPosition — in FS25's OOP
     -- system methods live on the metatable, not the instance, so that check returns nil
     -- even when the method is callable. Always use pcall directly.
+    -- NOTE: field.fieldId / field.id / field.index all return nil in FS25.
+    -- The correct identifier is field.farmland.id (confirmed in SoilFertilitySystem).
     if g_fieldManager then
         local ok, field = pcall(function()
             return g_fieldManager:getFieldAtWorldPosition(x, z)
         end)
-        if ok and field and field.fieldId then return field.fieldId end
+        if ok and field and field.farmland and field.farmland.id then
+            return field.farmland.id
+        end
     end
 
-    -- Tier 2: farmland → field mapping
+    -- Tier 2: farmland object lookup
+    -- NOTE: getFarmlandIdAtWorldPosition does not exist in FS25.
+    -- getFarmlandAtWorldPosition returns a farmland object; read .id from it.
     if g_farmlandManager then
-        local ok, farmlandId = pcall(function()
-            return g_farmlandManager:getFarmlandIdAtWorldPosition(x, z)
+        local ok, farmland = pcall(function()
+            return g_farmlandManager:getFarmlandAtWorldPosition(x, z)
         end)
-        if ok and farmlandId and farmlandId > 0 and g_fieldManager and g_fieldManager.fields then
-            for fId, field in pairs(g_fieldManager.fields) do
-                if field.farmlandId == farmlandId then return fId end
-            end
+        if ok and farmland and farmland.id and farmland.id > 0 then
+            return farmland.id
         end
     end
 
