@@ -30,18 +30,18 @@ SoilHUD.BAR_H     = 0.010   -- nutrient bar fill height
 SoilHUD.BAR_W     = 0.095   -- nutrient bar width
 
 -- ── Colors ──────────────────────────────────────────────
-SoilHUD.C_BG         = {0.05, 0.05, 0.08, 0.82}
-SoilHUD.C_TITLE_BG   = {0.08, 0.18, 0.38, 0.92}
-SoilHUD.C_BORDER     = {0.30, 0.30, 0.42, 0.55}
-SoilHUD.C_DIVIDER    = {0.30, 0.30, 0.45, 0.45}
+SoilHUD.C_BG         = {0.05, 0.05, 0.05, 0.82}   -- dark, matches native Field Info
+SoilHUD.C_TITLE_BG   = {0.10, 0.10, 0.10, 0.90}   -- subtle dark header, no colored accent
+SoilHUD.C_BORDER     = {0.20, 0.20, 0.20, 0.40}   -- neutral dark border
+SoilHUD.C_DIVIDER    = {0.25, 0.25, 0.25, 0.45}   -- neutral divider
 SoilHUD.C_SHADOW     = {0.00, 0.00, 0.00, 0.30}
-SoilHUD.C_BAR_BG     = {0.18, 0.18, 0.22, 0.90}
-SoilHUD.C_GOOD       = {0.25, 0.85, 0.25, 1.00}
-SoilHUD.C_FAIR       = {0.90, 0.82, 0.18, 1.00}
-SoilHUD.C_POOR       = {0.88, 0.25, 0.25, 1.00}
-SoilHUD.C_LABEL      = {0.65, 0.80, 0.65, 1.00}
+SoilHUD.C_BAR_BG     = {0.18, 0.18, 0.18, 0.90}   -- neutral bar track
+SoilHUD.C_GOOD       = {0.25, 0.85, 0.25, 1.00}   -- green  — data color, keep
+SoilHUD.C_FAIR       = {0.90, 0.82, 0.18, 1.00}   -- yellow — data color, keep
+SoilHUD.C_POOR       = {0.88, 0.25, 0.25, 1.00}   -- red    — data color, keep
+SoilHUD.C_LABEL      = {0.72, 0.72, 0.72, 1.00}   -- neutral gray, no green tint
 SoilHUD.C_VALUE      = {1.00, 1.00, 1.00, 1.00}
-SoilHUD.C_DIM        = {0.50, 0.50, 0.58, 0.85}
+SoilHUD.C_DIM        = {0.52, 0.52, 0.52, 0.85}   -- neutral dim
 SoilHUD.C_HINT       = {0.45, 0.45, 0.58, 0.75}
 SoilHUD.C_EDIT_HDL   = {0.20, 0.60, 1.00, 0.85}
 
@@ -95,13 +95,14 @@ end
 function SoilHUD:initialize()
     if self.initialized then return true end
     self:updatePosition()
+    self:loadLayout()   -- override preset with saved position/scale if available
     if createImageOverlay ~= nil then
         self.fillOverlay = createImageOverlay("dataS/menu/base/graph_pixel.dds")
     else
         SoilLogger.warn("SoilHUD: createImageOverlay not available")
     end
     self.initialized = true
-    SoilLogger.info("SoilHUD initialized at (%.3f, %.3f)", self.panelX, self.panelY)
+    SoilLogger.info("SoilHUD initialized at (%.3f, %.3f) scale=%.2f", self.panelX, self.panelY, self.scale)
     return true
 end
 
@@ -152,8 +153,42 @@ function SoilHUD:exitEditMode()
     if g_inputBinding and g_inputBinding.setShowMouseCursor then
         g_inputBinding:setShowMouseCursor(false)
     end
+    self:saveLayout()
     SoilLogger.info("[SoilHUD] Edit mode OFF — pos=(%.3f,%.3f) scale=%.2f",
         self.panelX, self.panelY, self.scale)
+end
+
+-- ── HUD layout persistence ────────────────────────────────
+function SoilHUD:getLayoutPath()
+    if g_currentMission and g_currentMission.missionInfo and g_currentMission.missionInfo.savegameDirectory then
+        return g_currentMission.missionInfo.savegameDirectory .. "/FS25_SoilFertilizer_hud.xml"
+    end
+end
+
+function SoilHUD:saveLayout()
+    local path = self:getLayoutPath()
+    if not path then return end
+    local xml = XMLFile.create("sf_hud", path, "hudLayout")
+    if xml then
+        xml:setFloat("hudLayout.panelX", self.panelX)
+        xml:setFloat("hudLayout.panelY", self.panelY)
+        xml:setFloat("hudLayout.scale",  self.scale)
+        xml:save()
+        xml:delete()
+    end
+end
+
+function SoilHUD:loadLayout()
+    local path = self:getLayoutPath()
+    if not path or not fileExists(path) then return end
+    local xml = XMLFile.load("sf_hud", path)
+    if xml then
+        self.panelX = xml:getFloat("hudLayout.panelX", self.panelX)
+        self.panelY = xml:getFloat("hudLayout.panelY", self.panelY)
+        self.scale  = xml:getFloat("hudLayout.scale",  self.scale)
+        xml:delete()
+        SoilLogger.info("[SoilHUD] Layout loaded: pos=(%.3f,%.3f) scale=%.2f", self.panelX, self.panelY, self.scale)
+    end
 end
 
 -- ── Geometry helpers ─────────────────────────────────────
