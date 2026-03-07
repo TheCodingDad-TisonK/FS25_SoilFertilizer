@@ -1,7 +1,9 @@
 -- =========================================================
--- FS25 Realistic Soil & Fertilizer (version 1.0.7.1)
+-- FS25 Realistic Soil & Fertilizer
 -- =========================================================
--- Soil HUD Overlay - legend/reference display (toggle with J key)
+-- Soil HUD Overlay - legend/reference display
+-- Toggle with J key. RMB to enter drag/resize edit mode.
+-- Follows the NPCFavorHUD pattern for edit mode UX.
 -- =========================================================
 -- Author: TisonK
 -- =========================================================
@@ -10,125 +12,313 @@
 SoilHUD = {}
 local SoilHUD_mt = Class(SoilHUD)
 
+-- ── Scale / resize ──────────────────────────────────────
+SoilHUD.MIN_SCALE          = 0.60
+SoilHUD.MAX_SCALE          = 1.80
+SoilHUD.RESIZE_HANDLE_SIZE = 0.008
+
+-- ── Base panel dimensions at scale 1.0 ─────────────────
+-- Width comes from the shared constant; height is defined here
+-- because we add more content (dividers, hint) than the original.
+SoilHUD.BASE_W = 0.165   -- slightly wider than the old 0.15 for readability
+SoilHUD.BASE_H = 0.178   -- title + 2 keys + dividers + 3 status + pH + hint
+
+-- ── Color constants ─────────────────────────────────────
+SoilHUD.COLOR_BG          = {0.05, 0.05, 0.08, 0.78}
+SoilHUD.COLOR_TITLE_BG    = {0.08, 0.18, 0.38, 0.88}
+SoilHUD.COLOR_BORDER      = {0.30, 0.30, 0.42, 0.55}
+SoilHUD.COLOR_DIVIDER     = {0.35, 0.35, 0.50, 0.50}
+SoilHUD.COLOR_SHADOW      = {0.00, 0.00, 0.00, 0.32}
+SoilHUD.COLOR_EDIT_HANDLE = {0.20, 0.60, 1.00, 0.85}
+
 function SoilHUD.new(soilSystem, settings)
     local self = setmetatable({}, SoilHUD_mt)
 
-    self.soilSystem = soilSystem
-    self.settings = settings
+    self.soilSystem  = soilSystem
+    self.settings    = settings
     self.initialized = false
-    self.backgroundOverlay = nil
-    self.visible = true  -- Runtime visibility toggle (J key)
+    self.visible     = true   -- J-key toggle
 
-    -- Panel dimensions from constants
-    self.panelWidth = SoilConstants.HUD.PANEL_WIDTH
-    self.panelHeight = SoilConstants.HUD.PANEL_HEIGHT
-
-    -- Position will be set based on hudPosition setting
+    -- Position (from preset, overridden by drag)
     local defaultPos = SoilConstants.HUD.POSITIONS[1]
-    self.panelX = defaultPos.x
-    self.panelY = defaultPos.y
-    self.lastHudPosition = nil  -- Track position changes
+    self.panelX          = defaultPos.x
+    self.panelY          = defaultPos.y
+    self.lastHudPosition = nil
+
+    -- Scale & edit state (mirrors HUDOverlay / NPCFavorHUD)
+    self.scale            = 1.0
+    self.editMode         = false
+    self.dragging         = false
+    self.resizing         = false
+    self.dragOffsetX      = 0
+    self.dragOffsetY      = 0
+    self.resizeStartX     = 0
+    self.resizeStartY     = 0
+    self.resizeStartScale = 1.0
+    self.hoverCorner      = nil
+    self.animTimer        = 0
+
+    -- Camera freeze (NPCFavor pattern)
+    self.savedCamRotX = nil
+    self.savedCamRotY = nil
+    self.savedCamRotZ = nil
+
+    -- Single overlay handle (set in initialize)
+    self.fillOverlay = nil
 
     return self
 end
 
--- Calculate HUD position based on preset setting
+-- ── Initialize ───────────────────────────────────────────
+function SoilHUD:initialize()
+    if self.initialized then return true end
+
+    self:updatePosition()
+
+    if createImageOverlay ~= nil then
+        self.fillOverlay = createImageOverlay("dataS/menu/base/graph_pixel.dds")
+    else
+        SoilLogger.warn("SoilHUD: createImageOverlay not available — rect rendering disabled")
+    end
+
+    self.initialized = true
+    SoilLogger.info("SoilHUD initialized at (%.3f, %.3f)", self.panelX, self.panelY)
+    return true
+end
+
+-- ── Delete ───────────────────────────────────────────────
+function SoilHUD:delete()
+    if self.editMode then self:exitEditMode() end
+    if self.fillOverlay then
+        delete(self.fillOverlay)
+        self.fillOverlay = nil
+    end
+    self.initialized = false
+    SoilLogger.info("SoilHUD deleted")
+end
+
+-- ── Position preset ──────────────────────────────────────
 function SoilHUD:updatePosition()
     local position = self.settings.hudPosition or 1
-
-    -- Get position from constants (1=Top Right, 2=Top Left, 3=Bottom Right, 4=Bottom Left, 5=Center Right)
     local pos = SoilConstants.HUD.POSITIONS[position]
     if pos then
         self.panelX = pos.x
         self.panelY = pos.y
     end
+end
 
-    -- Update overlay position if it exists
-    if self.backgroundOverlay and self.backgroundOverlay.setPosition then
-        self.backgroundOverlay:setPosition(self.panelX, self.panelY)
+-- ── Edit mode: enter ─────────────────────────────────────
+function SoilHUD:enterEditMode()
+    self.editMode = true
+    self.dragging = false
+    if g_inputBinding and g_inputBinding.setShowMouseCursor then
+        g_inputBinding:setShowMouseCursor(true)
+    end
+    if getCamera and getRotation then
+        local ok, cam = pcall(getCamera)
+        if ok and cam and cam ~= 0 then
+            local ok2, rx, ry, rz = pcall(getRotation, cam)
+            if ok2 then
+                self.savedCamRotX, self.savedCamRotY, self.savedCamRotZ = rx, ry, rz
+            end
+        end
+    end
+    SoilLogger.info("[SoilHUD] Edit mode ON — drag to move, corners to resize, RMB to finish")
+end
+
+-- ── Edit mode: exit ──────────────────────────────────────
+function SoilHUD:exitEditMode()
+    self.editMode    = false
+    self.dragging    = false
+    self.resizing    = false
+    self.hoverCorner = nil
+    self.savedCamRotX, self.savedCamRotY, self.savedCamRotZ = nil, nil, nil
+    if g_inputBinding and g_inputBinding.setShowMouseCursor then
+        g_inputBinding:setShowMouseCursor(false)
+    end
+    SoilLogger.info("[SoilHUD] Edit mode OFF — position (%.3f, %.3f) scale=%.2f",
+        self.panelX, self.panelY, self.scale)
+end
+
+-- ── Geometry helpers ─────────────────────────────────────
+function SoilHUD:getHUDRect()
+    local s = self.scale
+    return self.panelX, self.panelY, SoilHUD.BASE_W * s, SoilHUD.BASE_H * s
+end
+
+function SoilHUD:isPointerOverHUD(posX, posY)
+    local px, py, pw, ph = self:getHUDRect()
+    return posX >= px and posX <= px + pw
+       and posY >= py and posY <= py + ph
+end
+
+function SoilHUD:getResizeHandleRects()
+    local px, py, pw, ph = self:getHUDRect()
+    local hs = SoilHUD.RESIZE_HANDLE_SIZE
+    return {
+        bl = {x = px,        y = py,        w = hs, h = hs},
+        br = {x = px+pw-hs,  y = py,        w = hs, h = hs},
+        tl = {x = px,        y = py+ph-hs,  w = hs, h = hs},
+        tr = {x = px+pw-hs,  y = py+ph-hs,  w = hs, h = hs},
+    }
+end
+
+function SoilHUD:hitTestCorner(posX, posY)
+    for key, r in pairs(self:getResizeHandleRects()) do
+        if posX >= r.x and posX <= r.x + r.w
+        and posY >= r.y and posY <= r.y + r.h then
+            return key
+        end
+    end
+    return nil
+end
+
+function SoilHUD:clampPosition()
+    local s  = self.scale
+    local pw = SoilHUD.BASE_W * s
+    local ph = SoilHUD.BASE_H * s
+    self.panelX = math.max(0.01, math.min(1.0 - pw - 0.01, self.panelX))
+    self.panelY = math.max(ph + 0.01, math.min(0.98, self.panelY))
+end
+
+-- ── Mouse event (called from main.lua addModEventListener) ──
+-- FS25 button numbers: 1=LMB, 3=RMB, 2=MMB.
+-- With setShowMouseCursor(true) active, FS25 fires mouseEvent
+-- on every mouse MOVEMENT as well as clicks, enabling continuous drag.
+--
+-- RMB only enters edit mode when cursor is over THIS panel
+-- to prevent cross-contamination with other mods' RMB handlers.
+function SoilHUD:onMouseEvent(posX, posY, isDown, isUp, button)
+    if not self.initialized then return end
+    if not self.settings.enabled then return end
+    if not self.settings.showHUD then return end
+    if not self.visible then return end
+
+    -- RMB: enter if over our HUD, exit from anywhere while editing
+    if isDown and button == 3 then
+        if self.editMode then
+            self:exitEditMode()
+        elseif self:isPointerOverHUD(posX, posY) then
+            self:enterEditMode()
+        end
+        return
+    end
+
+    if not self.editMode then return end
+
+    -- LMB down: corner resize or body drag
+    if isDown and button == 1 then
+        local corner = self:hitTestCorner(posX, posY)
+        if corner then
+            self.resizing         = true
+            self.dragging         = false
+            self.resizeStartX     = posX
+            self.resizeStartY     = posY
+            self.resizeStartScale = self.scale
+            return
+        end
+        if self:isPointerOverHUD(posX, posY) then
+            self.dragging    = true
+            self.resizing    = false
+            self.dragOffsetX = posX - self.panelX
+            self.dragOffsetY = posY - self.panelY
+        end
+        return
+    end
+
+    -- LMB up: end drag/resize and clamp
+    if isUp and button == 1 then
+        if self.dragging or self.resizing then
+            self.dragging = false
+            self.resizing = false
+            self:clampPosition()
+        end
+        return
+    end
+
+    -- Mouse movement: continuous drag or resize
+    if self.dragging then
+        local s = self.scale
+        local pw = SoilHUD.BASE_W * s
+        self.panelX = math.max(0.0, math.min(1.0 - pw, posX - self.dragOffsetX))
+        self.panelY = math.max(0.05, math.min(0.95, posY - self.dragOffsetY))
+    end
+
+    if self.resizing then
+        local px, py, pw, ph = self:getHUDRect()
+        local cx       = px + pw * 0.5
+        local cy       = py + ph * 0.5
+        local startDist = math.sqrt((self.resizeStartX - cx)^2 + (self.resizeStartY - cy)^2)
+        local currDist  = math.sqrt((posX - cx)^2 + (posY - cy)^2)
+        local delta     = (currDist - startDist) * 2.5
+        self.scale = math.max(SoilHUD.MIN_SCALE,
+            math.min(SoilHUD.MAX_SCALE, self.resizeStartScale + delta))
+        self:clampPosition()
+    end
+
+    -- Hover corner detection while not dragging/resizing
+    if not self.dragging and not self.resizing then
+        self.hoverCorner = self:hitTestCorner(posX, posY)
     end
 end
 
-function SoilHUD:initialize()
-    if self.initialized then return true end
-
-    -- Set position based on user preference
-    self:updatePosition()
-
-    -- Create background overlay with a 1x1 white pixel (we'll color it black)
-    -- Using g_baseUIFilename which is a tiny white texture built into FS25
-    self.backgroundOverlay = Overlay.new(g_baseUIFilename, self.panelX, self.panelY, self.panelWidth, self.panelHeight)
-    self.backgroundOverlay:setUVs(g_colorBgUVs)
-    self.backgroundOverlay:setColor(0, 0, 0, 0.7)
-
-    -- Sprayer rate panel: pre-create background + one overlay per rate step
-    local rateH   = self:py(28)
-    local rateBgW = self.panelWidth
-    local rateBgH = rateH + self:py(18)  -- buttons + label row
-    self.ratePanelBg = Overlay.new(g_baseUIFilename, self.panelX, 0, rateBgW, rateBgH)
-    self.ratePanelBg:setUVs(g_colorBgUVs)
-    self.ratePanelBg:setColor(0, 0, 0, 0.7)
-
-    local steps = SoilConstants.SPRAYER_RATE.STEPS
-    self.rateButtonOverlays = {}
-    for i = 1, #steps do
-        local ov = Overlay.new(g_baseUIFilename, 0, 0, 0, 0)
-        ov:setUVs(g_colorBgUVs)
-        table.insert(self.rateButtonOverlays, ov)
-    end
-
-    self.initialized = true
-    SoilLogger.info("Soil HUD overlay initialized at position %d (%0.3f, %0.3f)",
-        self.settings.hudPosition or 1, self.panelX, self.panelY)
-
-    return true
-end
-
-function SoilHUD:delete()
-    if self.backgroundOverlay then
-        self.backgroundOverlay:delete()
-        self.backgroundOverlay = nil
-    end
-
-    if self.ratePanelBg then
-        self.ratePanelBg:delete()
-        self.ratePanelBg = nil
-    end
-
-    for _, ov in ipairs(self.rateButtonOverlays or {}) do
-        ov:delete()
-    end
-    self.rateButtonOverlays = {}
-
-    self.initialized = false
-    SoilLogger.info("Soil HUD overlay deleted")
-end
-
--- Update HUD (called every frame)
+-- ── Update (called every frame) ──────────────────────────
 function SoilHUD:update(dt)
-    -- Check if position setting changed and update if needed
+    self.animTimer = self.animTimer + dt
+
+    -- Apply preset only when not in free-drag mode
     local currentPosition = self.settings.hudPosition or 1
-    if self.lastHudPosition ~= currentPosition then
+    if not self.editMode and not self.dragging and self.lastHudPosition ~= currentPosition then
         self:updatePosition()
         self.lastHudPosition = currentPosition
-        SoilLogger.info("HUD position changed to preset %d", currentPosition)
+    end
+
+    if self.editMode then
+        -- Re-assert cursor unlock every frame (NPCFavor pattern)
+        if g_inputBinding and g_inputBinding.setShowMouseCursor then
+            g_inputBinding:setShowMouseCursor(true)
+        end
+        -- Freeze camera
+        if self.savedCamRotX ~= nil and getCamera and setRotation then
+            local ok, cam = pcall(getCamera)
+            if ok and cam and cam ~= 0 then
+                pcall(setRotation, cam, self.savedCamRotX, self.savedCamRotY, self.savedCamRotZ)
+            end
+        end
+        -- Auto-exit when a GUI/dialog opens
+        if g_gui and (g_gui:getIsGuiVisible() or g_gui:getIsDialogVisible()) then
+            self:exitEditMode()
+        end
+        -- Hover detection (fallback when movement events aren't firing)
+        if not self.dragging and not self.resizing then
+            if g_inputBinding and g_inputBinding.mousePosXLast then
+                self.hoverCorner = self:hitTestCorner(
+                    g_inputBinding.mousePosXLast, g_inputBinding.mousePosYLast)
+            end
+        end
+    else
+        self.hoverCorner = nil
     end
 end
 
--- Toggle HUD visibility (called by J key)
+-- ── Toggle visibility (J key) ────────────────────────────
 function SoilHUD:toggleVisibility()
     self.visible = not self.visible
     local message = self.visible and "Soil HUD shown" or "Soil HUD hidden"
     SoilLogger.info(message)
-
-    -- Show in-game notification so user sees the toggle
     if g_currentMission and g_currentMission.hud and g_currentMission.hud.showBlinkingWarning then
         g_currentMission.hud:showBlinkingWarning(message, 2000)
     end
 end
 
---- Draw HUD (called every frame from main update loop)
----@return nil
+-- ── Draw helper: filled rect ─────────────────────────────
+function SoilHUD:drawRect(x, y, w, h, r, g, b, a)
+    if not self.fillOverlay then return end
+    setOverlayColor(self.fillOverlay, r, g, b, a)
+    renderOverlay(self.fillOverlay, x, y, w, h)
+end
+
+-- ── Draw (called every frame from main.lua) ──────────────
 function SoilHUD:draw()
     if not self.initialized then return end
     if not self.settings.enabled then return end
@@ -136,15 +326,15 @@ function SoilHUD:draw()
     if not self.visible then return end
     if not g_currentMission then return end
 
-    -- Don't draw over menus or dialogs
-    if g_gui and (g_gui:getIsGuiVisible() or g_gui:getIsDialogVisible()) then
-        return
-    end
-
-    -- Don't draw over the fullscreen map
-    if g_currentMission.hud and g_currentMission.hud.ingameMap then
-        if g_currentMission.hud.ingameMap.state == IngameMap.STATE_LARGE_MAP then
+    -- Suppress over menus unless editing
+    if not self.editMode then
+        if g_gui and (g_gui:getIsGuiVisible() or g_gui:getIsDialogVisible()) then
             return
+        end
+        if g_currentMission.hud and g_currentMission.hud.ingameMap then
+            if g_currentMission.hud.ingameMap.state == IngameMap.STATE_LARGE_MAP then
+                return
+            end
         end
     end
 
@@ -152,84 +342,228 @@ function SoilHUD:draw()
     self:drawSprayerRatePanel()
 end
 
---- Draw the static legend/reference panel.
---- Shows key bindings (J/K) and nutrient status thresholds color-coded by status.
---- Thresholds match SoilConstants.STATUS_THRESHOLDS (Good = N>=50/P>=45/K>=40, etc.)
+-- ── Draw main legend panel ───────────────────────────────
 function SoilHUD:drawPanel()
-    local colorTheme   = self.settings.hudColorTheme or 1
-    local fontSize     = self.settings.hudFontSize or 2
+    local s           = self.scale
     local transparency = self.settings.hudTransparency or 3
-    local compactMode  = self.settings.hudCompactMode or false
+    local alpha       = SoilConstants.HUD.TRANSPARENCY_LEVELS[transparency]
+    local compactMode = self.settings.hudCompactMode or false
+    local fontSize    = self.settings.hudFontSize or 2
+    local colorTheme  = math.max(1, math.min(4, self.settings.hudColorTheme or 1))
 
-    -- Clamp to valid range
-    if colorTheme < 1 or colorTheme > 4 then
-        colorTheme = math.max(1, math.min(4, colorTheme))
+    local pw = SoilHUD.BASE_W * s
+    local ph = SoilHUD.BASE_H * s
+    local px = self.panelX
+    local py = self.panelY
+
+    -- Drop shadow
+    local sd = 0.003 * s
+    self:drawRect(px + sd, py - sd, pw, ph, 0, 0, 0, 0.30)
+
+    -- Background
+    self:drawRect(px, py, pw, ph, SoilHUD.COLOR_BG[1], SoilHUD.COLOR_BG[2], SoilHUD.COLOR_BG[3], alpha)
+
+    -- Title bar accent
+    local titleH = 0.024 * s
+    self:drawRect(px, py + ph - titleH, pw, titleH,
+        SoilHUD.COLOR_TITLE_BG[1], SoilHUD.COLOR_TITLE_BG[2], SoilHUD.COLOR_TITLE_BG[3], SoilHUD.COLOR_TITLE_BG[4])
+
+    -- Subtle permanent border
+    local bw = 0.001
+    self:drawRect(px,          py,          pw, bw, SoilHUD.COLOR_BORDER[1], SoilHUD.COLOR_BORDER[2], SoilHUD.COLOR_BORDER[3], SoilHUD.COLOR_BORDER[4])
+    self:drawRect(px,          py + ph - bw, pw, bw, SoilHUD.COLOR_BORDER[1], SoilHUD.COLOR_BORDER[2], SoilHUD.COLOR_BORDER[3], SoilHUD.COLOR_BORDER[4])
+    self:drawRect(px,          py,          bw, ph, SoilHUD.COLOR_BORDER[1], SoilHUD.COLOR_BORDER[2], SoilHUD.COLOR_BORDER[3], SoilHUD.COLOR_BORDER[4])
+    self:drawRect(px + pw - bw, py,          bw, ph, SoilHUD.COLOR_BORDER[1], SoilHUD.COLOR_BORDER[2], SoilHUD.COLOR_BORDER[3], SoilHUD.COLOR_BORDER[4])
+
+    -- Edit mode: pulsing orange border + corner handles
+    if self.editMode then
+        local pulse = 0.55 + 0.45 * math.sin(self.animTimer * 0.004)
+        local ebw   = 0.002
+        self:drawRect(px,           py,            pw, ebw, 1.0, 0.55, 0.10, pulse)
+        self:drawRect(px,           py + ph - ebw,  pw, ebw, 1.0, 0.55, 0.10, pulse)
+        self:drawRect(px,           py,            ebw, ph, 1.0, 0.55, 0.10, pulse)
+        self:drawRect(px + pw - ebw, py,            ebw, ph, 1.0, 0.55, 0.10, pulse)
+
+        local hs = SoilHUD.RESIZE_HANDLE_SIZE
+        for key, r in pairs(self:getResizeHandleRects()) do
+            local isHover = (self.hoverCorner == key)
+            self:drawRect(r.x, r.y, r.w, r.h,
+                SoilHUD.COLOR_EDIT_HANDLE[1],
+                SoilHUD.COLOR_EDIT_HANDLE[2],
+                SoilHUD.COLOR_EDIT_HANDLE[3],
+                isHover and 1.0 or 0.65)
+        end
     end
 
-    -- Render background
-    if self.backgroundOverlay then
-        local alpha = SoilConstants.HUD.TRANSPARENCY_LEVELS[transparency]
-        self.backgroundOverlay:setColor(0, 0, 0, alpha)
-        self.backgroundOverlay:render()
-    end
-
+    -- ── Text content ─────────────────────────────────────
     local theme    = SoilConstants.HUD.COLOR_THEMES[colorTheme]
-    local themeR   = theme.r
-    local themeG   = theme.g
-    local themeB   = theme.b
     local fontMult = SoilConstants.HUD.FONT_SIZE_MULTIPLIERS[fontSize]
-    local lineH    = compactMode and SoilConstants.HUD.COMPACT_LINE_HEIGHT or SoilConstants.HUD.NORMAL_LINE_HEIGHT
+    local lineH    = (compactMode and SoilConstants.HUD.COMPACT_LINE_HEIGHT or SoilConstants.HUD.NORMAL_LINE_HEIGHT) * s
     local needsShadow = transparency <= 2
 
     if needsShadow then setTextShadow(true) end
+    setTextAlignment(RenderText.ALIGN_LEFT)
 
-    local x = self.panelX + 0.005
-    local y = self.panelY + self.panelHeight - 0.018
+    local tx = px + 0.007 * s
+    local ty = py + ph - 0.018 * s  -- start just inside the title bar
 
     -- Title
     setTextBold(true)
-    setTextAlignment(RenderText.ALIGN_LEFT)
     setTextColor(1.0, 1.0, 1.0, 1.0)
-    renderText(x, y, 0.014 * fontMult, "SOIL LEGEND")
-    y = y - lineH * 1.4
+    renderText(tx, ty, 0.012 * fontMult * s, "SOIL LEGEND")
     setTextBold(false)
+    ty = ty - lineH * 1.6
 
     -- Key bindings
-    setTextColor(themeR, themeG, themeB, 1.0)
-    renderText(x, y, 0.011 * fontMult, "J = Toggle HUD")
-    y = y - lineH
-    renderText(x, y, 0.011 * fontMult, "K = Soil Report")
-    y = y - lineH * 1.3
+    setTextColor(theme.r, theme.g, theme.b, 1.0)
+    renderText(tx, ty, 0.010 * fontMult * s, "J  =  Toggle HUD")
+    ty = ty - lineH
+    renderText(tx, ty, 0.010 * fontMult * s, "K  =  Soil Report")
+    ty = ty - lineH * 1.1
 
-    -- Nutrient status legend — color matches the in-game status colors
-    -- Good  = value >= fair threshold (50 / 45 / 40)
-    -- Fair  = value >= poor threshold (30 / 25 / 20)
-    -- Poor  = value below poor threshold
-    setTextColor(0.3, 0.9, 0.3, 1.0)
-    renderText(x, y, 0.011 * fontMult, "Good: N>50, P>45, K>40")
-    y = y - lineH
+    -- Divider
+    self:drawRect(px + 0.006 * s, ty, pw - 0.012 * s, 0.0005,
+        SoilHUD.COLOR_DIVIDER[1], SoilHUD.COLOR_DIVIDER[2], SoilHUD.COLOR_DIVIDER[3], SoilHUD.COLOR_DIVIDER[4])
+    ty = ty - lineH * 0.8
 
-    setTextColor(0.9, 0.9, 0.2, 1.0)
-    renderText(x, y, 0.011 * fontMult, "Fair: N>30, P>25, K>20")
-    y = y - lineH
+    -- Nutrient status legend
+    setTextColor(0.28, 0.88, 0.28, 1.0)
+    renderText(tx, ty, 0.010 * fontMult * s, "Good  N>50  P>45  K>40")
+    ty = ty - lineH
 
-    setTextColor(0.9, 0.3, 0.3, 1.0)
-    renderText(x, y, 0.011 * fontMult, "Poor: needs fertilizer")
-    y = y - lineH * 1.3
+    setTextColor(0.90, 0.88, 0.20, 1.0)
+    renderText(tx, ty, 0.010 * fontMult * s, "Fair  N>30  P>25  K>20")
+    ty = ty - lineH
+
+    setTextColor(0.90, 0.28, 0.28, 1.0)
+    renderText(tx, ty, 0.010 * fontMult * s, "Poor  needs fertilizer")
+    ty = ty - lineH * 1.1
+
+    -- Divider
+    self:drawRect(px + 0.006 * s, ty, pw - 0.012 * s, 0.0005,
+        SoilHUD.COLOR_DIVIDER[1], SoilHUD.COLOR_DIVIDER[2], SoilHUD.COLOR_DIVIDER[3], SoilHUD.COLOR_DIVIDER[4])
+    ty = ty - lineH * 0.8
 
     -- pH reference
-    setTextColor(themeR, themeG, themeB, 0.75)
-    renderText(x, y, 0.010 * fontMult, "pH ideal: 6.5 - 7.0")
+    setTextColor(theme.r, theme.g, theme.b, 0.85)
+    renderText(tx, ty, 0.010 * fontMult * s, "pH ideal:  6.5 – 7.0")
+    ty = ty - lineH * 1.2
 
-    -- Reset text state
+    -- Edit / normal hint
+    if self.editMode then
+        setTextColor(1.0, 0.65, 0.15, 0.95)
+        renderText(tx, ty, 0.009 * fontMult * s, "Drag: move")
+        ty = ty - lineH * 0.95
+        renderText(tx, ty, 0.009 * fontMult * s, "Corner: resize   RMB: done")
+    else
+        setTextColor(0.45, 0.45, 0.58, 0.80)
+        renderText(tx, ty, 0.009 * fontMult * s, "RMB: move / resize")
+    end
+
+    -- Restore text state
     if needsShadow then setTextShadow(false) end
-    setTextAlignment(RenderText.ALIGN_LEFT)
     setTextBold(false)
+    setTextAlignment(RenderText.ALIGN_LEFT)
     setTextColor(1, 1, 1, 1)
 end
 
---- Returns the sprayer vehicle the local player is currently operating, or nil.
----@return table|nil vehicle
+-- ── Sprayer rate panel ───────────────────────────────────
+function SoilHUD:drawSprayerRatePanel()
+    local sprayer = self:getCurrentSprayer()
+    if sprayer == nil then return end
+
+    local rm = g_SoilFertilityManager and g_SoilFertilityManager.sprayerRateManager
+    if rm == nil then return end
+
+    local s        = self.scale
+    local steps    = SoilConstants.SPRAYER_RATE.STEPS
+    local currentIdx = rm:getIndex(sprayer.id)
+    local fontMult = SoilConstants.HUD.FONT_SIZE_MULTIPLIERS[self.settings.hudFontSize or 2]
+
+    local pw      = SoilHUD.BASE_W * s
+    local rateH   = self:py(24) * s
+    local labelH  = self:py(14) * s
+    local gap     = self:py(6)  * s
+    local panelH  = rateH + labelH + self:py(8) * s
+
+    local panelX  = self.panelX
+    local panelY  = self.panelY - gap - panelH
+
+    -- Shadow
+    local sd = 0.002 * s
+    self:drawRect(panelX + sd, panelY - sd, pw, panelH, 0, 0, 0, 0.28)
+
+    -- Background
+    self:drawRect(panelX, panelY, pw, panelH, 0.05, 0.05, 0.08, 0.80)
+
+    -- Border
+    local bw = 0.001
+    self:drawRect(panelX,           panelY,              pw, bw, SoilHUD.COLOR_BORDER[1], SoilHUD.COLOR_BORDER[2], SoilHUD.COLOR_BORDER[3], SoilHUD.COLOR_BORDER[4])
+    self:drawRect(panelX,           panelY + panelH - bw,  pw, bw, SoilHUD.COLOR_BORDER[1], SoilHUD.COLOR_BORDER[2], SoilHUD.COLOR_BORDER[3], SoilHUD.COLOR_BORDER[4])
+    self:drawRect(panelX,           panelY,              bw, panelH, SoilHUD.COLOR_BORDER[1], SoilHUD.COLOR_BORDER[2], SoilHUD.COLOR_BORDER[3], SoilHUD.COLOR_BORDER[4])
+    self:drawRect(panelX + pw - bw,  panelY,              bw, panelH, SoilHUD.COLOR_BORDER[1], SoilHUD.COLOR_BORDER[2], SoilHUD.COLOR_BORDER[3], SoilHUD.COLOR_BORDER[4])
+
+    -- Label row
+    setTextBold(true)
+    setTextAlignment(RenderText.ALIGN_CENTER)
+    setTextColor(1, 1, 1, 0.90)
+    renderText(panelX + pw * 0.5, panelY + rateH + self:py(4) * s,
+        0.009 * fontMult * s, "APP. RATE  ( [ / ] )")
+    setTextBold(false)
+
+    -- Step colors: blue → cyan → green → yellow → orange → red
+    local COLORS = {
+        {0.35, 0.55, 0.95},
+        {0.25, 0.75, 0.90},
+        {0.20, 0.82, 0.35},
+        {0.92, 0.82, 0.12},
+        {0.95, 0.50, 0.10},
+        {0.95, 0.18, 0.18},
+    }
+    local LABELS = {"50%", "75%", "100%", "125%", "150%", "200%"}
+
+    local pad  = self:px(3) * s
+    local btnW = (pw - pad * (#steps + 1)) / #steps
+    local btnY = panelY + self:py(2) * s
+
+    for i = 1, #steps do
+        local btnX  = panelX + pad + (i - 1) * (btnW + pad)
+        local col   = COLORS[i]
+        local isCur = (i == currentIdx)
+        local alpha = isCur and 0.95 or 0.22
+
+        -- Button background
+        self:drawRect(btnX, btnY, btnW, rateH, col[1], col[2], col[3], alpha)
+
+        -- Active indicator: thin top bar
+        if isCur then
+            self:drawRect(btnX, btnY + rateH - 0.002, btnW, 0.002, col[1], col[2], col[3], 1.0)
+        end
+
+        setTextAlignment(RenderText.ALIGN_CENTER)
+        setTextColor(1, 1, 1, isCur and 1.0 or 0.50)
+        if isCur then setTextBold(true) end
+        renderText(btnX + btnW * 0.5, btnY + self:py(7) * s, 0.009 * fontMult * s, LABELS[i])
+        if isCur then setTextBold(false) end
+    end
+
+    -- Burn warning
+    local curRate = steps[currentIdx]
+    local warnY   = panelY - self:py(14) * s
+    setTextAlignment(RenderText.ALIGN_CENTER)
+    if curRate >= SoilConstants.SPRAYER_RATE.BURN_GUARANTEED_THRESHOLD then
+        setTextColor(1.0, 0.15, 0.15, 1.0)
+        renderText(panelX + pw * 0.5, warnY, 0.010 * fontMult * s, "BURN RISK: GUARANTEED")
+    elseif curRate > SoilConstants.SPRAYER_RATE.BURN_RISK_THRESHOLD then
+        setTextColor(0.95, 0.65, 0.10, 1.0)
+        renderText(panelX + pw * 0.5, warnY, 0.010 * fontMult * s, "BURN RISK: POSSIBLE")
+    end
+
+    setTextAlignment(RenderText.ALIGN_LEFT)
+    setTextColor(1, 1, 1, 1)
+end
+
+-- ── Sprayer detection ────────────────────────────────────
 function SoilHUD:getCurrentSprayer()
     local player = g_localPlayer
     if player == nil then return nil end
@@ -242,96 +576,6 @@ function SoilHUD:getCurrentSprayer()
     return nil
 end
 
---- Draw the application rate selector panel below the legend when player is in a sprayer.
---- Highlights the active step; shows a burn warning for rates above the risk threshold.
-function SoilHUD:drawSprayerRatePanel()
-    if not self.ratePanelBg or not self.rateButtonOverlays then return end
-
-    local sprayer = self:getCurrentSprayer()
-    if sprayer == nil then return end
-
-    local rm = g_SoilFertilityManager and g_SoilFertilityManager.sprayerRateManager
-    if rm == nil then return end
-
-    local steps      = SoilConstants.SPRAYER_RATE.STEPS
-    local currentIdx = rm:getIndex(sprayer.id)
-    local fontMult   = SoilConstants.HUD.FONT_SIZE_MULTIPLIERS[self.settings.hudFontSize or 2]
-
-    -- Panel sits directly below the legend panel with a small gap
-    local gap    = self:py(6)
-    local rateH  = self:py(24)
-    local labelH = self:py(14)
-    local panelX = self.panelX
-    local panelY = self.panelY - gap - rateH - labelH - self:py(4)
-    local panelW = self.panelWidth
-
-    -- Background
-    self.ratePanelBg:setPosition(panelX, panelY)
-    self.ratePanelBg:setDimension(panelW, rateH + labelH + self:py(8))
-    self.ratePanelBg:setColor(0, 0, 0, 0.72)
-    self.ratePanelBg:render()
-
-    -- Label row
-    setTextBold(true)
-    setTextAlignment(RenderText.ALIGN_CENTER)
-    setTextColor(1, 1, 1, 0.85)
-    renderText(panelX + panelW * 0.5, panelY + rateH + self:py(4), 0.010 * fontMult, "APP. RATE  ( [ / ] )")
-    setTextBold(false)
-
-    -- Step button colors: cool→green→warm→hot
-    local COLORS = {
-        { 0.35, 0.55, 0.95 },  -- 50%  blue
-        { 0.25, 0.75, 0.90 },  -- 75%  cyan
-        { 0.20, 0.82, 0.35 },  -- 100% green
-        { 0.92, 0.82, 0.12 },  -- 125% yellow
-        { 0.95, 0.50, 0.10 },  -- 150% orange
-        { 0.95, 0.18, 0.18 },  -- 200% red
-    }
-    local LABELS = { "50%", "75%", "100%", "125%", "150%", "200%" }
-
-    local pad  = self:px(3)
-    local btnW = (panelW - pad * (#steps + 1)) / #steps
-    local btnY = panelY + self:py(2)
-
-    for i, _ in ipairs(steps) do
-        local btnX  = panelX + pad + (i - 1) * (btnW + pad)
-        local col   = COLORS[i]
-        local alpha = (i == currentIdx) and 0.95 or 0.28
-
-        local ov = self.rateButtonOverlays[i]
-        ov:setPosition(btnX, btnY)
-        ov:setDimension(btnW, rateH)
-        ov:setColor(col[1], col[2], col[3], alpha)
-        ov:render()
-
-        local textAlpha = (i == currentIdx) and 1.0 or 0.55
-        setTextColor(1, 1, 1, textAlpha)
-        if i == currentIdx then setTextBold(true) end
-        renderText(btnX + btnW * 0.5, btnY + self:py(7), 0.010 * fontMult, LABELS[i])
-        if i == currentIdx then setTextBold(false) end
-    end
-
-    -- Burn warning below buttons
-    local curRate = steps[currentIdx]
-    local warnY   = panelY - self:py(14)
-    if curRate >= SoilConstants.SPRAYER_RATE.BURN_GUARANTEED_THRESHOLD then
-        setTextColor(1.0, 0.15, 0.15, 1.0)
-        renderText(panelX + panelW * 0.5, warnY, 0.010 * fontMult, "BURN RISK: GUARANTEED")
-    elseif curRate > SoilConstants.SPRAYER_RATE.BURN_RISK_THRESHOLD then
-        setTextColor(0.95, 0.65, 0.10, 1.0)
-        renderText(panelX + panelW * 0.5, warnY, 0.010 * fontMult, "BURN RISK: POSSIBLE")
-    end
-
-    setTextAlignment(RenderText.ALIGN_LEFT)
-    setTextColor(1, 1, 1, 1)
-end
-
---- Normalised pixel helpers so button sizes are resolution-independent.
---- FS25 uses 0.0–1.0 screen-space coords; these convert from logical pixels.
-function SoilHUD:px(pixels)
-    return pixels / 1920
-end
-
-function SoilHUD:py(pixels)
-    return pixels / 1080
-end
+-- ── Pixel helpers (resolution-independent) ───────────────
+function SoilHUD:px(pixels) return pixels / 1920 end
+function SoilHUD:py(pixels) return pixels / 1080 end

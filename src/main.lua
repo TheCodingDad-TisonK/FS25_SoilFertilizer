@@ -175,6 +175,16 @@ end)
 -- Install save/load hooks
 hookSaveLoadEvents()
 
+-- Route mouse events to SoilHUD (for drag/resize edit mode)
+-- RMB only enters edit mode when cursor is over the panel (no cross-contamination)
+local soilMouseHandler = {}
+function soilMouseHandler:mouseEvent(posX, posY, isDown, isUp, button, eventUsed)
+    if sfm and sfm.soilHUD then
+        sfm.soilHUD:onMouseEvent(posX, posY, isDown, isUp, button)
+    end
+end
+addModEventListener(soilMouseHandler)
+
 -- Console commands
 function soilfertility()
     if g_SoilFertilityManager and g_SoilFertilityManager.settingsGUI then
