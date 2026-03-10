@@ -47,6 +47,9 @@ function HookManager:installAll(soilSystem, pfActive)
         local sprayerOk = self:installSprayerHook()
         if sprayerOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
+        local spreaderOk = self:installSpreaderHook()
+        if spreaderOk then successCount = successCount + 1 else failCount = failCount + 1 end
+
         local ownershipOk = self:installOwnershipHook()
         if ownershipOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
@@ -189,7 +192,131 @@ function HookManager:installSprayerHook()
     return true
 end
 
--- Hook 3: Field ownership changes
+-- Hook 3: Solid fertilizer spreaders (ManureSpreader / SpreadActivatable)
+-- Sprayer.spray receives fieldId=0 for solid spreaders because their area-based discharge
+-- system does not resolve a field before calling spray(). This hook intercepts
+-- Sprayer.processSprayerArea, which IS called per-frame with a valid workArea, so we
+-- can resolve the farmland from world coordinates — exactly like the plowing hook does.
+-- We accumulate liters per field within each game update tick to avoid calling
+-- onFertilizerApplied dozens of times per second for the same field.
+---@return boolean success True if hook installed successfully
+function HookManager:installSpreaderHook()
+    if not Sprayer or type(Sprayer.processSprayerArea) ~= "function" then
+        print("[SoilFertilizer WARNING] Could not install spreader hook - Sprayer.processSprayerArea not available")
+        return false
+    end
+
+    -- Accumulator: [farmlandId] = { fillTypeIndex, liters }
+    -- Flushed once per game update tick via a lightweight frame-coalescing pattern.
+    local pendingApplication = {}
+    local flushScheduled = false
+
+    local function flushPending()
+        flushScheduled = false
+        for farmlandId, entry in pairs(pendingApplication) do
+            local success, errorMsg = pcall(function()
+                g_SoilFertilityManager.soilSystem:onFertilizerApplied(farmlandId, entry.fillTypeIndex, entry.liters)
+            end)
+            if not success then
+                print("[SoilFertilizer ERROR] Spreader flush failed for field " .. tostring(farmlandId) .. ": " .. tostring(errorMsg))
+            end
+        end
+        pendingApplication = {}
+    end
+
+    local original = Sprayer.processSprayerArea
+    Sprayer.processSprayerArea = Utils.appendedFunction(
+        original,
+        function(sprayerSelf, workArea, dt)
+            if not g_SoilFertilityManager or
+               not g_SoilFertilityManager.soilSystem or
+               not g_SoilFertilityManager.settings.enabled then
+                return
+            end
+
+            -- Only intercept solid-material spreaders (spec_manureSpreader or spec_solidFertilizer).
+            -- Liquid sprayers are already handled by installSprayerHook via Sprayer.spray.
+            local isSolidSpreader = sprayerSelf.spec_manureSpreader ~= nil
+                                 or sprayerSelf.spec_solidFertilizer ~= nil
+                                 or (sprayerSelf.spec_sprayer ~= nil
+                                     and sprayerSelf.spec_sprayer.sprayType == SprayType.SPREAD)
+            if not isSolidSpreader then return end
+
+            -- Validate workArea coords (same guard as plowing hook)
+            if not workArea or type(workArea) ~= "table" or #workArea < 5 then return end
+
+            local success, errorMsg = pcall(function()
+                -- Resolve farmland from the centre of the work area
+                local x = (workArea[1] + workArea[4]) / 2
+                local z = (workArea[2] + workArea[5]) / 2
+
+                if not g_farmlandManager then return end
+                local farmland = g_farmlandManager:getFarmlandAtWorldPosition(x, z)
+                local farmlandId = farmland and farmland.id
+                if not farmlandId or farmlandId <= 0 then return end
+
+                -- Identify which fill type is currently being discharged
+                local sprayerSpec = sprayerSelf.spec_sprayer
+                if not sprayerSpec then return end
+
+                local fillUnitIndex = sprayerSpec.fillUnitIndex or 1
+                local fillTypeIndex = sprayerSelf:getFillUnitFillType(fillUnitIndex)
+                if not fillTypeIndex or fillTypeIndex == FillType.UNKNOWN then return end
+
+                local fillType = g_fillTypeManager:getFillTypeByIndex(fillTypeIndex)
+                if not fillType then return end
+
+                -- Only handle fill types we recognise as fertilizers
+                if not SoilConstants.FERTILIZER_PROFILES[fillType.name] then return end
+
+                -- Estimate liters applied this frame: discharge rate × dt
+                -- sprayerSpec.sprayAmountScale carries the per-nozzle volume coefficient;
+                -- multiply by dt (ms→s) for a per-frame litre estimate.
+                local sprayAmount = (sprayerSpec.sprayAmountScale or 1.0) * (dt * 0.001)
+                local rm = g_SoilFertilityManager.sprayerRateManager
+                local rateMultiplier = (rm ~= nil) and rm:getMultiplier(sprayerSelf.id) or 1.0
+                local effectiveLiters = sprayAmount * rateMultiplier
+
+                -- Accumulate into pending batch (coalesce multiple workArea callbacks per tick)
+                if pendingApplication[farmlandId] then
+                    pendingApplication[farmlandId].liters = pendingApplication[farmlandId].liters + effectiveLiters
+                else
+                    pendingApplication[farmlandId] = { fillTypeIndex = fillTypeIndex, liters = effectiveLiters }
+                end
+
+                -- Schedule a single flush at the end of this update cycle
+                if not flushScheduled then
+                    flushScheduled = true
+                    -- Utils.appendedFunction guarantees we run after original; schedule
+                    -- flush for next idle step via a one-shot updater.
+                    if g_currentMission and g_currentMission.addUpdateable then
+                        g_currentMission:addUpdateable({
+                            update = function(self2, _dt2)
+                                flushPending()
+                                return true  -- remove after one call
+                            end
+                        })
+                    else
+                        -- Fallback: flush immediately (slightly less coalesced but still correct)
+                        flushPending()
+                    end
+                end
+
+                SoilLogger.debug("Spreader work area: field %d, fillType %s, ~%.3fL this frame",
+                    farmlandId, fillType.name, effectiveLiters)
+            end)
+
+            if not success then
+                print("[SoilFertilizer ERROR] Spreader hook failed: " .. tostring(errorMsg))
+            end
+        end
+    )
+    self:register(Sprayer, "processSprayerArea", original, "Sprayer.processSprayerArea")
+    print("[SoilFertilizer] [OK] Spreader hook installed successfully")
+    return true
+end
+
+-- Hook 4: Field ownership changes (farmlandManager)
 ---@return boolean success True if hook installed successfully
 function HookManager:installOwnershipHook()
     if not g_farmlandManager or not g_farmlandManager.fieldOwnershipChanged then
@@ -221,7 +348,7 @@ function HookManager:installOwnershipHook()
     return true
 end
 
--- Hook 4: Weather/environment updates - converted from direct replacement to appended
+-- Hook 5: Weather/environment updates - converted from direct replacement to appended
 ---@return boolean success True if hook installed successfully
 function HookManager:installWeatherHook()
     if not g_currentMission or not g_currentMission.environment then
@@ -260,7 +387,7 @@ function HookManager:installWeatherHook()
     return true
 end
 
--- Hook 5: Plowing operations (Cultivator)
+-- Hook 6: Plowing operations (Cultivator)
 ---@return boolean success True if hook installed successfully
 function HookManager:installPlowingHook()
     if not Cultivator or type(Cultivator.processCultivatorArea) ~= "function" then
