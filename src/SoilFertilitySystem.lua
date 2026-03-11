@@ -957,6 +957,19 @@ function SoilFertilitySystem:getFieldInfo(fieldId)
 
     local currentDay = (g_currentMission and g_currentMission.environment and g_currentMission.environment.currentDay) or 0
 
+    -- Resolve current crop name: prefer lastCrop (set on harvest), fall back to
+    -- the live fruitTypeIndex from FieldState so fields show their growing crop.
+    local cropName = field.lastCrop
+    if (cropName == nil or cropName == "") and g_fieldManager and g_fieldManager.farmlandIdFieldMapping then
+        local fsField = g_fieldManager.farmlandIdFieldMapping[fieldId]
+        if fsField and fsField.fieldState and fsField.fieldState.fruitTypeIndex and fsField.fieldState.fruitTypeIndex ~= FruitType.UNKNOWN then
+            local fruitDesc = g_fruitTypeManager and g_fruitTypeManager:getFruitTypeByIndex(fsField.fieldState.fruitTypeIndex)
+            if fruitDesc and fruitDesc.name then
+                cropName = fruitDesc.name
+            end
+        end
+    end
+
     return {
         fieldId = fieldId,
         nitrogen = { value = math.floor(field.nitrogen), status = nutrientStatus(field.nitrogen, "nitrogen") },
@@ -964,7 +977,7 @@ function SoilFertilitySystem:getFieldInfo(fieldId)
         potassium = { value = math.floor(field.potassium), status = nutrientStatus(field.potassium, "potassium") },
         organicMatter = field.organicMatter,
         pH = field.pH,
-        lastCrop = field.lastCrop,
+        lastCrop = cropName,
         daysSinceHarvest = field.lastHarvest > 0 and (currentDay - field.lastHarvest) or 0,
         fertilizerApplied = field.fertilizerApplied or 0,
         needsFertilization = not self.PFActive and (

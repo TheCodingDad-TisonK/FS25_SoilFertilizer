@@ -81,7 +81,37 @@ function SoilReportDialog:show()
     g_gui:showDialog("SoilReportDialog")
 end
 
---- Collect field data from the soil system
+--- Get the local player's farm ID.
+---@return number
+local function getLocalFarmId()
+    if g_currentMission and g_currentMission.player then
+        local id = g_currentMission.player.farmId
+        if id and id > 0 then return id end
+    end
+
+    if g_currentMission and g_currentMission.userManager and g_currentMission.playerUserId then
+        local user = g_currentMission.userManager:getUserByUserId(g_currentMission.playerUserId)
+        if user and user.farmId and user.farmId > 0 then return user.farmId end
+    end
+
+    return 1  -- singleplayer is always farm 1
+end
+
+--- Returns true if the farmland is owned by the given farm.
+--- Uses g_farmlandManager.farmlandMapping[farmlandId] — the authoritative
+--- FS25 ownership table (confirmed in FarmlandManager.lua source).
+---@param farmlandId number
+---@param localFarmId number
+---@return boolean
+local function isFarmlandOwnedByFarm(farmlandId, localFarmId)
+    if not g_farmlandManager or not g_farmlandManager.farmlandMapping then
+        return false
+    end
+    return g_farmlandManager.farmlandMapping[farmlandId] == localFarmId
+end
+
+--- Collect field data limited to fields owned by the local player's farm.
+--- Uses field.fieldState.ownerFarmId via FieldManager.farmlandIdFieldMapping.
 function SoilReportDialog:collectFieldData()
     self.fieldInfos = {}
     self.sortedFieldIds = {}
@@ -89,10 +119,26 @@ function SoilReportDialog:collectFieldData()
     local soilSystem = g_SoilFertilityManager.soilSystem
     if not soilSystem or not soilSystem.fieldData then return end
 
-    -- Collect sorted field IDs
+    local localFarmId = getLocalFarmId()
+
+    local filtered = {}
     for fieldId, _ in pairs(soilSystem.fieldData) do
-        table.insert(self.sortedFieldIds, fieldId)
+        if isFarmlandOwnedByFarm(fieldId, localFarmId) then
+            table.insert(filtered, fieldId)
+        end
     end
+
+    -- Fallback: if fieldState isn't populated yet or player owns no fields,
+    -- show all tracked fields so the dialog is never uselessly blank.
+    if #filtered == 0 then
+        SoilLogger.warning("[SoilReport] No owned fields found for farmId %s - showing all tracked fields", tostring(localFarmId))
+        for fieldId, _ in pairs(soilSystem.fieldData) do
+            table.insert(self.sortedFieldIds, fieldId)
+        end
+    else
+        self.sortedFieldIds = filtered
+    end
+
     table.sort(self.sortedFieldIds)
 
     -- Build info for each field
