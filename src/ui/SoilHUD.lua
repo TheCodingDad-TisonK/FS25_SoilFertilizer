@@ -672,7 +672,84 @@ function SoilHUD:drawNutrientRow(label, nutrient, px, cy, pw, s, fontMult)
     return cy
 end
 
+-- ── Sprayer fill-type helpers ─────────────────────────────
+--- Returns the FillType object currently loaded in the sprayer, or nil.
+function SoilHUD:getSprayerFillType(sprayer)
+    local fillTypeIndex
+
+    -- Try workAreaParameters first (populated while actively spraying)
+    local spec = sprayer.spec_sprayer
+    if spec and spec.workAreaParameters then
+        local ft = spec.workAreaParameters.sprayFillType
+        if ft and ft > 0 then fillTypeIndex = ft end
+    end
+
+    -- Fall back to fill unit query (works when parked)
+    if not fillTypeIndex then
+        local ok, ft = pcall(function() return sprayer:getFillUnitFillType(1) end)
+        if ok and ft and ft > 0 then fillTypeIndex = ft end
+    end
+
+    if not fillTypeIndex then return nil end
+    return g_fillTypeManager and g_fillTypeManager:getFillTypeByIndex(fillTypeIndex)
+end
+
+--- Returns the BASE_RATES entry for a fill type, falling back to DEFAULT.
+function SoilHUD:getRateConfig(fillType)
+    local br = SoilConstants.SPRAYER_RATE.BASE_RATES
+    if fillType and br[fillType.name] then
+        return br[fillType.name]
+    end
+    return br.DEFAULT
+end
+
+--- Returns a formatted rate string with units for the given multiplier.
+--- Shows gal/ac (liquid) or lb/ac (dry) when useImperialUnits is true,
+--- otherwise L/ha or kg/ha.
+function SoilHUD:formatRate(multiplier, rateConfig)
+    local value    = rateConfig.value * multiplier
+    local imperial = (self.settings.useImperialUnits ~= false)
+    local conv     = SoilConstants.SPRAYER_RATE
+
+    if rateConfig.unit == "liquid" then
+        if imperial then
+            return string.format("%d gal/ac", math.floor(value * conv.L_PER_HA_TO_GAL_PER_AC + 0.5))
+        else
+            return string.format("%d L/ha", math.floor(value + 0.5))
+        end
+    else
+        if imperial then
+            return string.format("%d lb/ac", math.floor(value * conv.KG_PER_HA_TO_LB_PER_AC + 0.5))
+        else
+            return string.format("%d kg/ha", math.floor(value + 0.5))
+        end
+    end
+end
+
+--- Returns just the numeric part of the rate (no unit suffix), for adjacent step labels.
+function SoilHUD:formatRateNumber(multiplier, rateConfig)
+    local value    = rateConfig.value * multiplier
+    local imperial = (self.settings.useImperialUnits ~= false)
+    local conv     = SoilConstants.SPRAYER_RATE
+
+    if rateConfig.unit == "liquid" then
+        if imperial then
+            return string.format("%d", math.floor(value * conv.L_PER_HA_TO_GAL_PER_AC + 0.5))
+        else
+            return string.format("%d", math.floor(value + 0.5))
+        end
+    else
+        if imperial then
+            return string.format("%d", math.floor(value * conv.KG_PER_HA_TO_LB_PER_AC + 0.5))
+        else
+            return string.format("%d", math.floor(value + 0.5))
+        end
+    end
+end
+
 -- ── Sprayer rate panel ───────────────────────────────────
+-- Center-scroll design: ← prev prev  CURRENT RATE  next next →
+-- Thin progress bar beneath; burn warning below panel.
 function SoilHUD:drawSprayerRatePanel()
     local sprayer = self:getCurrentSprayer()
     if sprayer == nil then return end
@@ -684,72 +761,96 @@ function SoilHUD:drawSprayerRatePanel()
     local steps      = SoilConstants.SPRAYER_RATE.STEPS
     local currentIdx = rm:getIndex(sprayer.id)
     local fontMult   = SoilConstants.HUD.FONT_SIZE_MULTIPLIERS[self.settings.hudFontSize or 2]
+    local fillType   = self:getSprayerFillType(sprayer)
+    local rateConfig = self:getRateConfig(fillType)
+    local curMult    = steps[currentIdx]
 
-    local pw     = SoilHUD.BASE_W * s
-    local rateH  = self:py(24) * s
-    local labelH = self:py(14) * s
-    local gap    = self:py(6)  * s
-    local panelH = rateH + labelH + self:py(8) * s
+    -- Panel geometry
+    local pw      = SoilHUD.BASE_W * s
+    local padV    = self:py(5)  * s
+    local barH    = self:py(4)  * s
+    local scrollH = self:py(22) * s
+    local headerH = self:py(16) * s
+    local panelH  = padV + barH + padV + scrollH + padV + headerH
+    local gap     = self:py(6) * s
+    local panelX  = self.panelX
+    local panelY  = self.panelY - gap - panelH
+    local cx      = panelX + pw * 0.5
 
-    local panelX = self.panelX
-    local panelY = self.panelY - gap - panelH
-
-    -- Shadow
+    -- Shadow + background + border
     self:drawRect(panelX + 0.002*s, panelY - 0.002*s, pw, panelH, SoilHUD.C_SHADOW)
-
-    -- Background + border
     self:drawRect(panelX, panelY, pw, panelH, SoilHUD.C_BG, 0.82)
     local bw = 0.001
-    self:drawRect(panelX,           panelY,              pw, bw, SoilHUD.C_BORDER)
+    self:drawRect(panelX,           panelY,               pw, bw, SoilHUD.C_BORDER)
     self:drawRect(panelX,           panelY + panelH - bw,  pw, bw, SoilHUD.C_BORDER)
-    self:drawRect(panelX,           panelY,              bw, panelH, SoilHUD.C_BORDER)
-    self:drawRect(panelX + pw - bw,  panelY,              bw, panelH, SoilHUD.C_BORDER)
+    self:drawRect(panelX,           panelY,               bw, panelH, SoilHUD.C_BORDER)
+    self:drawRect(panelX + pw - bw,  panelY,               bw, panelH, SoilHUD.C_BORDER)
 
-    -- Label
+    -- Header: "APP. RATE  ( [ / ] )"
     setTextBold(true)
     setTextAlignment(RenderText.ALIGN_CENTER)
     setTextColor(1, 1, 1, 0.90)
-    renderText(panelX + pw * 0.5, panelY + rateH + self:py(4)*s,
+    renderText(cx, panelY + panelH - headerH * 0.5 - self:py(3)*s,
         0.009 * fontMult * s, "APP. RATE  ( [ / ] )")
     setTextBold(false)
 
-    local COLORS = {
-        {0.35, 0.55, 0.95}, {0.25, 0.75, 0.90}, {0.20, 0.82, 0.35},
-        {0.92, 0.82, 0.12}, {0.95, 0.50, 0.10}, {0.95, 0.18, 0.18},
-    }
-    local LABELS = {"50%", "75%", "100%", "125%", "150%", "200%"}
+    -- Rate scroll row base Y
+    local scrollY = panelY + padV + barH + padV
 
-    local pad  = self:px(3) * s
-    local btnW = (pw - pad * (#steps + 1)) / #steps
-    local btnY = panelY + self:py(2) * s
-
-    for i = 1, #steps do
-        local btnX  = panelX + pad + (i-1) * (btnW + pad)
-        local col   = COLORS[i]
-        local isCur = (i == currentIdx)
-
-        self:drawRect(btnX, btnY, btnW, rateH, col, isCur and 0.95 or 0.22)
-        if isCur then
-            self:drawRect(btnX, btnY + rateH - 0.002, btnW, 0.002, col, 1.0)
-        end
-
-        setTextAlignment(RenderText.ALIGN_CENTER)
-        setTextColor(1, 1, 1, isCur and 1.0 or 0.50)
-        if isCur then setTextBold(true) end
-        renderText(btnX + btnW*0.5, btnY + self:py(7)*s, 0.009*fontMult*s, LABELS[i])
-        if isCur then setTextBold(false) end
+    -- Current rate color (burn-aware)
+    local curCol
+    if curMult >= SoilConstants.SPRAYER_RATE.BURN_GUARANTEED_THRESHOLD then
+        curCol = {1.0, 0.20, 0.20, 1.0}
+    elseif curMult > SoilConstants.SPRAYER_RATE.BURN_RISK_THRESHOLD then
+        curCol = {0.95, 0.65, 0.10, 1.0}
+    else
+        curCol = {1.0, 1.0, 1.0, 1.0}
     end
 
-    -- Burn warning
-    local curRate = steps[currentIdx]
-    local warnY   = panelY - self:py(14) * s
+    -- Current rate (large, centered, bold)
+    local curRateStr = self:formatRate(curMult, rateConfig)
+    setTextBold(true)
     setTextAlignment(RenderText.ALIGN_CENTER)
-    if curRate >= SoilConstants.SPRAYER_RATE.BURN_GUARANTEED_THRESHOLD then
+    setTextColor(curCol[1], curCol[2], curCol[3], 1.0)
+    renderText(cx, scrollY + self:py(7)*s, 0.013 * fontMult * s, curRateStr)
+    setTextBold(false)
+
+    -- Adjacent steps: offsets -2, -1, +1, +2
+    -- Positioned symmetrically around center, dimming by distance
+    local adjPositions = { [-2] = -0.38, [-1] = -0.21, [1] = 0.21, [2] = 0.38 }
+    local adjSizes     = { [-2] = 0.008, [-1] = 0.009, [1] = 0.009, [2] = 0.008 }
+    local adjAlphas    = { [-2] = 0.28,  [-1] = 0.50,  [1] = 0.50,  [2] = 0.28  }
+
+    setTextAlignment(RenderText.ALIGN_CENTER)
+    for _, offset in ipairs({-2, -1, 1, 2}) do
+        local adjIdx = currentIdx + offset
+        if adjIdx >= 1 and adjIdx <= #steps then
+            local adjStr = self:formatRateNumber(steps[adjIdx], rateConfig)
+            setTextColor(1.0, 1.0, 1.0, adjAlphas[offset])
+            renderText(cx + pw * adjPositions[offset], scrollY + self:py(7)*s,
+                adjSizes[offset] * fontMult * s, adjStr)
+        end
+    end
+
+    -- Progress bar
+    local progress = (currentIdx - 1) / (#steps - 1)
+    local barPad   = pw * 0.06
+    local barW     = pw - barPad * 2
+    local barY     = panelY + padV
+    self:drawRect(panelX + barPad, barY, barW, barH, SoilHUD.C_BAR_BG)
+    if progress > 0 then
+        self:drawRect(panelX + barPad, barY, barW * progress, barH, curCol)
+    end
+
+    -- Burn warning below panel
+    local warnY = panelY - self:py(14) * s
+    setTextAlignment(RenderText.ALIGN_CENTER)
+    if curMult >= SoilConstants.SPRAYER_RATE.BURN_GUARANTEED_THRESHOLD then
         setTextColor(1.0, 0.15, 0.15, 1.0)
-        renderText(panelX + pw*0.5, warnY, 0.010*fontMult*s, "BURN RISK: GUARANTEED")
-    elseif curRate > SoilConstants.SPRAYER_RATE.BURN_RISK_THRESHOLD then
+        renderText(cx, warnY, 0.010 * fontMult * s, "BURN RISK: GUARANTEED")
+    elseif curMult > SoilConstants.SPRAYER_RATE.BURN_RISK_THRESHOLD then
         setTextColor(0.95, 0.65, 0.10, 1.0)
-        renderText(panelX + pw*0.5, warnY, 0.010*fontMult*s, "BURN RISK: POSSIBLE")
+        renderText(cx, warnY, 0.010 * fontMult * s, "BURN RISK: POSSIBLE")
     end
 
     setTextAlignment(RenderText.ALIGN_LEFT)

@@ -519,18 +519,61 @@ SoilConstants.RECOVERY_THRESHOLDS = {
 -- ========================================
 -- SPRAYER APPLICATION RATE
 -- ========================================
--- Six stepped rate multipliers shown in the HUD when the player is in a sprayer.
--- DEFAULT_INDEX = 3 → 1.0x (100%, no change from base behaviour).
+-- 20 stepped rate multipliers (0.10x – 2.00x in 0.10 increments).
+-- DEFAULT_INDEX = 10 → 1.0x (no change from base behaviour).
+-- The HUD displays real units (gal/ac or L/ha) by multiplying each step
+-- against the BASE_RATE for the currently loaded fertilizer fill type.
 -- Burn effects apply when nutrient-rich fertilizer is over-applied:
 --   > BURN_RISK_THRESHOLD      : probabilistic pH/N burn (prob scales with excess)
 --   >= BURN_GUARANTEED_THRESHOLD: guaranteed burn every application
 SoilConstants.SPRAYER_RATE = {
-    STEPS                    = { 0.50, 0.75, 1.00, 1.25, 1.50, 2.00 },
-    DEFAULT_INDEX            = 3,     -- 1.0x
-    BURN_RISK_THRESHOLD      = 1.25,  -- above this: chance of burn
-    BURN_GUARANTEED_THRESHOLD = 1.50, -- at or above this: burn every time
-    BURN_PH_DROP_RISK        = 0.15,  -- pH units lost on probabilistic burn
-    BURN_PH_DROP_CERTAIN     = 0.30,  -- pH units lost on guaranteed burn
-    BURN_N_DRAIN_RISK        = 5.0,   -- N points lost on probabilistic burn
-    BURN_N_DRAIN_CERTAIN     = 12.0,  -- N points lost on guaranteed burn
+    STEPS = {
+        0.10, 0.20, 0.30, 0.40, 0.50,
+        0.60, 0.70, 0.80, 0.90, 1.00,
+        1.10, 1.20, 1.30, 1.40, 1.50,
+        1.60, 1.70, 1.80, 1.90, 2.00,
+    },
+    DEFAULT_INDEX             = 10,    -- 1.0x
+    BURN_RISK_THRESHOLD       = 1.25,  -- above this: chance of burn
+    BURN_GUARANTEED_THRESHOLD = 1.50,  -- at or above this: burn every time
+    BURN_PH_DROP_RISK         = 0.15,  -- pH units lost on probabilistic burn
+    BURN_PH_DROP_CERTAIN      = 0.30,  -- pH units lost on guaranteed burn
+    BURN_N_DRAIN_RISK         = 5.0,   -- N points lost on probabilistic burn
+    BURN_N_DRAIN_CERTAIN      = 12.0,  -- N points lost on guaranteed burn
+
+    -- Reference application rates at 1.0x (step 10) per fill type.
+    -- unit = "liquid" → value in L/ha;  unit = "dry" → value in kg/ha.
+    -- actual_display_rate = STEPS[idx] * BASE_RATES[name].value
+    BASE_RATES = {
+        -- Base game
+        LIQUIDFERTILIZER  = { value =    93.5, unit = "liquid" },  -- 10 gal/ac
+        FERTILIZER        = { value =   225.0, unit = "dry"    },  -- ~200 lb/ac
+        MANURE            = { value = 14000.0, unit = "liquid" },  -- ~1500 gal/ac
+        SLURRY            = { value = 14000.0, unit = "liquid" },
+        DIGESTATE         = { value = 14000.0, unit = "liquid" },
+        LIME              = { value =  2500.0, unit = "dry"    },  -- ~2230 lb/ac
+        LIQUIDLIME        = { value =  2800.0, unit = "liquid" },
+        -- Nitrogen sources
+        UAN32             = { value =    60.8, unit = "liquid" },  -- ~6.5 gal/ac
+        UAN28             = { value =    60.8, unit = "liquid" },
+        ANHYDROUS         = { value =    28.0, unit = "liquid" },  -- ~3 gal/ac
+        AMS               = { value =   168.0, unit = "dry"    },  -- ~150 lb/ac
+        UREA              = { value =   168.0, unit = "dry"    },
+        -- Starter / P&K sources
+        STARTER           = { value =    46.8, unit = "liquid" },  -- ~5 gal/ac
+        MAP               = { value =   225.0, unit = "dry"    },
+        DAP               = { value =   225.0, unit = "dry"    },
+        POTASH            = { value =   225.0, unit = "dry"    },
+        -- Organic / slow-release
+        PELLETIZED_MANURE = { value =   450.0, unit = "dry"    },  -- ~400 lb/ac
+        COMPOST           = { value =  5000.0, unit = "dry"    },
+        BIOSOLIDS         = { value =  4500.0, unit = "dry"    },
+        CHICKEN_MANURE    = { value =  2000.0, unit = "dry"    },
+        -- Fallback for unrecognized fill types
+        DEFAULT           = { value =    93.5, unit = "liquid" },
+    },
+
+    -- Unit conversions for display
+    L_PER_HA_TO_GAL_PER_AC = 0.10694,  -- multiply L/ha by this for gal/ac
+    KG_PER_HA_TO_LB_PER_AC = 0.89218,  -- multiply kg/ha by this for lb/ac
 }

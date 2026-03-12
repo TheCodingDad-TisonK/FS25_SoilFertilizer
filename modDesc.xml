@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <modDesc descVersion="105">
     <author>TisonK</author>
-    <version>1.1.0.1</version>
+    <version>1.1.0.0</version>
     <modName>FS25_SoilFertilizer</modName>
     <title>
         <en>Realistic Soil & Fertilizer</en>
@@ -787,6 +787,34 @@
             <uk>Зменште вертикальний простір HUD об'єднанням ліній (економить місце на екрані)</uk>
             <ru>Уменьшить вертикальное пространство HUD объединением строк (экономит место на экране)</ru>
             <hu>Csökkentse a HUD vertikális terét sorok kombinálásával (képernyőhelyet takarít meg)</hu>
+        </text>
+
+        <text name="sf_use_imperial_short">
+            <en>Imperial Units</en>
+            <de>Imperiale Einheiten</de>
+            <fr>Unités impériales</fr>
+            <pl>Jednostki imperialne</pl>
+            <es>Unidades imperiales</es>
+            <it>Unità imperiali</it>
+            <cz>Imperiální jednotky</cz>
+            <br>Unidades imperiais</br>
+            <uk>Імперські одиниці</uk>
+            <ru>Имперские единицы</ru>
+            <hu>Angolszász mértékegységek</hu>
+        </text>
+
+        <text name="sf_use_imperial_long">
+            <en>Show application rates in gal/ac and lb/ac (off = L/ha and kg/ha)</en>
+            <de>Ausbringmengen in gal/ac und lb/ac (aus = L/ha und kg/ha)</de>
+            <fr>Afficher les doses en gal/ac et lb/ac (désactivé = L/ha et kg/ha)</fr>
+            <pl>Wyświetlaj dawki w gal/ac i lb/ac (wyłączone = L/ha i kg/ha)</pl>
+            <es>Mostrar tasas en gal/ac y lb/ac (apagado = L/ha y kg/ha)</es>
+            <it>Mostra le dosi in gal/ac e lb/ac (off = L/ha e kg/ha)</it>
+            <cz>Zobrazit dávky v gal/ac a lb/ac (vypnuto = L/ha a kg/ha)</cz>
+            <br>Exibir taxas em gal/ac e lb/ac (desativado = L/ha e kg/ha)</br>
+            <uk>Показувати норми у gal/ac і lb/ac (вимк. = L/ha і kg/ha)</uk>
+            <ru>Отображать нормы в gal/ac и lb/ac (откл. = L/ha и kg/ha)</ru>
+            <hu>Kijuttatási normák gal/ac és lb/ac egységben (ki = L/ha és kg/ha)</hu>
         </text>
 
         <text name="sf_reset">

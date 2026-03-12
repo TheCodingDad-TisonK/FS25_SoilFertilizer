@@ -141,6 +141,14 @@ SettingsSchema.definitions = {
         uiId = "sf_diff",
         pfProtected = true,
     },
+    {
+        id = "useImperialUnits",
+        type = "boolean",
+        default = true,
+        uiId = "sf_use_imperial",
+        pfProtected = false,
+        localOnly = true,  -- per-player display preference, not synced to server
+    },
 }
 
 -- Build lookup table by id for fast access
