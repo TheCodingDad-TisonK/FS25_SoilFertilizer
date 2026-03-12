@@ -1,10 +1,9 @@
 -- =========================================================
--- FS25 Realistic Soil & Fertilizer - Hook Manager (FIXED)
+-- FS25 Realistic Soil & Fertilizer - Hook Manager
 -- =========================================================
 -- Manages installation and cleanup of game engine hooks
--- NOW INCLUDES: Spreader hook for solid fertilizer application
 -- =========================================================
--- Author: TisonK (spreader fix by Claude & Samantha)
+-- Author: TisonK
 -- =========================================================
 
 ---@class HookManager
@@ -59,7 +58,7 @@ function HookManager:getFieldIdFromArea(sx, sz, wx, wz, hx, hz)
 end
 
 --- Install all game hooks for the soil system
---- Installs hooks for harvest, fertilizer (sprayer), spreader, plowing, ownership, and weather
+--- Installs hooks for harvest, fertilizer (all sprayer/spreader types), plowing, ownership, and weather
 --- When Precision Farming is active, skips nutrient-modifying hooks for efficiency
 --- Stores references for proper cleanup on uninstall
 ---@param soilSystem SoilFertilitySystem The soil system instance to connect hooks to
@@ -86,13 +85,9 @@ function HookManager:installAll(soilSystem, pfActive)
         local harvestOk = self:installHarvestHook()
         if harvestOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
-        -- Liquid fertilizer hook (Sprayer)
-        local sprayerOk = self:installSprayerHook()
-        if sprayerOk then successCount = successCount + 1 else failCount = failCount + 1 end
-
-        -- SOLID FERTILIZER HOOK (Spreader) - NEW!
-        local spreaderOk = self:installSpreaderHook()
-        if spreaderOk then successCount = successCount + 1 else failCount = failCount + 1 end
+        -- Fertilizer application hook (covers ALL sprayers + spreaders via Sprayer specialization)
+        local sprayerAreaOk = self:installSprayerAreaHook()
+        if sprayerAreaOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
         -- Field ownership changes
         local ownershipOk = self:installOwnershipHook()
@@ -188,136 +183,93 @@ function HookManager:installHarvestHook()
 end
 
 -- =========================================================
--- HOOK 2: Liquid fertilizer application (Sprayer)
+-- HOOK 2: All fertilizer application (Sprayer + Spreader)
 -- =========================================================
+--- Hooks Sprayer.onEndWorkAreaProcessing, which covers ALL fertilizer vehicles:
+--- liquid sprayers, manure spreaders, dry fertilizer spreaders, slurry tankers, etc.
+--- All of these use the Sprayer specialization in FS25 — there is no separate Spreader class.
+--- onEndWorkAreaProcessing is called via dynamic event dispatch (SpecializationUtil.registerEventListener),
+--- so replacing Sprayer.onEndWorkAreaProcessing works at any time, including post-load.
 ---@return boolean success True if hook installed successfully
-function HookManager:installSprayerHook()
-    if not Sprayer or type(Sprayer.spray) ~= "function" then
-        print("[SoilFertilizer WARNING] Could not install sprayer hook - Sprayer.spray not available or replaced")
+function HookManager:installSprayerAreaHook()
+    if not Sprayer or type(Sprayer.onEndWorkAreaProcessing) ~= "function" then
+        print("[SoilFertilizer WARNING] Could not install sprayer area hook - Sprayer.onEndWorkAreaProcessing not available")
         return false
     end
 
-    local original = Sprayer.spray
-    Sprayer.spray = Utils.appendedFunction(
+    local original = Sprayer.onEndWorkAreaProcessing
+    Sprayer.onEndWorkAreaProcessing = Utils.appendedFunction(
         original,
-        function(sprayerSelf, fillTypeIndex, liters, fieldId, ...)
-            if not g_SoilFertilityManager or
-               not g_SoilFertilityManager.soilSystem or
-               not g_SoilFertilityManager.settings.enabled or
-               not fieldId or fieldId <= 0 or
-               not liters or liters <= 0 then
-                return
-            end
+        function(self, dt, hasProcessed)
+            -- Server only
+            if not self.isServer then return end
 
-            local success, errorMsg = pcall(function()
-                local fillType = g_fillTypeManager:getFillTypeByIndex(fillTypeIndex)
-                if not fillType then return end
-
-                SoilLogger.debug("Sprayer hook triggered: Field %d, Fill type %s, %.0fL", 
-                    fieldId, fillType.name or "unknown", liters)
-
-                -- Check if this fill type is a recognized fertilizer
-                if SoilConstants.FERTILIZER_PROFILES[fillType.name] then
-                    -- Scale liters by the per-vehicle application rate
-                    local rm = g_SoilFertilityManager.sprayerRateManager
-                    local rateMultiplier = (rm ~= nil) and rm:getMultiplier(sprayerSelf.id) or 1.0
-                    local effectiveLiters = liters * rateMultiplier
-
-                    g_SoilFertilityManager.soilSystem:onFertilizerApplied(fieldId, fillTypeIndex, effectiveLiters)
-
-                    -- Over-application burn check (only for nutrient fertilizers, not lime)
-                    local entry = SoilConstants.FERTILIZER_PROFILES[fillType.name]
-                    local isNutrientFertilizer = entry and (entry.N or entry.P or entry.K)
-                    if isNutrientFertilizer and rateMultiplier > SoilConstants.SPRAYER_RATE.BURN_RISK_THRESHOLD then
-                        g_SoilFertilityManager.soilSystem:applyBurnEffect(fieldId, rateMultiplier)
-                    end
-                end
-            end)
-
-            if not success then
-                print("[SoilFertilizer ERROR] Sprayer hook failed: " .. tostring(errorMsg))
-            end
-        end
-    )
-    self:register(Sprayer, "spray", original, "Sprayer.spray")
-    print("[SoilFertilizer] [OK] Sprayer hook installed successfully")
-    return true
-end
-
--- =========================================================
--- HOOK 3: SOLID FERTILIZER APPLICATION (Spreader) - NEW!
--- =========================================================
---- Handles manure spreaders, dry fertilizer spreaders, and other solid applicators
----@return boolean success True if hook installed successfully
-function HookManager:installSpreaderHook()
-    if not Spreader or type(Spreader.processSpreadArea) ~= "function" then
-        print("[SoilFertilizer WARNING] Could not install spreader hook - Spreader.processSpreadArea not available")
-        return false
-    end
-
-    local original = Spreader.processSpreadArea
-    Spreader.processSpreadArea = Utils.appendedFunction(
-        original,
-        function(spreaderSelf, workArea, dt, fillTypeIndex, liters, ...)
-            -- Early exits for disabled mod or missing dependencies
             if not g_SoilFertilityManager or
                not g_SoilFertilityManager.soilSystem or
                not g_SoilFertilityManager.settings.enabled then
                 return
             end
 
-            -- Validate inputs
-            if not workArea or type(workArea) ~= "table" then return end
+            local spec = self.spec_sprayer
+            if not spec or not spec.workAreaParameters then return end
+
+            -- Only fire when the sprayer was actually active this frame
+            if not spec.workAreaParameters.isActive then return end
+
+            local fillTypeIndex = spec.workAreaParameters.sprayFillType
+            local liters = spec.workAreaParameters.usage
+
             if not fillTypeIndex or fillTypeIndex <= 0 then return end
             if not liters or liters <= 0 then return end
-
-            -- Get field ID from work area coordinates
-            local sx, _, sz = getWorldTranslation(workArea.start)
-            local wx, _, wz = getWorldTranslation(workArea.width)
-            local hx, _, hz = getWorldTranslation(workArea.height)
-            
-            local fieldId = self:getFieldIdFromArea(sx, sz, wx, wz, hx, hz)
-            if not fieldId or fieldId <= 0 then return end
 
             local success, errorMsg = pcall(function()
                 local fillType = g_fillTypeManager:getFillTypeByIndex(fillTypeIndex)
                 if not fillType then return end
 
-                SoilLogger.debug("Spreader hook triggered: Field %d, Fill type %s, %.0fL", 
-                    fieldId, fillType.name or "unknown", liters)
+                if not SoilConstants.FERTILIZER_PROFILES[fillType.name] then return end
 
-                -- Check if this fill type is a recognized fertilizer
-                -- Supports: MANURE, PELLETIZED_MANURE, FERTILIZER, LIME, etc.
-                if SoilConstants.FERTILIZER_PROFILES[fillType.name] then
-                    -- Apply rate multiplier if spreader supports variable rates
-                    -- (Some spreaders have the same rate control system as sprayers)
-                    local rateMultiplier = 1.0
-                    if g_SoilFertilityManager.sprayerRateManager then
-                        rateMultiplier = g_SoilFertilityManager.sprayerRateManager:getMultiplier(spreaderSelf.id)
-                    end
-                    
-                    local effectiveLiters = liters * rateMultiplier
-                    g_SoilFertilityManager.soilSystem:onFertilizerApplied(fieldId, fillTypeIndex, effectiveLiters)
+                -- Resolve field from vehicle root position
+                local x, _, z = getWorldTranslation(self.rootNode)
+                if not x then return end
 
-                    -- Burn check for over-application (if applicable to solid fertilizers)
-                    local entry = SoilConstants.FERTILIZER_PROFILES[fillType.name]
-                    local isNutrientFertilizer = entry and (entry.N or entry.P or entry.K)
-                    if isNutrientFertilizer and rateMultiplier > SoilConstants.SPRAYER_RATE.BURN_RISK_THRESHOLD then
-                        g_SoilFertilityManager.soilSystem:applyBurnEffect(fieldId, rateMultiplier)
+                local fieldId = nil
+                if g_fieldManager then
+                    local field = g_fieldManager:getFieldAtWorldPosition(x, z)
+                    if field and field.farmland then
+                        fieldId = field.farmland.id
                     end
-                else
-                    SoilLogger.debug("Spreader applied non-fertilizer fill type: %s", fillType.name or "unknown")
+                end
+                if not fieldId and g_farmlandManager then
+                    local farmland = g_farmlandManager:getFarmlandAtWorldPosition(x, z)
+                    if farmland then fieldId = farmland.id end
+                end
+                if not fieldId or fieldId <= 0 then return end
+
+                -- Apply rate multiplier
+                local rm = g_SoilFertilityManager.sprayerRateManager
+                local rateMultiplier = (rm ~= nil) and rm:getMultiplier(self.id) or 1.0
+                local effectiveLiters = liters * rateMultiplier
+
+                SoilLogger.debug("Sprayer/Spreader hook: Field %d, %s, %.1fL (x%.2f rate)",
+                    fieldId, fillType.name, effectiveLiters, rateMultiplier)
+
+                g_SoilFertilityManager.soilSystem:onFertilizerApplied(fieldId, fillTypeIndex, effectiveLiters)
+
+                -- Over-application burn check (nutrient fertilizers only, not lime)
+                local entry = SoilConstants.FERTILIZER_PROFILES[fillType.name]
+                local isNutrientFertilizer = entry and (entry.N or entry.P or entry.K)
+                if isNutrientFertilizer and rateMultiplier > SoilConstants.SPRAYER_RATE.BURN_RISK_THRESHOLD then
+                    g_SoilFertilityManager.soilSystem:applyBurnEffect(fieldId, rateMultiplier)
                 end
             end)
 
             if not success then
-                print("[SoilFertilizer ERROR] Spreader hook failed: " .. tostring(errorMsg))
+                print("[SoilFertilizer ERROR] Sprayer area hook failed: " .. tostring(errorMsg))
             end
         end
     )
-    
-    self:register(Spreader, "processSpreadArea", original, "Spreader.processSpreadArea")
-    print("[SoilFertilizer] [OK] Spreader hook installed successfully")
+    self:register(Sprayer, "onEndWorkAreaProcessing", original, "Sprayer.onEndWorkAreaProcessing")
+    print("[SoilFertilizer] [OK] Sprayer/Spreader hook installed (Sprayer.onEndWorkAreaProcessing)")
     return true
 end
 
@@ -465,33 +417,3 @@ function HookManager:installPlowingHook()
     return true
 end
 
--- =========================================================
--- DEBUG: Console command to test spreader detection
--- =========================================================
---- Call this from console to verify spreaders are being hooked
-function HookManager:debugListSpreaders()
-    print("[SoilFertilizer] === Spreader Debug Info ===")
-    if g_currentMission and g_currentMission.vehicles then
-        local spreaderCount = 0
-        for _, vehicle in pairs(g_currentMission.vehicles) do
-            if vehicle.spec_spreader then
-                spreaderCount = spreaderCount + 1
-                local fillTypeInfo = "unknown"
-                if vehicle.spec_spreader.fillUnitIndex then
-                    local fillType = vehicle:getFillUnitFillType(vehicle.spec_spreader.fillUnitIndex)
-                    if fillType then
-                        local fillTypeObj = g_fillTypeManager:getFillTypeByIndex(fillType)
-                        fillTypeInfo = fillTypeObj and fillTypeObj.name or tostring(fillType)
-                    end
-                end
-                print(string.format("  Spreader %d: %s", spreaderCount, vehicle.configFileName))
-                print(string.format("    - Fill Type: %s", fillTypeInfo))
-                print(string.format("    - Vehicle ID: %s", tostring(vehicle.id)))
-            end
-        end
-        print(string.format("Total spreaders found: %d", spreaderCount))
-    else
-        print("  No vehicles or mission not available")
-    end
-    print("=== End Spreader Debug ===")
-end
