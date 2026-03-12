@@ -26,6 +26,10 @@ function SoilFertilitySystem.new(settings)
     self.lastUpdateDay = 0
     self.hookManager = HookManager.new()
 
+    -- Throttle table for fertilizer application notifications (fieldId → last notify time ms)
+    -- Prevents notification spam since the sprayer hook fires every frame while active
+    self.fertNotifyTimes = {}
+
     -- Field scan retry mechanism (for delayed initialization)
     self.fieldsScanPending = true
     self.fieldsScanAttempts = 0
@@ -147,10 +151,27 @@ end
 function SoilFertilitySystem:onFertilizerApplied(fieldId, fillTypeIndex, liters)
     self:applyFertilizer(fieldId, fillTypeIndex, liters)
 
+    local fillType = g_fillTypeManager and g_fillTypeManager:getFillTypeByIndex(fillTypeIndex)
+
     if self.settings.debugMode then
-        local fillType = g_fillTypeManager and g_fillTypeManager:getFillTypeByIndex(fillTypeIndex)
         print(string.format("[SoilFertilizer DEBUG] Fertilizer: Field %d, %s, %.0fL",
             fieldId, fillType and fillType.name or "unknown", liters))
+    end
+
+    -- Show application confirmation notification (singleplayer only; MP clients see HUD refresh via SoilFieldUpdateEvent)
+    -- Throttled to once per 15 seconds per field to avoid spam (hook fires every frame while spraying)
+    if self.settings.showNotifications and
+       g_currentMission and not g_currentMission.missionDynamicInfo.isMultiplayer then
+        local now = g_currentMission.time or 0
+        local lastTime = self.fertNotifyTimes[fieldId] or 0
+        if (now - lastTime) >= 15000 then
+            self.fertNotifyTimes[fieldId] = now
+            local typeName = fillType and fillType.title or (fillType and fillType.name) or "Fertilizer"
+            self:showNotification(
+                "Fertilizer Recorded",
+                string.format("%s on Field %d — nutrients absorb next game day", typeName, fieldId)
+            )
+        end
     end
 
     -- Broadcast to clients if server in multiplayer
