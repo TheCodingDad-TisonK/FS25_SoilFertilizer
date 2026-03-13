@@ -978,17 +978,25 @@ function SoilFertilitySystem:getFieldInfo(fieldId)
 
     local currentDay = (g_currentMission and g_currentMission.environment and g_currentMission.environment.currentDay) or 0
 
-    -- Resolve current crop name: prefer lastCrop (set on harvest), fall back to
-    -- the live fruitTypeIndex from FieldState so fields show their growing crop.
-    local cropName = field.lastCrop
-    if (cropName == nil or cropName == "") and g_fieldManager and g_fieldManager.farmlandIdFieldMapping then
-        local fsField = g_fieldManager.farmlandIdFieldMapping[fieldId]
-        if fsField and fsField.fieldState and fsField.fieldState.fruitTypeIndex and fsField.fieldState.fruitTypeIndex ~= FruitType.UNKNOWN then
-            local fruitDesc = g_fruitTypeManager and g_fruitTypeManager:getFruitTypeByIndex(fsField.fieldState.fruitTypeIndex)
-            if fruitDesc and fruitDesc.name then
-                cropName = fruitDesc.name
+    -- Resolve current crop name: prefer the live growing fruit (what's actually in
+    -- the ground right now) over lastCrop, which is only set on harvest and will be
+    -- stale as soon as the next crop is sown.
+    local cropName = nil
+    if g_fieldManager then
+        local fsField = g_fieldManager:getFieldById(fieldId)
+        if fsField then
+            local ok, fieldState = pcall(function() return fsField:getFieldState() end)
+            if ok and fieldState and fieldState.fruitTypeIndex ~= FruitType.UNKNOWN then
+                local fruitDesc = g_fruitTypeManager and g_fruitTypeManager:getFruitTypeByIndex(fieldState.fruitTypeIndex)
+                if fruitDesc and fruitDesc.name then
+                    cropName = fruitDesc.name
+                end
             end
         end
+    end
+    -- Fall back to lastCrop when the field is fallow (no live fruit detected)
+    if not cropName or cropName == "" then
+        cropName = field.lastCrop
     end
 
     return {
