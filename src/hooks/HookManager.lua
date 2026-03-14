@@ -233,7 +233,7 @@ function HookManager:installSprayerAreaHook()
                 if not x then return end
 
                 local fieldId = nil
-                if g_fieldManager then
+                if g_fieldManager and type(g_fieldManager.getFieldAtWorldPosition) == "function" then
                     local field = g_fieldManager:getFieldAtWorldPosition(x, z)
                     if field and field.farmland then
                         fieldId = field.farmland.id
