@@ -66,9 +66,9 @@ SettingsSchema.definitions = {
     {
         id = "hudPosition",
         type = "number",
-        default = 1,  -- 1=Top Right, 2=Top Left, 3=Bottom Right, 4=Bottom Left, 5=Center Right
+        default = 1,  -- 1=Top Right, 2=Top Left, 3=Bottom Right, 4=Bottom Left, 5=Center Right, 6=Custom
         min = 1,
-        max = 5,
+        max = 6,
         uiId = "sf_hud_position",
         pfProtected = false,
         localOnly = true,  -- per-player display preference, not synced to server
