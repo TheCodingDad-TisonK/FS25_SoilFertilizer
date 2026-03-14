@@ -128,6 +128,9 @@ local function hookSaveLoadEvents()
                 if g_server or not mission.missionDynamicInfo.isMultiplayer then
                     if g_SoilFertilityManager then
                         g_SoilFertilityManager:saveSoilData()
+                        if g_SoilFertilityManager.soilHUD then
+                            g_SoilFertilityManager.soilHUD:saveLayout()
+                        end
                     end
                 end
             end

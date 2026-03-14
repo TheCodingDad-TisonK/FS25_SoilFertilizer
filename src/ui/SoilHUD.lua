@@ -170,9 +170,10 @@ function SoilHUD:saveLayout()
     if not path then return end
     local xml = XMLFile.create("sf_hud", path, "hudLayout")
     if xml then
-        xml:setFloat("hudLayout.panelX", self.panelX)
-        xml:setFloat("hudLayout.panelY", self.panelY)
-        xml:setFloat("hudLayout.scale",  self.scale)
+        xml:setFloat("hudLayout.panelX",  self.panelX)
+        xml:setFloat("hudLayout.panelY",  self.panelY)
+        xml:setFloat("hudLayout.scale",   self.scale)
+        xml:setBool("hudLayout.visible",  self.visible)
         xml:save()
         xml:delete()
     end
@@ -183,9 +184,10 @@ function SoilHUD:loadLayout()
     if not path or not fileExists(path) then return end
     local xml = XMLFile.load("sf_hud", path)
     if xml then
-        self.panelX = xml:getFloat("hudLayout.panelX", self.panelX)
-        self.panelY = xml:getFloat("hudLayout.panelY", self.panelY)
-        self.scale  = xml:getFloat("hudLayout.scale",  self.scale)
+        self.panelX  = xml:getFloat("hudLayout.panelX",  self.panelX)
+        self.panelY  = xml:getFloat("hudLayout.panelY",  self.panelY)
+        self.scale   = xml:getFloat("hudLayout.scale",   self.scale)
+        self.visible = xml:getBool("hudLayout.visible",  self.visible)
         xml:delete()
         SoilLogger.info("[SoilHUD] Layout loaded: pos=(%.3f,%.3f) scale=%.2f", self.panelX, self.panelY, self.scale)
     end

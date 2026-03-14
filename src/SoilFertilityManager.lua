@@ -533,6 +533,7 @@ function SoilFertilityManager:delete()
     end
 
     if self.soilHUD then
+        self.soilHUD:saveLayout()
         self.soilHUD:delete()
         self.soilHUD = nil
     end
