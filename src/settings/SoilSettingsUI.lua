@@ -247,7 +247,8 @@ function SoilSettingsUI:onFrameOpen(frame)
             g_i18n:getText("sf_hud_pos_2") or "Top Left",
             g_i18n:getText("sf_hud_pos_3") or "Bottom Right",
             g_i18n:getText("sf_hud_pos_4") or "Bottom Left",
-            g_i18n:getText("sf_hud_pos_5") or "Center Right"
+            g_i18n:getText("sf_hud_pos_5") or "Center Right",
+            g_i18n:getText("sf_hud_pos_6") or "Custom"
         }
 
         local ok5, hudPosElement = pcall(UIHelper.createMultiOption, layout, SoilSettingsUI, "onHudPositionChanged", hudPosOptions,

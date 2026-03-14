@@ -118,6 +118,8 @@ end
 
 -- ── Position preset ──────────────────────────────────────
 function SoilHUD:updatePosition()
+    -- hudPosition 6 = Custom: use whatever loadLayout() restored, don't overwrite
+    if (self.settings.hudPosition or 1) == 6 then return end
     local pos = SoilConstants.HUD.POSITIONS[self.settings.hudPosition or 1]
     if pos then
         self.panelX = pos.x
@@ -129,6 +131,7 @@ end
 function SoilHUD:enterEditMode()
     self.editMode = true
     self.dragging = false
+    self.movedInEditMode = false
     if g_inputBinding and g_inputBinding.setShowMouseCursor then
         g_inputBinding:setShowMouseCursor(true)
     end
@@ -154,6 +157,15 @@ function SoilHUD:exitEditMode()
         g_inputBinding:setShowMouseCursor(false)
     end
     self:saveLayout()
+    -- If the player actually moved/resized, switch setting to Custom (6)
+    if self.movedInEditMode then
+        self.movedInEditMode = false
+        self.settings.hudPosition = 6
+        self.settings:save()
+        if g_SoilFertilityManager and g_SoilFertilityManager.settingsUI then
+            g_SoilFertilityManager.settingsUI:refreshUI()
+        end
+    end
     SoilLogger.info("[SoilHUD] Edit mode OFF — pos=(%.3f,%.3f) scale=%.2f",
         self.panelX, self.panelY, self.scale)
 end
@@ -257,12 +269,14 @@ function SoilHUD:onMouseEvent(posX, posY, isDown, isUp, button)
             self.resizing = true ; self.dragging = false
             self.resizeStartX = posX ; self.resizeStartY = posY
             self.resizeStartScale = self.scale
+            self.movedInEditMode = true
             return
         end
         if self:isPointerOverHUD(posX, posY) then
             self.dragging = true ; self.resizing = false
             self.dragOffsetX = posX - self.panelX
             self.dragOffsetY = posY - self.panelY
+            self.movedInEditMode = true
         end
         return
     end
