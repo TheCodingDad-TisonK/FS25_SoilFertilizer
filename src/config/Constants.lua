@@ -167,6 +167,9 @@ SoilConstants.FERTILIZER_PROFILES = {
     -- Starter fertilizer
     STARTER           = { N=0.27, P=0.68, K=0.18 },  -- High-P starter (approx 10-34-0)
 
+    -- Gypsum (Calcium Sulfate)
+    GYPSUM            = { pH=0.1, OM=0.01 },         -- Stabilizes pH, improves structure (OM)
+
     -- Phosphorus & potassium sources
     MAP               = { N=0.30, P=1.41, K=0.00 },  -- 11-52-0 monoammonium phosphate
     DAP               = { N=0.49, P=1.26, K=0.00 },  -- 18-46-0 diammonium phosphate
@@ -190,6 +193,8 @@ SoilConstants.FERTILIZER_TYPES = {
     "UAN32", "UAN28", "ANHYDROUS", "AMS", "UREA",
     -- Starter
     "STARTER",
+    -- Gypsum
+    "GYPSUM",
     -- P&K sources
     "MAP", "DAP", "POTASH",
     -- Organic
@@ -569,8 +574,19 @@ SoilConstants.SPRAYER_RATE = {
         COMPOST           = { value =  5000.0, unit = "dry"    },
         BIOSOLIDS         = { value =  4500.0, unit = "dry"    },
         CHICKEN_MANURE    = { value =  2000.0, unit = "dry"    },
+        GYPSUM            = { value =  1500.0, unit = "dry"    },
         -- Fallback for unrecognized fill types
         DEFAULT           = { value =    93.5, unit = "liquid" },
+    },
+
+    -- Target nutrient levels for Auto-Rate Control
+    -- Used when SF_TOGGLE_AUTO is active on a sprayer
+    AUTO_RATE_TARGETS = {
+        N  = 80,
+        P  = 70,
+        K  = 75,
+        pH = 7.0,
+        OM = 5.0
     },
 
     -- Unit conversions for display

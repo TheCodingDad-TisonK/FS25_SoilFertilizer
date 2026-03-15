@@ -802,20 +802,29 @@ function SoilHUD:drawSprayerRatePanel()
     self:drawRect(panelX,           panelY,               bw, panelH, SoilHUD.C_BORDER)
     self:drawRect(panelX + pw - bw,  panelY,               bw, panelH, SoilHUD.C_BORDER)
 
-    -- Header: "APP. RATE  ( [ / ] )"
+    -- Header: "APP. RATE  ( [ / ] )" or "APP. RATE ( AUTO )"
+    local isAuto = rm:getAutoMode(sprayer.id) and self.settings.autoRateControl
+    local autoKey = g_inputBinding:getFormatButtonAndDevice(InputAction.SF_TOGGLE_AUTO)
+    local headerText = isAuto and "APP. RATE ( AUTO )" or string.format("APP. RATE ( [%s] AUTO )", autoKey)
+
     setTextBold(true)
     setTextAlignment(RenderText.ALIGN_CENTER)
     setTextColor(1, 1, 1, 0.90)
+    if isAuto then
+        setTextColor(0.4, 1.0, 0.4, 1.0)
+    end
     renderText(cx, panelY + panelH - headerH * 0.5 - self:py(3)*s,
-        0.009 * fontMult * s, "APP. RATE  ( [ / ] )")
+        0.009 * fontMult * s, headerText)
     setTextBold(false)
 
     -- Rate scroll row base Y
     local scrollY = panelY + padV + barH + padV
 
-    -- Current rate color (burn-aware)
+    -- Current rate color (burn-aware or auto-aware)
     local curCol
-    if curMult >= SoilConstants.SPRAYER_RATE.BURN_GUARANTEED_THRESHOLD then
+    if isAuto then
+        curCol = {0.4, 1.0, 0.4, 1.0}
+    elseif curMult >= SoilConstants.SPRAYER_RATE.BURN_GUARANTEED_THRESHOLD then
         curCol = {1.0, 0.20, 0.20, 1.0}
     elseif curMult > SoilConstants.SPRAYER_RATE.BURN_RISK_THRESHOLD then
         curCol = {0.95, 0.65, 0.10, 1.0}
@@ -830,6 +839,21 @@ function SoilHUD:drawSprayerRatePanel()
     setTextColor(curCol[1], curCol[2], curCol[3], 1.0)
     renderText(cx, scrollY + self:py(7)*s, 0.013 * fontMult * s, curRateStr)
     setTextBold(false)
+
+    -- In Auto-Mode, show what we are targeting below the rate
+    if isAuto and fillType then
+        local profile = SoilConstants.FERTILIZER_PROFILES[fillType.name]
+        if profile then
+            local targetText = "Target: "
+            local targets = SoilConstants.AUTO_RATE_TARGETS
+            if profile.N and profile.N > 0 then targetText = targetText .. targets.N .. "N " end
+            if profile.P and profile.P > 0 then targetText = targetText .. targets.P .. "P " end
+            if profile.K and profile.K > 0 then targetText = targetText .. targets.K .. "K " end
+            if profile.pH and profile.pH > 0 then targetText = targetText .. targets.pH .. "pH " end
+            setTextColor(0.7, 0.9, 0.7, 0.8)
+            renderText(cx, scrollY - self:py(6)*s, 0.008 * fontMult * s, targetText)
+        end
+    end
 
     -- Adjacent steps: offsets -2, -1, +1, +2
     -- Positioned symmetrically around center, dimming by distance
