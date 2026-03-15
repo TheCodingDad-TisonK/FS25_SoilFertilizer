@@ -717,4 +717,62 @@ function SoilNetworkEvents_SendSprayerRate(vehicleId, rateIndex)
     end
 end
 
+-- ========================================
+-- SPRAYER AUTO-MODE EVENT (Client <-> Server)
+-- ========================================
+SoilSprayerAutoModeEvent = {}
+SoilSprayerAutoModeEvent_mt = Class(SoilSprayerAutoModeEvent, Event)
+
+InitEventClass(SoilSprayerAutoModeEvent, "SoilSprayerAutoModeEvent")
+
+function SoilSprayerAutoModeEvent.emptyNew()
+    return Event.new(SoilSprayerAutoModeEvent_mt)
+end
+
+function SoilSprayerAutoModeEvent.new(vehicleId, enabled)
+    local self = SoilSprayerAutoModeEvent.emptyNew()
+    self.vehicleId = vehicleId
+    self.enabled = enabled
+    return self
+end
+
+function SoilSprayerAutoModeEvent:readStream(streamId, connection)
+    self.vehicleId = streamReadInt32(streamId)
+    self.enabled = streamReadBool(streamId)
+    self:run(connection)
+end
+
+function SoilSprayerAutoModeEvent:writeStream(streamId, connection)
+    streamWriteInt32(streamId, self.vehicleId)
+    streamWriteBool(streamId, self.enabled)
+end
+
+function SoilSprayerAutoModeEvent:run(connection)
+    local rm = g_SoilFertilityManager and g_SoilFertilityManager.sprayerRateManager
+    if rm == nil then return end
+
+    rm:setAutoMode(self.vehicleId, self.enabled)
+
+    -- Server rebroadcasts
+    if g_server then
+        g_server:broadcastEvent(
+            SoilSprayerAutoModeEvent.new(self.vehicleId, self.enabled),
+            nil, connection
+        )
+    end
+end
+
+function SoilNetworkEvents_SendSprayerAutoMode(vehicleId, enabled)
+    if g_client then
+        g_client:getServerConnection():sendEvent(
+            SoilSprayerAutoModeEvent.new(vehicleId, enabled)
+        )
+    else
+        local rm = g_SoilFertilityManager and g_SoilFertilityManager.sprayerRateManager
+        if rm then
+            rm:setAutoMode(vehicleId, enabled)
+        end
+    end
+end
+
 print("[SoilFertilizer] Network events system loaded")

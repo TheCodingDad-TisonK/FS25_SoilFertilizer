@@ -247,7 +247,76 @@ function HookManager:installSprayerAreaHook()
 
                 -- Apply rate multiplier
                 local rm = g_SoilFertilityManager.sprayerRateManager
-                local rateMultiplier = (rm ~= nil) and rm:getMultiplier(self.id) or 1.0
+                local rateMultiplier = 1.0
+
+                if rm ~= nil then
+                    if rm:getAutoMode(self.id) and g_SoilFertilityManager.settings.autoRateControl then
+                        -- AUTO-RATE LOGIC: Calculate required multiplier to reach target
+                        local soilSystem = g_SoilFertilityManager.soilSystem
+                        local field = soilSystem:getFieldData(fieldId)
+                        local profile = SoilConstants.FERTILIZER_PROFILES[fillType.name]
+
+                        if field and profile then
+                            -- Find the nutrient that needs the most "help" from this fertilizer
+                            local maxRequiredMultiplier = 0.1 -- minimum
+                            local targets = SoilConstants.AUTO_RATE_TARGETS
+                            local baseRates = SoilConstants.SPRAYER_RATE.BASE_RATES
+                            local baseRate = (baseRates[fillType.name] or baseRates.DEFAULT).value
+
+                            -- Check N, P, K
+                            for _, nutrient in ipairs({"N", "P", "K"}) do
+                                local profVal = profile[nutrient]
+                                if profVal and profVal > 0 then
+                                    local key = (nutrient == "N" and "nitrogen") or (nutrient == "P" and "phosphorus") or "potassium"
+                                    local current = field[key] or 0
+                                    local target = targets[nutrient] or 80
+                                    local gap = math.max(0, target - current)
+
+                                    -- nutrient_per_ha_at_1x = (base_rate / 1000) * profVal
+                                    local nutrientPerHaAt1x = (baseRate / 1000) * profVal
+                                    if nutrientPerHaAt1x > 0 then
+                                        local reqM = gap / nutrientPerHaAt1x
+                                        maxRequiredMultiplier = math.max(maxRequiredMultiplier, reqM)
+                                    end
+                                end
+                            end
+
+                            -- Check pH (Lime/Gypsum)
+                            if profile.pH and profile.pH > 0 then
+                                local current = field.pH or 6.5
+                                local target = targets.pH or 7.0
+                                local gap = math.max(0, target - current)
+                                local pHPerHaAt1x = (baseRate / 1000) * profile.pH
+                                if pHPerHaAt1x > 0 then
+                                    local reqM = gap / pHPerHaAt1x
+                                    maxRequiredMultiplier = math.max(maxRequiredMultiplier, reqM)
+                                end
+                            end
+
+                            -- Check OM (Manure/Gypsum/Slurry)
+                            if profile.OM and profile.OM > 0 then
+                                local current = field.organicMatter or 2.0
+                                local target = targets.OM or 5.0
+                                local gap = math.max(0, target - current)
+                                local OMPerHaAt1x = (baseRate / 1000) * profile.OM
+                                if OMPerHaAt1x > 0 then
+                                    local reqM = gap / OMPerHaAt1x
+                                    maxRequiredMultiplier = math.max(maxRequiredMultiplier, reqM)
+                                end
+                            end
+
+                            -- Clamp to allowed steps
+                            local steps = SoilConstants.SPRAYER_RATE.STEPS
+                            rateMultiplier = math.max(steps[1], math.min(steps[#steps], maxRequiredMultiplier))
+                        else
+                            rateMultiplier = rm:getMultiplier(self.id)
+                        end
+                    else
+                        -- MANUAL MODE
+                        rateMultiplier = rm:getMultiplier(self.id)
+                    end
+                end
+
                 local effectiveLiters = liters * rateMultiplier
 
                 SoilLogger.debug("Sprayer/Spreader hook: Field %d, %s, %.1fL (x%.2f rate)",

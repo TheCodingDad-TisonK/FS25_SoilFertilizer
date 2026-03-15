@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.4.0] - 2026-03-15
+
+### Added
+
+- **Auto-Rate Control**: Sprayers and spreaders can now automatically adjust application rates based on field nutrient gaps (Alt+Z).
+- **Gypsum Support**: Added Gypsum fertilizer type with pH stabilization and organic matter benefits.
+- **Enhanced HUD**: Updated sprayer rate panel to show AUTO status and target nutrients.
+
 ## [1.0.7.1] - 2026-02-21
 
 ### Fixed

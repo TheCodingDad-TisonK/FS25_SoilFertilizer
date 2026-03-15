@@ -183,6 +183,11 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
                         SoilFertilityManager.onSprayerRateDown,
                         false, true, false, true
                     )
+                    local _, autoId = g_inputBinding:registerActionEvent(
+                        InputAction.SF_TOGGLE_AUTO, vehicle,
+                        SoilFertilityManager.onToggleAuto,
+                        false, true, false, true
+                    )
                     -- Keep the binding text visible so players see it in controls list
                     if upId then
                         g_inputBinding:setActionEventText(upId, g_i18n:getText("input_SF_RATE_UP"))
@@ -191,6 +196,10 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
                     if downId then
                         g_inputBinding:setActionEventText(downId, g_i18n:getText("input_SF_RATE_DOWN"))
                         g_inputBinding:setActionEventActive(downId, true)
+                    end
+                    if autoId then
+                        g_inputBinding:setActionEventText(autoId, g_i18n:getText("input_SF_TOGGLE_AUTO"))
+                        g_inputBinding:setActionEventActive(autoId, true)
                     end
                 end
             )
@@ -407,6 +416,16 @@ function SoilFertilityManager.onSprayerRateDown(vehicle)
     if rm and vehicle and vehicle.id then
         local newIdx = rm:cycleDown(vehicle.id)
         SoilNetworkEvents_SendSprayerRate(vehicle.id, newIdx)
+    end
+end
+
+-- Input callback for toggling sprayer auto-mode (Alt+Z)
+function SoilFertilityManager.onToggleAuto(vehicle)
+    local rm = g_SoilFertilityManager and g_SoilFertilityManager.sprayerRateManager
+    local s = g_SoilFertilityManager and g_SoilFertilityManager.settings
+    if rm and s and s.autoRateControl and vehicle and vehicle.id then
+        local newState = rm:toggleAutoMode(vehicle.id)
+        SoilNetworkEvents_SendSprayerAutoMode(vehicle.id, newState)
     end
 end
 

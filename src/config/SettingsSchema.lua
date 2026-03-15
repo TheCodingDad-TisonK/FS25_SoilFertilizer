@@ -149,6 +149,13 @@ SettingsSchema.definitions = {
         pfProtected = false,
         localOnly = true,  -- per-player display preference, not synced to server
     },
+    {
+        id = "autoRateControl",
+        type = "boolean",
+        default = true,
+        uiId = "sf_auto_rate",
+        pfProtected = true,
+    },
 }
 
 -- Build lookup table by id for fast access
