@@ -158,6 +158,7 @@ function HookManager:installHarvestHook()
     FruitUtil.fruitPickupEvent = Utils.appendedFunction(
         original,
         function(fruitTypeIndex, x, z, fieldId, liters)
+            if not g_currentMission:getIsServer() then return end
             if not g_SoilFertilityManager or
                not g_SoilFertilityManager.soilSystem or
                not g_SoilFertilityManager.settings.enabled or
@@ -356,6 +357,7 @@ function HookManager:installOwnershipHook()
     g_farmlandManager.fieldOwnershipChanged = Utils.appendedFunction(
         original,
         function(fieldId, farmlandId, farmId)
+            if not g_currentMission:getIsServer() then return end
             if not g_SoilFertilityManager or
                not g_SoilFertilityManager.soilSystem or
                not g_SoilFertilityManager.settings.enabled then
@@ -396,6 +398,7 @@ function HookManager:installWeatherHook()
     env.update = Utils.appendedFunction(
         original,
         function(envSelf, dt, ...)
+            if not g_currentMission:getIsServer() then return end
             if not g_SoilFertilityManager or
                not g_SoilFertilityManager.soilSystem or
                not g_SoilFertilityManager.settings.enabled or
@@ -431,6 +434,7 @@ function HookManager:installPlowingHook()
     Cultivator.processCultivatorArea = Utils.appendedFunction(
         original,
         function(cultivatorSelf, superFunc, workArea, dt)
+            if not g_currentMission:getIsServer() then return end
             if not g_SoilFertilityManager or
                not g_SoilFertilityManager.soilSystem or
                not g_SoilFertilityManager.settings.enabled or
