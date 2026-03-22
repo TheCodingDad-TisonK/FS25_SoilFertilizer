@@ -119,7 +119,10 @@ function HookManager:uninstallAll()
 
     for i = #self.hooks, 1, -1 do
         local hook = self.hooks[i]
-        if hook.target and hook.key and hook.original then
+        if hook.cleanup then
+            hook.cleanup()
+            print(string.format("[SoilFertilizer] Cleaned up: %s", hook.name or "?"))
+        elseif hook.target and hook.key and hook.original then
             hook.target[hook.key] = hook.original
             print(string.format("[SoilFertilizer] Restored original: %s", hook.name or hook.key))
         end
@@ -144,33 +147,64 @@ function HookManager:register(target, key, original, name)
     })
 end
 
+--- Register a cleanup-only hook (e.g. message center subscriptions).
+---@param name string A human-readable name for logging
+---@param cleanupFn function Called during uninstallAll() to undo the hook
+function HookManager:registerCleanup(name, cleanupFn)
+    table.insert(self.hooks, {
+        name = name,
+        cleanup = cleanupFn
+    })
+end
+
 -- =========================================================
--- HOOK 1: Harvest events (FruitUtil)
+-- HOOK 1: Harvest events (Combine.addCutterArea)
 -- =========================================================
+-- FruitUtil.fruitPickupEvent does not exist in FS25.
+-- Combine.addCutterArea fires on every combine harvest pass with:
+--   area, liters, inputFruitType, outputFillType, strawRatio, farmId, cutterLoad
+-- 'self' inside the appended function is the combine vehicle instance.
 ---@return boolean success True if hook installed successfully
 function HookManager:installHarvestHook()
-    if not FruitUtil or type(FruitUtil.fruitPickupEvent) ~= "function" then
-        print("[SoilFertilizer WARNING] Could not install harvest hook - FruitUtil.fruitPickupEvent not available or replaced")
+    if not Combine or type(Combine.addCutterArea) ~= "function" then
+        print("[SoilFertilizer WARNING] Could not install harvest hook - Combine.addCutterArea not available")
         return false
     end
 
-    local original = FruitUtil.fruitPickupEvent
-    FruitUtil.fruitPickupEvent = Utils.appendedFunction(
+    local original = Combine.addCutterArea
+    Combine.addCutterArea = Utils.appendedFunction(
         original,
-        function(fruitTypeIndex, x, z, fieldId, liters)
-            if not g_currentMission:getIsServer() then return end
+        function(combineSelf, area, liters, inputFruitType, outputFillType, strawRatio, farmId, cutterLoad)
+            if not combineSelf.isServer then return end
             if not g_SoilFertilityManager or
                not g_SoilFertilityManager.soilSystem or
                not g_SoilFertilityManager.settings.enabled or
-               not g_SoilFertilityManager.settings.nutrientCycles or
-               not fieldId or fieldId <= 0 then
+               not g_SoilFertilityManager.settings.nutrientCycles then
                 return
             end
 
-            SoilLogger.debug("Harvest hook triggered: Field %d, Crop %d, %.0fL", fieldId, fruitTypeIndex, liters)
+            if not inputFruitType or inputFruitType <= 0 then return end
+            if not liters or liters <= 0 then return end
 
             local success, errorMsg = pcall(function()
-                g_SoilFertilityManager.soilSystem:onHarvest(fieldId, fruitTypeIndex, liters)
+                local x, _, z = getWorldTranslation(combineSelf.rootNode)
+                if not x then return end
+
+                local fieldId = nil
+                if g_fieldManager and type(g_fieldManager.getFieldAtWorldPosition) == "function" then
+                    local field = g_fieldManager:getFieldAtWorldPosition(x, z)
+                    if field and field.farmland then
+                        fieldId = field.farmland.id
+                    end
+                end
+                if not fieldId and g_farmlandManager then
+                    local farmland = g_farmlandManager:getFarmlandAtWorldPosition(x, z)
+                    if farmland then fieldId = farmland.id end
+                end
+                if not fieldId or fieldId <= 0 then return end
+
+                SoilLogger.debug("Harvest hook: Field %d, Crop %d, %.0fL", fieldId, inputFruitType, liters)
+                g_SoilFertilityManager.soilSystem:onHarvest(fieldId, inputFruitType, liters)
             end)
 
             if not success then
@@ -178,8 +212,8 @@ function HookManager:installHarvestHook()
             end
         end
     )
-    self:register(FruitUtil, "fruitPickupEvent", original, "FruitUtil.fruitPickupEvent")
-    print("[SoilFertilizer] [OK] Harvest hook installed successfully")
+    self:register(Combine, "addCutterArea", original, "Combine.addCutterArea")
+    print("[SoilFertilizer] [OK] Harvest hook installed (Combine.addCutterArea)")
     return true
 end
 
@@ -248,76 +282,7 @@ function HookManager:installSprayerAreaHook()
 
                 -- Apply rate multiplier
                 local rm = g_SoilFertilityManager.sprayerRateManager
-                local rateMultiplier = 1.0
-
-                if rm ~= nil then
-                    if rm:getAutoMode(self.id) and g_SoilFertilityManager.settings.autoRateControl then
-                        -- AUTO-RATE LOGIC: Calculate required multiplier to reach target
-                        local soilSystem = g_SoilFertilityManager.soilSystem
-                        local field = soilSystem:getFieldData(fieldId)
-                        local profile = SoilConstants.FERTILIZER_PROFILES[fillType.name]
-
-                        if field and profile then
-                            -- Find the nutrient that needs the most "help" from this fertilizer
-                            local maxRequiredMultiplier = 0.1 -- minimum
-                            local targets = SoilConstants.AUTO_RATE_TARGETS
-                            local baseRates = SoilConstants.SPRAYER_RATE.BASE_RATES
-                            local baseRate = (baseRates[fillType.name] or baseRates.DEFAULT).value
-
-                            -- Check N, P, K
-                            for _, nutrient in ipairs({"N", "P", "K"}) do
-                                local profVal = profile[nutrient]
-                                if profVal and profVal > 0 then
-                                    local key = (nutrient == "N" and "nitrogen") or (nutrient == "P" and "phosphorus") or "potassium"
-                                    local current = field[key] or 0
-                                    local target = targets[nutrient] or 80
-                                    local gap = math.max(0, target - current)
-
-                                    -- nutrient_per_ha_at_1x = (base_rate / 1000) * profVal
-                                    local nutrientPerHaAt1x = (baseRate / 1000) * profVal
-                                    if nutrientPerHaAt1x > 0 then
-                                        local reqM = gap / nutrientPerHaAt1x
-                                        maxRequiredMultiplier = math.max(maxRequiredMultiplier, reqM)
-                                    end
-                                end
-                            end
-
-                            -- Check pH (Lime/Gypsum)
-                            if profile.pH and profile.pH > 0 then
-                                local current = field.pH or 6.5
-                                local target = targets.pH or 7.0
-                                local gap = math.max(0, target - current)
-                                local pHPerHaAt1x = (baseRate / 1000) * profile.pH
-                                if pHPerHaAt1x > 0 then
-                                    local reqM = gap / pHPerHaAt1x
-                                    maxRequiredMultiplier = math.max(maxRequiredMultiplier, reqM)
-                                end
-                            end
-
-                            -- Check OM (Manure/Gypsum/Slurry)
-                            if profile.OM and profile.OM > 0 then
-                                local current = field.organicMatter or 2.0
-                                local target = targets.OM or 5.0
-                                local gap = math.max(0, target - current)
-                                local OMPerHaAt1x = (baseRate / 1000) * profile.OM
-                                if OMPerHaAt1x > 0 then
-                                    local reqM = gap / OMPerHaAt1x
-                                    maxRequiredMultiplier = math.max(maxRequiredMultiplier, reqM)
-                                end
-                            end
-
-                            -- Clamp to allowed steps
-                            local steps = SoilConstants.SPRAYER_RATE.STEPS
-                            rateMultiplier = math.max(steps[1], math.min(steps[#steps], maxRequiredMultiplier))
-                        else
-                            rateMultiplier = rm:getMultiplier(self.id)
-                        end
-                    else
-                        -- MANUAL MODE
-                        rateMultiplier = rm:getMultiplier(self.id)
-                    end
-                end
-
+                local rateMultiplier = (rm ~= nil) and rm:getMultiplier(self.id) or 1.0
                 local effectiveLiters = liters * rateMultiplier
 
                 SoilLogger.debug("Sprayer/Spreader hook: Field %d, %s, %.1fL (x%.2f rate)",
@@ -344,37 +309,46 @@ function HookManager:installSprayerAreaHook()
 end
 
 -- =========================================================
--- HOOK 4: Field ownership changes
+-- HOOK 4: Field ownership changes (MessageType.FARMLAND_OWNER_CHANGED)
 -- =========================================================
+-- g_farmlandManager.fieldOwnershipChanged does not exist in FS25.
+-- The correct pattern is g_messageCenter:subscribe(MessageType.FARMLAND_OWNER_CHANGED, cb, target).
+-- Callback receives: farmlandId, farmId, loadFromSavegame
+-- loadFromSavegame=true fires for every field on game load; we skip those to avoid
+-- resetting existing soil data on a fresh load.
 ---@return boolean success True if hook installed successfully
 function HookManager:installOwnershipHook()
-    if not g_farmlandManager or not g_farmlandManager.fieldOwnershipChanged then
-        print("[SoilFertilizer WARNING] Could not install ownership hook - farmlandManager not available")
+    if not g_messageCenter or not MessageType or not MessageType.FARMLAND_OWNER_CHANGED then
+        print("[SoilFertilizer WARNING] Could not install ownership hook - g_messageCenter or MessageType.FARMLAND_OWNER_CHANGED not available")
         return false
     end
 
-    local original = g_farmlandManager.fieldOwnershipChanged
-    g_farmlandManager.fieldOwnershipChanged = Utils.appendedFunction(
-        original,
-        function(fieldId, farmlandId, farmId)
-            if not g_currentMission:getIsServer() then return end
-            if not g_SoilFertilityManager or
-               not g_SoilFertilityManager.soilSystem or
-               not g_SoilFertilityManager.settings.enabled then
-                return
-            end
-
-            local success, errorMsg = pcall(function()
-                g_SoilFertilityManager.soilSystem:onFieldOwnershipChanged(fieldId, farmlandId, farmId)
-            end)
-
-            if not success then
-                print("[SoilFertilizer ERROR] Ownership hook failed: " .. tostring(errorMsg))
-            end
+    local function onOwnerChanged(farmlandId, farmId, loadFromSavegame)
+        if loadFromSavegame then return end  -- skip initial population on load
+        if not g_SoilFertilityManager or
+           not g_SoilFertilityManager.soilSystem or
+           not g_SoilFertilityManager.settings.enabled then
+            return
         end
-    )
-    self:register(g_farmlandManager, "fieldOwnershipChanged", original, "farmlandManager.fieldOwnershipChanged")
-    print("[SoilFertilizer] [OK] Field ownership hook installed successfully")
+
+        local success, errorMsg = pcall(function()
+            -- farmlandId is used as the fieldId key (same value; FS25 uses farmland IDs throughout)
+            g_SoilFertilityManager.soilSystem:onFieldOwnershipChanged(farmlandId, farmlandId, farmId)
+        end)
+
+        if not success then
+            print("[SoilFertilizer ERROR] Ownership hook failed: " .. tostring(errorMsg))
+        end
+    end
+
+    g_messageCenter:subscribe(MessageType.FARMLAND_OWNER_CHANGED, onOwnerChanged, self)
+
+    -- Register cleanup so uninstallAll() unsubscribes correctly
+    self:registerCleanup("MessageType.FARMLAND_OWNER_CHANGED", function()
+        g_messageCenter:unsubscribeAll(self)
+    end)
+
+    print("[SoilFertilizer] [OK] Field ownership hook installed (MessageType.FARMLAND_OWNER_CHANGED)")
     return true
 end
 
@@ -398,7 +372,6 @@ function HookManager:installWeatherHook()
     env.update = Utils.appendedFunction(
         original,
         function(envSelf, dt, ...)
-            if not g_currentMission:getIsServer() then return end
             if not g_SoilFertilityManager or
                not g_SoilFertilityManager.soilSystem or
                not g_SoilFertilityManager.settings.enabled or
@@ -434,7 +407,6 @@ function HookManager:installPlowingHook()
     Cultivator.processCultivatorArea = Utils.appendedFunction(
         original,
         function(cultivatorSelf, superFunc, workArea, dt)
-            if not g_currentMission:getIsServer() then return end
             if not g_SoilFertilityManager or
                not g_SoilFertilityManager.soilSystem or
                not g_SoilFertilityManager.settings.enabled or
