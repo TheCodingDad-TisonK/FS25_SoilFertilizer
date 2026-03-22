@@ -153,7 +153,7 @@ SoilConstants.FERTILIZER_PROFILES = {
     LIQUIDFERTILIZER  = { N=0.50, P=0.21, K=0.33 },           -- Balanced liquid NPK
     FERTILIZER        = { N=0.67, P=0.33, K=0.25 },           -- Solid granular, high N/P
     MANURE            = { N=0.25, P=0.17, K=0.29, OM=0.05 },  -- Organic, slow-release
-    SLURRY            = { N=0.33, P=0.17, K=0.42, OM=0.03 },  -- Liquid organic, high K
+    LIQUIDMANURE      = { N=0.33, P=0.17, K=0.42, OM=0.03 },  -- Liquid organic, high K (FS25 fill type name)
     DIGESTATE         = { N=0.42, P=0.18, K=0.46, OM=0.04 },  -- Biogas byproduct
     LIME              = { pH=0.4 },                             -- pH adjustment
 
@@ -188,7 +188,7 @@ SoilConstants.FERTILIZER_PROFILES = {
 -- List of recognized fertilizer fill type names (for reference/iteration)
 SoilConstants.FERTILIZER_TYPES = {
     -- Base game
-    "LIQUIDFERTILIZER", "FERTILIZER", "MANURE", "SLURRY", "DIGESTATE", "LIME",
+    "LIQUIDFERTILIZER", "FERTILIZER", "MANURE", "LIQUIDMANURE", "DIGESTATE", "LIME",
     -- Nitrogen sources
     "UAN32", "UAN28", "ANHYDROUS", "AMS", "UREA",
     -- Starter
@@ -554,7 +554,7 @@ SoilConstants.SPRAYER_RATE = {
         LIQUIDFERTILIZER  = { value =    93.5, unit = "liquid" },  -- 10 gal/ac
         FERTILIZER        = { value =   225.0, unit = "dry"    },  -- ~200 lb/ac
         MANURE            = { value = 14000.0, unit = "liquid" },  -- ~1500 gal/ac
-        SLURRY            = { value = 14000.0, unit = "liquid" },
+        LIQUIDMANURE      = { value = 14000.0, unit = "liquid" },  -- FS25 fill type name for slurry
         DIGESTATE         = { value = 14000.0, unit = "liquid" },
         LIME              = { value =  2500.0, unit = "dry"    },  -- ~2230 lb/ac
         LIQUIDLIME        = { value =  2800.0, unit = "liquid" },
