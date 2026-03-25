@@ -204,6 +204,39 @@ SoilConstants.FERTILIZER_TYPES = {
 }
 
 -- ========================================
+-- SINGLE-NUTRIENT PURCHASABLE FILL TYPES
+-- ========================================
+-- These fill types are declared in modDesc.xml <fillTypes> and are available
+-- for purchase at in-game shops when compatible equipment mods are installed.
+-- The entries here mirror the pricePerLiter values in modDesc.xml so that any
+-- Lua code performing cost estimates or HUD display can read a single source.
+--
+-- Nutrient targeting:
+--   ANHYDROUS  →  N only  (82-0-0)
+--   MAP        →  P-heavy (11-52-0)
+--   POTASH     →  K only  (0-0-60)
+SoilConstants.PURCHASABLE_SINGLE_NUTRIENT = {
+    ANHYDROUS = {
+        pricePerLiter = 1.85,   -- ~50 % premium over base LIQUIDFERTILIZER
+        fillUnit      = "liquid",
+        primaryNutrient = "N",
+        description   = "Anhydrous Ammonia 82-0-0",
+    },
+    MAP = {
+        pricePerLiter = 1.95,   -- ~60 % premium; P is the scarcest macro
+        fillUnit      = "dry",
+        primaryNutrient = "P",
+        description   = "Monoammonium Phosphate 11-52-0",
+    },
+    POTASH = {
+        pricePerLiter = 1.80,   -- ~50 % premium over base granular FERTILIZER
+        fillUnit      = "dry",
+        primaryNutrient = "K",
+        description   = "Muriate of Potash 0-0-60",
+    },
+}
+
+-- ========================================
 -- NUTRIENT STATUS THRESHOLDS
 -- ========================================
 SoilConstants.STATUS_THRESHOLDS = {

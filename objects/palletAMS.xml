@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<vehicle type="pallet" parentFile="$data/objects/pallets/fertilizer/fertilizer.xml">
+    <storeData>
+        <name>$l10n_sf_ams_title</name>
+        <price>1400</price>
+        <category>misc</category>
+        <image>$data/store/items/fertilizer/fertilizer_standard.png</image>
+        <specs>
+            <fillType>AMS</fillType>
+        </specs>
+    </storeData>
+    <fillUnit>
+        <fillVolumes>
+            <fillVolume fillTypes="AMS" capacity="800"/>
+        </fillVolumes>
+    </fillUnit>
+</vehicle>

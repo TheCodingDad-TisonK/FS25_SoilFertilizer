@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<vehicle type="pallet" parentFile="$data/objects/pallets/fertilizer/fertilizer.xml">
+    <storeData>
+        <name>$l10n_sf_dap_title</name>
+        <price>1750</price>
+        <category>misc</category>
+        <image>$data/store/items/fertilizer/fertilizer_standard.png</image>
+        <specs>
+            <fillType>DAP</fillType>
+        </specs>
+    </storeData>
+    <fillUnit>
+        <fillVolumes>
+            <fillVolume fillTypes="DAP" capacity="800"/>
+        </fillVolumes>
+    </fillUnit>
+</vehicle>
