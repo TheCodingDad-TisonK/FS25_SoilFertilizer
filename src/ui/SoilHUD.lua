@@ -19,7 +19,7 @@ SoilHUD.RESIZE_HANDLE_SIZE = 0.008
 
 -- ── Base panel dimensions at scale 1.0 ─────────────────
 SoilHUD.BASE_W = 0.190
-SoilHUD.BASE_H = 0.178
+SoilHUD.BASE_H = 0.202   -- expanded to accommodate yield forecast row
 
 -- ── Layout constants at scale 1.0 ──────────────────────
 SoilHUD.TITLE_H   = 0.024   -- title accent bar height
@@ -627,6 +627,49 @@ function SoilHUD:drawPanel()
         cy = cy - pad * 0.5
         self:drawRect(px + pad, cy, pw - pad*2, 0.0005, SoilHUD.C_DIVIDER)
         cy = cy - pad * 0.8
+
+        -- Yield forecast row (Issue #81 interim HUD warning)
+        -- Only shown when a harvestable crop is currently planted.
+        local ys = SoilConstants.YIELD_SENSITIVITY
+        local cropLower = info.lastCrop and string.lower(info.lastCrop) or nil
+        if cropLower and cropLower ~= "" and not ys.NON_CROP_NAMES[cropLower] then
+            local tier     = ys.CROP_TIERS[cropLower] or ys.DEFAULT_TIER
+            local tierData = ys.TIERS[tier]
+            local thresh   = ys.OPTIMAL_THRESHOLD
+
+            local nDef = math.max(0, thresh - info.nitrogen.value)   / thresh
+            local pDef = math.max(0, thresh - info.phosphorus.value) / thresh
+            local kDef = math.max(0, thresh - info.potassium.value)  / thresh
+            local avgDef = (nDef + pDef + kDef) / 3
+
+            local penalty    = math.min(ys.MAX_PENALTY, avgDef * tierData.scale)
+            local penaltyPct = math.floor(penalty * 100 + 0.5)
+
+            local yieldColor, yieldText
+            if penaltyPct <= 0 then
+                yieldColor = SoilHUD.C_GOOD
+                yieldText  = "Yield: Optimal"
+            elseif penaltyPct < 15 then
+                yieldColor = SoilHUD.C_FAIR
+                yieldText  = string.format("Yield ~-%d%%", penaltyPct)
+            else
+                yieldColor = SoilHUD.C_POOR
+                yieldText  = string.format("Yield ~-%d%%", penaltyPct)
+            end
+
+            setTextColor(yieldColor[1], yieldColor[2], yieldColor[3], 1.0)
+            renderText(tx, cy, 0.010 * fontMult * s, yieldText)
+            setTextAlignment(RenderText.ALIGN_RIGHT)
+            setTextColor(SoilHUD.C_DIM[1], SoilHUD.C_DIM[2], SoilHUD.C_DIM[3], SoilHUD.C_DIM[4])
+            renderText(px + pw - pad, cy, 0.009 * fontMult * s, tierData.label)
+            setTextAlignment(RenderText.ALIGN_LEFT)
+            cy = cy - SoilHUD.LINE_H * s
+
+            -- Divider before hint
+            cy = cy - pad * 0.5
+            self:drawRect(px + pad, cy, pw - pad*2, 0.0005, SoilHUD.C_DIVIDER)
+            cy = cy - pad * 0.8
+        end
     else
         cy = cy - SoilHUD.LINE_H * s * 4  -- skip nutrient rows space
     end
