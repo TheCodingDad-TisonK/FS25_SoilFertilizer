@@ -160,7 +160,8 @@ end
 -- Hook into FS25 mission events
 Mission00.load = Utils.prependedFunction(Mission00.load, load)
 Mission00.loadMission00Finished = Utils.appendedFunction(Mission00.loadMission00Finished, loadedMission)
-FSBaseMission.delete = Utils.appendedFunction(FSBaseMission.delete, unload)
+-- Prepend so our cleanup runs before FS25 tears down g_inputBinding/HUD (fixes black screen with AGS)
+FSBaseMission.delete = Utils.prependedFunction(FSBaseMission.delete, unload)
 
 FSBaseMission.update = Utils.appendedFunction(FSBaseMission.update, function(mission, dt)
     if sfm then
@@ -168,9 +169,9 @@ FSBaseMission.update = Utils.appendedFunction(FSBaseMission.update, function(mis
     end
 end)
 
--- Hook draw for HUD (always-on overlay)
+-- Hook draw for HUD — guard isRunning so we stop drawing once teardown begins
 FSBaseMission.draw = Utils.appendedFunction(FSBaseMission.draw, function(mission)
-    if sfm and sfm.soilHUD then
+    if sfm and sfm.soilHUD and mission.isRunning then
         sfm.soilHUD:draw()
     end
 end)
