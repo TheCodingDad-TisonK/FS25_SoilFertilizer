@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<vehicle type="bigBag" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../shared/xml/schema/vehicle.xsd">
+
+    <parentFile xmlFilename="$data/objects/bigBag/bigBag.xml">
+        <attributes>
+            <set path="vehicle.storeData.name"                                                                    value="$l10n_sf_bigBag_dap_name"/>
+            <set path="vehicle.storeData.image"                                                                   value="$moddir$/objects/bigBag/dap/store_bigBagHelm_fertilizer_dap.dds"/>
+            <set path="vehicle.storeData.price"                                                                   value="1900"/>
+            <set path="vehicle.storeData.brand"                                                                   value="LIZARD"/>
+            <set path="vehicle.storeData.functions.function"                                                      value="$l10n_sf_bigBag_dap_function"/>
+            <set path="vehicle.storeData.financeCategory"                                                         value="PURCHASE_FERTILIZER"/>
+
+            <set path="vehicle.fillUnit.fillUnitConfigurations.fillUnitConfiguration(0).fillUnits.fillUnit#fillTypes"      value="DAP"/>
+            <set path="vehicle.fillUnit.fillUnitConfigurations.fillUnitConfiguration(0).fillUnits.fillUnit#startFillType"  value="DAP"/>
+            <set path="vehicle.fillUnit.fillUnitConfigurations.fillUnitConfiguration(0).fillUnits.fillUnit#capacity"       value="1000"/>
+            <set path="vehicle.fillUnit.fillUnitConfigurations.fillUnitConfiguration(0).fillUnits.fillUnit#startFillLevel" value="1000"/>
+
+            <set path="vehicle.fillUnit.fillUnitConfigurations.fillUnitConfiguration(0).fillUnits.fillUnit.fillTypeMaterials.material(1)#fillType" value="DAP"/>
+            <set path="vehicle.fillUnit.fillUnitConfigurations.fillUnitConfiguration(0).fillUnits.fillUnit.fillTypeMaterials.material(1)#refNode" value="fertilizer_mat"/>
+        </attributes>
+    </parentFile>
+
+    <!-- ONLY FOR ICON GENERATION -->
+    <storeData>
+        <name>$l10n_sf_bigBag_dap_name</name>
+        <image>objects/bigBag/dap/store_bigBagHelm_fertilizer_dap.dds</image>
+        <brand>LIZARD</brand>
+        <category>bigbags</category>
+        <storeIconRendering>
+            <settings cameraXRot="-15" cameraYRot="35"/>
+        </storeIconRendering>
+        <vertexBufferMemoryUsage>0</vertexBufferMemoryUsage>
+        <indexBufferMemoryUsage>0</indexBufferMemoryUsage>
+        <textureMemoryUsage>0</textureMemoryUsage>
+        <audioMemoryUsage>0</audioMemoryUsage>
+        <instanceVertexBufferMemoryUsage>0</instanceVertexBufferMemoryUsage>
+        <instanceIndexBufferMemoryUsage>0</instanceIndexBufferMemoryUsage>
+    </storeData>
+</vehicle>
