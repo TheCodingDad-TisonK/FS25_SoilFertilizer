@@ -1,17 +1,24 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<vehicle type="pallet" parentFile="$data/objects/pallets/fertilizer/fertilizer.xml">
+<vehicle type="pallet" parentFile="$data/objects/pallets/fillablePallet/fillablePallet.xml">
     <storeData>
         <name>$l10n_sf_dap_title</name>
         <price>1750</price>
         <category>misc</category>
-        <image>$data/store/items/fertilizer/fertilizer_standard.png</image>
+        <showInStore>true</showInStore>
+        <image>objects/bigBag/dap/store_bigBagHelm_fertilizer_dap.dds</image>
         <specs>
             <fillType>DAP</fillType>
         </specs>
     </storeData>
     <fillUnit>
-        <fillVolumes>
-            <fillVolume fillTypes="DAP" capacity="800"/>
-        </fillVolumes>
+        <fillUnitConfigurations>
+            <fillUnitConfiguration>
+                <fillUnits removeVehicleIfEmpty="true">
+                    <fillUnit unitTextOverride="$l10n_unit_literShort" fillTypes="DAP" capacity="800" startFillType="DAP" startFillLevel="800" ignoreFillLimit="true">
+                        <exactFillRootNode node="exactFillRootNode" />
+                    </fillUnit>
+                </fillUnits>
+            </fillUnitConfiguration>
+        </fillUnitConfigurations>
     </fillUnit>
 </vehicle>

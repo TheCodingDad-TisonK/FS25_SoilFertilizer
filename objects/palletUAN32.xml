@@ -1,17 +1,24 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<vehicle type="pallet" parentFile="$data/objects/pallets/liquidFertilizer/liquidFertilizer.xml">
+<vehicle type="pallet" parentFile="$data/objects/pallets/liquidTank/fertilizerTank.xml">
     <storeData>
         <name>$l10n_sf_uan32_title</name>
         <price>1600</price>
         <category>misc</category>
-        <image>$data/store/items/liquidFertilizer/liquidFertilizer_standard.png</image>
+        <showInStore>true</showInStore>
+        <image>objects/bigBag/uan32/store_bigBagHelm_fertilizer_uan32.dds</image>
         <specs>
             <fillType>UAN32</fillType>
         </specs>
     </storeData>
     <fillUnit>
-        <fillVolumes>
-            <fillVolume fillTypes="UAN32" capacity="1000"/>
-        </fillVolumes>
+        <fillUnitConfigurations>
+            <fillUnitConfiguration>
+                <fillUnits removeVehicleIfEmpty="true">
+                    <fillUnit unitTextOverride="$l10n_unit_literShort" fillTypes="UAN32" capacity="1000" startFillType="UAN32" startFillLevel="1000" ignoreFillLimit="true">
+                        <fillRootNode node="0>" />
+                    </fillUnit>
+                </fillUnits>
+            </fillUnitConfiguration>
+        </fillUnitConfigurations>
     </fillUnit>
 </vehicle>

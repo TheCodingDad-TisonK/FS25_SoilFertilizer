@@ -535,18 +535,18 @@ function SoilFertilityManager:delete()
     end
 
     -- Clean up HUD and input actions
-    if self.toggleHUDEventId then
+    if self.toggleHUDEventId and g_inputBinding then
         g_inputBinding:removeActionEvent(self.toggleHUDEventId)
         self.toggleHUDEventId = nil
     end
 
-    if self.soilReportEventId then
+    if self.soilReportEventId and g_inputBinding then
         g_inputBinding:removeActionEvent(self.soilReportEventId)
         self.soilReportEventId = nil
     end
 
     if self.soilReportDialog then
-        g_gui:closeDialogByName("SoilReportDialog")
+        if g_gui then g_gui:closeDialogByName("SoilReportDialog") end
         self.soilReportDialog = nil
         SoilReportDialog.instance = nil
     end
