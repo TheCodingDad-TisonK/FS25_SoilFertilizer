@@ -1199,6 +1199,86 @@
             <ru>Поля %d-%d из %d  |  Страница %d из %d</ru>
             <hu>Mezők %d-%d / %d  |  Oldal %d / %d</hu>
         </text>
+        <text name="sf_bigBag_uan32_name">
+            <en>Big Bag UAN 32-0-0</en><de>Big Bag UAN 32-0-0</de><fr>Big Bag UAN 32-0-0</fr>
+            <pl>Big Bag UAN 32-0-0</pl><es>Big Bag UAN 32-0-0</es><it>Big Bag UAN 32-0-0</it>
+        </text>
+        <text name="sf_bigBag_uan32_function">
+            <en>Nitrogen Fertilizer (liquid)</en><de>Stickstoffdünger (flüssig)</de><fr>Engrais azoté (liquide)</fr>
+            <pl>Nawóz azotowy (ciekły)</pl><es>Fertilizante nitrogenado (líquido)</es><it>Fertilizzante azotato (liquido)</it>
+        </text>
+
+        <text name="sf_bigBag_uan28_name">
+            <en>Big Bag UAN 28-0-0</en><de>Big Bag UAN 28-0-0</de><fr>Big Bag UAN 28-0-0</fr>
+            <pl>Big Bag UAN 28-0-0</pl><es>Big Bag UAN 28-0-0</es><it>Big Bag UAN 28-0-0</it>
+        </text>
+        <text name="sf_bigBag_uan28_function">
+            <en>Nitrogen Fertilizer (liquid)</en><de>Stickstoffdünger (flüssig)</de><fr>Engrais azoté (liquide)</fr>
+            <pl>Nawóz azotowy (ciekły)</pl><es>Fertilizante nitrogenado (líquido)</es><it>Fertilizzante azotato (liquido)</it>
+        </text>
+
+        <text name="sf_bigBag_anhydrous_name">
+            <en>Big Bag Anhydrous Ammonia 82-0-0</en><de>Big Bag Wasserfreies Ammoniak 82-0-0</de><fr>Big Bag Ammoniac Anhydre 82-0-0</fr>
+            <pl>Big Bag Bezwodny Amoniak 82-0-0</pl><es>Big Bag Amoniaco Anhidro 82-0-0</es><it>Big Bag Ammoniaca Anidra 82-0-0</it>
+        </text>
+        <text name="sf_bigBag_anhydrous_function">
+            <en>Nitrogen Fertilizer (liquid)</en><de>Stickstoffdünger (flüssig)</de><fr>Engrais azoté (liquide)</fr>
+            <pl>Nawóz azotowy (ciekły)</pl><es>Fertilizante nitrogenado (líquido)</es><it>Fertilizzante azotato (liquido)</it>
+        </text>
+
+        <text name="sf_bigBag_urea_name">
+            <en>Big Bag Urea 46-0-0</en><de>Big Bag Harnstoff 46-0-0</de><fr>Big Bag Urée 46-0-0</fr>
+            <pl>Big Bag Mocznik 46-0-0</pl><es>Big Bag Urea 46-0-0</es><it>Big Bag Urea 46-0-0</it>
+        </text>
+        <text name="sf_bigBag_urea_function">
+            <en>Nitrogen Fertilizer (dry)</en><de>Stickstoffdünger (trocken)</de><fr>Engrais azoté (sec)</fr>
+            <pl>Nawóz azotowy (suchy)</pl><es>Fertilizante nitrogenado (seco)</es><it>Fertilizzante azotato (secco)</it>
+        </text>
+
+        <text name="sf_bigBag_ams_name">
+            <en>Big Bag AMS 21-0-0-24S</en><de>Big Bag AMS 21-0-0-24S</de><fr>Big Bag AMS 21-0-0-24S</fr>
+            <pl>Big Bag AMS 21-0-0-24S</pl><es>Big Bag AMS 21-0-0-24S</es><it>Big Bag AMS 21-0-0-24S</it>
+        </text>
+        <text name="sf_bigBag_ams_function">
+            <en>Nitrogen Fertilizer (dry)</en><de>Stickstoffdünger (trocken)</de><fr>Engrais azoté (sec)</fr>
+            <pl>Nawóz azotowy (suchy)</pl><es>Fertilizante nitrogenado (seco)</es><it>Fertilizzante azotato (secco)</it>
+        </text>
+
+        <text name="sf_bigBag_map_name">
+            <en>Big Bag MAP 11-52-0</en><de>Big Bag MAP 11-52-0</de><fr>Big Bag MAP 11-52-0</fr>
+            <pl>Big Bag MAP 11-52-0</pl><es>Big Bag MAP 11-52-0</es><it>Big Bag MAP 11-52-0</it>
+        </text>
+        <text name="sf_bigBag_map_function">
+            <en>Phosphorus Fertilizer (dry)</en><de>Phosphordünger (trocken)</de><fr>Engrais phosphoré (sec)</fr>
+            <pl>Nawóz fosforowy (suchy)</pl><es>Fertilizante fosfórico (seco)</es><it>Fertilizzante fosfatico (secco)</it>
+        </text>
+
+        <text name="sf_bigBag_dap_name">
+            <en>Big Bag DAP 18-46-0</en><de>Big Bag DAP 18-46-0</de><fr>Big Bag DAP 18-46-0</fr>
+            <pl>Big Bag DAP 18-46-0</pl><es>Big Bag DAP 18-46-0</es><it>Big Bag DAP 18-46-0</it>
+        </text>
+        <text name="sf_bigBag_dap_function">
+            <en>Phosphorus Fertilizer (dry)</en><de>Phosphordünger (trocken)</de><fr>Engrais phosphoré (sec)</fr>
+            <pl>Nawóz fosforowy (suchy)</pl><es>Fertilizante fosfórico (seco)</es><it>Fertilizzante fosfatico (secco)</it>
+        </text>
+
+        <text name="sf_bigBag_potash_name">
+            <en>Big Bag Potash 0-0-60</en><de>Big Bag Kalium 0-0-60</de><fr>Big Bag Potasse 0-0-60</fr>
+            <pl>Big Bag Potas 0-0-60</pl><es>Big Bag Potasa 0-0-60</es><it>Big Bag Potassio 0-0-60</it>
+        </text>
+        <text name="sf_bigBag_potash_function">
+            <en>Potassium Fertilizer (dry)</en><de>Kaliumdünger (trocken)</de><fr>Engrais potassique (sec)</fr>
+            <pl>Nawóz potasowy (suchy)</pl><es>Fertilizante potásico (seco)</es><it>Fertilizzante potassico (secco)</it>
+        </text>
+
+        <text name="sf_bigBag_starter_name">
+            <en>Big Bag Starter 10-34-0</en><de>Big Bag Starterdünger 10-34-0</de><fr>Big Bag Engrais Starter 10-34-0</fr>
+            <pl>Big Bag Nawóz Startowy 10-34-0</pl><es>Big Bag Fertilizante Inicial 10-34-0</es><it>Big Bag Fertilizzante Starter 10-34-0</it>
+        </text>
+        <text name="sf_bigBag_starter_function">
+            <en>Starter Fertilizer (liquid)</en><de>Starterdünger (flüssig)</de><fr>Engrais starter (liquide)</fr>
+            <pl>Nawóz startowy (ciekły)</pl><es>Fertilizante inicial (líquido)</es><it>Fertilizzante starter (liquido)</it>
+        </text>
     </l10n>
 
     <inputBinding>
@@ -1216,282 +1296,9 @@
         </actionBinding>
     </inputBinding>
 
-    <!--
-        ══════════════════════════════════════════════════════════════════════
-        CUSTOM FILL TYPES
-        All fertilizer types tracked by FS25_SoilFertilizer that are not
-        part of the base game are declared here so the game's fill type
-        manager can register them.  Each entry mirrors the name used in
-        SoilConstants.FERTILIZER_PROFILES so application logic works without
-        any additional Lua changes.
+    <!-- Custom fill types declared in external file (FS25 requires filename= attribute) -->
+    <fillTypes filename="fillTypes.xml"/>
 
-        Liquid types reuse the liquidFertilizer HUD icon.
-        Dry/granular types reuse the fertilizer HUD icon.
-        ══════════════════════════════════════════════════════════════════════
-    -->
-    <fillTypes>
-
-        <!-- ── LIQUID NITROGEN SOURCES ─────────────────────────────────── -->
-
-        <fillType name="UAN32" showOnPriceTable="true">
-            <title>
-                <en>UAN 32 Fertilizer (N)</en>
-                <de>UAN 32 Stickstoffdünger (N)</de>
-                <fr>UAN 32 Engrais azoté (N)</fr>
-                <pl>UAN 32 Nawóz azotowy (N)</pl>
-                <es>UAN 32 Fertilizante nitrogenado (N)</es>
-                <it>UAN 32 Fertilizzante azotato (N)</it>
-                <cz>UAN 32 Dusíkaté hnojivo (N)</cz>
-                <br>UAN 32 Fertilizante nitrogenado (N)</br>
-                <uk>UAN 32 Азотне добриво (N)</uk>
-                <ru>UAN 32 Азотное удобрение (N)</ru>
-                <hu>UAN 32 Nitrogén műtrágya (N)</hu>
-            </title>
-            <economy pricePerLiter="1.60">
-                <factors>
-                    <factor season="spring" value="1.15"/>
-                    <factor season="summer" value="0.95"/>
-                    <factor season="autumn" value="1.00"/>
-                    <factor season="winter" value="0.88"/>
-                </factors>
-            </economy>
-            <physics massPerLiter="1.32" maxPhysicalSurfaceAngle="0"/>
-            <image hud="$data/fillTypes/hud/hud_fillType_liquidFertilizer.png"
-                   icon="$data/fillTypes/hud/hud_fillType_liquidFertilizer.png"/>
-            <depot litersPerSecond="600"/>
-        </fillType>
-
-        <fillType name="UAN28" showOnPriceTable="true">
-            <title>
-                <en>UAN 28 Fertilizer (N)</en>
-                <de>UAN 28 Stickstoffdünger (N)</de>
-                <fr>UAN 28 Engrais azoté (N)</fr>
-                <pl>UAN 28 Nawóz azotowy (N)</pl>
-                <es>UAN 28 Fertilizante nitrogenado (N)</es>
-                <it>UAN 28 Fertilizzante azotato (N)</it>
-                <cz>UAN 28 Dusíkaté hnojivo (N)</cz>
-                <br>UAN 28 Fertilizante nitrogenado (N)</br>
-                <uk>UAN 28 Азотне добриво (N)</uk>
-                <ru>UAN 28 Азотное удобрение (N)</ru>
-                <hu>UAN 28 Nitrogén műtrágya (N)</hu>
-            </title>
-            <economy pricePerLiter="1.50">
-                <factors>
-                    <factor season="spring" value="1.12"/>
-                    <factor season="summer" value="0.95"/>
-                    <factor season="autumn" value="1.00"/>
-                    <factor season="winter" value="0.88"/>
-                </factors>
-            </economy>
-            <physics massPerLiter="1.28" maxPhysicalSurfaceAngle="0"/>
-            <image hud="$data/fillTypes/hud/hud_fillType_liquidFertilizer.png"
-                   icon="$data/fillTypes/hud/hud_fillType_liquidFertilizer.png"/>
-            <depot litersPerSecond="600"/>
-        </fillType>
-
-        <fillType name="ANHYDROUS" showOnPriceTable="true">
-            <title>
-                <en>Anhydrous Ammonia (N)</en>
-                <de>Flüssigammoniak (N)</de>
-                <fr>Ammoniac anhydre (N)</fr>
-                <pl>Amoniak bezwodny (N)</pl>
-                <es>Amoníaco anhidro (N)</es>
-                <it>Ammoniaca anidra (N)</it>
-                <cz>Bezvodý amoniak (N)</cz>
-                <br>Amônia anidra (N)</br>
-                <uk>Безводний аміак (N)</uk>
-                <ru>Безводный аммиак (N)</ru>
-                <hu>Vízmentes ammónia (N)</hu>
-            </title>
-            <economy pricePerLiter="1.85">
-                <factors>
-                    <factor season="spring" value="1.15"/>
-                    <factor season="summer" value="0.95"/>
-                    <factor season="autumn" value="1.00"/>
-                    <factor season="winter" value="0.90"/>
-                </factors>
-            </economy>
-            <physics massPerLiter="0.617" maxPhysicalSurfaceAngle="0"/>
-            <image hud="$data/fillTypes/hud/hud_fillType_liquidFertilizer.png"
-                   icon="$data/fillTypes/hud/hud_fillType_liquidFertilizer.png"/>
-            <depot litersPerSecond="600"/>
-        </fillType>
-
-        <fillType name="STARTER" showOnPriceTable="true">
-            <title>
-                <en>Starter Fertilizer 10-34-0 (P)</en>
-                <de>Starterdünger 10-34-0 (P)</de>
-                <fr>Engrais starter 10-34-0 (P)</fr>
-                <pl>Nawóz startowy 10-34-0 (P)</pl>
-                <es>Fertilizante arrancador 10-34-0 (P)</es>
-                <it>Fertilizzante starter 10-34-0 (P)</it>
-                <cz>Startovní hnojivo 10-34-0 (P)</cz>
-                <br>Fertilizante inicial 10-34-0 (P)</br>
-                <uk>Стартове добриво 10-34-0 (P)</uk>
-                <ru>Стартовое удобрение 10-34-0 (P)</ru>
-                <hu>Starter műtrágya 10-34-0 (P)</hu>
-            </title>
-            <economy pricePerLiter="1.70">
-                <factors>
-                    <factor season="spring" value="1.20"/>
-                    <factor season="summer" value="0.90"/>
-                    <factor season="autumn" value="0.95"/>
-                    <factor season="winter" value="0.85"/>
-                </factors>
-            </economy>
-            <physics massPerLiter="1.38" maxPhysicalSurfaceAngle="0"/>
-            <image hud="$data/fillTypes/hud/hud_fillType_liquidFertilizer.png"
-                   icon="$data/fillTypes/hud/hud_fillType_liquidFertilizer.png"/>
-            <depot litersPerSecond="600"/>
-        </fillType>
-
-        <!-- ── DRY NITROGEN SOURCES ──────────────────────────────────────── -->
-
-        <fillType name="UREA" showOnPriceTable="true">
-            <title>
-                <en>Urea 46-0-0 (N)</en>
-                <de>Harnstoff 46-0-0 (N)</de>
-                <fr>Urée 46-0-0 (N)</fr>
-                <pl>Mocznik 46-0-0 (N)</pl>
-                <es>Urea 46-0-0 (N)</es>
-                <it>Urea 46-0-0 (N)</it>
-                <cz>Močovina 46-0-0 (N)</cz>
-                <br>Ureia 46-0-0 (N)</br>
-                <uk>Карбамід 46-0-0 (N)</uk>
-                <ru>Карбамид 46-0-0 (N)</ru>
-                <hu>Karbamid 46-0-0 (N)</hu>
-            </title>
-            <economy pricePerLiter="1.65">
-                <factors>
-                    <factor season="spring" value="1.15"/>
-                    <factor season="summer" value="0.95"/>
-                    <factor season="autumn" value="1.00"/>
-                    <factor season="winter" value="0.88"/>
-                </factors>
-            </economy>
-            <physics massPerLiter="0.77" maxPhysicalSurfaceAngle="32"/>
-            <image hud="$data/fillTypes/hud/hud_fillType_fertilizer.png"
-                   icon="$data/fillTypes/hud/hud_fillType_fertilizer.png"/>
-            <depot litersPerSecond="500"/>
-        </fillType>
-
-        <fillType name="AMS" showOnPriceTable="true">
-            <title>
-                <en>Ammonium Sulfate 21-0-0 (N)</en>
-                <de>Ammoniumsulfat 21-0-0 (N)</de>
-                <fr>Sulfate d'ammonium 21-0-0 (N)</fr>
-                <pl>Siarczan amonu 21-0-0 (N)</pl>
-                <es>Sulfato de amonio 21-0-0 (N)</es>
-                <it>Solfato di ammonio 21-0-0 (N)</it>
-                <cz>Síran amonný 21-0-0 (N)</cz>
-                <br>Sulfato de amônio 21-0-0 (N)</br>
-                <uk>Сульфат амонію 21-0-0 (N)</uk>
-                <ru>Сульфат аммония 21-0-0 (N)</ru>
-                <hu>Ammónium-szulfát 21-0-0 (N)</hu>
-            </title>
-            <economy pricePerLiter="1.40">
-                <factors>
-                    <factor season="spring" value="1.10"/>
-                    <factor season="summer" value="1.00"/>
-                    <factor season="autumn" value="1.00"/>
-                    <factor season="winter" value="0.90"/>
-                </factors>
-            </economy>
-            <physics massPerLiter="1.07" maxPhysicalSurfaceAngle="32"/>
-            <image hud="$data/fillTypes/hud/hud_fillType_fertilizer.png"
-                   icon="$data/fillTypes/hud/hud_fillType_fertilizer.png"/>
-            <depot litersPerSecond="500"/>
-        </fillType>
-
-        <!-- ── PHOSPHORUS SOURCES ────────────────────────────────────────── -->
-
-        <fillType name="MAP" showOnPriceTable="true">
-            <title>
-                <en>MAP Fertilizer 11-52-0 (P)</en>
-                <de>MAP-Dünger 11-52-0 (P)</de>
-                <fr>Engrais MAP 11-52-0 (P)</fr>
-                <pl>Nawóz MAP 11-52-0 (P)</pl>
-                <es>Fertilizante MAP 11-52-0 (P)</es>
-                <it>Fertilizzante MAP 11-52-0 (P)</it>
-                <cz>MAP hnojivo 11-52-0 (P)</cz>
-                <br>Fertilizante MAP 11-52-0 (P)</br>
-                <uk>Добриво MAP 11-52-0 (P)</uk>
-                <ru>Удобрение MAP 11-52-0 (P)</ru>
-                <hu>MAP műtrágya 11-52-0 (P)</hu>
-            </title>
-            <economy pricePerLiter="1.95">
-                <factors>
-                    <factor season="spring" value="1.10"/>
-                    <factor season="summer" value="1.00"/>
-                    <factor season="autumn" value="1.05"/>
-                    <factor season="winter" value="0.90"/>
-                </factors>
-            </economy>
-            <physics massPerLiter="0.97" maxPhysicalSurfaceAngle="32"/>
-            <image hud="$data/fillTypes/hud/hud_fillType_fertilizer.png"
-                   icon="$data/fillTypes/hud/hud_fillType_fertilizer.png"/>
-            <depot litersPerSecond="500"/>
-        </fillType>
-
-        <fillType name="DAP" showOnPriceTable="true">
-            <title>
-                <en>DAP Fertilizer 18-46-0 (P)</en>
-                <de>DAP-Dünger 18-46-0 (P)</de>
-                <fr>Engrais DAP 18-46-0 (P)</fr>
-                <pl>Nawóz DAP 18-46-0 (P)</pl>
-                <es>Fertilizante DAP 18-46-0 (P)</es>
-                <it>Fertilizzante DAP 18-46-0 (P)</it>
-                <cz>DAP hnojivo 18-46-0 (P)</cz>
-                <br>Fertilizante DAP 18-46-0 (P)</br>
-                <uk>Добриво DAP 18-46-0 (P)</uk>
-                <ru>Удобрение DAP 18-46-0 (P)</ru>
-                <hu>DAP műtrágya 18-46-0 (P)</hu>
-            </title>
-            <economy pricePerLiter="1.75">
-                <factors>
-                    <factor season="spring" value="1.10"/>
-                    <factor season="summer" value="1.00"/>
-                    <factor season="autumn" value="1.05"/>
-                    <factor season="winter" value="0.90"/>
-                </factors>
-            </economy>
-            <physics massPerLiter="0.96" maxPhysicalSurfaceAngle="32"/>
-            <image hud="$data/fillTypes/hud/hud_fillType_fertilizer.png"
-                   icon="$data/fillTypes/hud/hud_fillType_fertilizer.png"/>
-            <depot litersPerSecond="500"/>
-        </fillType>
-
-        <!-- ── POTASSIUM SOURCE ──────────────────────────────────────────── -->
-
-        <fillType name="POTASH" showOnPriceTable="true">
-            <title>
-                <en>Potash 0-0-60 (K)</en>
-                <de>Kaliumchlorid 0-0-60 (K)</de>
-                <fr>Potasse 0-0-60 (K)</fr>
-                <pl>Potaż 0-0-60 (K)</pl>
-                <es>Potasa 0-0-60 (K)</es>
-                <it>Potassa 0-0-60 (K)</it>
-                <cz>Potaš 0-0-60 (K)</cz>
-                <br>Potassa 0-0-60 (K)</br>
-                <uk>Поташ 0-0-60 (K)</uk>
-                <ru>Поташ 0-0-60 (K)</ru>
-                <hu>Hamuzsír 0-0-60 (K)</hu>
-            </title>
-            <economy pricePerLiter="1.80">
-                <factors>
-                    <factor season="spring" value="1.05"/>
-                    <factor season="summer" value="0.95"/>
-                    <factor season="autumn" value="1.10"/>
-                    <factor season="winter" value="0.90"/>
-                </factors>
-            </economy>
-            <physics massPerLiter="1.00" maxPhysicalSurfaceAngle="32"/>
-            <image hud="$data/fillTypes/hud/hud_fillType_fertilizer.png"
-                   icon="$data/fillTypes/hud/hud_fillType_fertilizer.png"/>
-            <depot litersPerSecond="500"/>
-        </fillType>
-
-    </fillTypes>
 
     <!--
         ══════════════════════════════════════════════════════════════════════
@@ -1505,15 +1312,24 @@
         ══════════════════════════════════════════════════════════════════════
     -->
     <storeItems>
-        <storeItem xmlFilename="objects/palletUAN32.xml"/>
-        <storeItem xmlFilename="objects/palletUAN28.xml"/>
-        <storeItem xmlFilename="objects/palletAnhydrous.xml"/>
-        <storeItem xmlFilename="objects/palletStarter.xml"/>
-        <storeItem xmlFilename="objects/palletUrea.xml"/>
-        <storeItem xmlFilename="objects/palletAMS.xml"/>
-        <storeItem xmlFilename="objects/palletMAP.xml"/>
-        <storeItem xmlFilename="objects/palletDAP.xml"/>
-        <storeItem xmlFilename="objects/palletPotash.xml"/>
+        <storeItem xmlFilename="objects/bigBag/uan32/multiPurchaseBigBag_uan32.xml"/>
+        <storeItem xmlFilename="objects/bigBag/uan28/multiPurchaseBigBag_uan28.xml"/>
+        <storeItem xmlFilename="objects/bigBag/anhydrous/multiPurchaseBigBag_anhydrous.xml"/>
+        <storeItem xmlFilename="objects/bigBag/urea/multiPurchaseBigBag_urea.xml"/>
+        <storeItem xmlFilename="objects/bigBag/ams/multiPurchaseBigBag_ams.xml"/>
+        <storeItem xmlFilename="objects/bigBag/map/multiPurchaseBigBag_map.xml"/>
+        <storeItem xmlFilename="objects/bigBag/dap/multiPurchaseBigBag_dap.xml"/>
+        <storeItem xmlFilename="objects/bigBag/potash/multiPurchaseBigBag_potash.xml"/>
+        <storeItem xmlFilename="objects/bigBag/starter/multiPurchaseBigBag_starter.xml"/>
+        <storeItem xmlFilename="objects/bigBag/uan32/bigBag_uan32.xml"/>
+        <storeItem xmlFilename="objects/bigBag/uan28/bigBag_uan28.xml"/>
+        <storeItem xmlFilename="objects/bigBag/anhydrous/bigBag_anhydrous.xml"/>
+        <storeItem xmlFilename="objects/bigBag/urea/bigBag_urea.xml"/>
+        <storeItem xmlFilename="objects/bigBag/ams/bigBag_ams.xml"/>
+        <storeItem xmlFilename="objects/bigBag/map/bigBag_map.xml"/>
+        <storeItem xmlFilename="objects/bigBag/dap/bigBag_dap.xml"/>
+        <storeItem xmlFilename="objects/bigBag/potash/bigBag_potash.xml"/>
+        <storeItem xmlFilename="objects/bigBag/starter/bigBag_starter.xml"/>
     </storeItems>
 
 </modDesc>

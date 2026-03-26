@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<map>
+    <fillTypes>
+
+        <!-- ── LIQUID NITROGEN SOURCES ───────────────────────── -->
+
+        <fillType name="UAN32" title="$l10n_sf_uan32_title" showOnPriceTable="true" isBulkType="false" unitShort="$l10n_unit_literShort">
+            <physics massPerLiter="1.32" maxPhysicalSurfaceAngle="0"/>
+            <economy pricePerLiter="1.60"/>
+            <image hud="$dataS/menu/hud/fillTypes/hud_fill_liquidFertilizer.png"/>
+        </fillType>
+
+        <fillType name="UAN28" title="$l10n_sf_uan28_title" showOnPriceTable="true" isBulkType="false" unitShort="$l10n_unit_literShort">
+            <physics massPerLiter="1.28" maxPhysicalSurfaceAngle="0"/>
+            <economy pricePerLiter="1.50"/>
+            <image hud="$dataS/menu/hud/fillTypes/hud_fill_liquidFertilizer.png"/>
+        </fillType>
+
+        <fillType name="ANHYDROUS" title="$l10n_sf_anhydrous_title" showOnPriceTable="true" isBulkType="false" unitShort="$l10n_unit_literShort">
+            <physics massPerLiter="0.61" maxPhysicalSurfaceAngle="0"/>
+            <economy pricePerLiter="1.85"/>
+            <image hud="$dataS/menu/hud/fillTypes/hud_fill_liquidFertilizer.png"/>
+        </fillType>
+
+        <fillType name="STARTER" title="$l10n_sf_starter_title" showOnPriceTable="true" isBulkType="false" unitShort="$l10n_unit_literShort">
+            <physics massPerLiter="1.10" maxPhysicalSurfaceAngle="0"/>
+            <economy pricePerLiter="1.70"/>
+            <image hud="$dataS/menu/hud/fillTypes/hud_fill_liquidFertilizer.png"/>
+        </fillType>
+
+        <!-- ── SOLID GRANULAR SOURCES ─────────────────────────── -->
+
+        <fillType name="UREA" title="$l10n_sf_urea_title" showOnPriceTable="true" isBulkType="true" unitShort="$l10n_unit_literShort">
+            <physics massPerLiter="0.77" maxPhysicalSurfaceAngle="15"/>
+            <economy pricePerLiter="1.65"/>
+            <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
+        </fillType>
+
+        <fillType name="AMS" title="$l10n_sf_ams_title" showOnPriceTable="true" isBulkType="true" unitShort="$l10n_unit_literShort">
+            <physics massPerLiter="0.87" maxPhysicalSurfaceAngle="15"/>
+            <economy pricePerLiter="1.40"/>
+            <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
+        </fillType>
+
+        <fillType name="MAP" title="$l10n_sf_map_title" showOnPriceTable="true" isBulkType="true" unitShort="$l10n_unit_literShort">
+            <physics massPerLiter="0.90" maxPhysicalSurfaceAngle="15"/>
+            <economy pricePerLiter="1.95"/>
+            <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
+        </fillType>
+
+        <fillType name="DAP" title="$l10n_sf_dap_title" showOnPriceTable="true" isBulkType="true" unitShort="$l10n_unit_literShort">
+            <physics massPerLiter="0.90" maxPhysicalSurfaceAngle="15"/>
+            <economy pricePerLiter="1.75"/>
+            <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
+        </fillType>
+
+        <fillType name="POTASH" title="$l10n_sf_potash_title" showOnPriceTable="true" isBulkType="true" unitShort="$l10n_unit_literShort">
+            <physics massPerLiter="0.95" maxPhysicalSurfaceAngle="15"/>
+            <economy pricePerLiter="1.80"/>
+            <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
+        </fillType>
+
+    </fillTypes>
+
+    <fillTypeCategories>
+        <fillTypeCategory name="SPREADER">UREA AMS MAP DAP POTASH</fillTypeCategory>
+        <fillTypeCategory name="SPRAYER">UAN32 UAN28 ANHYDROUS STARTER</fillTypeCategory>
+    </fillTypeCategories>
+
+</map>
