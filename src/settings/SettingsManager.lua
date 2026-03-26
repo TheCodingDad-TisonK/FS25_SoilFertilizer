@@ -1,9 +1,10 @@
 -- =========================================================
--- FS25 Realistic Soil & Fertilizer (FIXED FOR MULTIPLAYER)
+-- FS25 Realistic Soil & Fertilizer - Settings Manager
 -- =========================================================
--- Settings persistence - auto-generated from SettingsSchema
+-- Saves/loads mod settings from the server savegame XML.
+-- Auto-generated from SettingsSchema — add settings there.
 -- =========================================================
--- Author: TisonK (Multiplayer fix applied)
+-- Author: TisonK
 -- =========================================================
 ---@class SettingsManager
 SettingsManager = {}
@@ -19,7 +20,7 @@ function SettingsManager.new()
     return setmetatable({}, SettingsManager_mt)
 end
 
--- FIXED: Now saves to SERVER SAVEGAME instead of client PC
+-- Settings are saved to the server savegame directory so all players share the same config.
 function SettingsManager:getSavegameXmlFilePath()
     if g_currentMission and g_currentMission.missionInfo and g_currentMission.missionInfo.savegameDirectory then
         local path = string.format("%s/%s.xml",

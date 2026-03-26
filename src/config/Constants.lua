@@ -1,10 +1,11 @@
 -- =========================================================
--- FS25 Realistic Soil & Fertilizer - Enhanced Constants
+-- FS25 Realistic Soil & Fertilizer - Constants
 -- =========================================================
--- Configuration values and constants for the mod
--- Enhanced with enterprise-grade monitoring and reliability features
+-- All tunable values: timing, difficulty, nutrient limits,
+-- crop extraction rates, fertilizer profiles, HUD config.
+-- Single source of truth — modify here, not in system code.
 -- =========================================================
--- Author: TisonK (Enhanced Version)
+-- Author: TisonK
 -- =========================================================
 
 ---@class SoilConstants

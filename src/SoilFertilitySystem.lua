@@ -1,14 +1,11 @@
 -- =========================================================
--- FS25 Realistic Soil & Fertilizer (ENHANCED VERSION)
+-- FS25 Realistic Soil & Fertilizer - Core Simulation
 -- =========================================================
--- Author: TisonK (enhanced with enterprise-grade features)
--- Enhanced: Dedicated server compatibility with advanced monitoring
---   1. Enhanced PF compatibility check with API validation
---   2. Circuit breaker pattern for network reliability
---   3. Bandwidth optimization with compressed field data
---   4. Performance monitoring and health checks
---   5. Predictive loading for better performance
---   6. Advanced error handling and recovery mechanisms
+-- Per-field N/P/K/pH/OM tracking: depletion on harvest,
+-- restoration on fertilizer, rain leaching, seasonal effects,
+-- fallow recovery, Precision Farming compatibility.
+-- =========================================================
+-- Author: TisonK
 -- =========================================================
 
 ---@class SoilFertilitySystem
@@ -261,7 +258,7 @@ function SoilFertilitySystem:onPlowing(fieldId)
 
     -- Debug logging
     if self.settings.debugMode and changed then
-        SoilLogger.info("[Plowing] Field %d: OM %.1f->%.1f, pH %.2f->%.2f",
+        self:info("[Plowing] Field %d: OM %.1f->%.1f, pH %.2f->%.2f",
             fieldId, omBefore, omAfter, phBefore, phAfter)
     end
 
@@ -487,7 +484,7 @@ function SoilFertilitySystem:scanFields()
     -- The correct field identifier is field.farmland.id (confirmed in-game).
     -- g_currentMission.fieldManager does not exist; use the global g_fieldManager.fields table directly.
     if not g_fieldManager or not g_fieldManager.fields then
-        self:warn("g_fieldManager.fields not available — scan deferred")
+        self:warning("g_fieldManager.fields not available — scan deferred")
         return false
     end
     local fields = g_fieldManager.fields

@@ -1,9 +1,10 @@
 -- =========================================================
--- FS25 Realistic Soil & Fertilizer (FIXED FOR MULTIPLAYER)
+-- FS25 Realistic Soil & Fertilizer - Entry Point
 -- =========================================================
--- Realistic soil fertility and fertilizer management
+-- Loads all modules in dependency order, hooks FS25 mission
+-- lifecycle events, and registers console commands.
 -- =========================================================
--- Author: TisonK (Multiplayer fix applied)
+-- Author: TisonK
 -- =========================================================
 -- COPYRIGHT NOTICE:
 -- All rights reserved. Unauthorized redistribution, copying,
