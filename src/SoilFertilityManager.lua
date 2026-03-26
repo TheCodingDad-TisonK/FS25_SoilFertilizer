@@ -271,6 +271,7 @@ function SoilFertilityManager:onMissionLoaded()
         -- Input binding (J key) is registered via PlayerInputComponent hook in new(), not here
         if self.soilHUD then
             self.soilHUD:initialize()
+            self.soilHUD:loadLayout()
         end
 
         -- Defer soil system initialization (hook installation) until game is ready
