@@ -254,6 +254,61 @@ SoilConstants.FERTILIZATION_THRESHOLDS = {
 }
 
 -- ========================================
+-- YIELD SENSITIVITY (Issue #81 interim HUD warning)
+-- ========================================
+-- Nutrient levels >= OPTIMAL_THRESHOLD (0-100 scale) → no yield penalty.
+-- Below that, penalty scales with how far each nutrient has dropped and
+-- how demanding the crop is.  Max penalty is capped at MAX_PENALTY.
+--
+-- Formula (per nutrient): deficit_fraction = max(0, threshold - value) / threshold
+-- Combined deficit = average of N, P, K deficit fractions
+-- Raw penalty      = combined_deficit * tier.scale
+-- Final penalty %  = min(MAX_PENALTY, raw_penalty) * 100
+SoilConstants.YIELD_SENSITIVITY = {
+    -- Nutrients must be at or above this value (0–100) for full yield
+    OPTIMAL_THRESHOLD = 70,
+
+    -- Hard cap on how much yield can be lost to nutrient stress
+    MAX_PENALTY = 0.50,
+
+    -- Tier definitions: scale how harshly the deficit translates to a penalty
+    TIERS = {
+        tolerant  = { scale = 0.50, label = "Tolerant"  },  -- barley, oat, sunflower
+        moderate  = { scale = 1.00, label = "Moderate"  },  -- wheat, canola, maize, etc.
+        demanding = { scale = 2.00, label = "Demanding" },  -- potato, sugarbeet, soybean
+    },
+
+    -- Crop name (lowercased fruitDesc.name) → sensitivity tier
+    CROP_TIERS = {
+        -- Tolerant: manage well even in poor soil
+        barley     = "tolerant",
+        oat        = "tolerant",
+        oats       = "tolerant",   -- alternate name
+        sunflower  = "tolerant",
+        rye        = "tolerant",
+        sorghum    = "tolerant",
+        -- Moderate: standard response to nutrient levels
+        wheat      = "moderate",
+        canola     = "moderate",
+        maize      = "moderate",
+        triticale  = "moderate",
+        peas       = "moderate",
+        beans      = "moderate",
+        -- Demanding: yield falls sharply with nutrient stress
+        potato     = "demanding",
+        sugarbeet  = "demanding",
+        soybean    = "demanding",
+    },
+
+    DEFAULT_TIER = "moderate",
+
+    -- Crops that are not row-crop harvests; skip yield forecast for these
+    NON_CROP_NAMES = {
+        grass = true, drygrass = true, poplar = true, oilseedradish = true,
+    },
+}
+
+-- ========================================
 -- REPORT COLOR THRESHOLDS
 -- ========================================
 -- pH/OM ranges for color-coded report display
