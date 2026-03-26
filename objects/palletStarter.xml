@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<vehicle type="pallet" parentFile="$data/objects/pallets/liquidFertilizer/liquidFertilizer.xml">
+    <storeData>
+        <name>$l10n_sf_starter_title</name>
+        <price>1700</price>
+        <category>misc</category>
+        <image>$data/store/items/liquidFertilizer/liquidFertilizer_standard.png</image>
+        <specs>
+            <fillType>STARTER</fillType>
+        </specs>
+    </storeData>
+    <fillUnit>
+        <fillVolumes>
+            <fillVolume fillTypes="STARTER" capacity="1000"/>
+        </fillVolumes>
+    </fillUnit>
+</vehicle>

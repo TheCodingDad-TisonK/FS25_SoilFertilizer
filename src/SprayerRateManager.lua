@@ -15,6 +15,8 @@ function SprayerRateManager.new()
     local self = setmetatable({}, SprayerRateManager)
     -- vehicleId (number) → rateIndex (1..#STEPS)
     self.vehicleRates = {}
+    -- vehicleId (number) → autoMode (boolean)
+    self.vehicleAutoModes = {}
     return self
 end
 
@@ -31,6 +33,29 @@ end
 function SprayerRateManager:getMultiplier(vehicleId)
     local idx = self:getIndex(vehicleId)
     return SoilConstants.SPRAYER_RATE.STEPS[idx] or 1.0
+end
+
+--- Returns whether Auto-Mode is enabled for a vehicle.
+---@param vehicleId number
+---@return boolean enabled
+function SprayerRateManager:getAutoMode(vehicleId)
+    return self.vehicleAutoModes[vehicleId] == true
+end
+
+--- Sets the Auto-Mode state for a vehicle.
+---@param vehicleId number
+---@param enabled boolean
+function SprayerRateManager:setAutoMode(vehicleId, enabled)
+    self.vehicleAutoModes[vehicleId] = (enabled == true)
+end
+
+--- Toggles Auto-Mode for a vehicle and returns the new state.
+---@param vehicleId number
+---@return boolean newState
+function SprayerRateManager:toggleAutoMode(vehicleId)
+    local newState = not self:getAutoMode(vehicleId)
+    self:setAutoMode(vehicleId, newState)
+    return newState
 end
 
 --- Explicitly sets the rate index for a vehicle.
@@ -65,4 +90,5 @@ end
 --- Called on mod unload to release all state.
 function SprayerRateManager:delete()
     self.vehicleRates = {}
+    self.vehicleAutoModes = {}
 end

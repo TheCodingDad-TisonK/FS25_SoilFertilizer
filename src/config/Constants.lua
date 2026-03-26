@@ -153,7 +153,7 @@ SoilConstants.FERTILIZER_PROFILES = {
     LIQUIDFERTILIZER  = { N=0.50, P=0.21, K=0.33 },           -- Balanced liquid NPK
     FERTILIZER        = { N=0.67, P=0.33, K=0.25 },           -- Solid granular, high N/P
     MANURE            = { N=0.25, P=0.17, K=0.29, OM=0.05 },  -- Organic, slow-release
-    SLURRY            = { N=0.33, P=0.17, K=0.42, OM=0.03 },  -- Liquid organic, high K
+    LIQUIDMANURE      = { N=0.33, P=0.17, K=0.42, OM=0.03 },  -- Liquid organic, high K (FS25 fill type name)
     DIGESTATE         = { N=0.42, P=0.18, K=0.46, OM=0.04 },  -- Biogas byproduct
     LIME              = { pH=0.4 },                             -- pH adjustment
 
@@ -166,6 +166,9 @@ SoilConstants.FERTILIZER_PROFILES = {
 
     -- Starter fertilizer
     STARTER           = { N=0.27, P=0.68, K=0.18 },  -- High-P starter (approx 10-34-0)
+
+    -- Gypsum (Calcium Sulfate)
+    GYPSUM            = { pH=0.1, OM=0.01 },         -- Stabilizes pH, improves structure (OM)
 
     -- Phosphorus & potassium sources
     MAP               = { N=0.30, P=1.41, K=0.00 },  -- 11-52-0 monoammonium phosphate
@@ -185,17 +188,52 @@ SoilConstants.FERTILIZER_PROFILES = {
 -- List of recognized fertilizer fill type names (for reference/iteration)
 SoilConstants.FERTILIZER_TYPES = {
     -- Base game
-    "LIQUIDFERTILIZER", "FERTILIZER", "MANURE", "SLURRY", "DIGESTATE", "LIME",
+    "LIQUIDFERTILIZER", "FERTILIZER", "MANURE", "LIQUIDMANURE", "DIGESTATE", "LIME",
     -- Nitrogen sources
     "UAN32", "UAN28", "ANHYDROUS", "AMS", "UREA",
     -- Starter
     "STARTER",
+    -- Gypsum
+    "GYPSUM",
     -- P&K sources
     "MAP", "DAP", "POTASH",
     -- Organic
     "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE",
     -- Lime variants
     "LIQUIDLIME",
+}
+
+-- ========================================
+-- SINGLE-NUTRIENT PURCHASABLE FILL TYPES
+-- ========================================
+-- These fill types are declared in modDesc.xml <fillTypes> and are available
+-- for purchase at in-game shops when compatible equipment mods are installed.
+-- The entries here mirror the pricePerLiter values in modDesc.xml so that any
+-- Lua code performing cost estimates or HUD display can read a single source.
+--
+-- Nutrient targeting:
+--   ANHYDROUS  →  N only  (82-0-0)
+--   MAP        →  P-heavy (11-52-0)
+--   POTASH     →  K only  (0-0-60)
+SoilConstants.PURCHASABLE_SINGLE_NUTRIENT = {
+    ANHYDROUS = {
+        pricePerLiter = 1.85,   -- ~50 % premium over base LIQUIDFERTILIZER
+        fillUnit      = "liquid",
+        primaryNutrient = "N",
+        description   = "Anhydrous Ammonia 82-0-0",
+    },
+    MAP = {
+        pricePerLiter = 1.95,   -- ~60 % premium; P is the scarcest macro
+        fillUnit      = "dry",
+        primaryNutrient = "P",
+        description   = "Monoammonium Phosphate 11-52-0",
+    },
+    POTASH = {
+        pricePerLiter = 1.80,   -- ~50 % premium over base granular FERTILIZER
+        fillUnit      = "dry",
+        primaryNutrient = "K",
+        description   = "Muriate of Potash 0-0-60",
+    },
 }
 
 -- ========================================
@@ -549,7 +587,7 @@ SoilConstants.SPRAYER_RATE = {
         LIQUIDFERTILIZER  = { value =    93.5, unit = "liquid" },  -- 10 gal/ac
         FERTILIZER        = { value =   225.0, unit = "dry"    },  -- ~200 lb/ac
         MANURE            = { value = 14000.0, unit = "liquid" },  -- ~1500 gal/ac
-        SLURRY            = { value = 14000.0, unit = "liquid" },
+        LIQUIDMANURE      = { value = 14000.0, unit = "liquid" },  -- FS25 fill type name for slurry
         DIGESTATE         = { value = 14000.0, unit = "liquid" },
         LIME              = { value =  2500.0, unit = "dry"    },  -- ~2230 lb/ac
         LIQUIDLIME        = { value =  2800.0, unit = "liquid" },
@@ -569,8 +607,19 @@ SoilConstants.SPRAYER_RATE = {
         COMPOST           = { value =  5000.0, unit = "dry"    },
         BIOSOLIDS         = { value =  4500.0, unit = "dry"    },
         CHICKEN_MANURE    = { value =  2000.0, unit = "dry"    },
+        GYPSUM            = { value =  1500.0, unit = "dry"    },
         -- Fallback for unrecognized fill types
         DEFAULT           = { value =    93.5, unit = "liquid" },
+    },
+
+    -- Target nutrient levels for Auto-Rate Control
+    -- Used when SF_TOGGLE_AUTO is active on a sprayer
+    AUTO_RATE_TARGETS = {
+        N  = 80,
+        P  = 70,
+        K  = 75,
+        pH = 7.0,
+        OM = 5.0
     },
 
     -- Unit conversions for display
