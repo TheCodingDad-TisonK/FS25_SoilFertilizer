@@ -83,6 +83,18 @@ SoilConstants.FALLOW_RECOVERY = {
 }
 
 -- ========================================
+-- CHOPPED STRAW / CHAFF ORGANIC MATTER GAIN
+-- ========================================
+-- When a combine chops straw instead of dropping it, the material decomposes
+-- into the soil and adds organic matter (realistic agricultural behaviour).
+-- Rate is per 1000L of harvested crop, scaled by strawRatio (0.0-1.0).
+-- Example: 5000L wheat, strawRatio=0.5 → 5 × 0.5 × 0.20 = 0.50 OM
+-- (comparable to one plowing event on the 0-10 OM scale)
+SoilConstants.CHOPPED_STRAW = {
+    OM_RATE = 0.20,   -- OM gain per 1000L harvested at full strawRatio=1.0
+}
+
+-- ========================================
 -- SEASONAL EFFECTS (per day)
 -- ========================================
 -- Adjusted for 0-100 scale (subtle seasonal changes)

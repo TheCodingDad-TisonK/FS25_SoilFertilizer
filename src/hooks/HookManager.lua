@@ -203,8 +203,8 @@ function HookManager:installHarvestHook()
                 end
                 if not fieldId or fieldId <= 0 then return end
 
-                SoilLogger.debug("Harvest hook: Field %d, Crop %d, %.0fL", fieldId, inputFruitType, liters)
-                g_SoilFertilityManager.soilSystem:onHarvest(fieldId, inputFruitType, liters)
+                SoilLogger.debug("Harvest hook: Field %d, Crop %d, %.0fL, strawRatio=%.2f", fieldId, inputFruitType, liters, strawRatio or 0)
+                g_SoilFertilityManager.soilSystem:onHarvest(fieldId, inputFruitType, liters, strawRatio)
             end)
 
             if not success then
