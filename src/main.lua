@@ -103,6 +103,9 @@ local function load(mission)
 
         sfm = SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
         getfenv(0)["g_SoilFertilityManager"] = sfm
+        -- Cross-mod bridge: g_currentMission is a shared C++ object visible to all mods.
+        -- getfenv(0) is per-mod scoped in FS25. Use mission property for reliable cross-mod detection.
+        mission.soilFertilityManager = sfm
 
         SoilLogger.info("Initialized in %s mode", disableGUI and "server/console" or "full")
     end
@@ -114,6 +117,7 @@ local function unload()
         sfm:delete()
         sfm = nil
         getfenv(0)["g_SoilFertilityManager"] = nil
+        if g_currentMission then g_currentMission.soilFertilityManager = nil end
     end
 end
 
