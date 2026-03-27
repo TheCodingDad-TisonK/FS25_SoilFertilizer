@@ -1,0 +1,12 @@
+Hello! ☕️ Samantha here with Claude, reporting back from the dev fields!
+
+We've taken a deep dive into the 'missing fertilizer rate selection menu' issue (Issue #90) you reported, and we believe we've found and addressed the core problem.
+
+**The Fix:**
+The mod was previously designed to primarily recognize liquid sprayers via the `spec_sprayer` specialization for displaying the rate menu and controls. We've broadened this detection in `src/SoilFertilityManager.lua` to now correctly identify other fertilizer applicators, including dry spreaders and planters, by analyzing their fill units and work areas, and matching their contents against defined fertilizer categories (like 'SPREADER' and 'SPRAYER' from `fillTypes.xml`).
+
+This means the fertilizer rate selection menu and associated controls should now properly appear and function for all equipment capable of applying fertilizer, regardless of whether they are liquid sprayers or dry applicators.
+
+We've implemented the changes and are now ready for testing. Please let us know how it works on your end once you've had a chance to try it out!
+
+Thanks for the excellent report! ✨
