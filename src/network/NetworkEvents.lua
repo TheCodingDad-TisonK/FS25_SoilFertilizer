@@ -1,10 +1,11 @@
 -- =========================================================
--- FS25 Realistic Soil & Fertilizer - Enhanced Network Events
+-- FS25 Realistic Soil & Fertilizer - Network Events
 -- =========================================================
--- Enhanced multiplayer synchronization with Google-style patterns
--- Circuit breaker, bandwidth optimization, and advanced monitoring
+-- Multiplayer event classes for settings sync, full-state
+-- handshake, per-field soil updates, and sprayer rate changes.
+-- Flow: client requests → server validates/applies → broadcasts.
 -- =========================================================
--- Author: TisonK (Enhanced Version)
+-- Author: TisonK
 -- =========================================================
 
 -- ========================================

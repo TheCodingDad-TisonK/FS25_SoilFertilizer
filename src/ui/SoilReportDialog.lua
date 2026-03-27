@@ -234,6 +234,77 @@ local function getOMColor(om)
     return SoilReportDialog.COLOR_POOR
 end
 
+--- Get fertilization recommendation and color based on field info
+---@param info table Field information from SoilFertilitySystem:getFieldInfo
+---@return string Recommendation text
+---@return table RGBA color for the recommendation text
+function SoilReportDialog:getFertilizationRecommendation(info)
+    local recommendations = {}
+    local overallStatus = "Good" -- Start optimistic, downgrade as needed
+
+    -- Check individual nutrient statuses
+    if info.nitrogen.status == "Poor" then
+        table.insert(recommendations, g_i18n:getText("sf_report_rec_n_poor", "N (Poor)"))
+        overallStatus = "Poor"
+    elseif info.nitrogen.status == "Fair" then
+        table.insert(recommendations, g_i18n:getText("sf_report_rec_n_fair", "N (Fair)"))
+        if overallStatus == "Good" then overallStatus = "Fair" end
+    end
+
+    if info.phosphorus.status == "Poor" then
+        table.insert(recommendations, g_i18n:getText("sf_report_rec_p_poor", "P (Poor)"))
+        overallStatus = "Poor"
+    elseif info.phosphorus.status == "Fair" then
+        table.insert(recommendations, g_i18n:getText("sf_report_rec_p_fair", "P (Fair)"))
+        if overallStatus == "Good" then overallStatus = "Fair" end
+    end
+
+    if info.potassium.status == "Poor" then
+        table.insert(recommendations, g_i18n:getText("sf_report_rec_k_poor", "K (Poor)"))
+        overallStatus = "Poor"
+    elseif info.potassium.status == "Fair" then
+        table.insert(recommendations, g_i18n:getText("sf_report_rec_k_fair", "K (Fair)"))
+        if overallStatus == "Good" then overallStatus = "Fair" end
+    end
+
+    -- Check pH status
+    local phColor = getPHColor(info.pH)
+    if phColor == SoilReportDialog.COLOR_POOR then
+        table.insert(recommendations, g_i18n:getText("sf_report_rec_ph_adjust", "Adjust pH (Poor)"))
+        overallStatus = "Poor"
+    elseif phColor == SoilReportDialog.COLOR_FAIR then
+        table.insert(recommendations, g_i18n:getText("sf_report_rec_ph_monitor", "Monitor pH (Fair)"))
+        if overallStatus == "Good" then overallStatus = "Fair" end
+    end
+
+    -- Check Organic Matter status
+    local omColor = getOMColor(info.organicMatter)
+    if omColor == SoilReportDialog.COLOR_POOR then
+        table.insert(recommendations, g_i18n:getText("sf_report_rec_om_increase", "Increase OM (Poor)"))
+        overallStatus = "Poor"
+    elseif omColor == SoilReportDialog.COLOR_FAIR then
+        table.insert(recommendations, g_i18n:getText("sf_report_rec_om_maintain", "Maintain OM (Fair)"))
+        if overallStatus == "Good" then overallStatus = "Fair" end
+    end
+
+    local recommendationString
+    local recommendationColor
+
+    if #recommendations > 0 then
+        recommendationString = g_i18n:getText("sf_report_rec_needs", "Needs: ") .. table.concat(recommendations, ", ")
+        if overallStatus == "Poor" then
+            recommendationColor = SoilReportDialog.COLOR_POOR
+        else
+            recommendationColor = SoilReportDialog.COLOR_FAIR
+        end
+    else
+        recommendationString = g_i18n:getText("sf_report_rec_optimal", "Soil Health: Optimal")
+        recommendationColor = SoilReportDialog.COLOR_GOOD
+    end
+
+    return recommendationString, recommendationColor
+end
+
 --- Set text and color on a text element
 ---@param element table GUI text element
 ---@param text string
@@ -300,13 +371,8 @@ function SoilReportDialog:updateFieldRows()
 
                     -- Needs Fertilization
                     if row.fert then
-                        if info.needsFertilization then
-                            row.fert:setText(g_i18n:getText("sf_report_yes", "YES"))
-                            row.fert:setTextColor(1, 0.4, 0.4, 1)
-                        else
-                            row.fert:setText(g_i18n:getText("sf_report_ok", "OK"))
-                            row.fert:setTextColor(0.3, 1, 0.3, 1)
-                        end
+                        local recommendationText, recommendationColor = self:getFertilizationRecommendation(info)
+                        setColoredText(row.fert, recommendationText, recommendationColor)
                     end
 
                     -- Row background tint for fields needing attention

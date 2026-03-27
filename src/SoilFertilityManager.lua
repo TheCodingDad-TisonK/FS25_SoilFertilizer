@@ -168,9 +168,9 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
             Vehicle.registerActionEvents = Utils.appendedFunction(
                 origVehicleActions,
                 function(vehicle, isActiveForInput, isSelected)
-                    -- Only inject for sprayer vehicles when they become the controlled vehicle
+                    -- Only inject for fertilizer applicator vehicles when they become the controlled vehicle
                     if not isActiveForInput then return end
-                    if not vehicle or not vehicle.spec_sprayer then return end
+                    if not SoilFertilityManager.isFertilizerApplicator(vehicle) then return end
                     if not g_SoilFertilityManager then return end
 
                     local _, upId = g_inputBinding:registerActionEvent(
@@ -271,6 +271,7 @@ function SoilFertilityManager:onMissionLoaded()
         -- Input binding (J key) is registered via PlayerInputComponent hook in new(), not here
         if self.soilHUD then
             self.soilHUD:initialize()
+            self.soilHUD:loadLayout()
         end
 
         -- Defer soil system initialization (hook installation) until game is ready
@@ -427,6 +428,56 @@ function SoilFertilityManager.onToggleAuto(vehicle)
         local newState = rm:toggleAutoMode(vehicle.id)
         SoilNetworkEvents_SendSprayerAutoMode(vehicle.id, newState)
     end
+end
+
+--- Helper function to determine if a vehicle is a fertilizer applicator (sprayer, spreader, planter)
+--- This includes vehicles with spec_sprayer or vehicles with fill units containing fertilizer categories.
+---@param vehicle table The vehicle object to check
+---@return boolean True if the vehicle is a fertilizer applicator, false otherwise.
+function SoilFertilityManager.isFertilizerApplicator(vehicle)
+    if not vehicle then
+        return false
+    end
+
+    -- First, check for existing liquid sprayers
+    if vehicle.spec_sprayer then
+        return true
+    end
+
+    -- Next, check for dry spreaders/planters that have fill units and work areas
+    if vehicle.spec_fillUnit and vehicle.spec_workArea then
+        local fillUnit = vehicle.spec_fillUnit.fillUnits[1] -- Assuming single fill unit for simplicity, can be extended
+        if fillUnit and fillUnit.fillTypeIndex then
+            local spreaderCategoryIndex = g_fillTypeManager:getFillTypeCategoryIndexByName("SPREADER")
+            local sprayerCategoryIndex = g_fillTypeManager:getFillTypeCategoryIndexByName("SPRAYER")
+
+            if spreaderCategoryIndex == nil and sprayerCategoryIndex == nil then
+                SoilLogger.warning("Fertilizer fillTypeCategories (SPREADER, SPRAYER) not found. Check fillTypes.xml.")
+                return false
+            end
+
+            -- Check if the fill type in the unit belongs to either SPREADER or SPRAYER category
+            local isFertilizerFillType = g_fillTypeManager:getIsFillTypeInCategories(fillUnit.fillTypeIndex, {spreaderCategoryIndex, sprayerCategoryIndex})
+            
+            -- Additionally check if the work area is active and configured for fertilizing work
+            -- This is a generic check; specific workArea types might be needed for more precision
+            local isWorkAreaActive = false
+            if vehicle.spec_workArea and vehicle.spec_workArea.workAreas then
+                for _, workArea in pairs(vehicle.spec_workArea.workAreas) do
+                    -- This check needs refinement based on actual workArea properties for fertilizing
+                    -- For now, assume any active work area on a fillUnit vehicle could be a fertilizer applicator
+                    if workArea.getIsActive and workArea:getIsActive() then
+                        isWorkAreaActive = true
+                        break
+                    end
+                end
+            end
+
+            return isFertilizerFillType and isWorkAreaActive
+        end
+    end
+
+    return false
 end
 
 --- Save soil data to XML file

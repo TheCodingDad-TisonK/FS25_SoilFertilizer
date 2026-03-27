@@ -203,8 +203,8 @@ function HookManager:installHarvestHook()
                 end
                 if not fieldId or fieldId <= 0 then return end
 
-                SoilLogger.debug("Harvest hook: Field %d, Crop %d, %.0fL", fieldId, inputFruitType, liters)
-                g_SoilFertilityManager.soilSystem:onHarvest(fieldId, inputFruitType, liters)
+                SoilLogger.debug("Harvest hook: Field %d, Crop %d, %.0fL, strawRatio=%.2f", fieldId, inputFruitType, liters, strawRatio or 0)
+                g_SoilFertilityManager.soilSystem:onHarvest(fieldId, inputFruitType, liters, strawRatio)
             end)
 
             if not success then
@@ -414,10 +414,11 @@ function HookManager:installPlowingHook()
                 return
             end
 
-            -- Validate workArea parameter
-            if not workArea or type(workArea) ~= "table" or #workArea < 5 then
-                return
-            end
+            -- Validate workArea parameter.
+            -- workArea is a named-key table ({start=node, width=node, height=node}),
+            -- not a sequence — #workArea always returns 0 and cannot be used as a guard.
+            if not workArea or type(workArea) ~= "table" then return end
+            if not workArea.start or not workArea.width or not workArea.height then return end
 
             -- Get field ID from work area
             local sx, _, sz = getWorldTranslation(workArea.start)

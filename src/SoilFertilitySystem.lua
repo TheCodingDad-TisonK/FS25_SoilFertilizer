@@ -1,14 +1,11 @@
 -- =========================================================
--- FS25 Realistic Soil & Fertilizer (ENHANCED VERSION)
+-- FS25 Realistic Soil & Fertilizer - Core Simulation
 -- =========================================================
--- Author: TisonK (enhanced with enterprise-grade features)
--- Enhanced: Dedicated server compatibility with advanced monitoring
---   1. Enhanced PF compatibility check with API validation
---   2. Circuit breaker pattern for network reliability
---   3. Bandwidth optimization with compressed field data
---   4. Performance monitoring and health checks
---   5. Predictive loading for better performance
---   6. Advanced error handling and recovery mechanisms
+-- Per-field N/P/K/pH/OM tracking: depletion on harvest,
+-- restoration on fertilizer, rain leaching, seasonal effects,
+-- fallow recovery, Precision Farming compatibility.
+-- =========================================================
+-- Author: TisonK
 -- =========================================================
 
 ---@class SoilFertilitySystem
@@ -26,9 +23,10 @@ function SoilFertilitySystem.new(settings)
     self.lastUpdateDay = 0
     self.hookManager = HookManager.new()
 
-    -- Throttle table for fertilizer application notifications (fieldId → last notify time ms)
-    -- Prevents notification spam since the sprayer hook fires every frame while active
-    self.fertNotifyTimes = {}
+    -- Per-day flag table for fertilizer application notifications (fieldId → game day last shown)
+    -- Prevents notification spam since the sprayer hook fires every frame while active.
+    -- Stores the game day, not a timestamp, so the notification fires at most once per field per in-game day.
+    self.fertNotifyShown = {}
 
     -- Field scan retry mechanism (for delayed initialization)
     self.fieldsScanPending = true
@@ -126,8 +124,9 @@ end
 ---@param fieldId number The field being harvested
 ---@param fruitTypeIndex number FS25 fruit type index
 ---@param liters number Amount harvested in liters
-function SoilFertilitySystem:onHarvest(fieldId, fruitTypeIndex, liters)
-    self:updateFieldNutrients(fieldId, fruitTypeIndex, liters)
+---@param strawRatio number 0.0-1.0 fraction of straw that was chopped (0 = dropped/collected, 1 = fully chopped)
+function SoilFertilitySystem:onHarvest(fieldId, fruitTypeIndex, liters, strawRatio)
+    self:updateFieldNutrients(fieldId, fruitTypeIndex, liters, strawRatio)
 
     if self.settings.debugMode then
         print(string.format("[SoilFertilizer DEBUG] Harvest: Field %d, Crop %d, %.0fL",
@@ -159,13 +158,12 @@ function SoilFertilitySystem:onFertilizerApplied(fieldId, fillTypeIndex, liters)
     end
 
     -- Show application confirmation notification (singleplayer only; MP clients see HUD refresh via SoilFieldUpdateEvent)
-    -- Throttled to once per 15 seconds per field to avoid spam (hook fires every frame while spraying)
+    -- Shown at most once per field per in-game day to avoid spam (hook fires every frame while spraying)
     if self.settings.showNotifications and
        g_currentMission and not g_currentMission.missionDynamicInfo.isMultiplayer then
-        local now = g_currentMission.time or 0
-        local lastTime = self.fertNotifyTimes[fieldId] or 0
-        if (now - lastTime) >= 15000 then
-            self.fertNotifyTimes[fieldId] = now
+        local today = (g_currentMission.environment and g_currentMission.environment.currentDay) or 0
+        if self.fertNotifyShown[fieldId] ~= today then
+            self.fertNotifyShown[fieldId] = today
             local typeName = fillType and fillType.title or (fillType and fillType.name) or "Fertilizer"
             self:showNotification(
                 "Fertilizer Recorded",
@@ -260,7 +258,7 @@ function SoilFertilitySystem:onPlowing(fieldId)
 
     -- Debug logging
     if self.settings.debugMode and changed then
-        SoilLogger.info("[Plowing] Field %d: OM %.1f->%.1f, pH %.2f->%.2f",
+        self:info("[Plowing] Field %d: OM %.1f->%.1f, pH %.2f->%.2f",
             fieldId, omBefore, omAfter, phBefore, phAfter)
     end
 
@@ -486,7 +484,7 @@ function SoilFertilitySystem:scanFields()
     -- The correct field identifier is field.farmland.id (confirmed in-game).
     -- g_currentMission.fieldManager does not exist; use the global g_fieldManager.fields table directly.
     if not g_fieldManager or not g_fieldManager.fields then
-        self:warn("g_fieldManager.fields not available — scan deferred")
+        self:warning("g_fieldManager.fields not available — scan deferred")
         return false
     end
     local fields = g_fieldManager.fields
@@ -693,7 +691,8 @@ function SoilFertilitySystem:applyRainEffects(dt, rainScale)
 end
 
 -- Update field nutrients after harvest
-function SoilFertilitySystem:updateFieldNutrients(fieldId, fruitTypeIndex, harvestedLiters)
+---@param strawRatio number 0.0-1.0 fraction of straw chopped back into the field (adds organic matter)
+function SoilFertilitySystem:updateFieldNutrients(fieldId, fruitTypeIndex, harvestedLiters, strawRatio)
     if self.PFActive then return end
     if not self.settings.enabled or not self.settings.nutrientCycles then return end
 
@@ -746,6 +745,16 @@ function SoilFertilitySystem:updateFieldNutrients(fieldId, fruitTypeIndex, harve
     field.nitrogen   = math.max(limits.MIN, field.nitrogen   - rates.N * factor)
     field.phosphorus = math.max(limits.MIN, field.phosphorus - rates.P * factor)
     field.potassium  = math.max(limits.MIN, field.potassium  - rates.K * factor)
+
+    -- Step 4: Chopped straw/chaff adds organic matter
+    -- When strawRatio > 0 the combine is chopping material back into the field.
+    -- The chopped biomass decomposes and increases soil organic matter.
+    -- Formula: OM gain = (harvestedLiters / 1000) × strawRatio × OM_RATE
+    local sr = strawRatio or 0
+    if sr > 0 then
+        local omGain = (harvestedLiters / 1000) * sr * SoilConstants.CHOPPED_STRAW.OM_RATE
+        field.organicMatter = math.min(limits.ORGANIC_MATTER_MAX, (field.organicMatter or 0) + omGain)
+    end
 
     field.lastCrop = fruitDesc.name
     field.lastHarvest = (g_currentMission and g_currentMission.environment and g_currentMission.environment.currentDay) or 0

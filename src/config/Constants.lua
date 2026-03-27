@@ -1,10 +1,11 @@
 -- =========================================================
--- FS25 Realistic Soil & Fertilizer - Enhanced Constants
+-- FS25 Realistic Soil & Fertilizer - Constants
 -- =========================================================
--- Configuration values and constants for the mod
--- Enhanced with enterprise-grade monitoring and reliability features
+-- All tunable values: timing, difficulty, nutrient limits,
+-- crop extraction rates, fertilizer profiles, HUD config.
+-- Single source of truth — modify here, not in system code.
 -- =========================================================
--- Author: TisonK (Enhanced Version)
+-- Author: TisonK
 -- =========================================================
 
 ---@class SoilConstants
@@ -80,6 +81,18 @@ SoilConstants.FALLOW_RECOVERY = {
     phosphorus = 0.03,    -- Phosphorus recovers slower
     potassium = 0.05,     -- Moderate recovery
     organicMatter = 0.01, -- Organic matter accumulates very slowly
+}
+
+-- ========================================
+-- CHOPPED STRAW / CHAFF ORGANIC MATTER GAIN
+-- ========================================
+-- When a combine chops straw instead of dropping it, the material decomposes
+-- into the soil and adds organic matter (realistic agricultural behaviour).
+-- Rate is per 1000L of harvested crop, scaled by strawRatio (0.0-1.0).
+-- Example: 5000L wheat, strawRatio=0.5 → 5 × 0.5 × 0.20 = 0.50 OM
+-- (comparable to one plowing event on the 0-10 OM scale)
+SoilConstants.CHOPPED_STRAW = {
+    OM_RATE = 0.20,   -- OM gain per 1000L harvested at full strawRatio=1.0
 }
 
 -- ========================================
