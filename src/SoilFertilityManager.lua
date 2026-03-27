@@ -446,7 +446,9 @@ function SoilFertilityManager.isFertilizerApplicator(vehicle)
 
     -- Next, check for dry spreaders/planters that have fill units and work areas
     if vehicle.spec_fillUnit and vehicle.spec_workArea then
-        local fillUnit = vehicle.spec_fillUnit.fillUnits[1] -- Assuming single fill unit for simplicity, can be extended
+        -- TODO: Only checks fillUnits[1]. Vehicles with multiple fill units (e.g. combination seed+fertilizer
+        -- planters) may not be detected if their fertilizer is not in the first fill unit.
+        local fillUnit = vehicle.spec_fillUnit.fillUnits[1]
         if fillUnit and fillUnit.fillTypeIndex then
             local spreaderCategoryIndex = g_fillTypeManager:getFillTypeCategoryIndexByName("SPREADER")
             local sprayerCategoryIndex = g_fillTypeManager:getFillTypeCategoryIndexByName("SPRAYER")
@@ -791,8 +793,9 @@ function SoilFertilityManager:checkNetworkReliability()
             clientCount = clientCount + 1
         end
 
-        -- If we have clients but no connections tracked, there's an issue
-        if clientCount > 0 and #self.soilSystem.connectedClients == 0 then
+        -- If we have clients but no connections tracked, there's an issue.
+        -- Use next() to check emptiness — # always returns 0 on hash-keyed tables.
+        if clientCount > 0 and next(self.soilSystem.connectedClients) == nil then
             SoilLogger.warning("Network check failed: Clients connected but not tracked")
             return false
         end

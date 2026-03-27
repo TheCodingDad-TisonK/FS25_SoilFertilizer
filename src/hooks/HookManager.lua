@@ -309,7 +309,7 @@ function HookManager:installSprayerAreaHook()
 end
 
 -- =========================================================
--- HOOK 4: Field ownership changes (MessageType.FARMLAND_OWNER_CHANGED)
+-- HOOK 3: Field ownership changes (MessageType.FARMLAND_OWNER_CHANGED)
 -- =========================================================
 -- g_farmlandManager.fieldOwnershipChanged does not exist in FS25.
 -- The correct pattern is g_messageCenter:subscribe(MessageType.FARMLAND_OWNER_CHANGED, cb, target).
@@ -353,7 +353,7 @@ function HookManager:installOwnershipHook()
 end
 
 -- =========================================================
--- HOOK 5: Weather/environment updates
+-- HOOK 4: Weather/environment updates
 -- =========================================================
 ---@return boolean success True if hook installed successfully
 function HookManager:installWeatherHook()
@@ -394,7 +394,7 @@ function HookManager:installWeatherHook()
 end
 
 -- =========================================================
--- HOOK 6: Plowing operations (Cultivator)
+-- HOOK 5: Plowing operations (Cultivator)
 -- =========================================================
 ---@return boolean success True if hook installed successfully
 function HookManager:installPlowingHook()

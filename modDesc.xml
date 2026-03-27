@@ -551,6 +551,86 @@
             <hu>Válassza ki a talajinformáció megjelenítésének színsémáját</hu>
         </text>
 
+        <text name="sf_hud_color_1">
+            <en>Green</en>
+            <de>Grün</de>
+            <fr>Vert</fr>
+            <pl>Zielony</pl>
+            <es>Verde</es>
+            <it>Verde</it>
+            <ru>Зелёный</ru>
+        </text>
+
+        <text name="sf_hud_color_2">
+            <en>Blue</en>
+            <de>Blau</de>
+            <fr>Bleu</fr>
+            <pl>Niebieski</pl>
+            <es>Azul</es>
+            <it>Blu</it>
+            <ru>Синий</ru>
+        </text>
+
+        <text name="sf_hud_color_3">
+            <en>Amber</en>
+            <de>Bernstein</de>
+            <fr>Ambre</fr>
+            <pl>Bursztynowy</pl>
+            <es>Ámbar</es>
+            <it>Ambra</it>
+            <ru>Янтарный</ru>
+        </text>
+
+        <text name="sf_hud_color_4">
+            <en>Mono</en>
+            <de>Mono</de>
+            <fr>Mono</fr>
+            <pl>Mono</pl>
+            <es>Mono</es>
+            <it>Mono</it>
+            <ru>Монохром</ru>
+        </text>
+
+        <text name="sf_diff_short">
+            <en>Difficulty</en>
+            <de>Schwierigkeit</de>
+            <fr>Difficulté</fr>
+            <pl>Trudność</pl>
+            <es>Dificultad</es>
+            <it>Difficoltà</it>
+            <ru>Сложность</ru>
+        </text>
+
+        <text name="sf_diff_long">
+            <en>Soil management difficulty level</en>
+            <de>Schwierigkeitsgrad der Bodenverwaltung</de>
+            <fr>Niveau de difficulté de gestion du sol</fr>
+            <pl>Poziom trudności zarządzania glebą</pl>
+            <es>Nivel de dificultad de gestión del suelo</es>
+            <it>Livello di difficoltà della gestione del suolo</it>
+            <ru>Уровень сложности управления почвой</ru>
+        </text>
+
+        <text name="sf_auto_rate_short">
+            <en>Auto Rate Control</en>
+            <de>Automatische Ratensteuerung</de>
+            <fr>Contrôle automatique du débit</fr>
+            <pl>Automatyczna kontrola dawki</pl>
+            <es>Control de tasa automático</es>
+            <it>Controllo automatico della velocità</it>
+            <ru>Авто-контроль дозирования</ru>
+        </text>
+
+        <text name="sf_auto_rate_long">
+            <en>Automatically adjusts fertilizer application rate based on field needs</en>
+            <de>Passt die Düngerrate automatisch an den Bedarf des Feldes an</de>
+            <fr>Ajuste automatiquement le taux d'application selon les besoins du champ</fr>
+            <pl>Automatycznie dostosowuje dawkę nawożenia do potrzeb pola</pl>
+            <es>Ajusta automáticamente la tasa de aplicación según las necesidades del campo</es>
+            <it>Regola automaticamente il tasso di applicazione in base alle esigenze del campo</it>
+            <ru>Автоматически регулирует норму внесения удобрений исходя из потребностей поля</ru>
+        </text>
+
         <text name="sf_hud_theme_1">
             <en>Green</en>
             <de>Grün</de>
@@ -895,6 +975,18 @@
             <uk>Зменшити норму добрива</uk>
             <ru>Уменьшить норму удобрения</ru>
             <hu>Műtrágya arány csökkentése</hu>
+        </text>
+        <text name="input_SF_TOGGLE_AUTO">
+            <de>Auto-Rate umschalten</de>
+            <en>Toggle Auto Rate</en>
+            <fr>Basculer taux auto</fr>
+            <es>Alternar tasa automática</es>
+            <it>Attiva/disattiva velocità auto</it>
+            <pl>Przełącz tryb auto</pl>
+            <nl>Auto-modus wisselen</nl>
+            <cs>Přepnout automatickou dávku</cs>
+            <pt>Alternar taxa automática</pt>
+            <ru>Авто-режим дозирования</ru>
         </text>
 
         <!-- Soil Report Dialog (K key) -->
@@ -1293,6 +1385,9 @@
         </actionBinding>
         <actionBinding action="SF_RATE_DOWN">
             <binding device="KB_MOUSE_DEFAULT" input="KEY_LEFTBRACKET" />
+        </actionBinding>
+        <actionBinding action="SF_TOGGLE_AUTO">
+            <binding device="KB_MOUSE_DEFAULT" input="KEY_lalt KEY_z" />
         </actionBinding>
     </inputBinding>
 

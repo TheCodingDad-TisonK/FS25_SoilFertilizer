@@ -398,7 +398,7 @@ function SoilFertilitySystem:update(dt)
 end
 
 -- Check for Precision Farming compatibility
--- FIX: Verify PF API is actually accessible before committing to read-only mode.
+-- Verify PF API is actually accessible before committing to read-only mode.
 -- On dedicated servers, g_precisionFarming may be present but its field data API
 -- (fieldData table / soilMap:getFieldData) returns nothing. Falling back to
 -- independent mode ensures fields are written and synced normally.
@@ -508,7 +508,7 @@ function SoilFertilitySystem:scanFields()
     if fieldCount > 0 then
         self.fieldsScanPending = false
 
-        -- FIX: Broadcast all field data to connected clients immediately after scan.
+        -- Broadcast all field data to connected clients immediately after scan.
         -- Without this, clients on a dedicated server never receive the initial state
         -- because per-field syncs only fire on harvest / fertilizer events.
         self:broadcastAllFieldData()
@@ -1120,7 +1120,7 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
 
     self:info("Loaded data for %d fields", index)
 
-    -- FIX: Re-broadcast after load so clients that were connected during a
+    -- Re-broadcast after load so clients that were connected during a
     -- save/load cycle get up-to-date values immediately.
     self:broadcastAllFieldData()
 end
@@ -1323,11 +1323,12 @@ function SoilFertilitySystem:updatePlayerFieldProximity(dt)
 end
 
 function SoilFertilitySystem:getFieldCenter(fieldId)
-    -- Simplified field center calculation
-    -- In a real implementation, this would use field geometry data
+    -- TODO: Replace with real field geometry lookup when predictive loading is activated.
+    -- Currently returns a placeholder coordinate (fieldId * 100, fieldId * 100).
+    -- Real implementation should use g_fieldManager to get the actual world-space
+    -- bounding box center for the farmland associated with fieldId.
     local field = self.fieldData[fieldId]
     if field then
-        -- Return approximate center based on field ID (placeholder)
         return fieldId * 100, fieldId * 100
     end
     return nil, nil
