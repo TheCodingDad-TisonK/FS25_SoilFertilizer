@@ -75,6 +75,30 @@ local function loadedMission(mission, node)
     if not isEnabled() or mission.cancelLoading then return end
     sfm:onMissionLoaded()
 
+    -- $modDir is not resolved in the fillTypes.xml loading context, so we patch
+    -- the HUD icon filenames directly via Lua using the captured modDirectory.
+    if g_fillTypeManager then
+        local hudDir = modDirectory .. "hud/fillTypes/"
+        local icons = {
+            UAN32     = "hud_fill_UAN32.dds",
+            UAN28     = "hud_fill_UAN28.dds",
+            ANHYDROUS = "hud_fill_anhydrous.dds",
+            STARTER   = "hud_fill_Starter.dds",
+            UREA      = "hud_fill_UREA.dds",
+            AMS       = "hud_fill_AMS.dds",
+            MAP       = "hud_fill_map.dds",
+            DAP       = "hud_fill_dap.dds",
+            POTASH    = "hud_fill_potash.dds",
+        }
+        for name, file in pairs(icons) do
+            local ft = g_fillTypeManager:getFillTypeByName(name)
+            if ft then
+                ft.hudOverlayFilename = hudDir .. file
+            end
+        end
+        SoilLogger.info("Custom HUD icons patched for mod fill types")
+    end
+
     -- Note: Multiplayer sync is handled in loadFromXMLFile hook
 end
 
