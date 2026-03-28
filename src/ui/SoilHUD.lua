@@ -680,7 +680,7 @@ function SoilHUD:drawPanel()
     if self.editMode then
         renderText(px + pw * 0.5, cy, 0.009 * fontMult * s, "Drag: move   Corner: resize   RMB: done")
     else
-        renderText(px + pw * 0.5, cy, 0.009 * fontMult * s, "J: toggle   K: report   RMB: move")
+        renderText(px + pw * 0.5, cy, 0.009 * fontMult * s, "RMB: move/resize")
     end
 
     -- Reset text state
