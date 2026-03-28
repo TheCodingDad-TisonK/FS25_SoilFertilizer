@@ -104,14 +104,6 @@ SettingsSchema.definitions = {
         localOnly = true,  -- per-player display preference, not synced to server
     },
     {
-        id = "hudCompactMode",
-        type = "boolean",
-        default = false,
-        uiId = "sf_hud_compact_mode",
-        pfProtected = false,
-        localOnly = true,  -- per-player display preference, not synced to server
-    },
-    {
         id = "seasonalEffects",
         type = "boolean",
         default = true,

@@ -855,34 +855,6 @@
             <hu>Tömör</hu>
         </text>
 
-        <text name="sf_hud_compact_mode_short">
-            <en>Compact Mode</en>
-            <de>Kompaktmodus</de>
-            <fr>Mode compact</fr>
-            <pl>Tryb kompaktowy</pl>
-            <es>Modo compacto</es>
-            <it>Modalità compatta</it>
-            <cz>Kompaktní režim</cz>
-            <br>Modo compacto</br>
-            <uk>Компактний режим</uk>
-            <ru>Компактный режим</ru>
-            <hu>Kompakt mód</hu>
-        </text>
-
-        <text name="sf_hud_compact_mode_long">
-            <en>Reduce HUD vertical space by combining lines (saves screen space)</en>
-            <de>Reduzieren Sie den vertikalen HUD-Raum durch Kombination von Zeilen (spart Bildschirmplatz)</de>
-            <fr>Réduire l'espace vertical du HUD en combinant les lignes (économise l'espace écran)</fr>
-            <pl>Zmniejsz pionową przestrzeń HUD łącząc linie (oszczędza miejsce na ekranie)</pl>
-            <es>Reducir espacio vertical HUD combinando líneas (ahorra espacio pantalla)</es>
-            <it>Riduci spazio verticale HUD combinando righe (risparmia spazio schermo)</it>
-            <cz>Snižte vertikální prostor HUD kombinováním řádků (šetří místo na obrazovce)</cz>
-            <br>Reduzir espaço vertical HUD combinando linhas (economiza espaço na tela)</br>
-            <uk>Зменште вертикальний простір HUD об'єднанням ліній (економить місце на екрані)</uk>
-            <ru>Уменьшить вертикальное пространство HUD объединением строк (экономит место на экране)</ru>
-            <hu>Csökkentse a HUD vertikális terét sorok kombinálásával (képernyőhelyet takarít meg)</hu>
-        </text>
-
         <text name="sf_use_imperial_short">
             <en>Imperial Units</en>
             <de>Imperiale Einheiten</de>
@@ -1158,6 +1130,163 @@
             <uk>Немає</uk>
             <ru>Нет</ru>
             <hu>Nincs</hu>
+        </text>
+        <!-- ── Soil report recommendation strings ───────────────────────── -->
+        <text name="sf_report_rec_n_poor">
+            <en>Needs Nitrogen</en>
+            <de>Stickstoff nötig</de>
+            <fr>Azote nécessaire</fr>
+            <pl>Potrzebny azot</pl>
+            <es>Necesita nitrógeno</es>
+            <it>Serve azoto</it>
+            <cz>Potřebuje dusík</cz>
+            <br>Precisa de nitrogênio</br>
+            <uk>Потрібен азот</uk>
+            <ru>Нужен азот</ru>
+            <hu>Nitrogén szükséges</hu>
+        </text>
+        <text name="sf_report_rec_n_fair">
+            <en>Low Nitrogen</en>
+            <de>Niedriger Stickstoff</de>
+            <fr>Azote faible</fr>
+            <pl>Niski azot</pl>
+            <es>Nitrógeno bajo</es>
+            <it>Azoto basso</it>
+            <cz>Nízký dusík</cz>
+            <br>Nitrogênio baixo</br>
+            <uk>Низький азот</uk>
+            <ru>Низкий азот</ru>
+            <hu>Alacsony nitrogén</hu>
+        </text>
+        <text name="sf_report_rec_p_poor">
+            <en>Needs Phosphorus</en>
+            <de>Phosphor nötig</de>
+            <fr>Phosphore nécessaire</fr>
+            <pl>Potrzebny fosfor</pl>
+            <es>Necesita fósforo</es>
+            <it>Serve fosforo</it>
+            <cz>Potřebuje fosfor</cz>
+            <br>Precisa de fósforo</br>
+            <uk>Потрібен фосфор</uk>
+            <ru>Нужен фосфор</ru>
+            <hu>Foszfor szükséges</hu>
+        </text>
+        <text name="sf_report_rec_p_fair">
+            <en>Low Phosphorus</en>
+            <de>Niedriger Phosphor</de>
+            <fr>Phosphore faible</fr>
+            <pl>Niski fosfor</pl>
+            <es>Fósforo bajo</es>
+            <it>Fosforo basso</it>
+            <cz>Nízký fosfor</cz>
+            <br>Fósforo baixo</br>
+            <uk>Низький фосфор</uk>
+            <ru>Низкий фосфор</ru>
+            <hu>Alacsony foszfor</hu>
+        </text>
+        <text name="sf_report_rec_k_poor">
+            <en>Needs Potassium</en>
+            <de>Kalium nötig</de>
+            <fr>Potassium nécessaire</fr>
+            <pl>Potrzebny potas</pl>
+            <es>Necesita potasio</es>
+            <it>Serve potassio</it>
+            <cz>Potřebuje draslík</cz>
+            <br>Precisa de potássio</br>
+            <uk>Потрібен калій</uk>
+            <ru>Нужен калий</ru>
+            <hu>Kálium szükséges</hu>
+        </text>
+        <text name="sf_report_rec_k_fair">
+            <en>Low Potassium</en>
+            <de>Niedriges Kalium</de>
+            <fr>Potassium faible</fr>
+            <pl>Niski potas</pl>
+            <es>Potasio bajo</es>
+            <it>Potassio basso</it>
+            <cz>Nízký draslík</cz>
+            <br>Potássio baixo</br>
+            <uk>Низький калій</uk>
+            <ru>Низкий калий</ru>
+            <hu>Alacsony kálium</hu>
+        </text>
+        <text name="sf_report_rec_ph_adjust">
+            <en>Adjust pH</en>
+            <de>pH anpassen</de>
+            <fr>Ajuster le pH</fr>
+            <pl>Dostosuj pH</pl>
+            <es>Ajustar pH</es>
+            <it>Regola pH</it>
+            <cz>Upravit pH</cz>
+            <br>Ajustar pH</br>
+            <uk>Відрегулюйте pH</uk>
+            <ru>Отрегулировать pH</ru>
+            <hu>pH beállítása</hu>
+        </text>
+        <text name="sf_report_rec_ph_monitor">
+            <en>Monitor pH</en>
+            <de>pH beobachten</de>
+            <fr>Surveiller le pH</fr>
+            <pl>Monitoruj pH</pl>
+            <es>Monitorear pH</es>
+            <it>Monitorare pH</it>
+            <cz>Sledovat pH</cz>
+            <br>Monitorar pH</br>
+            <uk>Стежте за pH</uk>
+            <ru>Следить за pH</ru>
+            <hu>pH figyelése</hu>
+        </text>
+        <text name="sf_report_rec_om_increase">
+            <en>Increase Organic Matter</en>
+            <de>Organik erhöhen</de>
+            <fr>Augmenter MO</fr>
+            <pl>Zwiększ OM</pl>
+            <es>Aumentar MO</es>
+            <it>Aumentare MO</it>
+            <cz>Zvýšit organiku</cz>
+            <br>Aumentar MO</br>
+            <uk>Збільшіть ОР</uk>
+            <ru>Увеличить ОВ</ru>
+            <hu>Szerves anyag növelése</hu>
+        </text>
+        <text name="sf_report_rec_om_maintain">
+            <en>Maintain Organic Matter</en>
+            <de>Organik halten</de>
+            <fr>Maintenir MO</fr>
+            <pl>Utrzymaj OM</pl>
+            <es>Mantener MO</es>
+            <it>Mantenere MO</it>
+            <cz>Udržovat organiku</cz>
+            <br>Manter MO</br>
+            <uk>Підтримуйте ОР</uk>
+            <ru>Поддерживать ОВ</ru>
+            <hu>Szerves anyag fenntartása</hu>
+        </text>
+        <text name="sf_report_rec_needs">
+            <en>Needs: </en>
+            <de>Bedarf: </de>
+            <fr>Besoins: </fr>
+            <pl>Potrzeby: </pl>
+            <es>Necesita: </es>
+            <it>Necessita: </it>
+            <cz>Potřebuje: </cz>
+            <br>Precisa: </br>
+            <uk>Потреби: </uk>
+            <ru>Нужно: </ru>
+            <hu>Szükséges: </hu>
+        </text>
+        <text name="sf_report_rec_optimal">
+            <en>Soil Health: Optimal</en>
+            <de>Bodengesundheit: Optimal</de>
+            <fr>Santé sol: Optimale</fr>
+            <pl>Zdrowie gleby: Optymalne</pl>
+            <es>Salud suelo: Óptima</es>
+            <it>Salute suolo: Ottimale</it>
+            <cz>Zdraví půdy: Optimální</cz>
+            <br>Saúde solo: Ótima</br>
+            <uk>Здоров'я ґрунту: Оптимальне</uk>
+            <ru>Здоровье почвы: Оптимальное</ru>
+            <hu>Talaj egészség: Optimális</hu>
         </text>
         <!-- ── Pallet shop titles ─────────────────────────────────────── -->
         <text name="sf_uan32_title">
