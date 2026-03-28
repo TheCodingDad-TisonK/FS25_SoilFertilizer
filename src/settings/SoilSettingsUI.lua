@@ -168,7 +168,7 @@ function SoilSettingsUI:onFrameOpen(frame)
 
     local layout = frame.gameSettingsLayout
     if not layout then
-        SoilLogger.warning("[SoilFertilizer] gameSettingsLayout not found on frame")
+        SoilLogger.warning("gameSettingsLayout not found on frame")
         return
     end
 
@@ -178,7 +178,7 @@ function SoilSettingsUI:onFrameOpen(frame)
     -- Section header
     local ok, err = pcall(UIHelper.createSectionHeader, layout, g_i18n:getText("sf_section") or "Soil & Fertilizer")
     if not ok then
-        SoilLogger.warning("[SoilFertilizer] Failed to create section header: %s", tostring(err))
+        SoilLogger.warning("Failed to create section header: %s", tostring(err))
     end
 
     -- PF viewer-mode notice
@@ -211,7 +211,7 @@ function SoilSettingsUI:onFrameOpen(frame)
 
             frame["soilFertilizer_" .. def.uiId] = element
         else
-            SoilLogger.warning("[SoilFertilizer] Failed to create toggle for %s: %s", def.id, tostring(element))
+            SoilLogger.warning("Failed to create toggle for %s: %s", def.id, tostring(element))
         end
     end
 

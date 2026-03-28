@@ -99,7 +99,7 @@ function SoilHUD:initialize()
     if createImageOverlay ~= nil then
         self.fillOverlay = createImageOverlay("dataS/menu/base/graph_pixel.dds")
     else
-        SoilLogger.warn("SoilHUD: createImageOverlay not available")
+        SoilLogger.warning("SoilHUD: createImageOverlay not available")
     end
     self.initialized = true
     SoilLogger.info("SoilHUD initialized at (%.3f, %.3f) scale=%.2f", self.panelX, self.panelY, self.scale)

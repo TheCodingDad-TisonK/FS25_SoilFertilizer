@@ -3,7 +3,7 @@
     <GuiElement profile="newLayer" />
     <Bitmap profile="dialogFullscreenBg" id="dialogBg" />
 
-    <GuiElement profile="dialogBg" id="dialogElement" size="760px 520px">
+    <GuiElement profile="dialogBg" id="dialogElement" size="960px 520px">
         <ThreePartBitmap profile="fs25_dialogBgMiddle" />
         <ThreePartBitmap profile="fs25_dialogBgTop" />
         <ThreePartBitmap profile="fs25_dialogBgBottom" />
@@ -34,7 +34,7 @@
                 <Text profile="srHeaderText" position="0px -4px" text="pH"/>
                 <Text profile="srHeaderText" position="80px -4px" text="OM%"/>
                 <Text profile="srHeaderText" position="170px -4px" text="$l10n_sf_report_col_last_crop"/>
-                <Text profile="srHeaderText" position="280px -4px" text="$l10n_sf_report_col_fert"/>
+                <Text profile="srHeaderTextWide" position="290px -4px" text="$l10n_sf_report_col_fert"/>
             </GuiElement>
 
             <!-- Row 0 -->
@@ -47,7 +47,7 @@
                 <Text profile="srRowText" id="fieldRow0pH" position="0px -4px" text=""/>
                 <Text profile="srRowText" id="fieldRow0OM" position="80px -4px" text=""/>
                 <Text profile="srRowText" id="fieldRow0Crop" position="170px -4px" text=""/>
-                <Text profile="srRowText" id="fieldRow0Fert" position="280px -4px" text=""/>
+                <Text profile="srRowTextWide" id="fieldRow0Fert" position="290px -4px" text=""/>
             </GuiElement>
 
             <!-- Row 1 -->
@@ -60,7 +60,7 @@
                 <Text profile="srRowText" id="fieldRow1pH" position="0px -4px" text=""/>
                 <Text profile="srRowText" id="fieldRow1OM" position="80px -4px" text=""/>
                 <Text profile="srRowText" id="fieldRow1Crop" position="170px -4px" text=""/>
-                <Text profile="srRowText" id="fieldRow1Fert" position="280px -4px" text=""/>
+                <Text profile="srRowTextWide" id="fieldRow1Fert" position="290px -4px" text=""/>
             </GuiElement>
 
             <!-- Row 2 -->
@@ -73,7 +73,7 @@
                 <Text profile="srRowText" id="fieldRow2pH" position="0px -4px" text=""/>
                 <Text profile="srRowText" id="fieldRow2OM" position="80px -4px" text=""/>
                 <Text profile="srRowText" id="fieldRow2Crop" position="170px -4px" text=""/>
-                <Text profile="srRowText" id="fieldRow2Fert" position="280px -4px" text=""/>
+                <Text profile="srRowTextWide" id="fieldRow2Fert" position="290px -4px" text=""/>
             </GuiElement>
 
             <!-- Row 3 -->
@@ -86,7 +86,7 @@
                 <Text profile="srRowText" id="fieldRow3pH" position="0px -4px" text=""/>
                 <Text profile="srRowText" id="fieldRow3OM" position="80px -4px" text=""/>
                 <Text profile="srRowText" id="fieldRow3Crop" position="170px -4px" text=""/>
-                <Text profile="srRowText" id="fieldRow3Fert" position="280px -4px" text=""/>
+                <Text profile="srRowTextWide" id="fieldRow3Fert" position="290px -4px" text=""/>
             </GuiElement>
 
             <!-- Row 4 -->
@@ -99,7 +99,7 @@
                 <Text profile="srRowText" id="fieldRow4pH" position="0px -4px" text=""/>
                 <Text profile="srRowText" id="fieldRow4OM" position="80px -4px" text=""/>
                 <Text profile="srRowText" id="fieldRow4Crop" position="170px -4px" text=""/>
-                <Text profile="srRowText" id="fieldRow4Fert" position="280px -4px" text=""/>
+                <Text profile="srRowTextWide" id="fieldRow4Fert" position="290px -4px" text=""/>
             </GuiElement>
 
             <!-- Row 5 -->
@@ -112,7 +112,7 @@
                 <Text profile="srRowText" id="fieldRow5pH" position="0px -4px" text=""/>
                 <Text profile="srRowText" id="fieldRow5OM" position="80px -4px" text=""/>
                 <Text profile="srRowText" id="fieldRow5Crop" position="170px -4px" text=""/>
-                <Text profile="srRowText" id="fieldRow5Fert" position="280px -4px" text=""/>
+                <Text profile="srRowTextWide" id="fieldRow5Fert" position="290px -4px" text=""/>
             </GuiElement>
 
             <!-- Row 6 -->
@@ -125,7 +125,7 @@
                 <Text profile="srRowText" id="fieldRow6pH" position="0px -4px" text=""/>
                 <Text profile="srRowText" id="fieldRow6OM" position="80px -4px" text=""/>
                 <Text profile="srRowText" id="fieldRow6Crop" position="170px -4px" text=""/>
-                <Text profile="srRowText" id="fieldRow6Fert" position="280px -4px" text=""/>
+                <Text profile="srRowTextWide" id="fieldRow6Fert" position="290px -4px" text=""/>
             </GuiElement>
 
             <!-- Row 7 -->
@@ -138,7 +138,7 @@
                 <Text profile="srRowText" id="fieldRow7pH" position="0px -4px" text=""/>
                 <Text profile="srRowText" id="fieldRow7OM" position="80px -4px" text=""/>
                 <Text profile="srRowText" id="fieldRow7Crop" position="170px -4px" text=""/>
-                <Text profile="srRowText" id="fieldRow7Fert" position="280px -4px" text=""/>
+                <Text profile="srRowTextWide" id="fieldRow7Fert" position="290px -4px" text=""/>
             </GuiElement>
 
             <!-- Row 8 -->
@@ -151,7 +151,7 @@
                 <Text profile="srRowText" id="fieldRow8pH" position="0px -4px" text=""/>
                 <Text profile="srRowText" id="fieldRow8OM" position="80px -4px" text=""/>
                 <Text profile="srRowText" id="fieldRow8Crop" position="170px -4px" text=""/>
-                <Text profile="srRowText" id="fieldRow8Fert" position="280px -4px" text=""/>
+                <Text profile="srRowTextWide" id="fieldRow8Fert" position="290px -4px" text=""/>
             </GuiElement>
 
             <!-- Row 9 -->
@@ -164,7 +164,7 @@
                 <Text profile="srRowText" id="fieldRow9pH" position="0px -4px" text=""/>
                 <Text profile="srRowText" id="fieldRow9OM" position="80px -4px" text=""/>
                 <Text profile="srRowText" id="fieldRow9Crop" position="170px -4px" text=""/>
-                <Text profile="srRowText" id="fieldRow9Fert" position="280px -4px" text=""/>
+                <Text profile="srRowTextWide" id="fieldRow9Fert" position="290px -4px" text=""/>
             </GuiElement>
 
             <!-- Pagination Info -->
@@ -188,31 +188,31 @@
     <GUIProfiles>
         <!-- ========== SECTION CONTAINERS ========== -->
         <Profile name="srSectionContainer" extends="emptyPanel" with="anchorTopCenter">
-            <size value="700px 30px"/>
+            <size value="900px 30px"/>
         </Profile>
 
         <Profile name="srRowSection" extends="emptyPanel" with="anchorTopCenter">
-            <size value="700px 24px"/>
+            <size value="900px 24px"/>
         </Profile>
 
         <!-- ========== BACKGROUNDS ========== -->
         <Profile name="srSectionBg" extends="baseReference" with="anchorTopCenter">
-            <size value="700px 30px"/>
+            <size value="900px 30px"/>
             <imageColor value="0.08 0.08 0.12 0.9"/>
         </Profile>
 
         <Profile name="srHeaderBg" extends="baseReference" with="anchorTopCenter">
-            <size value="700px 24px"/>
+            <size value="900px 24px"/>
             <imageColor value="0.15 0.15 0.2 1"/>
         </Profile>
 
         <Profile name="srRowBg" extends="baseReference" with="anchorTopCenter">
-            <size value="700px 24px"/>
+            <size value="900px 24px"/>
             <imageColor value="0.1 0.1 0.1 1"/>
         </Profile>
 
         <Profile name="srRowBgAlt" extends="baseReference" with="anchorTopCenter">
-            <size value="700px 24px"/>
+            <size value="900px 24px"/>
             <imageColor value="0.12 0.12 0.14 1"/>
         </Profile>
 
@@ -244,21 +244,36 @@
             <textColor value="0.8 0.8 0.8 1"/>
         </Profile>
 
+        <Profile name="srHeaderTextWide" extends="fs25_textDefault" with="anchorTopCenter">
+            <size value="200px 18px"/>
+            <textSize value="11px"/>
+            <textBold value="true"/>
+            <textColor value="0.8 0.8 0.8 1"/>
+            <textAlignment value="left"/>
+        </Profile>
+
         <Profile name="srRowText" extends="fs25_textDefault" with="anchorTopCenter">
             <size value="80px 18px"/>
             <textSize value="11px"/>
             <textColor value="1 1 1 1"/>
         </Profile>
 
+        <Profile name="srRowTextWide" extends="fs25_textDefault" with="anchorTopCenter">
+            <size value="200px 18px"/>
+            <textSize value="11px"/>
+            <textColor value="1 1 1 1"/>
+            <textAlignment value="left"/>
+        </Profile>
+
         <Profile name="srPageInfo" extends="fs25_textDefault" with="anchorTopCenter">
-            <size value="700px 20px"/>
+            <size value="900px 20px"/>
             <textSize value="12px"/>
             <textColor value="0.6 0.6 0.6 1"/>
             <textAlignment value="center"/>
         </Profile>
 
         <Profile name="srNoData" extends="fs25_textDefault" with="anchorTopCenter">
-            <size value="700px 30px"/>
+            <size value="900px 30px"/>
             <textSize value="14px"/>
             <textColor value="0.6 0.6 0.6 1"/>
             <textAlignment value="center"/>

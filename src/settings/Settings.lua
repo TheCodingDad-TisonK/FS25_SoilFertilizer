@@ -20,7 +20,7 @@ function Settings.new(manager)
 
     self:resetToDefaults(false)
 
-    SoilLogger.info("[SoilFertilizer] Settings initialized")
+    SoilLogger.info("Initialized")
 
     return self
 end
@@ -37,7 +37,7 @@ function Settings:setDifficulty(difficulty)
             difficultyName = "Hardcore"
         end
 
-        SoilLogger.info("[SoilFertilizer] Difficulty changed to: %s", difficultyName)
+        SoilLogger.info("Difficulty set to: %s", difficultyName)
     end
 end
 
@@ -54,7 +54,7 @@ end
 
 function Settings:load()
     if type(self.difficulty) ~= "number" then
-        SoilLogger.warning("[SoilFertilizer]difficulty is not a number! Type: %s, Value: %s",
+        SoilLogger.warning("Difficulty is not a number! Type: %s, Value: %s",
             type(self.difficulty), tostring(self.difficulty))
         self.difficulty = Settings.DIFFICULTY_NORMAL
     end
@@ -63,7 +63,7 @@ function Settings:load()
 
     self:validateSettings()
 
-    SoilLogger.info("[SoilFertilizer]Settings Loaded. Enabled: %s, Difficulty: %s",
+    SoilLogger.info("Settings loaded. Enabled: %s, Difficulty: %s",
         tostring(self.enabled), self:getDifficultyName())
 end
 
@@ -76,13 +76,13 @@ end
 
 function Settings:save()
     if type(self.difficulty) ~= "number" then
-        SoilLogger.warning("[SoilFertilizer]difficulty is not a number! Type: %s, Value: %s",
+        SoilLogger.warning("Difficulty is not a number! Type: %s, Value: %s",
             type(self.difficulty), tostring(self.difficulty))
         self.difficulty = Settings.DIFFICULTY_NORMAL
     end
 
     self.manager:saveSettings(self)
-    SoilLogger.info("[SoilFertilizer]Settings Saved. Difficulty: %s", self:getDifficultyName())
+    SoilLogger.info("Settings saved. Difficulty: %s", self:getDifficultyName())
 end
 
 ---@param saveImmediately boolean

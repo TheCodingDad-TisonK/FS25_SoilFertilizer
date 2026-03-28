@@ -33,7 +33,7 @@ function SoilSettingsGUI:registerConsoleCommands()
     addConsoleCommand("SoilDebug", "Toggle debug mode", "consoleCommandDebug", self)
     addConsoleCommand("soilfertility", "Show all soil commands", "consoleCommandHelp", self)
 
-    SoilLogger.info("[SoilFertilizer] Console commands registered")
+    SoilLogger.info("Console commands registered")
 end
 
 function SoilSettingsGUI:consoleCommandHelp()

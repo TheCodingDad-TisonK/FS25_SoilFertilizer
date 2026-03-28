@@ -7,25 +7,25 @@
         <fillType name="UAN32" title="$l10n_sf_uan32_title" showOnPriceTable="true" isBulkType="false" unitShort="$l10n_unit_literShort">
             <physics massPerLiter="1.32" maxPhysicalSurfaceAngle="0"/>
             <economy pricePerLiter="1.60"/>
-            <image hud="$dataS/menu/hud/fillTypes/hud_fill_liquidFertilizer.png"/>
+            <image hud="$modDir/hud/fillTypes/hud_fill_UAN32.dds"/>
         </fillType>
 
         <fillType name="UAN28" title="$l10n_sf_uan28_title" showOnPriceTable="true" isBulkType="false" unitShort="$l10n_unit_literShort">
             <physics massPerLiter="1.28" maxPhysicalSurfaceAngle="0"/>
             <economy pricePerLiter="1.50"/>
-            <image hud="$dataS/menu/hud/fillTypes/hud_fill_liquidFertilizer.png"/>
+            <image hud="$modDir/hud/fillTypes/hud_fill_UAN28.dds"/>
         </fillType>
 
         <fillType name="ANHYDROUS" title="$l10n_sf_anhydrous_title" showOnPriceTable="true" isBulkType="false" unitShort="$l10n_unit_literShort">
             <physics massPerLiter="0.61" maxPhysicalSurfaceAngle="0"/>
             <economy pricePerLiter="1.85"/>
-            <image hud="$dataS/menu/hud/fillTypes/hud_fill_liquidFertilizer.png"/>
+            <image hud="$modDir/hud/fillTypes/hud_fill_anhydrous.dds"/>
         </fillType>
 
         <fillType name="STARTER" title="$l10n_sf_starter_title" showOnPriceTable="true" isBulkType="false" unitShort="$l10n_unit_literShort">
             <physics massPerLiter="1.10" maxPhysicalSurfaceAngle="0"/>
             <economy pricePerLiter="1.70"/>
-            <image hud="$dataS/menu/hud/fillTypes/hud_fill_liquidFertilizer.png"/>
+            <image hud="$modDir/hud/fillTypes/hud_fill_Starter.dds"/>
         </fillType>
 
         <!-- ── SOLID GRANULAR SOURCES ─────────────────────────── -->
@@ -33,31 +33,56 @@
         <fillType name="UREA" title="$l10n_sf_urea_title" showOnPriceTable="true" isBulkType="true" unitShort="$l10n_unit_literShort">
             <physics massPerLiter="0.77" maxPhysicalSurfaceAngle="15"/>
             <economy pricePerLiter="1.65"/>
-            <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
+            <image hud="$modDir/hud/fillTypes/hud_fill_UREA.dds"/>
+            <fillPlane
+                diffuseMapFilename="$modDir/textures/fillPlanes/urea_diffuse.dds"
+                normalMapFilename="$modDir/textures/fillPlanes/urea_normal.dds"
+                heightMapFilename="$modDir/textures/fillPlanes/urea_height.dds"
+                displacementMapFilename="$modDir/textures/fillPlanes/urea_displacement.dds"/>
         </fillType>
 
         <fillType name="AMS" title="$l10n_sf_ams_title" showOnPriceTable="true" isBulkType="true" unitShort="$l10n_unit_literShort">
             <physics massPerLiter="0.87" maxPhysicalSurfaceAngle="15"/>
             <economy pricePerLiter="1.40"/>
-            <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
+            <image hud="$modDir/hud/fillTypes/hud_fill_AMS.dds"/>
+            <fillPlane
+                diffuseMapFilename="$modDir/textures/fillPlanes/AMS_diffuse.dds"
+                normalMapFilename="$modDir/textures/fillPlanes/AMS_normal.dds"
+                heightMapFilename="$modDir/textures/fillPlanes/AMS_height.dds"
+                displacementMapFilename="$modDir/textures/fillPlanes/AMS_displacement.dds"/>
         </fillType>
 
         <fillType name="MAP" title="$l10n_sf_map_title" showOnPriceTable="true" isBulkType="true" unitShort="$l10n_unit_literShort">
             <physics massPerLiter="0.90" maxPhysicalSurfaceAngle="15"/>
             <economy pricePerLiter="1.95"/>
-            <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
+            <image hud="$modDir/hud/fillTypes/hud_fill_map.dds"/>
+            <fillPlane
+                diffuseMapFilename="$modDir/textures/fillPlanes/MAP_diffuse.dds"
+                normalMapFilename="$modDir/textures/fillPlanes/MAP_normal.dds"
+                heightMapFilename="$modDir/textures/fillPlanes/MAP_height.dds"
+                displacementMapFilename="$modDir/textures/fillPlanes/MAP_displacement.dds"/>
         </fillType>
 
         <fillType name="DAP" title="$l10n_sf_dap_title" showOnPriceTable="true" isBulkType="true" unitShort="$l10n_unit_literShort">
             <physics massPerLiter="0.90" maxPhysicalSurfaceAngle="15"/>
             <economy pricePerLiter="1.75"/>
-            <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
+            <image hud="$modDir/hud/fillTypes/hud_fill_dap.dds"/>
+            <fillPlane
+                diffuseMapFilename="$modDir/textures/fillPlanes/DAP_diffuse.dds"
+                normalMapFilename="$modDir/textures/fillPlanes/DAP_normal.dds"
+                heightMapFilename="$modDir/textures/fillPlanes/DAP_height.dds"
+                displacementMapFilename="$modDir/textures/fillPlanes/DAP_displacement.dds"/>
         </fillType>
 
         <fillType name="POTASH" title="$l10n_sf_potash_title" showOnPriceTable="true" isBulkType="true" unitShort="$l10n_unit_literShort">
             <physics massPerLiter="0.95" maxPhysicalSurfaceAngle="15"/>
             <economy pricePerLiter="1.80"/>
-            <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
+            <image hud="$modDir/hud/fillTypes/hud_fill_potash.dds"/>
+            <fillPlane
+                diffuseMapFilename="$modDir/textures/fillPlanes/potash_diffuse.dds"
+                normalMapFilename="$modDir/textures/fillPlanes/potash_normal.dds"
+                heightMapFilename="$modDir/textures/fillPlanes/potash_height.dds"
+                displacementMapFilename="$modDir/textures/fillPlanes/potash_displacement.dds"/>
         </fillType>
 
     </fillTypes>
