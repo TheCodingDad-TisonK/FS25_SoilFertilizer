@@ -1,0 +1,54 @@
+{
+  "2026-03-29": [
+    {
+      "referrer": "github.com",
+      "count": 547,
+      "uniques": 117
+    },
+    {
+      "referrer": "kingmods.net",
+      "count": 433,
+      "uniques": 184
+    },
+    {
+      "referrer": "Google",
+      "count": 199,
+      "uniques": 48
+    },
+    {
+      "referrer": "Bing",
+      "count": 21,
+      "uniques": 12
+    },
+    {
+      "referrer": "symbaloo.com",
+      "count": 15,
+      "uniques": 1
+    },
+    {
+      "referrer": "forbidden-mods.de",
+      "count": 5,
+      "uniques": 2
+    },
+    {
+      "referrer": "amail.centrum.cz",
+      "count": 4,
+      "uniques": 1
+    },
+    {
+      "referrer": "DuckDuckGo",
+      "count": 2,
+      "uniques": 1
+    },
+    {
+      "referrer": "m.facebook.com",
+      "count": 2,
+      "uniques": 1
+    },
+    {
+      "referrer": "ntp.msn.com",
+      "count": 2,
+      "uniques": 1
+    }
+  ]
+}
