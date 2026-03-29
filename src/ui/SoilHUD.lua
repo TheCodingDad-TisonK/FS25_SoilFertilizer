@@ -847,7 +847,13 @@ function SoilHUD:drawSprayerRatePanel()
 
     -- Header: "APP. RATE  ( [ / ] )" or "APP. RATE ( AUTO )"
     local isAuto = rm:getAutoMode(sprayer.id) and self.settings.autoRateControl
-    local autoKey = g_inputBinding:getFormatButtonAndDevice(InputAction.SF_TOGGLE_AUTO)
+    local autoKey = "?"
+    if g_inputDisplayManager ~= nil then
+        local helpElement = g_inputDisplayManager:getControllerSymbolOverlays(InputAction.SF_TOGGLE_AUTO)
+        if helpElement ~= nil and helpElement.keys ~= nil and helpElement.keys[1] ~= nil then
+            autoKey = tostring(helpElement.keys[1])
+        end
+    end
     local headerText = isAuto and "APP. RATE ( AUTO )" or string.format("APP. RATE ( [%s] AUTO )", autoKey)
 
     setTextBold(true)
