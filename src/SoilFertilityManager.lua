@@ -441,11 +441,12 @@ function SoilFertilityManager.isFertilizerApplicator(vehicle)
 
     -- Slow path: planters, seeders, or generic spreaders — check SUPPORTED fill types
     if vehicle.spec_fillUnit and vehicle.spec_fillUnit.fillUnits then
-        local spreaderCategoryIndex = g_fillTypeManager:getFillTypeCategoryIndexByName("SPREADER")
-        local sprayerCategoryIndex  = g_fillTypeManager:getFillTypeCategoryIndexByName("SPRAYER")
+        -- Standard FS25 fertilizer categories
         local categories = {}
-        if spreaderCategoryIndex then table.insert(categories, spreaderCategoryIndex) end
-        if sprayerCategoryIndex then table.insert(categories, sprayerCategoryIndex) end
+        for _, catName in ipairs({"FERTILIZER", "LIQUIDFERTILIZER", "LIME", "MANURE", "LIQUIDMANURE", "DIGESTATE"}) do
+            local catIdx = g_fillTypeManager:getFillTypeCategoryIndexByName(catName)
+            if catIdx then table.insert(categories, catIdx) end
+        end
 
         for _, fillUnit in ipairs(vehicle.spec_fillUnit.fillUnits) do
             if fillUnit.supportedFillTypes then

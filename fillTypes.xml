@@ -66,26 +66,16 @@
 
     <fillTypeCategories>
         <!--
-            FIX (Issue #1 - Cannot fill vanilla spreaders with dry fertilizer types):
-            The SPREADER category is what FS25 uses to determine which fill types a spreader
-            fill unit accepts. Vanilla spreaders ship with "FERTILIZER" already in their
-            accepted list. Adding the mod's dry types here ensures ANY spreader that accepts
-            the SPREADER category will also accept UREA, AMS, MAP, DAP and POTASH.
-
-            LIME and MANURE are added so those specialized spreaders are also identified
-            as fertilizer applicators by the HUD and rate control system.
+            FIX (Issue #96 - Fertilizer won't fill a spreader):
+            In FS25, vanilla spreaders look for the "FERTILIZER" category (solid)
+            and vanilla sprayers look for the "LIQUIDFERTILIZER" category (liquid).
+            By redefining these categories and including the mod's custom types,
+            we ensure all compatible vanilla and modded equipment will accept
+            UREA, MAP, POTASH, etc.
         -->
-        <fillTypeCategory name="SPREADER">FERTILIZER UREA AMS MAP DAP POTASH LIME MANURE</fillTypeCategory>
+        <fillTypeCategory name="FERTILIZER">FERTILIZER UREA AMS MAP DAP POTASH</fillTypeCategory>
 
-        <!--
-            LIQUIDFERTILIZER is included for the same reason on the sprayer side - vanilla
-            sprayers reference LIQUIDFERTILIZER and need it present so the category is
-            matched when isFertilizerApplicator scans supportedFillTypes.
-
-            LIQUIDMANURE, DIGESTATE and LIQUIDLIME are added to cover slurry tankers
-            and liquid lime applicators.
-        -->
-        <fillTypeCategory name="SPRAYER">LIQUIDFERTILIZER UAN32 UAN28 ANHYDROUS STARTER LIQUIDMANURE DIGESTATE LIQUIDLIME</fillTypeCategory>
+        <fillTypeCategory name="LIQUIDFERTILIZER">LIQUIDFERTILIZER UAN32 UAN28 ANHYDROUS STARTER LIQUIDLIME</fillTypeCategory>
     </fillTypeCategories>
 
 </map>
