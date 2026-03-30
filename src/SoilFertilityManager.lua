@@ -417,7 +417,19 @@ function SoilFertilityManager.onToggleAuto(vehicle)
 end
 
 --- Helper function to determine if a vehicle is a fertilizer applicator (sprayer, spreader, planter)
---- This includes vehicles with spec_sprayer or vehicles with fill units containing fertilizer categories.
+--- This includes vehicles with spec_sprayer or vehicles with fill units whose SUPPORTED fill types
+--- include any type belonging to the mod's SPREADER or SPRAYER categories.
+---
+--- FIX (Issue #1 / Issue #2):
+---   Previously this checked fillUnit.fillTypeIndex (the *currently loaded* fill type) and
+---   workArea:getIsActive() (only true while physically working a field). Both are always wrong
+---   at vehicle-enter time:
+---     - fillTypeIndex is 0/FT_UNKNOWN when the spreader is empty → category check fails → no rate UI
+---     - getIsActive() is always false at enter time → entire spreader branch was dead code
+---   The fix iterates fillUnit.supportedFillTypes (the static set of types the fill unit can hold,
+---   registered at mission load time) and removes the isWorkAreaActive gate entirely.
+---   This correctly identifies spreaders as fertilizer applicators regardless of their current
+---   fill level, which also resolves the fill-acceptance detection used downstream.
 ---@param vehicle table The vehicle object to check
 ---@return boolean True if the vehicle is a fertilizer applicator, false otherwise.
 function SoilFertilityManager.isFertilizerApplicator(vehicle)
@@ -425,43 +437,39 @@ function SoilFertilityManager.isFertilizerApplicator(vehicle)
         return false
     end
 
-    -- First, check for existing liquid sprayers
+    -- Fast path: all liquid sprayers (sprayer specialization present)
     if vehicle.spec_sprayer then
         return true
     end
 
-    -- Next, check for dry spreaders/planters that have fill units and work areas
-    if vehicle.spec_fillUnit and vehicle.spec_workArea then
-        -- TODO: Only checks fillUnits[1]. Vehicles with multiple fill units (e.g. combination seed+fertilizer
-        -- planters) may not be detected if their fertilizer is not in the first fill unit.
-        local fillUnit = vehicle.spec_fillUnit.fillUnits[1]
-        if fillUnit and fillUnit.fillTypeIndex then
-            local spreaderCategoryIndex = g_fillTypeManager:getFillTypeCategoryIndexByName("SPREADER")
-            local sprayerCategoryIndex = g_fillTypeManager:getFillTypeCategoryIndexByName("SPRAYER")
+    -- Slow path: dry spreaders / planters — check their SUPPORTED fill type set, not what's
+    -- currently loaded. A spreader is empty at enter-time so fillTypeIndex is 0/FT_UNKNOWN.
+    if vehicle.spec_fillUnit then
+        local spreaderCategoryIndex = g_fillTypeManager:getFillTypeCategoryIndexByName("SPREADER")
+        local sprayerCategoryIndex  = g_fillTypeManager:getFillTypeCategoryIndexByName("SPRAYER")
 
-            if spreaderCategoryIndex == nil and sprayerCategoryIndex == nil then
-                SoilLogger.warning("Fertilizer fillTypeCategories (SPREADER, SPRAYER) not found. Check fillTypes.xml.")
-                return false
-            end
+        if spreaderCategoryIndex == nil and sprayerCategoryIndex == nil then
+            SoilLogger.warning("Fertilizer fillTypeCategories (SPREADER, SPRAYER) not found. Check fillTypes.xml.")
+            return false
+        end
 
-            -- Check if the fill type in the unit belongs to either SPREADER or SPRAYER category
-            local isFertilizerFillType = g_fillTypeManager:getIsFillTypeInCategories(fillUnit.fillTypeIndex, {spreaderCategoryIndex, sprayerCategoryIndex})
-            
-            -- Additionally check if the work area is active and configured for fertilizing work
-            -- This is a generic check; specific workArea types might be needed for more precision
-            local isWorkAreaActive = false
-            if vehicle.spec_workArea and vehicle.spec_workArea.workAreas then
-                for _, workArea in pairs(vehicle.spec_workArea.workAreas) do
-                    -- This check needs refinement based on actual workArea properties for fertilizing
-                    -- For now, assume any active work area on a fillUnit vehicle could be a fertilizer applicator
-                    if workArea.getIsActive and workArea:getIsActive() then
-                        isWorkAreaActive = true
-                        break
+        local categories = {spreaderCategoryIndex, sprayerCategoryIndex}
+
+        -- Scan all fill units (handles combination seed+fertilizer planters too)
+        local fillUnits = vehicle.spec_fillUnit.fillUnits
+        if fillUnits then
+            for _, fillUnit in ipairs(fillUnits) do
+                -- supportedFillTypes is a hash-set keyed by fill type index; it is populated
+                -- by the game engine at mission load from the vehicle's XML definition and is
+                -- always available, even when the fill unit is empty.
+                if fillUnit.supportedFillTypes then
+                    for fillTypeIndex, supported in pairs(fillUnit.supportedFillTypes) do
+                        if supported and g_fillTypeManager:getIsFillTypeInCategories(fillTypeIndex, categories) then
+                            return true
+                        end
                     end
                 end
             end
-
-            return isFertilizerFillType and isWorkAreaActive
         end
     end
 
@@ -604,4 +612,3 @@ function SoilFertilityManager:delete()
     end
     SoilLogger.info("Shutting down")
 end
-
