@@ -953,7 +953,12 @@ function SoilHUD:getCurrentSprayer()
     if type(player.getIsInVehicle) ~= "function" then return nil end
     if not player:getIsInVehicle() then return nil end
     local vehicle = player:getCurrentVehicle()
-    if vehicle and vehicle.spec_sprayer then return vehicle end
+    
+    -- Use the robust detection logic from the manager to include spreaders, tankers and planters
+    if vehicle and SoilFertilityManager.isFertilizerApplicator(vehicle) then
+        return vehicle
+    end
+    
     return nil
 end
 

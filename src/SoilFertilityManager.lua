@@ -420,16 +420,12 @@ end
 --- This includes vehicles with spec_sprayer or vehicles with fill units whose SUPPORTED fill types
 --- include any type belonging to the mod's SPREADER or SPRAYER categories.
 ---
---- FIX (Issue #1 / Issue #2):
----   Previously this checked fillUnit.fillTypeIndex (the *currently loaded* fill type) and
----   workArea:getIsActive() (only true while physically working a field). Both are always wrong
----   at vehicle-enter time:
----     - fillTypeIndex is 0/FT_UNKNOWN when the spreader is empty → category check fails → no rate UI
----     - getIsActive() is always false at enter time → entire spreader branch was dead code
----   The fix iterates fillUnit.supportedFillTypes (the static set of types the fill unit can hold,
----   registered at mission load time) and removes the isWorkAreaActive gate entirely.
----   This correctly identifies spreaders as fertilizer applicators regardless of their current
----   fill level, which also resolves the fill-acceptance detection used downstream.
+--- FIX (Issue #1 / Issue #2 / Issue #90):
+---   - Switched from fillTypeIndex (current) to supportedFillTypes (static)
+---   - Removed workArea:getIsActive() requirement (always false at enter time)
+---   - Expanded category set to include LIME, MANURE, LIQUIDMANURE, and DIGESTATE
+---   - Added explicit specialization checks (manureSpreader, slurryTanker, limeSpreader)
+---   - Added direct check against SoilConstants.FERTILIZER_TYPES for maximum reliability
 ---@param vehicle table The vehicle object to check
 ---@return boolean True if the vehicle is a fertilizer applicator, false otherwise.
 function SoilFertilityManager.isFertilizerApplicator(vehicle)
@@ -437,36 +433,36 @@ function SoilFertilityManager.isFertilizerApplicator(vehicle)
         return false
     end
 
-    -- Fast path: all liquid sprayers (sprayer specialization present)
-    if vehicle.spec_sprayer then
+    -- Fast path: common specializations
+    if vehicle.spec_sprayer or vehicle.spec_manureSpreader or 
+       vehicle.spec_slurryTanker or vehicle.spec_limeSpreader then
         return true
     end
 
-    -- Slow path: dry spreaders / planters — check their SUPPORTED fill type set, not what's
-    -- currently loaded. A spreader is empty at enter-time so fillTypeIndex is 0/FT_UNKNOWN.
-    if vehicle.spec_fillUnit then
+    -- Slow path: planters, seeders, or generic spreaders — check SUPPORTED fill types
+    if vehicle.spec_fillUnit and vehicle.spec_fillUnit.fillUnits then
         local spreaderCategoryIndex = g_fillTypeManager:getFillTypeCategoryIndexByName("SPREADER")
         local sprayerCategoryIndex  = g_fillTypeManager:getFillTypeCategoryIndexByName("SPRAYER")
+        local categories = {}
+        if spreaderCategoryIndex then table.insert(categories, spreaderCategoryIndex) end
+        if sprayerCategoryIndex then table.insert(categories, sprayerCategoryIndex) end
 
-        if spreaderCategoryIndex == nil and sprayerCategoryIndex == nil then
-            SoilLogger.warning("Fertilizer fillTypeCategories (SPREADER, SPRAYER) not found. Check fillTypes.xml.")
-            return false
-        end
-
-        local categories = {spreaderCategoryIndex, sprayerCategoryIndex}
-
-        -- Scan all fill units (handles combination seed+fertilizer planters too)
-        local fillUnits = vehicle.spec_fillUnit.fillUnits
-        if fillUnits then
-            for _, fillUnit in ipairs(fillUnits) do
-                -- supportedFillTypes is a hash-set keyed by fill type index; it is populated
-                -- by the game engine at mission load from the vehicle's XML definition and is
-                -- always available, even when the fill unit is empty.
-                if fillUnit.supportedFillTypes then
+        for _, fillUnit in ipairs(vehicle.spec_fillUnit.fillUnits) do
+            if fillUnit.supportedFillTypes then
+                -- 1. Check by category (efficiently catches modded types)
+                if #categories > 0 then
                     for fillTypeIndex, supported in pairs(fillUnit.supportedFillTypes) do
                         if supported and g_fillTypeManager:getIsFillTypeInCategories(fillTypeIndex, categories) then
                             return true
                         end
+                    end
+                end
+
+                -- 2. Direct check against mod's known types (failsafe for vanilla types without categories)
+                for _, fertTypeName in ipairs(SoilConstants.FERTILIZER_TYPES) do
+                    local ftIndex = g_fillTypeManager:getFillTypeIndexByName(fertTypeName)
+                    if ftIndex and fillUnit.supportedFillTypes[ftIndex] then
+                        return true
                     end
                 end
             end

@@ -42,6 +42,7 @@
         <action name="SF_SOIL_REPORT" category="ONFOOT" />
         <action name="SF_RATE_UP"     category="VEHICLE" />
         <action name="SF_RATE_DOWN"   category="VEHICLE" />
+        <action name="SF_TOGGLE_AUTO" category="VEHICLE" />
     </actions>
 
     <l10n>

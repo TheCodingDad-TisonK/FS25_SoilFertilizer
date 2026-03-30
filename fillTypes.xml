@@ -72,19 +72,20 @@
             accepted list. Adding the mod's dry types here ensures ANY spreader that accepts
             the SPREADER category will also accept UREA, AMS, MAP, DAP and POTASH.
 
-            FERTILIZER is included so vanilla spreader fill units (which already accept
-            FERTILIZER by default) recognise the extended category and accept mod types.
-            Without it, the category exists but vanilla equipment never matches it because
-            their XML only references the base FERTILIZER type, not this new category name.
+            LIME and MANURE are added so those specialized spreaders are also identified
+            as fertilizer applicators by the HUD and rate control system.
         -->
-        <fillTypeCategory name="SPREADER">FERTILIZER UREA AMS MAP DAP POTASH</fillTypeCategory>
+        <fillTypeCategory name="SPREADER">FERTILIZER UREA AMS MAP DAP POTASH LIME MANURE</fillTypeCategory>
 
         <!--
             LIQUIDFERTILIZER is included for the same reason on the sprayer side - vanilla
             sprayers reference LIQUIDFERTILIZER and need it present so the category is
             matched when isFertilizerApplicator scans supportedFillTypes.
+
+            LIQUIDMANURE, DIGESTATE and LIQUIDLIME are added to cover slurry tankers
+            and liquid lime applicators.
         -->
-        <fillTypeCategory name="SPRAYER">LIQUIDFERTILIZER UAN32 UAN28 ANHYDROUS STARTER</fillTypeCategory>
+        <fillTypeCategory name="SPRAYER">LIQUIDFERTILIZER UAN32 UAN28 ANHYDROUS STARTER LIQUIDMANURE DIGESTATE LIQUIDLIME</fillTypeCategory>
     </fillTypeCategories>
 
 </map>
