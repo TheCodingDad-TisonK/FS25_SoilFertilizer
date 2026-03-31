@@ -66,16 +66,24 @@
 
     <fillTypeCategories>
         <!--
-            FIX (Issue #96 - Fertilizer won't fill a spreader):
-            In FS25, vanilla spreaders look for the "FERTILIZER" category (solid)
-            and vanilla sprayers look for the "LIQUIDFERTILIZER" category (liquid).
-            By redefining these categories and including the mod's custom types,
-            we ensure all compatible vanilla and modded equipment will accept
-            UREA, MAP, POTASH, etc.
+            Use the NATIVE FS25 category names FERTILIZER and LIQUIDFERTILIZER instead of
+            custom names like SPREADER/SPRAYER.
+
+            Vanilla FS25 equipment (e.g. Case IH spreaders, Amazone sprayers) has fill units
+            that accept the FERTILIZER or LIQUIDFERTILIZER category. If we define a category
+            called "SPREADER", vanilla equipment never matches it because their XML only
+            references "FERTILIZER" — not our new name. By extending the native category
+            names, any spreader that already accepts FERTILIZER will automatically also
+            accept UREA, AMS, MAP, DAP, POTASH without any equipment mod changes.
         -->
         <fillTypeCategory name="FERTILIZER">FERTILIZER UREA AMS MAP DAP POTASH</fillTypeCategory>
 
-        <fillTypeCategory name="LIQUIDFERTILIZER">LIQUIDFERTILIZER UAN32 UAN28 ANHYDROUS STARTER LIQUIDLIME</fillTypeCategory>
+        <!--
+            Same principle for liquid sprayers — extend LIQUIDFERTILIZER so vanilla sprayers
+            that already accept LIQUIDFERTILIZER will also accept our liquid nitrogen products
+            and starter fertilizer.
+        -->
+        <fillTypeCategory name="LIQUIDFERTILIZER">LIQUIDFERTILIZER UAN32 UAN28 ANHYDROUS STARTER</fillTypeCategory>
     </fillTypeCategories>
 
 </map>

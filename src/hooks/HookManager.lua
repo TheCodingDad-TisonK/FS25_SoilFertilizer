@@ -65,7 +65,7 @@ end
 ---@param pfActive boolean|nil If true, skips nutrient-modifying hooks (PF Viewer Mode)
 function HookManager:installAll(soilSystem, pfActive)
     if self.installed then
-        print("[SoilFertilizer] Hooks already installed, skipping re-installation")
+        SoilLogger.warning("Hooks already installed, skipping re-installation")
         return
     end
 
@@ -73,13 +73,13 @@ function HookManager:installAll(soilSystem, pfActive)
     local failCount = 0
 
     if pfActive then
-        print("[SoilFertilizer] Viewer Mode (Precision Farming active) - installing minimal hooks...")
+        SoilLogger.info("Viewer Mode (Precision Farming active) - installing minimal hooks...")
         -- Only install ownership hook for field cleanup - skip all nutrient-modifying hooks
         local success = self:installOwnershipHook()
         if success then successCount = successCount + 1 else failCount = failCount + 1 end
-        print(string.format("[SoilFertilizer] Viewer Mode hooks: %d installed, %d failed", successCount, failCount))
+        SoilLogger.info("Viewer Mode hooks: %d installed, %d failed", successCount, failCount)
     else
-        print("[SoilFertilizer] Installing event hooks...")
+        SoilLogger.info("Installing event hooks...")
 
         -- Harvest hook (FruitUtil)
         local harvestOk = self:installHarvestHook()
@@ -101,11 +101,11 @@ function HookManager:installAll(soilSystem, pfActive)
         local plowingOk = self:installPlowingHook()
         if plowingOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
-        print(string.format("[SoilFertilizer] Hook installation complete: %d/%d successful, %d failed",
-            successCount, successCount + failCount, failCount))
+        SoilLogger.info("Hook installation complete: %d/%d successful, %d failed",
+            successCount, successCount + failCount, failCount)
 
         if failCount > 0 then
-            print("[SoilFertilizer WARNING] Some hooks failed to install - mod functionality may be limited")
+            SoilLogger.warning("Some hooks failed to install - mod functionality may be limited")
         end
     end
 
@@ -121,16 +121,16 @@ function HookManager:uninstallAll()
         local hook = self.hooks[i]
         if hook.cleanup then
             hook.cleanup()
-            print(string.format("[SoilFertilizer] Cleaned up: %s", hook.name or "?"))
+            SoilLogger.debug("Cleaned up: %s", hook.name or "?")
         elseif hook.target and hook.key and hook.original then
             hook.target[hook.key] = hook.original
-            print(string.format("[SoilFertilizer] Restored original: %s", hook.name or hook.key))
+            SoilLogger.debug("Restored original: %s", hook.name or hook.key)
         end
     end
 
     self.hooks = {}
     self.installed = false
-    print("[SoilFertilizer] All hooks uninstalled")
+    SoilLogger.info("All hooks uninstalled")
 end
 
 --- Register a hook for later cleanup.
@@ -167,7 +167,7 @@ end
 ---@return boolean success True if hook installed successfully
 function HookManager:installHarvestHook()
     if not Combine or type(Combine.addCutterArea) ~= "function" then
-        print("[SoilFertilizer WARNING] Could not install harvest hook - Combine.addCutterArea not available")
+        SoilLogger.warning("Could not install harvest hook - Combine.addCutterArea not available")
         return false
     end
 
@@ -208,12 +208,12 @@ function HookManager:installHarvestHook()
             end)
 
             if not success then
-                print("[SoilFertilizer ERROR] Harvest hook failed: " .. tostring(errorMsg))
+                SoilLogger.error("Harvest hook failed: %s", tostring(errorMsg))
             end
         end
     )
     self:register(Combine, "addCutterArea", original, "Combine.addCutterArea")
-    print("[SoilFertilizer] [OK] Harvest hook installed (Combine.addCutterArea)")
+    SoilLogger.info("[OK] Harvest hook installed (Combine.addCutterArea)")
     return true
 end
 
@@ -228,7 +228,7 @@ end
 ---@return boolean success True if hook installed successfully
 function HookManager:installSprayerAreaHook()
     if not Sprayer or type(Sprayer.onEndWorkAreaProcessing) ~= "function" then
-        print("[SoilFertilizer WARNING] Could not install sprayer area hook - Sprayer.onEndWorkAreaProcessing not available")
+        SoilLogger.warning("Could not install sprayer area hook - Sprayer.onEndWorkAreaProcessing not available")
         return false
     end
 
@@ -254,7 +254,7 @@ function HookManager:installSprayerAreaHook()
             local fillTypeIndex = spec.workAreaParameters.sprayFillType
             local liters = spec.workAreaParameters.usage
 
-            if not fillTypeIndex or fillTypeIndex <= 0 then return end
+            if (not fillTypeIndex or fillTypeIndex <= 0) then return end
             if not liters or liters <= 0 then return end
 
             local success, errorMsg = pcall(function()
@@ -299,12 +299,12 @@ function HookManager:installSprayerAreaHook()
             end)
 
             if not success then
-                print("[SoilFertilizer ERROR] Sprayer area hook failed: " .. tostring(errorMsg))
+                SoilLogger.error("Sprayer area hook failed: %s", tostring(errorMsg))
             end
         end
     )
     self:register(Sprayer, "onEndWorkAreaProcessing", original, "Sprayer.onEndWorkAreaProcessing")
-    print("[SoilFertilizer] [OK] Sprayer/Spreader hook installed (Sprayer.onEndWorkAreaProcessing)")
+    SoilLogger.info("[OK] Sprayer/Spreader hook installed (Sprayer.onEndWorkAreaProcessing)")
     return true
 end
 
@@ -319,7 +319,7 @@ end
 ---@return boolean success True if hook installed successfully
 function HookManager:installOwnershipHook()
     if not g_messageCenter or not MessageType or not MessageType.FARMLAND_OWNER_CHANGED then
-        print("[SoilFertilizer WARNING] Could not install ownership hook - g_messageCenter or MessageType.FARMLAND_OWNER_CHANGED not available")
+        SoilLogger.warning("Could not install ownership hook - g_messageCenter or MessageType.FARMLAND_OWNER_CHANGED not available")
         return false
     end
 
@@ -337,7 +337,7 @@ function HookManager:installOwnershipHook()
         end)
 
         if not success then
-            print("[SoilFertilizer ERROR] Ownership hook failed: " .. tostring(errorMsg))
+            SoilLogger.error("Ownership hook failed: %s", tostring(errorMsg))
         end
     end
 
@@ -348,7 +348,7 @@ function HookManager:installOwnershipHook()
         g_messageCenter:unsubscribeAll(self)
     end)
 
-    print("[SoilFertilizer] [OK] Field ownership hook installed (MessageType.FARMLAND_OWNER_CHANGED)")
+    SoilLogger.info("[OK] Field ownership hook installed (MessageType.FARMLAND_OWNER_CHANGED)")
     return true
 end
 
@@ -358,13 +358,13 @@ end
 ---@return boolean success True if hook installed successfully
 function HookManager:installWeatherHook()
     if not g_currentMission or not g_currentMission.environment then
-        print("[SoilFertilizer WARNING] Could not install weather hook - environment not available")
+        SoilLogger.warning("Could not install weather hook - environment not available")
         return false
     end
 
     local env = g_currentMission.environment
     if not env.update then
-        print("[SoilFertilizer WARNING] Could not install weather hook - environment.update not found")
+        SoilLogger.warning("Could not install weather hook - environment.update not found")
         return false
     end
 
@@ -384,12 +384,12 @@ function HookManager:installWeatherHook()
             end)
 
             if not success then
-                print("[SoilFertilizer ERROR] Weather hook failed: " .. tostring(errorMsg))
+                SoilLogger.error("Weather hook failed: %s", tostring(errorMsg))
             end
         end
     )
     self:register(env, "update", original, "environment.update")
-    print("[SoilFertilizer] [OK] Weather hook installed successfully")
+    SoilLogger.info("[OK] Weather hook installed successfully")
     return true
 end
 
@@ -399,7 +399,7 @@ end
 ---@return boolean success True if hook installed successfully
 function HookManager:installPlowingHook()
     if not Cultivator or type(Cultivator.processCultivatorArea) ~= "function" then
-        print("[SoilFertilizer WARNING] Could not install plowing hook - Cultivator.processCultivatorArea not available or replaced")
+        SoilLogger.warning("Could not install plowing hook - Cultivator.processCultivatorArea not available or replaced")
         return false
     end
 
@@ -454,12 +454,12 @@ function HookManager:installPlowingHook()
             end)
 
             if not success then
-                print("[SoilFertilizer ERROR] Plowing hook failed: " .. tostring(errorMsg))
+                SoilLogger.error("Plowing hook failed: %s", tostring(errorMsg))
             end
         end
     )
     self:register(Cultivator, "processCultivatorArea", original, "Cultivator.processCultivatorArea")
-    print("[SoilFertilizer] [OK] Plowing hook installed successfully")
+    SoilLogger.info("[OK] Plowing hook installed successfully")
     return true
 end
 

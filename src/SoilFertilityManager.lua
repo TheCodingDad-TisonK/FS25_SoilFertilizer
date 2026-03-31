@@ -92,10 +92,9 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
             SoilLogger.info("Soil Report dialog created")
         end
 
-        -- Hook PlayerInputComponent.registerActionEvents for reliable J-key binding.
-        -- This fires at exactly the right time (when the player's input subsystem is ready),
-        -- eliminating the race condition from calling g_inputBinding during onMissionLoaded.
-        -- Pattern proven in FS25_NPCFavor main.lua:430-523.
+        -- Hook PlayerInputComponent.registerActionEvents to register J/K in the PLAYER context.
+        -- PLAYER context is reused (not recreated) when the player returns on foot, so these
+        -- events persist across vehicle entry/exit cycles.
         if self.soilHUD and PlayerInputComponent and PlayerInputComponent.registerActionEvents then
             local originalRegisterActionEvents = PlayerInputComponent.registerActionEvents
             self._inputHookOriginal = originalRegisterActionEvents  -- saved for cleanup in delete()
@@ -108,90 +107,136 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
                 if g_SoilFertilityManager and g_SoilFertilityManager.toggleHUDEventId then return end
                 if not g_SoilFertilityManager or not g_SoilFertilityManager.soilHUD then return end
 
+                -- Register J and K in PLAYER context (on-foot use).
+                -- PlayerStateDriving calls setContext("PLAYER") WITHOUT createNew=true,
+                -- so the PLAYER context is reused and our events survive vehicle transitions.
                 g_inputBinding:beginActionEventsModification(PlayerInputComponent.INPUT_CONTEXT_NAME)
 
-                local success, eventId = g_inputBinding:registerActionEvent(
-                    InputAction.SF_TOGGLE_HUD,
-                    g_SoilFertilityManager,
+                local hudOk, hudId = g_inputBinding:registerActionEvent(
+                    InputAction.SF_TOGGLE_HUD, g_SoilFertilityManager,
                     g_SoilFertilityManager.onToggleHUDInput,
-                    false,  -- triggerUp
-                    true,   -- triggerDown
-                    false,  -- triggerAlways
-                    true    -- startActive
+                    false, true, false, true
                 )
-                if success and eventId then
-                    g_SoilFertilityManager.toggleHUDEventId = eventId
-                    SoilLogger.info("HUD toggle (J) registered via PlayerInputComponent hook")
+                if hudOk and hudId then
+                    g_SoilFertilityManager.toggleHUDEventId = hudId
+                    SoilLogger.info("HUD toggle (J) registered in PLAYER context")
                 else
-                    SoilLogger.warning("HUD toggle (J) registration failed in PlayerInputComponent hook")
+                    SoilLogger.warning("HUD toggle (J) PLAYER registration failed")
                 end
 
-                -- Register K key for Soil Report dialog
-                if g_SoilFertilityManager.soilReportDialog and not g_SoilFertilityManager.soilReportEventId then
-                    local reportSuccess, reportEventId = g_inputBinding:registerActionEvent(
-                        InputAction.SF_SOIL_REPORT,
-                        g_SoilFertilityManager,
+                if g_SoilFertilityManager.soilReportDialog then
+                    local repOk, repId = g_inputBinding:registerActionEvent(
+                        InputAction.SF_SOIL_REPORT, g_SoilFertilityManager,
                         g_SoilFertilityManager.onSoilReportInput,
                         false, true, false, true
                     )
-                    if reportSuccess and reportEventId then
-                        g_SoilFertilityManager.soilReportEventId = reportEventId
-                        SoilLogger.info("Soil Report (K) registered via PlayerInputComponent hook")
+                    if repOk and repId then
+                        g_SoilFertilityManager.soilReportEventId = repId
+                        SoilLogger.info("Soil Report (K) registered in PLAYER context")
                     end
                 end
 
                 g_inputBinding:endActionEventsModification()
+                SoilLogger.info("PLAYER context input registration complete")
             end
-            SoilLogger.info("PlayerInputComponent hook installed for J/K keys")
+            SoilLogger.info("PlayerInputComponent hook installed for J/K (PLAYER context)")
         end
 
-        -- Hook Vehicle.registerActionEvents to inject rate up/down keys when the player
-        -- enters any vehicle that has a sprayer specialization (spec_sprayer present).
-        -- Sprayer.registerActionEvents does not exist in FS25 as a static method.
-        if Vehicle and type(Vehicle.registerActionEvents) == "function" then
-            local origVehicleActions = Vehicle.registerActionEvents
-            self._sprayerActionHookOriginal = origVehicleActions
-            Vehicle.registerActionEvents = Utils.appendedFunction(
-                origVehicleActions,
-                function(vehicle, isActiveForInput, isSelected)
-                    -- Only inject for fertilizer applicator vehicles when they become the controlled vehicle
-                    if not isActiveForInput then return end
-                    if not SoilFertilityManager.isFertilizerApplicator(vehicle) then return end
-                    if not g_SoilFertilityManager then return end
+        -- Hook InputBinding.endActionEventsModification to register our keys in VEHICLE context.
+        --
+        -- WHY this approach instead of hooking Vehicle.registerActionEvents directly:
+        -- SpecializationUtil.copyTypeFunctionsInto() copies functions to each vehicle INSTANCE
+        -- table at spawn time. After that, vehicle:registerActionEvents() resolves from the
+        -- instance table, never looking up Vehicle.registerActionEvents on the class. Any
+        -- override of Vehicle.registerActionEvents after vehicles exist is silently ignored.
+        --
+        -- Instead, we hook InputBinding.endActionEventsModification (a class method on the
+        -- InputBinding class). Every call to endActionEventsModification routes through it,
+        -- including every VEHICLE context close. We detect VEHICLE context and inject our events.
+        -- registerActionEvent's built-in dedup handles multiple calls per session gracefully.
+        if self.soilHUD and InputBinding and InputBinding.endActionEventsModification then
+            local _soilVehicleHookActive = false
+            local originalEndMod = InputBinding.endActionEventsModification
+            self._vehicleInputHookOriginal = originalEndMod
+            InputBinding.endActionEventsModification = function(binding, ignoreCheck)
+                -- Capture context name BEFORE the original resets it to NO_REGISTRATION_CONTEXT
+                local contextName = ""
+                if binding.registrationContext and
+                   binding.registrationContext ~= InputBinding.NO_REGISTRATION_CONTEXT then
+                    contextName = binding.registrationContext.name or ""
+                end
 
-                    local _, upId = g_inputBinding:registerActionEvent(
-                        InputAction.SF_RATE_UP, vehicle,
-                        SoilFertilityManager.onSprayerRateUp,
+                originalEndMod(binding, ignoreCheck)
+
+                -- Only act on VEHICLE context closures, and avoid re-entrancy
+                if contextName ~= Vehicle.INPUT_CONTEXT_NAME then return end
+                if _soilVehicleHookActive then return end
+                if not g_SoilFertilityManager or not g_SoilFertilityManager.soilHUD then return end
+
+                _soilVehicleHookActive = true
+                binding:beginActionEventsModification(Vehicle.INPUT_CONTEXT_NAME)
+
+                -- HUD toggle (J) in vehicle
+                local vHudOk, vHudId = binding:registerActionEvent(
+                    InputAction.SF_TOGGLE_HUD, g_SoilFertilityManager,
+                    g_SoilFertilityManager.onToggleHUDInput,
+                    false, true, false, true
+                )
+                if vHudOk and vHudId then
+                    g_SoilFertilityManager.vehicleHUDEventId = vHudId
+                    SoilLogger.info("HUD toggle (J) registered in VEHICLE context")
+                end
+
+                -- Soil Report (K) in vehicle
+                if g_SoilFertilityManager.soilReportDialog then
+                    local vRepOk, vRepId = binding:registerActionEvent(
+                        InputAction.SF_SOIL_REPORT, g_SoilFertilityManager,
+                        g_SoilFertilityManager.onSoilReportInput,
                         false, true, false, true
                     )
-                    local _, downId = g_inputBinding:registerActionEvent(
-                        InputAction.SF_RATE_DOWN, vehicle,
-                        SoilFertilityManager.onSprayerRateDown,
-                        false, true, false, true
-                    )
-                    local _, autoId = g_inputBinding:registerActionEvent(
-                        InputAction.SF_TOGGLE_AUTO, vehicle,
-                        SoilFertilityManager.onToggleAuto,
-                        false, true, false, true
-                    )
-                    -- Keep the binding text visible so players see it in controls list
-                    if upId then
-                        g_inputBinding:setActionEventText(upId, g_i18n:getText("input_SF_RATE_UP"))
-                        g_inputBinding:setActionEventActive(upId, true)
-                    end
-                    if downId then
-                        g_inputBinding:setActionEventText(downId, g_i18n:getText("input_SF_RATE_DOWN"))
-                        g_inputBinding:setActionEventActive(downId, true)
-                    end
-                    if autoId then
-                        g_inputBinding:setActionEventText(autoId, g_i18n:getText("input_SF_TOGGLE_AUTO"))
-                        g_inputBinding:setActionEventActive(autoId, true)
+                    if vRepOk and vRepId then
+                        g_SoilFertilityManager.vehicleReportEventId = vRepId
+                        SoilLogger.info("Soil Report (K) registered in VEHICLE context")
                     end
                 end
-            )
-            SoilLogger.info("Vehicle action hook installed for sprayer rate up/down keys")
-        else
-            SoilLogger.warning("Vehicle.registerActionEvents not available — rate keys disabled")
+
+                -- Rate UP (])
+                local upOk, upId = binding:registerActionEvent(
+                    InputAction.SF_RATE_UP, g_SoilFertilityManager,
+                    g_SoilFertilityManager.onSprayerRateUpInput,
+                    false, true, false, true
+                )
+                if upOk and upId then
+                    g_SoilFertilityManager.rateUpEventId = upId
+                    SoilLogger.info("Rate UP (]) registered in VEHICLE context")
+                end
+
+                -- Rate DOWN ([)
+                local downOk, downId = binding:registerActionEvent(
+                    InputAction.SF_RATE_DOWN, g_SoilFertilityManager,
+                    g_SoilFertilityManager.onSprayerRateDownInput,
+                    false, true, false, true
+                )
+                if downOk and downId then
+                    g_SoilFertilityManager.rateDownEventId = downId
+                    SoilLogger.info("Rate DOWN ([) registered in VEHICLE context")
+                end
+
+                -- Auto toggle (Shift+L)
+                local autoOk, autoId = binding:registerActionEvent(
+                    InputAction.SF_TOGGLE_AUTO, g_SoilFertilityManager,
+                    g_SoilFertilityManager.onToggleAutoInput,
+                    false, true, false, true
+                )
+                if autoOk and autoId then
+                    g_SoilFertilityManager.toggleAutoEventId = autoId
+                    SoilLogger.info("Auto toggle (Shift+L) registered in VEHICLE context")
+                end
+
+                binding:endActionEventsModification()
+                _soilVehicleHookActive = false
+            end
+            SoilLogger.info("InputBinding.endActionEventsModification hooked for VEHICLE context keys")
         end
     else
         self.soilHUD = nil
@@ -390,27 +435,76 @@ end
 
 -- Input callbacks for sprayer rate up/down ([ / ] keys in VEHICLE context)
 -- Note: `self` here is the sprayer vehicle (the action event target), not SoilFertilityManager.
-function SoilFertilityManager.onSprayerRateUp(vehicle)
-    local rm = g_SoilFertilityManager and g_SoilFertilityManager.sprayerRateManager
-    if rm and vehicle and vehicle.id then
+-- Player-context rate callbacks (registered in PlayerInputComponent hook).
+-- `self` here is g_SoilFertilityManager.  Current vehicle is fetched via g_localPlayer.
+local function getPlayerVehicle()
+    if not g_localPlayer then return nil end
+    if type(g_localPlayer.getIsInVehicle) ~= "function" then return nil end
+    if not g_localPlayer:getIsInVehicle() then return nil end
+    return g_localPlayer:getCurrentVehicle()
+end
+
+-- Returns the fertilizer applicator relevant for rate adjustment.
+-- Checks the directly driven vehicle first; if that is not an applicator (e.g. a
+-- tractor towing a spreader), scans the attacher-joint implement tree.
+-- Mirrors the same logic in SoilHUD:getCurrentSprayer so both the HUD panel
+-- and the key callbacks always agree on which vehicle the rate belongs to.
+local function getApplicatorVehicle()
+    local v = getPlayerVehicle()
+    if not v then return nil end
+
+    -- Direct (self-propelled): liquid sprayer, air seeder, etc.
+    if SoilFertilityManager.isFertilizerApplicator(v) then
+        return v
+    end
+
+    -- Pulled implement: walk the attacher-joint tree
+    local function scanImpls(root)
+        local ok, spec = pcall(function() return root.spec_attacherJoints end)
+        if not ok or not spec then return nil end
+        local ok2, impls = pcall(function() return spec.attachedImplements end)
+        if not ok2 or not impls then return nil end
+        for _, impl in pairs(impls) do
+            local obj = impl.object
+            if obj then
+                if SoilFertilityManager.isFertilizerApplicator(obj) then
+                    return obj
+                end
+                local found = scanImpls(obj)
+                if found then return found end
+            end
+        end
+        return nil
+    end
+    return scanImpls(v)
+end
+
+function SoilFertilityManager:onSprayerRateUpInput()
+    local vehicle = getApplicatorVehicle()
+    if not vehicle then return end
+    local rm = self.sprayerRateManager
+    if rm then
         local newIdx = rm:cycleUp(vehicle.id)
         SoilNetworkEvents_SendSprayerRate(vehicle.id, newIdx)
     end
 end
 
-function SoilFertilityManager.onSprayerRateDown(vehicle)
-    local rm = g_SoilFertilityManager and g_SoilFertilityManager.sprayerRateManager
-    if rm and vehicle and vehicle.id then
+function SoilFertilityManager:onSprayerRateDownInput()
+    local vehicle = getApplicatorVehicle()
+    if not vehicle then return end
+    local rm = self.sprayerRateManager
+    if rm then
         local newIdx = rm:cycleDown(vehicle.id)
         SoilNetworkEvents_SendSprayerRate(vehicle.id, newIdx)
     end
 end
 
--- Input callback for toggling sprayer auto-mode (Alt+Z)
-function SoilFertilityManager.onToggleAuto(vehicle)
-    local rm = g_SoilFertilityManager and g_SoilFertilityManager.sprayerRateManager
-    local s = g_SoilFertilityManager and g_SoilFertilityManager.settings
-    if rm and s and s.autoRateControl and vehicle and vehicle.id then
+function SoilFertilityManager:onToggleAutoInput()
+    local vehicle = getApplicatorVehicle()
+    if not vehicle then return end
+    if not self.settings.autoRateControl then return end
+    local rm = self.sprayerRateManager
+    if rm then
         local newState = rm:toggleAutoMode(vehicle.id)
         SoilNetworkEvents_SendSprayerAutoMode(vehicle.id, newState)
     end
@@ -420,12 +514,16 @@ end
 --- This includes vehicles with spec_sprayer or vehicles with fill units whose SUPPORTED fill types
 --- include any type belonging to the mod's SPREADER or SPRAYER categories.
 ---
---- FIX (Issue #1 / Issue #2 / Issue #90):
----   - Switched from fillTypeIndex (current) to supportedFillTypes (static)
----   - Removed workArea:getIsActive() requirement (always false at enter time)
----   - Expanded category set to include LIME, MANURE, LIQUIDMANURE, and DIGESTATE
----   - Added explicit specialization checks (manureSpreader, slurryTanker, limeSpreader)
----   - Added direct check against SoilConstants.FERTILIZER_TYPES for maximum reliability
+--- FIX (Issue #1 / Issue #2):
+---   Previously this checked fillUnit.fillTypeIndex (the *currently loaded* fill type) and
+---   workArea:getIsActive() (only true while physically working a field). Both are always wrong
+---   at vehicle-enter time:
+---     - fillTypeIndex is 0/FT_UNKNOWN when the spreader is empty → category check fails → no rate UI
+---     - getIsActive() is always false at enter time → entire spreader branch was dead code
+---   The fix iterates fillUnit.supportedFillTypes (the static set of types the fill unit can hold,
+---   registered at mission load time) and removes the isWorkAreaActive gate entirely.
+---   This correctly identifies spreaders as fertilizer applicators regardless of their current
+---   fill level, which also resolves the fill-acceptance detection used downstream.
 ---@param vehicle table The vehicle object to check
 ---@return boolean True if the vehicle is a fertilizer applicator, false otherwise.
 function SoilFertilityManager.isFertilizerApplicator(vehicle)
@@ -433,37 +531,47 @@ function SoilFertilityManager.isFertilizerApplicator(vehicle)
         return false
     end
 
-    -- Fast path: common specializations
-    if vehicle.spec_sprayer or vehicle.spec_manureSpreader or 
-       vehicle.spec_slurryTanker or vehicle.spec_limeSpreader then
+    -- Fast path: check for dedicated applicator specializations.
+    -- All of these are set at vehicle load time and are always reliable even when empty.
+    --   spec_sprayer              → liquid sprayers (Patriot 50, anhydrous applicators, etc.)
+    --   spec_manureSpreader       → solid/liquid manure spreaders, lime spreaders
+    --   spec_slurryTanker         → slurry / liquid manure tankers
+    --   spec_limeSpreader         → dedicated lime spreader spec (some mods)
+    --   spec_fertilizingCultivator  → cultivators that also apply fertilizer/herbicide
+    --   spec_fertilizingSowingMachine → seeders that apply starter fertilizer in-furrow
+    --   spec_manureBarrel         → backpack/small barrel sprayers
+    if vehicle.spec_sprayer
+    or vehicle.spec_manureSpreader
+    or vehicle.spec_slurryTanker
+    or vehicle.spec_limeSpreader
+    or vehicle.spec_fertilizingCultivator
+    or vehicle.spec_fertilizingSowingMachine
+    or vehicle.spec_manureBarrel then
         return true
     end
 
-    -- Slow path: planters, seeders, or generic spreaders — check SUPPORTED fill types
-    if vehicle.spec_fillUnit and vehicle.spec_fillUnit.fillUnits then
-        -- Standard FS25 fertilizer categories
-        local categories = {}
-        for _, catName in ipairs({"FERTILIZER", "LIQUIDFERTILIZER", "LIME", "MANURE", "LIQUIDMANURE", "DIGESTATE"}) do
-            local catIdx = g_fillTypeManager:getFillTypeCategoryIndexByName(catName)
-            if catIdx then table.insert(categories, catIdx) end
-        end
-
-        for _, fillUnit in ipairs(vehicle.spec_fillUnit.fillUnits) do
-            if fillUnit.supportedFillTypes then
-                -- 1. Check by category (efficiently catches modded types)
-                if #categories > 0 then
+    -- Slow path: applicators whose specialization we don't directly recognize.
+    -- Checks whether any supported fill type is one our system tracks in FERTILIZER_PROFILES.
+    --
+    -- IMPORTANT guard: also require spec_workArea.
+    -- All implements that ACTIVELY apply material to the ground have spec_workArea
+    -- (sprayers, spreaders, cultivators, seeders). Transport wagons, grain trailers,
+    -- overload belts, and auger wagons do NOT have spec_workArea even when they
+    -- support fill types like LIME or POTASH (e.g., via category mods like
+    -- FS25_0_THDefaultTypes adding LIME to the BULK fill type category).
+    -- This guard eliminates false positives from transport equipment.
+    if vehicle.spec_workArea and vehicle.spec_fillUnit and g_fillTypeManager then
+        local fillUnits = vehicle.spec_fillUnit.fillUnits
+        if fillUnits then
+            for _, fillUnit in ipairs(fillUnits) do
+                if fillUnit.supportedFillTypes then
                     for fillTypeIndex, supported in pairs(fillUnit.supportedFillTypes) do
-                        if supported and g_fillTypeManager:getIsFillTypeInCategories(fillTypeIndex, categories) then
-                            return true
+                        if supported then
+                            local ft = g_fillTypeManager:getFillTypeByIndex(fillTypeIndex)
+                            if ft and ft.name and SoilConstants.FERTILIZER_PROFILES[ft.name] then
+                                return true
+                            end
                         end
-                    end
-                end
-
-                -- 2. Direct check against mod's known types (failsafe for vanilla types without categories)
-                for _, fertTypeName in ipairs(SoilConstants.FERTILIZER_TYPES) do
-                    local ftIndex = g_fillTypeManager:getFillTypeIndexByName(fertTypeName)
-                    if ftIndex and fillUnit.supportedFillTypes[ftIndex] then
-                        return true
                     end
                 end
             end
@@ -477,21 +585,43 @@ end
 --- Only runs on server in multiplayer, always in singleplayer
 --- Saves to {savegame}/soilData.xml
 function SoilFertilityManager:saveSoilData()
-    if not self.soilSystem or not g_currentMission or not g_currentMission.missionInfo then
+    print("[SoilFertilizer DIAG] saveSoilData() CALLED")
+    if not self.soilSystem then
+        print("[SoilFertilizer DIAG] saveSoilData() ABORT: soilSystem is nil")
+        return
+    end
+    if not g_currentMission or not g_currentMission.missionInfo then
+        print("[SoilFertilizer DIAG] saveSoilData() ABORT: missionInfo is nil")
         return
     end
 
     local savegamePath = g_currentMission.missionInfo.savegameDirectory
-    if not savegamePath then return end
+    print("[SoilFertilizer DIAG] saveSoilData() savegamePath = " .. tostring(savegamePath))
+    if not savegamePath then
+        print("[SoilFertilizer DIAG] saveSoilData() ABORT: savegamePath is nil")
+        return
+    end
+
+    -- Count fields with data
+    local fieldCount = 0
+    if self.soilSystem.fieldData then
+        for _ in pairs(self.soilSystem.fieldData) do fieldCount = fieldCount + 1 end
+    end
+    print(string.format("[SoilFertilizer DIAG] saveSoilData() fields in memory: %d", fieldCount))
 
     local xmlPath = savegamePath .. "/soilData.xml"
+    print("[SoilFertilizer DIAG] saveSoilData() writing to: " .. xmlPath)
     local xmlFile = createXMLFile("soilData", xmlPath, "soilData")
 
     if xmlFile then
         self.soilSystem:saveToXMLFile(xmlFile, "soilData")
         saveXMLFile(xmlFile)
         delete(xmlFile)
-        SoilLogger.info("Soil data saved to %s", xmlPath)
+        print("[SoilFertilizer DIAG] saveSoilData() SUCCESS — file written")
+        SoilLogger.info("Soil data saved to %s (%d fields)", xmlPath, fieldCount)
+    else
+        print("[SoilFertilizer DIAG] saveSoilData() FAILED — createXMLFile returned nil for: " .. xmlPath)
+        SoilLogger.error("Failed to create XML file for save: %s", xmlPath)
     end
 end
 
@@ -499,23 +629,44 @@ end
 --- Reads from {savegame}/soilData.xml if exists
 --- Falls back to defaults if file not found
 function SoilFertilityManager:loadSoilData()
-    if not self.soilSystem or not g_currentMission or not g_currentMission.missionInfo then
+    print("[SoilFertilizer DIAG] loadSoilData() CALLED")
+    if not self.soilSystem then
+        print("[SoilFertilizer DIAG] loadSoilData() ABORT: soilSystem is nil")
+        return
+    end
+    if not g_currentMission or not g_currentMission.missionInfo then
+        print("[SoilFertilizer DIAG] loadSoilData() ABORT: missionInfo is nil")
         return
     end
 
     local savegamePath = g_currentMission.missionInfo.savegameDirectory
-    if not savegamePath then return end
+    print("[SoilFertilizer DIAG] loadSoilData() savegamePath = " .. tostring(savegamePath))
+    if not savegamePath then
+        print("[SoilFertilizer DIAG] loadSoilData() ABORT: savegamePath is nil")
+        return
+    end
 
     local xmlPath = savegamePath .. "/soilData.xml"
+    print("[SoilFertilizer DIAG] loadSoilData() looking for: " .. xmlPath)
     if fileExists(xmlPath) then
+        print("[SoilFertilizer DIAG] loadSoilData() FILE FOUND — loading...")
         local xmlFile = loadXMLFile("soilData", xmlPath)
         if xmlFile then
             self.soilSystem:loadFromXMLFile(xmlFile, "soilData")
             delete(xmlFile)
-            SoilLogger.info("Soil data loaded from %s", xmlPath)
+            -- Count fields loaded
+            local fieldCount = 0
+            if self.soilSystem.fieldData then
+                for _ in pairs(self.soilSystem.fieldData) do fieldCount = fieldCount + 1 end
+            end
+            print(string.format("[SoilFertilizer DIAG] loadSoilData() SUCCESS — %d fields loaded", fieldCount))
+            SoilLogger.info("Soil data loaded from %s (%d fields)", xmlPath, fieldCount)
+        else
+            print("[SoilFertilizer DIAG] loadSoilData() FAILED — loadXMLFile returned nil")
         end
     else
-        SoilLogger.info("No saved soil data found, using defaults")
+        print("[SoilFertilizer DIAG] loadSoilData() FILE NOT FOUND — using defaults")
+        SoilLogger.info("No saved soil data found at %s, using defaults", xmlPath)
     end
 end
 
@@ -565,11 +716,11 @@ function SoilFertilityManager:delete()
         SoilLogger.info("PlayerInputComponent hook restored")
     end
 
-    -- Restore Vehicle.registerActionEvents hook
-    if self._sprayerActionHookOriginal and Vehicle then
-        Vehicle.registerActionEvents = self._sprayerActionHookOriginal
-        self._sprayerActionHookOriginal = nil
-        SoilLogger.info("Vehicle action hook restored")
+    -- Restore InputBinding.endActionEventsModification hook if we installed one
+    if self._vehicleInputHookOriginal and InputBinding then
+        InputBinding.endActionEventsModification = self._vehicleInputHookOriginal
+        self._vehicleInputHookOriginal = nil
+        SoilLogger.info("InputBinding.endActionEventsModification hook restored")
     end
 
     -- Clean up sprayer rate state
@@ -578,7 +729,7 @@ function SoilFertilityManager:delete()
         self.sprayerRateManager = nil
     end
 
-    -- Clean up HUD and input actions
+    -- Clean up all registered input action events (PLAYER context)
     if self.toggleHUDEventId and g_inputBinding then
         g_inputBinding:removeActionEvent(self.toggleHUDEventId)
         self.toggleHUDEventId = nil
@@ -587,6 +738,32 @@ function SoilFertilityManager:delete()
     if self.soilReportEventId and g_inputBinding then
         g_inputBinding:removeActionEvent(self.soilReportEventId)
         self.soilReportEventId = nil
+    end
+
+    -- Clean up VEHICLE context events
+    if self.vehicleHUDEventId and g_inputBinding then
+        g_inputBinding:removeActionEvent(self.vehicleHUDEventId)
+        self.vehicleHUDEventId = nil
+    end
+
+    if self.vehicleReportEventId and g_inputBinding then
+        g_inputBinding:removeActionEvent(self.vehicleReportEventId)
+        self.vehicleReportEventId = nil
+    end
+
+    if self.rateUpEventId and g_inputBinding then
+        g_inputBinding:removeActionEvent(self.rateUpEventId)
+        self.rateUpEventId = nil
+    end
+
+    if self.rateDownEventId and g_inputBinding then
+        g_inputBinding:removeActionEvent(self.rateDownEventId)
+        self.rateDownEventId = nil
+    end
+
+    if self.toggleAutoEventId and g_inputBinding then
+        g_inputBinding:removeActionEvent(self.toggleAutoEventId)
+        self.toggleAutoEventId = nil
     end
 
     if self.soilReportDialog then

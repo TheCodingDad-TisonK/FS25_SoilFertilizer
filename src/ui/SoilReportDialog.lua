@@ -337,17 +337,33 @@ function SoilReportDialog:updateFieldRows()
                         row.id:setText(tostring(fieldId))
                     end
 
-                    -- Nitrogen (color-coded)
+                    -- N / P / K displayed in ppm (soil-test units).
+                    -- SoilConstants.PPM_DISPLAY converts the internal 0-100 scale
+                    -- to agronomic ppm values matching standard Mehlich-3 lab benchmarks.
+                    local ppm = SoilConstants.PPM_DISPLAY or { N = 1, P = 1, K = 1 }
+
+                    -- Nitrogen (color-coded, ppm)
                     local nColor = getStatusColor(info.nitrogen.status)
-                    setColoredText(row.n, tostring(info.nitrogen.value), nColor)
+                    local nPpm = tostring(math.floor(info.nitrogen.value * ppm.N + 0.5))
+                    setColoredText(row.n, nPpm, nColor)
 
-                    -- Phosphorus (color-coded)
+                    -- Phosphorus (color-coded, ppm)
                     local pColor = getStatusColor(info.phosphorus.status)
-                    setColoredText(row.p, tostring(info.phosphorus.value), pColor)
+                    local pPpm = tostring(math.floor(info.phosphorus.value * ppm.P + 0.5))
+                    setColoredText(row.p, pPpm, pColor)
 
-                    -- Potassium (color-coded)
+                    -- Potassium (color-coded, ppm)
                     local kColor = getStatusColor(info.potassium.status)
-                    setColoredText(row.k, tostring(info.potassium.value), kColor)
+                    local kPpm = tostring(math.floor(info.potassium.value * ppm.K + 0.5))
+                    setColoredText(row.k, kPpm, kColor)
+
+                    -- DIAG: first row of each page — confirm ppm conversion is live
+                    if i == 0 then
+                        print(string.format(
+                            "[SoilFertilizer DIAG] SoilReport page row0 field=%s N=%s ppm P=%s ppm K=%s ppm",
+                            tostring(fieldId), nPpm, pPpm, kPpm
+                        ))
+                    end
 
                     -- pH (color-coded)
                     local phColor = getPHColor(info.pH)

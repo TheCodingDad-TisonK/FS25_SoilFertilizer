@@ -148,42 +148,51 @@ end
 
 -- Hook save/load events
 local function hookSaveLoadEvents()
-    -- Hook mission save (SERVER ONLY)
-    if Mission00.saveToXMLFile then
-        Mission00.saveToXMLFile = Utils.prependedFunction(
-            Mission00.saveToXMLFile,
-            function(mission, xmlFile, key, usedModNames)
-                -- Only server should save
-                if g_server or not mission.missionDynamicInfo.isMultiplayer then
-                    if g_SoilFertilityManager then
-                        g_SoilFertilityManager:saveSoilData()
-                        if g_SoilFertilityManager.soilHUD then
-                            g_SoilFertilityManager.soilHUD:saveLayout()
-                        end
-                    end
+    -- Hook mission save via FSCareerMissionInfo:saveToXMLFile().
+    --
+    -- FS25 1.17+ save flow:
+    --   FSBaseMission:saveSavegame()
+    --     → g_savegameController:saveSavegame()
+    --       → saveWriteSavegameStart() (C++)
+    --         → SavegameController:onSaveStartComplete(errorCode, savegameDirectory)
+    --           → missionInfo:setSavegameDirectory(savegameDirectory)   ← sets tempsavegame path
+    --           → missionInfo:saveToXMLFile()                           ← THIS is what we hook
+    --
+    -- The old Mission00.saveToXMLFile hook was a ghost — that method does not exist on
+    -- Mission00 and was never called by FS25 1.17, so soilData.xml was never written.
+    --
+    -- At the time our appended function fires, missionInfo.savegameDirectory already
+    -- points to the tempsavegame staging directory.  FS25 copies ALL files from
+    -- tempsavegame to the real savegame directory after save tasks complete, so
+    -- soilData.xml written here will land in the correct savegame folder on disk.
+    if FSCareerMissionInfo and FSCareerMissionInfo.saveToXMLFile then
+        FSCareerMissionInfo.saveToXMLFile = Utils.appendedFunction(
+            FSCareerMissionInfo.saveToXMLFile,
+            function(missionInfo)
+                -- In multiplayer only the server holds authoritative soil data
+                if g_currentMission and g_currentMission.missionDynamicInfo.isMultiplayer then
+                    if not g_server then return end
                 end
-            end
-        )
-    end
-
-    -- Hook mission load
-    if Mission00.loadFromXMLFile then
-        Mission00.loadFromXMLFile = Utils.appendedFunction(
-            Mission00.loadFromXMLFile,
-            function(mission, xmlFile, key)
                 if g_SoilFertilityManager then
-                    g_SoilFertilityManager:loadSoilData()
-
-                    -- If multiplayer client, request sync
-                    if g_client and not g_server and SoilNetworkEvents_RequestFullSync then
-                        -- Small delay to let server finish loading
-                        mission.loadingDelay = 2000
-                        SoilNetworkEvents_RequestFullSync()
+                    g_SoilFertilityManager:saveSoilData()
+                    if g_SoilFertilityManager.soilHUD then
+                        g_SoilFertilityManager.soilHUD:saveLayout()
                     end
+                else
+                    SoilLogger.warning("g_SoilFertilityManager is NIL — soil data NOT saved!")
                 end
             end
         )
+        SoilLogger.info("Save hook installed on FSCareerMissionInfo:saveToXMLFile")
+    else
+        SoilLogger.warning("FSCareerMissionInfo.saveToXMLFile not found — soil data will NOT be saved")
     end
+
+    -- Load is handled directly in SoilFertilityManager.new() via loadSoilData().
+    -- By the time our Mission00.load prepend fires, FSCareerMissionInfo:loadFromXML
+    -- has already run and missionInfo.savegameDirectory is set to the real savegame
+    -- folder, so loadSoilData() finds and reads soilData.xml correctly without any
+    -- additional hook here.
 end
 
 -- Hook into FS25 mission events

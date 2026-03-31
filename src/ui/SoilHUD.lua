@@ -362,11 +362,40 @@ function SoilHUD:refreshFieldData()
     end
 
     local fieldId = self:detectCurrentFieldId()
+    local prevId  = self.cachedFieldId
     self.cachedFieldId = fieldId
+
     if fieldId then
         self.cachedFieldInfo = soilSys:getFieldInfo(fieldId)
+
+        -- DIAG: log raw→ppm values whenever we step onto a new field
+        if fieldId ~= prevId and self.cachedFieldInfo then
+            local info = self.cachedFieldInfo
+            local ppm  = SoilConstants.PPM_DISPLAY or { N=1, P=1, K=1 }
+            print(string.format(
+                "[SoilFertilizer DIAG] HUD field → %s | N=%d (raw) → %dppm | P=%d → %dppm | K=%d → %dppm | pH=%.1f | OM=%.1f",
+                tostring(fieldId),
+                math.floor(info.nitrogen.value + 0.5),
+                math.floor(info.nitrogen.value   * ppm.N + 0.5),
+                math.floor(info.phosphorus.value + 0.5),
+                math.floor(info.phosphorus.value * ppm.P + 0.5),
+                math.floor(info.potassium.value  + 0.5),
+                math.floor(info.potassium.value  * ppm.K + 0.5),
+                info.pH,
+                info.organicMatter
+            ))
+            print(string.format(
+                "[SoilFertilizer DIAG] HUD status → N:%s P:%s K:%s",
+                tostring(info.nitrogen.status),
+                tostring(info.phosphorus.status),
+                tostring(info.potassium.status)
+            ))
+        end
     else
         self.cachedFieldInfo = nil
+        if prevId and prevId ~= fieldId then
+            print("[SoilFertilizer DIAG] HUD field → off-field (was " .. tostring(prevId) .. ")")
+        end
     end
 end
 
@@ -591,9 +620,14 @@ function SoilHUD:drawPanel()
         setTextAlignment(RenderText.ALIGN_LEFT)
     end
 
-    -- Divider
+    -- Divider above N/P/K block; "(ppm)" unit label right-aligned on the same line
+    -- so the user sees the unit context once, not repeated on every row.
     cy = cy - pad * 0.8
     self:drawRect(px + pad, cy, pw - pad*2, 0.0005, SoilHUD.C_DIVIDER)
+    setTextAlignment(RenderText.ALIGN_RIGHT)
+    setTextColor(SoilHUD.C_DIM[1], SoilHUD.C_DIM[2], SoilHUD.C_DIM[3], 0.60)
+    renderText(px + pw - pad, cy + 0.001*s, 0.007 * fontMult * s, "(ppm)")
+    setTextAlignment(RenderText.ALIGN_LEFT)
     cy = cy - pad * 0.8
 
     if info then
@@ -692,6 +726,7 @@ end
 
 -- ── Nutrient bar row ─────────────────────────────────────
 -- Returns the new cy after drawing the row.
+-- label must be "N", "P", or "K" — used to look up ppm conversion + thresholds.
 function SoilHUD:drawNutrientRow(label, nutrient, px, cy, pw, s, fontMult)
     local pad    = SoilHUD.PAD * s
     local rowH   = SoilHUD.ROW_H * s
@@ -716,11 +751,36 @@ function SoilHUD:drawNutrientRow(label, nutrient, px, cy, pw, s, fontMult)
         self:drawRect(barX, barY, barW * fill, barH, col)
     end
 
-    -- Value
-    local valX = barX + barW + 0.006*s
+    -- Threshold tick marks (Poor and Fair/Good boundary lines on bar)
+    -- Tick at the poor→fair boundary and the fair→good boundary.
+    -- Map lookup: "N"→nitrogen, "P"→phosphorus, "K"→potassium
+    local thresholdKey = label == "N" and "nitrogen"
+                      or label == "P" and "phosphorus"
+                      or label == "K" and "potassium"
+                      or nil
+    if thresholdKey then
+        local th = SoilConstants.STATUS_THRESHOLDS[thresholdKey]
+        if th then
+            local tickW  = 0.0005 * s
+            local tickH  = barH + 0.002 * s          -- slightly taller than bar
+            local tickY  = barY - 0.001 * s
+            local poorX  = barX + barW * (th.poor / 100) - tickW * 0.5
+            local fairX  = barX + barW * (th.fair / 100) - tickW * 0.5
+            self:drawRect(poorX, tickY, tickW, tickH, {0.70, 0.70, 0.70, 0.50})
+            self:drawRect(fairX, tickY, tickW, tickH, {0.70, 0.70, 0.70, 0.50})
+        end
+    end
+
+    -- Value displayed in ppm (soil-test units).
+    -- SoilConstants.PPM_DISPLAY[label] converts internal 0-100 → agronomic ppm.
+    -- The unit "(ppm)" is shown once on the divider above the N/P/K block,
+    -- not per-row, to avoid inline sizing/positioning issues.
+    local ppmMult = SoilConstants.PPM_DISPLAY and SoilConstants.PPM_DISPLAY[label] or 1.0
+    local ppmVal  = math.floor(nutrient.value * ppmMult + 0.5)
+    local valX    = barX + barW + 0.006*s
     setTextColor(col[1], col[2], col[3], 1.0)
     renderText(valX, cy + (rowH - 0.010*s) * 0.5, 0.010 * fontMult * s,
-        string.format("%d", nutrient.value))
+        string.format("%d", ppmVal))
 
     -- Status label (right-aligned)
     setTextAlignment(RenderText.ALIGN_RIGHT)
@@ -845,16 +905,32 @@ function SoilHUD:drawSprayerRatePanel()
     self:drawRect(panelX,           panelY,               bw, panelH, SoilHUD.C_BORDER)
     self:drawRect(panelX + pw - bw,  panelY,               bw, panelH, SoilHUD.C_BORDER)
 
-    -- Header: "APP. RATE  ( [ / ] )" or "APP. RATE ( AUTO )"
+    -- Header: "APP. RATE  AUTO: OFF  [Alt+Z]" or "APP. RATE  AUTO: ON"
+    -- isAuto = auto rate mode active on this vehicle AND the setting is enabled
     local isAuto = rm:getAutoMode(sprayer.id) and self.settings.autoRateControl
-    local autoKey = "?"
+    local autoKey = "Shift+L"   -- fallback display string (matches modDesc.xml binding)
     if g_inputDisplayManager ~= nil then
-        local helpElement = g_inputDisplayManager:getControllerSymbolOverlays(InputAction.SF_TOGGLE_AUTO)
-        if helpElement ~= nil and helpElement.keys ~= nil and helpElement.keys[1] ~= nil then
-            autoKey = tostring(helpElement.keys[1])
+        local ok, helpElement = pcall(function()
+            -- Four-argument form per FS25 API: (action1, action2, text, ignoreComboButtons)
+            return g_inputDisplayManager:getControllerSymbolOverlays(InputAction.SF_TOGGLE_AUTO, "", "", false)
+        end)
+        if ok and helpElement ~= nil and helpElement.keys ~= nil and #helpElement.keys > 0 then
+            -- keys is an array of display strings, one per key in the combo (e.g. {"Shift","L"})
+            -- Join them with "+" to produce "Shift+L"
+            local parts = {}
+            for _, k in ipairs(helpElement.keys) do
+                table.insert(parts, tostring(k))
+            end
+            autoKey = table.concat(parts, "+")
         end
     end
-    local headerText = isAuto and "APP. RATE ( AUTO )" or string.format("APP. RATE ( [%s] AUTO )", autoKey)
+    -- Separate the mode status from the toggle hint so AUTO is never ambiguous
+    local headerText
+    if isAuto then
+        headerText = "APP. RATE  ( AUTO: ON )"
+    else
+        headerText = string.format("APP. RATE  AUTO: OFF [%s]", autoKey)
+    end
 
     setTextBold(true)
     setTextAlignment(RenderText.ALIGN_CENTER)
@@ -946,20 +1022,85 @@ function SoilHUD:drawSprayerRatePanel()
     setTextColor(1, 1, 1, 1)
 end
 
--- ── Sprayer detection ────────────────────────────────────
+-- ── Sprayer / spreader detection ────────────────────────────────────
+-- Recursively walks the attacher-joint implement tree of `vehicle` looking
+-- for the first attached object that passes isFertilizerApplicator.
+-- Used so that tractor+spreader combos show the rate panel even though the
+-- player is seated in the tractor, not the spreader.
+-- Safe: wrapped in pcall; returns nil on any API error.
+local function findApplicatorImplement(vehicle)
+    if not vehicle then return nil end
+    local ok, spec = pcall(function() return vehicle.spec_attacherJoints end)
+    if not ok or not spec then return nil end
+    local ok2, implements = pcall(function() return spec.attachedImplements end)
+    if not ok2 or not implements then return nil end
+    for _, impl in pairs(implements) do
+        local obj = impl.object
+        if obj then
+            if SoilFertilityManager.isFertilizerApplicator(obj) then
+                return obj
+            end
+            -- Recurse: implements can themselves have implements (e.g. wagon train)
+            local found = findApplicatorImplement(obj)
+            if found then return found end
+        end
+    end
+    return nil
+end
+
+-- Returns the fertilizer applicator the player should adjust rate for:
+--   1. The directly driven vehicle (self-propelled sprayer / spreader)
+--   2. First attached implement that passes isFertilizerApplicator (tractor+spreader)
+-- Returns the current vehicle if it is any fertilizer applicator (liquid sprayer,
+-- dry spreader, or planter with fertilizer capability).  Uses isFertilizerApplicator
+-- so the rate panel appears for all equipment types, not just spec_sprayer vehicles.
 function SoilHUD:getCurrentSprayer()
     local player = g_localPlayer
     if player == nil then return nil end
     if type(player.getIsInVehicle) ~= "function" then return nil end
-    if not player:getIsInVehicle() then return nil end
-    local vehicle = player:getCurrentVehicle()
-    
-    -- Use the robust detection logic from the manager to include spreaders, tankers and planters
-    if vehicle and SoilFertilityManager.isFertilizerApplicator(vehicle) then
-        return vehicle
+    if not player:getIsInVehicle() then
+        -- State change: was in sprayer, now not
+        if self._lastSprayerDetected ~= false then
+            self._lastSprayerDetected = false
+            print("[SoilFertilizer DIAG] getCurrentSprayer: player NOT in vehicle — rate panel hidden")
+        end
+        return nil
     end
-    
-    return nil
+    local vehicle = player:getCurrentVehicle()
+    if not vehicle then return nil end
+
+    local result = nil
+    if SoilFertilityManager and SoilFertilityManager.isFertilizerApplicator then
+        if SoilFertilityManager.isFertilizerApplicator(vehicle) then
+            -- Self-propelled: the driven vehicle is the applicator
+            result = vehicle
+        else
+            -- Pulled implement: scan the attacher joint tree
+            result = findApplicatorImplement(vehicle)
+        end
+    elseif vehicle.spec_sprayer then
+        -- Fallback: SoilFertilityManager not yet available, accept any sprayer
+        result = vehicle
+    end
+
+    -- Log only on state change to avoid log spam
+    local prevId = self._lastSprayerVehicleId
+    local newId  = result and result.id or nil
+    if prevId ~= newId then
+        self._lastSprayerVehicleId = newId
+        self._lastSprayerDetected  = (result ~= nil)
+        if result then
+            local isImpl = (result ~= vehicle) and "IMPLEMENT" or "DIRECT"
+            print(string.format(
+                "[SoilFertilizer DIAG] getCurrentSprayer: APPLICATOR %s id=%s cfg=%s",
+                isImpl, tostring(result.id), tostring(result.configFileName)))
+        else
+            print(string.format(
+                "[SoilFertilizer DIAG] getCurrentSprayer: no applicator on vehicle cfg=%s — rate panel hidden",
+                tostring(vehicle.configFileName)))
+        end
+    end
+    return result
 end
 
 -- ── Pixel helpers ────────────────────────────────────────

@@ -38,7 +38,7 @@
     </extraSourceFiles>
 
     <actions>
-        <action name="SF_TOGGLE_HUD" category="ONFOOT" />
+        <action name="SF_TOGGLE_HUD"  category="ONFOOT" />
         <action name="SF_SOIL_REPORT" category="ONFOOT" />
         <action name="SF_RATE_UP"     category="VEHICLE" />
         <action name="SF_RATE_DOWN"   category="VEHICLE" />
@@ -1517,7 +1517,7 @@
             <binding device="KB_MOUSE_DEFAULT" input="KEY_LEFTBRACKET" />
         </actionBinding>
         <actionBinding action="SF_TOGGLE_AUTO">
-            <binding device="KB_MOUSE_DEFAULT" input="KEY_lalt KEY_z" />
+            <binding device="KB_MOUSE_DEFAULT" input="KEY_lshift KEY_l" />
         </actionBinding>
     </inputBinding>
 
