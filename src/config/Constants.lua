@@ -442,6 +442,8 @@ SoilConstants.SPRAYER_RATE = {
         1.60, 1.70, 1.80, 1.90, 2.00,
     },
     DEFAULT_INDEX             = 10,    -- 1.0x
+    AUTO_RATE_MIN_STEP        = 5,     -- 0.50x: auto mode lower bound
+    AUTO_RATE_MAX_STEP        = 14,    -- 1.40x: stays below BURN_GUARANTEED_THRESHOLD
     BURN_RISK_THRESHOLD       = 1.25,  -- above this: chance of burn
     BURN_GUARANTEED_THRESHOLD = 1.50,  -- at or above this: burn every time
     BURN_PH_DROP_RISK         = 0.15,  -- pH units lost on probabilistic burn

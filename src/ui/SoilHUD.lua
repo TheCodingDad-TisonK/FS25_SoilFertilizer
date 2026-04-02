@@ -1012,7 +1012,7 @@ function SoilHUD:drawSprayerRatePanel()
         local profile = SoilConstants.FERTILIZER_PROFILES[fillType.name]
         if profile then
             local targetText = "Target: "
-            local targets = SoilConstants.AUTO_RATE_TARGETS
+            local targets = SoilConstants.SPRAYER_RATE.AUTO_RATE_TARGETS
             if profile.N and profile.N > 0 then targetText = targetText .. targets.N .. "N " end
             if profile.P and profile.P > 0 then targetText = targetText .. targets.P .. "P " end
             if profile.K and profile.K > 0 then targetText = targetText .. targets.K .. "K " end
@@ -1027,13 +1027,14 @@ function SoilHUD:drawSprayerRatePanel()
     local adjPositions = { [-2] = -0.38, [-1] = -0.21, [1] = 0.21, [2] = 0.38 }
     local adjSizes     = { [-2] = 0.008, [-1] = 0.009, [1] = 0.009, [2] = 0.008 }
     local adjAlphas    = { [-2] = 0.28,  [-1] = 0.50,  [1] = 0.50,  [2] = 0.28  }
+    local adjAlphaScale = isAuto and 0.35 or 1.0
 
     setTextAlignment(RenderText.ALIGN_CENTER)
     for _, offset in ipairs({-2, -1, 1, 2}) do
         local adjIdx = currentIdx + offset
         if adjIdx >= 1 and adjIdx <= #steps then
             local adjStr = self:formatRateNumber(steps[adjIdx], rateConfig)
-            setTextColor(1.0, 1.0, 1.0, adjAlphas[offset])
+            setTextColor(1.0, 1.0, 1.0, adjAlphas[offset] * adjAlphaScale)
             renderText(cx + pw * adjPositions[offset], scrollY + self:py(7)*s,
                 adjSizes[offset] * fontMult * s, adjStr)
         end
