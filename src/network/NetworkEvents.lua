@@ -296,6 +296,7 @@ function SoilFullSyncEvent:readStream(streamId, connection)
     self.settings.seasonalEffects = streamReadBool(streamId)
     self.settings.rainEffects = streamReadBool(streamId)
     self.settings.plowingBonus = streamReadBool(streamId)
+    self.settings.weedPressure = streamReadBool(streamId)
     self.settings.difficulty = streamReadInt32(streamId)
 
     -- Read field data
@@ -352,6 +353,8 @@ function SoilFullSyncEvent:readStream(streamId, connection)
                 lastCrop = lastCrop,
                 lastHarvest = lastHarvest,
                 fertilizerApplied = fertilizerApplied,
+                weedPressure = 0,
+                herbicideDaysLeft = 0,
                 initialized = true
             }
             -- Clear empty strings
@@ -380,6 +383,7 @@ function SoilFullSyncEvent:writeStream(streamId, connection)
     streamWriteBool(streamId, self.settings.seasonalEffects)
     streamWriteBool(streamId, self.settings.rainEffects)
     streamWriteBool(streamId, self.settings.plowingBonus)
+    streamWriteBool(streamId, self.settings.weedPressure == true)
     streamWriteInt32(streamId, self.settings.difficulty)
 
     -- Write field data
@@ -419,6 +423,7 @@ function SoilFullSyncEvent:run(connection)
     settings.seasonalEffects = self.settings.seasonalEffects
     settings.rainEffects = self.settings.rainEffects
     settings.plowingBonus = self.settings.plowingBonus
+    settings.weedPressure = self.settings.weedPressure
     settings.difficulty = self.settings.difficulty
 
     -- Apply field data (server-authoritative)

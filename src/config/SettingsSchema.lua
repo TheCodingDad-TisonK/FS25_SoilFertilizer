@@ -125,6 +125,13 @@ SettingsSchema.definitions = {
         pfProtected = true,
     },
     {
+        id = "weedPressure",
+        type = "boolean",
+        default = true,
+        uiId = "sf_weed_pressure",
+        pfProtected = false,
+    },
+    {
         id = "difficulty",
         type = "number",
         default = 2,

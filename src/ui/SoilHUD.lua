@@ -19,7 +19,7 @@ SoilHUD.RESIZE_HANDLE_SIZE = 0.008
 
 -- ── Base panel dimensions at scale 1.0 ─────────────────
 SoilHUD.BASE_W = 0.190
-SoilHUD.BASE_H = 0.202   -- expanded to accommodate yield forecast row
+SoilHUD.BASE_H = 0.228   -- expanded to accommodate yield forecast + weed pressure rows
 
 -- ── Layout constants at scale 1.0 ──────────────────────
 SoilHUD.TITLE_H   = 0.024   -- title accent bar height
@@ -694,6 +694,51 @@ function SoilHUD:drawPanel()
             setTextColor(SoilHUD.C_DIM[1], SoilHUD.C_DIM[2], SoilHUD.C_DIM[3], SoilHUD.C_DIM[4])
             renderText(px + pw - pad, cy, 0.009 * fontMult * s, tierData.label)
             setTextAlignment(RenderText.ALIGN_LEFT)
+            cy = cy - SoilHUD.LINE_H * s
+
+            -- Divider before weed row
+            cy = cy - pad * 0.5
+            self:drawRect(px + pad, cy, pw - pad*2, 0.0005, SoilHUD.C_DIVIDER)
+            cy = cy - pad * 0.8
+        end
+
+        -- Weed pressure row (always shown when info available and setting enabled)
+        if g_SoilFertilityManager and g_SoilFertilityManager.settings.weedPressure then
+            local pressure = info.weedPressure or 0
+            local wp = SoilConstants.WEED_PRESSURE
+            local weedColor
+            if pressure < wp.LOW then
+                weedColor = SoilHUD.C_GOOD
+            elseif pressure < wp.MEDIUM then
+                weedColor = SoilHUD.C_FAIR
+            elseif pressure < wp.HIGH then
+                weedColor = {1.0, 0.55, 0.10, 1.0}  -- orange
+            else
+                weedColor = SoilHUD.C_POOR
+            end
+
+            setTextColor(SoilHUD.C_LABEL[1], SoilHUD.C_LABEL[2], SoilHUD.C_LABEL[3], SoilHUD.C_LABEL[4])
+            renderText(tx, cy, 0.010 * fontMult * s, "Weeds")
+
+            -- Progress bar (reuse BAR geometry)
+            local barX = tx + 0.038*s
+            local barH = SoilHUD.BAR_H * s
+            local barW = SoilHUD.BAR_W * s
+            local barY = cy + (SoilHUD.LINE_H * s - barH) * 0.5
+            self:drawRect(barX, barY, barW, barH, SoilHUD.C_BAR_BG)
+            local fill = math.max(0, math.min(1, pressure / 100))
+            if fill > 0 then
+                self:drawRect(barX, barY, barW * fill, barH, weedColor)
+            end
+
+            -- Value + herbicide indicator
+            local weedLabel = string.format("%.0f%%", pressure)
+            if info.herbicideActive then weedLabel = weedLabel .. " (protected)" end
+            setTextAlignment(RenderText.ALIGN_RIGHT)
+            setTextColor(weedColor[1], weedColor[2], weedColor[3], 1.0)
+            renderText(px + pw - pad, cy, 0.009 * fontMult * s, weedLabel)
+            setTextAlignment(RenderText.ALIGN_LEFT)
+
             cy = cy - SoilHUD.LINE_H * s
 
             -- Divider before hint
