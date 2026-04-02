@@ -422,7 +422,7 @@ SoilConstants.NETWORK = {
     }
 }
 
-print("[SoilFertilizer] Constants loaded")
+SoilLogger.info("Constants loaded")
 
 -- ========================================
 -- SPRAYER APPLICATION RATE

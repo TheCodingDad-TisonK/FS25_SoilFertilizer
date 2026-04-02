@@ -585,20 +585,18 @@ end
 --- Only runs on server in multiplayer, always in singleplayer
 --- Saves to {savegame}/soilData.xml
 function SoilFertilityManager:saveSoilData()
-    print("[SoilFertilizer DIAG] saveSoilData() CALLED")
     if not self.soilSystem then
-        print("[SoilFertilizer DIAG] saveSoilData() ABORT: soilSystem is nil")
+        SoilLogger.error("saveSoilData: soilSystem is nil")
         return
     end
     if not g_currentMission or not g_currentMission.missionInfo then
-        print("[SoilFertilizer DIAG] saveSoilData() ABORT: missionInfo is nil")
+        SoilLogger.error("saveSoilData: missionInfo is nil")
         return
     end
 
     local savegamePath = g_currentMission.missionInfo.savegameDirectory
-    print("[SoilFertilizer DIAG] saveSoilData() savegamePath = " .. tostring(savegamePath))
     if not savegamePath then
-        print("[SoilFertilizer DIAG] saveSoilData() ABORT: savegamePath is nil")
+        SoilLogger.error("saveSoilData: savegameDirectory is nil")
         return
     end
 
@@ -607,20 +605,16 @@ function SoilFertilityManager:saveSoilData()
     if self.soilSystem.fieldData then
         for _ in pairs(self.soilSystem.fieldData) do fieldCount = fieldCount + 1 end
     end
-    print(string.format("[SoilFertilizer DIAG] saveSoilData() fields in memory: %d", fieldCount))
 
     local xmlPath = savegamePath .. "/soilData.xml"
-    print("[SoilFertilizer DIAG] saveSoilData() writing to: " .. xmlPath)
     local xmlFile = createXMLFile("soilData", xmlPath, "soilData")
 
     if xmlFile then
         self.soilSystem:saveToXMLFile(xmlFile, "soilData")
         saveXMLFile(xmlFile)
         delete(xmlFile)
-        print("[SoilFertilizer DIAG] saveSoilData() SUCCESS — file written")
         SoilLogger.info("Soil data saved to %s (%d fields)", xmlPath, fieldCount)
     else
-        print("[SoilFertilizer DIAG] saveSoilData() FAILED — createXMLFile returned nil for: " .. xmlPath)
         SoilLogger.error("Failed to create XML file for save: %s", xmlPath)
     end
 end
@@ -629,43 +623,36 @@ end
 --- Reads from {savegame}/soilData.xml if exists
 --- Falls back to defaults if file not found
 function SoilFertilityManager:loadSoilData()
-    print("[SoilFertilizer DIAG] loadSoilData() CALLED")
     if not self.soilSystem then
-        print("[SoilFertilizer DIAG] loadSoilData() ABORT: soilSystem is nil")
+        SoilLogger.error("loadSoilData: soilSystem is nil")
         return
     end
     if not g_currentMission or not g_currentMission.missionInfo then
-        print("[SoilFertilizer DIAG] loadSoilData() ABORT: missionInfo is nil")
+        SoilLogger.error("loadSoilData: missionInfo is nil")
         return
     end
 
     local savegamePath = g_currentMission.missionInfo.savegameDirectory
-    print("[SoilFertilizer DIAG] loadSoilData() savegamePath = " .. tostring(savegamePath))
     if not savegamePath then
-        print("[SoilFertilizer DIAG] loadSoilData() ABORT: savegamePath is nil")
+        SoilLogger.error("loadSoilData: savegameDirectory is nil")
         return
     end
 
     local xmlPath = savegamePath .. "/soilData.xml"
-    print("[SoilFertilizer DIAG] loadSoilData() looking for: " .. xmlPath)
     if fileExists(xmlPath) then
-        print("[SoilFertilizer DIAG] loadSoilData() FILE FOUND — loading...")
         local xmlFile = loadXMLFile("soilData", xmlPath)
         if xmlFile then
             self.soilSystem:loadFromXMLFile(xmlFile, "soilData")
             delete(xmlFile)
-            -- Count fields loaded
             local fieldCount = 0
             if self.soilSystem.fieldData then
                 for _ in pairs(self.soilSystem.fieldData) do fieldCount = fieldCount + 1 end
             end
-            print(string.format("[SoilFertilizer DIAG] loadSoilData() SUCCESS — %d fields loaded", fieldCount))
             SoilLogger.info("Soil data loaded from %s (%d fields)", xmlPath, fieldCount)
         else
-            print("[SoilFertilizer DIAG] loadSoilData() FAILED — loadXMLFile returned nil")
+            SoilLogger.error("loadSoilData: loadXMLFile returned nil for: %s", xmlPath)
         end
     else
-        print("[SoilFertilizer DIAG] loadSoilData() FILE NOT FOUND — using defaults")
         SoilLogger.info("No saved soil data found at %s, using defaults", xmlPath)
     end
 end

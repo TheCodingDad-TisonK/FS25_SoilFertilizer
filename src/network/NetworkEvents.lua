@@ -69,8 +69,8 @@ function SoilSettingChangeEvent:run(connection)
     if not connection:getIsServer() then
         local user = g_currentMission.userManager:getUserByConnection(connection)
         if not user or not user:getIsMasterUser() then
-            print(string.format("[SoilFertilizer] Player %s (non-admin) tried to change settings - denied",
-                user and user:getNickname() or "Unknown"))
+            SoilLogger.warning("Player %s (non-admin) tried to change settings - denied",
+                user and user:getNickname() or "Unknown")
             return
         end
     end
@@ -84,8 +84,8 @@ function SoilSettingChangeEvent:run(connection)
         settings[self.settingName] = self.settingValue
         settings:save()
 
-        print(string.format("[SoilFertilizer] Server: Setting '%s' changed from %s to %s",
-            self.settingName, tostring(oldValue), tostring(self.settingValue)))
+        SoilLogger.info("Server: Setting '%s' changed from %s to %s",
+            self.settingName, tostring(oldValue), tostring(self.settingValue))
 
         -- Re-initialize system if enabled state changed
         if self.settingName == "enabled" and g_SoilFertilityManager.soilSystem then
@@ -776,4 +776,4 @@ function SoilNetworkEvents_SendSprayerAutoMode(vehicleId, enabled)
     end
 end
 
-print("[SoilFertilizer] Network events system loaded")
+SoilLogger.info("Network events system loaded")

@@ -368,12 +368,10 @@ function SoilHUD:refreshFieldData()
     if fieldId then
         self.cachedFieldInfo = soilSys:getFieldInfo(fieldId)
 
-        -- DIAG: log raw→ppm values whenever we step onto a new field
         if fieldId ~= prevId and self.cachedFieldInfo then
             local info = self.cachedFieldInfo
             local ppm  = SoilConstants.PPM_DISPLAY or { N=1, P=1, K=1 }
-            print(string.format(
-                "[SoilFertilizer DIAG] HUD field → %s | N=%d (raw) → %dppm | P=%d → %dppm | K=%d → %dppm | pH=%.1f | OM=%.1f",
+            SoilLogger.debug("HUD field → %s | N=%d (raw) → %dppm | P=%d → %dppm | K=%d → %dppm | pH=%.1f | OM=%.1f",
                 tostring(fieldId),
                 math.floor(info.nitrogen.value + 0.5),
                 math.floor(info.nitrogen.value   * ppm.N + 0.5),
@@ -383,18 +381,17 @@ function SoilHUD:refreshFieldData()
                 math.floor(info.potassium.value  * ppm.K + 0.5),
                 info.pH,
                 info.organicMatter
-            ))
-            print(string.format(
-                "[SoilFertilizer DIAG] HUD status → N:%s P:%s K:%s",
+            )
+            SoilLogger.debug("HUD status → N:%s P:%s K:%s",
                 tostring(info.nitrogen.status),
                 tostring(info.phosphorus.status),
                 tostring(info.potassium.status)
-            ))
+            )
         end
     else
         self.cachedFieldInfo = nil
         if prevId and prevId ~= fieldId then
-            print("[SoilFertilizer DIAG] HUD field → off-field (was " .. tostring(prevId) .. ")")
+            SoilLogger.debug("HUD field → off-field (was %s)", tostring(prevId))
         end
     end
 end
