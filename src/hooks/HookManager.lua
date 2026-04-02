@@ -101,6 +101,10 @@ function HookManager:installAll(soilSystem, pfActive)
         local plowingOk = self:installPlowingHook()
         if plowingOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
+        -- Patch vanilla fill units to accept custom fertilizer types
+        local fillUnitOk = self:installFillUnitHook()
+        if fillUnitOk then successCount = successCount + 1 else failCount = failCount + 1 end
+
         SoilLogger.info("Hook installation complete: %d/%d successful, %d failed",
             successCount, successCount + failCount, failCount)
 
@@ -463,3 +467,77 @@ function HookManager:installPlowingHook()
     return true
 end
 
+-- =========================================================
+-- HOOK 6: Patch vehicle fill units to accept custom types
+-- =========================================================
+-- Vanilla spreaders/sprayers have fillUnit#fillTypes="FERTILIZER" or "LIQUIDFERTILIZER".
+-- FS25 resolves these by NAME at parse time, yielding only the single vanilla type index.
+-- Our fillTypes.xml extends those categories, but category extension only helps vehicles
+-- that use fillTypeCategories="..." (category lookup), not fillTypes="..." (name lookup).
+-- Therefore vanilla equipment never gets DAP/UREA/etc added to their supportedFillTypes.
+--
+-- Fix: hook FillUnit.onPostLoad to inject our custom fill type indices into any fill unit
+-- that already accepts the corresponding vanilla base type (FERTILIZER or LIQUIDFERTILIZER).
+-- This runs on every vehicle after its fill unit data is fully parsed, covering all
+-- vanilla spreaders, sprayers, and any mod equipment using the standard category names.
+---@return boolean success
+function HookManager:installFillUnitHook()
+    if not FillUnit or type(FillUnit.onPostLoad) ~= "function" then
+        SoilLogger.warning("Could not install FillUnit hook - FillUnit.onPostLoad not available")
+        return false
+    end
+
+    local original = FillUnit.onPostLoad
+    FillUnit.onPostLoad = Utils.appendedFunction(
+        original,
+        function(vehicleSelf, savegame)
+            -- Resolve vanilla base type indices once (cached after first call)
+            local fm = g_fillTypeManager
+            if not fm then return end
+
+            local fertIndex      = fm:getFillTypeIndexByName("FERTILIZER")
+            local liqFertIndex   = fm:getFillTypeIndexByName("LIQUIDFERTILIZER")
+            if not fertIndex and not liqFertIndex then return end
+
+            -- Build lists of our custom type indices keyed to which base type they extend
+            -- Solid types extend FERTILIZER; liquid types extend LIQUIDFERTILIZER
+            local solidNames  = {"UREA", "AMS", "MAP", "DAP", "POTASH"}
+            local liquidNames = {"UAN32", "UAN28", "ANHYDROUS", "STARTER"}
+
+            local solidIndices  = {}
+            local liquidIndices = {}
+            for _, name in ipairs(solidNames) do
+                local idx = fm:getFillTypeIndexByName(name)
+                if idx then table.insert(solidIndices, idx) end
+            end
+            for _, name in ipairs(liquidNames) do
+                local idx = fm:getFillTypeIndexByName(name)
+                if idx then table.insert(liquidIndices, idx) end
+            end
+
+            local spec = vehicleSelf.spec_fillUnit
+            if not spec or not spec.fillUnits then return end
+
+            for _, fillUnit in pairs(spec.fillUnits) do
+                if fillUnit.supportedFillTypes then
+                    local addSolid  = fertIndex    and fillUnit.supportedFillTypes[fertIndex]
+                    local addLiquid = liqFertIndex and fillUnit.supportedFillTypes[liqFertIndex]
+
+                    if addSolid then
+                        for _, idx in ipairs(solidIndices) do
+                            fillUnit.supportedFillTypes[idx] = true
+                        end
+                    end
+                    if addLiquid then
+                        for _, idx in ipairs(liquidIndices) do
+                            fillUnit.supportedFillTypes[idx] = true
+                        end
+                    end
+                end
+            end
+        end
+    )
+    self:register(FillUnit, "onPostLoad", original, "FillUnit.onPostLoad")
+    SoilLogger.info("[OK] FillUnit hook installed - custom types injected into compatible vehicles")
+    return true
+end
