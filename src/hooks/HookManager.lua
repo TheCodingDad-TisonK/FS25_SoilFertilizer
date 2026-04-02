@@ -265,7 +265,12 @@ function HookManager:installSprayerAreaHook()
                 local fillType = g_fillTypeManager:getFillTypeByIndex(fillTypeIndex)
                 if not fillType then return end
 
-                if not SoilConstants.FERTILIZER_PROFILES[fillType.name] then return end
+                -- Check herbicide first (mutually exclusive with fertilizer profiles)
+                local herbTypes = SoilConstants.WEED_PRESSURE and SoilConstants.WEED_PRESSURE.HERBICIDE_TYPES
+                local herbEffectiveness = herbTypes and herbTypes[fillType.name]
+                local isFertilizer = SoilConstants.FERTILIZER_PROFILES[fillType.name] ~= nil
+
+                if not isFertilizer and not herbEffectiveness then return end
 
                 -- Resolve field from vehicle root position
                 local x, _, z = getWorldTranslation(self.rootNode)
@@ -292,7 +297,14 @@ function HookManager:installSprayerAreaHook()
                 SoilLogger.debug("Sprayer/Spreader hook: Field %d, %s, %.1fL (x%.2f rate)",
                     fieldId, fillType.name, effectiveLiters, rateMultiplier)
 
-                g_SoilFertilityManager.soilSystem:onFertilizerApplied(fieldId, fillTypeIndex, effectiveLiters)
+                if isFertilizer then
+                    g_SoilFertilityManager.soilSystem:onFertilizerApplied(fieldId, fillTypeIndex, effectiveLiters)
+                end
+
+                -- Herbicide application reduces weed pressure
+                if herbEffectiveness and g_SoilFertilityManager.soilSystem.onHerbicideApplied then
+                    g_SoilFertilityManager.soilSystem:onHerbicideApplied(fieldId, herbEffectiveness)
+                end
 
                 -- Over-application burn check (nutrient fertilizers only, not lime)
                 local entry = SoilConstants.FERTILIZER_PROFILES[fillType.name]

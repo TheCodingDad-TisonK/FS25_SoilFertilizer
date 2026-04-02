@@ -496,3 +496,54 @@ SoilConstants.SPRAYER_RATE = {
     L_PER_HA_TO_GAL_PER_AC = 0.10694,  -- multiply L/ha by this for gal/ac
     KG_PER_HA_TO_LB_PER_AC = 0.89218,  -- multiply kg/ha by this for lb/ac
 }
+
+-- ========================================
+-- WEED PRESSURE (Issue #98)
+-- ========================================
+-- Field-level 0-100 score representing weed density.
+-- Grows daily with seasonal/rain multipliers.
+-- Herbicide spray reduces pressure and temporarily suppresses growth.
+-- Tillage (any cultivator/plow) resets pressure to 0.
+-- Harvest applies a yield penalty proportional to pressure tier.
+SoilConstants.WEED_PRESSURE = {
+    -- Daily base growth rate (points/day) by current pressure tier
+    -- Growth slows as pressure approaches capacity
+    GROWTH_RATE_LOW    = 1.2,   -- 0-20:  slow germination phase
+    GROWTH_RATE_MID    = 2.0,   -- 20-50: active competition phase
+    GROWTH_RATE_HIGH   = 1.2,   -- 50-75: density self-limiting
+    GROWTH_RATE_PEAK   = 0.4,   -- 75-100: near carrying capacity
+
+    -- Seasonal growth multipliers (season index matches FS25 environment.currentSeason)
+    -- Season 1=Spring, 2=Summer, 3=Fall, 4=Winter (matches SoilConstants.SEASONAL_EFFECTS)
+    SEASONAL_SPRING = 1.4,  -- peak germination
+    SEASONAL_SUMMER = 1.6,  -- maximum growth
+    SEASONAL_FALL   = 0.7,  -- slowing down
+    SEASONAL_WINTER = 0.05, -- near dormancy
+
+    -- Rain bonus added to base daily rate when it is raining
+    RAIN_BONUS = 0.5,
+
+    -- Herbicide fill type names → effectiveness multiplier (0.0-1.0)
+    -- Any fill type not listed here is NOT treated as herbicide
+    HERBICIDE_TYPES = {
+        HERBICIDE = 1.0,
+        PESTICIDE = 0.8,
+    },
+    -- Pressure points removed on a single herbicide application
+    HERBICIDE_PRESSURE_REDUCTION = 30,
+    -- Number of in-game days herbicide suppresses weed growth after application
+    HERBICIDE_DURATION_DAYS = 14,
+
+    -- Tillage resets pressure to 0 (handled in onPlowing)
+
+    -- Harvest yield penalty at each pressure tier
+    YIELD_PENALTY_LOW    = 0.00,  -- 0-20:  none
+    YIELD_PENALTY_MID    = 0.05,  -- 20-50: -5%
+    YIELD_PENALTY_HIGH   = 0.15,  -- 50-75: -15%
+    YIELD_PENALTY_PEAK   = 0.30,  -- 75-100: -30%
+
+    -- HUD tier thresholds
+    LOW    = 20,
+    MEDIUM = 50,
+    HIGH   = 75,
+}

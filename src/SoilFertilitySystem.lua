@@ -91,6 +91,31 @@ end
 ---@param liters number Amount harvested in liters
 ---@param strawRatio number 0.0-1.0 fraction of straw that was chopped (0 = dropped/collected, 1 = fully chopped)
 function SoilFertilitySystem:onHarvest(fieldId, fruitTypeIndex, liters, strawRatio)
+    -- Apply weed pressure yield penalty before nutrient update so the penalty
+    -- is applied to the actual liters harvested (not already depleted).
+    if self.settings.weedPressure and SoilConstants.WEED_PRESSURE then
+        local field = self.fieldData[fieldId]
+        if field then
+            local wp = SoilConstants.WEED_PRESSURE
+            local pressure = field.weedPressure or 0
+            local penalty
+            if pressure < wp.LOW then
+                penalty = wp.YIELD_PENALTY_LOW
+            elseif pressure < wp.MEDIUM then
+                penalty = wp.YIELD_PENALTY_MID
+            elseif pressure < wp.HIGH then
+                penalty = wp.YIELD_PENALTY_HIGH
+            else
+                penalty = wp.YIELD_PENALTY_PEAK
+            end
+            if penalty > 0 then
+                liters = liters * (1.0 - penalty)
+                self:log("Weed penalty field %d: pressure=%.0f, penalty=%.0f%%",
+                    fieldId, pressure, penalty * 100)
+            end
+        end
+    end
+
     self:updateFieldNutrients(fieldId, fruitTypeIndex, liters, strawRatio)
 
     SoilLogger.debug("Harvest: Field %d, Crop %d, %.0fL", fieldId, fruitTypeIndex, liters)
@@ -215,6 +240,14 @@ function SoilFertilitySystem:onPlowing(fieldId)
         changed = true
     end
 
+    -- Plowing benefit 3: Reset weed pressure to 0 (tillage buries weed seeds/roots)
+    if self.settings.weedPressure and (field.weedPressure or 0) > 0 then
+        self:log("[Plowing] Field %d: weed pressure %.0f -> 0 (tillage reset)", fieldId, field.weedPressure)
+        field.weedPressure = 0
+        field.herbicideDaysLeft = 0
+        changed = true
+    end
+
     -- Debug logging
     if self.settings.debugMode and changed then
         self:info("[Plowing] Field %d: OM %.1f->%.1f, pH %.2f->%.2f",
@@ -224,6 +257,34 @@ function SoilFertilitySystem:onPlowing(fieldId)
     -- Broadcast to clients if server in multiplayer
     if changed and g_server and g_currentMission and g_currentMission.missionDynamicInfo.isMultiplayer then
         if field and SoilFieldUpdateEvent then
+            g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
+        end
+    end
+end
+
+--- Called when herbicide is applied to a field.
+--- Reduces weed pressure and activates suppression window.
+---@param fieldId number
+---@param effectiveness number 0.0-1.0 herbicide effectiveness multiplier
+function SoilFertilitySystem:onHerbicideApplied(fieldId, effectiveness)
+    if not self.settings.weedPressure then return end
+    if not SoilConstants.WEED_PRESSURE then return end
+
+    local field = self:getOrCreateField(fieldId, false)
+    if not field then return end
+
+    local wp = SoilConstants.WEED_PRESSURE
+    local reduction = wp.HERBICIDE_PRESSURE_REDUCTION * (effectiveness or 1.0)
+    local before = field.weedPressure or 0
+    field.weedPressure = math.max(0, before - reduction)
+    field.herbicideDaysLeft = wp.HERBICIDE_DURATION_DAYS
+
+    self:log("[Herbicide] Field %d: weed pressure %.0f -> %.0f, protected for %d days",
+        fieldId, before, field.weedPressure, field.herbicideDaysLeft)
+
+    -- Broadcast in multiplayer
+    if g_server and g_currentMission and g_currentMission.missionDynamicInfo.isMultiplayer then
+        if SoilFieldUpdateEvent then
             g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
         end
     end
@@ -549,7 +610,9 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing)
                 lastHarvest = 0,
                 fertilizerApplied = 0,
                 initialized = true,
-                fromPF = true
+                fromPF = true,
+                weedPressure = 0,
+                herbicideDaysLeft = 0,
             }
             self:log("Created field %d from PF data", fieldId)
             return self.fieldData[fieldId]
@@ -579,7 +642,9 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing)
         lastHarvest = 0,
         fertilizerApplied = 0,
         initialized = true,
-        fromPF = false
+        fromPF = false,
+        weedPressure = 0,
+        herbicideDaysLeft = 0,
     }
 
     self:log("Lazy-created field %d with natural soil variation", fieldId)
@@ -622,6 +687,46 @@ function SoilFertilitySystem:updateDailySoil()
             field.pH = math.min(limits.PH_NEUTRAL_LOW, field.pH + phNorm.RATE)
         elseif field.pH > limits.PH_NEUTRAL_HIGH then
             field.pH = math.max(limits.PH_NEUTRAL_HIGH, field.pH - phNorm.RATE)
+        end
+
+        -- Weed pressure daily growth
+        if self.settings.weedPressure and SoilConstants.WEED_PRESSURE then
+            local wp = SoilConstants.WEED_PRESSURE
+            local pressure = field.weedPressure or 0
+            local herbDays = field.herbicideDaysLeft or 0
+
+            -- Decrement herbicide protection
+            if herbDays > 0 then
+                field.herbicideDaysLeft = herbDays - 1
+            end
+
+            -- Only grow when not under herbicide protection
+            if (field.herbicideDaysLeft or 0) <= 0 then
+                -- Base rate by current pressure tier
+                local baseRate
+                if pressure < wp.LOW then
+                    baseRate = wp.GROWTH_RATE_LOW
+                elseif pressure < wp.MEDIUM then
+                    baseRate = wp.GROWTH_RATE_MID
+                elseif pressure < wp.HIGH then
+                    baseRate = wp.GROWTH_RATE_HIGH
+                else
+                    baseRate = wp.GROWTH_RATE_PEAK
+                end
+
+                -- Seasonal multiplier
+                local seasonMult = 1.0
+                if g_currentMission and g_currentMission.environment then
+                    local season = g_currentMission.environment.currentSeason
+                    if season == 1 then seasonMult = wp.SEASONAL_SPRING
+                    elseif season == 2 then seasonMult = wp.SEASONAL_SUMMER
+                    elseif season == 3 then seasonMult = wp.SEASONAL_FALL
+                    elseif season == 4 then seasonMult = wp.SEASONAL_WINTER
+                    end
+                end
+
+                field.weedPressure = math.min(100, pressure + baseRate * seasonMult)
+            end
         end
     end
 
@@ -945,9 +1050,19 @@ function SoilFertilitySystem:getFieldInfo(fieldId)
     -- Resolve current crop name: prefer the live growing fruit (what's actually in
     -- the ground right now) over lastCrop, which is only set on harvest and will be
     -- stale as soon as the next crop is sown.
+    -- #99 fix: field.id / field.fieldId are nil in FS25; our fieldId is farmland.id.
+    -- g_fieldManager:getFieldById() searches by field.id which is always nil, so it
+    -- returns the wrong field or nil depending on list position.
+    -- Correct approach: iterate g_fieldManager.fields and match farmland.id.
     local cropName = nil
-    if g_fieldManager then
-        local fsField = g_fieldManager:getFieldById(fieldId)
+    if g_fieldManager and g_fieldManager.fields then
+        local fsField = nil
+        for _, f in ipairs(g_fieldManager.fields) do
+            if f and f.farmland and f.farmland.id == fieldId then
+                fsField = f
+                break
+            end
+        end
         if fsField then
             local ok, fieldState = pcall(function() return fsField:getFieldState() end)
             if ok and fieldState and fieldState.fruitTypeIndex ~= FruitType.UNKNOWN then
@@ -973,6 +1088,8 @@ function SoilFertilitySystem:getFieldInfo(fieldId)
         lastCrop = cropName,
         daysSinceHarvest = field.lastHarvest > 0 and (currentDay - field.lastHarvest) or 0,
         fertilizerApplied = field.fertilizerApplied or 0,
+        weedPressure = field.weedPressure or 0,
+        herbicideActive = (field.herbicideDaysLeft or 0) > 0,
         needsFertilization = not self.PFActive and (
             field.nitrogen < fertThresholds.nitrogen or
             field.phosphorus < fertThresholds.phosphorus or
@@ -1025,6 +1142,8 @@ function SoilFertilitySystem:saveToXMLFile(xmlFile, key)
             setXMLString(xmlFile, fieldKey .. "#lastCrop", field.lastCrop or "")
             setXMLInt(xmlFile, fieldKey .. "#lastHarvest", field.lastHarvest or 0)
             setXMLFloat(xmlFile, fieldKey .. "#fertilizerApplied", field.fertilizerApplied or 0)
+            setXMLFloat(xmlFile, fieldKey .. "#weedPressure", field.weedPressure or 0)
+            setXMLInt(xmlFile, fieldKey .. "#herbicideDaysLeft", field.herbicideDaysLeft or 0)
 
             index = index + 1
         else
@@ -1062,6 +1181,8 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
             lastCrop = getXMLString(xmlFile, fieldKey .. "#lastCrop"),
             lastHarvest = getXMLInt(xmlFile, fieldKey .. "#lastHarvest") or 0,
             fertilizerApplied = getXMLFloat(xmlFile, fieldKey .. "#fertilizerApplied") or 0,
+            weedPressure = getXMLFloat(xmlFile, fieldKey .. "#weedPressure") or 0,
+            herbicideDaysLeft = getXMLInt(xmlFile, fieldKey .. "#herbicideDaysLeft") or 0,
             initialized = true
         }
 
