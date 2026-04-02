@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <modDesc descVersion="105">
     <author>TisonK</author>
-    <version>1.1.9.0</version>
+    <version>1.2.0.0</version>
     <modName>FS25_SoilFertilizer</modName>
     <title>
         <en>Realistic Soil & Fertilizer</en>
@@ -38,10 +38,11 @@
     </extraSourceFiles>
 
     <actions>
-        <action name="SF_TOGGLE_HUD" category="ONFOOT" />
+        <action name="SF_TOGGLE_HUD"  category="ONFOOT" />
         <action name="SF_SOIL_REPORT" category="ONFOOT" />
         <action name="SF_RATE_UP"     category="VEHICLE" />
         <action name="SF_RATE_DOWN"   category="VEHICLE" />
+        <action name="SF_TOGGLE_AUTO" category="VEHICLE" />
     </actions>
 
     <l10n>
@@ -1516,7 +1517,7 @@
             <binding device="KB_MOUSE_DEFAULT" input="KEY_LEFTBRACKET" />
         </actionBinding>
         <actionBinding action="SF_TOGGLE_AUTO">
-            <binding device="KB_MOUSE_DEFAULT" input="KEY_lalt KEY_z" />
+            <binding device="KB_MOUSE_DEFAULT" input="KEY_lshift KEY_l" />
         </actionBinding>
     </inputBinding>
 

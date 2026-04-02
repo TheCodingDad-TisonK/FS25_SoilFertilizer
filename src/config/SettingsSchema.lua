@@ -203,4 +203,4 @@ function SettingsSchema.validate(id, value)
     return value
 end
 
-print("[SoilFertilizer] Settings schema loaded")
+SoilLogger.info("Settings schema loaded")

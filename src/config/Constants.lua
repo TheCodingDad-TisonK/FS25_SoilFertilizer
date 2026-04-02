@@ -258,6 +258,24 @@ SoilConstants.STATUS_THRESHOLDS = {
     potassium  = { poor = 20, fair = 40 },
 }
 
+-- ========================================
+-- PPM DISPLAY SCALE
+-- ========================================
+-- Converts the internal 0-100 nutrient scale to soil-test PPM values for
+-- HUD and Report display.  Calibrated so that the fair→good status boundary
+-- aligns with standard agronomic lab benchmarks (Mehlich-3 / ammonium-acetate):
+--   N: Good >150 ppm  (plant-available nitrogen)
+--   P: Good >27 ppm   (Bray/Mehlich-3 phosphorus; lab "Good" ~25-30 ppm)
+--   K: Good >160 ppm  (Mehlich-3 potassium; lab "Good" ~150 ppm)
+-- The bar in the HUD still runs 0-100 % (internal), where 100 % represents
+-- the luxury-level ceiling (300 ppm N, 60 ppm P, 400 ppm K).
+-- Nothing in the simulation changes — these multipliers are display-only.
+SoilConstants.PPM_DISPLAY = {
+    N = 3.0,   -- internal 50 (fair→good boundary) = 150 ppm
+    P = 0.6,   -- internal 45 (fair→good boundary) = 27 ppm
+    K = 4.0,   -- internal 40 (fair→good boundary) = 160 ppm
+}
+
 -- Threshold for "needs fertilization" warning
 SoilConstants.FERTILIZATION_THRESHOLDS = {
     nitrogen = 30,
@@ -404,7 +422,7 @@ SoilConstants.NETWORK = {
     }
 }
 
-print("[SoilFertilizer] Constants loaded")
+SoilLogger.info("Constants loaded")
 
 -- ========================================
 -- SPRAYER APPLICATION RATE

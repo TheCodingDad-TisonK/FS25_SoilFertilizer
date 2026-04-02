@@ -65,7 +65,7 @@ end
 ---@param pfActive boolean|nil If true, skips nutrient-modifying hooks (PF Viewer Mode)
 function HookManager:installAll(soilSystem, pfActive)
     if self.installed then
-        print("[SoilFertilizer] Hooks already installed, skipping re-installation")
+        SoilLogger.warning("Hooks already installed, skipping re-installation")
         return
     end
 
@@ -73,13 +73,13 @@ function HookManager:installAll(soilSystem, pfActive)
     local failCount = 0
 
     if pfActive then
-        print("[SoilFertilizer] Viewer Mode (Precision Farming active) - installing minimal hooks...")
+        SoilLogger.info("Viewer Mode (Precision Farming active) - installing minimal hooks...")
         -- Only install ownership hook for field cleanup - skip all nutrient-modifying hooks
         local success = self:installOwnershipHook()
         if success then successCount = successCount + 1 else failCount = failCount + 1 end
-        print(string.format("[SoilFertilizer] Viewer Mode hooks: %d installed, %d failed", successCount, failCount))
+        SoilLogger.info("Viewer Mode hooks: %d installed, %d failed", successCount, failCount)
     else
-        print("[SoilFertilizer] Installing event hooks...")
+        SoilLogger.info("Installing event hooks...")
 
         -- Harvest hook (FruitUtil)
         local harvestOk = self:installHarvestHook()
@@ -101,11 +101,15 @@ function HookManager:installAll(soilSystem, pfActive)
         local plowingOk = self:installPlowingHook()
         if plowingOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
-        print(string.format("[SoilFertilizer] Hook installation complete: %d/%d successful, %d failed",
-            successCount, successCount + failCount, failCount))
+        -- Patch vanilla fill units to accept custom fertilizer types
+        local fillUnitOk = self:installFillUnitHook()
+        if fillUnitOk then successCount = successCount + 1 else failCount = failCount + 1 end
+
+        SoilLogger.info("Hook installation complete: %d/%d successful, %d failed",
+            successCount, successCount + failCount, failCount)
 
         if failCount > 0 then
-            print("[SoilFertilizer WARNING] Some hooks failed to install - mod functionality may be limited")
+            SoilLogger.warning("Some hooks failed to install - mod functionality may be limited")
         end
     end
 
@@ -121,16 +125,16 @@ function HookManager:uninstallAll()
         local hook = self.hooks[i]
         if hook.cleanup then
             hook.cleanup()
-            print(string.format("[SoilFertilizer] Cleaned up: %s", hook.name or "?"))
+            SoilLogger.debug("Cleaned up: %s", hook.name or "?")
         elseif hook.target and hook.key and hook.original then
             hook.target[hook.key] = hook.original
-            print(string.format("[SoilFertilizer] Restored original: %s", hook.name or hook.key))
+            SoilLogger.debug("Restored original: %s", hook.name or hook.key)
         end
     end
 
     self.hooks = {}
     self.installed = false
-    print("[SoilFertilizer] All hooks uninstalled")
+    SoilLogger.info("All hooks uninstalled")
 end
 
 --- Register a hook for later cleanup.
@@ -167,7 +171,7 @@ end
 ---@return boolean success True if hook installed successfully
 function HookManager:installHarvestHook()
     if not Combine or type(Combine.addCutterArea) ~= "function" then
-        print("[SoilFertilizer WARNING] Could not install harvest hook - Combine.addCutterArea not available")
+        SoilLogger.warning("Could not install harvest hook - Combine.addCutterArea not available")
         return false
     end
 
@@ -208,12 +212,12 @@ function HookManager:installHarvestHook()
             end)
 
             if not success then
-                print("[SoilFertilizer ERROR] Harvest hook failed: " .. tostring(errorMsg))
+                SoilLogger.error("Harvest hook failed: %s", tostring(errorMsg))
             end
         end
     )
     self:register(Combine, "addCutterArea", original, "Combine.addCutterArea")
-    print("[SoilFertilizer] [OK] Harvest hook installed (Combine.addCutterArea)")
+    SoilLogger.info("[OK] Harvest hook installed (Combine.addCutterArea)")
     return true
 end
 
@@ -228,7 +232,7 @@ end
 ---@return boolean success True if hook installed successfully
 function HookManager:installSprayerAreaHook()
     if not Sprayer or type(Sprayer.onEndWorkAreaProcessing) ~= "function" then
-        print("[SoilFertilizer WARNING] Could not install sprayer area hook - Sprayer.onEndWorkAreaProcessing not available")
+        SoilLogger.warning("Could not install sprayer area hook - Sprayer.onEndWorkAreaProcessing not available")
         return false
     end
 
@@ -254,7 +258,7 @@ function HookManager:installSprayerAreaHook()
             local fillTypeIndex = spec.workAreaParameters.sprayFillType
             local liters = spec.workAreaParameters.usage
 
-            if not fillTypeIndex or fillTypeIndex <= 0 then return end
+            if (not fillTypeIndex or fillTypeIndex <= 0) then return end
             if not liters or liters <= 0 then return end
 
             local success, errorMsg = pcall(function()
@@ -299,12 +303,12 @@ function HookManager:installSprayerAreaHook()
             end)
 
             if not success then
-                print("[SoilFertilizer ERROR] Sprayer area hook failed: " .. tostring(errorMsg))
+                SoilLogger.error("Sprayer area hook failed: %s", tostring(errorMsg))
             end
         end
     )
     self:register(Sprayer, "onEndWorkAreaProcessing", original, "Sprayer.onEndWorkAreaProcessing")
-    print("[SoilFertilizer] [OK] Sprayer/Spreader hook installed (Sprayer.onEndWorkAreaProcessing)")
+    SoilLogger.info("[OK] Sprayer/Spreader hook installed (Sprayer.onEndWorkAreaProcessing)")
     return true
 end
 
@@ -319,7 +323,7 @@ end
 ---@return boolean success True if hook installed successfully
 function HookManager:installOwnershipHook()
     if not g_messageCenter or not MessageType or not MessageType.FARMLAND_OWNER_CHANGED then
-        print("[SoilFertilizer WARNING] Could not install ownership hook - g_messageCenter or MessageType.FARMLAND_OWNER_CHANGED not available")
+        SoilLogger.warning("Could not install ownership hook - g_messageCenter or MessageType.FARMLAND_OWNER_CHANGED not available")
         return false
     end
 
@@ -337,7 +341,7 @@ function HookManager:installOwnershipHook()
         end)
 
         if not success then
-            print("[SoilFertilizer ERROR] Ownership hook failed: " .. tostring(errorMsg))
+            SoilLogger.error("Ownership hook failed: %s", tostring(errorMsg))
         end
     end
 
@@ -348,7 +352,7 @@ function HookManager:installOwnershipHook()
         g_messageCenter:unsubscribeAll(self)
     end)
 
-    print("[SoilFertilizer] [OK] Field ownership hook installed (MessageType.FARMLAND_OWNER_CHANGED)")
+    SoilLogger.info("[OK] Field ownership hook installed (MessageType.FARMLAND_OWNER_CHANGED)")
     return true
 end
 
@@ -358,13 +362,13 @@ end
 ---@return boolean success True if hook installed successfully
 function HookManager:installWeatherHook()
     if not g_currentMission or not g_currentMission.environment then
-        print("[SoilFertilizer WARNING] Could not install weather hook - environment not available")
+        SoilLogger.warning("Could not install weather hook - environment not available")
         return false
     end
 
     local env = g_currentMission.environment
     if not env.update then
-        print("[SoilFertilizer WARNING] Could not install weather hook - environment.update not found")
+        SoilLogger.warning("Could not install weather hook - environment.update not found")
         return false
     end
 
@@ -384,12 +388,12 @@ function HookManager:installWeatherHook()
             end)
 
             if not success then
-                print("[SoilFertilizer ERROR] Weather hook failed: " .. tostring(errorMsg))
+                SoilLogger.error("Weather hook failed: %s", tostring(errorMsg))
             end
         end
     )
     self:register(env, "update", original, "environment.update")
-    print("[SoilFertilizer] [OK] Weather hook installed successfully")
+    SoilLogger.info("[OK] Weather hook installed successfully")
     return true
 end
 
@@ -399,7 +403,7 @@ end
 ---@return boolean success True if hook installed successfully
 function HookManager:installPlowingHook()
     if not Cultivator or type(Cultivator.processCultivatorArea) ~= "function" then
-        print("[SoilFertilizer WARNING] Could not install plowing hook - Cultivator.processCultivatorArea not available or replaced")
+        SoilLogger.warning("Could not install plowing hook - Cultivator.processCultivatorArea not available or replaced")
         return false
     end
 
@@ -454,12 +458,117 @@ function HookManager:installPlowingHook()
             end)
 
             if not success then
-                print("[SoilFertilizer ERROR] Plowing hook failed: " .. tostring(errorMsg))
+                SoilLogger.error("Plowing hook failed: %s", tostring(errorMsg))
             end
         end
     )
     self:register(Cultivator, "processCultivatorArea", original, "Cultivator.processCultivatorArea")
-    print("[SoilFertilizer] [OK] Plowing hook installed successfully")
+    SoilLogger.info("[OK] Plowing hook installed successfully")
     return true
 end
 
+-- =========================================================
+-- HOOK 6: Patch vehicle fill units to accept custom types
+-- =========================================================
+-- Vanilla spreaders/sprayers have fillUnit#fillTypes="FERTILIZER" or "LIQUIDFERTILIZER".
+-- FS25 resolves these by NAME at parse time, yielding only the single vanilla type index.
+-- Our fillTypes.xml extends those categories, but category extension only helps vehicles
+-- that use fillTypeCategories="..." (category lookup), not fillTypes="..." (name lookup).
+-- Therefore vanilla equipment never gets DAP/UREA/etc added to their supportedFillTypes.
+--
+-- Fix: hook FillUnit.onPostLoad to inject our custom fill type indices into any fill unit
+-- that already accepts the corresponding vanilla base type (FERTILIZER or LIQUIDFERTILIZER).
+-- This runs on every vehicle after its fill unit data is fully parsed, covering all
+-- vanilla spreaders, sprayers, and any mod equipment using the standard category names.
+--
+-- Additionally, after the hook is installed, all vehicles already in memory are patched
+-- retroactively. This covers the save/load scenario where FillUnit.onPostLoad fires during
+-- Mission00.load — well before our deferred hook installation — leaving saved sprayers
+-- unable to accept custom fill types until a new one is bought from the shop.
+---@return boolean success
+function HookManager:installFillUnitHook()
+    if not FillUnit or type(FillUnit.onPostLoad) ~= "function" then
+        SoilLogger.warning("Could not install FillUnit hook - FillUnit.onPostLoad not available")
+        return false
+    end
+
+    -- Resolve fill type indices once at install time (used by hook closure + retroactive patch)
+    local fm = g_fillTypeManager
+    if not fm then
+        SoilLogger.warning("FillUnit hook: g_fillTypeManager not available")
+        return false
+    end
+
+    local fertIndex    = fm:getFillTypeIndexByName("FERTILIZER")
+    local liqFertIndex = fm:getFillTypeIndexByName("LIQUIDFERTILIZER")
+    if not fertIndex and not liqFertIndex then
+        SoilLogger.warning("FillUnit hook: base fertilizer fill types not registered")
+        return false
+    end
+
+    local solidNames  = {"UREA", "AMS", "MAP", "DAP", "POTASH"}
+    local liquidNames = {"UAN32", "UAN28", "ANHYDROUS", "STARTER"}
+
+    local solidIndices  = {}
+    local liquidIndices = {}
+    for _, name in ipairs(solidNames) do
+        local idx = fm:getFillTypeIndexByName(name)
+        if idx then table.insert(solidIndices, idx) end
+    end
+    for _, name in ipairs(liquidNames) do
+        local idx = fm:getFillTypeIndexByName(name)
+        if idx then table.insert(liquidIndices, idx) end
+    end
+
+    -- Shared helper: inject custom fill type indices into one vehicle's fill units
+    local function patchVehicleFillUnits(vehicleSelf)
+        local spec = vehicleSelf.spec_fillUnit
+        if not spec or not spec.fillUnits then return end
+        for _, fillUnit in pairs(spec.fillUnits) do
+            if fillUnit.supportedFillTypes then
+                local addSolid  = fertIndex    and fillUnit.supportedFillTypes[fertIndex]
+                local addLiquid = liqFertIndex and fillUnit.supportedFillTypes[liqFertIndex]
+                if addSolid then
+                    for _, idx in ipairs(solidIndices) do
+                        fillUnit.supportedFillTypes[idx] = true
+                    end
+                end
+                if addLiquid then
+                    for _, idx in ipairs(liquidIndices) do
+                        fillUnit.supportedFillTypes[idx] = true
+                    end
+                end
+            end
+        end
+    end
+
+    local original = FillUnit.onPostLoad
+    FillUnit.onPostLoad = Utils.appendedFunction(
+        original,
+        function(vehicleSelf, savegame)
+            patchVehicleFillUnits(vehicleSelf)
+        end
+    )
+    self:register(FillUnit, "onPostLoad", original, "FillUnit.onPostLoad")
+    SoilLogger.info("[OK] FillUnit hook installed - custom types injected into compatible vehicles")
+
+    -- Retroactively patch all vehicles already in memory.
+    -- On save/load, FillUnit.onPostLoad fires during Mission00.load (before our deferred
+    -- hook installation runs), so saved sprayers miss the injection entirely. Patching them
+    -- here ensures they accept custom fill types without needing a shop purchase.
+    -- NOTE: In FS25, vehicles are stored in g_currentMission.vehicleSystem.vehicles,
+    --       not g_currentMission.vehicles (which does not exist).
+    local vehicleSystem = g_currentMission and g_currentMission.vehicleSystem
+    if vehicleSystem and vehicleSystem.vehicles then
+        local patched = 0
+        for _, vehicle in pairs(vehicleSystem.vehicles) do
+            patchVehicleFillUnits(vehicle)
+            patched = patched + 1
+        end
+        if patched > 0 then
+            SoilLogger.info("Retroactively patched %d existing vehicles with custom fill types", patched)
+        end
+    end
+
+    return true
+end

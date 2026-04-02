@@ -93,10 +93,7 @@ end
 function SoilFertilitySystem:onHarvest(fieldId, fruitTypeIndex, liters, strawRatio)
     self:updateFieldNutrients(fieldId, fruitTypeIndex, liters, strawRatio)
 
-    if self.settings.debugMode then
-        print(string.format("[SoilFertilizer DEBUG] Harvest: Field %d, Crop %d, %.0fL",
-            fieldId, fruitTypeIndex, liters))
-    end
+    SoilLogger.debug("Harvest: Field %d, Crop %d, %.0fL", fieldId, fruitTypeIndex, liters)
 
     -- Broadcast to clients if server in multiplayer
     if g_server and g_currentMission and g_currentMission.missionDynamicInfo.isMultiplayer then
@@ -117,10 +114,7 @@ function SoilFertilitySystem:onFertilizerApplied(fieldId, fillTypeIndex, liters)
 
     local fillType = g_fillTypeManager and g_fillTypeManager:getFillTypeByIndex(fillTypeIndex)
 
-    if self.settings.debugMode then
-        print(string.format("[SoilFertilizer DEBUG] Fertilizer: Field %d, %s, %.0fL",
-            fieldId, fillType and fillType.name or "unknown", liters))
-    end
+    SoilLogger.debug("Fertilizer: Field %d, %s, %.0fL", fieldId, fillType and fillType.name or "unknown", liters)
 
     -- Show application confirmation notification (singleplayer only; MP clients see HUD refresh via SoilFieldUpdateEvent)
     -- Shown at most once per field per in-game day to avoid spam (hook fires every frame while spraying)
@@ -254,17 +248,15 @@ end
 
 -- Logging helpers
 function SoilFertilitySystem:log(msg, ...)
-    if self.settings and self.settings.debugMode then
-        print(string.format("[SoilFertilizer DEBUG] " .. msg, ...))
-    end
+    SoilLogger.debug(msg, ...)
 end
 
 function SoilFertilitySystem:info(msg, ...)
-    print(string.format("[SoilFertilizer] " .. msg, ...))
+    SoilLogger.info(msg, ...)
 end
 
 function SoilFertilitySystem:warning(msg, ...)
-    print(string.format("[SoilFertilizer WARNING] " .. msg, ...))
+    SoilLogger.warning(msg, ...)
 end
 
 -- Notification helper
@@ -458,9 +450,7 @@ function SoilFertilitySystem:scanFields()
             local actualFieldId = field.farmland and field.farmland.id
 
             if actualFieldId and actualFieldId > 0 then
-                if self.settings.debugMode then
-                    print(string.format("[SoilFertilizer DEBUG] Found field %d", actualFieldId))
-                end
+                SoilLogger.debug("Found field %d", actualFieldId)
 
                 self:getOrCreateField(actualFieldId, true)
                 fieldCount = fieldCount + 1
