@@ -480,6 +480,11 @@ end
 -- that already accepts the corresponding vanilla base type (FERTILIZER or LIQUIDFERTILIZER).
 -- This runs on every vehicle after its fill unit data is fully parsed, covering all
 -- vanilla spreaders, sprayers, and any mod equipment using the standard category names.
+--
+-- Additionally, after the hook is installed, all vehicles already in memory are patched
+-- retroactively. This covers the save/load scenario where FillUnit.onPostLoad fires during
+-- Mission00.load — well before our deferred hook installation — leaving saved sprayers
+-- unable to accept custom fill types until a new one is bought from the shop.
 ---@return boolean success
 function HookManager:installFillUnitHook()
     if not FillUnit or type(FillUnit.onPostLoad) ~= "function" then
@@ -487,57 +492,83 @@ function HookManager:installFillUnitHook()
         return false
     end
 
-    local original = FillUnit.onPostLoad
-    FillUnit.onPostLoad = Utils.appendedFunction(
-        original,
-        function(vehicleSelf, savegame)
-            -- Resolve vanilla base type indices once (cached after first call)
-            local fm = g_fillTypeManager
-            if not fm then return end
+    -- Resolve fill type indices once at install time (used by hook closure + retroactive patch)
+    local fm = g_fillTypeManager
+    if not fm then
+        SoilLogger.warning("FillUnit hook: g_fillTypeManager not available")
+        return false
+    end
 
-            local fertIndex      = fm:getFillTypeIndexByName("FERTILIZER")
-            local liqFertIndex   = fm:getFillTypeIndexByName("LIQUIDFERTILIZER")
-            if not fertIndex and not liqFertIndex then return end
+    local fertIndex    = fm:getFillTypeIndexByName("FERTILIZER")
+    local liqFertIndex = fm:getFillTypeIndexByName("LIQUIDFERTILIZER")
+    if not fertIndex and not liqFertIndex then
+        SoilLogger.warning("FillUnit hook: base fertilizer fill types not registered")
+        return false
+    end
 
-            -- Build lists of our custom type indices keyed to which base type they extend
-            -- Solid types extend FERTILIZER; liquid types extend LIQUIDFERTILIZER
-            local solidNames  = {"UREA", "AMS", "MAP", "DAP", "POTASH"}
-            local liquidNames = {"UAN32", "UAN28", "ANHYDROUS", "STARTER"}
+    local solidNames  = {"UREA", "AMS", "MAP", "DAP", "POTASH"}
+    local liquidNames = {"UAN32", "UAN28", "ANHYDROUS", "STARTER"}
 
-            local solidIndices  = {}
-            local liquidIndices = {}
-            for _, name in ipairs(solidNames) do
-                local idx = fm:getFillTypeIndexByName(name)
-                if idx then table.insert(solidIndices, idx) end
-            end
-            for _, name in ipairs(liquidNames) do
-                local idx = fm:getFillTypeIndexByName(name)
-                if idx then table.insert(liquidIndices, idx) end
-            end
+    local solidIndices  = {}
+    local liquidIndices = {}
+    for _, name in ipairs(solidNames) do
+        local idx = fm:getFillTypeIndexByName(name)
+        if idx then table.insert(solidIndices, idx) end
+    end
+    for _, name in ipairs(liquidNames) do
+        local idx = fm:getFillTypeIndexByName(name)
+        if idx then table.insert(liquidIndices, idx) end
+    end
 
-            local spec = vehicleSelf.spec_fillUnit
-            if not spec or not spec.fillUnits then return end
-
-            for _, fillUnit in pairs(spec.fillUnits) do
-                if fillUnit.supportedFillTypes then
-                    local addSolid  = fertIndex    and fillUnit.supportedFillTypes[fertIndex]
-                    local addLiquid = liqFertIndex and fillUnit.supportedFillTypes[liqFertIndex]
-
-                    if addSolid then
-                        for _, idx in ipairs(solidIndices) do
-                            fillUnit.supportedFillTypes[idx] = true
-                        end
+    -- Shared helper: inject custom fill type indices into one vehicle's fill units
+    local function patchVehicleFillUnits(vehicleSelf)
+        local spec = vehicleSelf.spec_fillUnit
+        if not spec or not spec.fillUnits then return end
+        for _, fillUnit in pairs(spec.fillUnits) do
+            if fillUnit.supportedFillTypes then
+                local addSolid  = fertIndex    and fillUnit.supportedFillTypes[fertIndex]
+                local addLiquid = liqFertIndex and fillUnit.supportedFillTypes[liqFertIndex]
+                if addSolid then
+                    for _, idx in ipairs(solidIndices) do
+                        fillUnit.supportedFillTypes[idx] = true
                     end
-                    if addLiquid then
-                        for _, idx in ipairs(liquidIndices) do
-                            fillUnit.supportedFillTypes[idx] = true
-                        end
+                end
+                if addLiquid then
+                    for _, idx in ipairs(liquidIndices) do
+                        fillUnit.supportedFillTypes[idx] = true
                     end
                 end
             end
         end
+    end
+
+    local original = FillUnit.onPostLoad
+    FillUnit.onPostLoad = Utils.appendedFunction(
+        original,
+        function(vehicleSelf, savegame)
+            patchVehicleFillUnits(vehicleSelf)
+        end
     )
     self:register(FillUnit, "onPostLoad", original, "FillUnit.onPostLoad")
     SoilLogger.info("[OK] FillUnit hook installed - custom types injected into compatible vehicles")
+
+    -- Retroactively patch all vehicles already in memory.
+    -- On save/load, FillUnit.onPostLoad fires during Mission00.load (before our deferred
+    -- hook installation runs), so saved sprayers miss the injection entirely. Patching them
+    -- here ensures they accept custom fill types without needing a shop purchase.
+    -- NOTE: In FS25, vehicles are stored in g_currentMission.vehicleSystem.vehicles,
+    --       not g_currentMission.vehicles (which does not exist).
+    local vehicleSystem = g_currentMission and g_currentMission.vehicleSystem
+    if vehicleSystem and vehicleSystem.vehicles then
+        local patched = 0
+        for _, vehicle in pairs(vehicleSystem.vehicles) do
+            patchVehicleFillUnits(vehicle)
+            patched = patched + 1
+        end
+        if patched > 0 then
+            SoilLogger.info("Retroactively patched %d existing vehicles with custom fill types", patched)
+        end
+    end
+
     return true
 end
