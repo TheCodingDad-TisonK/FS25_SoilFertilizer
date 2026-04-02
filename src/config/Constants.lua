@@ -492,6 +492,12 @@ SoilConstants.SPRAYER_RATE = {
         OM = 5.0
     },
 
+    -- Speed compensation floor (km/h)
+    -- Prevents division-by-zero and erratic corrections at near-zero speeds.
+    -- actualSpeed and speedLimit are both clamped to this minimum before
+    -- computing the speed correction ratio.
+    SPEED_CORRECTION_MIN_KMH = 0.5,
+
     -- Unit conversions for display
     L_PER_HA_TO_GAL_PER_AC = 0.10694,  -- multiply L/ha by this for gal/ac
     KG_PER_HA_TO_LB_PER_AC = 0.89218,  -- multiply kg/ha by this for lb/ac

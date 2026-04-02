@@ -292,6 +292,18 @@ function HookManager:installSprayerAreaHook()
                 -- Apply rate multiplier
                 local rm = g_SoilFertilityManager.sprayerRateManager
                 local rateMultiplier = (rm ~= nil) and rm:getMultiplier(self.id) or 1.0
+
+                -- Speed-dependent correction: scale to actual speed vs configured speedLimit.
+                -- At full speed the correction is 1.0 (no change). Driving slower than the
+                -- vehicle's configured speedLimit reduces the effective dose proportionally,
+                -- matching real-world application rate behaviour.
+                -- self:getLastSpeed() returns km/h in FS25; self.speedLimit is also km/h.
+                local speedFloor = SoilConstants.SPRAYER_RATE.SPEED_CORRECTION_MIN_KMH
+                local actualSpeed = math.max(speedFloor, self:getLastSpeed())
+                local configSpeed = math.max(speedFloor, self.speedLimit or speedFloor)
+                local speedCorrection = math.min(1.0, actualSpeed / configSpeed)
+                rateMultiplier = rateMultiplier * speedCorrection
+
                 local effectiveLiters = liters * rateMultiplier
 
                 SoilLogger.debug("Sprayer/Spreader hook: Field %d, %s, %.1fL (x%.2f rate)",
