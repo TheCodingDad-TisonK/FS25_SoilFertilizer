@@ -41,16 +41,13 @@ source(modDirectory .. "src/ui/SoilReportDialog.lua")
 -- 5. Network
 source(modDirectory .. "src/network/NetworkEvents.lua")
 
--- Globals
 local sfm = nil
 local SAFE_MODE = false
 
--- Helper: check if mod is initialized
 local function isEnabled()
     return sfm ~= nil
 end
 
--- Compatibility check
 local function checkModCompatibility()
     if g_modIsLoaded then
         for modName, _ in pairs(g_modIsLoaded) do
@@ -102,7 +99,6 @@ local function loadedMission(mission, node)
     -- Note: Multiplayer sync is handled in loadFromXMLFile hook
 end
 
--- Load handler
 local function load(mission)
     local isDedicatedServer = mission:getIsServer() and not mission:getIsClient()
     local disableGUI = isDedicatedServer or SAFE_MODE or not mission:getIsClient()
@@ -135,7 +131,6 @@ local function load(mission)
     end
 end
 
--- Unload handler
 local function unload()
     if sfm ~= nil then
         sfm:delete()
@@ -214,7 +209,6 @@ FSBaseMission.draw = Utils.appendedFunction(FSBaseMission.draw, function(mission
     end
 end)
 
--- Install save/load hooks
 hookSaveLoadEvents()
 
 -- Route mouse events to SoilHUD (for drag/resize edit mode)
@@ -227,7 +221,6 @@ function soilMouseHandler:mouseEvent(posX, posY, isDown, isUp, button, eventUsed
 end
 addModEventListener(soilMouseHandler)
 
--- Console commands
 function soilfertility()
     if g_SoilFertilityManager and g_SoilFertilityManager.settingsGUI then
         return g_SoilFertilityManager.settingsGUI:consoleCommandHelp()
@@ -293,7 +286,6 @@ function soilStatus()
     end
 end
 
--- Expose global console functions
 getfenv(0)["soilfertility"] = soilfertility
 getfenv(0)["soilStatus"] = soilStatus
 getfenv(0)["soilEnable"] = function()

@@ -52,7 +52,6 @@ function AsyncRetryHandler:start()
     return true
 end
 
--- Perform single attempt
 function AsyncRetryHandler:attempt()
     if self.state ~= "pending" then return end
 
@@ -69,7 +68,6 @@ function AsyncRetryHandler:attempt()
     end
 end
 
--- Check if condition met (call from update loop)
 function AsyncRetryHandler:checkCondition()
     if self.state ~= "pending" then return end
 
@@ -101,15 +99,12 @@ end
 function AsyncRetryHandler:update(dt)
     if self.state ~= "pending" then return end
 
-    -- Check if condition already met
     self:checkCondition()
     if self.state ~= "pending" then return end
 
-    -- Calculate elapsed time
     local currentTime = g_currentMission and g_currentMission.time or 0
     local elapsed = currentTime - self.lastAttemptTime
 
-    -- Get delay for current attempt
     local delayIndex = math.min(self.attempts, #self.delays)
     local retryDelay = self.delays[delayIndex]
 
@@ -136,7 +131,6 @@ function AsyncRetryHandler:update(dt)
     end
 end
 
--- Reset handler
 function AsyncRetryHandler:reset()
     self.state = "idle"
     self.attempts = 0
@@ -145,7 +139,6 @@ function AsyncRetryHandler:reset()
     SoilLogger.debug("[%s] Reset", self.name)
 end
 
--- Check if running
 function AsyncRetryHandler:isPending()
     return self.state == "pending"
 end
