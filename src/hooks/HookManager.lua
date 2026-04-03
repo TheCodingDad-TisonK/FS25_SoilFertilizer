@@ -118,10 +118,11 @@ function HookManager:installAll(soilSystem, pfActive)
     -- is populated from map XML before loadMission00Finished fires).
     self:registerCustomSprayTypes()
 
-    -- Hook g_motionPathEffectManager:getSharedMotionPathEffect so that
-    -- FertilizerMotionPathEffect (and similar) fall back to the vanilla FERTILIZER /
-    -- LIQUIDFERTILIZER shared effect when their custom fill type has no entry.
-    -- Must run in both full and viewer-mode paths.
+    -- Remap custom fill types to vanilla visual equivalents for all effect classes
+    -- (FertilizerMotionPathEffect, ShaderPlaneEffect, etc.). Two-layer approach:
+    -- primary hook on g_effectManager:setEffectTypeInfo intercepts before storage;
+    -- backup hook on g_motionPathEffectManager:getSharedMotionPathEffect catches any
+    -- indices that bypass setEffectTypeInfo. Must run in both full and viewer-mode paths.
     self:installEffectTypeHook()
 
     -- Inject custom fill type names into each vehicle's sprayType.fillTypes arrays so
@@ -248,47 +249,29 @@ end
 -- =========================================================
 -- EFFECT TYPE REMAP: custom fill types → vanilla visuals
 -- =========================================================
--- FertilizerMotionPathEffect (and related visual effect classes) only have
--- effect mesh/material configurations for vanilla fill types that were
--- present when the vehicle XML was authored. Custom fill types (MAP, UREA,
--- UAN32, ANHYDROUS, etc.) have no such configuration, so the game logs
--- "Could not find motion path effect for settings" and shows no spreading
--- or spray visual.
+-- FS25 effect classes (FertilizerMotionPathEffect, ShaderPlaneEffect, etc.)
+-- only have visual configurations for vanilla fill types that were present
+-- when the vehicle or map XML was authored. Custom fill types (UREA, UAN32,
+-- ANHYDROUS, etc.) have no such configuration, so the game logs "Could not
+-- find motion path effect for settings" and shows no visual at all.
 --
--- Fix: wrap g_effectManager:setEffectTypeInfo to substitute custom fill type
--- indices with their vanilla visual equivalents (solid → FERTILIZER, liquid →
--- LIQUIDFERTILIZER) before the effect system looks up configurations. This is
--- purely cosmetic — nutrient tracking in the sprayer hook uses the real index.
+-- Root cause for sprayers: g_effectManager:setEffectTypeInfo stores the
+-- custom fill type index on each effect object. Downstream lookups
+-- (getSharedMotionPathEffect, shader parameter tables, etc.) find no entry
+-- for the custom type and fail silently — effects never start.
+--
+-- Fix (two-layer):
+--   PRIMARY: Wrap g_effectManager:setEffectTypeInfo to substitute custom
+--   fill type indices with their vanilla visual equivalents before the index
+--   is stored on any effect object. Every downstream system then sees only
+--   vanilla types and works normally. Purely cosmetic — nutrient tracking
+--   uses the real fill type index from the sprayer hook, not the effect.
+--
+--   BACKUP: Wrap g_motionPathEffectManager:getSharedMotionPathEffect so
+--   that if a custom index somehow reaches it (e.g. set through a code path
+--   that bypasses setEffectTypeInfo), we remap and retry before returning nil.
 ---@return boolean success
 function HookManager:installEffectTypeHook()
-    -- g_motionPathEffectManager:getSharedMotionPathEffect(motionPathEffectObject) is the
-    -- function that FertilizerMotionPathEffect (and related classes) call to find their
-    -- shared i3d mesh/material configuration. It iterates all loaded shared effects and
-    -- calls motionPathEffectObject:getIsSharedEffectMatching(candidate, allowAlt).
-    --
-    -- getIsSharedEffectMatching on FertilizerMotionPathEffect compares the object's stored
-    -- fillTypeIndex (set by setTypeInfo) against the shared effect's effectTypes strings.
-    -- The shared effects loaded from the map XML only have effectType="FERTILIZER" or
-    -- "LIQUIDFERTILIZER". Our custom type names ("POTASH", "UAN32", etc.) never appear
-    -- in any effectType string, so getIsSharedEffectMatching always returns false for them
-    -- → getSharedMotionPathEffect returns nil → "Could not find motion path effect" error
-    -- → no spreading/spraying visual.
-    --
-    -- Fix: wrap getSharedMotionPathEffect so that when the lookup returns nil for a custom
-    -- fill type, we temporarily swap the object's fillTypeIndex to the vanilla equivalent
-    -- (FERTILIZER or LIQUIDFERTILIZER) and retry. The vanilla index WILL match, giving
-    -- the correct visual. We restore the original index immediately after the retry so
-    -- the object's state is unchanged for all other purposes.
-    --
-    -- Field name probe: FertilizerMotionPathEffect stores fillTypeIndex under one of
-    -- several possible names. We probe for all known variants at hook-build time by
-    -- checking what's present on the first effect object we encounter. At retry time we
-    -- swap whichever field the object actually has.
-    if not g_motionPathEffectManager or
-       type(g_motionPathEffectManager.getSharedMotionPathEffect) ~= "function" then
-        SoilLogger.warning("Effect type hook: g_motionPathEffectManager.getSharedMotionPathEffect not available - skipping")
-        return false
-    end
     if not g_fillTypeManager then
         SoilLogger.warning("Effect type hook: g_fillTypeManager not available - skipping")
         return false
@@ -319,50 +302,61 @@ function HookManager:installEffectTypeHook()
         return false
     end
 
-    -- Known field names that FertilizerMotionPathEffect (and subclasses) may use
-    -- to store the active fill type index. We try each in order.
-    local FILL_TYPE_FIELDS = { "fillTypeIndex", "fillType", "sprayTypeIndex", "currentFillType" }
-
-    local original = g_motionPathEffectManager.getSharedMotionPathEffect
-    g_motionPathEffectManager.getSharedMotionPathEffect = function(mgr, effectObj)
-        -- Fast path: call original and return if it succeeded
-        local result = original(mgr, effectObj)
-        if result ~= nil then return result end
-
-        -- Original returned nil. Check if effectObj has a custom fill type index
-        -- stored under any of the known field names.
-        local fieldName = nil
-        local customIdx = nil
-        for _, fname in ipairs(FILL_TYPE_FIELDS) do
-            local val = effectObj[fname]
-            if val ~= nil and remap[val] then
-                fieldName = fname
-                customIdx = val
-                break
-            end
-        end
-
-        if fieldName == nil then
-            -- Not one of our custom types - nothing we can do
-            return nil
-        end
-
-        -- Temporarily replace the fill type index with the vanilla equivalent and retry
-        local vanillaIdx = remap[customIdx]
-        effectObj[fieldName] = vanillaIdx
-        result = original(mgr, effectObj)
-        effectObj[fieldName] = customIdx  -- always restore, even if retry also fails
-
-        return result  -- may still be nil if vanilla lookup also fails (shouldn't happen)
-    end
-
-    self:registerCleanup("g_motionPathEffectManager.getSharedMotionPathEffect", function()
-        g_motionPathEffectManager.getSharedMotionPathEffect = original
-    end)
-
     local count = 0
     for _ in pairs(remap) do count = count + 1 end
-    SoilLogger.info("[OK] Effect type hook installed on g_motionPathEffectManager - %d custom fill types remapped", count)
+
+    -- PRIMARY: hook g_effectManager:setEffectTypeInfo
+    -- This fires before the fill type index is stored on the effect object,
+    -- so all downstream lookups (FertilizerMotionPathEffect shared effect,
+    -- ShaderPlaneEffect shader tables, etc.) only ever see vanilla types.
+    if g_effectManager and type(g_effectManager.setEffectTypeInfo) == "function" then
+        local origSetTypeInfo = g_effectManager.setEffectTypeInfo
+        g_effectManager.setEffectTypeInfo = function(mgr, effects, fillType, ...)
+            local mapped = (fillType ~= nil and remap[fillType]) or fillType
+            return origSetTypeInfo(mgr, effects, mapped, ...)
+        end
+        self:registerCleanup("g_effectManager.setEffectTypeInfo", function()
+            g_effectManager.setEffectTypeInfo = origSetTypeInfo
+        end)
+        SoilLogger.info("[OK] Effect type hook installed on g_effectManager.setEffectTypeInfo - %d custom fill types remapped", count)
+    else
+        SoilLogger.warning("Effect type hook: g_effectManager.setEffectTypeInfo not available - sprayer visuals may not show")
+    end
+
+    -- BACKUP: hook g_motionPathEffectManager:getSharedMotionPathEffect
+    -- Handles any custom fill type index that bypasses setEffectTypeInfo and
+    -- reaches the motion path lookup directly (e.g. via direct field writes).
+    if g_motionPathEffectManager and
+       type(g_motionPathEffectManager.getSharedMotionPathEffect) == "function" then
+        local FILL_TYPE_FIELDS = { "fillTypeIndex", "fillType", "sprayTypeIndex", "currentFillType" }
+        local origGetShared = g_motionPathEffectManager.getSharedMotionPathEffect
+        g_motionPathEffectManager.getSharedMotionPathEffect = function(mgr, effectObj)
+            local result = origGetShared(mgr, effectObj)
+            if result ~= nil then return result end
+
+            local fieldName, customIdx
+            for _, fname in ipairs(FILL_TYPE_FIELDS) do
+                local val = effectObj[fname]
+                if val ~= nil and remap[val] then
+                    fieldName = fname
+                    customIdx = val
+                    break
+                end
+            end
+            if fieldName == nil then return nil end
+
+            local vanillaIdx = remap[customIdx]
+            effectObj[fieldName] = vanillaIdx
+            result = origGetShared(mgr, effectObj)
+            effectObj[fieldName] = customIdx
+            return result
+        end
+        self:registerCleanup("g_motionPathEffectManager.getSharedMotionPathEffect", function()
+            g_motionPathEffectManager.getSharedMotionPathEffect = origGetShared
+        end)
+        SoilLogger.info("[OK] Effect type hook backup installed on g_motionPathEffectManager - %d custom fill types remapped", count)
+    end
+
     return true
 end
 
