@@ -118,6 +118,11 @@ function HookManager:installAll(soilSystem, pfActive)
     -- is populated from map XML before loadMission00Finished fires).
     self:registerCustomSprayTypes()
 
+    -- Remap custom fill types to vanilla equivalents inside g_effectManager so that
+    -- FertilizerMotionPathEffect (and similar) find a valid effect configuration.
+    -- Must run in both full and viewer-mode paths.
+    self:installEffectTypeHook()
+
     self.installed = true
 end
 
@@ -225,6 +230,72 @@ function HookManager:registerCustomSprayTypes()
         "[OK] Custom spray types registered: %d types (liquid LPS=%.5f, solid LPS=%.5f, %d skipped/unavailable)",
         registered, liquidLPS, solidLPS, skipped
     )
+end
+
+-- =========================================================
+-- EFFECT TYPE REMAP: custom fill types → vanilla visuals
+-- =========================================================
+-- FertilizerMotionPathEffect (and related visual effect classes) only have
+-- effect mesh/material configurations for vanilla fill types that were
+-- present when the vehicle XML was authored. Custom fill types (MAP, UREA,
+-- UAN32, ANHYDROUS, etc.) have no such configuration, so the game logs
+-- "Could not find motion path effect for settings" and shows no spreading
+-- or spray visual.
+--
+-- Fix: wrap g_effectManager:setEffectTypeInfo to substitute custom fill type
+-- indices with their vanilla visual equivalents (solid → FERTILIZER, liquid →
+-- LIQUIDFERTILIZER) before the effect system looks up configurations. This is
+-- purely cosmetic — nutrient tracking in the sprayer hook uses the real index.
+---@return boolean success
+function HookManager:installEffectTypeHook()
+    if not g_effectManager or type(g_effectManager.setEffectTypeInfo) ~= "function" then
+        SoilLogger.warning("Effect type hook: g_effectManager.setEffectTypeInfo not available - skipping")
+        return false
+    end
+    if not g_fillTypeManager then
+        SoilLogger.warning("Effect type hook: g_fillTypeManager not available - skipping")
+        return false
+    end
+
+    local fm = g_fillTypeManager
+    local fertIdx = fm:getFillTypeIndexByName("FERTILIZER")
+    local liqIdx  = fm:getFillTypeIndexByName("LIQUIDFERTILIZER")
+
+    -- Build remap: customIndex → vanillaIndex
+    local remap = {}
+    if fertIdx then
+        for _, name in ipairs({ "UREA", "AMS", "MAP", "DAP", "POTASH" }) do
+            local idx = fm:getFillTypeIndexByName(name)
+            if idx then remap[idx] = fertIdx end
+        end
+    end
+    if liqIdx then
+        for _, name in ipairs({ "UAN32", "UAN28", "ANHYDROUS", "STARTER" }) do
+            local idx = fm:getFillTypeIndexByName(name)
+            if idx then remap[idx] = liqIdx end
+        end
+    end
+
+    if not next(remap) then
+        SoilLogger.warning("Effect type hook: no custom fill types found — skipping")
+        return false
+    end
+
+    local original = g_effectManager.setEffectTypeInfo
+    g_effectManager.setEffectTypeInfo = function(mgr, effects, fillType)
+        local remapped = remap[fillType]
+        if remapped then fillType = remapped end
+        return original(mgr, effects, fillType)
+    end
+
+    self:registerCleanup("g_effectManager.setEffectTypeInfo", function()
+        g_effectManager.setEffectTypeInfo = original
+    end)
+
+    local count = 0
+    for _ in pairs(remap) do count = count + 1 end
+    SoilLogger.info("[OK] Effect type hook installed - %d custom fill types remapped for visuals", count)
+    return true
 end
 
 --- Register a cleanup-only hook (e.g. message center subscriptions).
