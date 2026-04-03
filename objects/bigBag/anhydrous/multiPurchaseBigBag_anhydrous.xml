@@ -38,7 +38,7 @@
         <fillUnitConfigurations>
             <fillUnitConfiguration>
                 <fillUnits>
-                    <fillUnit fillTypes="ANHYDROUS" capacity="1000" />
+                    <fillUnit fillTypes="ANHYDROUS" capacity="10000" />
                 </fillUnits>
             </fillUnitConfiguration>
         </fillUnitConfigurations>

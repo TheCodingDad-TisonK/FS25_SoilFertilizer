@@ -217,6 +217,19 @@ SoilConstants.FERTILIZER_TYPES = {
 }
 
 -- ========================================
+-- BIG BAG CAPACITY
+-- ========================================
+-- Capacity (in litres) for all BigBag objects.
+-- Real IBC / FIBC bags hold 500–1000 kg of dry product or 1000L of liquid.
+-- The game's sprayers consume product quickly, so we use a larger value
+-- (10,000 L) to give a realistic field-spanning amount per bag.
+-- Change this value here and update the matching capacity/startFillLevel
+-- attributes in every objects/bigBag/*/bigBag_*.xml and multiPurchase*.xml.
+SoilConstants.BIGBAG = {
+    CAPACITY = 10000,  -- litres per bag
+}
+
+-- ========================================
 -- SINGLE-NUTRIENT PURCHASABLE FILL TYPES
 -- ========================================
 -- These fill types are declared in modDesc.xml <fillTypes> and are available
@@ -442,8 +455,6 @@ SoilConstants.SPRAYER_RATE = {
         1.60, 1.70, 1.80, 1.90, 2.00,
     },
     DEFAULT_INDEX             = 10,    -- 1.0x
-    AUTO_RATE_MIN_STEP        = 5,     -- 0.50x: auto mode lower bound
-    AUTO_RATE_MAX_STEP        = 14,    -- 1.40x: stays below BURN_GUARANTEED_THRESHOLD
     BURN_RISK_THRESHOLD       = 1.25,  -- above this: chance of burn
     BURN_GUARANTEED_THRESHOLD = 1.50,  -- at or above this: burn every time
     BURN_PH_DROP_RISK         = 0.15,  -- pH units lost on probabilistic burn
@@ -493,12 +504,6 @@ SoilConstants.SPRAYER_RATE = {
         pH = 7.0,
         OM = 5.0
     },
-
-    -- Speed compensation floor (km/h)
-    -- Prevents division-by-zero and erratic corrections at near-zero speeds.
-    -- actualSpeed and speedLimit are both clamped to this minimum before
-    -- computing the speed correction ratio.
-    SPEED_CORRECTION_MIN_KMH = 0.5,
 
     -- Unit conversions for display
     L_PER_HA_TO_GAL_PER_AC = 0.10694,  -- multiply L/ha by this for gal/ac

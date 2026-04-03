@@ -289,64 +289,9 @@ function HookManager:installSprayerAreaHook()
                 end
                 if not fieldId or fieldId <= 0 then return end
 
-                -- Apply rate multiplier (auto or manual)
+                -- Apply rate multiplier
                 local rm = g_SoilFertilityManager.sprayerRateManager
-                local rateMultiplier
-
-                if rm ~= nil and rm:getAutoMode(self.id) and
-                   g_SoilFertilityManager.settings.autoRateControl then
-
-                    local soilField = g_SoilFertilityManager.soilSystem.fieldData[fieldId]
-                    local profile   = SoilConstants.FERTILIZER_PROFILES[fillType.name]
-                    local targets   = SoilConstants.SPRAYER_RATE.AUTO_RATE_TARGETS
-                    local cfg       = SoilConstants.SPRAYER_RATE
-
-                    local deficitRatio = 0.0
-                    if soilField and profile then
-                        if profile.N and profile.N > 0 and targets.N and targets.N > 0 then
-                            deficitRatio = math.max(deficitRatio,
-                                math.max(0, 1.0 - (soilField.nitrogen   / targets.N)))
-                        end
-                        if profile.P and profile.P > 0 and targets.P and targets.P > 0 then
-                            deficitRatio = math.max(deficitRatio,
-                                math.max(0, 1.0 - (soilField.phosphorus / targets.P)))
-                        end
-                        if profile.K and profile.K > 0 and targets.K and targets.K > 0 then
-                            deficitRatio = math.max(deficitRatio,
-                                math.max(0, 1.0 - (soilField.potassium  / targets.K)))
-                        end
-                        if profile.pH and profile.pH > 0 and targets.pH and targets.pH > 0 then
-                            deficitRatio = math.max(deficitRatio,
-                                math.max(0, 1.0 - (soilField.pH / targets.pH)))
-                        end
-                    end
-                    deficitRatio = math.max(0.0, math.min(1.0, deficitRatio))
-
-                    local minIdx  = cfg.AUTO_RATE_MIN_STEP
-                    local maxIdx  = cfg.AUTO_RATE_MAX_STEP
-                    local autoIdx = math.floor(minIdx + deficitRatio * (maxIdx - minIdx) + 0.5)
-                    autoIdx = math.max(minIdx, math.min(maxIdx, autoIdx))
-
-                    rm:setIndex(self.id, autoIdx)
-                    rateMultiplier = cfg.STEPS[autoIdx]
-
-                    SoilLogger.debug("Auto-rate: Field %d %s deficit=%.2f -> step %d (x%.2f)",
-                        fieldId, fillType.name, deficitRatio, autoIdx, rateMultiplier)
-                else
-                    rateMultiplier = (rm ~= nil) and rm:getMultiplier(self.id) or 1.0
-                end
-
-                -- Speed-dependent correction: scale to actual speed vs configured speedLimit.
-                -- At full speed the correction is 1.0 (no change). Driving slower than the
-                -- vehicle's configured speedLimit reduces the effective dose proportionally,
-                -- matching real-world application rate behaviour.
-                -- self:getLastSpeed() returns km/h in FS25; self.speedLimit is also km/h.
-                local speedFloor = SoilConstants.SPRAYER_RATE.SPEED_CORRECTION_MIN_KMH
-                local actualSpeed = math.max(speedFloor, self:getLastSpeed())
-                local configSpeed = math.max(speedFloor, self.speedLimit or speedFloor)
-                local speedCorrection = math.min(1.0, actualSpeed / configSpeed)
-                rateMultiplier = rateMultiplier * speedCorrection
-
+                local rateMultiplier = (rm ~= nil) and rm:getMultiplier(self.id) or 1.0
                 local effectiveLiters = liters * rateMultiplier
 
                 SoilLogger.debug("Sprayer/Spreader hook: Field %d, %s, %.1fL (x%.2f rate)",

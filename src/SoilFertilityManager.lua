@@ -484,10 +484,6 @@ function SoilFertilityManager:onSprayerRateUpInput()
     if not vehicle then return end
     local rm = self.sprayerRateManager
     if rm then
-        if rm:getAutoMode(vehicle.id) then
-            rm:setAutoMode(vehicle.id, false)
-            SoilNetworkEvents_SendSprayerAutoMode(vehicle.id, false)
-        end
         local newIdx = rm:cycleUp(vehicle.id)
         SoilNetworkEvents_SendSprayerRate(vehicle.id, newIdx)
     end
@@ -498,10 +494,6 @@ function SoilFertilityManager:onSprayerRateDownInput()
     if not vehicle then return end
     local rm = self.sprayerRateManager
     if rm then
-        if rm:getAutoMode(vehicle.id) then
-            rm:setAutoMode(vehicle.id, false)
-            SoilNetworkEvents_SendSprayerAutoMode(vehicle.id, false)
-        end
         local newIdx = rm:cycleDown(vehicle.id)
         SoilNetworkEvents_SendSprayerRate(vehicle.id, newIdx)
     end
