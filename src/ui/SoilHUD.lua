@@ -1013,6 +1013,7 @@ function SoilHUD:drawSprayerRatePanel()
         if profile then
             local targetText = "Target: "
             local targets = SoilConstants.AUTO_RATE_TARGETS
+            if not targets then return end
             if profile.N and profile.N > 0 then targetText = targetText .. targets.N .. "N " end
             if profile.P and profile.P > 0 then targetText = targetText .. targets.P .. "P " end
             if profile.K and profile.K > 0 then targetText = targetText .. targets.K .. "K " end

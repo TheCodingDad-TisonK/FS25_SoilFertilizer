@@ -113,6 +113,11 @@ function HookManager:installAll(soilSystem, pfActive)
         end
     end
 
+    -- Register custom fill types in SprayTypeManager so they get correct tank
+    -- drain rates and visual spray effects. Must run after hooks (g_sprayTypeManager
+    -- is populated from map XML before loadMission00Finished fires).
+    self:registerCustomSprayTypes()
+
     self.installed = true
 end
 
@@ -149,6 +154,77 @@ function HookManager:register(target, key, original, name)
         original = original,
         name = name or key
     })
+end
+
+-- =========================================================
+-- SPRAY TYPE REGISTRATION: custom fill types
+-- =========================================================
+-- FS25 determines tank drain rate and visual spray effects (terrain overlay,
+-- nozzle particles) from g_sprayTypeManager entries. Base-game types
+-- (FERTILIZER, LIQUIDFERTILIZER, MANURE, LIME, etc.) are registered by the
+-- map XML. Our custom types are NOT in any map XML, so FS25 falls back to
+-- litersPerSecond=1 — ~300-400x higher than vanilla. This empties tanks
+-- instantly and suppresses all spray visuals (FSDensityMapUtil.updateSprayArea
+-- is a no-op with a nil spray type).
+--
+-- Fix: inherit litersPerSecond and sprayGroundType from the closest vanilla
+-- equivalent, then call g_sprayTypeManager:addSprayType() for each custom type.
+---@return nil
+function HookManager:registerCustomSprayTypes()
+    if not g_sprayTypeManager then
+        SoilLogger.warning("registerCustomSprayTypes: g_sprayTypeManager not available - skipping")
+        return
+    end
+    if not g_fillTypeManager then
+        SoilLogger.warning("registerCustomSprayTypes: g_fillTypeManager not available - skipping")
+        return
+    end
+
+    -- Borrow litersPerSecond and sprayGroundType from the vanilla base types.
+    local liqType = g_sprayTypeManager:getSprayTypeByName("LIQUIDFERTILIZER")
+    local dryType = g_sprayTypeManager:getSprayTypeByName("FERTILIZER")
+
+    if not liqType and not dryType then
+        SoilLogger.warning("registerCustomSprayTypes: vanilla spray types not found - skipping")
+        return
+    end
+
+    local liquidLPS         = liqType and liqType.litersPerSecond or 0
+    local liquidGroundType  = liqType and liqType.sprayGroundType or 1
+    local solidLPS          = dryType and dryType.litersPerSecond or 0
+    local solidGroundType   = dryType and dryType.sprayGroundType or 1
+
+    -- Liquid nitrogen / starter types → inherit from LIQUIDFERTILIZER
+    local liquidNames = { "UAN32", "UAN28", "ANHYDROUS", "STARTER" }
+    -- Granular/solid types → inherit from FERTILIZER
+    local solidNames  = { "UREA", "AMS", "MAP", "DAP", "POTASH" }
+
+    local registered = 0
+    local skipped    = 0
+
+    for _, name in ipairs(liquidNames) do
+        if g_fillTypeManager:getFillTypeByName(name) then
+            -- addSprayType is idempotent: if already registered it updates the entry
+            g_sprayTypeManager:addSprayType(name, liquidLPS, "FERTILIZER", liquidGroundType, false)
+            registered = registered + 1
+        else
+            skipped = skipped + 1
+        end
+    end
+
+    for _, name in ipairs(solidNames) do
+        if g_fillTypeManager:getFillTypeByName(name) then
+            g_sprayTypeManager:addSprayType(name, solidLPS, "FERTILIZER", solidGroundType, false)
+            registered = registered + 1
+        else
+            skipped = skipped + 1
+        end
+    end
+
+    SoilLogger.info(
+        "[OK] Custom spray types registered: %d types (liquid LPS=%.5f, solid LPS=%.5f, %d skipped/unavailable)",
+        registered, liquidLPS, solidLPS, skipped
+    )
 end
 
 --- Register a cleanup-only hook (e.g. message center subscriptions).
