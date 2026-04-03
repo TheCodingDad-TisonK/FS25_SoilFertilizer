@@ -19,7 +19,7 @@ function SoilFertilitySystem.new(settings)
     self.lastUpdate = 0
     self.updateInterval = SoilConstants.TIMING.UPDATE_INTERVAL
     self.isInitialized = false
-    self.PFActive = false
+    self.PFActive = nil
     self.lastUpdateDay = 0
     self.hookManager = HookManager.new()
 

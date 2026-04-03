@@ -1012,7 +1012,7 @@ function SoilHUD:drawSprayerRatePanel()
         local profile = SoilConstants.FERTILIZER_PROFILES[fillType.name]
         if profile then
             local targetText = "Target: "
-            local targets = SoilConstants.AUTO_RATE_TARGETS
+            local targets = SoilConstants.SPRAYER_RATE.AUTO_RATE_TARGETS
             if not targets then return end
             if profile.N and profile.N > 0 then targetText = targetText .. targets.N .. "N " end
             if profile.P and profile.P > 0 then targetText = targetText .. targets.P .. "P " end
