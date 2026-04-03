@@ -202,17 +202,13 @@ function SoilSettingsGUI:consoleCommandShowSettings()
         local info = string.format(
             "=== Soil & Fertilizer Mod Settings ===\n" ..
             "Enabled: %s\nDebug Mode: %s\nFertility System: %s\nNutrient Cycles: %s\nFertilizer Costs: %s\nDifficulty: %s\nNotifications: %s\n" ..
-            -- NEW SETTINGS IN SHOW SETTINGS
-            "Seasonal Effects: %s\nRain Effects: %s\nPlowing Bonus: %s\n" ..
-            "PF Active: %s\nFields Tracked: %d\n" ..
+            "Seasonal Effects: %s\nRain Effects: %s\nPlowing Bonus: %s\nFields Tracked: %d\n" ..
             "================================",
             tostring(s.enabled), tostring(s.debugMode), tostring(s.fertilitySystem),
             tostring(s.nutrientCycles), tostring(s.fertilizerCosts),
             s:getDifficultyName(), tostring(s.showNotifications),
-            -- NEW SETTINGS VALUES
             tostring(s.seasonalEffects), tostring(s.rainEffects), tostring(s.plowingBonus),
-            tostring(g_SoilFertilityManager.soilSystem and g_SoilFertilityManager.soilSystem.PFActive or false),
-            g_SoilFertilityManager.soilSystem and #g_SoilFertilityManager.soilSystem.fieldData or 0
+            g_SoilFertilityManager.soilSystem and g_SoilFertilityManager.soilSystem:getFieldCount() or 0
         )
         print(info)
         return info

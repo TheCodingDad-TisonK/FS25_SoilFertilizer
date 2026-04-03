@@ -62,8 +62,7 @@ end
 --- When Precision Farming is active, skips nutrient-modifying hooks for efficiency
 --- Stores references for proper cleanup on uninstall
 ---@param soilSystem SoilFertilitySystem The soil system instance to connect hooks to
----@param pfActive boolean|nil If true, skips nutrient-modifying hooks (PF Viewer Mode)
-function HookManager:installAll(soilSystem, pfActive)
+function HookManager:installAll(soilSystem)
     if self.installed then
         SoilLogger.warning("Hooks already installed, skipping re-installation")
         return
@@ -72,45 +71,37 @@ function HookManager:installAll(soilSystem, pfActive)
     local successCount = 0
     local failCount = 0
 
-    if pfActive then
-        SoilLogger.info("Viewer Mode (Precision Farming active) - installing minimal hooks...")
-        -- Only install ownership hook for field cleanup - skip all nutrient-modifying hooks
-        local success = self:installOwnershipHook()
-        if success then successCount = successCount + 1 else failCount = failCount + 1 end
-        SoilLogger.info("Viewer Mode hooks: %d installed, %d failed", successCount, failCount)
-    else
-        SoilLogger.info("Installing event hooks...")
+    SoilLogger.info("Installing event hooks...")
 
-        -- Harvest hook (FruitUtil)
-        local harvestOk = self:installHarvestHook()
-        if harvestOk then successCount = successCount + 1 else failCount = failCount + 1 end
+    -- Harvest hook (FruitUtil)
+    local harvestOk = self:installHarvestHook()
+    if harvestOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
-        -- Fertilizer application hook (covers ALL sprayers + spreaders via Sprayer specialization)
-        local sprayerAreaOk = self:installSprayerAreaHook()
-        if sprayerAreaOk then successCount = successCount + 1 else failCount = failCount + 1 end
+    -- Fertilizer application hook (covers ALL sprayers + spreaders via Sprayer specialization)
+    local sprayerAreaOk = self:installSprayerAreaHook()
+    if sprayerAreaOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
-        -- Field ownership changes
-        local ownershipOk = self:installOwnershipHook()
-        if ownershipOk then successCount = successCount + 1 else failCount = failCount + 1 end
+    -- Field ownership changes
+    local ownershipOk = self:installOwnershipHook()
+    if ownershipOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
-        -- Weather/environment effects
-        local weatherOk = self:installWeatherHook()
-        if weatherOk then successCount = successCount + 1 else failCount = failCount + 1 end
+    -- Weather/environment effects
+    local weatherOk = self:installWeatherHook()
+    if weatherOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
-        -- Plowing benefits
-        local plowingOk = self:installPlowingHook()
-        if plowingOk then successCount = successCount + 1 else failCount = failCount + 1 end
+    -- Plowing benefits
+    local plowingOk = self:installPlowingHook()
+    if plowingOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
-        -- Patch vanilla fill units to accept custom fertilizer types
-        local fillUnitOk = self:installFillUnitHook()
-        if fillUnitOk then successCount = successCount + 1 else failCount = failCount + 1 end
+    -- Patch vanilla fill units to accept custom fertilizer types
+    local fillUnitOk = self:installFillUnitHook()
+    if fillUnitOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
-        SoilLogger.info("Hook installation complete: %d/%d successful, %d failed",
-            successCount, successCount + failCount, failCount)
+    SoilLogger.info("Hook installation complete: %d/%d successful, %d failed",
+        successCount, successCount + failCount, failCount)
 
-        if failCount > 0 then
-            SoilLogger.warning("Some hooks failed to install - mod functionality may be limited")
-        end
+    if failCount > 0 then
+        SoilLogger.warning("Some hooks failed to install - mod functionality may be limited")
     end
 
     -- Register custom fill types in SprayTypeManager so they get correct tank

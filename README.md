@@ -160,7 +160,7 @@ All integrations are detected automatically at runtime and fail gracefully if th
 
 | Mod | Behaviour |
 |---|---|
-| **Precision Farming DLC** | Auto-detected. Enters read-only mode — your PF soil data is displayed in the HUD without modification. No double-tracking, no conflicts. |
+| **Precision Farming DLC** | Compatible — both mods run independently. No conflicts. |
 | **FS25_SeasonalCropStress** | Soil pH and organic matter influence evapotranspiration rates per field. |
 | **FS25_NPCFavor** | NPC neighbour favour quests can reference your fields' soil state. |
 
@@ -207,7 +207,7 @@ All integrations are detected automatically at runtime and fail gracefully if th
 |---|---|
 | 🌱 **Base game lime indicator** | The base game's "needs liming" flag is a separate system from our pH tracking. Both update when you apply lime through the sprayer, but the indicators can show different states until the field is treated. Workaround: disable the base game's liming requirement in **Settings → Farming → Liming** to rely solely on our HUD. |
 | 🌐 **Multiplayer** | Soil simulation runs on the server only. Clients receive synced state on join and after each harvest or fertiliser event. |
-| 🔬 **Precision Farming** | When PF is detected, the mod enters read-only mode. All nutrient modification hooks are skipped to avoid conflict — PF data is displayed, not overwritten. |
+| 🔬 **Precision Farming** | Compatible — both mods track nutrients independently. No conflicts. |
 
 ---
 

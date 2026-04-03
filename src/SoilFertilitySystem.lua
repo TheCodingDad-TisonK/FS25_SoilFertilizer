@@ -19,7 +19,6 @@ function SoilFertilitySystem.new(settings)
     self.lastUpdate = 0
     self.updateInterval = SoilConstants.TIMING.UPDATE_INTERVAL
     self.isInitialized = false
-    self.PFActive = nil
     self.lastUpdateDay = 0
     self.hookManager = HookManager.new()
 
@@ -52,8 +51,6 @@ function SoilFertilitySystem:initialize()
 
     self:info("Initializing Soil Fertility System...")
 
-    self:checkPFCompatibility()
-
     -- Scan fields using real FieldManager
     if g_fieldManager then
         self:scanFields()
@@ -62,8 +59,7 @@ function SoilFertilitySystem:initialize()
     end
 
     -- Install hooks via HookManager
-    -- Pass PFActive flag to skip nutrient-modifying hooks if in Viewer Mode
-    self.hookManager:installAll(self, self.PFActive)
+    self.hookManager:installAll(self)
 
     self.isInitialized = true
     self:info("Soil Fertility System initialized successfully")
@@ -416,62 +412,6 @@ function SoilFertilitySystem:update(dt)
 end
 
 -- Check for Precision Farming compatibility
--- Verify PF API is actually accessible before committing to read-only mode.
--- On dedicated servers, g_precisionFarming may be present but its field data API
--- (fieldData table / soilMap:getFieldData) returns nothing. Falling back to
--- independent mode ensures fields are written and synced normally.
-function SoilFertilitySystem:checkPFCompatibility()
-    -- If PFActive is already set (by Manager), skip re-detection to avoid duplicate logging
-    if self.PFActive ~= nil then
-        return
-    end
-
-    self.PFActive = false
-
-    -- Step 1: Detect whether PF is loaded at all
-    local pfDetected = false
-
-    if g_precisionFarming then
-        pfDetected = true
-    elseif g_modIsLoaded then
-        for modName, _ in pairs(g_modIsLoaded) do
-            local lowerName = string.lower(tostring(modName))
-            if lowerName:find("precisionfarming") or lowerName:find("precision_farming") then
-                pfDetected = true
-                break
-            end
-        end
-    end
-
-    if not pfDetected then
-        return  -- PF not present, nothing to do
-    end
-
-    -- Step 2: Verify the PF field data API is actually accessible.
-    -- On dedicated servers the g_precisionFarming global exists but neither
-    -- fieldData nor soilMap:getFieldData are populated at mod-init time,
-    -- which would leave us in a broken read-only state with no data ever
-    -- reaching connected clients.
-    local pfApiAvailable = false
-    if g_precisionFarming then
-        if g_precisionFarming.fieldData and next(g_precisionFarming.fieldData) ~= nil then
-            pfApiAvailable = true
-        elseif g_precisionFarming.soilMap and type(g_precisionFarming.soilMap.getFieldData) == "function" then
-            pfApiAvailable = true
-        end
-    end
-
-    if pfApiAvailable then
-        self.PFActive = true
-        self:info("Precision Farming detected - enabling read-only mode")
-    else
-        -- PF is loaded but its API is not reachable (dedicated server or early init order).
-        -- Run in independent mode so field data is written and synced normally.
-        self.PFActive = false
-        self:warning("Precision Farming detected but API not accessible (dedicated server / load-order issue) - falling back to independent mode")
-    end
-end
-
 -- Scan all fields from FieldManager
 ---@return boolean True if successfully scanned fields, false if fields not ready yet
 function SoilFertilitySystem:scanFields()
@@ -572,7 +512,7 @@ function SoilFertilitySystem:onClientJoined(connection)
     self:info("Sent %d fields to newly joined client", count)
 end
 
--- Get or create field data - FIXED: Better PF integration and validation
+-- Get or create field data
 function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing)
     if not fieldId or fieldId <= 0 then return nil end
 
@@ -592,30 +532,6 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing)
         if not g_server then
             -- Client in multiplayer - return nil and wait for server sync
             return nil
-        end
-    end
-
-    -- Check if PF is active and try to read from it
-    if self.PFActive then
-        local pfData = self:readPFFieldData(fieldId)
-        if pfData then
-            local defaults = SoilConstants.FIELD_DEFAULTS
-            self.fieldData[fieldId] = {
-                nitrogen = pfData.nitrogen or defaults.nitrogen,
-                phosphorus = pfData.phosphorus or defaults.phosphorus,
-                potassium = pfData.potassium or defaults.potassium,
-                organicMatter = pfData.organicMatter or defaults.organicMatter,
-                pH = pfData.pH or defaults.pH,
-                lastCrop = nil,
-                lastHarvest = 0,
-                fertilizerApplied = 0,
-                initialized = true,
-                fromPF = true,
-                weedPressure = 0,
-                herbicideDaysLeft = 0,
-            }
-            self:log("Created field %d from PF data", fieldId)
-            return self.fieldData[fieldId]
         end
     end
 
@@ -642,7 +558,6 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing)
         lastHarvest = 0,
         fertilizerApplied = 0,
         initialized = true,
-        fromPF = false,
         weedPressure = 0,
         herbicideDaysLeft = 0,
     }
@@ -654,7 +569,6 @@ end
 -- Daily soil update
 function SoilFertilitySystem:updateDailySoil()
     if not self.settings.enabled or not self.settings.nutrientCycles then return end
-    if self.PFActive then return end
 
     local currentDay = (g_currentMission and g_currentMission.environment and g_currentMission.environment.currentDay) or 0
     local limits = SoilConstants.NUTRIENT_LIMITS
@@ -736,7 +650,6 @@ end
 -- Apply rain effects
 function SoilFertilitySystem:applyRainEffects(dt, rainScale)
     if not self.settings.enabled or not self.settings.rainEffects then return end
-    if self.PFActive then return end
 
     local rain = SoilConstants.RAIN
     local limits = SoilConstants.NUTRIENT_LIMITS
@@ -753,7 +666,6 @@ end
 -- Update field nutrients after harvest
 ---@param strawRatio number 0.0-1.0 fraction of straw chopped back into the field (adds organic matter)
 function SoilFertilitySystem:updateFieldNutrients(fieldId, fruitTypeIndex, harvestedLiters, strawRatio)
-    if self.PFActive then return end
     if not self.settings.enabled or not self.settings.nutrientCycles then return end
 
     local field = self:getOrCreateField(fieldId, true)
@@ -830,7 +742,6 @@ end
 
 -- Apply fertilizer
 function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
-    if self.PFActive then return end
     if not self.settings.enabled then return end
 
     local field = self:getOrCreateField(fieldId, true)
@@ -939,89 +850,6 @@ function SoilFertilitySystem:applyBurnEffect(fieldId, rateMultiplier)
     end
 end
 
--- Read PF data with validation and logging
-function SoilFertilitySystem:readPFFieldData(fieldId)
-    if not self.PFActive or not g_precisionFarming then return nil end
-
-    local rawData = nil
-    local apiPath = "none"
-
-    -- Try API path 1: g_precisionFarming.fieldData[fieldId]
-    if g_precisionFarming.fieldData and g_precisionFarming.fieldData[fieldId] then
-        rawData = g_precisionFarming.fieldData[fieldId]
-        apiPath = "fieldData"
-    -- Try API path 2: g_precisionFarming.soilMap:getFieldData(fieldId)
-    elseif g_precisionFarming.soilMap and g_precisionFarming.soilMap.getFieldData then
-        rawData = g_precisionFarming.soilMap:getFieldData(fieldId)
-        if rawData then
-            apiPath = "soilMap.getFieldData"
-        end
-    end
-
-    -- No data found via either API
-    if not rawData then
-        if self.settings.debugMode then
-            self:log("PF data not available for field %d (tried both API paths)", fieldId)
-        end
-        return nil
-    end
-
-    -- Validate and extract PF data
-    local pfData = {
-        nitrogen = rawData.nitrogen,
-        phosphorus = rawData.phosphorus,
-        potassium = rawData.potassium,
-        pH = rawData.pH,
-        organicMatter = rawData.organicMatter
-    }
-
-    -- Validation: check for nil values
-    local missingFields = {}
-    for key, value in pairs(pfData) do
-        if value == nil then
-            table.insert(missingFields, key)
-        end
-    end
-
-    if #missingFields > 0 then
-        self:warning("PF data incomplete for field %d (missing: %s) via API: %s",
-            fieldId, table.concat(missingFields, ", "), apiPath)
-        return nil
-    end
-
-    -- Validation: check for reasonable ranges (PF uses similar 0-100 scale)
-    local outOfRange = {}
-    if pfData.nitrogen < 0 or pfData.nitrogen > 100 then
-        table.insert(outOfRange, string.format("N=%.1f", pfData.nitrogen))
-    end
-    if pfData.phosphorus < 0 or pfData.phosphorus > 100 then
-        table.insert(outOfRange, string.format("P=%.1f", pfData.phosphorus))
-    end
-    if pfData.potassium < 0 or pfData.potassium > 100 then
-        table.insert(outOfRange, string.format("K=%.1f", pfData.potassium))
-    end
-    if pfData.pH < 4.0 or pfData.pH > 9.0 then
-        table.insert(outOfRange, string.format("pH=%.1f", pfData.pH))
-    end
-    if pfData.organicMatter < 0 or pfData.organicMatter > 20 then
-        table.insert(outOfRange, string.format("OM=%.1f", pfData.organicMatter))
-    end
-
-    if #outOfRange > 0 then
-        self:warning("PF data out of expected range for field %d (%s) via API: %s",
-            fieldId, table.concat(outOfRange, ", "), apiPath)
-    end
-
-    -- Debug log successful read
-    if self.settings.debugMode then
-        self:log("PF data read for field %d via API: %s (N=%.1f, P=%.1f, K=%.1f, pH=%.1f, OM=%.1f)",
-            fieldId, apiPath,
-            pfData.nitrogen, pfData.phosphorus, pfData.potassium, pfData.pH, pfData.organicMatter)
-    end
-
-    return pfData
-end
-
 --- Get field info for display (HUD, console, etc)
 ---@param fieldId number The field ID to query
 ---@return table|nil Field info with nutrient values and status, or nil if not found
@@ -1090,7 +918,7 @@ function SoilFertilitySystem:getFieldInfo(fieldId)
         fertilizerApplied = field.fertilizerApplied or 0,
         weedPressure = field.weedPressure or 0,
         herbicideActive = (field.herbicideDaysLeft or 0) > 0,
-        needsFertilization = not self.PFActive and (
+        needsFertilization = (
             field.nitrogen < fertThresholds.nitrogen or
             field.phosphorus < fertThresholds.phosphorus or
             field.potassium < fertThresholds.potassium or

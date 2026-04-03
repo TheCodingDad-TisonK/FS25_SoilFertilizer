@@ -245,35 +245,8 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
     -- Load settings
     self.settings:load()
 
-    -- Load saved soil data
-    self:loadSoilData()
-
-    -- Compatibility with other mods
-    self:checkAndApplyCompatibility()
-
-    return self
-end
-
-function SoilFertilityManager:checkAndApplyCompatibility()
-    -- Precision Farming
-    local pfDetected = false
-    if g_modIsLoaded then
-        for modName, _ in pairs(g_modIsLoaded) do
-            local lowerName = string.lower(tostring(modName))
-            if lowerName:find("precisionfarming") then
-                pfDetected = true
-                break
-            end
-        end
-    end
-
-    if pfDetected then
-        SoilLogger.info("Precision Farming detected - enabling read-only mode")
-        self.soilSystem.PFActive = true
-        -- Note: Notification is shown later in onMissionLoaded (consolidates PF + activation message)
-    else
-        self.soilSystem.PFActive = false
-    end
+    -- NOTE: Soil data is loaded in deferredSoilSystemInit() AFTER initialize(),
+    -- so savegameDirectory is guaranteed to be set (it's nil at constructor time on new careers).
 
     -- Informational detection for known mod categories
     if g_modIsLoaded then
@@ -290,6 +263,8 @@ function SoilFertilityManager:checkAndApplyCompatibility()
             end
         end
     end
+
+    return self
 end
 
 --- Called after mission is loaded
@@ -382,15 +357,15 @@ function SoilFertilityManager:deferredSoilSystemInit()
             local initSuccess, initError = pcall(function()
                 self.sfm.soilSystem:initialize()
 
-                -- Show consolidated notification (different message if PF is active)
+                -- Load saved soil data now that savegameDirectory is set
+                self.sfm:loadSoilData()
+
+                -- Show activation notification
                 if self.sfm.settings.showNotifications and g_currentMission and g_currentMission.hud then
-                    local message
-                    if self.sfm.soilSystem.PFActive then
-                        message = "Soil Mod: Viewer Mode (Precision Farming active) | J = HUD | K = Soil Report"
-                    else
-                        message = "Soil & Fertilizer Mod Active | J = HUD | K = Soil Report | Type 'soilfertility' for commands"
-                    end
-                    g_currentMission.hud:showBlinkingWarning(message, 8000)
+                    g_currentMission.hud:showBlinkingWarning(
+                        "Soil & Fertilizer Mod Active | J = HUD | K = Soil Report | Type 'soilfertility' for commands",
+                        8000
+                    )
                 end
             end)
 

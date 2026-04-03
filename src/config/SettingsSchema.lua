@@ -18,49 +18,42 @@ SettingsSchema.definitions = {
         type = "boolean",
         default = true,
         uiId = "sf_enabled",
-        pfProtected = false,
     },
     {
         id = "debugMode",
         type = "boolean",
         default = false,
         uiId = "sf_debug",
-        pfProtected = false,
     },
     {
         id = "fertilitySystem",
         type = "boolean",
         default = true,
         uiId = "sf_fertility",
-        pfProtected = true,
     },
     {
         id = "nutrientCycles",
         type = "boolean",
         default = true,
         uiId = "sf_nutrients",
-        pfProtected = true,
     },
     {
         id = "fertilizerCosts",
         type = "boolean",
         default = true,
         uiId = "sf_fertilizer_cost",
-        pfProtected = true,
     },
     {
         id = "showNotifications",
         type = "boolean",
         default = true,
         uiId = "sf_notifications",
-        pfProtected = false,
     },
     {
         id = "showHUD",
         type = "boolean",
         default = true,
         uiId = "sf_show_hud",
-        pfProtected = false,
         localOnly = true,  -- per-player HUD visibility, not synced to server
     },
     {
@@ -70,7 +63,6 @@ SettingsSchema.definitions = {
         min = 1,
         max = 6,
         uiId = "sf_hud_position",
-        pfProtected = false,
         localOnly = true,  -- per-player display preference, not synced to server
     },
     {
@@ -80,7 +72,6 @@ SettingsSchema.definitions = {
         min = 1,
         max = 4,
         uiId = "sf_hud_color_theme",
-        pfProtected = false,
         localOnly = true,  -- per-player display preference, not synced to server
     },
     {
@@ -90,7 +81,6 @@ SettingsSchema.definitions = {
         min = 1,
         max = 3,
         uiId = "sf_hud_font_size",
-        pfProtected = false,
         localOnly = true,  -- per-player display preference, not synced to server
     },
     {
@@ -100,7 +90,6 @@ SettingsSchema.definitions = {
         min = 1,
         max = 5,
         uiId = "sf_hud_transparency",
-        pfProtected = false,
         localOnly = true,  -- per-player display preference, not synced to server
     },
     {
@@ -108,28 +97,24 @@ SettingsSchema.definitions = {
         type = "boolean",
         default = true,
         uiId = "sf_seasonal_effects",
-        pfProtected = true,
     },
     {
         id = "rainEffects",
         type = "boolean",
         default = true,
         uiId = "sf_rain_effects",
-        pfProtected = true,
     },
     {
         id = "plowingBonus",
         type = "boolean",
         default = true,
         uiId = "sf_plowing_bonus",
-        pfProtected = true,
     },
     {
         id = "weedPressure",
         type = "boolean",
         default = true,
         uiId = "sf_weed_pressure",
-        pfProtected = false,
     },
     {
         id = "difficulty",
@@ -138,14 +123,12 @@ SettingsSchema.definitions = {
         min = 1,
         max = 3,
         uiId = "sf_diff",
-        pfProtected = true,
     },
     {
         id = "useImperialUnits",
         type = "boolean",
         default = true,
         uiId = "sf_use_imperial",
-        pfProtected = false,
         localOnly = true,  -- per-player display preference, not synced to server
     },
     {
@@ -153,7 +136,6 @@ SettingsSchema.definitions = {
         type = "boolean",
         default = true,
         uiId = "sf_auto_rate",
-        pfProtected = true,
     },
 }
 
