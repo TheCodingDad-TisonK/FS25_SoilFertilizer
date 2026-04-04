@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.1.0] - 2026-04-04
+
+### Added
+
+- **Purchasable big bags for Insecticide and Fungicide**: Both crop protection products are now available as 10,000 L big bags in the shop (same system as all other custom fertilizer types). Insecticide: $1,200/bag; Fungicide: $1,300/bag. Multi-buy available up to 8 bags at a time.
+
+---
+
 ## [1.4.0.0] - 2026-04-04
 
 ### Added

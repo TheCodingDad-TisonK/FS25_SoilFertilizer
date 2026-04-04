@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <modDesc descVersion="106">
     <author>TisonK</author>
-    <version>1.4.0.0</version>
+    <version>1.4.1.0</version>
     <modName>FS25_SoilFertilizer</modName>
     <title>
         <en>Realistic Soil & Fertilizer</en>
@@ -120,6 +120,8 @@
         <storeItem xmlFilename="objects/bigBag/dap/multiPurchaseBigBag_dap.xml"/>
         <storeItem xmlFilename="objects/bigBag/potash/multiPurchaseBigBag_potash.xml"/>
         <storeItem xmlFilename="objects/bigBag/starter/multiPurchaseBigBag_starter.xml"/>
+        <storeItem xmlFilename="objects/bigBag/insecticide/multiPurchaseBigBag_insecticide.xml"/>
+        <storeItem xmlFilename="objects/bigBag/fungicide/multiPurchaseBigBag_fungicide.xml"/>
         <storeItem xmlFilename="objects/bigBag/uan32/bigBag_uan32.xml"/>
         <storeItem xmlFilename="objects/bigBag/uan28/bigBag_uan28.xml"/>
         <storeItem xmlFilename="objects/bigBag/anhydrous/bigBag_anhydrous.xml"/>
@@ -129,6 +131,8 @@
         <storeItem xmlFilename="objects/bigBag/dap/bigBag_dap.xml"/>
         <storeItem xmlFilename="objects/bigBag/potash/bigBag_potash.xml"/>
         <storeItem xmlFilename="objects/bigBag/starter/bigBag_starter.xml"/>
+        <storeItem xmlFilename="objects/bigBag/insecticide/bigBag_insecticide.xml"/>
+        <storeItem xmlFilename="objects/bigBag/fungicide/bigBag_fungicide.xml"/>
     </storeItems>
 
 </modDesc>
