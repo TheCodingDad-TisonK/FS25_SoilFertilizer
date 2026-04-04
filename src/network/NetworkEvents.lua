@@ -209,29 +209,6 @@ function SoilRequestFullSyncEvent:run(connection)
         local soilSystem = g_SoilFertilityManager.soilSystem
         local fieldData = soilSystem and soilSystem.fieldData or {}
 
-        -- If Precision Farming is active, refresh field data from PF before syncing
-        if soilSystem and soilSystem.PFActive then
-            local refreshedCount = 0
-            for fieldId, field in pairs(fieldData) do
-                local pfData = soilSystem:readPFFieldData(fieldId)
-                if pfData then
-                    -- Update cached field data with fresh PF values
-                    field.nitrogen = pfData.nitrogen
-                    field.phosphorus = pfData.phosphorus
-                    field.potassium = pfData.potassium
-                    field.pH = pfData.pH
-                    field.organicMatter = pfData.organicMatter
-                    refreshedCount = refreshedCount + 1
-                end
-            end
-            if refreshedCount > 0 then
-                print(string.format(
-                    "[SoilFertilizer] Server: Refreshed %d fields from Precision Farming before sync",
-                    refreshedCount
-                ))
-            end
-        end
-
         -- Count actual fields (not just empty table)
         local fieldCount = 0
         if fieldData then
@@ -248,10 +225,9 @@ function SoilRequestFullSyncEvent:run(connection)
                 fieldCount
             ))
         else
-            local pfStatus = (soilSystem and soilSystem.PFActive) and " (Viewer Mode)" or ""
             print(string.format(
-                "[SoilFertilizer] Server: Sending full sync to client (%d fields%s)",
-                fieldCount, pfStatus
+                "[SoilFertilizer] Server: Sending full sync to client (%d fields)",
+                fieldCount
             ))
         end
 

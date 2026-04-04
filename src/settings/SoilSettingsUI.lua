@@ -83,24 +83,6 @@ function SoilSettingsUI:requestSettingChange(settingName, value)
     end
 end
 
--- PF-protected toggle helper
-function SoilSettingsUI:togglePFProtected(settingKey, val)
-    local pfActive = g_SoilFertilityManager and g_SoilFertilityManager.soilSystem and g_SoilFertilityManager.soilSystem.PFActive
-
-    if pfActive then
-        if g_currentMission and g_currentMission.hud then
-            g_currentMission.hud:showBlinkingWarning(
-                "Viewer Mode: Precision Farming is managing soil data - this setting is locked",
-                5000
-            )
-        end
-        self:refreshUI()
-        return
-    end
-
-    self:requestSettingChange(settingKey, val)
-end
-
 -- Refresh UI elements to match current settings values
 function SoilSettingsUI:refreshUI()
     -- Find the current settings frame
@@ -130,7 +112,6 @@ end
 function SoilSettingsUI:updateAdminState(frame)
     if not frame.soilFertilizer_initDone then return end
     local isAdmin = self:isPlayerAdmin()
-    local pfActive = g_SoilFertilityManager and g_SoilFertilityManager.soilSystem and g_SoilFertilityManager.soilSystem.PFActive
 
     for _, def in ipairs(SettingsSchema.definitions) do
         local element = frame["soilFertilizer_" .. def.uiId]
@@ -140,16 +121,9 @@ function SoilSettingsUI:updateAdminState(frame)
                 element:setIsEnabled(true)
                 if element.setToolTipText then element:setToolTipText("") end
             else
-                local pfLocked = def.pfProtected and pfActive or false
-                element:setIsEnabled(isAdmin and not pfLocked)
+                element:setIsEnabled(isAdmin)
                 if element.setToolTipText then
-                    if pfLocked then
-                        element:setToolTipText("Viewer Mode - Precision Farming manages this")
-                    elseif not isAdmin then
-                        element:setToolTipText("Admin only")
-                    else
-                        element:setToolTipText("")
-                    end
+                    element:setToolTipText(isAdmin and "" or "Admin only")
                 end
             end
         end
@@ -173,20 +147,11 @@ function SoilSettingsUI:onFrameOpen(frame)
     end
 
     local isAdmin = self:isPlayerAdmin()
-    local pfActive = g_SoilFertilityManager and g_SoilFertilityManager.soilSystem and g_SoilFertilityManager.soilSystem.PFActive
 
     -- Section header
     local ok, err = pcall(UIHelper.createSectionHeader, layout, g_i18n:getText("sf_section") or "Soil & Fertilizer")
     if not ok then
         SoilLogger.warning("Failed to create section header: %s", tostring(err))
-    end
-
-    -- PF viewer-mode notice
-    if pfActive then
-        local ok2, pfHeader = pcall(UIHelper.createSectionHeader, layout, "[ VIEWER MODE: Precision Farming active ]")
-        if ok2 and pfHeader and pfHeader.textColor then
-            pfHeader.textColor = {0.4, 0.8, 1.0, 1.0}
-        end
     end
 
     -- Auto-generate boolean toggle options from schema
@@ -197,15 +162,13 @@ function SoilSettingsUI:onFrameOpen(frame)
 
         local ok3, element = pcall(UIHelper.createBinaryOption, layout, SoilSettingsUI, callbackName, title, tooltip)
         if ok3 and element then
-            local disabled = def.pfProtected and pfActive or false
             -- localOnly settings (HUD prefs) are always accessible; only gate server-wide settings
-            local shouldDisable = (not def.localOnly and not isAdmin) or disabled
+            local shouldDisable = not def.localOnly and not isAdmin
 
             if shouldDisable and element.setIsEnabled then
                 element:setIsEnabled(false)
-                local tipText = disabled and "Viewer Mode - Precision Farming manages this" or "Admin only"
                 if element.setToolTipText then
-                    element:setToolTipText(tipText)
+                    element:setToolTipText("Admin only")
                 end
             end
 
@@ -228,11 +191,10 @@ function SoilSettingsUI:onFrameOpen(frame)
             g_i18n:getText("sf_difficulty_short") or "Difficulty",
             g_i18n:getText("sf_difficulty_long") or "Soil management difficulty level")
         if ok4 and diffElement then
-            if (not isAdmin or pfActive) and diffElement.setIsEnabled then
+            if not isAdmin and diffElement.setIsEnabled then
                 diffElement:setIsEnabled(false)
-                local tipText = pfActive and "Viewer Mode - Precision Farming manages this" or "Admin only"
                 if diffElement.setToolTipText then
-                    diffElement:setToolTipText(tipText)
+                    diffElement:setToolTipText("Admin only")
                 end
             end
             frame["soilFertilizer_" .. diffDef.uiId] = diffElement
@@ -328,8 +290,7 @@ function SoilSettingsUI:onFrameOpen(frame)
     -- Sync UI state from current settings
     self:updateGameSettings(frame)
 
-    SoilLogger.info("Settings UI injected via profile-based creation (Admin: %s, PF: %s)",
-        tostring(isAdmin), tostring(pfActive))
+    SoilLogger.info("Settings UI injected via profile-based creation (Admin: %s)", tostring(isAdmin))
 end
 
 --- Sync UI elements with current settings values. Called on frame refresh.
@@ -415,30 +376,14 @@ for _, def in ipairs(SettingsSchema.getBooleanSettings()) do
         if not g_SoilFertilityManager or not g_SoilFertilityManager.settingsUI then return end
         local settingsUI = g_SoilFertilityManager.settingsUI
         local isChecked = (state == BinaryOptionElement.STATE_RIGHT)
-        if def.pfProtected then
-            settingsUI:togglePFProtected(def.id, isChecked)
-        else
-            settingsUI:requestSettingChange(def.id, isChecked)
-        end
+        settingsUI:requestSettingChange(def.id, isChecked)
     end
 end
 
 -- Difficulty dropdown callback
 function SoilSettingsUI:onDifficultyChanged(state)
     if not g_SoilFertilityManager or not g_SoilFertilityManager.settingsUI then return end
-    local settingsUI = g_SoilFertilityManager.settingsUI
-    local pfActive = g_SoilFertilityManager.soilSystem and g_SoilFertilityManager.soilSystem.PFActive
-    if pfActive then
-        if g_currentMission and g_currentMission.hud then
-            g_currentMission.hud:showBlinkingWarning(
-                "Viewer Mode: Precision Farming is managing soil data - difficulty locked",
-                5000
-            )
-        end
-        settingsUI:refreshUI()
-        return
-    end
-    settingsUI:requestSettingChange("difficulty", state)
+    g_SoilFertilityManager.settingsUI:requestSettingChange("difficulty", state)
 end
 
 -- HUD Position dropdown callback

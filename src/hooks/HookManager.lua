@@ -62,8 +62,7 @@ end
 --- When Precision Farming is active, skips nutrient-modifying hooks for efficiency
 --- Stores references for proper cleanup on uninstall
 ---@param soilSystem SoilFertilitySystem The soil system instance to connect hooks to
----@param pfActive boolean|nil If true, skips nutrient-modifying hooks (PF Viewer Mode)
-function HookManager:installAll(soilSystem, pfActive)
+function HookManager:installAll(soilSystem)
     if self.installed then
         SoilLogger.warning("Hooks already installed, skipping re-installation")
         return
@@ -72,46 +71,61 @@ function HookManager:installAll(soilSystem, pfActive)
     local successCount = 0
     local failCount = 0
 
-    if pfActive then
-        SoilLogger.info("Viewer Mode (Precision Farming active) - installing minimal hooks...")
-        -- Only install ownership hook for field cleanup - skip all nutrient-modifying hooks
-        local success = self:installOwnershipHook()
-        if success then successCount = successCount + 1 else failCount = failCount + 1 end
-        SoilLogger.info("Viewer Mode hooks: %d installed, %d failed", successCount, failCount)
-    else
-        SoilLogger.info("Installing event hooks...")
+    SoilLogger.info("Installing event hooks...")
 
-        -- Harvest hook (FruitUtil)
-        local harvestOk = self:installHarvestHook()
-        if harvestOk then successCount = successCount + 1 else failCount = failCount + 1 end
+    -- Harvest hook (FruitUtil)
+    local harvestOk = self:installHarvestHook()
+    if harvestOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
-        -- Fertilizer application hook (covers ALL sprayers + spreaders via Sprayer specialization)
-        local sprayerAreaOk = self:installSprayerAreaHook()
-        if sprayerAreaOk then successCount = successCount + 1 else failCount = failCount + 1 end
+    -- Fertilizer application hook (covers ALL sprayers + spreaders via Sprayer specialization)
+    local sprayerAreaOk = self:installSprayerAreaHook()
+    if sprayerAreaOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
-        -- Field ownership changes
-        local ownershipOk = self:installOwnershipHook()
-        if ownershipOk then successCount = successCount + 1 else failCount = failCount + 1 end
+    -- Field ownership changes
+    local ownershipOk = self:installOwnershipHook()
+    if ownershipOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
-        -- Weather/environment effects
-        local weatherOk = self:installWeatherHook()
-        if weatherOk then successCount = successCount + 1 else failCount = failCount + 1 end
+    -- Weather/environment effects
+    local weatherOk = self:installWeatherHook()
+    if weatherOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
-        -- Plowing benefits
-        local plowingOk = self:installPlowingHook()
-        if plowingOk then successCount = successCount + 1 else failCount = failCount + 1 end
+    -- Plowing benefits
+    local plowingOk = self:installPlowingHook()
+    if plowingOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
-        -- Patch vanilla fill units to accept custom fertilizer types
-        local fillUnitOk = self:installFillUnitHook()
-        if fillUnitOk then successCount = successCount + 1 else failCount = failCount + 1 end
+    -- Patch vanilla fill units to accept custom fertilizer types
+    local fillUnitOk = self:installFillUnitHook()
+    if fillUnitOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
-        SoilLogger.info("Hook installation complete: %d/%d successful, %d failed",
-            successCount, successCount + failCount, failCount)
+    SoilLogger.info("Hook installation complete: %d/%d successful, %d failed",
+        successCount, successCount + failCount, failCount)
 
-        if failCount > 0 then
-            SoilLogger.warning("Some hooks failed to install - mod functionality may be limited")
-        end
+    if failCount > 0 then
+        SoilLogger.warning("Some hooks failed to install - mod functionality may be limited")
     end
+
+    -- Register custom fill types in SprayTypeManager so they get correct tank
+    -- drain rates and visual spray effects. Must run after hooks (g_sprayTypeManager
+    -- is populated from map XML before loadMission00Finished fires).
+    self:registerCustomSprayTypes()
+
+    -- Remap custom fill types to vanilla visual equivalents for all effect classes
+    -- (FertilizerMotionPathEffect, ShaderPlaneEffect, etc.). Two-layer approach:
+    -- primary hook on g_effectManager:setEffectTypeInfo intercepts before storage;
+    -- backup hook on g_motionPathEffectManager:getSharedMotionPathEffect catches any
+    -- indices that bypass setEffectTypeInfo. Must run in both full and viewer-mode paths.
+    self:installEffectTypeHook()
+
+    -- Inject custom fill type names into each vehicle's sprayType.fillTypes arrays so
+    -- that Sprayer:getIsSprayTypeActive returns true for our custom types, triggering
+    -- the correct sprayType.effects visual. Also hooks Sprayer.onLoad so newly bought
+    -- or spawned vehicles receive the same injection.
+    self:installSprayTypeEffectsHook()
+
+    -- Force-refresh sprayer/spreader effects on all vehicles already in memory.
+    -- Must run AFTER installSprayTypeEffectsHook so the fill type arrays are patched
+    -- before updateSprayerEffects re-evaluates getActiveSprayType.
+    self:refreshAllSprayerEffects()
 
     self.installed = true
 end
@@ -149,6 +163,403 @@ function HookManager:register(target, key, original, name)
         original = original,
         name = name or key
     })
+end
+
+-- =========================================================
+-- SPRAY TYPE REGISTRATION: custom fill types
+-- =========================================================
+-- FS25 determines tank drain rate and visual spray effects (terrain overlay,
+-- nozzle particles) from g_sprayTypeManager entries. Base-game types
+-- (FERTILIZER, LIQUIDFERTILIZER, MANURE, LIME, etc.) are registered by the
+-- map XML. Our custom types are NOT in any map XML, so FS25 falls back to
+-- litersPerSecond=1 — ~300-400x higher than vanilla. This empties tanks
+-- instantly and suppresses all spray visuals (FSDensityMapUtil.updateSprayArea
+-- is a no-op with a nil spray type).
+--
+-- Fix: inherit litersPerSecond and sprayGroundType from the closest vanilla
+-- equivalent, then call g_sprayTypeManager:addSprayType() for each custom type.
+---@return nil
+function HookManager:registerCustomSprayTypes()
+    if not g_sprayTypeManager then
+        SoilLogger.warning("registerCustomSprayTypes: g_sprayTypeManager not available - skipping")
+        return
+    end
+    if not g_fillTypeManager then
+        SoilLogger.warning("registerCustomSprayTypes: g_fillTypeManager not available - skipping")
+        return
+    end
+
+    -- Borrow litersPerSecond and sprayGroundType from the vanilla base types.
+    local liqType = g_sprayTypeManager:getSprayTypeByName("LIQUIDFERTILIZER")
+    local dryType = g_sprayTypeManager:getSprayTypeByName("FERTILIZER")
+
+    if not liqType and not dryType then
+        SoilLogger.warning("registerCustomSprayTypes: vanilla spray types not found - skipping")
+        return
+    end
+
+    local liquidLPS         = liqType and liqType.litersPerSecond or 0
+    local liquidGroundType  = liqType and liqType.sprayGroundType or 1
+    local solidLPS          = dryType and dryType.litersPerSecond or 0
+    local solidGroundType   = dryType and dryType.sprayGroundType or 1
+
+    -- Liquid nitrogen / starter types → inherit from LIQUIDFERTILIZER
+    local liquidNames = { "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME" }
+    -- Granular/solid types → inherit from FERTILIZER
+    local solidNames  = { "UREA", "AMS", "MAP", "DAP", "POTASH",
+                          "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM" }
+
+    local registered = 0
+    local skipped    = 0
+
+    for _, name in ipairs(liquidNames) do
+        if g_fillTypeManager:getFillTypeByName(name) then
+            -- addSprayType is idempotent: if already registered it updates the entry
+            g_sprayTypeManager:addSprayType(name, liquidLPS, "FERTILIZER", liquidGroundType, false)
+            registered = registered + 1
+        else
+            skipped = skipped + 1
+        end
+    end
+
+    for _, name in ipairs(solidNames) do
+        if g_fillTypeManager:getFillTypeByName(name) then
+            g_sprayTypeManager:addSprayType(name, solidLPS, "FERTILIZER", solidGroundType, false)
+            registered = registered + 1
+        else
+            skipped = skipped + 1
+        end
+    end
+
+    SoilLogger.info(
+        "[OK] Custom spray types registered: %d types (liquid LPS=%.5f, solid LPS=%.5f, %d skipped/unavailable)",
+        registered, liquidLPS, solidLPS, skipped
+    )
+end
+
+-- =========================================================
+-- EFFECT TYPE REMAP: custom fill types → vanilla visuals
+-- =========================================================
+-- FS25 effect classes (FertilizerMotionPathEffect, ShaderPlaneEffect, etc.)
+-- only have visual configurations for vanilla fill types that were present
+-- when the vehicle or map XML was authored. Custom fill types (UREA, UAN32,
+-- ANHYDROUS, etc.) have no such configuration, so the game logs "Could not
+-- find motion path effect for settings" and shows no visual at all.
+--
+-- Root cause for sprayers: g_effectManager:setEffectTypeInfo stores the
+-- custom fill type index on each effect object. Downstream lookups
+-- (getSharedMotionPathEffect, shader parameter tables, etc.) find no entry
+-- for the custom type and fail silently — effects never start.
+--
+-- Fix (two-layer):
+--   PRIMARY: Wrap g_effectManager:setEffectTypeInfo to substitute custom
+--   fill type indices with their vanilla visual equivalents before the index
+--   is stored on any effect object. Every downstream system then sees only
+--   vanilla types and works normally. Purely cosmetic — nutrient tracking
+--   uses the real fill type index from the sprayer hook, not the effect.
+--
+--   BACKUP: Wrap g_motionPathEffectManager:getSharedMotionPathEffect so
+--   that if a custom index somehow reaches it (e.g. set through a code path
+--   that bypasses setEffectTypeInfo), we remap and retry before returning nil.
+---@return boolean success
+function HookManager:installEffectTypeHook()
+    if not g_fillTypeManager then
+        SoilLogger.warning("Effect type hook: g_fillTypeManager not available - skipping")
+        return false
+    end
+
+    local fm = g_fillTypeManager
+    local fertIdx = fm:getFillTypeIndexByName("FERTILIZER")
+    local liqIdx  = fm:getFillTypeIndexByName("LIQUIDFERTILIZER")
+
+    -- Build remap: customFillTypeIndex → vanillaFillTypeIndex
+    local remap = {}
+    if fertIdx then
+        for _, name in ipairs({ "UREA", "AMS", "MAP", "DAP", "POTASH",
+                                 "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM" }) do
+            local idx = fm:getFillTypeIndexByName(name)
+            if idx then remap[idx] = fertIdx end
+        end
+    end
+    if liqIdx then
+        for _, name in ipairs({ "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME" }) do
+            local idx = fm:getFillTypeIndexByName(name)
+            if idx then remap[idx] = liqIdx end
+        end
+    end
+
+    if not next(remap) then
+        SoilLogger.warning("Effect type hook: no custom fill types found — skipping")
+        return false
+    end
+
+    local count = 0
+    for _ in pairs(remap) do count = count + 1 end
+
+    -- PRIMARY: hook g_effectManager:setEffectTypeInfo
+    -- This fires before the fill type index is stored on the effect object,
+    -- so all downstream lookups (FertilizerMotionPathEffect shared effect,
+    -- ShaderPlaneEffect shader tables, etc.) only ever see vanilla types.
+    if g_effectManager and type(g_effectManager.setEffectTypeInfo) == "function" then
+        local origSetTypeInfo = g_effectManager.setEffectTypeInfo
+        g_effectManager.setEffectTypeInfo = function(mgr, effects, fillType, ...)
+            local mapped = (fillType ~= nil and remap[fillType]) or fillType
+            return origSetTypeInfo(mgr, effects, mapped, ...)
+        end
+        self:registerCleanup("g_effectManager.setEffectTypeInfo", function()
+            g_effectManager.setEffectTypeInfo = origSetTypeInfo
+        end)
+        SoilLogger.info("[OK] Effect type hook installed on g_effectManager.setEffectTypeInfo - %d custom fill types remapped", count)
+    else
+        SoilLogger.warning("Effect type hook: g_effectManager.setEffectTypeInfo not available - sprayer visuals may not show")
+    end
+
+    -- BACKUP: hook g_motionPathEffectManager:getSharedMotionPathEffect
+    -- Handles any custom fill type index that bypasses setEffectTypeInfo and
+    -- reaches the motion path lookup directly (e.g. via direct field writes).
+    if g_motionPathEffectManager and
+       type(g_motionPathEffectManager.getSharedMotionPathEffect) == "function" then
+        local FILL_TYPE_FIELDS = { "fillTypeIndex", "fillType", "sprayTypeIndex", "currentFillType" }
+        local origGetShared = g_motionPathEffectManager.getSharedMotionPathEffect
+        g_motionPathEffectManager.getSharedMotionPathEffect = function(mgr, effectObj)
+            local result = origGetShared(mgr, effectObj)
+            if result ~= nil then return result end
+
+            local fieldName, customIdx
+            for _, fname in ipairs(FILL_TYPE_FIELDS) do
+                local val = effectObj[fname]
+                if val ~= nil and remap[val] then
+                    fieldName = fname
+                    customIdx = val
+                    break
+                end
+            end
+            if fieldName == nil then return nil end
+
+            local vanillaIdx = remap[customIdx]
+            effectObj[fieldName] = vanillaIdx
+            result = origGetShared(mgr, effectObj)
+            effectObj[fieldName] = customIdx
+            return result
+        end
+        self:registerCleanup("g_motionPathEffectManager.getSharedMotionPathEffect", function()
+            g_motionPathEffectManager.getSharedMotionPathEffect = origGetShared
+        end)
+        SoilLogger.info("[OK] Effect type hook backup installed on g_motionPathEffectManager - %d custom fill types remapped", count)
+    end
+
+    -- RUNTIME CONSTANT REMAP: wrap Sprayer.onEndWorkAreaProcessing
+    -- Pattern from THPFConfigurator: temporarily swap FillType and SprayType globals
+    -- so that FillType.LIQUIDFERTILIZER == our custom fill type index for the duration
+    -- of the call. Every vanilla runtime check inside (getIsSprayTypeActive,
+    -- if fillType == FillType.LIQUIDFERTILIZER, etc.) transparently passes for our types.
+    -- Restore originals immediately after. No persistent global state change.
+    --
+    -- Build inverseRemap: customFillTypeIndex → vanilla constant name (e.g. "LIQUIDFERTILIZER")
+    local inverseRemap = {}
+    for customIdx, vanillaIdx in pairs(remap) do
+        local vanillaFT = fm:getFillTypeByIndex(vanillaIdx)
+        if vanillaFT and vanillaFT.name then
+            inverseRemap[customIdx] = vanillaFT.name
+        end
+    end
+
+    local globalEnv = getfenv(0)
+
+    if Sprayer and type(Sprayer.onEndWorkAreaProcessing) == "function" then
+        local origOnEnd = Sprayer.onEndWorkAreaProcessing
+        Sprayer.onEndWorkAreaProcessing = function(self, ...)
+            local spec    = self.spec_sprayer
+            local wap     = spec and spec.workAreaParameters
+            local sprayFT = wap and wap.sprayFillType
+            local vName   = sprayFT and inverseRemap[sprayFT]
+
+            if not vName then
+                return origOnEnd(self, ...)
+            end
+
+            -- Swap FillType global: FillType.LIQUIDFERTILIZER → our custom index
+            local origFT = globalEnv.FillType
+            local newFT  = {}
+            for k, v in pairs(origFT) do newFT[k] = v end
+            newFT[vName] = sprayFT
+            globalEnv.FillType = newFT
+
+            -- Swap SprayType global: SprayType.LIQUIDFERTILIZER → our custom spray type index
+            local origST    = globalEnv.SprayType
+            local customSTD = g_sprayTypeManager and g_sprayTypeManager:getSprayTypeByFillTypeIndex(sprayFT)
+            if customSTD then
+                local newST = {}
+                for k, v in pairs(origST) do newST[k] = v end
+                newST[vName] = customSTD.index
+                globalEnv.SprayType = newST
+            end
+
+            origOnEnd(self, ...)
+
+            globalEnv.FillType = origFT
+            if customSTD then globalEnv.SprayType = origST end
+        end
+        self:registerCleanup("Sprayer.onEndWorkAreaProcessing (constant remap)", function()
+            Sprayer.onEndWorkAreaProcessing = origOnEnd
+        end)
+        SoilLogger.info("[OK] Sprayer.onEndWorkAreaProcessing wrapped with runtime constant remap")
+    end
+
+    return true
+end
+
+-- =========================================================
+-- SPRAY TYPE EFFECTS INJECTION: custom fill types → sprayType.fillTypes
+-- =========================================================
+-- Sprayer:getIsSprayTypeActive(sprayType) checks whether the vehicle's current
+-- fill type matches any name in sprayType.fillTypes (the list from the vehicle XML,
+-- e.g. {"FERTILIZER"} or {"LIQUIDFERTILIZER"}). Only when it matches does FS25 call
+-- g_effectManager:setEffectTypeInfo(sprayType.effects, fillType) and startEffects —
+-- giving the spreading/spraying visual for that sprayType slot.
+--
+-- Because no vanilla or mod vehicle XML lists our custom fill type names (UREA, UAN32,
+-- etc.), getIsSprayTypeActive always returns false for them → getActiveSprayType()
+-- returns nil → sprayType.effects never starts → NO visual, even though the base
+-- spec.effects fallback is usually empty on modern FS25 vehicles.
+--
+-- Fix (two-part):
+--   1. Retroactively patch every loaded vehicle: for each sprayType entry whose
+--      fillTypes list contains "FERTILIZER", also add our solid custom names;
+--      likewise for "LIQUIDFERTILIZER" and our liquid names.
+--   2. Hook Sprayer.onLoad (fires when any vehicle is loaded) to apply the same
+--      injection to newly bought/spawned vehicles going forward.
+---@return boolean success
+function HookManager:installSprayTypeEffectsHook()
+    -- Solid custom types visually match FERTILIZER spreading
+    local solidNames  = { "UREA", "AMS", "MAP", "DAP", "POTASH",
+                          "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM" }
+    -- Liquid custom types visually match LIQUIDFERTILIZER spraying
+    local liquidNames = { "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME" }
+
+    -- Shared helper: walk a vehicle's sprayType entries and inject our names
+    local function patchVehicleSprayTypes(vehicle)
+        local spec = vehicle.spec_sprayer
+        if not spec or not spec.sprayTypes then return end
+
+        for _, st in ipairs(spec.sprayTypes) do
+            if st.fillTypes then
+                local hasFert    = false
+                local hasLiqFert = false
+
+                -- Check what vanilla base types this sprayType slot already covers
+                for _, name in ipairs(st.fillTypes) do
+                    local upper = string.upper(name)
+                    if upper == "FERTILIZER"        then hasFert    = true end
+                    if upper == "LIQUIDFERTILIZER"  then hasLiqFert = true end
+                end
+
+                -- Build a lookup of names already present to avoid duplicates
+                local existing = {}
+                for _, name in ipairs(st.fillTypes) do
+                    existing[string.upper(name)] = true
+                end
+
+                if hasFert then
+                    for _, name in ipairs(solidNames) do
+                        if not existing[name] then
+                            table.insert(st.fillTypes, name)
+                            existing[name] = true
+                        end
+                    end
+                end
+
+                if hasLiqFert then
+                    for _, name in ipairs(liquidNames) do
+                        if not existing[name] then
+                            table.insert(st.fillTypes, name)
+                            existing[name] = true
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    -- Part 1: retroactively patch all vehicles already in memory
+    local vehicleSystem = g_currentMission and g_currentMission.vehicleSystem
+    local patched = 0
+    if vehicleSystem and vehicleSystem.vehicles then
+        for _, vehicle in pairs(vehicleSystem.vehicles) do
+            patchVehicleSprayTypes(vehicle)
+            patched = patched + 1
+        end
+    end
+
+    -- Part 2: hook Sprayer.onLoad so future vehicles get the same treatment.
+    -- onLoad fires after the vehicle XML is fully parsed but before the vehicle
+    -- enters the world, so sprayType.fillTypes is already populated at this point.
+    if not Sprayer or type(Sprayer.onLoad) ~= "function" then
+        SoilLogger.warning("SprayTypeEffects hook: Sprayer.onLoad not available - new vehicles won't be patched")
+    else
+        local original = Sprayer.onLoad
+        Sprayer.onLoad = Utils.appendedFunction(original, function(sprayerSelf, savegame)
+            patchVehicleSprayTypes(sprayerSelf)
+        end)
+        self:register(Sprayer, "onLoad", original, "Sprayer.onLoad (sprayType effects)")
+    end
+
+    SoilLogger.info("[OK] SprayType effects hook installed - %d vehicles patched retroactively", patched)
+    return true
+end
+
+-- =========================================================
+-- POST-INSTALL: Force-refresh sprayer effects on loaded vehicles
+-- =========================================================
+-- After our deferred hooks install, vehicles that were loaded before
+-- registerCustomSprayTypes ran will have workAreaParameters.sprayType = nil
+-- (because getSprayTypeIndexByFillTypeIndex returned nil at vehicle-load time
+-- before our custom types were registered). Their effects also have a stale
+-- lastEffectsState that prevents re-evaluation.
+--
+-- Fix: iterate all loaded vehicles, reset lastEffectsState to nil so the
+-- next updateSprayerEffects call sees a state change, then call it with
+-- force=true to immediately re-resolve the sprayType and restart effects.
+-- This is purely cosmetic and safe to call at any time post-load.
+---@return nil
+function HookManager:refreshAllSprayerEffects()
+    local vehicleSystem = g_currentMission and g_currentMission.vehicleSystem
+    if not vehicleSystem or not vehicleSystem.vehicles then
+        SoilLogger.debug("refreshAllSprayerEffects: vehicleSystem not available, skipping")
+        return
+    end
+
+    local refreshed = 0
+    for _, vehicle in pairs(vehicleSystem.vehicles) do
+        local spec = vehicle.spec_sprayer
+        if spec then
+            -- Re-resolve sprayType from the current fillType now that our custom
+            -- types are registered in SprayTypeManager.
+            local wap = spec.workAreaParameters
+            if wap and wap.sprayFillType and wap.sprayFillType > 0 then
+                wap.sprayType = g_sprayTypeManager:getSprayTypeIndexByFillTypeIndex(wap.sprayFillType)
+            end
+
+            -- Reset lastEffectsState so updateSprayerEffects sees a change and
+            -- re-calls setEffectTypeInfo with the now-remapped fill type.
+            spec.lastEffectsState = nil
+
+            -- Call updateSprayerEffects(force=true) if the method exists on this vehicle.
+            if type(vehicle.updateSprayerEffects) == "function" then
+                local ok, err = pcall(vehicle.updateSprayerEffects, vehicle, true)
+                if not ok then
+                    SoilLogger.debug("refreshAllSprayerEffects: updateSprayerEffects failed on vehicle %s: %s",
+                        tostring(vehicle.configFileName or "?"), tostring(err))
+                end
+            end
+
+            refreshed = refreshed + 1
+        end
+    end
+
+    if refreshed > 0 then
+        SoilLogger.info("[OK] Refreshed sprayer effects on %d loaded vehicle(s)", refreshed)
+    end
 end
 
 --- Register a cleanup-only hook (e.g. message center subscriptions).
@@ -518,8 +929,9 @@ function HookManager:installFillUnitHook()
         return false
     end
 
-    local solidNames  = {"UREA", "AMS", "MAP", "DAP", "POTASH"}
-    local liquidNames = {"UAN32", "UAN28", "ANHYDROUS", "STARTER"}
+    local solidNames  = {"UREA", "AMS", "MAP", "DAP", "POTASH",
+                          "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM"}
+    local liquidNames = {"UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME"}
 
     local solidIndices  = {}
     local liquidIndices = {}

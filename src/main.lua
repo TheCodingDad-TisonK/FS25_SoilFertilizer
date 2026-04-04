@@ -99,7 +99,13 @@ local function loadedMission(mission, node)
         SoilLogger.info("Custom HUD icons patched for mod fill types")
     end
 
-    -- Note: Multiplayer sync is handled in loadFromXMLFile hook
+    -- Multiplayer client: request full state from server.
+    -- SoilRequestFullSyncEvent asks the server for all settings + field data.
+    -- The retry handler (AsyncRetryHandler) makes up to 3 attempts with delay
+    -- in case the server-side soil system hasn't finished initializing yet.
+    if g_client and not g_server and SoilNetworkEvents_RequestFullSync then
+        SoilNetworkEvents_RequestFullSync()
+    end
 end
 
 -- Load handler
@@ -188,11 +194,9 @@ local function hookSaveLoadEvents()
         SoilLogger.warning("FSCareerMissionInfo.saveToXMLFile not found — soil data will NOT be saved")
     end
 
-    -- Load is handled directly in SoilFertilityManager.new() via loadSoilData().
-    -- By the time our Mission00.load prepend fires, FSCareerMissionInfo:loadFromXML
-    -- has already run and missionInfo.savegameDirectory is set to the real savegame
-    -- folder, so loadSoilData() finds and reads soilData.xml correctly without any
-    -- additional hook here.
+    -- Load is handled in SoilFertilityManager:deferredSoilSystemInit() after soilSystem:initialize().
+    -- This guarantees missionInfo.savegameDirectory is set (it is nil at constructor time
+    -- for new careers) before we attempt to read soilData.xml.
 end
 
 -- Hook into FS25 mission events

@@ -38,7 +38,7 @@
         <fillUnitConfigurations>
             <fillUnitConfiguration>
                 <fillUnits>
-                    <fillUnit fillTypes="UREA" capacity="1000" />
+                    <fillUnit fillTypes="UREA" capacity="10000" />
                 </fillUnits>
             </fillUnitConfiguration>
         </fillUnitConfigurations>

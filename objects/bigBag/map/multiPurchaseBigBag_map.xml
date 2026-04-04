@@ -38,7 +38,7 @@
         <fillUnitConfigurations>
             <fillUnitConfiguration>
                 <fillUnits>
-                    <fillUnit fillTypes="MAP" capacity="1000" />
+                    <fillUnit fillTypes="MAP" capacity="10000" />
                 </fillUnits>
             </fillUnitConfiguration>
         </fillUnitConfigurations>

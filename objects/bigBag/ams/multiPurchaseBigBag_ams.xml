@@ -38,7 +38,7 @@
         <fillUnitConfigurations>
             <fillUnitConfiguration>
                 <fillUnits>
-                    <fillUnit fillTypes="AMS" capacity="1000" />
+                    <fillUnit fillTypes="AMS" capacity="10000" />
                 </fillUnits>
             </fillUnitConfiguration>
         </fillUnitConfigurations>

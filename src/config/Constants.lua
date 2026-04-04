@@ -217,6 +217,19 @@ SoilConstants.FERTILIZER_TYPES = {
 }
 
 -- ========================================
+-- BIG BAG CAPACITY
+-- ========================================
+-- Capacity (in litres) for all BigBag objects.
+-- Real IBC / FIBC bags hold 500–1000 kg of dry product or 1000L of liquid.
+-- The game's sprayers consume product quickly, so we use a larger value
+-- (10,000 L) to give a realistic field-spanning amount per bag.
+-- Change this value here and update the matching capacity/startFillLevel
+-- attributes in every objects/bigBag/*/bigBag_*.xml and multiPurchase*.xml.
+SoilConstants.BIGBAG = {
+    CAPACITY = 10000,  -- litres per bag
+}
+
+-- ========================================
 -- SINGLE-NUTRIENT PURCHASABLE FILL TYPES
 -- ========================================
 -- These fill types are declared in modDesc.xml <fillTypes> and are available
