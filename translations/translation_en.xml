@@ -111,6 +111,8 @@
     <e k="sf_map_title" v="MAP Fertilizer 11-52-0 (P)" eh="31aa2534" />
     <e k="sf_dap_title" v="DAP Fertilizer 18-46-0 (P)" eh="5030a80a" />
     <e k="sf_potash_title" v="Potash 0-0-60 (K)" eh="8db6c54c" />
+    <e k="sf_insecticide_title" v="Insecticide" eh="fa0200a7" />
+    <e k="sf_fungicide_title" v="Fungicide" eh="a3d4e59c" />
     <e k="sf_report_page_info" v="Fields %d-%d of %d  |  Page %d of %d" eh="8db851d1" />
     <e k="sf_bigBag_uan32_name" v="Big Bag UAN 32-0-0" eh="7bdc4d9d" />
     <e k="sf_bigBag_uan32_function" v="Nitrogen Fertilizer (liquid)" eh="27de5f41" />
@@ -129,10 +131,11 @@
     <e k="sf_bigBag_potash_name" v="Big Bag Potash 0-0-60" eh="eb771556" />
     <e k="sf_bigBag_potash_function" v="Potassium Fertilizer (dry)" eh="18015099" />
     <e k="sf_bigBag_starter_name" v="Big Bag Starter 10-34-0" eh="953fd6c0" />
-    <e k="sf_bigBag_insecticide_name" v="Big Bag Insecticide" />
-    <e k="sf_bigBag_insecticide_function" v="Insecticide (liquid)" />
-    <e k="sf_bigBag_fungicide_name" v="Big Bag Fungicide" />
-    <e k="sf_bigBag_fungicide_function" v="Fungicide (liquid)" />
+    <e k="sf_bigBag_insecticide_name" v="Big Bag Insecticide" eh="fa0200a7" />
+    <e k="sf_bigBag_insecticide_function" v="Insecticide (liquid)" eh="09580f6b" />
+    <e k="sf_bigBag_fungicide_name" v="Big Bag Fungicide" eh="a3d4e59c" />
+    <e k="sf_bigBag_fungicide_function" v="Fungicide (liquid)" eh="745c34cb" />
     <e k="sf_bigBag_starter_function" v="Starter Fertilizer (liquid)" eh="2c36ea57" />
     </elements>
 </l10n>
+

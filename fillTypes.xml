@@ -73,14 +73,14 @@
 
         <!-- ── CROP PROTECTION ────────────────────────────────── -->
 
-        <fillType name="INSECTICIDE" title="$l10n_fillType_insecticide" showOnPriceTable="true" isBulkType="false" unitShort="$l10n_unit_literShort">
+        <fillType name="INSECTICIDE" title="$l10n_sf_insecticide_title" showOnPriceTable="true" isBulkType="false" unitShort="$l10n_unit_literShort">
             <physics massPerLiter="0.001" maxPhysicalSurfaceAngle="0"/>
             <economy pricePerLiter="1.20"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_liquidFertilizer.png"/>
             <sprayType sprayTypeStr="LIQUID"/>
         </fillType>
 
-        <fillType name="FUNGICIDE" title="$l10n_fillType_fungicide" showOnPriceTable="true" isBulkType="false" unitShort="$l10n_unit_literShort">
+        <fillType name="FUNGICIDE" title="$l10n_sf_fungicide_title" showOnPriceTable="true" isBulkType="false" unitShort="$l10n_unit_literShort">
             <physics massPerLiter="0.001" maxPhysicalSurfaceAngle="0"/>
             <economy pricePerLiter="1.30"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_liquidFertilizer.png"/>

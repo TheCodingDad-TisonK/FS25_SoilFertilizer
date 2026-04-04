@@ -232,7 +232,7 @@ SoilConstants.FERTILIZER_TYPES = {
 -- Change this value here and update the matching capacity/startFillLevel
 -- attributes in every objects/bigBag/*/bigBag_*.xml and multiPurchase*.xml.
 SoilConstants.BIGBAG = {
-    CAPACITY = 10000,  -- litres per bag
+    CAPACITY = 1000,  -- litres per bag
 }
 
 -- ========================================
@@ -497,6 +497,9 @@ SoilConstants.SPRAYER_RATE = {
         BIOSOLIDS         = { value =  4500.0, unit = "dry"    },
         CHICKEN_MANURE    = { value =  2000.0, unit = "dry"    },
         GYPSUM            = { value =  1500.0, unit = "dry"    },
+        -- Crop protection
+        INSECTICIDE = { value = 1.5, unit = "liquid" },  -- ~0.16 gal/ac
+        FUNGICIDE   = { value = 1.5, unit = "liquid" },  -- ~0.16 gal/ac
         -- Fallback for unrecognized fill types
         DEFAULT           = { value =    93.5, unit = "liquid" },
     },
