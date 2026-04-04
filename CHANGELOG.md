@@ -7,7 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.3.1.0] - 2026-04-04
+## [1.3.3.0] - 2026-04-04
+
+### Fixed
+
+- **Settings page showing raw key names instead of translated text**: All UI text lookups now correctly use the mod-scoped i18n instance. Root cause: `g_currentModName` is only valid at mod load time, not at UI construction time. The mod name is now captured in a local variable (`SF_MOD_NAME`) at file load time and used in all translation lookups across `SoilSettingsUI`, `SoilReportDialog`, and `UIHelper`. Affected 1.3.2.0 users on all languages.
+
+---
+
+## [1.3.2.0] - 2026-04-04
 
 ### Fixed
 

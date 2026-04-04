@@ -14,10 +14,13 @@
 SoilSettingsUI = {}
 local SoilSettingsUI_mt = Class(SoilSettingsUI)
 
+-- Capture mod name at load time — g_currentModName is only valid during loading.
+local SF_MOD_NAME = g_currentModName
+
 -- Resolve a translation key using the mod-scoped i18n instance.
 -- g_i18n is the base-game global and does not know about mod keys.
 local function tr(key, fallback)
-    local modEnv = g_modEnvironments and g_modEnvironments[g_currentModName]
+    local modEnv = g_modEnvironments and g_modEnvironments[SF_MOD_NAME]
     local i18n = (modEnv and modEnv.i18n) or g_i18n
     if i18n then
         local text = i18n:getText(key)

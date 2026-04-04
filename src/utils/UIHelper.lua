@@ -10,10 +10,13 @@
 ---@class UIHelper
 UIHelper = {}
 
+-- Capture mod name at load time — g_currentModName is only valid during loading.
+local SF_MOD_NAME = g_currentModName
+
 local function getTextSafe(key)
     -- Use mod-scoped i18n so mod translation keys are resolved correctly.
     -- g_i18n is the global (base-game) object and does not contain mod keys.
-    local modEnv = g_modEnvironments and g_modEnvironments[g_currentModName]
+    local modEnv = g_modEnvironments and g_modEnvironments[SF_MOD_NAME]
     local i18n = (modEnv and modEnv.i18n) or g_i18n
     if not i18n then
         return key
