@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.1.0] - 2026-04-04
+
+### Fixed
+
+- **Sprayer visuals for custom fill types**: Custom fertilizers (UAN32, UAN28, Anhydrous, Starter, UREA, AMS, MAP, DAP, Potash) now correctly show spray/spread effects on all sprayer and spreader types, including PF-modded equipment. Root cause: vanilla runtime checks inside `Sprayer.onEndWorkAreaProcessing` compared against hardcoded `FillType`/`SprayType` constants, which never matched our custom indices. Fix wraps the function with a temporary global table swap (pattern identified from community testing) so all vanilla checks transparently pass for our fill types — originals are restored immediately after the call.
+
+- **Save data not written on first career start**: `loadSoilData()` was called in the `SoilFertilityManager` constructor before `savegameDirectory` was set by the game engine. Moved to `deferredSoilSystemInit()` which runs after the mission info is fully populated.
+
+- **Multiplayer clients never received full soil state on join**: `SoilNetworkEvents_RequestFullSync()` was implemented but never called. Now triggered in `loadedMission()` for MP clients, with the existing 3-attempt retry handler backing it.
+
+- **Precision Farming compatibility mode removed**: The PF read-only mode was causing field data to silently disappear on servers with PF installed. Both mods now run fully independently. PF users retain their own soil maps; our mod tracks NPK/OM/pH separately.
+
+- **fillTypeCategory name collision**: Categories named `FERTILIZER` and `LIQUIDFERTILIZER` conflicted with vanilla entries. Renamed to `SPREADER` and `SPRAYER`.
+
+### Thanks
+
+Special thanks to **seb** from the FS25 Modding Community Discord for testing and identifying the spray effects solution.
+
+---
+
 ## [1.1.4.0] - 2026-03-15
 
 ### Added
