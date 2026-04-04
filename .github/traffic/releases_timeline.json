@@ -178,5 +178,15 @@
     "published_at": "2026-04-04T14:49:14Z",
     "tag": "v1.3.3.0",
     "peak_downloads": 20
+  },
+  "v1.4.1.0": {
+    "published_at": "2026-04-04T18:26:50Z",
+    "tag": "v1.4.1.0",
+    "peak_downloads": 2
+  },
+  "v1.4.0.0": {
+    "published_at": "2026-04-04T18:04:03Z",
+    "tag": "v1.4.0.0",
+    "peak_downloads": 3
   }
 }
