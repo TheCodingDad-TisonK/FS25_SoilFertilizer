@@ -61,9 +61,21 @@ Different crops take different amounts from your soil. Push the same field too h
 | 🌾 Barley / Oats / Rye | ●●●○○ | ●●○○○ | ●●●○○ | Light feeders, good rotation crops |
 | 🫛 Peas / Beans | ●●●●○ | ●●●○○ | ●●●●○ | Legumes — still need balanced soil |
 
+### 🐛 Field Health System
+
+Three pressure scores (0–100) track threats to each field independently. Left unchecked they reduce your yield at harvest. Treat them with the right product and the pressure drops within a few days.
+
+| Pressure | Source | Treatment | Resets naturally | Max penalty |
+|----------|--------|-----------|-----------------|-------------|
+| 🌿 **Weed** | Grows daily — peaks without tillage | `HERBICIDE` spray | Any tillage / plowing | −30% |
+| 🐞 **Pest** | Insects — peaks in summer | `INSECTICIDE` spray | Harvest disperses population | −20% |
+| 🍄 **Disease** | Fungal — driven by rain | `FUNGICIDE` spray | 3+ dry days cause natural decay | −25% |
+
+All three are visible in the HUD and the full Soil Report. Each can be toggled off in settings.
+
 ### 💊 Fertilizer Types
 
-Six products, each with a different job:
+Six nutrient products, each with a different job:
 
 | Fertilizer | N | P | K | Organic Matter | Notes |
 |---|---|---|---|---|---|
@@ -118,6 +130,9 @@ Open via **ESC → Settings → Game Settings → Soil & Fertilizer**.
 | **Seasonal effects** | On / Off | Spring boost and fall nitrogen loss |
 | **Rain effects** | On / Off | Leaching and pH acidification from rain |
 | **Plowing bonus** | On / Off | Whether plowing improves OM and pH |
+| **Weed pressure** | On / Off | Track weed competition per field — apply herbicide to reduce |
+| **Pest pressure** | On / Off | Track insect pest populations per field — apply insecticide to reduce |
+| **Disease pressure** | On / Off | Track crop disease per field — apply fungicide to reduce |
 | **Difficulty** | Simple / Realistic / Hardcore | Scales depletion rate — 0.7× / 1× / 1.5× |
 | **HUD enabled** | On / Off | Show or hide the soil overlay |
 | **HUD position** | 5 presets | Top-right, top-left, bottom-right, bottom-left, centre-right |
@@ -225,7 +240,7 @@ This mod is licensed under **[CC BY-NC-ND 4.0](https://creativecommons.org/licen
 
 You may share it in its original form with attribution. You may not sell it, modify and redistribute it, or reupload it under a different name or authorship. Contributions via pull request are explicitly permitted and encouraged.
 
-**Author:** TisonK &nbsp;·&nbsp; **Version:** 1.3.3.0
+**Author:** TisonK &nbsp;·&nbsp; **Version:** 1.4.0.0
 
 © 2026 TisonK — See [LICENSE](LICENSE) for full terms.
 

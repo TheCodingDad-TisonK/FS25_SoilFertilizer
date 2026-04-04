@@ -273,6 +273,8 @@ function SoilFullSyncEvent:readStream(streamId, connection)
     self.settings.rainEffects = streamReadBool(streamId)
     self.settings.plowingBonus = streamReadBool(streamId)
     self.settings.weedPressure = streamReadBool(streamId)
+    self.settings.pestPressure = streamReadBool(streamId)
+    self.settings.diseasePressure = streamReadBool(streamId)
     self.settings.difficulty = streamReadInt32(streamId)
     self.settings.autoRateControl = streamReadBool(streamId)
 
@@ -291,6 +293,13 @@ function SoilFullSyncEvent:readStream(streamId, connection)
         local lastCrop = streamReadString(streamId)
         local lastHarvest = streamReadInt32(streamId)
         local fertilizerApplied = streamReadFloat32(streamId)
+        local weedPressure = streamReadFloat32(streamId)
+        local herbDays = streamReadInt32(streamId)
+        local pestPressure = streamReadFloat32(streamId)
+        local pestDays = streamReadInt32(streamId)
+        local diseasePressure = streamReadFloat32(streamId)
+        local diseaseDays = streamReadInt32(streamId)
+        local dryDays = streamReadInt32(streamId)
 
         -- Validate and sanitize field data
         local function validateNumber(value, min, max, default, name)
@@ -330,8 +339,13 @@ function SoilFullSyncEvent:readStream(streamId, connection)
                 lastCrop = lastCrop,
                 lastHarvest = lastHarvest,
                 fertilizerApplied = fertilizerApplied,
-                weedPressure = 0,
-                herbicideDaysLeft = 0,
+                weedPressure = weedPressure,
+                herbicideDaysLeft = herbDays,
+                pestPressure = pestPressure,
+                insecticideDaysLeft = pestDays,
+                diseasePressure = diseasePressure,
+                fungicideDaysLeft = diseaseDays,
+                dryDayCount = dryDays,
                 initialized = true
             }
             -- Clear empty strings
@@ -361,6 +375,8 @@ function SoilFullSyncEvent:writeStream(streamId, connection)
     streamWriteBool(streamId, self.settings.rainEffects)
     streamWriteBool(streamId, self.settings.plowingBonus)
     streamWriteBool(streamId, self.settings.weedPressure == true)
+    streamWriteBool(streamId, self.settings.pestPressure == true)
+    streamWriteBool(streamId, self.settings.diseasePressure == true)
     streamWriteInt32(streamId, self.settings.difficulty)
     streamWriteBool(streamId, self.settings.autoRateControl == true)
 
@@ -381,6 +397,13 @@ function SoilFullSyncEvent:writeStream(streamId, connection)
         streamWriteString(streamId, field.lastCrop or "")
         streamWriteInt32(streamId, field.lastHarvest or 0)
         streamWriteFloat32(streamId, field.fertilizerApplied or 0)
+        streamWriteFloat32(streamId, field.weedPressure or 0)
+        streamWriteInt32(streamId, field.herbicideDaysLeft or 0)
+        streamWriteFloat32(streamId, field.pestPressure or 0)
+        streamWriteInt32(streamId, field.insecticideDaysLeft or 0)
+        streamWriteFloat32(streamId, field.diseasePressure or 0)
+        streamWriteInt32(streamId, field.fungicideDaysLeft or 0)
+        streamWriteInt32(streamId, field.dryDayCount or 0)
     end
 end
 
@@ -402,6 +425,8 @@ function SoilFullSyncEvent:run(connection)
     settings.rainEffects = self.settings.rainEffects
     settings.plowingBonus = self.settings.plowingBonus
     settings.weedPressure = self.settings.weedPressure
+    settings.pestPressure = self.settings.pestPressure
+    settings.diseasePressure = self.settings.diseasePressure
     settings.difficulty = self.settings.difficulty
     settings.autoRateControl = self.settings.autoRateControl
 
@@ -463,6 +488,13 @@ function SoilFieldUpdateEvent:readStream(streamId, connection)
     local lastCrop = streamReadString(streamId)
     local lastHarvest = streamReadInt32(streamId)
     local fertilizerApplied = streamReadFloat32(streamId)
+    local weedPressure = streamReadFloat32(streamId)
+    local herbDays = streamReadInt32(streamId)
+    local pestPressure = streamReadFloat32(streamId)
+    local pestDays = streamReadInt32(streamId)
+    local diseasePressure = streamReadFloat32(streamId)
+    local diseaseDays = streamReadInt32(streamId)
+    local dryDays = streamReadInt32(streamId)
 
     -- Clamp all values to valid ranges
     self.field = {
@@ -479,6 +511,13 @@ function SoilFieldUpdateEvent:readStream(streamId, connection)
         lastCrop = lastCrop,
         lastHarvest = math.max(0, lastHarvest),
         fertilizerApplied = math.max(0, fertilizerApplied),
+        weedPressure = math.max(0, math.min(100, weedPressure)),
+        herbicideDaysLeft = math.max(0, herbDays),
+        pestPressure = math.max(0, math.min(100, pestPressure)),
+        insecticideDaysLeft = math.max(0, pestDays),
+        diseasePressure = math.max(0, math.min(100, diseasePressure)),
+        fungicideDaysLeft = math.max(0, diseaseDays),
+        dryDayCount = math.max(0, dryDays),
         initialized = true
     }
 
@@ -500,6 +539,13 @@ function SoilFieldUpdateEvent:writeStream(streamId, connection)
     streamWriteString(streamId, self.field.lastCrop or "")
     streamWriteInt32(streamId, self.field.lastHarvest or 0)
     streamWriteFloat32(streamId, self.field.fertilizerApplied or 0)
+    streamWriteFloat32(streamId, self.field.weedPressure or 0)
+    streamWriteInt32(streamId, self.field.herbicideDaysLeft or 0)
+    streamWriteFloat32(streamId, self.field.pestPressure or 0)
+    streamWriteInt32(streamId, self.field.insecticideDaysLeft or 0)
+    streamWriteFloat32(streamId, self.field.diseasePressure or 0)
+    streamWriteInt32(streamId, self.field.fungicideDaysLeft or 0)
+    streamWriteInt32(streamId, self.field.dryDayCount or 0)
 end
 
 function SoilFieldUpdateEvent:run(connection)

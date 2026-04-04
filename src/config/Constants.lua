@@ -196,6 +196,10 @@ SoilConstants.FERTILIZER_PROFILES = {
 
     -- Lime variants
     LIQUIDLIME        = { pH=0.3 },  -- Slightly weaker per volume than dry lime
+
+    -- Crop protection products
+    INSECTICIDE = { pestReduction = 1.0 },   -- effectiveness 1.0 (key signals this is insecticide)
+    FUNGICIDE   = { diseaseReduction = 1.0 }, -- effectiveness 1.0
 }
 
 -- List of recognized fertilizer fill type names (for reference/iteration)
@@ -214,6 +218,8 @@ SoilConstants.FERTILIZER_TYPES = {
     "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE",
     -- Lime variants
     "LIQUIDLIME",
+    -- Crop protection
+    "INSECTICIDE", "FUNGICIDE",
 }
 
 -- ========================================
@@ -554,6 +560,133 @@ SoilConstants.WEED_PRESSURE = {
     YIELD_PENALTY_MID    = 0.05,  -- 20-50: -5%
     YIELD_PENALTY_HIGH   = 0.15,  -- 50-75: -15%
     YIELD_PENALTY_PEAK   = 0.30,  -- 75-100: -30%
+
+    -- HUD tier thresholds
+    LOW    = 20,
+    MEDIUM = 50,
+    HIGH   = 75,
+}
+
+-- ========================================
+-- PEST PRESSURE
+-- ========================================
+-- Per-field 0-100 insect/pest infestation score.
+-- Grows daily, peaks in summer, rain accelerates it.
+-- Insecticide spray reduces pressure and suppresses regrowth.
+-- Harvest disperses the pest population (resets to 30% of current).
+SoilConstants.PEST_PRESSURE = {
+    -- Daily base growth rate (points/day) by current pressure tier
+    GROWTH_RATE_LOW    = 0.8,   -- 0-20:  slow colonisation phase
+    GROWTH_RATE_MID    = 1.5,   -- 20-50: active infestation
+    GROWTH_RATE_HIGH   = 1.0,   -- 50-75: density self-limiting
+    GROWTH_RATE_PEAK   = 0.3,   -- 75-100: near carrying capacity
+
+    -- Seasonal growth multipliers (season index: 1=Spring 2=Summer 3=Fall 4=Winter)
+    SEASONAL_SPRING = 1.1,
+    SEASONAL_SUMMER = 1.8,   -- peak insect activity
+    SEASONAL_FALL   = 0.6,
+    SEASONAL_WINTER = 0.05,  -- near dormancy
+
+    -- Rain bonus added to base daily rate when raining
+    RAIN_BONUS = 0.3,
+
+    -- Crop susceptibility multipliers (lowercased fruitDesc.name → multiplier)
+    -- Any crop NOT listed here defaults to 1.0
+    CROP_SUSCEPTIBILITY = {
+        potato    = 1.4,
+        sugarbeet = 1.4,
+        canola    = 1.4,
+        soybean   = 1.3,
+        maize     = 1.2,
+        sunflower = 1.2,
+        wheat     = 0.8,
+        barley    = 0.7,
+        oats      = 0.7,
+        rye       = 0.7,
+        sorghum   = 0.7,
+    },
+
+    -- Insecticide fill type names → effectiveness multiplier (0.0-1.0)
+    INSECTICIDE_TYPES = {
+        INSECTICIDE = 1.0,
+    },
+    -- Pressure points removed on a single insecticide application
+    INSECTICIDE_PRESSURE_REDUCTION = 25,
+    -- Days insecticide suppresses pest growth after application
+    INSECTICIDE_DURATION_DAYS = 10,
+
+    -- On harvest: pest pressure resets to this fraction of current value
+    -- (insects disperse when the host crop is removed)
+    HARVEST_RESET_FRACTION = 0.30,
+
+    -- Harvest yield penalty at each pressure tier
+    YIELD_PENALTY_LOW    = 0.00,  -- 0-20:  none
+    YIELD_PENALTY_MID    = 0.05,  -- 20-50: -5%
+    YIELD_PENALTY_HIGH   = 0.12,  -- 50-75: -12%
+    YIELD_PENALTY_PEAK   = 0.20,  -- 75-100: -20%
+
+    -- HUD tier thresholds (mirrors WEED_PRESSURE)
+    LOW    = 20,
+    MEDIUM = 50,
+    HIGH   = 75,
+}
+
+-- ========================================
+-- DISEASE PRESSURE
+-- ========================================
+-- Per-field 0-100 fungal/crop disease score.
+-- Rain is the primary driver. Peaks in spring and fall.
+-- Fungicide spray reduces pressure and suppresses regrowth.
+-- Extended dry weather causes natural decay.
+SoilConstants.DISEASE_PRESSURE = {
+    -- Daily base growth rate (points/day) by current pressure tier
+    GROWTH_RATE_LOW    = 0.6,   -- 0-20:  initial infection
+    GROWTH_RATE_MID    = 1.2,   -- 20-50: active spread
+    GROWTH_RATE_HIGH   = 0.8,   -- 50-75: density self-limiting
+    GROWTH_RATE_PEAK   = 0.2,   -- 75-100: near maximum
+
+    -- Seasonal growth multipliers (season: 1=Spring 2=Summer 3=Fall 4=Winter)
+    SEASONAL_SPRING = 1.5,   -- fungal window: cool+moist
+    SEASONAL_SUMMER = 0.9,
+    SEASONAL_FALL   = 1.3,   -- second fungal window
+    SEASONAL_WINTER = 0.1,
+
+    -- Rain is the primary driver: extra points/day added during active rain
+    RAIN_BONUS = 1.0,
+
+    -- Dry weather decay: pressure points lost per day when it has NOT rained
+    -- for DRY_DAYS_THRESHOLD consecutive days.
+    -- NOTE: tracking consecutive dry days requires a new field: `field.dryDayCount`
+    -- (integer, default 0). Increment each day without rain, reset to 0 on rain.
+    DRY_DAYS_THRESHOLD = 3,    -- after this many dry days, decay begins
+    DRY_DECAY_RATE     = 0.5,  -- pts/day removed during dry period
+
+    -- Crop susceptibility multipliers (lowercased fruitDesc.name → multiplier)
+    CROP_SUSCEPTIBILITY = {
+        wheat     = 1.3,   -- fusarium / septoria risk
+        canola    = 1.3,   -- sclerotinia risk
+        potato    = 1.4,   -- blight risk
+        soybean   = 1.2,
+        maize     = 1.1,
+        barley    = 0.8,
+        rye       = 0.7,
+        sorghum   = 0.7,
+    },
+
+    -- Fungicide fill type names → effectiveness multiplier
+    FUNGICIDE_TYPES = {
+        FUNGICIDE = 1.0,
+    },
+    -- Pressure points removed on a single fungicide application
+    FUNGICIDE_PRESSURE_REDUCTION = 20,
+    -- Days fungicide suppresses disease growth after application
+    FUNGICIDE_DURATION_DAYS = 12,
+
+    -- Harvest yield penalty at each pressure tier
+    YIELD_PENALTY_LOW    = 0.00,  -- 0-20:  none
+    YIELD_PENALTY_MID    = 0.05,  -- 20-50: -5%
+    YIELD_PENALTY_HIGH   = 0.15,  -- 50-75: -15%
+    YIELD_PENALTY_PEAK   = 0.25,  -- 75-100: -25%
 
     -- HUD tier thresholds
     LOW    = 20,

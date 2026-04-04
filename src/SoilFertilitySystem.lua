@@ -151,6 +151,57 @@ function SoilFertilitySystem:onHarvest(fieldId, fruitTypeIndex, liters, strawRat
         end
     end
 
+    -- Pest pressure yield penalty
+    if self.settings.pestPressure and SoilConstants.PEST_PRESSURE then
+        local field = self.fieldData[fieldId]
+        if field then
+            local pp = SoilConstants.PEST_PRESSURE
+            local pressure = field.pestPressure or 0
+            local penalty
+            if pressure < pp.LOW then
+                penalty = pp.YIELD_PENALTY_LOW
+            elseif pressure < pp.MEDIUM then
+                penalty = pp.YIELD_PENALTY_MID
+            elseif pressure < pp.HIGH then
+                penalty = pp.YIELD_PENALTY_HIGH
+            else
+                penalty = pp.YIELD_PENALTY_PEAK
+            end
+            if penalty > 0 then
+                liters = liters * (1.0 - penalty)
+                self:log("Pest penalty field %d: pressure=%.0f, penalty=%.0f%%",
+                    fieldId, pressure, penalty * 100)
+            end
+            -- Harvest disperses pest population
+            field.pestPressure = pressure * pp.HARVEST_RESET_FRACTION
+            field.insecticideDaysLeft = 0
+        end
+    end
+
+    -- Disease pressure yield penalty
+    if self.settings.diseasePressure and SoilConstants.DISEASE_PRESSURE then
+        local field = self.fieldData[fieldId]
+        if field then
+            local dp = SoilConstants.DISEASE_PRESSURE
+            local pressure = field.diseasePressure or 0
+            local penalty
+            if pressure < dp.LOW then
+                penalty = dp.YIELD_PENALTY_LOW
+            elseif pressure < dp.MEDIUM then
+                penalty = dp.YIELD_PENALTY_MID
+            elseif pressure < dp.HIGH then
+                penalty = dp.YIELD_PENALTY_HIGH
+            else
+                penalty = dp.YIELD_PENALTY_PEAK
+            end
+            if penalty > 0 then
+                liters = liters * (1.0 - penalty)
+                self:log("Disease penalty field %d: pressure=%.0f, penalty=%.0f%%",
+                    fieldId, pressure, penalty * 100)
+            end
+        end
+    end
+
     self:updateFieldNutrients(fieldId, fruitTypeIndex, liters, strawRatio)
 
     SoilLogger.debug("Harvest: Field %d, Crop %d, %.0fL", fieldId, fruitTypeIndex, liters)
@@ -318,6 +369,58 @@ function SoilFertilitySystem:onHerbicideApplied(fieldId, effectiveness)
         fieldId, before, field.weedPressure, field.herbicideDaysLeft)
 
     -- Broadcast in multiplayer
+    if g_server and g_currentMission and g_currentMission.missionDynamicInfo.isMultiplayer then
+        if SoilFieldUpdateEvent then
+            g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
+        end
+    end
+end
+
+--- Called when insecticide is applied to a field.
+---@param fieldId number
+---@param effectiveness number 0.0-1.0 insecticide effectiveness multiplier
+function SoilFertilitySystem:onInsecticideApplied(fieldId, effectiveness)
+    if not self.settings.pestPressure then return end
+    if not SoilConstants.PEST_PRESSURE then return end
+
+    local field = self:getOrCreateField(fieldId, false)
+    if not field then return end
+
+    local pp = SoilConstants.PEST_PRESSURE
+    local reduction = pp.INSECTICIDE_PRESSURE_REDUCTION * (effectiveness or 1.0)
+    local before = field.pestPressure or 0
+    field.pestPressure = math.max(0, before - reduction)
+    field.insecticideDaysLeft = pp.INSECTICIDE_DURATION_DAYS
+
+    self:log("[Insecticide] Field %d: pest pressure %.0f -> %.0f, protected for %d days",
+        fieldId, before, field.pestPressure, field.insecticideDaysLeft)
+
+    if g_server and g_currentMission and g_currentMission.missionDynamicInfo.isMultiplayer then
+        if SoilFieldUpdateEvent then
+            g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
+        end
+    end
+end
+
+--- Called when fungicide is applied to a field.
+---@param fieldId number
+---@param effectiveness number 0.0-1.0 fungicide effectiveness multiplier
+function SoilFertilitySystem:onFungicideApplied(fieldId, effectiveness)
+    if not self.settings.diseasePressure then return end
+    if not SoilConstants.DISEASE_PRESSURE then return end
+
+    local field = self:getOrCreateField(fieldId, false)
+    if not field then return end
+
+    local dp = SoilConstants.DISEASE_PRESSURE
+    local reduction = dp.FUNGICIDE_PRESSURE_REDUCTION * (effectiveness or 1.0)
+    local before = field.diseasePressure or 0
+    field.diseasePressure = math.max(0, before - reduction)
+    field.fungicideDaysLeft = dp.FUNGICIDE_DURATION_DAYS
+
+    self:log("[Fungicide] Field %d: disease pressure %.0f -> %.0f, protected for %d days",
+        fieldId, before, field.diseasePressure, field.fungicideDaysLeft)
+
     if g_server and g_currentMission and g_currentMission.missionDynamicInfo.isMultiplayer then
         if SoilFieldUpdateEvent then
             g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
@@ -599,6 +702,11 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing)
         initialized = true,
         weedPressure = 0,
         herbicideDaysLeft = 0,
+        pestPressure = 0,
+        insecticideDaysLeft = 0,
+        diseasePressure = 0,
+        fungicideDaysLeft = 0,
+        dryDayCount = 0,
     }
 
     self:log("Lazy-created field %d with natural soil variation", fieldId)
@@ -679,6 +787,119 @@ function SoilFertilitySystem:updateDailySoil()
                 end
 
                 field.weedPressure = math.min(100, pressure + baseRate * seasonMult)
+            end
+        end
+
+        -- Pest pressure daily growth
+        if self.settings.pestPressure and SoilConstants.PEST_PRESSURE then
+            local pp = SoilConstants.PEST_PRESSURE
+
+            -- Decrement insecticide protection
+            if (field.insecticideDaysLeft or 0) > 0 then
+                field.insecticideDaysLeft = field.insecticideDaysLeft - 1
+            end
+
+            -- Only grow when not under insecticide protection
+            if (field.insecticideDaysLeft or 0) <= 0 then
+                local pressure = field.pestPressure or 0
+
+                -- Base rate by tier
+                local baseRate
+                if pressure < pp.LOW then
+                    baseRate = pp.GROWTH_RATE_LOW
+                elseif pressure < pp.MEDIUM then
+                    baseRate = pp.GROWTH_RATE_MID
+                elseif pressure < pp.HIGH then
+                    baseRate = pp.GROWTH_RATE_HIGH
+                else
+                    baseRate = pp.GROWTH_RATE_PEAK
+                end
+
+                -- Seasonal multiplier
+                local seasonMult = 1.0
+                if g_currentMission and g_currentMission.environment then
+                    local season = g_currentMission.environment.currentSeason
+                    if season == 1 then seasonMult = pp.SEASONAL_SPRING
+                    elseif season == 2 then seasonMult = pp.SEASONAL_SUMMER
+                    elseif season == 3 then seasonMult = pp.SEASONAL_FALL
+                    elseif season == 4 then seasonMult = pp.SEASONAL_WINTER
+                    end
+                end
+
+                -- Crop susceptibility multiplier
+                local cropMult = 1.0
+                if field.lastCrop then
+                    cropMult = pp.CROP_SUSCEPTIBILITY[string.lower(field.lastCrop)] or 1.0
+                end
+
+                -- Rain bonus (check current rain state)
+                local rainBonus = 0
+                if g_currentMission and g_currentMission.environment and
+                   g_currentMission.environment.weather and
+                   (g_currentMission.environment.weather.rainScale or 0) > SoilConstants.RAIN.MIN_RAIN_THRESHOLD then
+                    rainBonus = pp.RAIN_BONUS
+                end
+
+                field.pestPressure = math.min(100, pressure + (baseRate * seasonMult * cropMult) + rainBonus)
+            end
+        end
+
+        -- Disease pressure daily growth
+        if self.settings.diseasePressure and SoilConstants.DISEASE_PRESSURE then
+            local dp = SoilConstants.DISEASE_PRESSURE
+            local isRaining = g_currentMission and g_currentMission.environment and
+                              g_currentMission.environment.weather and
+                              (g_currentMission.environment.weather.rainScale or 0) > SoilConstants.RAIN.MIN_RAIN_THRESHOLD
+
+            -- Track consecutive dry days for natural decay
+            if isRaining then
+                field.dryDayCount = 0
+            else
+                field.dryDayCount = (field.dryDayCount or 0) + 1
+            end
+
+            -- Decrement fungicide protection
+            if (field.fungicideDaysLeft or 0) > 0 then
+                field.fungicideDaysLeft = field.fungicideDaysLeft - 1
+            end
+
+            local pressure = field.diseasePressure or 0
+
+            -- Natural dry-weather decay (overrides growth)
+            if (field.dryDayCount or 0) >= dp.DRY_DAYS_THRESHOLD then
+                field.diseasePressure = math.max(0, pressure - dp.DRY_DECAY_RATE)
+            elseif (field.fungicideDaysLeft or 0) <= 0 then
+                -- Only grow when not protected
+
+                local baseRate
+                if pressure < dp.LOW then
+                    baseRate = dp.GROWTH_RATE_LOW
+                elseif pressure < dp.MEDIUM then
+                    baseRate = dp.GROWTH_RATE_MID
+                elseif pressure < dp.HIGH then
+                    baseRate = dp.GROWTH_RATE_HIGH
+                else
+                    baseRate = dp.GROWTH_RATE_PEAK
+                end
+
+                local seasonMult = 1.0
+                if g_currentMission and g_currentMission.environment then
+                    local season = g_currentMission.environment.currentSeason
+                    if season == 1 then seasonMult = dp.SEASONAL_SPRING
+                    elseif season == 2 then seasonMult = dp.SEASONAL_SUMMER
+                    elseif season == 3 then seasonMult = dp.SEASONAL_FALL
+                    elseif season == 4 then seasonMult = dp.SEASONAL_WINTER
+                    end
+                end
+
+                local cropMult = 1.0
+                if field.lastCrop then
+                    cropMult = dp.CROP_SUSCEPTIBILITY[string.lower(field.lastCrop)] or 1.0
+                end
+
+                local rainBonus = isRaining and dp.RAIN_BONUS or 0
+
+                field.diseasePressure = math.min(100, pressure + (baseRate * seasonMult * cropMult) + rainBonus)
             end
         end
     end
@@ -799,6 +1020,22 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
     local entry = SoilConstants.FERTILIZER_PROFILES[fillType.name]
     if not entry then
         self:log("Fertilizer type %s not recognized", fillType.name)
+        return
+    end
+
+    -- Route crop protection products (they don't add N/P/K, they reduce pressure)
+    if entry.pestReduction then
+        local effectiveness = SoilConstants.PEST_PRESSURE.INSECTICIDE_TYPES[fillType.name] or 0
+        if effectiveness > 0 then
+            self:onInsecticideApplied(fieldId, effectiveness)
+        end
+        return
+    end
+    if entry.diseaseReduction then
+        local effectiveness = SoilConstants.DISEASE_PRESSURE.FUNGICIDE_TYPES[fillType.name] or 0
+        if effectiveness > 0 then
+            self:onFungicideApplied(fieldId, effectiveness)
+        end
         return
     end
 
@@ -957,6 +1194,10 @@ function SoilFertilitySystem:getFieldInfo(fieldId)
         fertilizerApplied = field.fertilizerApplied or 0,
         weedPressure = field.weedPressure or 0,
         herbicideActive = (field.herbicideDaysLeft or 0) > 0,
+        pestPressure = field.pestPressure or 0,
+        insecticideActive = (field.insecticideDaysLeft or 0) > 0,
+        diseasePressure = field.diseasePressure or 0,
+        fungicideActive = (field.fungicideDaysLeft or 0) > 0,
         needsFertilization = (
             field.nitrogen < fertThresholds.nitrogen or
             field.phosphorus < fertThresholds.phosphorus or
@@ -1011,6 +1252,11 @@ function SoilFertilitySystem:saveToXMLFile(xmlFile, key)
             setXMLFloat(xmlFile, fieldKey .. "#fertilizerApplied", field.fertilizerApplied or 0)
             setXMLFloat(xmlFile, fieldKey .. "#weedPressure", field.weedPressure or 0)
             setXMLInt(xmlFile, fieldKey .. "#herbicideDaysLeft", field.herbicideDaysLeft or 0)
+            setXMLFloat(xmlFile, fieldKey .. "#pestPressure", field.pestPressure or 0)
+            setXMLInt(xmlFile, fieldKey .. "#insecticideDaysLeft", field.insecticideDaysLeft or 0)
+            setXMLFloat(xmlFile, fieldKey .. "#diseasePressure", field.diseasePressure or 0)
+            setXMLInt(xmlFile, fieldKey .. "#fungicideDaysLeft", field.fungicideDaysLeft or 0)
+            setXMLInt(xmlFile, fieldKey .. "#dryDayCount", field.dryDayCount or 0)
 
             index = index + 1
         else
@@ -1050,6 +1296,11 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
             fertilizerApplied = getXMLFloat(xmlFile, fieldKey .. "#fertilizerApplied") or 0,
             weedPressure = getXMLFloat(xmlFile, fieldKey .. "#weedPressure") or 0,
             herbicideDaysLeft = getXMLInt(xmlFile, fieldKey .. "#herbicideDaysLeft") or 0,
+            pestPressure = getXMLFloat(xmlFile, fieldKey .. "#pestPressure") or 0,
+            insecticideDaysLeft = getXMLInt(xmlFile, fieldKey .. "#insecticideDaysLeft") or 0,
+            diseasePressure = getXMLFloat(xmlFile, fieldKey .. "#diseasePressure") or 0,
+            fungicideDaysLeft = getXMLInt(xmlFile, fieldKey .. "#fungicideDaysLeft") or 0,
+            dryDayCount = getXMLInt(xmlFile, fieldKey .. "#dryDayCount") or 0,
             initialized = true
         }
 

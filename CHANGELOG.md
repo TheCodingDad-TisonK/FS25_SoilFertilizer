@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.0.0] - 2026-04-04
+
+### Added
+
+- **Field Health System — Pest & Disease Pressure**: Two new per-field pressure scores (0–100) join the existing weed pressure system, each independently toggleable in settings.
+
+  | Pressure | Max Yield Penalty | Controlled by | Resets via |
+  |----------|-------------------|---------------|------------|
+  | **Pest** | −20% | `INSECTICIDE` spray | Harvest event |
+  | **Disease** | −25% | `FUNGICIDE` spray | Dry weather (3+ days) |
+
+  Both grow daily with seasonal multipliers (pests peak in summer; disease peaks in spring and fall). Crop susceptibility varies by type — potatoes and canola are most vulnerable. Rain accelerates both. Active protection suppresses regrowth for 10–12 days after application.
+
+- **Two new fill types**: `INSECTICIDE` (liquid, $1.20/L) and `FUNGICIDE` (liquid, $1.30/L), registered in `fillTypes.xml` and accepted by any liquid sprayer. Crop protection products are routed through the sprayer hook alongside fertilizers — they reduce pressure but do not add N/P/K.
+
+- **Settings**: `Pest Pressure` and `Disease Pressure` toggles added to the mod settings page (default on). Both are server-authoritative in multiplayer and fully synced to joining clients.
+
+- **HUD**: Pest and disease pressure rows appear below weed pressure when the respective settings are enabled, using the same colour tiers (green/amber/red).
+
+- **Soil Report**: Pest and disease alerts added to the per-field report — flagged when pressure exceeds the medium threshold.
+
+- **Save/load**: `pestPressure`, `diseasePressure`, `insecticideDaysLeft`, `fungicideDaysLeft`, and `dryDayCount` persisted per field in `soilData.xml`. Backward-compatible — old saves load cleanly with all new values defaulting to 0.
+
+- **Multiplayer**: `SoilFullSyncEvent` and `SoilFieldUpdateEvent` extended with pest and disease fields. Stream symmetry preserved.
+
+---
+
 ## [1.3.3.0] - 2026-04-04
 
 ### Fixed

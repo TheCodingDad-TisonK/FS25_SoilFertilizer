@@ -117,6 +117,18 @@ SettingsSchema.definitions = {
         uiId = "sf_weed_pressure",
     },
     {
+        id = "pestPressure",
+        type = "boolean",
+        default = true,
+        uiId = "sf_pest_pressure",
+    },
+    {
+        id = "diseasePressure",
+        type = "boolean",
+        default = true,
+        uiId = "sf_disease_pressure",
+    },
+    {
         id = "difficulty",
         type = "number",
         default = 2,

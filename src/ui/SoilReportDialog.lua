@@ -301,6 +301,18 @@ function SoilReportDialog:getFertilizationRecommendation(info)
         if overallStatus == "Good" then overallStatus = "Fair" end
     end
 
+    -- Check Pest Pressure
+    if info.pestPressure and info.pestPressure >= SoilConstants.PEST_PRESSURE.MEDIUM then
+        table.insert(recommendations, tr("sf_report_rec_pest", "Pest Risk"))
+        overallStatus = "Poor"
+    end
+
+    -- Check Disease Pressure
+    if info.diseasePressure and info.diseasePressure >= SoilConstants.DISEASE_PRESSURE.MEDIUM then
+        table.insert(recommendations, tr("sf_report_rec_disease", "Disease Risk"))
+        overallStatus = "Poor"
+    end
+
     local recommendationString
     local recommendationColor
 

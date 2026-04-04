@@ -1,126 +1,134 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <l10n>
     <elements>
-    <e k="sf_section" v="Грунт та добриво" eh="f31197fb" />
-    <e k="sf_enabled_short" v="Увімкнути мод" eh="cf7fea13" />
-    <e k="sf_enabled_long" v="Увімкнути або вимкнути мод грунту та добрива" eh="a891399a" />
-    <e k="sf_debug_short" v="Режим DEBUG" eh="2ddcdc76" />
-    <e k="sf_debug_long" v="Увімкнути/вимкнути режим DEBUG (додаткове логування)" eh="f6f20240" />
-    <e k="sf_seasonal_effects_short" v="Сезонні ефекти" eh="c16ea608" />
-    <e k="sf_seasonal_effects_long" v="Увімкнути/вимкнути сезонний вплив на поживні речовини ґрунту (весняне зростання, осіннє сповільнення)" eh="3eea94c7" />
-    <e k="sf_rain_effects_short" v="Ефекти дощу" eh="a2a1758b" />
-    <e k="sf_rain_effects_long" v="Увімкнути/вимкнути вплив дощу на ґрунт (вилуговування поживних речовин, зміни pH)" eh="de3b14b9" />
-    <e k="sf_plowing_bonus_short" v="Бонус оранки" eh="541ec752" />
-    <e k="sf_plowing_bonus_long" v="Увімкнути/вимкнути переваги оранки для родючості ґрунту (покращений азот та органічна речовина)" eh="fe701c1c" />
-    <e k="sf_fertility_short" v="Система родючості" eh="f7e27d58" />
-    <e k="sf_fertility_long" v="Увімкнути/вимкнути динамічну систему родючості ґрунту" eh="ea074366" />
-    <e k="sf_nutrients_short" v="Цикли поживних речовин" eh="ffab595d" />
-    <e k="sf_nutrients_long" v="Увімкнути/вимкнути реалістичне виснаження та відновлення поживних речовин" eh="dbe9c8ff" />
-    <e k="sf_difficulty_short" v="Складність" eh="7b29ca96" />
-    <e k="sf_difficulty_long" v="Встановити рівень складності: Простий, Реалістичний, Хардкор" eh="cfb758a4" />
-    <e k="sf_diff_1" v="Простий" eh="1fbb1e39" />
-    <e k="sf_diff_2" v="Реалістичний" eh="408c999f" />
-    <e k="sf_diff_3" v="Хардкор" eh="1c800aa9" />
-    <e k="sf_fertilizer_cost_short" v="Вартість добрив" eh="6870d88b" />
-    <e k="sf_fertilizer_cost_long" v="Увімкнути/вимкнути реалістичну вартість покупки добрив" eh="12b03fbb" />
-    <e k="sf_notifications_short" v="Сповіщення" eh="a274f4d4" />
-    <e k="sf_notifications_long" v="Увімкнути/вимкнути сповіщення про ґрунт і добрива" eh="9a872f8f" />
-    <e k="sf_show_hud_short" v="Показати HUD" eh="c94fd4d7" />
-    <e k="sf_show_hud_long" v="Показати/сховати накладку HUD інформації про ґрунт (F8 для тимчасового перемикання)" eh="4e2e11b6" />
-    <e k="sf_hud_position_short" v="Позиція HUD" eh="5ac371f2" />
-    <e k="sf_hud_position_long" v="Виберіть, де на екрані з'являється HUD інформації про ґрунт" eh="d7b9c109" />
-    <e k="sf_hud_pos_1" v="Верхній правий" eh="5f9f6784" />
-    <e k="sf_hud_pos_2" v="Верхній лівий" eh="ac71274a" />
-    <e k="sf_hud_pos_3" v="Нижній правий" eh="4d297f5d" />
-    <e k="sf_hud_pos_4" v="Нижній лівий" eh="7eb55425" />
-    <e k="sf_hud_pos_5" v="Центр правий" eh="d7afdc5a" />
-    <e k="sf_hud_pos_6" v="Власний" eh="90589c47" />
-    <e k="sf_hud_color_theme_short" v="Колірна тема HUD" eh="4a73f95b" />
-    <e k="sf_hud_color_theme_long" v="Виберіть колірну схему для відображення інформації про ґрунт" eh="3218bca6" />
-    <e k="sf_hud_color_1" v="Зелений" eh="d382816a" />
-    <e k="sf_hud_color_2" v="Синій" eh="9594eec9" />
-    <e k="sf_hud_color_3" v="Бурштиновий" eh="88068e33" />
-    <e k="sf_hud_color_4" v="Моно" eh="5d9b47bd" />
-    <e k="sf_diff_short" v="Складність" eh="7b29ca96" />
-    <e k="sf_diff_long" v="Рівень складності управління ґрунтом" eh="d6f4560c" />
-    <e k="sf_auto_rate_short" v="Автоматичне керування нормою" eh="6f99137d" />
-    <e k="sf_auto_rate_long" v="Автоматично регулює норму внесення добрив залежно від потреб поля" eh="a9ca9f6b" />
-    <e k="sf_hud_theme_1" v="Зелений" eh="d382816a" />
-    <e k="sf_hud_theme_2" v="Синій" eh="9594eec9" />
-    <e k="sf_hud_theme_3" v="Бурштиновий" eh="88068e33" />
-    <e k="sf_hud_theme_4" v="Моно" eh="5d9b47bd" />
-    <e k="sf_hud_font_size_short" v="Розмір шрифту HUD" eh="fd6ca64a" />
-    <e k="sf_hud_font_size_long" v="Налаштуйте розмір тексту для кращої читабельності" eh="c338854f" />
-    <e k="sf_hud_font_1" v="Малий" eh="2660064e" />
-    <e k="sf_hud_font_2" v="Середній" eh="87f8a6ab" />
-    <e k="sf_hud_font_3" v="Великий" eh="3a69b34c" />
-    <e k="sf_hud_transparency_short" v="Прозорість HUD" eh="e8a009e4" />
-    <e k="sf_hud_transparency_long" v="Встановити рівень прозорості фону (Прозорий = прозорий, Суцільний = непрозорий)" eh="152e390a" />
-    <e k="sf_hud_trans_1" v="Прозорий" eh="dc30bc0c" />
-    <e k="sf_hud_trans_2" v="Легкий" eh="9914a0ce" />
-    <e k="sf_hud_trans_3" v="Середній" eh="87f8a6ab" />
-    <e k="sf_hud_trans_4" v="Темний" eh="a18366b2" />
-    <e k="sf_hud_trans_5" v="Суцільний" eh="e41480b6" />
-    <e k="sf_use_imperial_short" v="Імперські одиниці" eh="ff2701ad" />
-    <e k="sf_use_imperial_long" v="Показувати норми у gal/ac і lb/ac (вимк. = L/ha і kg/ha)" eh="17efa489" />
-    <e k="sf_reset" v="Скинути налаштування ґрунту" eh="467bc2f5" />
-    <e k="input_SF_TOGGLE_HUD" v="Перемкнути HUD ґрунту" eh="f0224a10" />
-    <e k="input_SF_SOIL_REPORT" v="Звіт про ґрунт" eh="c33180ef" />
-    <e k="input_SF_RATE_UP" v="Збільшити норму добрива" eh="6e601ef5" />
-    <e k="input_SF_RATE_DOWN" v="Зменшити норму добрива" eh="30712026" />
-    <e k="input_SF_TOGGLE_AUTO" v="Перемкнути автоматичний режим" eh="a8642cf0" />
-    <e k="sf_report_title" v="Звіт про ґрунт та добриво" eh="a76f8218" />
-    <e k="sf_report_fields_tracked" v="Відстежувані поля:" eh="7b1e59b8" />
-    <e k="sf_report_need_fert" v="Потребують добрива:" eh="110b60f2" />
-    <e k="sf_report_difficulty" v="Складність:" eh="3abaf54f" />
-    <e k="sf_report_col_field" v="Поле" eh="6f16a5f8" />
-    <e k="sf_report_col_last_crop" v="Остання культура" eh="ff41e5eb" />
-    <e k="sf_report_col_fert" v="Добр?" eh="9e6d0eb4" />
-    <e k="sf_report_no_data" v="Дані про ґрунт відсутні. Пройдіть по полю, щоб почати відстеження." eh="1528a4cb" />
-    <e k="sf_report_prev" v="Попер" eh="14230d11" />
-    <e k="sf_report_next" v="Наст" eh="10ac3d04" />
-    <e k="sf_report_yes" v="ТАК" eh="7469a286" />
+    <e k="sf_section" v="Ð“Ñ€ÑƒÐ½Ñ‚ Ñ‚Ð° Ð´Ð¾Ð±Ñ€Ð¸Ð²Ð¾" eh="f31197fb" />
+    <e k="sf_enabled_short" v="Ð£Ð²Ñ–Ð¼ÐºÐ½ÑƒÑ‚Ð¸ Ð¼Ð¾Ð´" eh="cf7fea13" />
+    <e k="sf_enabled_long" v="Ð£Ð²Ñ–Ð¼ÐºÐ½ÑƒÑ‚Ð¸ Ð°Ð±Ð¾ Ð²Ð¸Ð¼ÐºÐ½ÑƒÑ‚Ð¸ Ð¼Ð¾Ð´ Ð³Ñ€ÑƒÐ½Ñ‚Ñƒ Ñ‚Ð° Ð´Ð¾Ð±Ñ€Ð¸Ð²Ð°" eh="a891399a" />
+    <e k="sf_debug_short" v="Ð ÐµÐ¶Ð¸Ð¼ DEBUG" eh="2ddcdc76" />
+    <e k="sf_debug_long" v="Ð£Ð²Ñ–Ð¼ÐºÐ½ÑƒÑ‚Ð¸/Ð²Ð¸Ð¼ÐºÐ½ÑƒÑ‚Ð¸ Ñ€ÐµÐ¶Ð¸Ð¼ DEBUG (Ð´Ð¾Ð´Ð°Ñ‚ÐºÐ¾Ð²Ðµ Ð»Ð¾Ð³ÑƒÐ²Ð°Ð½Ð½Ñ)" eh="f6f20240" />
+    <e k="sf_seasonal_effects_short" v="Ð¡ÐµÐ·Ð¾Ð½Ð½Ñ– ÐµÑ„ÐµÐºÑ‚Ð¸" eh="c16ea608" />
+    <e k="sf_seasonal_effects_long" v="Ð£Ð²Ñ–Ð¼ÐºÐ½ÑƒÑ‚Ð¸/Ð²Ð¸Ð¼ÐºÐ½ÑƒÑ‚Ð¸ ÑÐµÐ·Ð¾Ð½Ð½Ð¸Ð¹ Ð²Ð¿Ð»Ð¸Ð² Ð½Ð° Ð¿Ð¾Ð¶Ð¸Ð²Ð½Ñ– Ñ€ÐµÑ‡Ð¾Ð²Ð¸Ð½Ð¸ Ò‘Ñ€ÑƒÐ½Ñ‚Ñƒ (Ð²ÐµÑÐ½ÑÐ½Ðµ Ð·Ñ€Ð¾ÑÑ‚Ð°Ð½Ð½Ñ, Ð¾ÑÑ–Ð½Ð½Ñ” ÑÐ¿Ð¾Ð²Ñ–Ð»ÑŒÐ½ÐµÐ½Ð½Ñ)" eh="3eea94c7" />
+    <e k="sf_rain_effects_short" v="Ð•Ñ„ÐµÐºÑ‚Ð¸ Ð´Ð¾Ñ‰Ñƒ" eh="a2a1758b" />
+    <e k="sf_rain_effects_long" v="Ð£Ð²Ñ–Ð¼ÐºÐ½ÑƒÑ‚Ð¸/Ð²Ð¸Ð¼ÐºÐ½ÑƒÑ‚Ð¸ Ð²Ð¿Ð»Ð¸Ð² Ð´Ð¾Ñ‰Ñƒ Ð½Ð° Ò‘Ñ€ÑƒÐ½Ñ‚ (Ð²Ð¸Ð»ÑƒÐ³Ð¾Ð²ÑƒÐ²Ð°Ð½Ð½Ñ Ð¿Ð¾Ð¶Ð¸Ð²Ð½Ð¸Ñ… Ñ€ÐµÑ‡Ð¾Ð²Ð¸Ð½, Ð·Ð¼Ñ–Ð½Ð¸ pH)" eh="de3b14b9" />
+    <e k="sf_plowing_bonus_short" v="Ð‘Ð¾Ð½ÑƒÑ Ð¾Ñ€Ð°Ð½ÐºÐ¸" eh="541ec752" />
+    <e k="sf_plowing_bonus_long" v="Ð£Ð²Ñ–Ð¼ÐºÐ½ÑƒÑ‚Ð¸/Ð²Ð¸Ð¼ÐºÐ½ÑƒÑ‚Ð¸ Ð¿ÐµÑ€ÐµÐ²Ð°Ð³Ð¸ Ð¾Ñ€Ð°Ð½ÐºÐ¸ Ð´Ð»Ñ Ñ€Ð¾Ð´ÑŽÑ‡Ð¾ÑÑ‚Ñ– Ò‘Ñ€ÑƒÐ½Ñ‚Ñƒ (Ð¿Ð¾ÐºÑ€Ð°Ñ‰ÐµÐ½Ð¸Ð¹ Ð°Ð·Ð¾Ñ‚ Ñ‚Ð° Ð¾Ñ€Ð³Ð°Ð½Ñ–Ñ‡Ð½Ð° Ñ€ÐµÑ‡Ð¾Ð²Ð¸Ð½Ð°)" eh="fe701c1c" />
+    <e k="sf_weed_pressure_short" v="Weed Pressure" eh="7f71ee68" />
+    <e k="sf_weed_pressure_long" v="Enable/disable dynamic weed growth and yield impact" eh="27de5f41" />
+    <e k="sf_pest_pressure_short" v="Pest Pressure" eh="eb771556" />
+    <e k="sf_pest_pressure_long" v="Enable/disable insect and pest infestation system" eh="18015099" />
+    <e k="sf_disease_pressure_short" v="Disease Pressure" eh="953fd6c0" />
+    <e k="sf_disease_pressure_long" v="Enable/disable fungal and crop disease system" eh="2c36ea57" />
+    <e k="sf_fertility_short" v="Ð¡Ð¸ÑÑ‚ÐµÐ¼Ð° Ñ€Ð¾Ð´ÑŽÑ‡Ð¾ÑÑ‚Ñ–" eh="f7e27d58" />
+    <e k="sf_fertility_long" v="Ð£Ð²Ñ–Ð¼ÐºÐ½ÑƒÑ‚Ð¸/Ð²Ð¸Ð¼ÐºÐ½ÑƒÑ‚Ð¸ Ð´Ð¸Ð½Ð°Ð¼Ñ–Ñ‡Ð½Ñƒ ÑÐ¸ÑÑ‚ÐµÐ¼Ñƒ Ñ€Ð¾Ð´ÑŽÑ‡Ð¾ÑÑ‚Ñ– Ò‘Ñ€ÑƒÐ½Ñ‚Ñƒ" eh="ea074366" />
+    <e k="sf_nutrients_short" v="Ð¦Ð¸ÐºÐ»Ð¸ Ð¿Ð¾Ð¶Ð¸Ð²Ð½Ð¸Ñ… Ñ€ÐµÑ‡Ð¾Ð²Ð¸Ð½" eh="ffab595d" />
+    <e k="sf_nutrients_long" v="Ð£Ð²Ñ–Ð¼ÐºÐ½ÑƒÑ‚Ð¸/Ð²Ð¸Ð¼ÐºÐ½ÑƒÑ‚Ð¸ Ñ€ÐµÐ°Ð»Ñ–ÑÑ‚Ð¸Ñ‡Ð½Ðµ Ð²Ð¸ÑÐ½Ð°Ð¶ÐµÐ½Ð½Ñ Ñ‚Ð° Ð²Ñ–Ð´Ð½Ð¾Ð²Ð»ÐµÐ½Ð½Ñ Ð¿Ð¾Ð¶Ð¸Ð²Ð½Ð¸Ñ… Ñ€ÐµÑ‡Ð¾Ð²Ð¸Ð½" eh="dbe9c8ff" />
+    <e k="sf_difficulty_short" v="Ð¡ÐºÐ»Ð°Ð´Ð½Ñ–ÑÑ‚ÑŒ" eh="7b29ca96" />
+    <e k="sf_difficulty_long" v="Ð’ÑÑ‚Ð°Ð½Ð¾Ð²Ð¸Ñ‚Ð¸ Ñ€Ñ–Ð²ÐµÐ½ÑŒ ÑÐºÐ»Ð°Ð´Ð½Ð¾ÑÑ‚Ñ–: ÐŸÑ€Ð¾ÑÑ‚Ð¸Ð¹, Ð ÐµÐ°Ð»Ñ–ÑÑ‚Ð¸Ñ‡Ð½Ð¸Ð¹, Ð¥Ð°Ñ€Ð´ÐºÐ¾Ñ€" eh="cfb758a4" />
+    <e k="sf_diff_1" v="ÐŸÑ€Ð¾ÑÑ‚Ð¸Ð¹" eh="1fbb1e39" />
+    <e k="sf_diff_2" v="Ð ÐµÐ°Ð»Ñ–ÑÑ‚Ð¸Ñ‡Ð½Ð¸Ð¹" eh="408c999f" />
+    <e k="sf_diff_3" v="Ð¥Ð°Ñ€Ð´ÐºÐ¾Ñ€" eh="1c800aa9" />
+    <e k="sf_fertilizer_cost_short" v="Ð’Ð°Ñ€Ñ‚Ñ–ÑÑ‚ÑŒ Ð´Ð¾Ð±Ñ€Ð¸Ð²" eh="6870d88b" />
+    <e k="sf_fertilizer_cost_long" v="Ð£Ð²Ñ–Ð¼ÐºÐ½ÑƒÑ‚Ð¸/Ð²Ð¸Ð¼ÐºÐ½ÑƒÑ‚Ð¸ Ñ€ÐµÐ°Ð»Ñ–ÑÑ‚Ð¸Ñ‡Ð½Ñƒ Ð²Ð°Ñ€Ñ‚Ñ–ÑÑ‚ÑŒ Ð¿Ð¾ÐºÑƒÐ¿ÐºÐ¸ Ð´Ð¾Ð±Ñ€Ð¸Ð²" eh="12b03fbb" />
+    <e k="sf_notifications_short" v="Ð¡Ð¿Ð¾Ð²Ñ–Ñ‰ÐµÐ½Ð½Ñ" eh="a274f4d4" />
+    <e k="sf_notifications_long" v="Ð£Ð²Ñ–Ð¼ÐºÐ½ÑƒÑ‚Ð¸/Ð²Ð¸Ð¼ÐºÐ½ÑƒÑ‚Ð¸ ÑÐ¿Ð¾Ð²Ñ–Ñ‰ÐµÐ½Ð½Ñ Ð¿Ñ€Ð¾ Ò‘Ñ€ÑƒÐ½Ñ‚ Ñ– Ð´Ð¾Ð±Ñ€Ð¸Ð²Ð°" eh="9a872f8f" />
+    <e k="sf_show_hud_short" v="ÐŸÐ¾ÐºÐ°Ð·Ð°Ñ‚Ð¸ HUD" eh="c94fd4d7" />
+    <e k="sf_show_hud_long" v="ÐŸÐ¾ÐºÐ°Ð·Ð°Ñ‚Ð¸/ÑÑ…Ð¾Ð²Ð°Ñ‚Ð¸ Ð½Ð°ÐºÐ»Ð°Ð´ÐºÑƒ HUD Ñ–Ð½Ñ„Ð¾Ñ€Ð¼Ð°Ñ†Ñ–Ñ— Ð¿Ñ€Ð¾ Ò‘Ñ€ÑƒÐ½Ñ‚ (F8 Ð´Ð»Ñ Ñ‚Ð¸Ð¼Ñ‡Ð°ÑÐ¾Ð²Ð¾Ð³Ð¾ Ð¿ÐµÑ€ÐµÐ¼Ð¸ÐºÐ°Ð½Ð½Ñ)" eh="4e2e11b6" />
+    <e k="sf_hud_position_short" v="ÐŸÐ¾Ð·Ð¸Ñ†Ñ–Ñ HUD" eh="5ac371f2" />
+    <e k="sf_hud_position_long" v="Ð’Ð¸Ð±ÐµÑ€Ñ–Ñ‚ÑŒ, Ð´Ðµ Ð½Ð° ÐµÐºÑ€Ð°Ð½Ñ– Ð·'ÑÐ²Ð»ÑÑ”Ñ‚ÑŒÑÑ HUD Ñ–Ð½Ñ„Ð¾Ñ€Ð¼Ð°Ñ†Ñ–Ñ— Ð¿Ñ€Ð¾ Ò‘Ñ€ÑƒÐ½Ñ‚" eh="d7b9c109" />
+    <e k="sf_hud_pos_1" v="Ð’ÐµÑ€Ñ…Ð½Ñ–Ð¹ Ð¿Ñ€Ð°Ð²Ð¸Ð¹" eh="5f9f6784" />
+    <e k="sf_hud_pos_2" v="Ð’ÐµÑ€Ñ…Ð½Ñ–Ð¹ Ð»Ñ–Ð²Ð¸Ð¹" eh="ac71274a" />
+    <e k="sf_hud_pos_3" v="ÐÐ¸Ð¶Ð½Ñ–Ð¹ Ð¿Ñ€Ð°Ð²Ð¸Ð¹" eh="4d297f5d" />
+    <e k="sf_hud_pos_4" v="ÐÐ¸Ð¶Ð½Ñ–Ð¹ Ð»Ñ–Ð²Ð¸Ð¹" eh="7eb55425" />
+    <e k="sf_hud_pos_5" v="Ð¦ÐµÐ½Ñ‚Ñ€ Ð¿Ñ€Ð°Ð²Ð¸Ð¹" eh="d7afdc5a" />
+    <e k="sf_hud_pos_6" v="Ð’Ð»Ð°ÑÐ½Ð¸Ð¹" eh="90589c47" />
+    <e k="sf_hud_color_theme_short" v="ÐšÐ¾Ð»Ñ–Ñ€Ð½Ð° Ñ‚ÐµÐ¼Ð° HUD" eh="4a73f95b" />
+    <e k="sf_hud_color_theme_long" v="Ð’Ð¸Ð±ÐµÑ€Ñ–Ñ‚ÑŒ ÐºÐ¾Ð»Ñ–Ñ€Ð½Ñƒ ÑÑ…ÐµÐ¼Ñƒ Ð´Ð»Ñ Ð²Ñ–Ð´Ð¾Ð±Ñ€Ð°Ð¶ÐµÐ½Ð½Ñ Ñ–Ð½Ñ„Ð¾Ñ€Ð¼Ð°Ñ†Ñ–Ñ— Ð¿Ñ€Ð¾ Ò‘Ñ€ÑƒÐ½Ñ‚" eh="3218bca6" />
+    <e k="sf_hud_color_1" v="Ð—ÐµÐ»ÐµÐ½Ð¸Ð¹" eh="d382816a" />
+    <e k="sf_hud_color_2" v="Ð¡Ð¸Ð½Ñ–Ð¹" eh="9594eec9" />
+    <e k="sf_hud_color_3" v="Ð‘ÑƒÑ€ÑˆÑ‚Ð¸Ð½Ð¾Ð²Ð¸Ð¹" eh="88068e33" />
+    <e k="sf_hud_color_4" v="ÐœÐ¾Ð½Ð¾" eh="5d9b47bd" />
+    <e k="sf_diff_short" v="Ð¡ÐºÐ»Ð°Ð´Ð½Ñ–ÑÑ‚ÑŒ" eh="7b29ca96" />
+    <e k="sf_diff_long" v="Ð Ñ–Ð²ÐµÐ½ÑŒ ÑÐºÐ»Ð°Ð´Ð½Ð¾ÑÑ‚Ñ– ÑƒÐ¿Ñ€Ð°Ð²Ð»Ñ–Ð½Ð½Ñ Ò‘Ñ€ÑƒÐ½Ñ‚Ð¾Ð¼" eh="d6f4560c" />
+    <e k="sf_auto_rate_short" v="ÐÐ²Ñ‚Ð¾Ð¼Ð°Ñ‚Ð¸Ñ‡Ð½Ðµ ÐºÐµÑ€ÑƒÐ²Ð°Ð½Ð½Ñ Ð½Ð¾Ñ€Ð¼Ð¾ÑŽ" eh="6f99137d" />
+    <e k="sf_auto_rate_long" v="ÐÐ²Ñ‚Ð¾Ð¼Ð°Ñ‚Ð¸Ñ‡Ð½Ð¾ Ñ€ÐµÐ³ÑƒÐ»ÑŽÑ” Ð½Ð¾Ñ€Ð¼Ñƒ Ð²Ð½ÐµÑÐµÐ½Ð½Ñ Ð´Ð¾Ð±Ñ€Ð¸Ð² Ð·Ð°Ð»ÐµÐ¶Ð½Ð¾ Ð²Ñ–Ð´ Ð¿Ð¾Ñ‚Ñ€ÐµÐ± Ð¿Ð¾Ð»Ñ" eh="a9ca9f6b" />
+    <e k="sf_hud_theme_1" v="Ð—ÐµÐ»ÐµÐ½Ð¸Ð¹" eh="d382816a" />
+    <e k="sf_hud_theme_2" v="Ð¡Ð¸Ð½Ñ–Ð¹" eh="9594eec9" />
+    <e k="sf_hud_theme_3" v="Ð‘ÑƒÑ€ÑˆÑ‚Ð¸Ð½Ð¾Ð²Ð¸Ð¹" eh="88068e33" />
+    <e k="sf_hud_theme_4" v="ÐœÐ¾Ð½Ð¾" eh="5d9b47bd" />
+    <e k="sf_hud_font_size_short" v="Ð Ð¾Ð·Ð¼Ñ–Ñ€ ÑˆÑ€Ð¸Ñ„Ñ‚Ñƒ HUD" eh="fd6ca64a" />
+    <e k="sf_hud_font_size_long" v="ÐÐ°Ð»Ð°ÑˆÑ‚ÑƒÐ¹Ñ‚Ðµ Ñ€Ð¾Ð·Ð¼Ñ–Ñ€ Ñ‚ÐµÐºÑÑ‚Ñƒ Ð´Ð»Ñ ÐºÑ€Ð°Ñ‰Ð¾Ñ— Ñ‡Ð¸Ñ‚Ð°Ð±ÐµÐ»ÑŒÐ½Ð¾ÑÑ‚Ñ–" eh="c338854f" />
+    <e k="sf_hud_font_1" v="ÐœÐ°Ð»Ð¸Ð¹" eh="2660064e" />
+    <e k="sf_hud_font_2" v="Ð¡ÐµÑ€ÐµÐ´Ð½Ñ–Ð¹" eh="87f8a6ab" />
+    <e k="sf_hud_font_3" v="Ð’ÐµÐ»Ð¸ÐºÐ¸Ð¹" eh="3a69b34c" />
+    <e k="sf_hud_transparency_short" v="ÐŸÑ€Ð¾Ð·Ð¾Ñ€Ñ–ÑÑ‚ÑŒ HUD" eh="e8a009e4" />
+    <e k="sf_hud_transparency_long" v="Ð’ÑÑ‚Ð°Ð½Ð¾Ð²Ð¸Ñ‚Ð¸ Ñ€Ñ–Ð²ÐµÐ½ÑŒ Ð¿Ñ€Ð¾Ð·Ð¾Ñ€Ð¾ÑÑ‚Ñ– Ñ„Ð¾Ð½Ñƒ (ÐŸÑ€Ð¾Ð·Ð¾Ñ€Ð¸Ð¹ = Ð¿Ñ€Ð¾Ð·Ð¾Ñ€Ð¸Ð¹, Ð¡ÑƒÑ†Ñ–Ð»ÑŒÐ½Ð¸Ð¹ = Ð½ÐµÐ¿Ñ€Ð¾Ð·Ð¾Ñ€Ð¸Ð¹)" eh="152e390a" />
+    <e k="sf_hud_trans_1" v="ÐŸÑ€Ð¾Ð·Ð¾Ñ€Ð¸Ð¹" eh="dc30bc0c" />
+    <e k="sf_hud_trans_2" v="Ð›ÐµÐ³ÐºÐ¸Ð¹" eh="9914a0ce" />
+    <e k="sf_hud_trans_3" v="Ð¡ÐµÑ€ÐµÐ´Ð½Ñ–Ð¹" eh="87f8a6ab" />
+    <e k="sf_hud_trans_4" v="Ð¢ÐµÐ¼Ð½Ð¸Ð¹" eh="a18366b2" />
+    <e k="sf_hud_trans_5" v="Ð¡ÑƒÑ†Ñ–Ð»ÑŒÐ½Ð¸Ð¹" eh="e41480b6" />
+    <e k="sf_use_imperial_short" v="Ð†Ð¼Ð¿ÐµÑ€ÑÑŒÐºÑ– Ð¾Ð´Ð¸Ð½Ð¸Ñ†Ñ–" eh="ff2701ad" />
+    <e k="sf_use_imperial_long" v="ÐŸÐ¾ÐºÐ°Ð·ÑƒÐ²Ð°Ñ‚Ð¸ Ð½Ð¾Ñ€Ð¼Ð¸ Ñƒ gal/ac Ñ– lb/ac (Ð²Ð¸Ð¼Ðº. = L/ha Ñ– kg/ha)" eh="17efa489" />
+    <e k="sf_reset" v="Ð¡ÐºÐ¸Ð½ÑƒÑ‚Ð¸ Ð½Ð°Ð»Ð°ÑˆÑ‚ÑƒÐ²Ð°Ð½Ð½Ñ Ò‘Ñ€ÑƒÐ½Ñ‚Ñƒ" eh="467bc2f5" />
+    <e k="input_SF_TOGGLE_HUD" v="ÐŸÐµÑ€ÐµÐ¼ÐºÐ½ÑƒÑ‚Ð¸ HUD Ò‘Ñ€ÑƒÐ½Ñ‚Ñƒ" eh="f0224a10" />
+    <e k="input_SF_SOIL_REPORT" v="Ð—Ð²Ñ–Ñ‚ Ð¿Ñ€Ð¾ Ò‘Ñ€ÑƒÐ½Ñ‚" eh="c33180ef" />
+    <e k="input_SF_RATE_UP" v="Ð—Ð±Ñ–Ð»ÑŒÑˆÐ¸Ñ‚Ð¸ Ð½Ð¾Ñ€Ð¼Ñƒ Ð´Ð¾Ð±Ñ€Ð¸Ð²Ð°" eh="6e601ef5" />
+    <e k="input_SF_RATE_DOWN" v="Ð—Ð¼ÐµÐ½ÑˆÐ¸Ñ‚Ð¸ Ð½Ð¾Ñ€Ð¼Ñƒ Ð´Ð¾Ð±Ñ€Ð¸Ð²Ð°" eh="30712026" />
+    <e k="input_SF_TOGGLE_AUTO" v="ÐŸÐµÑ€ÐµÐ¼ÐºÐ½ÑƒÑ‚Ð¸ Ð°Ð²Ñ‚Ð¾Ð¼Ð°Ñ‚Ð¸Ñ‡Ð½Ð¸Ð¹ Ñ€ÐµÐ¶Ð¸Ð¼" eh="a8642cf0" />
+    <e k="sf_report_title" v="Ð—Ð²Ñ–Ñ‚ Ð¿Ñ€Ð¾ Ò‘Ñ€ÑƒÐ½Ñ‚ Ñ‚Ð° Ð´Ð¾Ð±Ñ€Ð¸Ð²Ð¾" eh="a76f8218" />
+    <e k="sf_report_fields_tracked" v="Ð’Ñ–Ð´ÑÑ‚ÐµÐ¶ÑƒÐ²Ð°Ð½Ñ– Ð¿Ð¾Ð»Ñ:" eh="7b1e59b8" />
+    <e k="sf_report_need_fert" v="ÐŸÐ¾Ñ‚Ñ€ÐµÐ±ÑƒÑŽÑ‚ÑŒ Ð´Ð¾Ð±Ñ€Ð¸Ð²Ð°:" eh="110b60f2" />
+    <e k="sf_report_difficulty" v="Ð¡ÐºÐ»Ð°Ð´Ð½Ñ–ÑÑ‚ÑŒ:" eh="3abaf54f" />
+    <e k="sf_report_col_field" v="ÐŸÐ¾Ð»Ðµ" eh="6f16a5f8" />
+    <e k="sf_report_col_last_crop" v="ÐžÑÑ‚Ð°Ð½Ð½Ñ ÐºÑƒÐ»ÑŒÑ‚ÑƒÑ€Ð°" eh="ff41e5eb" />
+    <e k="sf_report_col_fert" v="Ð”Ð¾Ð±Ñ€?" eh="9e6d0eb4" />
+    <e k="sf_report_no_data" v="Ð”Ð°Ð½Ñ– Ð¿Ñ€Ð¾ Ò‘Ñ€ÑƒÐ½Ñ‚ Ð²Ñ–Ð´ÑÑƒÑ‚Ð½Ñ–. ÐŸÑ€Ð¾Ð¹Ð´Ñ–Ñ‚ÑŒ Ð¿Ð¾ Ð¿Ð¾Ð»ÑŽ, Ñ‰Ð¾Ð± Ð¿Ð¾Ñ‡Ð°Ñ‚Ð¸ Ð²Ñ–Ð´ÑÑ‚ÐµÐ¶ÐµÐ½Ð½Ñ." eh="1528a4cb" />
+    <e k="sf_report_prev" v="ÐŸÐ¾Ð¿ÐµÑ€" eh="14230d11" />
+    <e k="sf_report_next" v="ÐÐ°ÑÑ‚" eh="10ac3d04" />
+    <e k="sf_report_yes" v="Ð¢ÐÐš" eh="7469a286" />
     <e k="sf_report_ok" v="OK" eh="e0aa021e" />
-    <e k="sf_report_none" v="Немає" eh="6adf97f8" />
-    <e k="sf_report_rec_n_poor" v="Потрібен азот" eh="5dca0711" />
-    <e k="sf_report_rec_n_fair" v="Низький азот" eh="35ad072d" />
-    <e k="sf_report_rec_p_poor" v="Потрібен фосфор" eh="e8fa326f" />
-    <e k="sf_report_rec_p_fair" v="Низький фосфор" eh="077e12cf" />
-    <e k="sf_report_rec_k_poor" v="Потрібен калій" eh="f23194e0" />
-    <e k="sf_report_rec_k_fair" v="Низький калій" eh="2006c0a2" />
-    <e k="sf_report_rec_ph_adjust" v="Відрегулюйте pH" eh="84f6bbbc" />
-    <e k="sf_report_rec_ph_monitor" v="Стежте за pH" eh="6dfcded4" />
-    <e k="sf_report_rec_om_increase" v="Збільшіть ОР" eh="c2a930af" />
-    <e k="sf_report_rec_om_maintain" v="Підтримуйте ОР" eh="e7655847" />
-    <e k="sf_report_rec_needs" v="Потреби:" eh="3e6d95cf" />
-    <e k="sf_report_rec_optimal" v="Здоров'я ґрунту: Оптимальне" eh="6ee9d19b" />
-    <e k="sf_uan32_title" v="UAN 32 Азотне добриво (N)" eh="90913bb8" />
-    <e k="sf_uan28_title" v="UAN 28 Азотне добриво (N)" eh="9d902cd7" />
-    <e k="sf_anhydrous_title" v="Безводний аміак (N)" eh="3fc85c02" />
-    <e k="sf_starter_title" v="Стартове добриво 10-34-0 (P)" eh="8c1a1ddc" />
-    <e k="sf_urea_title" v="Карбамід 46-0-0 (N)" eh="659b3097" />
-    <e k="sf_ams_title" v="Сульфат амонію 21-0-0 (N)" eh="033d1845" />
-    <e k="sf_map_title" v="Добриво MAP 11-52-0 (P)" eh="31aa2534" />
-    <e k="sf_dap_title" v="Добриво DAP 18-46-0 (P)" eh="5030a80a" />
-    <e k="sf_potash_title" v="Поташ 0-0-60 (K)" eh="8db6c54c" />
-    <e k="sf_report_page_info" v="Поля %d-%d з %d  |  Сторінка %d з %d" eh="8db851d1" />
+    <e k="sf_report_none" v="ÐÐµÐ¼Ð°Ñ”" eh="6adf97f8" />
+    <e k="sf_report_rec_n_poor" v="ÐŸÐ¾Ñ‚Ñ€Ñ–Ð±ÐµÐ½ Ð°Ð·Ð¾Ñ‚" eh="5dca0711" />
+    <e k="sf_report_rec_n_fair" v="ÐÐ¸Ð·ÑŒÐºÐ¸Ð¹ Ð°Ð·Ð¾Ñ‚" eh="35ad072d" />
+    <e k="sf_report_rec_p_poor" v="ÐŸÐ¾Ñ‚Ñ€Ñ–Ð±ÐµÐ½ Ñ„Ð¾ÑÑ„Ð¾Ñ€" eh="e8fa326f" />
+    <e k="sf_report_rec_p_fair" v="ÐÐ¸Ð·ÑŒÐºÐ¸Ð¹ Ñ„Ð¾ÑÑ„Ð¾Ñ€" eh="077e12cf" />
+    <e k="sf_report_rec_k_poor" v="ÐŸÐ¾Ñ‚Ñ€Ñ–Ð±ÐµÐ½ ÐºÐ°Ð»Ñ–Ð¹" eh="f23194e0" />
+    <e k="sf_report_rec_k_fair" v="ÐÐ¸Ð·ÑŒÐºÐ¸Ð¹ ÐºÐ°Ð»Ñ–Ð¹" eh="2006c0a2" />
+    <e k="sf_report_rec_ph_adjust" v="Ð’Ñ–Ð´Ñ€ÐµÐ³ÑƒÐ»ÑŽÐ¹Ñ‚Ðµ pH" eh="84f6bbbc" />
+    <e k="sf_report_rec_ph_monitor" v="Ð¡Ñ‚ÐµÐ¶Ñ‚Ðµ Ð·Ð° pH" eh="6dfcded4" />
+    <e k="sf_report_rec_om_increase" v="Ð—Ð±Ñ–Ð»ÑŒÑˆÑ–Ñ‚ÑŒ ÐžÐ " eh="c2a930af" />
+    <e k="sf_report_rec_om_maintain" v="ÐŸÑ–Ð´Ñ‚Ñ€Ð¸Ð¼ÑƒÐ¹Ñ‚Ðµ ÐžÐ " eh="e7655847" />
+    <e k="sf_report_rec_pest" v="Pest Risk" eh="c2a930af" />
+    <e k="sf_report_rec_disease" v="Disease Risk" eh="e7655847" />
+    <e k="sf_report_rec_needs" v="ÐŸÐ¾Ñ‚Ñ€ÐµÐ±Ð¸:" eh="3e6d95cf" />
+    <e k="sf_report_rec_optimal" v="Ð—Ð´Ð¾Ñ€Ð¾Ð²'Ñ Ò‘Ñ€ÑƒÐ½Ñ‚Ñƒ: ÐžÐ¿Ñ‚Ð¸Ð¼Ð°Ð»ÑŒÐ½Ðµ" eh="6ee9d19b" />
+    <e k="sf_uan32_title" v="UAN 32 ÐÐ·Ð¾Ñ‚Ð½Ðµ Ð´Ð¾Ð±Ñ€Ð¸Ð²Ð¾ (N)" eh="90913bb8" />
+    <e k="sf_uan28_title" v="UAN 28 ÐÐ·Ð¾Ñ‚Ð½Ðµ Ð´Ð¾Ð±Ñ€Ð¸Ð²Ð¾ (N)" eh="9d902cd7" />
+    <e k="sf_anhydrous_title" v="Ð‘ÐµÐ·Ð²Ð¾Ð´Ð½Ð¸Ð¹ Ð°Ð¼Ñ–Ð°Ðº (N)" eh="3fc85c02" />
+    <e k="sf_starter_title" v="Ð¡Ñ‚Ð°Ñ€Ñ‚Ð¾Ð²Ðµ Ð´Ð¾Ð±Ñ€Ð¸Ð²Ð¾ 10-34-0 (P)" eh="8c1a1ddc" />
+    <e k="sf_urea_title" v="ÐšÐ°Ñ€Ð±Ð°Ð¼Ñ–Ð´ 46-0-0 (N)" eh="659b3097" />
+    <e k="sf_ams_title" v="Ð¡ÑƒÐ»ÑŒÑ„Ð°Ñ‚ Ð°Ð¼Ð¾Ð½Ñ–ÑŽ 21-0-0 (N)" eh="033d1845" />
+    <e k="sf_map_title" v="Ð”Ð¾Ð±Ñ€Ð¸Ð²Ð¾ MAP 11-52-0 (P)" eh="31aa2534" />
+    <e k="sf_dap_title" v="Ð”Ð¾Ð±Ñ€Ð¸Ð²Ð¾ DAP 18-46-0 (P)" eh="5030a80a" />
+    <e k="sf_potash_title" v="ÐŸÐ¾Ñ‚Ð°Ñˆ 0-0-60 (K)" eh="8db6c54c" />
+    <e k="sf_report_page_info" v="ÐŸÐ¾Ð»Ñ %d-%d Ð· %d  |  Ð¡Ñ‚Ð¾Ñ€Ñ–Ð½ÐºÐ° %d Ð· %d" eh="8db851d1" />
     <e k="sf_bigBag_uan32_name" v="Big Bag UAN 32-0-0" eh="7bdc4d9d" />
-    <e k="sf_bigBag_uan32_function" v="Азотне добриво (рідке)" eh="27de5f41" />
+    <e k="sf_bigBag_uan32_function" v="ÐÐ·Ð¾Ñ‚Ð½Ðµ Ð´Ð¾Ð±Ñ€Ð¸Ð²Ð¾ (Ñ€Ñ–Ð´ÐºÐµ)" eh="27de5f41" />
     <e k="sf_bigBag_uan28_name" v="Big Bag UAN 28-0-0" eh="997781d5" />
-    <e k="sf_bigBag_uan28_function" v="Азотне добриво (рідке)" eh="27de5f41" />
-    <e k="sf_bigBag_anhydrous_name" v="Big Bag Безводний Аміак 82-0-0" eh="44914201" />
-    <e k="sf_bigBag_anhydrous_function" v="Азотне добриво (рідке)" eh="27de5f41" />
-    <e k="sf_bigBag_urea_name" v="Big Bag Карбамід 46-0-0" eh="8e8cbaae" />
-    <e k="sf_bigBag_urea_function" v="Азотне добриво (сухе)" eh="63efea20" />
+    <e k="sf_bigBag_uan28_function" v="ÐÐ·Ð¾Ñ‚Ð½Ðµ Ð´Ð¾Ð±Ñ€Ð¸Ð²Ð¾ (Ñ€Ñ–Ð´ÐºÐµ)" eh="27de5f41" />
+    <e k="sf_bigBag_anhydrous_name" v="Big Bag Ð‘ÐµÐ·Ð²Ð¾Ð´Ð½Ð¸Ð¹ ÐÐ¼Ñ–Ð°Ðº 82-0-0" eh="44914201" />
+    <e k="sf_bigBag_anhydrous_function" v="ÐÐ·Ð¾Ñ‚Ð½Ðµ Ð´Ð¾Ð±Ñ€Ð¸Ð²Ð¾ (Ñ€Ñ–Ð´ÐºÐµ)" eh="27de5f41" />
+    <e k="sf_bigBag_urea_name" v="Big Bag ÐšÐ°Ñ€Ð±Ð°Ð¼Ñ–Ð´ 46-0-0" eh="8e8cbaae" />
+    <e k="sf_bigBag_urea_function" v="ÐÐ·Ð¾Ñ‚Ð½Ðµ Ð´Ð¾Ð±Ñ€Ð¸Ð²Ð¾ (ÑÑƒÑ…Ðµ)" eh="63efea20" />
     <e k="sf_bigBag_ams_name" v="Big Bag AMS 21-0-0-24S" eh="7f71ee68" />
-    <e k="sf_bigBag_ams_function" v="Азотне добриво (сухе)" eh="63efea20" />
+    <e k="sf_bigBag_ams_function" v="ÐÐ·Ð¾Ñ‚Ð½Ðµ Ð´Ð¾Ð±Ñ€Ð¸Ð²Ð¾ (ÑÑƒÑ…Ðµ)" eh="63efea20" />
     <e k="sf_bigBag_map_name" v="Big Bag MAP 11-52-0" eh="8a5a059b" />
-    <e k="sf_bigBag_map_function" v="Фосфорне добриво (сухе)" eh="0cc85c60" />
+    <e k="sf_bigBag_map_function" v="Ð¤Ð¾ÑÑ„Ð¾Ñ€Ð½Ðµ Ð´Ð¾Ð±Ñ€Ð¸Ð²Ð¾ (ÑÑƒÑ…Ðµ)" eh="0cc85c60" />
     <e k="sf_bigBag_dap_name" v="Big Bag DAP 18-46-0" eh="fb4e9987" />
-    <e k="sf_bigBag_dap_function" v="Фосфорне добриво (сухе)" eh="0cc85c60" />
-    <e k="sf_bigBag_potash_name" v="Big Bag Поташ 0-0-60" eh="eb771556" />
-    <e k="sf_bigBag_potash_function" v="Калійне добриво (сухе)" eh="18015099" />
-    <e k="sf_bigBag_starter_name" v="Big Bag Стартове Добриво 10-34-0" eh="953fd6c0" />
-    <e k="sf_bigBag_starter_function" v="Стартове добриво (рідке)" eh="2c36ea57" />
+    <e k="sf_bigBag_dap_function" v="Ð¤Ð¾ÑÑ„Ð¾Ñ€Ð½Ðµ Ð´Ð¾Ð±Ñ€Ð¸Ð²Ð¾ (ÑÑƒÑ…Ðµ)" eh="0cc85c60" />
+    <e k="sf_bigBag_potash_name" v="Big Bag ÐŸÐ¾Ñ‚Ð°Ñˆ 0-0-60" eh="eb771556" />
+    <e k="sf_bigBag_potash_function" v="ÐšÐ°Ð»Ñ–Ð¹Ð½Ðµ Ð´Ð¾Ð±Ñ€Ð¸Ð²Ð¾ (ÑÑƒÑ…Ðµ)" eh="18015099" />
+    <e k="sf_bigBag_starter_name" v="Big Bag Ð¡Ñ‚Ð°Ñ€Ñ‚Ð¾Ð²Ðµ Ð”Ð¾Ð±Ñ€Ð¸Ð²Ð¾ 10-34-0" eh="953fd6c0" />
+    <e k="sf_bigBag_starter_function" v="Ð¡Ñ‚Ð°Ñ€Ñ‚Ð¾Ð²Ðµ Ð´Ð¾Ð±Ñ€Ð¸Ð²Ð¾ (Ñ€Ñ–Ð´ÐºÐµ)" eh="2c36ea57" />
     </elements>
 </l10n>
