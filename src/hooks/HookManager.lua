@@ -348,6 +348,64 @@ function HookManager:installEffectTypeHook()
         SoilLogger.info("[OK] Effect type hook backup installed on g_motionPathEffectManager - %d custom fill types remapped", count)
     end
 
+    -- RUNTIME CONSTANT REMAP: wrap Sprayer.onEndWorkAreaProcessing
+    -- Pattern from THPFConfigurator: temporarily swap FillType and SprayType globals
+    -- so that FillType.LIQUIDFERTILIZER == our custom fill type index for the duration
+    -- of the call. Every vanilla runtime check inside (getIsSprayTypeActive,
+    -- if fillType == FillType.LIQUIDFERTILIZER, etc.) transparently passes for our types.
+    -- Restore originals immediately after. No persistent global state change.
+    --
+    -- Build inverseRemap: customFillTypeIndex → vanilla constant name (e.g. "LIQUIDFERTILIZER")
+    local inverseRemap = {}
+    for customIdx, vanillaIdx in pairs(remap) do
+        local vanillaFT = fm:getFillTypeByIndex(vanillaIdx)
+        if vanillaFT and vanillaFT.name then
+            inverseRemap[customIdx] = vanillaFT.name
+        end
+    end
+
+    local globalEnv = getfenv(0)
+
+    if Sprayer and type(Sprayer.onEndWorkAreaProcessing) == "function" then
+        local origOnEnd = Sprayer.onEndWorkAreaProcessing
+        Sprayer.onEndWorkAreaProcessing = function(self, ...)
+            local spec    = self.spec_sprayer
+            local wap     = spec and spec.workAreaParameters
+            local sprayFT = wap and wap.sprayFillType
+            local vName   = sprayFT and inverseRemap[sprayFT]
+
+            if not vName then
+                return origOnEnd(self, ...)
+            end
+
+            -- Swap FillType global: FillType.LIQUIDFERTILIZER → our custom index
+            local origFT = globalEnv.FillType
+            local newFT  = {}
+            for k, v in pairs(origFT) do newFT[k] = v end
+            newFT[vName] = sprayFT
+            globalEnv.FillType = newFT
+
+            -- Swap SprayType global: SprayType.LIQUIDFERTILIZER → our custom spray type index
+            local origST    = globalEnv.SprayType
+            local customSTD = g_sprayTypeManager and g_sprayTypeManager:getSprayTypeByFillTypeIndex(sprayFT)
+            if customSTD then
+                local newST = {}
+                for k, v in pairs(origST) do newST[k] = v end
+                newST[vName] = customSTD.index
+                globalEnv.SprayType = newST
+            end
+
+            origOnEnd(self, ...)
+
+            globalEnv.FillType = origFT
+            if customSTD then globalEnv.SprayType = origST end
+        end
+        self:registerCleanup("Sprayer.onEndWorkAreaProcessing (constant remap)", function()
+            Sprayer.onEndWorkAreaProcessing = origOnEnd
+        end)
+        SoilLogger.info("[OK] Sprayer.onEndWorkAreaProcessing wrapped with runtime constant remap")
+    end
+
     return true
 end
 

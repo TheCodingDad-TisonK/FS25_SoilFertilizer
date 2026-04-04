@@ -85,14 +85,14 @@
             names, any spreader that already accepts FERTILIZER will automatically also
             accept UREA, AMS, MAP, DAP, POTASH without any equipment mod changes.
         -->
-        <fillTypeCategory name="FERTILIZER">FERTILIZER UREA AMS MAP DAP POTASH</fillTypeCategory>
+        <fillTypeCategory name="SPREADER">FERTILIZER UREA AMS MAP DAP POTASH</fillTypeCategory>
 
         <!--
             Same principle for liquid sprayers — extend LIQUIDFERTILIZER so vanilla sprayers
             that already accept LIQUIDFERTILIZER will also accept our liquid nitrogen products
             and starter fertilizer.
         -->
-        <fillTypeCategory name="LIQUIDFERTILIZER">LIQUIDFERTILIZER UAN32 UAN28 ANHYDROUS STARTER</fillTypeCategory>
+        <fillTypeCategory name="SPRAYER">LIQUIDFERTILIZER UAN32 UAN28 ANHYDROUS STARTER</fillTypeCategory>
     </fillTypeCategories>
 
 </map>
