@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.2.0] - 2026-04-04
+
+### Fixed
+
+- **Missing text entries and declaration in registerCustomSprayTypes**: Both new added types where missing their title entry. They are also added into `constants` and declared propperly.
+
+---
+
 ## [1.4.1.0] - 2026-04-04
 
 ### Added
