@@ -14,6 +14,18 @@
 SoilSettingsUI = {}
 local SoilSettingsUI_mt = Class(SoilSettingsUI)
 
+-- Resolve a translation key using the mod-scoped i18n instance.
+-- g_i18n is the base-game global and does not know about mod keys.
+local function tr(key, fallback)
+    local modEnv = g_modEnvironments and g_modEnvironments[g_currentModName]
+    local i18n = (modEnv and modEnv.i18n) or g_i18n
+    if i18n then
+        local text = i18n:getText(key)
+        if text and text ~= "" then return text end
+    end
+    return fallback or key
+end
+
 function SoilSettingsUI.new(settings)
     local self = setmetatable({}, SoilSettingsUI_mt)
     self.settings = settings
@@ -149,7 +161,7 @@ function SoilSettingsUI:onFrameOpen(frame)
     local isAdmin = self:isPlayerAdmin()
 
     -- Section header
-    local ok, err = pcall(UIHelper.createSectionHeader, layout, g_i18n:getText("sf_section") or "Soil & Fertilizer")
+    local ok, err = pcall(UIHelper.createSectionHeader, layout, tr("sf_section") or "Soil & Fertilizer")
     if not ok then
         SoilLogger.warning("Failed to create section header: %s", tostring(err))
     end
@@ -157,8 +169,8 @@ function SoilSettingsUI:onFrameOpen(frame)
     -- Auto-generate boolean toggle options from schema
     for _, def in ipairs(SettingsSchema.getBooleanSettings()) do
         local callbackName = "on_" .. def.id .. "_Changed"
-        local title = g_i18n:getText(def.uiId .. "_short") or def.id
-        local tooltip = g_i18n:getText(def.uiId .. "_long") or ""
+        local title = tr(def.uiId .. "_short") or def.id
+        local tooltip = tr(def.uiId .. "_long") or ""
 
         local ok3, element = pcall(UIHelper.createBinaryOption, layout, SoilSettingsUI, callbackName, title, tooltip)
         if ok3 and element then
@@ -182,14 +194,14 @@ function SoilSettingsUI:onFrameOpen(frame)
     local diffDef = SettingsSchema.byId["difficulty"]
     if diffDef then
         local diffOptions = {
-            g_i18n:getText("sf_diff_1") or "Simple",
-            g_i18n:getText("sf_diff_2") or "Realistic",
-            g_i18n:getText("sf_diff_3") or "Hardcore"
+            tr("sf_diff_1") or "Simple",
+            tr("sf_diff_2") or "Realistic",
+            tr("sf_diff_3") or "Hardcore"
         }
 
         local ok4, diffElement = pcall(UIHelper.createMultiOption, layout, SoilSettingsUI, "onDifficultyChanged", diffOptions,
-            g_i18n:getText("sf_difficulty_short") or "Difficulty",
-            g_i18n:getText("sf_difficulty_long") or "Soil management difficulty level")
+            tr("sf_difficulty_short") or "Difficulty",
+            tr("sf_difficulty_long") or "Soil management difficulty level")
         if ok4 and diffElement then
             if not isAdmin and diffElement.setIsEnabled then
                 diffElement:setIsEnabled(false)
@@ -205,17 +217,17 @@ function SoilSettingsUI:onFrameOpen(frame)
     local hudPosDef = SettingsSchema.byId["hudPosition"]
     if hudPosDef then
         local hudPosOptions = {
-            g_i18n:getText("sf_hud_pos_1") or "Top Right",
-            g_i18n:getText("sf_hud_pos_2") or "Top Left",
-            g_i18n:getText("sf_hud_pos_3") or "Bottom Right",
-            g_i18n:getText("sf_hud_pos_4") or "Bottom Left",
-            g_i18n:getText("sf_hud_pos_5") or "Center Right",
-            g_i18n:getText("sf_hud_pos_6") or "Custom"
+            tr("sf_hud_pos_1") or "Top Right",
+            tr("sf_hud_pos_2") or "Top Left",
+            tr("sf_hud_pos_3") or "Bottom Right",
+            tr("sf_hud_pos_4") or "Bottom Left",
+            tr("sf_hud_pos_5") or "Center Right",
+            tr("sf_hud_pos_6") or "Custom"
         }
 
         local ok5, hudPosElement = pcall(UIHelper.createMultiOption, layout, SoilSettingsUI, "onHudPositionChanged", hudPosOptions,
-            g_i18n:getText("sf_hud_position_short") or "HUD Position",
-            g_i18n:getText("sf_hud_position_long") or "Position of the soil HUD overlay")
+            tr("sf_hud_position_short") or "HUD Position",
+            tr("sf_hud_position_long") or "Position of the soil HUD overlay")
         if ok5 and hudPosElement then
             -- hudPosition is localOnly — all players can adjust their own HUD position
             frame["soilFertilizer_" .. hudPosDef.uiId] = hudPosElement
@@ -226,15 +238,15 @@ function SoilSettingsUI:onFrameOpen(frame)
     local hudColorDef = SettingsSchema.byId["hudColorTheme"]
     if hudColorDef then
         local hudColorOptions = {
-            g_i18n:getText("sf_hud_color_1") or "Green",
-            g_i18n:getText("sf_hud_color_2") or "Blue",
-            g_i18n:getText("sf_hud_color_3") or "Amber",
-            g_i18n:getText("sf_hud_color_4") or "Mono"
+            tr("sf_hud_color_1") or "Green",
+            tr("sf_hud_color_2") or "Blue",
+            tr("sf_hud_color_3") or "Amber",
+            tr("sf_hud_color_4") or "Mono"
         }
 
         local ok6, hudColorElement = pcall(UIHelper.createMultiOption, layout, SoilSettingsUI, "onHudColorThemeChanged", hudColorOptions,
-            g_i18n:getText("sf_hud_color_theme_short") or "HUD Color Theme",
-            g_i18n:getText("sf_hud_color_theme_long") or "Color theme for the soil HUD")
+            tr("sf_hud_color_theme_short") or "HUD Color Theme",
+            tr("sf_hud_color_theme_long") or "Color theme for the soil HUD")
         if ok6 and hudColorElement then
             frame["soilFertilizer_" .. hudColorDef.uiId] = hudColorElement
         end
@@ -244,14 +256,14 @@ function SoilSettingsUI:onFrameOpen(frame)
     local hudFontDef = SettingsSchema.byId["hudFontSize"]
     if hudFontDef then
         local hudFontOptions = {
-            g_i18n:getText("sf_hud_font_1") or "Small",
-            g_i18n:getText("sf_hud_font_2") or "Medium",
-            g_i18n:getText("sf_hud_font_3") or "Large"
+            tr("sf_hud_font_1") or "Small",
+            tr("sf_hud_font_2") or "Medium",
+            tr("sf_hud_font_3") or "Large"
         }
 
         local ok7, hudFontElement = pcall(UIHelper.createMultiOption, layout, SoilSettingsUI, "onHudFontSizeChanged", hudFontOptions,
-            g_i18n:getText("sf_hud_font_size_short") or "HUD Font Size",
-            g_i18n:getText("sf_hud_font_size_long") or "Font size for the soil HUD")
+            tr("sf_hud_font_size_short") or "HUD Font Size",
+            tr("sf_hud_font_size_long") or "Font size for the soil HUD")
         if ok7 and hudFontElement then
             frame["soilFertilizer_" .. hudFontDef.uiId] = hudFontElement
         end
@@ -261,16 +273,16 @@ function SoilSettingsUI:onFrameOpen(frame)
     local hudTransDef = SettingsSchema.byId["hudTransparency"]
     if hudTransDef then
         local hudTransOptions = {
-            g_i18n:getText("sf_hud_trans_1") or "Clear (25%)",
-            g_i18n:getText("sf_hud_trans_2") or "Light (50%)",
-            g_i18n:getText("sf_hud_trans_3") or "Medium (70%)",
-            g_i18n:getText("sf_hud_trans_4") or "Dark (85%)",
-            g_i18n:getText("sf_hud_trans_5") or "Solid (100%)"
+            tr("sf_hud_trans_1") or "Clear (25%)",
+            tr("sf_hud_trans_2") or "Light (50%)",
+            tr("sf_hud_trans_3") or "Medium (70%)",
+            tr("sf_hud_trans_4") or "Dark (85%)",
+            tr("sf_hud_trans_5") or "Solid (100%)"
         }
 
         local ok8, hudTransElement = pcall(UIHelper.createMultiOption, layout, SoilSettingsUI, "onHudTransparencyChanged", hudTransOptions,
-            g_i18n:getText("sf_hud_transparency_short") or "HUD Transparency",
-            g_i18n:getText("sf_hud_transparency_long") or "Background transparency of the soil HUD")
+            tr("sf_hud_transparency_short") or "HUD Transparency",
+            tr("sf_hud_transparency_long") or "Background transparency of the soil HUD")
         if ok8 and hudTransElement then
             frame["soilFertilizer_" .. hudTransDef.uiId] = hudTransElement
         end

@@ -11,6 +11,17 @@
 SoilReportDialog = {}
 local SoilReportDialog_mt = Class(SoilReportDialog, ScreenElement)
 
+-- Resolve a translation key using the mod-scoped i18n instance.
+local function tr(key, fallback)
+    local modEnv = g_modEnvironments and g_modEnvironments[g_currentModName]
+    local i18n = (modEnv and modEnv.i18n) or g_i18n
+    if i18n then
+        local text = i18n:getText(key)
+        if text and text ~= "" then return text end
+    end
+    return fallback or key
+end
+
 SoilReportDialog.MAX_ROWS = 10
 SoilReportDialog.instance = nil
 SoilReportDialog.xmlPath = nil
@@ -244,46 +255,46 @@ function SoilReportDialog:getFertilizationRecommendation(info)
 
     -- Check individual nutrient statuses
     if info.nitrogen.status == "Poor" then
-        table.insert(recommendations, g_i18n:getText("sf_report_rec_n_poor", "N (Poor)"))
+        table.insert(recommendations, tr("sf_report_rec_n_poor", "N (Poor)"))
         overallStatus = "Poor"
     elseif info.nitrogen.status == "Fair" then
-        table.insert(recommendations, g_i18n:getText("sf_report_rec_n_fair", "N (Fair)"))
+        table.insert(recommendations, tr("sf_report_rec_n_fair", "N (Fair)"))
         if overallStatus == "Good" then overallStatus = "Fair" end
     end
 
     if info.phosphorus.status == "Poor" then
-        table.insert(recommendations, g_i18n:getText("sf_report_rec_p_poor", "P (Poor)"))
+        table.insert(recommendations, tr("sf_report_rec_p_poor", "P (Poor)"))
         overallStatus = "Poor"
     elseif info.phosphorus.status == "Fair" then
-        table.insert(recommendations, g_i18n:getText("sf_report_rec_p_fair", "P (Fair)"))
+        table.insert(recommendations, tr("sf_report_rec_p_fair", "P (Fair)"))
         if overallStatus == "Good" then overallStatus = "Fair" end
     end
 
     if info.potassium.status == "Poor" then
-        table.insert(recommendations, g_i18n:getText("sf_report_rec_k_poor", "K (Poor)"))
+        table.insert(recommendations, tr("sf_report_rec_k_poor", "K (Poor)"))
         overallStatus = "Poor"
     elseif info.potassium.status == "Fair" then
-        table.insert(recommendations, g_i18n:getText("sf_report_rec_k_fair", "K (Fair)"))
+        table.insert(recommendations, tr("sf_report_rec_k_fair", "K (Fair)"))
         if overallStatus == "Good" then overallStatus = "Fair" end
     end
 
     -- Check pH status
     local phColor = getPHColor(info.pH)
     if phColor == SoilReportDialog.COLOR_POOR then
-        table.insert(recommendations, g_i18n:getText("sf_report_rec_ph_adjust", "Adjust pH (Poor)"))
+        table.insert(recommendations, tr("sf_report_rec_ph_adjust", "Adjust pH (Poor)"))
         overallStatus = "Poor"
     elseif phColor == SoilReportDialog.COLOR_FAIR then
-        table.insert(recommendations, g_i18n:getText("sf_report_rec_ph_monitor", "Monitor pH (Fair)"))
+        table.insert(recommendations, tr("sf_report_rec_ph_monitor", "Monitor pH (Fair)"))
         if overallStatus == "Good" then overallStatus = "Fair" end
     end
 
     -- Check Organic Matter status
     local omColor = getOMColor(info.organicMatter)
     if omColor == SoilReportDialog.COLOR_POOR then
-        table.insert(recommendations, g_i18n:getText("sf_report_rec_om_increase", "Increase OM (Poor)"))
+        table.insert(recommendations, tr("sf_report_rec_om_increase", "Increase OM (Poor)"))
         overallStatus = "Poor"
     elseif omColor == SoilReportDialog.COLOR_FAIR then
-        table.insert(recommendations, g_i18n:getText("sf_report_rec_om_maintain", "Maintain OM (Fair)"))
+        table.insert(recommendations, tr("sf_report_rec_om_maintain", "Maintain OM (Fair)"))
         if overallStatus == "Good" then overallStatus = "Fair" end
     end
 
@@ -291,14 +302,14 @@ function SoilReportDialog:getFertilizationRecommendation(info)
     local recommendationColor
 
     if #recommendations > 0 then
-        recommendationString = g_i18n:getText("sf_report_rec_needs", "Needs: ") .. table.concat(recommendations, ", ")
+        recommendationString = tr("sf_report_rec_needs", "Needs: ") .. table.concat(recommendations, ", ")
         if overallStatus == "Poor" then
             recommendationColor = SoilReportDialog.COLOR_POOR
         else
             recommendationColor = SoilReportDialog.COLOR_FAIR
         end
     else
-        recommendationString = g_i18n:getText("sf_report_rec_optimal", "Soil Health: Optimal")
+        recommendationString = tr("sf_report_rec_optimal", "Soil Health: Optimal")
         recommendationColor = SoilReportDialog.COLOR_GOOD
     end
 
@@ -375,7 +386,7 @@ function SoilReportDialog:updateFieldRows()
 
                     -- Last Crop
                     if row.crop then
-                        local noneText = g_i18n:getText("sf_report_none", "None")
+                        local noneText = tr("sf_report_none", "None")
                         local cropName = info.lastCrop or noneText
                         -- Capitalize first letter
                         if cropName ~= noneText then
@@ -420,7 +431,7 @@ function SoilReportDialog:updatePagination()
         local endIndex = math.min(startIndex + SoilReportDialog.MAX_ROWS - 1, totalFields)
 
         if self.pageInfoText then
-            local pageFmt = g_i18n:getText("sf_report_page_info", "Fields %d-%d of %d  |  Page %d of %d")
+            local pageFmt = tr("sf_report_page_info", "Fields %d-%d of %d  |  Page %d of %d")
             self.pageInfoText:setText(string.format(pageFmt,
                 startIndex, endIndex, totalFields, self.currentPage, self.totalPages))
             self.pageInfoText:setVisible(true)
