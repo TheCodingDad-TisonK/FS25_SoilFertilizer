@@ -3,12 +3,12 @@
     <elements>
     <e k="sf_hud_color_1" v="Verde" eh="d382816a" />
     <e k="sf_hud_color_2" v="Azul" eh="9594eec9" />
-    <e k="sf_hud_color_3" v="Ámbar" eh="88068e33" />
+    <e k="sf_hud_color_3" v="Ãmbar" eh="88068e33" />
     <e k="sf_hud_color_4" v="Mono" eh="5d9b47bd" />
     <e k="sf_diff_short" v="Dificultad" eh="7b29ca96" />
-    <e k="sf_diff_long" v="Nivel de dificultad de gestión del suelo" eh="d6f4560c" />
-    <e k="sf_auto_rate_short" v="Control de tasa automático" eh="6f99137d" />
-    <e k="sf_auto_rate_long" v="Ajusta automáticamente la tasa de aplicación según las necesidades del campo" eh="a9ca9f6b" />
+    <e k="sf_diff_long" v="Nivel de dificultad de gestiÃ³n del suelo" eh="d6f4560c" />
+    <e k="sf_auto_rate_short" v="Control de tasa automÃ¡tico" eh="6f99137d" />
+    <e k="sf_auto_rate_long" v="Ajusta automÃ¡ticamente la tasa de aplicaciÃ³n segÃºn las necesidades del campo" eh="a9ca9f6b" />
 		<e k="sf_hud_theme_1" v="[EN] Green" eh="d382816a" />
 		<e k="sf_hud_theme_2" v="[EN] Blue" eh="9594eec9" />
 		<e k="sf_hud_theme_3" v="[EN] Amber" eh="88068e33" />
@@ -32,7 +32,7 @@
 		<e k="input_SF_SOIL_REPORT" v="[EN] Soil Report" eh="c33180ef" />
 		<e k="input_SF_RATE_UP" v="[EN] Increase Fertilizer Rate" eh="6e601ef5" />
 		<e k="input_SF_RATE_DOWN" v="[EN] Decrease Fertilizer Rate" eh="30712026" />
-    <e k="input_SF_TOGGLE_AUTO" v="Alternar tasa automática" eh="a8642cf0" />
+    <e k="input_SF_TOGGLE_AUTO" v="Alternar tasa automÃ¡tica" eh="a8642cf0" />
 		<e k="sf_report_title" v="[EN] Soil &amp;amp;amp; Fertilizer Report" eh="e4d0126a" />
 		<e k="sf_report_fields_tracked" v="[EN] Fields Tracked:" eh="7b1e59b8" />
 		<e k="sf_report_need_fert" v="[EN] Need Fertilizer:" eh="110b60f2" />
@@ -56,6 +56,8 @@
 		<e k="sf_report_rec_ph_monitor" v="[EN] Monitor pH" eh="6dfcded4" />
 		<e k="sf_report_rec_om_increase" v="[EN] Increase Organic Matter" eh="c2a930af" />
 		<e k="sf_report_rec_om_maintain" v="[EN] Maintain Organic Matter" eh="e7655847" />
+    <e k="sf_report_rec_pest" v="Pest Risk" eh="c2a930af" />
+    <e k="sf_report_rec_disease" v="Disease Risk" eh="e7655847" />
 		<e k="sf_report_rec_needs" v="[EN] Needs:" eh="3e6d95cf" />
 		<e k="sf_report_rec_optimal" v="[EN] Soil Health: Optimal" eh="6ee9d19b" />
 		<e k="sf_uan32_title" v="[EN] UAN 32 Fertilizer (N)" eh="90913bb8" />
@@ -69,23 +71,23 @@
 		<e k="sf_potash_title" v="[EN] Potash 0-0-60 (K)" eh="8db6c54c" />
 		<e k="sf_report_page_info" v="[EN] Fields %d-%d of %d  |  Page %d of %d" eh="8db851d1" />
     <e k="sf_bigBag_uan32_name" v="Big Bag UAN 32-0-0" eh="7bdc4d9d" />
-    <e k="sf_bigBag_uan32_function" v="Fertilizante nitrogenado (líquido)" eh="27de5f41" />
+    <e k="sf_bigBag_uan32_function" v="Fertilizante nitrogenado (lÃ­quido)" eh="27de5f41" />
     <e k="sf_bigBag_uan28_name" v="Big Bag UAN 28-0-0" eh="997781d5" />
-    <e k="sf_bigBag_uan28_function" v="Fertilizante nitrogenado (líquido)" eh="27de5f41" />
+    <e k="sf_bigBag_uan28_function" v="Fertilizante nitrogenado (lÃ­quido)" eh="27de5f41" />
     <e k="sf_bigBag_anhydrous_name" v="Big Bag Amoniaco Anhidro 82-0-0" eh="44914201" />
-    <e k="sf_bigBag_anhydrous_function" v="Fertilizante nitrogenado (líquido)" eh="27de5f41" />
+    <e k="sf_bigBag_anhydrous_function" v="Fertilizante nitrogenado (lÃ­quido)" eh="27de5f41" />
     <e k="sf_bigBag_urea_name" v="Big Bag Urea 46-0-0" eh="8e8cbaae" />
     <e k="sf_bigBag_urea_function" v="Fertilizante nitrogenado (seco)" eh="63efea20" />
     <e k="sf_bigBag_ams_name" v="Big Bag AMS 21-0-0-24S" eh="7f71ee68" />
     <e k="sf_bigBag_ams_function" v="Fertilizante nitrogenado (seco)" eh="63efea20" />
     <e k="sf_bigBag_map_name" v="Big Bag MAP 11-52-0" eh="8a5a059b" />
-    <e k="sf_bigBag_map_function" v="Fertilizante fosfórico (seco)" eh="0cc85c60" />
+    <e k="sf_bigBag_map_function" v="Fertilizante fosfÃ³rico (seco)" eh="0cc85c60" />
     <e k="sf_bigBag_dap_name" v="Big Bag DAP 18-46-0" eh="fb4e9987" />
-    <e k="sf_bigBag_dap_function" v="Fertilizante fosfórico (seco)" eh="0cc85c60" />
+    <e k="sf_bigBag_dap_function" v="Fertilizante fosfÃ³rico (seco)" eh="0cc85c60" />
     <e k="sf_bigBag_potash_name" v="Big Bag Potasa 0-0-60" eh="eb771556" />
-    <e k="sf_bigBag_potash_function" v="Fertilizante potásico (seco)" eh="18015099" />
+    <e k="sf_bigBag_potash_function" v="Fertilizante potÃ¡sico (seco)" eh="18015099" />
     <e k="sf_bigBag_starter_name" v="Big Bag Fertilizante Inicial 10-34-0" eh="953fd6c0" />
-    <e k="sf_bigBag_starter_function" v="Fertilizante inicial (líquido)" eh="2c36ea57" />
+    <e k="sf_bigBag_starter_function" v="Fertilizante inicial (lÃ­quido)" eh="2c36ea57" />
 
 		<e k="sf_section" v="[EN] Soil &amp;amp; Fertilizer" eh="d30a22a9" />
 		<e k="sf_enabled_short" v="[EN] Enable Mod" eh="cf7fea13" />
@@ -98,6 +100,12 @@
 		<e k="sf_rain_effects_long" v="[EN] Enable/disable rain impact on soil (nutrient leaching, pH changes)" eh="de3b14b9" />
 		<e k="sf_plowing_bonus_short" v="[EN] Plowing Bonus" eh="541ec752" />
 		<e k="sf_plowing_bonus_long" v="[EN] Enable/disable plowing benefits to soil fertility (improved nitrogen and organic matter)" eh="fe701c1c" />
+    <e k="sf_weed_pressure_short" v="Weed Pressure" eh="7f71ee68" />
+    <e k="sf_weed_pressure_long" v="Enable/disable dynamic weed growth and yield impact" eh="27de5f41" />
+    <e k="sf_pest_pressure_short" v="Pest Pressure" eh="eb771556" />
+    <e k="sf_pest_pressure_long" v="Enable/disable insect and pest infestation system" eh="18015099" />
+    <e k="sf_disease_pressure_short" v="Disease Pressure" eh="953fd6c0" />
+    <e k="sf_disease_pressure_long" v="Enable/disable fungal and crop disease system" eh="2c36ea57" />
 		<e k="sf_fertility_short" v="[EN] Fertility System" eh="f7e27d58" />
 		<e k="sf_fertility_long" v="[EN] Enable/disable dynamic soil fertility system" eh="ea074366" />
 		<e k="sf_nutrients_short" v="[EN] Nutrient Cycles" eh="ffab595d" />

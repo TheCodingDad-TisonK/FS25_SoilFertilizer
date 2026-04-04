@@ -1,82 +1,88 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <l10n>
     <elements>
-    <e k="sf_section" v="Gleba &amp; Nawóz" eh="f31197fb" />
-    <e k="sf_enabled_short" v="Włącz mod" eh="cf7fea13" />
-    <e k="sf_enabled_long" v="Włącz lub wyłącz mod gleby i nawozu" eh="a891399a" />
+    <e k="sf_section" v="Gleba &amp; NawÃ³z" eh="f31197fb" />
+    <e k="sf_enabled_short" v="WÅ‚Ä…cz mod" eh="cf7fea13" />
+    <e k="sf_enabled_long" v="WÅ‚Ä…cz lub wyÅ‚Ä…cz mod gleby i nawozu" eh="a891399a" />
     <e k="sf_debug_short" v="Tryb DEBUG" eh="2ddcdc76" />
-    <e k="sf_debug_long" v="Włącz/wyłącz tryb DEBUG (dodatkowe logowanie)" eh="f6f20240" />
+    <e k="sf_debug_long" v="WÅ‚Ä…cz/wyÅ‚Ä…cz tryb DEBUG (dodatkowe logowanie)" eh="f6f20240" />
     <e k="sf_seasonal_effects_short" v="Efekty Sezonowe" eh="c16ea608" />
-    <e k="sf_seasonal_effects_long" v="Włącz/wyłącz sezonowy wpływ na składniki gleby (wzrost wiosenny, spowolnienie jesienne)" eh="3eea94c7" />
+    <e k="sf_seasonal_effects_long" v="WÅ‚Ä…cz/wyÅ‚Ä…cz sezonowy wpÅ‚yw na skÅ‚adniki gleby (wzrost wiosenny, spowolnienie jesienne)" eh="3eea94c7" />
     <e k="sf_rain_effects_short" v="Efekty Deszczu" eh="a2a1758b" />
-    <e k="sf_rain_effects_long" v="Włącz/wyłącz wpływ deszczu na glebę (wypłukiwanie składników, zmiany pH)" eh="de3b14b9" />
+    <e k="sf_rain_effects_long" v="WÅ‚Ä…cz/wyÅ‚Ä…cz wpÅ‚yw deszczu na glebÄ™ (wypÅ‚ukiwanie skÅ‚adnikÃ³w, zmiany pH)" eh="de3b14b9" />
     <e k="sf_plowing_bonus_short" v="Bonus Orki" eh="541ec752" />
-    <e k="sf_plowing_bonus_long" v="Włącz/wyłącz korzyści orki dla żyzności gleby (poprawiony azot i materia organiczna)" eh="fe701c1c" />
-    <e k="sf_fertility_short" v="System Żyzności" eh="f7e27d58" />
-    <e k="sf_fertility_long" v="Włącz/wyłącz dynamiczny system żyzności gleby" eh="ea074366" />
-    <e k="sf_nutrients_short" v="Cykle Składników" eh="ffab595d" />
-    <e k="sf_nutrients_long" v="Włącz/wyłącz realistyczne wyczerpywanie i uzupełnianie składników" eh="dbe9c8ff" />
-    <e k="sf_difficulty_short" v="Trudność" eh="7b29ca96" />
-    <e k="sf_difficulty_long" v="Ustaw poziom trudności: Prosty, Realistyczny, Hardcore" eh="cfb758a4" />
+    <e k="sf_plowing_bonus_long" v="WÅ‚Ä…cz/wyÅ‚Ä…cz korzyÅ›ci orki dla Å¼yznoÅ›ci gleby (poprawiony azot i materia organiczna)" eh="fe701c1c" />
+    <e k="sf_weed_pressure_short" v="Weed Pressure" eh="7f71ee68" />
+    <e k="sf_weed_pressure_long" v="Enable/disable dynamic weed growth and yield impact" eh="27de5f41" />
+    <e k="sf_pest_pressure_short" v="Pest Pressure" eh="eb771556" />
+    <e k="sf_pest_pressure_long" v="Enable/disable insect and pest infestation system" eh="18015099" />
+    <e k="sf_disease_pressure_short" v="Disease Pressure" eh="953fd6c0" />
+    <e k="sf_disease_pressure_long" v="Enable/disable fungal and crop disease system" eh="2c36ea57" />
+    <e k="sf_fertility_short" v="System Å»yznoÅ›ci" eh="f7e27d58" />
+    <e k="sf_fertility_long" v="WÅ‚Ä…cz/wyÅ‚Ä…cz dynamiczny system Å¼yznoÅ›ci gleby" eh="ea074366" />
+    <e k="sf_nutrients_short" v="Cykle SkÅ‚adnikÃ³w" eh="ffab595d" />
+    <e k="sf_nutrients_long" v="WÅ‚Ä…cz/wyÅ‚Ä…cz realistyczne wyczerpywanie i uzupeÅ‚nianie skÅ‚adnikÃ³w" eh="dbe9c8ff" />
+    <e k="sf_difficulty_short" v="TrudnoÅ›Ä‡" eh="7b29ca96" />
+    <e k="sf_difficulty_long" v="Ustaw poziom trudnoÅ›ci: Prosty, Realistyczny, Hardcore" eh="cfb758a4" />
     <e k="sf_diff_1" v="Prosty" eh="1fbb1e39" />
     <e k="sf_diff_2" v="Realistyczny" eh="408c999f" />
     <e k="sf_diff_3" v="Hardcore" eh="1c800aa9" />
     <e k="sf_fertilizer_cost_short" v="Koszty Nawozu" eh="6870d88b" />
-    <e k="sf_fertilizer_cost_long" v="Włącz/wyłącz realistyczne koszty zakupu nawozu" eh="12b03fbb" />
+    <e k="sf_fertilizer_cost_long" v="WÅ‚Ä…cz/wyÅ‚Ä…cz realistyczne koszty zakupu nawozu" eh="12b03fbb" />
     <e k="sf_notifications_short" v="Powiadomienia" eh="a274f4d4" />
-    <e k="sf_notifications_long" v="Włącz/wyłącz powiadomienia o glebie i nawozie" eh="9a872f8f" />
-    <e k="sf_show_hud_short" v="Pokaż HUD" eh="c94fd4d7" />
-    <e k="sf_show_hud_long" v="Pokaż/ukryj nakładkę HUD informacji o glebie (F8 aby przełączyć tymczasowo)" eh="4e2e11b6" />
+    <e k="sf_notifications_long" v="WÅ‚Ä…cz/wyÅ‚Ä…cz powiadomienia o glebie i nawozie" eh="9a872f8f" />
+    <e k="sf_show_hud_short" v="PokaÅ¼ HUD" eh="c94fd4d7" />
+    <e k="sf_show_hud_long" v="PokaÅ¼/ukryj nakÅ‚adkÄ™ HUD informacji o glebie (F8 aby przeÅ‚Ä…czyÄ‡ tymczasowo)" eh="4e2e11b6" />
     <e k="sf_hud_position_short" v="Pozycja HUD" eh="5ac371f2" />
-    <e k="sf_hud_position_long" v="Wybierz, gdzie na ekranie pojawia się HUD informacji o glebie" eh="d7b9c109" />
-    <e k="sf_hud_pos_1" v="Góra prawa" eh="5f9f6784" />
-    <e k="sf_hud_pos_2" v="Góra lewa" eh="ac71274a" />
-    <e k="sf_hud_pos_3" v="Dół prawa" eh="4d297f5d" />
-    <e k="sf_hud_pos_4" v="Dół lewa" eh="7eb55425" />
-    <e k="sf_hud_pos_5" v="Środek prawa" eh="d7afdc5a" />
+    <e k="sf_hud_position_long" v="Wybierz, gdzie na ekranie pojawia siÄ™ HUD informacji o glebie" eh="d7b9c109" />
+    <e k="sf_hud_pos_1" v="GÃ³ra prawa" eh="5f9f6784" />
+    <e k="sf_hud_pos_2" v="GÃ³ra lewa" eh="ac71274a" />
+    <e k="sf_hud_pos_3" v="DÃ³Å‚ prawa" eh="4d297f5d" />
+    <e k="sf_hud_pos_4" v="DÃ³Å‚ lewa" eh="7eb55425" />
+    <e k="sf_hud_pos_5" v="Åšrodek prawa" eh="d7afdc5a" />
     <e k="sf_hud_pos_6" v="Niestandardowy" eh="90589c47" />
-    <e k="sf_hud_color_theme_short" v="Motyw kolorów HUD" eh="4a73f95b" />
-    <e k="sf_hud_color_theme_long" v="Wybierz schemat kolorów dla wyświetlania informacji o glebie" eh="3218bca6" />
+    <e k="sf_hud_color_theme_short" v="Motyw kolorÃ³w HUD" eh="4a73f95b" />
+    <e k="sf_hud_color_theme_long" v="Wybierz schemat kolorÃ³w dla wyÅ›wietlania informacji o glebie" eh="3218bca6" />
     <e k="sf_hud_color_1" v="Zielony" eh="d382816a" />
     <e k="sf_hud_color_2" v="Niebieski" eh="9594eec9" />
     <e k="sf_hud_color_3" v="Bursztynowy" eh="88068e33" />
     <e k="sf_hud_color_4" v="Mono" eh="5d9b47bd" />
-    <e k="sf_diff_short" v="Trudność" eh="7b29ca96" />
-    <e k="sf_diff_long" v="Poziom trudności zarządzania glebą" eh="d6f4560c" />
+    <e k="sf_diff_short" v="TrudnoÅ›Ä‡" eh="7b29ca96" />
+    <e k="sf_diff_long" v="Poziom trudnoÅ›ci zarzÄ…dzania glebÄ…" eh="d6f4560c" />
     <e k="sf_auto_rate_short" v="Automatyczna kontrola dawki" eh="6f99137d" />
-    <e k="sf_auto_rate_long" v="Automatycznie dostosowuje dawkę nawożenia do potrzeb pola" eh="a9ca9f6b" />
+    <e k="sf_auto_rate_long" v="Automatycznie dostosowuje dawkÄ™ nawoÅ¼enia do potrzeb pola" eh="a9ca9f6b" />
     <e k="sf_hud_theme_1" v="Zielony" eh="d382816a" />
     <e k="sf_hud_theme_2" v="Niebieski" eh="9594eec9" />
     <e k="sf_hud_theme_3" v="Bursztynowy" eh="88068e33" />
     <e k="sf_hud_theme_4" v="Mono" eh="5d9b47bd" />
     <e k="sf_hud_font_size_short" v="Rozmiar czcionki HUD" eh="fd6ca64a" />
-    <e k="sf_hud_font_size_long" v="Dostosuj rozmiar tekstu dla lepszej czytelności" eh="c338854f" />
-    <e k="sf_hud_font_1" v="Mały" eh="2660064e" />
-    <e k="sf_hud_font_2" v="Średni" eh="87f8a6ab" />
-    <e k="sf_hud_font_3" v="Duży" eh="3a69b34c" />
-    <e k="sf_hud_transparency_short" v="Przezroczystość HUD" eh="e8a009e4" />
-    <e k="sf_hud_transparency_long" v="Ustaw poziom przezroczystości tła (Przezroczysty = przejrzysty, Solidny = nieprzezroczysty)" eh="152e390a" />
+    <e k="sf_hud_font_size_long" v="Dostosuj rozmiar tekstu dla lepszej czytelnoÅ›ci" eh="c338854f" />
+    <e k="sf_hud_font_1" v="MaÅ‚y" eh="2660064e" />
+    <e k="sf_hud_font_2" v="Åšredni" eh="87f8a6ab" />
+    <e k="sf_hud_font_3" v="DuÅ¼y" eh="3a69b34c" />
+    <e k="sf_hud_transparency_short" v="PrzezroczystoÅ›Ä‡ HUD" eh="e8a009e4" />
+    <e k="sf_hud_transparency_long" v="Ustaw poziom przezroczystoÅ›ci tÅ‚a (Przezroczysty = przejrzysty, Solidny = nieprzezroczysty)" eh="152e390a" />
     <e k="sf_hud_trans_1" v="Przezroczysty" eh="dc30bc0c" />
     <e k="sf_hud_trans_2" v="Lekki" eh="9914a0ce" />
-    <e k="sf_hud_trans_3" v="Średni" eh="87f8a6ab" />
+    <e k="sf_hud_trans_3" v="Åšredni" eh="87f8a6ab" />
     <e k="sf_hud_trans_4" v="Ciemny" eh="a18366b2" />
     <e k="sf_hud_trans_5" v="Solidny" eh="e41480b6" />
     <e k="sf_use_imperial_short" v="Jednostki imperialne" eh="ff2701ad" />
-    <e k="sf_use_imperial_long" v="Wyświetlaj dawki w gal/ac i lb/ac (wyłączone = L/ha i kg/ha)" eh="17efa489" />
+    <e k="sf_use_imperial_long" v="WyÅ›wietlaj dawki w gal/ac i lb/ac (wyÅ‚Ä…czone = L/ha i kg/ha)" eh="17efa489" />
     <e k="sf_reset" v="Resetuj ustawienia gleby" eh="467bc2f5" />
-    <e k="input_SF_TOGGLE_HUD" v="Przełącz HUD gleby" eh="f0224a10" />
+    <e k="input_SF_TOGGLE_HUD" v="PrzeÅ‚Ä…cz HUD gleby" eh="f0224a10" />
     <e k="input_SF_SOIL_REPORT" v="Raport Gleby" eh="c33180ef" />
-    <e k="input_SF_RATE_UP" v="Zwiększ dawkę nawozu" eh="6e601ef5" />
-    <e k="input_SF_RATE_DOWN" v="Zmniejsz dawkę nawozu" eh="30712026" />
-    <e k="input_SF_TOGGLE_AUTO" v="Przełącz tryb auto" eh="a8642cf0" />
+    <e k="input_SF_RATE_UP" v="ZwiÄ™ksz dawkÄ™ nawozu" eh="6e601ef5" />
+    <e k="input_SF_RATE_DOWN" v="Zmniejsz dawkÄ™ nawozu" eh="30712026" />
+    <e k="input_SF_TOGGLE_AUTO" v="PrzeÅ‚Ä…cz tryb auto" eh="a8642cf0" />
     <e k="sf_report_title" v="Raport Gleby &amp;amp; Nawozu" eh="a76f8218" />
-    <e k="sf_report_fields_tracked" v="Śledzone Pola:" eh="7b1e59b8" />
-    <e k="sf_report_need_fert" v="Potrzebują Nawozu:" eh="110b60f2" />
-    <e k="sf_report_difficulty" v="Trudność:" eh="3abaf54f" />
+    <e k="sf_report_fields_tracked" v="Åšledzone Pola:" eh="7b1e59b8" />
+    <e k="sf_report_need_fert" v="PotrzebujÄ… Nawozu:" eh="110b60f2" />
+    <e k="sf_report_difficulty" v="TrudnoÅ›Ä‡:" eh="3abaf54f" />
     <e k="sf_report_col_field" v="Pole" eh="6f16a5f8" />
     <e k="sf_report_col_last_crop" v="Ostatni Plon" eh="ff41e5eb" />
     <e k="sf_report_col_fert" v="Naw?" eh="9e6d0eb4" />
-    <e k="sf_report_no_data" v="Brak danych o glebie. Wejdź na pole, aby rozpocząć śledzenie." eh="1528a4cb" />
+    <e k="sf_report_no_data" v="Brak danych o glebie. WejdÅº na pole, aby rozpoczÄ…Ä‡ Å›ledzenie." eh="1528a4cb" />
     <e k="sf_report_prev" v="Poprz" eh="14230d11" />
     <e k="sf_report_next" v="Nast" eh="10ac3d04" />
     <e k="sf_report_yes" v="TAK" eh="7469a286" />
@@ -90,37 +96,39 @@
     <e k="sf_report_rec_k_fair" v="Niski potas" eh="2006c0a2" />
     <e k="sf_report_rec_ph_adjust" v="Dostosuj pH" eh="84f6bbbc" />
     <e k="sf_report_rec_ph_monitor" v="Monitoruj pH" eh="6dfcded4" />
-    <e k="sf_report_rec_om_increase" v="Zwiększ OM" eh="c2a930af" />
+    <e k="sf_report_rec_om_increase" v="ZwiÄ™ksz OM" eh="c2a930af" />
     <e k="sf_report_rec_om_maintain" v="Utrzymaj OM" eh="e7655847" />
+    <e k="sf_report_rec_pest" v="Pest Risk" eh="c2a930af" />
+    <e k="sf_report_rec_disease" v="Disease Risk" eh="e7655847" />
     <e k="sf_report_rec_needs" v="Potrzeby:" eh="3e6d95cf" />
     <e k="sf_report_rec_optimal" v="Zdrowie gleby: Optymalne" eh="6ee9d19b" />
-    <e k="sf_uan32_title" v="UAN 32 Nawóz azotowy (N)" eh="90913bb8" />
-    <e k="sf_uan28_title" v="UAN 28 Nawóz azotowy (N)" eh="9d902cd7" />
+    <e k="sf_uan32_title" v="UAN 32 NawÃ³z azotowy (N)" eh="90913bb8" />
+    <e k="sf_uan28_title" v="UAN 28 NawÃ³z azotowy (N)" eh="9d902cd7" />
     <e k="sf_anhydrous_title" v="Amoniak bezwodny (N)" eh="3fc85c02" />
-    <e k="sf_starter_title" v="Nawóz startowy 10-34-0 (P)" eh="8c1a1ddc" />
+    <e k="sf_starter_title" v="NawÃ³z startowy 10-34-0 (P)" eh="8c1a1ddc" />
     <e k="sf_urea_title" v="Mocznik 46-0-0 (N)" eh="659b3097" />
     <e k="sf_ams_title" v="Siarczan amonu 21-0-0 (N)" eh="033d1845" />
-    <e k="sf_map_title" v="Nawóz MAP 11-52-0 (P)" eh="31aa2534" />
-    <e k="sf_dap_title" v="Nawóz DAP 18-46-0 (P)" eh="5030a80a" />
-    <e k="sf_potash_title" v="Potaż 0-0-60 (K)" eh="8db6c54c" />
+    <e k="sf_map_title" v="NawÃ³z MAP 11-52-0 (P)" eh="31aa2534" />
+    <e k="sf_dap_title" v="NawÃ³z DAP 18-46-0 (P)" eh="5030a80a" />
+    <e k="sf_potash_title" v="PotaÅ¼ 0-0-60 (K)" eh="8db6c54c" />
     <e k="sf_report_page_info" v="Pola %d-%d z %d  |  Strona %d z %d" eh="8db851d1" />
     <e k="sf_bigBag_uan32_name" v="Big Bag UAN 32-0-0" eh="7bdc4d9d" />
-    <e k="sf_bigBag_uan32_function" v="Nawóz azotowy (ciekły)" eh="27de5f41" />
+    <e k="sf_bigBag_uan32_function" v="NawÃ³z azotowy (ciekÅ‚y)" eh="27de5f41" />
     <e k="sf_bigBag_uan28_name" v="Big Bag UAN 28-0-0" eh="997781d5" />
-    <e k="sf_bigBag_uan28_function" v="Nawóz azotowy (ciekły)" eh="27de5f41" />
+    <e k="sf_bigBag_uan28_function" v="NawÃ³z azotowy (ciekÅ‚y)" eh="27de5f41" />
     <e k="sf_bigBag_anhydrous_name" v="Big Bag Bezwodny Amoniak 82-0-0" eh="44914201" />
-    <e k="sf_bigBag_anhydrous_function" v="Nawóz azotowy (ciekły)" eh="27de5f41" />
+    <e k="sf_bigBag_anhydrous_function" v="NawÃ³z azotowy (ciekÅ‚y)" eh="27de5f41" />
     <e k="sf_bigBag_urea_name" v="Big Bag Mocznik 46-0-0" eh="8e8cbaae" />
-    <e k="sf_bigBag_urea_function" v="Nawóz azotowy (suchy)" eh="63efea20" />
+    <e k="sf_bigBag_urea_function" v="NawÃ³z azotowy (suchy)" eh="63efea20" />
     <e k="sf_bigBag_ams_name" v="Big Bag AMS 21-0-0-24S" eh="7f71ee68" />
-    <e k="sf_bigBag_ams_function" v="Nawóz azotowy (suchy)" eh="63efea20" />
+    <e k="sf_bigBag_ams_function" v="NawÃ³z azotowy (suchy)" eh="63efea20" />
     <e k="sf_bigBag_map_name" v="Big Bag MAP 11-52-0" eh="8a5a059b" />
-    <e k="sf_bigBag_map_function" v="Nawóz fosforowy (suchy)" eh="0cc85c60" />
+    <e k="sf_bigBag_map_function" v="NawÃ³z fosforowy (suchy)" eh="0cc85c60" />
     <e k="sf_bigBag_dap_name" v="Big Bag DAP 18-46-0" eh="fb4e9987" />
-    <e k="sf_bigBag_dap_function" v="Nawóz fosforowy (suchy)" eh="0cc85c60" />
+    <e k="sf_bigBag_dap_function" v="NawÃ³z fosforowy (suchy)" eh="0cc85c60" />
     <e k="sf_bigBag_potash_name" v="Big Bag Potas 0-0-60" eh="eb771556" />
-    <e k="sf_bigBag_potash_function" v="Nawóz potasowy (suchy)" eh="18015099" />
-    <e k="sf_bigBag_starter_name" v="Big Bag Nawóz Startowy 10-34-0" eh="953fd6c0" />
-    <e k="sf_bigBag_starter_function" v="Nawóz startowy (ciekły)" eh="2c36ea57" />
+    <e k="sf_bigBag_potash_function" v="NawÃ³z potasowy (suchy)" eh="18015099" />
+    <e k="sf_bigBag_starter_name" v="Big Bag NawÃ³z Startowy 10-34-0" eh="953fd6c0" />
+    <e k="sf_bigBag_starter_function" v="NawÃ³z startowy (ciekÅ‚y)" eh="2c36ea57" />
     </elements>
 </l10n>

@@ -71,6 +71,22 @@
             <sprayType sprayTypeStr="SOLID"/>
         </fillType>
 
+        <!-- ── CROP PROTECTION ────────────────────────────────── -->
+
+        <fillType name="INSECTICIDE" title="$l10n_fillType_insecticide" showOnPriceTable="true" isBulkType="false" unitShort="$l10n_unit_literShort">
+            <physics massPerLiter="0.001" maxPhysicalSurfaceAngle="0"/>
+            <economy pricePerLiter="1.20"/>
+            <image hud="$dataS/menu/hud/fillTypes/hud_fill_liquidFertilizer.png"/>
+            <sprayType sprayTypeStr="LIQUID"/>
+        </fillType>
+
+        <fillType name="FUNGICIDE" title="$l10n_fillType_fungicide" showOnPriceTable="true" isBulkType="false" unitShort="$l10n_unit_literShort">
+            <physics massPerLiter="0.001" maxPhysicalSurfaceAngle="0"/>
+            <economy pricePerLiter="1.30"/>
+            <image hud="$dataS/menu/hud/fillTypes/hud_fill_liquidFertilizer.png"/>
+            <sprayType sprayTypeStr="LIQUID"/>
+        </fillType>
+
     </fillTypes>
 
     <fillTypeCategories>
@@ -92,7 +108,7 @@
             that already accept LIQUIDFERTILIZER will also accept our liquid nitrogen products
             and starter fertilizer.
         -->
-        <fillTypeCategory name="SPRAYER">LIQUIDFERTILIZER UAN32 UAN28 ANHYDROUS STARTER</fillTypeCategory>
+        <fillTypeCategory name="SPRAYER">LIQUIDFERTILIZER UAN32 UAN28 ANHYDROUS STARTER INSECTICIDE FUNGICIDE</fillTypeCategory>
     </fillTypeCategories>
 
 </map>

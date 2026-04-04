@@ -736,16 +736,75 @@ function SoilHUD:drawPanel()
             if info.herbicideActive then weedLabel = weedLabel .. " (protected)" end
             setTextAlignment(RenderText.ALIGN_RIGHT)
             setTextColor(weedColor[1], weedColor[2], weedColor[3], 1.0)
-            renderText(px + pw - pad, cy, 0.009 * fontMult * s, weedLabel)
+            renderText(px + pw - pad, cy, 0.010 * fontMult * s, weedLabel)
             setTextAlignment(RenderText.ALIGN_LEFT)
-
             cy = cy - SoilHUD.LINE_H * s
-
-            -- Divider before hint
-            cy = cy - pad * 0.5
-            self:drawRect(px + pad, cy, pw - pad*2, 0.0005, SoilHUD.C_DIVIDER)
-            cy = cy - pad * 0.8
         end
+
+        -- Pest pressure row
+        if g_SoilFertilityManager and g_SoilFertilityManager.settings.pestPressure then
+            local pressure = info.pestPressure or 0
+            local pp = SoilConstants.PEST_PRESSURE
+            local pestColor
+            if pressure < pp.LOW then pestColor = SoilHUD.C_GOOD
+            elseif pressure < pp.MEDIUM then pestColor = SoilHUD.C_FAIR
+            elseif pressure < pp.HIGH then pestColor = {1.0, 0.55, 0.10, 1.0}
+            else pestColor = SoilHUD.C_POOR end
+
+            setTextColor(SoilHUD.C_LABEL[1], SoilHUD.C_LABEL[2], SoilHUD.C_LABEL[3], SoilHUD.C_LABEL[4])
+            renderText(tx, cy, 0.010 * fontMult * s, "Pests")
+
+            local barX = tx + 0.038*s
+            local barH = SoilHUD.BAR_H * s
+            local barW = SoilHUD.BAR_W * s
+            local barY = cy + (SoilHUD.LINE_H * s - barH) * 0.5
+            self:drawRect(barX, barY, barW, barH, SoilHUD.C_BAR_BG)
+            local fill = math.max(0, math.min(1, pressure / 100))
+            if fill > 0 then self:drawRect(barX, barY, barW * fill, barH, pestColor) end
+
+            local pestLabel = string.format("%.0f%%", pressure)
+            if info.insecticideActive then pestLabel = pestLabel .. " (protected)" end
+            setTextAlignment(RenderText.ALIGN_RIGHT)
+            setTextColor(pestColor[1], pestColor[2], pestColor[3], 1.0)
+            renderText(px + pw - pad, cy, 0.010 * fontMult * s, pestLabel)
+            setTextAlignment(RenderText.ALIGN_LEFT)
+            cy = cy - SoilHUD.LINE_H * s
+        end
+
+        -- Disease pressure row
+        if g_SoilFertilityManager and g_SoilFertilityManager.settings.diseasePressure then
+            local pressure = info.diseasePressure or 0
+            local dp = SoilConstants.DISEASE_PRESSURE
+            local diseaseColor
+            if pressure < dp.LOW then diseaseColor = SoilHUD.C_GOOD
+            elseif pressure < dp.MEDIUM then diseaseColor = SoilHUD.C_FAIR
+            elseif pressure < dp.HIGH then diseaseColor = {1.0, 0.55, 0.10, 1.0}
+            else diseaseColor = SoilHUD.C_POOR end
+
+            setTextColor(SoilHUD.C_LABEL[1], SoilHUD.C_LABEL[2], SoilHUD.C_LABEL[3], SoilHUD.C_LABEL[4])
+            renderText(tx, cy, 0.010 * fontMult * s, "Disease")
+
+            local barX = tx + 0.038*s
+            local barH = SoilHUD.BAR_H * s
+            local barW = SoilHUD.BAR_W * s
+            local barY = cy + (SoilHUD.LINE_H * s - barH) * 0.5
+            self:drawRect(barX, barY, barW, barH, SoilHUD.C_BAR_BG)
+            local fill = math.max(0, math.min(1, pressure / 100))
+            if fill > 0 then self:drawRect(barX, barY, barW * fill, barH, diseaseColor) end
+
+            local diseaseLabel = string.format("%.0f%%", pressure)
+            if info.fungicideActive then diseaseLabel = diseaseLabel .. " (protected)" end
+            setTextAlignment(RenderText.ALIGN_RIGHT)
+            setTextColor(diseaseColor[1], diseaseColor[2], diseaseColor[3], 1.0)
+            renderText(px + pw - pad, cy, 0.010 * fontMult * s, diseaseLabel)
+            setTextAlignment(RenderText.ALIGN_LEFT)
+            cy = cy - SoilHUD.LINE_H * s
+        end
+
+        -- Divider before hint
+        cy = cy - pad * 0.5
+        self:drawRect(px + pad, cy, pw - pad*2, 0.0005, SoilHUD.C_DIVIDER)
+        cy = cy - pad * 0.8
     else
         cy = cy - SoilHUD.LINE_H * s * 4  -- skip nutrient rows space
     end
