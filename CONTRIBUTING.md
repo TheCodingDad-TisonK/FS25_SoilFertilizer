@@ -66,7 +66,7 @@ Wrap anything that could fail in `pcall()`. Don't let hook errors propagate to t
 **Don't:**
 - Submit a PR that rewrites files you weren't asked to touch
 - Reorder existing entries in `SettingsSchema.definitions` — this breaks saves
-- Add a setting without its `_short` and `_long` translation keys in `modDesc.xml` (all 10 languages)
+- Add a setting without its `_short` and `_long` translation keys in `modDesc.xml` (all 26 languages)
 - Commit the `.zip` directly — use `build.py` and let the release process handle it
 - Use `assert()` — use graceful error handling with user-facing dialogs instead
 
@@ -92,7 +92,7 @@ Maintainers merge development → main on a release cycle, not per-PR.
 
 - **Bug fixes** — always welcome, especially with a log excerpt showing the error
 - **New crop support** — add extraction rates to `Constants.lua` (see `DEVELOPMENT.md`)
-- **Translations** — all 10 languages in `modDesc.xml` under `<l10n>`
+- **Translations** — all 26 languages in `modDesc.xml` under `<l10n>`
 - **Performance** — the update loop runs every 30s, hooks run on every harvest/spray event
 - **UI/UX improvements** — for the Soil Report dialog or HUD legend
 

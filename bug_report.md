@@ -1,6 +1,10 @@
 # FS25_SoilFertilizer — Full Code Review
-**Pass type:** Bugs · Edge Cases · Dead/Unhooked Code · Comments · Polish  
+**Pass type:** Bugs · Edge Cases · Dead/Unhooked Code · Comments · Polish
 **Files reviewed:** all 15 Lua source files under `src/`
+**Audit date:** 2026-04-03 (reflects codebase at v1.1.x)
+
+> **Status note (2026-04-04):** Items #1, #2, #3, #5, #25 are resolved as of v1.3.1.0.
+> See CHANGELOG.md for details. Remaining items are tracked in the roadmap (Issue #104).
 
 ---
 
@@ -371,11 +375,11 @@ The full-sync retry handler provides `onAttempt` but no `condition`. This means 
 
 | # | File | Severity | Category |
 |---|------|----------|----------|
-| 1 | SoilFertilitySystem.lua | CRITICAL | Bug — PFActive guard always skips |
-| 2 | SoilFertilityManager.lua | CRITICAL | Bug — loadSoilData() called before path exists |
-| 3 | NetworkEvents.lua | CRITICAL | Bug — getDifficultyName() called on raw table |
+| 1 | SoilFertilitySystem.lua | ~~CRITICAL~~ | ~~Bug — PFActive guard always skips~~ ✅ RESOLVED v1.3.1.0 (PF mode removed entirely) |
+| 2 | SoilFertilityManager.lua | ~~CRITICAL~~ | ~~Bug — loadSoilData() called before path exists~~ ✅ RESOLVED v1.3.1.0 |
+| 3 | NetworkEvents.lua | ~~CRITICAL~~ | ~~Bug — getDifficultyName() called on raw table~~ ✅ RESOLVED v1.3.x |
 | 4 | SoilSettingsGUI.lua | HIGH | Bug — # on hash table |
-| 5 | SoilHUD.lua | HIGH | Bug — wrong constant path for AUTO_RATE_TARGETS |
+| 5 | SoilHUD.lua | ~~HIGH~~ | ~~Bug — wrong constant path for AUTO_RATE_TARGETS~~ ✅ RESOLVED v1.3.x |
 | 7 | HookManager.lua | HIGH | Edge case — plowing hook arg order needs verification |
 | 8 | SoilFertilitySystem.lua | HIGH | Edge case — g_currentMission nil in daily update |
 | 9 | SoilFertilitySystem.lua | HIGH | Dead code — onClientJoined() never called |
@@ -389,7 +393,7 @@ The full-sync retry handler provides `onAttempt` but no `condition`. This means 
 | 20 | SoilHUD.lua | LOW | Dead code — px() unused |
 | 22 | HookManager.lua | LOW | Dead code — workingDepth never non-nil |
 | 24 | main.lua | MEDIUM | Dead code — SAFE_MODE too broad |
-| 25 | NetworkEvents.lua | HIGH | Dead code — full sync never triggered on client join |
+| 25 | NetworkEvents.lua | ~~HIGH~~ | ~~Dead code — full sync never triggered on client join~~ ✅ RESOLVED v1.3.1.0 |
 | 26 | Multiple | MEDIUM | Polish — DIAG print() not gated by debugMode |
 | 27 | SoilFertilitySystem.lua | LOW | Comment — field.fieldId always nil in listAllFields |
 | 29 | SoilFertilitySystem.lua | LOW | Polish — unused 30-second timer |
