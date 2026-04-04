@@ -274,6 +274,7 @@ function SoilFullSyncEvent:readStream(streamId, connection)
     self.settings.plowingBonus = streamReadBool(streamId)
     self.settings.weedPressure = streamReadBool(streamId)
     self.settings.difficulty = streamReadInt32(streamId)
+    self.settings.autoRateControl = streamReadBool(streamId)
 
     -- Read field data
     self.fieldData = {}
@@ -361,6 +362,7 @@ function SoilFullSyncEvent:writeStream(streamId, connection)
     streamWriteBool(streamId, self.settings.plowingBonus)
     streamWriteBool(streamId, self.settings.weedPressure == true)
     streamWriteInt32(streamId, self.settings.difficulty)
+    streamWriteBool(streamId, self.settings.autoRateControl == true)
 
     -- Write field data
     local fieldCount = 0
@@ -401,6 +403,7 @@ function SoilFullSyncEvent:run(connection)
     settings.plowingBonus = self.settings.plowingBonus
     settings.weedPressure = self.settings.weedPressure
     settings.difficulty = self.settings.difficulty
+    settings.autoRateControl = self.settings.autoRateControl
 
     -- Apply field data (server-authoritative)
     if g_SoilFertilityManager.soilSystem then

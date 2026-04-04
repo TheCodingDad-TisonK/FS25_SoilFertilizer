@@ -67,9 +67,48 @@ function SoilFertilitySystem:initialize()
         tostring(self.settings.fertilitySystem),
         tostring(self.settings.nutrientCycles))
 
+    -- Log multifruit compatibility status
+    self:logCropProfileStatus()
+
     -- Show notification
     if self.settings.enabled and self.settings.showNotifications then
         self:showNotification("Soil & Fertilizer Mod Active", "Real soil system with full event hooks")
+    end
+end
+
+-- Log which registered fruit types have explicit extraction profiles
+-- and which will use the fallback (multifruit/custom map crops).
+function SoilFertilitySystem:logCropProfileStatus()
+    if not g_fruitTypeManager then return end
+    local fruitTypes = g_fruitTypeManager:getFruitTypes()
+    if not fruitTypes then return end
+
+    local explicit = {}
+    local fallback = {}
+
+    for _, fruitDesc in pairs(fruitTypes) do
+        local name = fruitDesc and fruitDesc.name
+        if name then
+            local lowerName = string.lower(name)
+            if SoilConstants.CROP_EXTRACTION[lowerName] then
+                table.insert(explicit, name)
+            else
+                table.insert(fallback, name)
+            end
+        end
+    end
+
+    table.sort(explicit)
+    table.sort(fallback)
+
+    local def = SoilConstants.CROP_EXTRACTION_DEFAULT
+    self:info("Crop profiles: %d explicit, %d using fallback (N=%.2f P=%.2f K=%.2f)",
+        #explicit, #fallback, def.N, def.P, def.K)
+    if #explicit > 0 then
+        self:info("  Explicit: %s", table.concat(explicit, ", "))
+    end
+    if #fallback > 0 then
+        self:info("  Fallback (multifruit/unknown): %s", table.concat(fallback, ", "))
     end
 end
 
