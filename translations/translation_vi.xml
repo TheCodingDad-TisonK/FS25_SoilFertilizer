@@ -87,6 +87,10 @@
     <e k="sf_bigBag_potash_name" v="TÃºi lá»›n Kali 0-0-60" eh="eb771556" />
     <e k="sf_bigBag_potash_function" v="PhÃ¢n bÃ³n kali (dáº¡ng khÃ´)" eh="18015099" />
     <e k="sf_bigBag_starter_name" v="TÃºi lá»›n PhÃ¢n BÃ³n Khá»Ÿi Äáº§u 10-34-0" eh="953fd6c0" />
+    <e k="sf_bigBag_insecticide_name" v="Big Bag Insecticide" />
+    <e k="sf_bigBag_insecticide_function" v="Insecticide (liquid)" />
+    <e k="sf_bigBag_fungicide_name" v="Big Bag Fungicide" />
+    <e k="sf_bigBag_fungicide_function" v="Fungicide (liquid)" />
     <e k="sf_bigBag_starter_function" v="PhÃ¢n bÃ³n khá»Ÿi Ä‘áº§u (dáº¡ng lá»ng)" eh="2c36ea57" />
 
 		<e k="sf_section" v="[EN] Soil &amp;amp; Fertilizer" eh="d30a22a9" />

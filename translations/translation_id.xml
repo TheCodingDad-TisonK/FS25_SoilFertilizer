@@ -87,6 +87,10 @@
     <e k="sf_bigBag_potash_name" v="Big Bag Kalium 0-0-60" eh="eb771556" />
     <e k="sf_bigBag_potash_function" v="Pupuk kalium (kering)" eh="18015099" />
     <e k="sf_bigBag_starter_name" v="Big Bag Pupuk Starter 10-34-0" eh="953fd6c0" />
+    <e k="sf_bigBag_insecticide_name" v="Big Bag Insecticide" />
+    <e k="sf_bigBag_insecticide_function" v="Insecticide (liquid)" />
+    <e k="sf_bigBag_fungicide_name" v="Big Bag Fungicide" />
+    <e k="sf_bigBag_fungicide_function" v="Fungicide (liquid)" />
     <e k="sf_bigBag_starter_function" v="Pupuk starter (cair)" eh="2c36ea57" />
 
 		<e k="sf_section" v="[EN] Soil &amp;amp; Fertilizer" eh="d30a22a9" />
