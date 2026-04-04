@@ -114,7 +114,7 @@ At these stages, Claude and Samantha MUST have explicit dialog:
 
 ## Project Overview
 
-**FS25_SoilFertilizer** is a Farming Simulator 25 mod that adds realistic soil nutrient management. It tracks Nitrogen, Phosphorus, Potassium, Organic Matter, and pH per field, with crop-specific depletion, fertilizer replenishment, weather effects, and seasonal cycles. Current version: **1.0.4.1**. Fully supports multiplayer with admin-only settings enforcement. 10-language localization inline in `modDesc.xml`.
+**FS25_SoilFertilizer** is a Farming Simulator 25 mod that adds realistic soil nutrient management. It tracks Nitrogen, Phosphorus, Potassium, Organic Matter, and pH per field, with crop-specific depletion, fertilizer replenishment, weather effects, and seasonal cycles. Current version: **1.3.1.0**. Fully supports multiplayer with admin-only settings enforcement. 26-language localization inline in `modDesc.xml`.
 
 ---
 
@@ -194,8 +194,7 @@ Global reference: `g_SoilFertilityManager` (set via `getfenv(0)`).
 | `Mission00.loadMission00Finished` | Post-load initialization, MP sync request |
 | `FSBaseMission.update` | Per-frame update + delayed GUI injection |
 | `FSBaseMission.delete` | Cleanup |
-| `Mission00.saveToXMLFile` | Save soil data (server only) |
-| `Mission00.loadFromXMLFile` | Load soil data |
+| `FSCareerMissionInfo.saveToXMLFile` | Save soil data (server only) |
 
 ### HookManager
 
@@ -245,7 +244,7 @@ All `getWorldTranslation()` calls wrapped in `pcall()` for crash prevention. Pat
 
 ### Settings System
 
-`SettingsSchema.lua` is the **single source of truth** for all settings. Each setting is defined once with `{id, type, default, uiId, pfProtected}`. This drives:
+`SettingsSchema.lua` is the **single source of truth** for all settings. Each setting is defined once with `{id, type, default, uiId}`. This drives:
 - `SettingsManager` — auto-generates XML load/save
 - `Settings` — auto-generates defaults and validation
 - `SoilSettingsUI` — auto-generates in-game UI elements
@@ -277,7 +276,7 @@ Full sync has retry logic: 3 attempts at 5-second intervals.
 - Fertilizer types (liquid, solid, manure, slurry, digestate, lime) with different nutrient profiles
 - Environmental: rain causes nutrient leaching, seasons affect nitrogen, fallow fields slowly recover
 - Update loop throttled to 30-second intervals; daily updates on game-day change
-- Precision Farming compatibility: auto-detects PF mod and enters read-only mode
+- Precision Farming compatible — both mods run fully independently, no read-only mode
 
 ### Constants
 
@@ -309,12 +308,10 @@ This project follows standard Lua naming conventions with FS25-specific adaptati
 | **Functions (methods)** | camelCase | `getCurrentFieldId()`, `updatePosition()`, `markSuccess()` |
 | **Functions (global)** | PascalCase_camelCase | `SoilNetworkEvents_RequestFullSync()` (namespace prefix) |
 | **Constants** | UPPER_SNAKE_CASE | `MAX_ATTEMPTS`, `PANEL_WIDTH`, `VALUE_TYPE` |
-| **Boolean flags** | Descriptive prefix OK | `pfActive` (Precision Farming active), `initialized` |
+| **Boolean flags** | Descriptive prefix OK | `initialized`, `isRunning` |
 | **File handles** | Descriptive prefix OK | `xmlFile` (XML file handle) |
 
 **Global Function Naming**: Global functions use `ModuleName_functionName` pattern to avoid conflicts in the global namespace. This is a FS25 modding best practice.
-
-**Descriptive Prefixes**: Prefixes like `pf` (Precision Farming) and `xml` are acceptable when they add clarity and context.
 
 ---
 
@@ -344,7 +341,7 @@ Type `soilfertility` in the developer console (`~` key) for the full list. Key c
 
 ## Localization
 
-All i18n strings are inline in `modDesc.xml` under `<l10n>` (not separate translation files). 10 languages: en, de, fr, pl, es, it, cz, br, uk, ru. Access via `g_i18n:getText("key_name")`.
+All i18n strings are inline in `modDesc.xml` under `<l10n>` (not separate translation files). 26 languages: en, de, fr, nl, it, pl, es, ea, pt, br, ru, uk, cz, hu, ro, tr, fi, no, sv, da, kr, jp, ct, fc, id, vi. Access via `g_i18n:getText("key_name")`.
 
 ---
 

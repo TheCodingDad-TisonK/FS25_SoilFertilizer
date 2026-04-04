@@ -1,7 +1,7 @@
 # FS25_SoilFertilizer - Developer Guide
 
-**Version**: 1.0.7.1
-**Last Updated**: 2026-02-21
+**Version**: 1.3.1.0
+**Last Updated**: 2026-04-04
 
 ---
 
@@ -33,7 +33,7 @@
 
 2. **Install to FS25**
    - Copy entire folder to `%USERPROFILE%\Documents\My Games\FarmingSimulator2025\mods\`
-   - Or create symbolic link for live development
+   - Or run `bash build.sh --deploy` to build the zip and deploy automatically
 
 3. **Enable Developer Console**
    - Edit `game.xml` in FS25 root
@@ -50,13 +50,14 @@
 FS25_SoilFertilizer/
 ├── modDesc.xml              # Mod manifest & translations
 ├── icon.dds                 # Mod icon
+├── fillTypes.xml            # Custom fill type definitions
 ├── CLAUDE.md                # Project architecture guide
 ├── DEVELOPMENT.md           # This file
-├── TESTING.md               # Testing procedures
 ├── src/
 │   ├── main.lua             # Entry point & lifecycle hooks
 │   ├── SoilFertilityManager.lua    # Central coordinator
 │   ├── SoilFertilitySystem.lua     # Core soil simulation logic
+│   ├── SprayerRateManager.lua      # Auto-rate control logic
 │   ├── config/
 │   │   ├── Constants.lua           # All tunable values
 │   │   └── SettingsSchema.lua      # Settings definitions
@@ -84,12 +85,12 @@ FS25_SoilFertilizer/
 
 ### Module Loading Order
 
-`main.lua` loads modules in strict dependency order (see `CLAUDE.md` for details):
+`main.lua` loads modules in strict dependency order:
 
-1. **Utilities & Config**: Logger, Constants, SettingsSchema
-2. **Core Systems**: HookManager, SoilFertilitySystem, SoilFertilityManager
+1. **Utilities & Config**: Logger, AsyncRetryHandler, Constants, SettingsSchema
+2. **Core Systems**: HookManager, SprayerRateManager, SoilFertilitySystem, SoilFertilityManager
 3. **Settings**: SettingsManager, Settings, SoilSettingsGUI
-4. **UI**: UIHelper, SoilSettingsUI, SoilHUD
+4. **UI**: UIHelper, SoilSettingsUI, SoilHUD, SoilReportDialog
 5. **Network**: NetworkEvents
 
 **Important**: Respect this order when adding new modules.
@@ -141,10 +142,10 @@ SoilConstants.CROP_EXTRACTION = {
 ```
 
 **Calibration Guidelines**:
-- **High N crops**: Wheat, Barley, Corn (leafy growth) - N: 15-20
-- **High P crops**: Corn, Soybeans (energy/seeds) - P: 8-12
-- **High K crops**: Potatoes, Sugar Beets (roots/tubers) - K: 12-18
-- **Nitrogen-fixing**: Soybeans, Peas (legumes) - N: 5-8 (they fix their own)
+- **High N crops**: Wheat, Barley, Corn (leafy growth) — N: 15-20
+- **High P crops**: Corn, Soybeans (energy/seeds) — P: 8-12
+- **High K crops**: Potatoes, Sugar Beets (roots/tubers) — K: 12-18
+- **Nitrogen-fixing**: Soybeans, Peas (legumes) — N: 5-8 (they fix their own)
 
 ### Step 2: Test
 
@@ -154,7 +155,7 @@ SoilConstants.CROP_EXTRACTION = {
 4. Check nutrients after: `SoilFieldInfo <fieldId>`
 5. Verify depletion matches your rates × difficulty multiplier
 
-**No code changes needed** - the system automatically picks up crops from Constants!
+**No other code changes needed** — the system automatically picks up crops from Constants.
 
 ---
 
@@ -181,15 +182,11 @@ SoilConstants.FERTILIZER_PROFILES = {
 }
 ```
 
-**Common Fertilizer Types**:
-- **Liquid Fertilizer**: High N (25-30), Moderate P/K (10-15)
-- **Solid Fertilizer**: Balanced N/P/K (15-20 each)
-- **Manure**: Moderate N/P/K (10-15), adds OM (0.5-1.0)
-- **Slurry**: Moderate N/P/K (12-18), adds OM (0.3-0.5)
-- **Digestate**: High N (20-25), moderate P/K, adds OM (0.4)
-- **Lime**: No N/P/K, raises pH (+0.2 to +0.5)
+### Step 2: Register the Fill Type
 
-### Step 2: Test
+If the fertilizer uses a custom fill type (not vanilla), register it in `HookManager:installEffectTypeHook()` by adding to the `remap` table so spray effects work correctly.
+
+### Step 3: Test
 
 1. Note field nutrients: `SoilFieldInfo <fieldId>`
 2. Apply your fertilizer in FS25
@@ -223,32 +220,32 @@ SettingsSchema.definitions = {
         min = 1,                         -- (Optional) Min value for numbers
         max = 10,                        -- (Optional) Max value for numbers
         uiId = "sf_your_setting",        -- UI/translation key (snake_case)
-        pfProtected = false,             -- true = disabled when Precision Farming active
     },
 }
 ```
 
+**Important**: Do NOT reorder existing entries — this breaks XML save/load compatibility with existing saves.
+
 ### Step 2: Add Translations to modDesc.xml
 
-Edit `modDesc.xml` in the `<l10n>` section:
+Edit `modDesc.xml` in the `<l10n>` section. Add entries for all 26 languages:
+en, de, fr, nl, it, pl, es, ea, pt, br, ru, uk, cz, hu, ro, tr, fi, no, sv, da, kr, jp, ct, fc, id, vi
 
 ```xml
 <!-- Short label for UI toggle -->
 <text name="sf_your_setting_short">
     <en>Your Setting</en>
     <de>Deine Einstellung</de>
-    <!-- ... other languages -->
+    <!-- ... all 26 languages -->
 </text>
 
 <!-- Long description/tooltip -->
 <text name="sf_your_setting_long">
     <en>Enable/disable your new feature</en>
     <de>Aktiviere/deaktiviere deine neue Funktion</de>
-    <!-- ... other languages -->
+    <!-- ... all 26 languages -->
 </text>
 ```
-
-**Languages**: en, de, fr, pl, es, it, cz, br, uk, ru, hu (11 total)
 
 ### Step 3: Use in Code
 
@@ -286,58 +283,10 @@ end
 ### Full Sync Flow
 
 1. Client joins server
-2. Client sends `SoilRequestFullSyncEvent`
-3. Server responds with `SoilFullSyncEvent` containing:
-   - All settings
-   - All field data
+2. `loadedMission()` in `main.lua` calls `SoilNetworkEvents_RequestFullSync()`
+3. Server responds with `SoilFullSyncEvent` containing all settings + all field data
 4. Client applies received data
-5. If sync fails, client retries (3 attempts, 5-second intervals)
-
-### Initial Field Data Broadcast (Dedicated Servers)
-
-On dedicated servers, clients may join before any harvest or fertilizer events have
-fired, meaning per-field `SoilFieldUpdateEvent` broadcasts never reach them. To handle
-this, `SoilFertilitySystem` performs a full broadcast immediately after the field scan
-completes and again after `loadFromXMLFile`:
-
-```lua
--- Called automatically by scanFields() and loadFromXMLFile()
-function SoilFertilitySystem:broadcastAllFieldData()
-    if not g_server then return end
-    for fieldId, field in pairs(self.fieldData) do
-        g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
-    end
-end
-```
-
-For late-joining clients, call `SoilFertilitySystem:onClientJoined(connection)` from
-your multiplayer connection-accepted handler. This sends the full field state to the
-single new connection rather than broadcasting to everyone:
-
-```lua
--- Wire this up wherever the server accepts a new player connection
-g_SoilFertilityManager.soilSystem:onClientJoined(connection)
-```
-
-> **Note**: `onClientJoined` is implemented but not yet wired to a connection event.
-> This is tracked as a follow-up task. The `broadcastAllFieldData` call after scan
-> covers the common case of all players being present at server load.
-
-### Precision Farming on Dedicated Servers
-
-`checkPFCompatibility` detects PF by presence of `g_precisionFarming` or a matching
-mod name, then **probes the API** before enabling read-only mode. If neither
-`g_precisionFarming.fieldData` nor `soilMap:getFieldData` are accessible — which is
-the case on dedicated servers where the PF global exists but is not yet populated —
-the mod falls back to independent mode automatically:
-
-```
-[SoilFertilizer WARNING] Precision Farming detected but API not accessible
-(dedicated server / load-order issue) - falling back to independent mode
-```
-
-This prevents the mod from entering a silent broken read-only state where no field
-data is ever written or synced to clients.
+5. If sync fails, client retries via `AsyncRetryHandler` (3 attempts, 5-second intervals)
 
 ### Adding New Network-Synced Data
 
@@ -368,29 +317,28 @@ If you need to sync new data types:
 The mod intercepts FS25 game events using `Utils.appendedFunction`:
 
 ```lua
--- Original FS25 function
-FruitUtil.fruitPickupEvent = function(...)
-    -- FS25's original code runs first
-end
-
--- Our hook wraps it
-FruitUtil.fruitPickupEvent = Utils.appendedFunction(
-    FruitUtil.fruitPickupEvent,  -- Original function
-    function(...)                 -- Our code runs AFTER original
-        -- Our soil depletion logic
+-- Our hook wraps the original FS25 function
+SomeClass.someMethod = Utils.appendedFunction(
+    SomeClass.someMethod,  -- Original runs first
+    function(self, ...)    -- Our code runs AFTER original
+        -- Our logic here
     end
 )
 ```
+
+All hooks are tracked in `HookManager` and restored on mod unload via `HookManager:uninstallAll()`.
 
 ### Existing Hooks
 
 | Hook | Target | Triggers On | Handler |
 |------|--------|-------------|---------|
 | Harvest | `FruitUtil.fruitPickupEvent` | Crop harvested | `SoilFertilitySystem:onHarvest()` |
-| Fertilizer | `Sprayer.spray` | Fertilizer applied | `SoilFertilitySystem:onFertilizerApplied()` |
+| Fertilizer | `Sprayer.onEndWorkAreaProcessing` | Fertilizer applied | `SoilFertilitySystem:onFertilizerApplied()` |
 | Plowing | `Cultivator.processCultivatorArea` | Field plowed | `SoilFertilitySystem:onPlowing()` |
 | Ownership | `g_farmlandManager.fieldOwnershipChanged` | Field bought/sold | `SoilFertilitySystem:onFieldOwnershipChanged()` |
 | Weather | `g_currentMission.environment.update` | Every frame | `SoilFertilitySystem:onEnvironmentUpdate()` |
+| Effect type | `g_effectManager.setEffectTypeInfo` | Effect stored | Remaps custom fill type indices to vanilla |
+| Sprayer constant remap | `Sprayer.onEndWorkAreaProcessing` | Sprayer fires | Swaps FillType/SprayType globals for duration of call |
 
 ### Adding a New Hook
 
@@ -399,35 +347,37 @@ FruitUtil.fruitPickupEvent = Utils.appendedFunction(
 ```lua
 function HookManager:installYourHook()
     if not YourGameClass or not YourGameClass.yourMethod then
-        print("[SoilFertilizer WARNING] Could not install your hook")
+        SoilLogger.warning("Could not install your hook — method not found")
         return
     end
 
-    local original = YourGameClass.yourMethod
+    local origMethod = YourGameClass.yourMethod
     YourGameClass.yourMethod = Utils.appendedFunction(
-        original,
-        function(self, param1, param2, ...)
+        origMethod,
+        function(self, ...)
             if not g_SoilFertilityManager or
                not g_SoilFertilityManager.settings.enabled then
                 return
             end
 
-            local success, errorMsg = pcall(function()
-                g_SoilFertilityManager.soilSystem:onYourEvent(param1, param2)
+            local ok, err = pcall(function()
+                g_SoilFertilityManager.soilSystem:onYourEvent(...)
             end)
 
-            if not success then
-                print("[SoilFertilizer ERROR] Your hook failed: " .. tostring(errorMsg))
+            if not ok then
+                SoilLogger.warning("Your hook failed: %s", tostring(err))
             end
         end
     )
 
-    self:register(YourGameClass, "yourMethod", original, "YourGameClass.yourMethod")
-    print("[SoilFertilizer] Your hook installed")
+    self:registerCleanup("YourGameClass.yourMethod", function()
+        YourGameClass.yourMethod = origMethod
+    end)
+    SoilLogger.info("[OK] Your hook installed")
 end
 ```
 
-2. **Call from installAll()**:
+2. **Call from `installAll()`**:
 ```lua
 function HookManager:installAll(soilSystem)
     -- ... existing hooks
@@ -437,12 +387,12 @@ end
 
 3. **Add handler** in `SoilFertilitySystem.lua`:
 ```lua
-function SoilFertilitySystem:onYourEvent(param1, param2)
+function SoilFertilitySystem:onYourEvent(...)
     -- Your logic here
 end
 ```
 
-**Important**: Always use `pcall()` to prevent crashes from propagating to FS25!
+**Always use `pcall()`** — a crash in our code must never crash the player's game.
 
 ---
 
@@ -450,29 +400,11 @@ end
 
 ### Architecture
 
-The HUD is a **static legend/reference panel** always rendered in a corner of the screen.
-Per-field soil data is shown in the **Soil Report dialog** (`SoilReportDialog`, opened with K).
-
 | File | Role |
 |------|------|
-| `src/ui/SoilHUD.lua` | Renders the static legend overlay |
-| `src/ui/SoilReportDialog.lua` | Full paginated soil report (K key) |
-
-### What the HUD Shows
-
-```
-SOIL LEGEND
-J = Toggle HUD
-K = Soil Report
-Good: N>50, P>45, K>40   ← green
-Fair: N>30, P>25, K>20   ← yellow
-Poor: needs fertilizer    ← red
-pH ideal: 6.5 - 7.0
-```
-
-- **Position**: User-configurable (5 presets in `SoilConstants.HUD.POSITIONS`)
-- **Appearance**: Color theme, font size, and transparency all respect user settings
-- **Visibility**: `settings.showHUD` (persistent) and `self.visible` (J key runtime toggle)
+| `src/ui/SoilHUD.lua` | Always-on HUD panel — shows current field soil stats, sprayer rate panel, position/theme/font settings |
+| `src/ui/SoilReportDialog.lua` | Full-farm paginated soil report (K key) |
+| `gui/SoilReportDialog.xml` | Dialog layout — must be included in the zip |
 
 ### HUD Visibility Logic
 
@@ -480,70 +412,32 @@ The HUD hides automatically when:
 1. Mod disabled (`settings.enabled = false`)
 2. Show HUD setting off (`settings.showHUD = false`)
 3. J key toggled off (`self.visible = false`)
-4. Menu or dialog open (`g_gui:getIsGuiVisible()` / `getIsDialogVisible()`)
-5. Fullscreen map open (`IngameMap.STATE_LARGE_MAP`)
-
-### Modifying the Legend Content
-
-Edit `SoilHUD:drawPanel()` in `src/ui/SoilHUD.lua`. The method is a simple top-to-bottom text renderer:
-
-```lua
--- Pattern: render text, then step Y down by lineH
-setTextColor(r, g, b, 1.0)
-renderText(x, y, 0.011 * fontMult, "Your line here")
-y = y - lineH
-```
-
-Threshold values come from `SoilConstants.STATUS_THRESHOLDS` — if you change the thresholds there, update the legend text to match.
+4. Menu or dialog open (`g_gui:getIsGuiVisible()`)
+5. Fullscreen map open
 
 ### Render Order Note
 
-FS25 does not expose Z-order APIs for Overlays. Render order is determined by callback registration order. The HUD renders via `FSBaseMission.draw`, which runs after core UI initialization. If a mod conflict causes overlap, players can move the HUD via the position preset setting.
+FS25 does not expose Z-order APIs for Overlays. Render order is determined by callback registration order. The HUD renders via `FSBaseMission.draw`. If a mod conflict causes overlap, players can move the HUD via the position preset setting.
 
 ---
 
 ## Testing Your Changes
 
-See `TESTING.md` for comprehensive manual testing procedures.
-
 ### Quick Testing Checklist
 
-- [ ] Load mod in clean savegame - no errors in log
-- [ ] Harvest crops - nutrients deplete correctly
-- [ ] Apply fertilizer - nutrients restore correctly
-- [ ] Toggle settings - changes take effect
-- [ ] Save/load - data persists
-- [ ] Multiplayer - server/client sync works
-- [ ] With Precision Farming - read-only mode activates (listen-server)
-- [ ] With Precision Farming on dedicated server - falls back to independent mode, clients receive data
-
-### Dedicated Server Testing
-
-When testing dedicated server scenarios with Precision Farming:
-
-1. Start a dedicated server with Precision Farming enabled
-2. Connect as a client
-3. Check `log.txt` — you should see:
-   ```
-   [SoilFertilizer WARNING] Precision Farming detected but API not accessible
-   (dedicated server / load-order issue) - falling back to independent mode
-   ```
-   followed by:
-   ```
-   [SoilFertilizer] Broadcast initial field data for N fields to all clients
-   ```
-4. Open the Soil Report (K key) — all fields should show soil data immediately without needing to harvest or fertilize first
+- [ ] Load mod in clean savegame — no errors in log.txt
+- [ ] Harvest crops — nutrients deplete correctly (`SoilFieldInfo <id>`)
+- [ ] Apply fertilizer — nutrients restore correctly, spray visuals appear
+- [ ] Toggle settings — changes take effect and persist after save/reload
+- [ ] Save and reload — all field data and settings survive
+- [ ] Multiplayer — server/client sync works (client joins and sees field data immediately)
+- [ ] With Precision Farming — both mods run independently, no conflicts
 
 ### Debug Logging
 
-```lua
--- Add to your code for debugging
-if self.settings.debugMode then
-    SoilLogger.info("Your debug message: %s", tostring(value))
-end
-```
+Enable verbose logging in-game: `SoilDebug`
 
-Enable in-game: `SoilDebug`
+Check `log.txt` (search for `[SoilFertilizer]`) for errors and diagnostic output.
 
 ---
 
@@ -553,23 +447,10 @@ Enable in-game: `SoilDebug`
 
 FS25 uses Lua 5.1 (not 5.2+):
 
-- ❌ No `goto` or `continue`
-- ❌ No `os.time()` or `os.date()` - Use `g_currentMission.time`
-- ❌ No bitwise operators - Use `bitAND`, `bitOR`, etc.
-- ✅ Use guard clauses instead of `continue`:
-  ```lua
-  -- Bad (doesn't work)
-  for i, v in ipairs(list) do
-      if v == skip then continue end
-  end
-
-  -- Good
-  for i, v in ipairs(list) do
-      if v ~= skip then
-          -- your code
-      end
-  end
-  ```
+- No `goto` or `continue` — use guard clauses / `if/else`
+- No `os.time()` or `os.date()` — use `g_currentMission.time`
+- No bitwise operators — use `bitAND`, `bitOR`
+- `#` on a hash-keyed table returns undefined behavior — iterate with `pairs()` and count manually
 
 ### 2. Global Namespace Pollution
 
@@ -577,486 +458,97 @@ Use module prefixes for global functions:
 
 ```lua
 -- Bad
-function RequestSync()  -- Pollutes global namespace
-end
+function RequestSync() end
 
 -- Good
-function SoilNetworkEvents_RequestSync()  -- Namespaced
-end
+function SoilNetworkEvents_RequestSync() end
 ```
 
 ### 3. Hook Accumulation
 
-Always uninstall hooks on mod unload:
-
-```lua
--- HookManager tracks all hooks
-self:register(TargetClass, "method", originalFunction, "name")
-
--- Cleanup in HookManager:uninstallAll()
-for _, hook in ipairs(self.hooks) do
-    hook.target[hook.key] = hook.original  -- Restore original
-end
-```
+Always register cleanup for every hook you install. Use `self:registerCleanup(name, fn)` in HookManager — it's called automatically on mod unload. Never reinstall a hook without cleaning up the previous one.
 
 ### 4. Multiplayer Desyncs
 
-- **Always** run soil changes on server only
-- **Always** broadcast updates to clients
-- **Never** modify soil data on clients directly
+- Always run soil changes on server only (`if g_server then`)
+- Always broadcast updates to clients after server-side changes
+- Never modify soil data on clients directly
 
-```lua
--- Good pattern
-if g_server then
-    -- Modify data
-    field.nitrogen = newValue
+### 5. Custom Fill Type Spray Effects
 
-    -- Broadcast to clients
-    if g_currentMission.missionDynamicInfo.isMultiplayer then
-        g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
-    end
-end
-```
+Vanilla FS25 spray effect code checks `FillType.LIQUIDFERTILIZER` and `SprayType.LIQUIDFERTILIZER` as integer constants. Custom fill types have different indices, so those checks fail silently and no effects appear.
 
-### 5. Dedicated Server + Precision Farming
+This mod solves it with a three-layer approach in `HookManager:installEffectTypeHook()`:
+1. Hook `g_effectManager.setEffectTypeInfo` to remap custom indices to vanilla before effects are stored
+2. Inject custom fill types into vanilla `sprayType.fillTypes` arrays so `getIsSprayTypeActive` returns true
+3. Wrap `Sprayer.onEndWorkAreaProcessing` with a temporary global table swap — `FillType` and `SprayType` in `getfenv(0)` are replaced with modified copies where the vanilla constant name points to our custom index, then restored immediately after the call
 
-On dedicated servers, `g_precisionFarming` may exist in the global scope before its
-field data API is populated. Do **not** assume PF API availability from the presence
-of the global alone — always probe `g_precisionFarming.fieldData` or
-`soilMap:getFieldData` before treating it as accessible. The existing
-`checkPFCompatibility` handles this correctly; follow the same pattern in any new
-PF-aware code you add.
+If adding a new custom fill type, add it to the `remap` table in `installEffectTypeHook()`.
 
 ### 6. Settings Schema Order Matters
 
-`SettingsSchema.definitions` order affects:
-- UI display order
-- Network sync order
-- XML save/load order
-
-**Don't reorder** existing settings after release - it breaks saves!
+`SettingsSchema.definitions` order determines XML save/load order and network stream order. **Never reorder existing entries after a release** — it breaks saves.
 
 ### 7. Translation Keys
 
-- UI IDs must have `_short` and `_long` variants:
-  - `sf_your_setting_short` - Label in UI
-  - `sf_your_setting_long` - Tooltip text
-
-- Multi-option settings need option labels:
-  - `sf_your_option_1`, `sf_your_option_2`, etc.
+All settings need `_short` and `_long` variants for all 26 languages. Multi-option settings also need `_1`, `_2`, etc. option labels.
 
 ### 8. Field ID vs Farmland ID
 
-- **Field ID**: Specific field polygon (unique)
+- **Field ID**: Specific field polygon (unique per field)
 - **Farmland ID**: Purchasable land parcel (may contain multiple fields)
 
-Use `g_fieldManager:getFieldAtWorldPosition(x, z)` for precise field lookup.
+Use `g_fieldManager:getFieldAtWorldPosition(x, z)` as the primary lookup. Farmland is a fallback only.
 
 ### 9. Field ID Resolution in scanFields
 
-When iterating `g_fieldManager.fields`, the loop key is an internal table index that
-does not reliably match the in-game field ID on all maps. Always resolve the actual
-field ID using this priority order:
+When iterating `g_fieldManager.fields`, resolve the actual field ID in priority order:
 
 ```lua
-local actualFieldId = nil
-if field.fieldId and field.fieldId > 0 then
-    actualFieldId = field.fieldId
-elseif field.id and field.id > 0 then
-    actualFieldId = field.id
-elseif field.index and field.index > 0 then
-    actualFieldId = field.index
-elseif type(numericFieldId) == "number" and numericFieldId > 0 then
-    actualFieldId = numericFieldId  -- last resort: loop key
-end
+local actualFieldId =
+    (field.fieldId and field.fieldId > 0 and field.fieldId) or
+    (field.id and field.id > 0 and field.id) or
+    (field.index and field.index > 0 and field.index) or
+    numericLoopKey  -- last resort
 ```
 
-Using the loop key as anything other than a last resort causes data to be stored
-under the wrong ID, breaking all subsequent lookups.
+Using the loop key directly causes data to be stored under the wrong ID on some maps.
 
 ---
 
 ## Build & Release
 
+### Build and Deploy
+
+```bash
+# Build zip and deploy to FS25 mods folder
+bash build.sh --deploy
+```
+
+Check `log.txt` after launching — search for `[SoilFertilizer]` to verify load.
+
 ### Preparing a Release
 
-1. **Update version in modDesc.xml**:
-   ```xml
-   <version>1.0.7.1</version>
-   ```
+1. **Update version in `modDesc.xml`**
+2. **Update version in `DEVELOPMENT.md` header**
+3. **Update version in `CLAUDE.md` Project Overview**
+4. **Update `CHANGELOG.md`** with all changes since last release
+5. **Update `README.md`** version line at the bottom
+6. **Build**: `bash build.sh --deploy`
+7. **Test** in singleplayer and multiplayer
+8. **Commit** to `development` branch
+9. **PR** `development` → `main`
+10. **Merge** and create GitHub release with the zip attached
 
-2. **Update version in source file headers**:
-   - Update headers in `SoilHUD.lua`, `UIHelper.lua`, `Settings.lua`, etc.
-   - Update `CLAUDE.md` Project Overview section
-   - Update `DEVELOPMENT.md` header (this file)
+### Release Checklist
 
-3. **Test thoroughly**:
-   - Run full regression test checklist (see `TESTING.md`)
-   - Test in multiplayer (listen server)
-   - Test on dedicated server
-   - Test with Precision Farming on both listen server and dedicated server
-
-4. **Update CHANGELOG**:
-   - Document all changes since last version
-   - Group by: Added, Changed, Fixed, Removed
-
-5. **Create ZIP**:
-   ```bash
-   # From mod root directory
-   zip -r FS25_SoilFertilizer.zip . -x "*.git*" -x "*.md"
-   ```
-
-6. **Commit & Tag**:
-   ```bash
-   git add .
-   git commit -m "Release v1.0.7.1"
-   git tag v1.0.7.1
-   git push origin development
-   git push origin v1.0.7.1
-   ```
-
-7. **Create Pull Request** from `development` to `main`
-
-### ModHub Submission Guidelines
-
-- **Icon**: 256×256 DDS file
-- **ZIP name**: Must match modDesc `<modName>`
-- **No external dependencies**: All code must be self-contained
-- **Translations**: All 11 languages required
-- **Testing**: Must work in both SP and MP
-- **File size**: Keep under 50MB
+- [ ] Version updated in modDesc.xml
+- [ ] CHANGELOG.md has an entry for this version
+- [ ] Tested in singleplayer (harvest, fertilize, save/load)
+- [ ] Tested in multiplayer (client joins, field data arrives)
+- [ ] No `[SoilFertilizer ERROR]` lines in log.txt
+- [ ] PR targets `main` from `development`
 
 ---
 
-## Additional Resources
-
-- **FS25 Scripting Documentation**: https://gdn.giants-software.com/
-- **CLAUDE.md**: Project architecture and conventions
-- **TESTING.md**: Manual testing procedures
-- **CODEBASE_AUDIT.md**: Known issues and tech debt
-
----
-
-**Questions?** Open an issue on GitHub!
-
-**Happy Modding!** 🚜🌾
-
----
-
-## Enterprise-Grade Development Patterns
-
-### Circuit Breaker Implementation
-
-```lua
--- Example circuit breaker pattern
-function myNetworkOperation()
-    if self:circuitBreakerOpen() then
-        self:log("Circuit breaker open - skipping operation")
-        return false
-    end
-
-    local success, result = pcall(function()
-        -- Network operation here
-        return self:performNetworkCall()
-    end)
-
-    if success then
-        self:recordCircuitBreakerSuccess()
-        return result
-    else
-        self:recordCircuitBreakerFailure()
-        return false
-    end
-end
-```
-
-### Health Monitoring
-
-```lua
--- Example health check implementation
-function checkSystemHealth()
-    local checks = {
-        "checkSystemIntegrity",
-        "checkFieldDataIntegrity", 
-        "checkNetworkReliability",
-        "checkMemoryUsage",
-        "checkPerformanceMetrics"
-    }
-
-    local results = {}
-    for _, checkName in ipairs(checks) do
-        local success, result = pcall(self[checkName])
-        results[checkName] = {
-            success = success,
-            result = result,
-            timestamp = g_currentMission.time
-        }
-    end
-
-    return results
-end
-```
-
-### Performance Monitoring
-
-```lua
--- Example performance tracking
-function trackPerformance(operationName, func)
-    local startTime = g_currentMission.time
-    
-    local success, result = pcall(func)
-    
-    local duration = g_currentMission.time - startTime
-    
-    -- Record metrics
-    self:recordMetric(operationName, {
-        duration = duration,
-        success = success,
-        timestamp = g_currentMission.time
-    })
-    
-    return success, result
-end
-```
-
-### Error Recovery
-
-```lua
--- Example graceful degradation
-function handleFailure(operation, fallback)
-    local maxAttempts = 3
-    local attempt = 0
-    
-    while attempt < maxAttempts do
-        local success, result = pcall(operation)
-        if success then
-            return result
-        end
-        
-        attempt = attempt + 1
-        self:log("Operation failed, attempt %d/%d", attempt, maxAttempts)
-        
-        -- Exponential backoff
-        if attempt < maxAttempts then
-            self:waitForRetry(math.pow(2, attempt))
-        end
-    end
-    
-    -- Fallback mechanism
-    self:log("Max attempts reached, using fallback")
-    return fallback()
-end
-```
-
-### Enterprise Testing Guidelines
-
-#### 1. **Reliability Testing**
-- Test circuit breaker behavior under failure conditions
-- Verify health monitoring accuracy
-- Test graceful degradation scenarios
-- Validate recovery mechanisms
-
-#### 2. **Performance Testing**
-- Test with large maps (100+ fields)
-- Measure memory usage over time
-- Test network bandwidth optimization
-- Validate predictive loading performance
-
-#### 3. **Multiplayer Testing**
-- Test client connection tracking
-- Verify field data synchronization
-- Test network failure scenarios
-- Validate circuit breaker in multiplayer
-
-#### 4. **Stress Testing**
-- Test memory leak detection
-- Validate garbage collection
-- Test system under high load
-- Verify error handling under stress
-
-### Enhanced Debug Features
-
-#### 1. **Health Monitoring Debug**
-```bash
-# Check system health
-soilfertility debug health
-
-# View detailed health report
-soilfertility debug health detailed
-
-# Reset health metrics
-soilfertility debug health reset
-```
-
-#### 2. **Performance Debug**
-```bash
-# Show performance metrics
-soilfertility debug metrics
-
-# Monitor memory usage
-soilfertility debug memory
-
-# Track network performance
-soilfertility debug network
-```
-
-#### 3. **Circuit Breaker Debug**
-```bash
-# Check circuit breaker status
-soilfertility debug circuit
-
-# Force circuit breaker state
-soilfertility debug circuit force open
-soilfertility debug circuit force closed
-
-# Reset circuit breaker
-soilfertility debug circuit reset
-```
-
-#### 4. **Field Data Debug**
-```bash
-# List all tracked fields
-soilfertility debug fields list
-
-# Check field data integrity
-soilfertility debug fields integrity
-
-# Force field data sync
-soilfertility debug fields sync
-```
-
-### Enterprise Configuration
-
-#### Development Environment Setup
-
-```lua
--- Development configuration
-SoilConstants.DEVELOPMENT = {
-    DEBUG_MODE = true,
-    HEALTH_CHECK_INTERVAL = 5000,      -- Faster checks in dev
-    CIRCUIT_BREAKER_DEBUG = true,      -- Verbose circuit breaker logging
-    PERFORMANCE_MONITORING = true,     -- Detailed performance tracking
-    MEMORY_TRACKING = true,            -- Memory leak detection
-    NETWORK_DEBUG = true,              -- Detailed network logging
-}
-```
-
-#### Monitoring in Development
-
-```lua
--- Development monitoring helpers
-function devMonitorSystem()
-    if not SoilConstants.DEVELOPMENT.DEBUG_MODE then return end
-    
-    -- Log health status
-    local health = g_SoilFertilityManager:getHealthReport()
-    print(string.format("Health: %s, Uptime: %dms, Fields: %d",
-        health.status, health.uptime, health.fieldCount))
-    
-    -- Log performance metrics
-    local metrics = g_SoilFertilityManager.soilSystem:getPerformanceReport()
-    print(string.format("Latency: %.1fms, Success: %.1f%%, Bandwidth: %.1fKB",
-        metrics.avgSyncLatency, metrics.syncSuccessRate * 100, metrics.bandwidthUsage / 1024))
-end
-```
-
-### Security Considerations
-
-#### Enterprise Security Patterns
-
-1. **Input Validation**
-   - All network data must be validated
-   - Use bounds checking for all numeric inputs
-   - Sanitize all user inputs
-
-2. **Error Handling**
-   - Never expose internal system details in error messages
-   - Use structured error codes
-   - Implement error rate limiting
-
-3. **Resource Management**
-   - Prevent resource exhaustion attacks
-   - Implement proper cleanup mechanisms
-   - Monitor resource usage patterns
-
-4. **Network Security**
-   - Validate all network messages
-   - Implement message signing where appropriate
-   - Use circuit breaker to prevent DoS
-
-### Performance Optimization
-
-#### Enterprise Performance Guidelines
-
-1. **Memory Management**
-   - Implement automatic garbage collection
-   - Monitor memory usage patterns
-   - Prevent memory leaks with cleanup mechanisms
-
-2. **Network Optimization**
-   - Use compression for large data transfers
-   - Implement intelligent caching
-   - Optimize bandwidth usage
-
-3. **CPU Optimization**
-   - Use efficient algorithms for field processing
-   - Implement lazy loading where possible
-   - Optimize update loops
-
-4. **I/O Optimization**
-   - Batch file operations
-   - Use asynchronous operations where possible
-   - Implement intelligent caching for file data
-
-### Troubleshooting
-
-#### Common Enterprise Issues
-
-1. **Circuit Breaker Stays Open**
-   - Check network connectivity
-   - Verify server availability
-   - Review failure thresholds
-
-2. **High Memory Usage**
-   - Check for memory leaks
-   - Verify garbage collection
-   - Review field data retention
-
-3. **Poor Performance**
-   - Check bandwidth limits
-   - Verify compression settings
-   - Review predictive loading configuration
-
-4. **Health Check Failures**
-   - Verify system integrity
-   - Check field data corruption
-   - Review network reliability
-
-#### Debug Commands Reference
-
-```bash
-# Health monitoring
-soilfertility debug health          # System health status
-soilfertility debug health detailed # Detailed health report
-soilfertility debug health reset    # Reset health metrics
-
-# Performance monitoring  
-soilfertility debug metrics         # Performance metrics
-soilfertility debug memory          # Memory usage
-soilfertility debug network         # Network performance
-
-# Circuit breaker
-soilfertility debug circuit         # Circuit breaker status
-soilfertility debug circuit force   # Force circuit state
-soilfertility debug circuit reset   # Reset circuit breaker
-
-# Field data
-soilfertility debug fields list     # List tracked fields
-soilfertility debug fields integrity # Check data integrity
-soilfertility debug fields sync     # Force data sync
-
-# System status
-soilfertility debug status          # Overall system status
-soilfertility debug connections     # Client connections
-soilfertility debug errors          # Error logs
-```
+**Questions?** Open an issue on GitHub or ask on the [FS25 Modding Community Discord](https://discord.gg/Th2pnq36).
