@@ -75,9 +75,7 @@
         <action name="SF_TOGGLE_AUTO" category="VEHICLE" />
     </actions>
 
-    <l10n>
     <l10n filenamePrefix="translations/translation" />
-    </l10n>
 
     <inputBinding>
         <actionBinding action="SF_TOGGLE_HUD">
