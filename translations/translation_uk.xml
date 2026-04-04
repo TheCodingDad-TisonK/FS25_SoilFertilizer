@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<l10n>
+    <elements>
+    <e k="sf_section" v="Грунт та добриво" eh="f31197fb" />
+    <e k="sf_enabled_short" v="Увімкнути мод" eh="cf7fea13" />
+    <e k="sf_enabled_long" v="Увімкнути або вимкнути мод грунту та добрива" eh="a891399a" />
+    <e k="sf_debug_short" v="Режим DEBUG" eh="2ddcdc76" />
+    <e k="sf_debug_long" v="Увімкнути/вимкнути режим DEBUG (додаткове логування)" eh="f6f20240" />
+    <e k="sf_seasonal_effects_short" v="Сезонні ефекти" eh="c16ea608" />
+    <e k="sf_seasonal_effects_long" v="Увімкнути/вимкнути сезонний вплив на поживні речовини ґрунту (весняне зростання, осіннє сповільнення)" eh="3eea94c7" />
+    <e k="sf_rain_effects_short" v="Ефекти дощу" eh="a2a1758b" />
+    <e k="sf_rain_effects_long" v="Увімкнути/вимкнути вплив дощу на ґрунт (вилуговування поживних речовин, зміни pH)" eh="de3b14b9" />
+    <e k="sf_plowing_bonus_short" v="Бонус оранки" eh="541ec752" />
+    <e k="sf_plowing_bonus_long" v="Увімкнути/вимкнути переваги оранки для родючості ґрунту (покращений азот та органічна речовина)" eh="fe701c1c" />
+    <e k="sf_fertility_short" v="Система родючості" eh="f7e27d58" />
+    <e k="sf_fertility_long" v="Увімкнути/вимкнути динамічну систему родючості ґрунту" eh="ea074366" />
+    <e k="sf_nutrients_short" v="Цикли поживних речовин" eh="ffab595d" />
+    <e k="sf_nutrients_long" v="Увімкнути/вимкнути реалістичне виснаження та відновлення поживних речовин" eh="dbe9c8ff" />
+    <e k="sf_difficulty_short" v="Складність" eh="7b29ca96" />
+    <e k="sf_difficulty_long" v="Встановити рівень складності: Простий, Реалістичний, Хардкор" eh="cfb758a4" />
+    <e k="sf_diff_1" v="Простий" eh="1fbb1e39" />
+    <e k="sf_diff_2" v="Реалістичний" eh="408c999f" />
+    <e k="sf_diff_3" v="Хардкор" eh="1c800aa9" />
+    <e k="sf_fertilizer_cost_short" v="Вартість добрив" eh="6870d88b" />
+    <e k="sf_fertilizer_cost_long" v="Увімкнути/вимкнути реалістичну вартість покупки добрив" eh="12b03fbb" />
+    <e k="sf_notifications_short" v="Сповіщення" eh="a274f4d4" />
+    <e k="sf_notifications_long" v="Увімкнути/вимкнути сповіщення про ґрунт і добрива" eh="9a872f8f" />
+    <e k="sf_show_hud_short" v="Показати HUD" eh="c94fd4d7" />
+    <e k="sf_show_hud_long" v="Показати/сховати накладку HUD інформації про ґрунт (F8 для тимчасового перемикання)" eh="4e2e11b6" />
+    <e k="sf_hud_position_short" v="Позиція HUD" eh="5ac371f2" />
+    <e k="sf_hud_position_long" v="Виберіть, де на екрані з'являється HUD інформації про ґрунт" eh="d7b9c109" />
+    <e k="sf_hud_pos_1" v="Верхній правий" eh="5f9f6784" />
+    <e k="sf_hud_pos_2" v="Верхній лівий" eh="ac71274a" />
+    <e k="sf_hud_pos_3" v="Нижній правий" eh="4d297f5d" />
+    <e k="sf_hud_pos_4" v="Нижній лівий" eh="7eb55425" />
+    <e k="sf_hud_pos_5" v="Центр правий" eh="d7afdc5a" />
+    <e k="sf_hud_pos_6" v="Власний" eh="90589c47" />
+    <e k="sf_hud_color_theme_short" v="Колірна тема HUD" eh="4a73f95b" />
+    <e k="sf_hud_color_theme_long" v="Виберіть колірну схему для відображення інформації про ґрунт" eh="3218bca6" />
+    <e k="sf_hud_color_1" v="Зелений" eh="d382816a" />
+    <e k="sf_hud_color_2" v="Синій" eh="9594eec9" />
+    <e k="sf_hud_color_3" v="Бурштиновий" eh="88068e33" />
+    <e k="sf_hud_color_4" v="Моно" eh="5d9b47bd" />
+    <e k="sf_diff_short" v="Складність" eh="7b29ca96" />
+    <e k="sf_diff_long" v="Рівень складності управління ґрунтом" eh="d6f4560c" />
+    <e k="sf_auto_rate_short" v="Автоматичне керування нормою" eh="6f99137d" />
+    <e k="sf_auto_rate_long" v="Автоматично регулює норму внесення добрив залежно від потреб поля" eh="a9ca9f6b" />
+    <e k="sf_hud_theme_1" v="Зелений" eh="d382816a" />
+    <e k="sf_hud_theme_2" v="Синій" eh="9594eec9" />
+    <e k="sf_hud_theme_3" v="Бурштиновий" eh="88068e33" />
+    <e k="sf_hud_theme_4" v="Моно" eh="5d9b47bd" />
+    <e k="sf_hud_font_size_short" v="Розмір шрифту HUD" eh="fd6ca64a" />
+    <e k="sf_hud_font_size_long" v="Налаштуйте розмір тексту для кращої читабельності" eh="c338854f" />
+    <e k="sf_hud_font_1" v="Малий" eh="2660064e" />
+    <e k="sf_hud_font_2" v="Середній" eh="87f8a6ab" />
+    <e k="sf_hud_font_3" v="Великий" eh="3a69b34c" />
+    <e k="sf_hud_transparency_short" v="Прозорість HUD" eh="e8a009e4" />
+    <e k="sf_hud_transparency_long" v="Встановити рівень прозорості фону (Прозорий = прозорий, Суцільний = непрозорий)" eh="152e390a" />
+    <e k="sf_hud_trans_1" v="Прозорий" eh="dc30bc0c" />
+    <e k="sf_hud_trans_2" v="Легкий" eh="9914a0ce" />
+    <e k="sf_hud_trans_3" v="Середній" eh="87f8a6ab" />
+    <e k="sf_hud_trans_4" v="Темний" eh="a18366b2" />
+    <e k="sf_hud_trans_5" v="Суцільний" eh="e41480b6" />
+    <e k="sf_use_imperial_short" v="Імперські одиниці" eh="ff2701ad" />
+    <e k="sf_use_imperial_long" v="Показувати норми у gal/ac і lb/ac (вимк. = L/ha і kg/ha)" eh="17efa489" />
+    <e k="sf_reset" v="Скинути налаштування ґрунту" eh="467bc2f5" />
+    <e k="input_SF_TOGGLE_HUD" v="Перемкнути HUD ґрунту" eh="f0224a10" />
+    <e k="input_SF_SOIL_REPORT" v="Звіт про ґрунт" eh="c33180ef" />
+    <e k="input_SF_RATE_UP" v="Збільшити норму добрива" eh="6e601ef5" />
+    <e k="input_SF_RATE_DOWN" v="Зменшити норму добрива" eh="30712026" />
+    <e k="input_SF_TOGGLE_AUTO" v="Перемкнути автоматичний режим" eh="a8642cf0" />
+    <e k="sf_report_title" v="Звіт про ґрунт та добриво" eh="a76f8218" />
+    <e k="sf_report_fields_tracked" v="Відстежувані поля:" eh="7b1e59b8" />
+    <e k="sf_report_need_fert" v="Потребують добрива:" eh="110b60f2" />
+    <e k="sf_report_difficulty" v="Складність:" eh="3abaf54f" />
+    <e k="sf_report_col_field" v="Поле" eh="6f16a5f8" />
+    <e k="sf_report_col_last_crop" v="Остання культура" eh="ff41e5eb" />
+    <e k="sf_report_col_fert" v="Добр?" eh="9e6d0eb4" />
+    <e k="sf_report_no_data" v="Дані про ґрунт відсутні. Пройдіть по полю, щоб почати відстеження." eh="1528a4cb" />
+    <e k="sf_report_prev" v="Попер" eh="14230d11" />
+    <e k="sf_report_next" v="Наст" eh="10ac3d04" />
+    <e k="sf_report_yes" v="ТАК" eh="7469a286" />
+    <e k="sf_report_ok" v="OK" eh="e0aa021e" />
+    <e k="sf_report_none" v="Немає" eh="6adf97f8" />
+    <e k="sf_report_rec_n_poor" v="Потрібен азот" eh="5dca0711" />
+    <e k="sf_report_rec_n_fair" v="Низький азот" eh="35ad072d" />
+    <e k="sf_report_rec_p_poor" v="Потрібен фосфор" eh="e8fa326f" />
+    <e k="sf_report_rec_p_fair" v="Низький фосфор" eh="077e12cf" />
+    <e k="sf_report_rec_k_poor" v="Потрібен калій" eh="f23194e0" />
+    <e k="sf_report_rec_k_fair" v="Низький калій" eh="2006c0a2" />
+    <e k="sf_report_rec_ph_adjust" v="Відрегулюйте pH" eh="84f6bbbc" />
+    <e k="sf_report_rec_ph_monitor" v="Стежте за pH" eh="6dfcded4" />
+    <e k="sf_report_rec_om_increase" v="Збільшіть ОР" eh="c2a930af" />
+    <e k="sf_report_rec_om_maintain" v="Підтримуйте ОР" eh="e7655847" />
+    <e k="sf_report_rec_needs" v="Потреби:" eh="3e6d95cf" />
+    <e k="sf_report_rec_optimal" v="Здоров'я ґрунту: Оптимальне" eh="6ee9d19b" />
+    <e k="sf_uan32_title" v="UAN 32 Азотне добриво (N)" eh="90913bb8" />
+    <e k="sf_uan28_title" v="UAN 28 Азотне добриво (N)" eh="9d902cd7" />
+    <e k="sf_anhydrous_title" v="Безводний аміак (N)" eh="3fc85c02" />
+    <e k="sf_starter_title" v="Стартове добриво 10-34-0 (P)" eh="8c1a1ddc" />
+    <e k="sf_urea_title" v="Карбамід 46-0-0 (N)" eh="659b3097" />
+    <e k="sf_ams_title" v="Сульфат амонію 21-0-0 (N)" eh="033d1845" />
+    <e k="sf_map_title" v="Добриво MAP 11-52-0 (P)" eh="31aa2534" />
+    <e k="sf_dap_title" v="Добриво DAP 18-46-0 (P)" eh="5030a80a" />
+    <e k="sf_potash_title" v="Поташ 0-0-60 (K)" eh="8db6c54c" />
+    <e k="sf_report_page_info" v="Поля %d-%d з %d  |  Сторінка %d з %d" eh="8db851d1" />
+    <e k="sf_bigBag_uan32_name" v="Big Bag UAN 32-0-0" eh="7bdc4d9d" />
+    <e k="sf_bigBag_uan32_function" v="Азотне добриво (рідке)" eh="27de5f41" />
+    <e k="sf_bigBag_uan28_name" v="Big Bag UAN 28-0-0" eh="997781d5" />
+    <e k="sf_bigBag_uan28_function" v="Азотне добриво (рідке)" eh="27de5f41" />
+    <e k="sf_bigBag_anhydrous_name" v="Big Bag Безводний Аміак 82-0-0" eh="44914201" />
+    <e k="sf_bigBag_anhydrous_function" v="Азотне добриво (рідке)" eh="27de5f41" />
+    <e k="sf_bigBag_urea_name" v="Big Bag Карбамід 46-0-0" eh="8e8cbaae" />
+    <e k="sf_bigBag_urea_function" v="Азотне добриво (сухе)" eh="63efea20" />
+    <e k="sf_bigBag_ams_name" v="Big Bag AMS 21-0-0-24S" eh="7f71ee68" />
+    <e k="sf_bigBag_ams_function" v="Азотне добриво (сухе)" eh="63efea20" />
+    <e k="sf_bigBag_map_name" v="Big Bag MAP 11-52-0" eh="8a5a059b" />
+    <e k="sf_bigBag_map_function" v="Фосфорне добриво (сухе)" eh="0cc85c60" />
+    <e k="sf_bigBag_dap_name" v="Big Bag DAP 18-46-0" eh="fb4e9987" />
+    <e k="sf_bigBag_dap_function" v="Фосфорне добриво (сухе)" eh="0cc85c60" />
+    <e k="sf_bigBag_potash_name" v="Big Bag Поташ 0-0-60" eh="eb771556" />
+    <e k="sf_bigBag_potash_function" v="Калійне добриво (сухе)" eh="18015099" />
+    <e k="sf_bigBag_starter_name" v="Big Bag Стартове Добриво 10-34-0" eh="953fd6c0" />
+    <e k="sf_bigBag_starter_function" v="Стартове добриво (рідке)" eh="2c36ea57" />
+    </elements>
+</l10n>

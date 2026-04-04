@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<l10n>
+    <elements>
+    <e k="sf_section" v="Boden &amp; Dünger" eh="f31197fb" />
+    <e k="sf_enabled_short" v="Mod aktivieren" eh="cf7fea13" />
+    <e k="sf_enabled_long" v="Boden- &amp; Dünger-Mod aktivieren oder deaktivieren" eh="a891399a" />
+    <e k="sf_debug_short" v="DEBUG-Modus" eh="2ddcdc76" />
+    <e k="sf_debug_long" v="DEBUG-Modus ein-/ausschalten (zusätzliche Protokollierung)" eh="f6f20240" />
+    <e k="sf_seasonal_effects_short" v="Saisoneffekte" eh="c16ea608" />
+    <e k="sf_seasonal_effects_long" v="Saisonale Auswirkungen auf Bodennährstoffe ein-/ausschalten (Frühjahrswachstumsschub, Herbstverlangsamung)" eh="3eea94c7" />
+    <e k="sf_rain_effects_short" v="Regeneffekte" eh="a2a1758b" />
+    <e k="sf_rain_effects_long" v="Regenauswirkungen auf Boden ein-/ausschalten (Nährstoffauswaschung, pH-Änderungen)" eh="de3b14b9" />
+    <e k="sf_plowing_bonus_short" v="Pflugbonus" eh="541ec752" />
+    <e k="sf_plowing_bonus_long" v="Pflugvorteile für Bodenfruchtbarkeit ein-/ausschalten (verbesserter Stickstoff und organische Substanz)" eh="fe701c1c" />
+    <e k="sf_fertility_short" v="Fruchtbarkeitssystem" eh="f7e27d58" />
+    <e k="sf_fertility_long" v="Dynamisches Bodenfruchtbarkeitssystem ein-/ausschalten" eh="ea074366" />
+    <e k="sf_nutrients_short" v="Nährstoffkreisläufe" eh="ffab595d" />
+    <e k="sf_nutrients_long" v="Realistische Nährstoffverarmung und -auffüllung ein-/ausschalten" eh="dbe9c8ff" />
+    <e k="sf_difficulty_short" v="Schwierigkeit" eh="7b29ca96" />
+    <e k="sf_difficulty_long" v="Schwierigkeitsgrad festlegen: Einfach, Realistisch, Hardcore" eh="cfb758a4" />
+    <e k="sf_diff_1" v="Einfach" eh="1fbb1e39" />
+    <e k="sf_diff_2" v="Realistisch" eh="408c999f" />
+    <e k="sf_diff_3" v="Hardcore" eh="1c800aa9" />
+    <e k="sf_fertilizer_cost_short" v="Düngerkosten" eh="6870d88b" />
+    <e k="sf_fertilizer_cost_long" v="Realistische Düngerkaufkosten ein-/ausschalten" eh="12b03fbb" />
+    <e k="sf_notifications_short" v="Benachrichtigungen" eh="a274f4d4" />
+    <e k="sf_notifications_long" v="Boden- und Düngerbenachrichtigungen ein-/ausschalten" eh="9a872f8f" />
+    <e k="sf_show_hud_short" v="HUD anzeigen" eh="c94fd4d7" />
+    <e k="sf_show_hud_long" v="Boden-Info-HUD ein-/ausblenden (F8 zum temporären Umschalten)" eh="4e2e11b6" />
+    <e k="sf_hud_position_short" v="HUD-Position" eh="5ac371f2" />
+    <e k="sf_hud_position_long" v="Wählen Sie, wo das Boden-Info-HUD auf dem Bildschirm erscheint" eh="d7b9c109" />
+    <e k="sf_hud_pos_1" v="Oben rechts" eh="5f9f6784" />
+    <e k="sf_hud_pos_2" v="Oben links" eh="ac71274a" />
+    <e k="sf_hud_pos_3" v="Unten rechts" eh="4d297f5d" />
+    <e k="sf_hud_pos_4" v="Unten links" eh="7eb55425" />
+    <e k="sf_hud_pos_5" v="Mitte rechts" eh="d7afdc5a" />
+    <e k="sf_hud_pos_6" v="Benutzerdefiniert" eh="90589c47" />
+    <e k="sf_hud_color_theme_short" v="HUD-Farbthema" eh="4a73f95b" />
+    <e k="sf_hud_color_theme_long" v="Wählen Sie das Farbschema für die Boden-Info-Anzeige" eh="3218bca6" />
+    <e k="sf_hud_color_1" v="Grün" eh="d382816a" />
+    <e k="sf_hud_color_2" v="Blau" eh="9594eec9" />
+    <e k="sf_hud_color_3" v="Bernstein" eh="88068e33" />
+    <e k="sf_hud_color_4" v="Mono" eh="5d9b47bd" />
+    <e k="sf_diff_short" v="Schwierigkeit" eh="7b29ca96" />
+    <e k="sf_diff_long" v="Schwierigkeitsgrad der Bodenverwaltung" eh="d6f4560c" />
+    <e k="sf_auto_rate_short" v="Automatische Ratensteuerung" eh="6f99137d" />
+    <e k="sf_auto_rate_long" v="Passt die Düngerrate automatisch an den Bedarf des Feldes an" eh="a9ca9f6b" />
+    <e k="sf_hud_theme_1" v="Grün" eh="d382816a" />
+    <e k="sf_hud_theme_2" v="Blau" eh="9594eec9" />
+    <e k="sf_hud_theme_3" v="Bernstein" eh="88068e33" />
+    <e k="sf_hud_theme_4" v="Mono" eh="5d9b47bd" />
+    <e k="sf_hud_font_size_short" v="HUD-Schriftgröße" eh="fd6ca64a" />
+    <e k="sf_hud_font_size_long" v="Textgröße für bessere Lesbarkeit anpassen" eh="c338854f" />
+    <e k="sf_hud_font_1" v="Klein" eh="2660064e" />
+    <e k="sf_hud_font_2" v="Mittel" eh="87f8a6ab" />
+    <e k="sf_hud_font_3" v="Groß" eh="3a69b34c" />
+    <e k="sf_hud_transparency_short" v="HUD-Transparenz" eh="e8a009e4" />
+    <e k="sf_hud_transparency_long" v="Hintergrundtransparenz festlegen (Klar = durchsichtig, Fest = undurchsichtig)" eh="152e390a" />
+    <e k="sf_hud_trans_1" v="Klar" eh="dc30bc0c" />
+    <e k="sf_hud_trans_2" v="Leicht" eh="9914a0ce" />
+    <e k="sf_hud_trans_3" v="Mittel" eh="87f8a6ab" />
+    <e k="sf_hud_trans_4" v="Dunkel" eh="a18366b2" />
+    <e k="sf_hud_trans_5" v="Fest" eh="e41480b6" />
+    <e k="sf_use_imperial_short" v="Imperiale Einheiten" eh="ff2701ad" />
+    <e k="sf_use_imperial_long" v="Ausbringmengen in gal/ac und lb/ac (aus = L/ha und kg/ha)" eh="17efa489" />
+    <e k="sf_reset" v="Bodeneinstellungen zurücksetzen" eh="467bc2f5" />
+    <e k="input_SF_TOGGLE_HUD" v="Boden-HUD umschalten" eh="f0224a10" />
+    <e k="input_SF_SOIL_REPORT" v="Bodenbericht" eh="c33180ef" />
+    <e k="input_SF_RATE_UP" v="Düngerrate erhöhen" eh="6e601ef5" />
+    <e k="input_SF_RATE_DOWN" v="Düngerrate verringern" eh="30712026" />
+    <e k="input_SF_TOGGLE_AUTO" v="Auto-Rate umschalten" eh="a8642cf0" />
+    <e k="sf_report_title" v="Boden- &amp;amp; Düngerbericht" eh="a76f8218" />
+    <e k="sf_report_fields_tracked" v="Verfolgte Felder:" eh="7b1e59b8" />
+    <e k="sf_report_need_fert" v="Brauchen Dünger:" eh="110b60f2" />
+    <e k="sf_report_difficulty" v="Schwierigkeit:" eh="3abaf54f" />
+    <e k="sf_report_col_field" v="Feld" eh="6f16a5f8" />
+    <e k="sf_report_col_last_crop" v="Letzte Ernte" eh="ff41e5eb" />
+    <e k="sf_report_col_fert" v="Düng?" eh="9e6d0eb4" />
+    <e k="sf_report_no_data" v="Keine Bodendaten verfügbar. Gehen Sie auf ein Feld, um die Verfolgung zu starten." eh="1528a4cb" />
+    <e k="sf_report_prev" v="Zurück" eh="14230d11" />
+    <e k="sf_report_next" v="Weiter" eh="10ac3d04" />
+    <e k="sf_report_yes" v="JA" eh="7469a286" />
+    <e k="sf_report_ok" v="OK" eh="e0aa021e" />
+    <e k="sf_report_none" v="Keine" eh="6adf97f8" />
+    <e k="sf_report_rec_n_poor" v="Stickstoff nötig" eh="5dca0711" />
+    <e k="sf_report_rec_n_fair" v="Niedriger Stickstoff" eh="35ad072d" />
+    <e k="sf_report_rec_p_poor" v="Phosphor nötig" eh="e8fa326f" />
+    <e k="sf_report_rec_p_fair" v="Niedriger Phosphor" eh="077e12cf" />
+    <e k="sf_report_rec_k_poor" v="Kalium nötig" eh="f23194e0" />
+    <e k="sf_report_rec_k_fair" v="Niedriges Kalium" eh="2006c0a2" />
+    <e k="sf_report_rec_ph_adjust" v="pH anpassen" eh="84f6bbbc" />
+    <e k="sf_report_rec_ph_monitor" v="pH beobachten" eh="6dfcded4" />
+    <e k="sf_report_rec_om_increase" v="Organik erhöhen" eh="c2a930af" />
+    <e k="sf_report_rec_om_maintain" v="Organik halten" eh="e7655847" />
+    <e k="sf_report_rec_needs" v="Bedarf:" eh="3e6d95cf" />
+    <e k="sf_report_rec_optimal" v="Bodengesundheit: Optimal" eh="6ee9d19b" />
+    <e k="sf_uan32_title" v="UAN 32 Stickstoffdünger (N)" eh="90913bb8" />
+    <e k="sf_uan28_title" v="UAN 28 Stickstoffdünger (N)" eh="9d902cd7" />
+    <e k="sf_anhydrous_title" v="Flüssigammoniak (N)" eh="3fc85c02" />
+    <e k="sf_starter_title" v="Starterdünger 10-34-0 (P)" eh="8c1a1ddc" />
+    <e k="sf_urea_title" v="Harnstoff 46-0-0 (N)" eh="659b3097" />
+    <e k="sf_ams_title" v="Ammoniumsulfat 21-0-0 (N)" eh="033d1845" />
+    <e k="sf_map_title" v="MAP-Dünger 11-52-0 (P)" eh="31aa2534" />
+    <e k="sf_dap_title" v="DAP-Dünger 18-46-0 (P)" eh="5030a80a" />
+    <e k="sf_potash_title" v="Kaliumchlorid 0-0-60 (K)" eh="8db6c54c" />
+    <e k="sf_report_page_info" v="Felder %d-%d von %d  |  Seite %d von %d" eh="8db851d1" />
+    <e k="sf_bigBag_uan32_name" v="Big Bag UAN 32-0-0" eh="7bdc4d9d" />
+    <e k="sf_bigBag_uan32_function" v="Stickstoffdünger (flüssig)" eh="27de5f41" />
+    <e k="sf_bigBag_uan28_name" v="Big Bag UAN 28-0-0" eh="997781d5" />
+    <e k="sf_bigBag_uan28_function" v="Stickstoffdünger (flüssig)" eh="27de5f41" />
+    <e k="sf_bigBag_anhydrous_name" v="Big Bag Wasserfreies Ammoniak 82-0-0" eh="44914201" />
+    <e k="sf_bigBag_anhydrous_function" v="Stickstoffdünger (flüssig)" eh="27de5f41" />
+    <e k="sf_bigBag_urea_name" v="Big Bag Harnstoff 46-0-0" eh="8e8cbaae" />
+    <e k="sf_bigBag_urea_function" v="Stickstoffdünger (trocken)" eh="63efea20" />
+    <e k="sf_bigBag_ams_name" v="Big Bag AMS 21-0-0-24S" eh="7f71ee68" />
+    <e k="sf_bigBag_ams_function" v="Stickstoffdünger (trocken)" eh="63efea20" />
+    <e k="sf_bigBag_map_name" v="Big Bag MAP 11-52-0" eh="8a5a059b" />
+    <e k="sf_bigBag_map_function" v="Phosphordünger (trocken)" eh="0cc85c60" />
+    <e k="sf_bigBag_dap_name" v="Big Bag DAP 18-46-0" eh="fb4e9987" />
+    <e k="sf_bigBag_dap_function" v="Phosphordünger (trocken)" eh="0cc85c60" />
+    <e k="sf_bigBag_potash_name" v="Big Bag Kalium 0-0-60" eh="eb771556" />
+    <e k="sf_bigBag_potash_function" v="Kaliumdünger (trocken)" eh="18015099" />
+    <e k="sf_bigBag_starter_name" v="Big Bag Starterdünger 10-34-0" eh="953fd6c0" />
+    <e k="sf_bigBag_starter_function" v="Starterdünger (flüssig)" eh="2c36ea57" />
+    </elements>
+</l10n>

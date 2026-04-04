@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<l10n>
+    <elements>
+    <e k="sf_hud_color_1" v="Grøn" eh="d382816a" />
+    <e k="sf_hud_color_2" v="Blå" eh="9594eec9" />
+    <e k="sf_hud_color_3" v="Rav" eh="88068e33" />
+    <e k="sf_hud_color_4" v="Mono" eh="5d9b47bd" />
+    <e k="sf_diff_short" v="Sværhedsgrad" eh="7b29ca96" />
+    <e k="sf_diff_long" v="Sværhedsgrad for jordstyring" eh="d6f4560c" />
+    <e k="sf_auto_rate_short" v="Automatisk hastighedskontrol" eh="6f99137d" />
+    <e k="sf_auto_rate_long" v="Justerer automatisk gødningsraten baseret på markens behov" eh="a9ca9f6b" />
+		<e k="sf_hud_theme_1" v="[EN] Green" eh="d382816a" />
+		<e k="sf_hud_theme_2" v="[EN] Blue" eh="9594eec9" />
+		<e k="sf_hud_theme_3" v="[EN] Amber" eh="88068e33" />
+		<e k="sf_hud_theme_4" v="[EN] Mono" eh="5d9b47bd" />
+		<e k="sf_hud_font_size_short" v="[EN] HUD Font Size" eh="fd6ca64a" />
+		<e k="sf_hud_font_size_long" v="[EN] Adjust text size for better readability" eh="c338854f" />
+		<e k="sf_hud_font_1" v="[EN] Small" eh="2660064e" />
+		<e k="sf_hud_font_2" v="[EN] Medium" eh="87f8a6ab" />
+		<e k="sf_hud_font_3" v="[EN] Large" eh="3a69b34c" />
+		<e k="sf_hud_transparency_short" v="[EN] HUD Transparency" eh="e8a009e4" />
+		<e k="sf_hud_transparency_long" v="[EN] Set background transparency level (Clear = see-through, Solid = opaque)" eh="152e390a" />
+		<e k="sf_hud_trans_1" v="[EN] Clear" eh="dc30bc0c" />
+		<e k="sf_hud_trans_2" v="[EN] Light" eh="9914a0ce" />
+		<e k="sf_hud_trans_3" v="[EN] Medium" eh="87f8a6ab" />
+		<e k="sf_hud_trans_4" v="[EN] Dark" eh="a18366b2" />
+		<e k="sf_hud_trans_5" v="[EN] Solid" eh="e41480b6" />
+		<e k="sf_use_imperial_short" v="[EN] Imperial Units" eh="ff2701ad" />
+		<e k="sf_use_imperial_long" v="[EN] Show application rates in gal/ac and lb/ac (off = L/ha and kg/ha)" eh="17efa489" />
+		<e k="sf_reset" v="[EN] Reset Soil Settings" eh="467bc2f5" />
+		<e k="input_SF_TOGGLE_HUD" v="[EN] Toggle Soil HUD" eh="f0224a10" />
+		<e k="input_SF_SOIL_REPORT" v="[EN] Soil Report" eh="c33180ef" />
+		<e k="input_SF_RATE_UP" v="[EN] Increase Fertilizer Rate" eh="6e601ef5" />
+		<e k="input_SF_RATE_DOWN" v="[EN] Decrease Fertilizer Rate" eh="30712026" />
+    <e k="input_SF_TOGGLE_AUTO" v="Skift automatisk hastighed" eh="a8642cf0" />
+		<e k="sf_report_title" v="[EN] Soil &amp;amp;amp; Fertilizer Report" eh="e4d0126a" />
+		<e k="sf_report_fields_tracked" v="[EN] Fields Tracked:" eh="7b1e59b8" />
+		<e k="sf_report_need_fert" v="[EN] Need Fertilizer:" eh="110b60f2" />
+		<e k="sf_report_difficulty" v="[EN] Difficulty:" eh="3abaf54f" />
+		<e k="sf_report_col_field" v="[EN] Field" eh="6f16a5f8" />
+		<e k="sf_report_col_last_crop" v="[EN] Last Crop" eh="ff41e5eb" />
+		<e k="sf_report_col_fert" v="[EN] Fert?" eh="9e6d0eb4" />
+		<e k="sf_report_no_data" v="[EN] No soil data available. Walk onto a field to start tracking." eh="1528a4cb" />
+		<e k="sf_report_prev" v="[EN] Prev" eh="14230d11" />
+		<e k="sf_report_next" v="[EN] Next" eh="10ac3d04" />
+		<e k="sf_report_yes" v="[EN] YES" eh="7469a286" />
+		<e k="sf_report_ok" v="[EN] OK" eh="e0aa021e" />
+		<e k="sf_report_none" v="[EN] None" eh="6adf97f8" />
+		<e k="sf_report_rec_n_poor" v="[EN] Needs Nitrogen" eh="5dca0711" />
+		<e k="sf_report_rec_n_fair" v="[EN] Low Nitrogen" eh="35ad072d" />
+		<e k="sf_report_rec_p_poor" v="[EN] Needs Phosphorus" eh="e8fa326f" />
+		<e k="sf_report_rec_p_fair" v="[EN] Low Phosphorus" eh="077e12cf" />
+		<e k="sf_report_rec_k_poor" v="[EN] Needs Potassium" eh="f23194e0" />
+		<e k="sf_report_rec_k_fair" v="[EN] Low Potassium" eh="2006c0a2" />
+		<e k="sf_report_rec_ph_adjust" v="[EN] Adjust pH" eh="84f6bbbc" />
+		<e k="sf_report_rec_ph_monitor" v="[EN] Monitor pH" eh="6dfcded4" />
+		<e k="sf_report_rec_om_increase" v="[EN] Increase Organic Matter" eh="c2a930af" />
+		<e k="sf_report_rec_om_maintain" v="[EN] Maintain Organic Matter" eh="e7655847" />
+		<e k="sf_report_rec_needs" v="[EN] Needs:" eh="3e6d95cf" />
+		<e k="sf_report_rec_optimal" v="[EN] Soil Health: Optimal" eh="6ee9d19b" />
+		<e k="sf_uan32_title" v="[EN] UAN 32 Fertilizer (N)" eh="90913bb8" />
+		<e k="sf_uan28_title" v="[EN] UAN 28 Fertilizer (N)" eh="9d902cd7" />
+		<e k="sf_anhydrous_title" v="[EN] Anhydrous Ammonia (N)" eh="3fc85c02" />
+		<e k="sf_starter_title" v="[EN] Starter Fertilizer 10-34-0 (P)" eh="8c1a1ddc" />
+		<e k="sf_urea_title" v="[EN] Urea 46-0-0 (N)" eh="659b3097" />
+		<e k="sf_ams_title" v="[EN] Ammonium Sulfate 21-0-0 (N)" eh="033d1845" />
+		<e k="sf_map_title" v="[EN] MAP Fertilizer 11-52-0 (P)" eh="31aa2534" />
+		<e k="sf_dap_title" v="[EN] DAP Fertilizer 18-46-0 (P)" eh="5030a80a" />
+		<e k="sf_potash_title" v="[EN] Potash 0-0-60 (K)" eh="8db6c54c" />
+		<e k="sf_report_page_info" v="[EN] Fields %d-%d of %d  |  Page %d of %d" eh="8db851d1" />
+    <e k="sf_bigBag_uan32_name" v="Big Bag UAN 32-0-0" eh="7bdc4d9d" />
+    <e k="sf_bigBag_uan32_function" v="Kvælstofgødning (flydende)" eh="27de5f41" />
+    <e k="sf_bigBag_uan28_name" v="Big Bag UAN 28-0-0" eh="997781d5" />
+    <e k="sf_bigBag_uan28_function" v="Kvælstofgødning (flydende)" eh="27de5f41" />
+    <e k="sf_bigBag_anhydrous_name" v="Big Bag Vandfri Ammoniak 82-0-0" eh="44914201" />
+    <e k="sf_bigBag_anhydrous_function" v="Kvælstofgødning (flydende)" eh="27de5f41" />
+    <e k="sf_bigBag_urea_name" v="Big Bag Urea 46-0-0" eh="8e8cbaae" />
+    <e k="sf_bigBag_urea_function" v="Kvælstofgødning (tør)" eh="63efea20" />
+    <e k="sf_bigBag_ams_name" v="Big Bag AMS 21-0-0-24S" eh="7f71ee68" />
+    <e k="sf_bigBag_ams_function" v="Kvælstofgødning (tør)" eh="63efea20" />
+    <e k="sf_bigBag_map_name" v="Big Bag MAP 11-52-0" eh="8a5a059b" />
+    <e k="sf_bigBag_map_function" v="Fosfatgødning (tør)" eh="0cc85c60" />
+    <e k="sf_bigBag_dap_name" v="Big Bag DAP 18-46-0" eh="fb4e9987" />
+    <e k="sf_bigBag_dap_function" v="Fosfatgødning (tør)" eh="0cc85c60" />
+    <e k="sf_bigBag_potash_name" v="Big Bag Kaliumklorid 0-0-60" eh="eb771556" />
+    <e k="sf_bigBag_potash_function" v="Kaliumgødning (tør)" eh="18015099" />
+    <e k="sf_bigBag_starter_name" v="Big Bag Startgødning 10-34-0" eh="953fd6c0" />
+    <e k="sf_bigBag_starter_function" v="Startgødning (flydende)" eh="2c36ea57" />
+
+		<e k="sf_section" v="[EN] Soil &amp;amp; Fertilizer" eh="d30a22a9" />
+		<e k="sf_enabled_short" v="[EN] Enable Mod" eh="cf7fea13" />
+		<e k="sf_enabled_long" v="[EN] Enable or disable the soil &amp;amp; fertilizer mod" eh="e377fd59" />
+		<e k="sf_debug_short" v="[EN] DEBUG Mode" eh="2ddcdc76" />
+		<e k="sf_debug_long" v="[EN] Enable/disable debug mode (extra logging)" eh="f6f20240" />
+		<e k="sf_seasonal_effects_short" v="[EN] Seasonal Effects" eh="c16ea608" />
+		<e k="sf_seasonal_effects_long" v="[EN] Enable/disable seasonal impact on soil nutrients (spring growth boost, fall slowdown)" eh="3eea94c7" />
+		<e k="sf_rain_effects_short" v="[EN] Rain Effects" eh="a2a1758b" />
+		<e k="sf_rain_effects_long" v="[EN] Enable/disable rain impact on soil (nutrient leaching, pH changes)" eh="de3b14b9" />
+		<e k="sf_plowing_bonus_short" v="[EN] Plowing Bonus" eh="541ec752" />
+		<e k="sf_plowing_bonus_long" v="[EN] Enable/disable plowing benefits to soil fertility (improved nitrogen and organic matter)" eh="fe701c1c" />
+		<e k="sf_fertility_short" v="[EN] Fertility System" eh="f7e27d58" />
+		<e k="sf_fertility_long" v="[EN] Enable/disable dynamic soil fertility system" eh="ea074366" />
+		<e k="sf_nutrients_short" v="[EN] Nutrient Cycles" eh="ffab595d" />
+		<e k="sf_nutrients_long" v="[EN] Enable/disable realistic nutrient depletion and replenishment" eh="dbe9c8ff" />
+		<e k="sf_difficulty_short" v="[EN] Difficulty" eh="7b29ca96" />
+		<e k="sf_difficulty_long" v="[EN] Set difficulty level: Simple, Realistic, Hardcore" eh="cfb758a4" />
+		<e k="sf_diff_1" v="[EN] Simple" eh="1fbb1e39" />
+		<e k="sf_diff_2" v="[EN] Realistic" eh="408c999f" />
+		<e k="sf_diff_3" v="[EN] Hardcore" eh="1c800aa9" />
+		<e k="sf_fertilizer_cost_short" v="[EN] Fertilizer Costs" eh="6870d88b" />
+		<e k="sf_fertilizer_cost_long" v="[EN] Enable/disable realistic fertilizer purchase costs" eh="12b03fbb" />
+		<e k="sf_notifications_short" v="[EN] Notifications" eh="a274f4d4" />
+		<e k="sf_notifications_long" v="[EN] Enable/disable soil and fertilizer notifications" eh="9a872f8f" />
+		<e k="sf_show_hud_short" v="[EN] Show HUD" eh="c94fd4d7" />
+		<e k="sf_show_hud_long" v="[EN] Show/hide the soil info HUD overlay (F8 to toggle temporarily)" eh="4e2e11b6" />
+		<e k="sf_hud_position_short" v="[EN] HUD Position" eh="5ac371f2" />
+		<e k="sf_hud_position_long" v="[EN] Choose where the soil info HUD appears on screen" eh="d7b9c109" />
+		<e k="sf_hud_pos_1" v="[EN] Top Right" eh="5f9f6784" />
+		<e k="sf_hud_pos_2" v="[EN] Top Left" eh="ac71274a" />
+		<e k="sf_hud_pos_3" v="[EN] Bottom Right" eh="4d297f5d" />
+		<e k="sf_hud_pos_4" v="[EN] Bottom Left" eh="7eb55425" />
+		<e k="sf_hud_pos_5" v="[EN] Center Right" eh="d7afdc5a" />
+		<e k="sf_hud_pos_6" v="[EN] Custom" eh="90589c47" />
+		<e k="sf_hud_color_theme_short" v="[EN] HUD Color Theme" eh="4a73f95b" />
+		<e k="sf_hud_color_theme_long" v="[EN] Choose the color scheme for soil info display" eh="3218bca6" />    </elements>
+</l10n>
