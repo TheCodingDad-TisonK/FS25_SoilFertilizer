@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<elements>
+    <e k="sf_section" v="Talaj &amp; Műtrágya" eh="f31197fb" />
+    <e k="sf_enabled_short" v="Mod engedélyezése" eh="cf7fea13" />
+    <e k="sf_enabled_long" v="A talaj és műtrágya mod engedélyezése vagy tiltása" eh="a891399a" />
+    <e k="sf_debug_short" v="DEBUG mód" eh="2ddcdc76" />
+    <e k="sf_debug_long" v="DEBUG mód engedélyezése/tiltása (további naplózás)" eh="f6f20240" />
+    <e k="sf_seasonal_effects_short" v="Évszak Hatások" eh="c16ea608" />
+    <e k="sf_seasonal_effects_long" v="Évszak hatásának engedélyezése/tiltása a talaj tápanyagaira (tavaszi növekedési gyorsítás, őszi lassítás)" eh="3eea94c7" />
+    <e k="sf_rain_effects_short" v="Eső Hatások" eh="a2a1758b" />
+    <e k="sf_rain_effects_long" v="Engedélyezze/tiltsa az eső hatását a talajra (tápanyag kimosódás, pH-változások)" eh="de3b14b9" />
+    <e k="sf_plowing_bonus_short" v="Szántás Bónusz" eh="541ec752" />
+    <e k="sf_plowing_bonus_long" v="A szántás előnyeinek engedélyezése/tiltása a talaj termékenységére (javított nitrogén és szerves anyag)" eh="fe701c1c" />
+    <e k="sf_fertility_short" v="Termékenységi Rendszer" eh="f7e27d58" />
+    <e k="sf_fertility_long" v="Dinamikus talajtermékenységi rendszer engedélyezése/tiltása" eh="ea074366" />
+    <e k="sf_nutrients_short" v="Tápanyagciklusok" eh="ffab595d" />
+    <e k="sf_nutrients_long" v="Realisztikus tápanyagkimerülés és feltöltés engedélyezése/tiltása" eh="dbe9c8ff" />
+    <e k="sf_difficulty_short" v="Nehézség" eh="7b29ca96" />
+    <e k="sf_difficulty_long" v="Nehézségi szint beállítása: Egyszerű, Realisztikus, Hardcore" eh="cfb758a4" />
+    <e k="sf_diff_1" v="Egyszerű" eh="1fbb1e39" />
+    <e k="sf_diff_2" v="Realisztikus" eh="408c999f" />
+    <e k="sf_diff_3" v="Hardcore" eh="1c800aa9" />
+    <e k="sf_fertilizer_cost_short" v="Műtrágya Költségek" eh="6870d88b" />
+    <e k="sf_fertilizer_cost_long" v="Realisztikus műtrágya-vásárlási költségek engedélyezése/tiltása" eh="12b03fbb" />
+    <e k="sf_notifications_short" v="Értesítések" eh="a274f4d4" />
+    <e k="sf_notifications_long" v="Talaj és műtrágya értesítések engedélyezése/tiltása" eh="9a872f8f" />
+    <e k="sf_show_hud_short" v="HUD megjelenítése" eh="c94fd4d7" />
+    <e k="sf_show_hud_long" v="Talajinformáció HUD átfedés megjelenítése/elrejtése (F8 az ideiglenes váltáshoz)" eh="4e2e11b6" />
+    <e k="sf_hud_position_short" v="HUD pozíció" eh="5ac371f2" />
+    <e k="sf_hud_position_long" v="Válassza ki, hol jelenjen meg a talajinformáció HUD a képernyőn" eh="d7b9c109" />
+    <e k="sf_hud_pos_1" v="Jobb felső" eh="5f9f6784" />
+    <e k="sf_hud_pos_2" v="Bal felső" eh="ac71274a" />
+    <e k="sf_hud_pos_3" v="Jobb alsó" eh="4d297f5d" />
+    <e k="sf_hud_pos_4" v="Bal alsó" eh="7eb55425" />
+    <e k="sf_hud_pos_5" v="Középen jobbra" eh="d7afdc5a" />
+    <e k="sf_hud_pos_6" v="Egyéni" eh="90589c47" />
+    <e k="sf_hud_color_theme_short" v="HUD színtéma" eh="4a73f95b" />
+    <e k="sf_hud_color_theme_long" v="Válassza ki a talajinformáció megjelenítésének színsémáját" eh="3218bca6" />
+    <e k="sf_hud_color_1" v="Zöld" eh="d382816a" />
+    <e k="sf_hud_color_2" v="Kék" eh="9594eec9" />
+    <e k="sf_hud_color_3" v="Borostyán" eh="88068e33" />
+    <e k="sf_hud_color_4" v="Mono" eh="5d9b47bd" />
+    <e k="sf_diff_short" v="Nehézség" eh="7b29ca96" />
+    <e k="sf_diff_long" v="Talajkezelés nehézségi szintje" eh="d6f4560c" />
+    <e k="sf_auto_rate_short" v="Automatikus adagolás vezérlés" eh="6f99137d" />
+    <e k="sf_auto_rate_long" v="Automatikusan állítja be a műtrágya kijuttatási arányát a terület igényei alapján" eh="a9ca9f6b" />
+    <e k="sf_hud_theme_1" v="Zöld" eh="d382816a" />
+    <e k="sf_hud_theme_2" v="Kék" eh="9594eec9" />
+    <e k="sf_hud_theme_3" v="Borostyán" eh="88068e33" />
+    <e k="sf_hud_theme_4" v="Mono" eh="5d9b47bd" />
+    <e k="sf_hud_font_size_short" v="HUD betűméret" eh="fd6ca64a" />
+    <e k="sf_hud_font_size_long" v="Állítsa be a szöveg méretét a jobb olvashatóság érdekében" eh="c338854f" />
+    <e k="sf_hud_font_1" v="Kicsi" eh="2660064e" />
+    <e k="sf_hud_font_2" v="Közepes" eh="87f8a6ab" />
+    <e k="sf_hud_font_3" v="Nagy" eh="3a69b34c" />
+    <e k="sf_hud_transparency_short" v="HUD átlátszóság" eh="e8a009e4" />
+    <e k="sf_hud_transparency_long" v="Háttér átlátszósági szint beállítása (Átlátszó = áttetsző, Tömör = átlátszatlan)" eh="152e390a" />
+    <e k="sf_hud_trans_1" v="Átlátszó" eh="dc30bc0c" />
+    <e k="sf_hud_trans_2" v="Könnyű" eh="9914a0ce" />
+    <e k="sf_hud_trans_3" v="Közepes" eh="87f8a6ab" />
+    <e k="sf_hud_trans_4" v="Sötét" eh="a18366b2" />
+    <e k="sf_hud_trans_5" v="Tömör" eh="e41480b6" />
+    <e k="sf_use_imperial_short" v="Angolszász mértékegységek" eh="ff2701ad" />
+    <e k="sf_use_imperial_long" v="Kijuttatási normák gal/ac és lb/ac egységben (ki = L/ha és kg/ha)" eh="17efa489" />
+    <e k="sf_reset" v="Talajbeállítások alaphelyzetbe állítása" eh="467bc2f5" />
+    <e k="input_SF_TOGGLE_HUD" v="Talaj HUD váltása" eh="f0224a10" />
+    <e k="input_SF_SOIL_REPORT" v="Talajjelentés" eh="c33180ef" />
+    <e k="input_SF_RATE_UP" v="Műtrágya arány növelése" eh="6e601ef5" />
+    <e k="input_SF_RATE_DOWN" v="Műtrágya arány csökkentése" eh="30712026" />
+    <e k="input_SF_TOGGLE_AUTO" v="Automatikus adagolás váltása" eh="a8642cf0" />
+    <e k="sf_report_title" v="Talaj &amp;amp; Műtrágya Jelentés" eh="a76f8218" />
+    <e k="sf_report_fields_tracked" v="Követett Mezők:" eh="7b1e59b8" />
+    <e k="sf_report_need_fert" v="Műtrágya Szükséges:" eh="110b60f2" />
+    <e k="sf_report_difficulty" v="Nehézség:" eh="3abaf54f" />
+    <e k="sf_report_col_field" v="Mező" eh="6f16a5f8" />
+    <e k="sf_report_col_last_crop" v="Utolsó Termény" eh="ff41e5eb" />
+    <e k="sf_report_col_fert" v="Műtr?" eh="9e6d0eb4" />
+    <e k="sf_report_no_data" v="Nincsenek talajadatok. Sétáljon egy mezőre a követés elindításához." eh="1528a4cb" />
+    <e k="sf_report_prev" v="Előző" eh="14230d11" />
+    <e k="sf_report_next" v="Köv" eh="10ac3d04" />
+    <e k="sf_report_yes" v="IGEN" eh="7469a286" />
+    <e k="sf_report_ok" v="OK" eh="e0aa021e" />
+    <e k="sf_report_none" v="Nincs" eh="6adf97f8" />
+    <e k="sf_report_rec_n_poor" v="Nitrogén szükséges" eh="5dca0711" />
+    <e k="sf_report_rec_n_fair" v="Alacsony nitrogén" eh="35ad072d" />
+    <e k="sf_report_rec_p_poor" v="Foszfor szükséges" eh="e8fa326f" />
+    <e k="sf_report_rec_p_fair" v="Alacsony foszfor" eh="077e12cf" />
+    <e k="sf_report_rec_k_poor" v="Kálium szükséges" eh="f23194e0" />
+    <e k="sf_report_rec_k_fair" v="Alacsony kálium" eh="2006c0a2" />
+    <e k="sf_report_rec_ph_adjust" v="pH beállítása" eh="84f6bbbc" />
+    <e k="sf_report_rec_ph_monitor" v="pH figyelése" eh="6dfcded4" />
+    <e k="sf_report_rec_om_increase" v="Szerves anyag növelése" eh="c2a930af" />
+    <e k="sf_report_rec_om_maintain" v="Szerves anyag fenntartása" eh="e7655847" />
+    <e k="sf_report_rec_needs" v="Szükséges:" eh="3e6d95cf" />
+    <e k="sf_report_rec_optimal" v="Talaj egészség: Optimális" eh="6ee9d19b" />
+    <e k="sf_uan32_title" v="UAN 32 Nitrogén műtrágya (N)" eh="90913bb8" />
+    <e k="sf_uan28_title" v="UAN 28 Nitrogén műtrágya (N)" eh="9d902cd7" />
+    <e k="sf_anhydrous_title" v="Vízmentes ammónia (N)" eh="3fc85c02" />
+    <e k="sf_starter_title" v="Starter műtrágya 10-34-0 (P)" eh="8c1a1ddc" />
+    <e k="sf_urea_title" v="Karbamid 46-0-0 (N)" eh="659b3097" />
+    <e k="sf_ams_title" v="Ammónium-szulfát 21-0-0 (N)" eh="033d1845" />
+    <e k="sf_map_title" v="MAP műtrágya 11-52-0 (P)" eh="31aa2534" />
+    <e k="sf_dap_title" v="DAP műtrágya 18-46-0 (P)" eh="5030a80a" />
+    <e k="sf_potash_title" v="Hamuzsír 0-0-60 (K)" eh="8db6c54c" />
+    <e k="sf_report_page_info" v="Mezők %d-%d / %d  |  Oldal %d / %d" eh="8db851d1" />
+    <e k="sf_bigBag_uan32_name" v="Big Bag UAN 32-0-0" eh="7bdc4d9d" />
+    <e k="sf_bigBag_uan32_function" v="Nitrogén műtrágya (folyékony)" eh="27de5f41" />
+    <e k="sf_bigBag_uan28_name" v="Big Bag UAN 28-0-0" eh="997781d5" />
+    <e k="sf_bigBag_uan28_function" v="Nitrogén műtrágya (folyékony)" eh="27de5f41" />
+    <e k="sf_bigBag_anhydrous_name" v="Big Bag Vízmentes Ammónia 82-0-0" eh="44914201" />
+    <e k="sf_bigBag_anhydrous_function" v="Nitrogén műtrágya (folyékony)" eh="27de5f41" />
+    <e k="sf_bigBag_urea_name" v="Big Bag Karbamid 46-0-0" eh="8e8cbaae" />
+    <e k="sf_bigBag_urea_function" v="Nitrogén műtrágya (száraz)" eh="63efea20" />
+    <e k="sf_bigBag_ams_name" v="Big Bag AMS 21-0-0-24S" eh="7f71ee68" />
+    <e k="sf_bigBag_ams_function" v="Nitrogén műtrágya (száraz)" eh="63efea20" />
+    <e k="sf_bigBag_map_name" v="Big Bag MAP 11-52-0" eh="8a5a059b" />
+    <e k="sf_bigBag_map_function" v="Foszfor műtrágya (száraz)" eh="0cc85c60" />
+    <e k="sf_bigBag_dap_name" v="Big Bag DAP 18-46-0" eh="fb4e9987" />
+    <e k="sf_bigBag_dap_function" v="Foszfor műtrágya (száraz)" eh="0cc85c60" />
+    <e k="sf_bigBag_potash_name" v="Big Bag Hamuzsír 0-0-60" eh="eb771556" />
+    <e k="sf_bigBag_potash_function" v="Kálium műtrágya (száraz)" eh="18015099" />
+    <e k="sf_bigBag_starter_name" v="Big Bag Starter Műtrágya 10-34-0" eh="953fd6c0" />
+    <e k="sf_bigBag_starter_function" v="Starter műtrágya (folyékony)" eh="2c36ea57" />
+</elements>

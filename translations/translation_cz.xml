@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<elements>
+    <e k="sf_section" v="Půda &amp; Hnojivo" eh="f31197fb" />
+    <e k="sf_enabled_short" v="Povolit mod" eh="cf7fea13" />
+    <e k="sf_enabled_long" v="Povolit nebo zakázat mod půda &amp; hnojivo" eh="a891399a" />
+    <e k="sf_debug_short" v="DEBUG režim" eh="2ddcdc76" />
+    <e k="sf_debug_long" v="Povolit/zakázat DEBUG režim (dodatečné logování)" eh="f6f20240" />
+    <e k="sf_seasonal_effects_short" v="Sezónní Efekty" eh="c16ea608" />
+    <e k="sf_seasonal_effects_long" v="Povolit/zakázat sezónní vliv na půdní živiny (jarní růstový impuls, podzimní zpomalení)" eh="3eea94c7" />
+    <e k="sf_rain_effects_short" v="Dešťové Efekty" eh="a2a1758b" />
+    <e k="sf_rain_effects_long" v="Povolit/zakázat vliv deště na půdu (vymývání živin, změny pH)" eh="de3b14b9" />
+    <e k="sf_plowing_bonus_short" v="Bonus Orby" eh="541ec752" />
+    <e k="sf_plowing_bonus_long" v="Povolit/zakázat výhody orby pro úrodnost půdy (zlepšený dusík a organická hmota)" eh="fe701c1c" />
+    <e k="sf_fertility_short" v="Systém Úrodnosti" eh="f7e27d58" />
+    <e k="sf_fertility_long" v="Povolit/zakázat dynamický systém úrodnosti půdy" eh="ea074366" />
+    <e k="sf_nutrients_short" v="Nutriční Cykly" eh="ffab595d" />
+    <e k="sf_nutrients_long" v="Povolit/zakázat realistické vyčerpání a doplňování živin" eh="dbe9c8ff" />
+    <e k="sf_difficulty_short" v="Obtížnost" eh="7b29ca96" />
+    <e k="sf_difficulty_long" v="Nastavit úroveň obtížnosti: Jednoduchý, Realistický, Hardcore" eh="cfb758a4" />
+    <e k="sf_diff_1" v="Jednoduchý" eh="1fbb1e39" />
+    <e k="sf_diff_2" v="Realistický" eh="408c999f" />
+    <e k="sf_diff_3" v="Hardcore" eh="1c800aa9" />
+    <e k="sf_fertilizer_cost_short" v="Náklady Hnojiva" eh="6870d88b" />
+    <e k="sf_fertilizer_cost_long" v="Povolit/zakázat realistické nákupní náklady hnojiva" eh="12b03fbb" />
+    <e k="sf_notifications_short" v="Upozornění" eh="a274f4d4" />
+    <e k="sf_notifications_long" v="Povolit/zakázat upozornění na půdu a hnojivo" eh="9a872f8f" />
+    <e k="sf_show_hud_short" v="Zobrazit HUD" eh="c94fd4d7" />
+    <e k="sf_show_hud_long" v="Zobrazit/skrýt HUD s informacemi o půdě (F8 pro dočasné přepnutí)" eh="4e2e11b6" />
+    <e k="sf_hud_position_short" v="Pozice HUD" eh="5ac371f2" />
+    <e k="sf_hud_position_long" v="Vyberte, kde se na obrazovce zobrazí HUD s informacemi o půdě" eh="d7b9c109" />
+    <e k="sf_hud_pos_1" v="Vpravo nahoře" eh="5f9f6784" />
+    <e k="sf_hud_pos_2" v="Vlevo nahoře" eh="ac71274a" />
+    <e k="sf_hud_pos_3" v="Vpravo dole" eh="4d297f5d" />
+    <e k="sf_hud_pos_4" v="Vlevo dole" eh="7eb55425" />
+    <e k="sf_hud_pos_5" v="Střed vpravo" eh="d7afdc5a" />
+    <e k="sf_hud_pos_6" v="Vlastní" eh="90589c47" />
+    <e k="sf_hud_color_theme_short" v="Barevný motiv HUD" eh="4a73f95b" />
+    <e k="sf_hud_color_theme_long" v="Vyberte barevné schéma pro zobrazení informací o půdě" eh="3218bca6" />
+    <e k="sf_hud_color_1" v="Zelený" eh="d382816a" />
+    <e k="sf_hud_color_2" v="Modrý" eh="9594eec9" />
+    <e k="sf_hud_color_3" v="Jantarový" eh="88068e33" />
+    <e k="sf_hud_color_4" v="Mono" eh="5d9b47bd" />
+    <e k="sf_diff_short" v="Obtížnost" eh="7b29ca96" />
+    <e k="sf_diff_long" v="Úroveň obtížnosti správy půdy" eh="d6f4560c" />
+    <e k="sf_auto_rate_short" v="Automatické řízení dávky" eh="6f99137d" />
+    <e k="sf_auto_rate_long" v="Automaticky upravuje dávku hnojiva podle potřeb pole" eh="a9ca9f6b" />
+    <e k="sf_hud_theme_1" v="Zelený" eh="d382816a" />
+    <e k="sf_hud_theme_2" v="Modrý" eh="9594eec9" />
+    <e k="sf_hud_theme_3" v="Jantarový" eh="88068e33" />
+    <e k="sf_hud_theme_4" v="Mono" eh="5d9b47bd" />
+    <e k="sf_hud_font_size_short" v="Velikost písma HUD" eh="fd6ca64a" />
+    <e k="sf_hud_font_size_long" v="Upravte velikost textu pro lepší čitelnost" eh="c338854f" />
+    <e k="sf_hud_font_1" v="Malý" eh="2660064e" />
+    <e k="sf_hud_font_2" v="Střední" eh="87f8a6ab" />
+    <e k="sf_hud_font_3" v="Velký" eh="3a69b34c" />
+    <e k="sf_hud_transparency_short" v="Průhlednost HUD" eh="e8a009e4" />
+    <e k="sf_hud_transparency_long" v="Nastavte úroveň průhlednosti pozadí (Čirý = průhledný, Plný = neprůhledný)" eh="152e390a" />
+    <e k="sf_hud_trans_1" v="Čirý" eh="dc30bc0c" />
+    <e k="sf_hud_trans_2" v="Lehký" eh="9914a0ce" />
+    <e k="sf_hud_trans_3" v="Střední" eh="87f8a6ab" />
+    <e k="sf_hud_trans_4" v="Tmavý" eh="a18366b2" />
+    <e k="sf_hud_trans_5" v="Plný" eh="e41480b6" />
+    <e k="sf_use_imperial_short" v="Imperiální jednotky" eh="ff2701ad" />
+    <e k="sf_use_imperial_long" v="Zobrazit dávky v gal/ac a lb/ac (vypnuto = L/ha a kg/ha)" eh="17efa489" />
+    <e k="sf_reset" v="Resetovat nastavení půdy" eh="467bc2f5" />
+    <e k="input_SF_TOGGLE_HUD" v="Přepnout HUD půdy" eh="f0224a10" />
+    <e k="input_SF_SOIL_REPORT" v="Zpráva o půdě" eh="c33180ef" />
+    <e k="input_SF_RATE_UP" v="Zvýšit dávku hnojiva" eh="6e601ef5" />
+    <e k="input_SF_RATE_DOWN" v="Snížit dávku hnojiva" eh="30712026" />
+    <e k="input_SF_TOGGLE_AUTO" v="Přepnout automatickou dávku" eh="a8642cf0" />
+    <e k="sf_report_title" v="Zpráva o Půdě &amp;amp; Hnojivu" eh="a76f8218" />
+    <e k="sf_report_fields_tracked" v="Sledovaná Pole:" eh="7b1e59b8" />
+    <e k="sf_report_need_fert" v="Potřebují Hnojivo:" eh="110b60f2" />
+    <e k="sf_report_difficulty" v="Obtížnost:" eh="3abaf54f" />
+    <e k="sf_report_col_field" v="Pole" eh="6f16a5f8" />
+    <e k="sf_report_col_last_crop" v="Poslední Plodina" eh="ff41e5eb" />
+    <e k="sf_report_col_fert" v="Hnoj?" eh="9e6d0eb4" />
+    <e k="sf_report_no_data" v="Nejsou k dispozici údaje o půdě. Projděte se po poli a začněte sledovat." eh="1528a4cb" />
+    <e k="sf_report_prev" v="Předch" eh="14230d11" />
+    <e k="sf_report_next" v="Další" eh="10ac3d04" />
+    <e k="sf_report_yes" v="ANO" eh="7469a286" />
+    <e k="sf_report_ok" v="OK" eh="e0aa021e" />
+    <e k="sf_report_none" v="Žádná" eh="6adf97f8" />
+    <e k="sf_report_rec_n_poor" v="Potřebuje dusík" eh="5dca0711" />
+    <e k="sf_report_rec_n_fair" v="Nízký dusík" eh="35ad072d" />
+    <e k="sf_report_rec_p_poor" v="Potřebuje fosfor" eh="e8fa326f" />
+    <e k="sf_report_rec_p_fair" v="Nízký fosfor" eh="077e12cf" />
+    <e k="sf_report_rec_k_poor" v="Potřebuje draslík" eh="f23194e0" />
+    <e k="sf_report_rec_k_fair" v="Nízký draslík" eh="2006c0a2" />
+    <e k="sf_report_rec_ph_adjust" v="Upravit pH" eh="84f6bbbc" />
+    <e k="sf_report_rec_ph_monitor" v="Sledovat pH" eh="6dfcded4" />
+    <e k="sf_report_rec_om_increase" v="Zvýšit organiku" eh="c2a930af" />
+    <e k="sf_report_rec_om_maintain" v="Udržovat organiku" eh="e7655847" />
+    <e k="sf_report_rec_needs" v="Potřebuje:" eh="3e6d95cf" />
+    <e k="sf_report_rec_optimal" v="Zdraví půdy: Optimální" eh="6ee9d19b" />
+    <e k="sf_uan32_title" v="UAN 32 Dusíkaté hnojivo (N)" eh="90913bb8" />
+    <e k="sf_uan28_title" v="UAN 28 Dusíkaté hnojivo (N)" eh="9d902cd7" />
+    <e k="sf_anhydrous_title" v="Bezvodý amoniak (N)" eh="3fc85c02" />
+    <e k="sf_starter_title" v="Startovní hnojivo 10-34-0 (P)" eh="8c1a1ddc" />
+    <e k="sf_urea_title" v="Močovina 46-0-0 (N)" eh="659b3097" />
+    <e k="sf_ams_title" v="Síran amonný 21-0-0 (N)" eh="033d1845" />
+    <e k="sf_map_title" v="MAP hnojivo 11-52-0 (P)" eh="31aa2534" />
+    <e k="sf_dap_title" v="DAP hnojivo 18-46-0 (P)" eh="5030a80a" />
+    <e k="sf_potash_title" v="Potaš 0-0-60 (K)" eh="8db6c54c" />
+    <e k="sf_report_page_info" v="Pole %d-%d z %d  |  Strana %d z %d" eh="8db851d1" />
+    <e k="sf_bigBag_uan32_name" v="Big Bag UAN 32-0-0" eh="7bdc4d9d" />
+    <e k="sf_bigBag_uan32_function" v="Dusíkaté hnojivo (kapalné)" eh="27de5f41" />
+    <e k="sf_bigBag_uan28_name" v="Big Bag UAN 28-0-0" eh="997781d5" />
+    <e k="sf_bigBag_uan28_function" v="Dusíkaté hnojivo (kapalné)" eh="27de5f41" />
+    <e k="sf_bigBag_anhydrous_name" v="Big Bag Bezvodý Amoniak 82-0-0" eh="44914201" />
+    <e k="sf_bigBag_anhydrous_function" v="Dusíkaté hnojivo (kapalné)" eh="27de5f41" />
+    <e k="sf_bigBag_urea_name" v="Big Bag Močovina 46-0-0" eh="8e8cbaae" />
+    <e k="sf_bigBag_urea_function" v="Dusíkaté hnojivo (granulované)" eh="63efea20" />
+    <e k="sf_bigBag_ams_name" v="Big Bag AMS 21-0-0-24S" eh="7f71ee68" />
+    <e k="sf_bigBag_ams_function" v="Dusíkaté hnojivo (granulované)" eh="63efea20" />
+    <e k="sf_bigBag_map_name" v="Big Bag MAP 11-52-0" eh="8a5a059b" />
+    <e k="sf_bigBag_map_function" v="Fosforečné hnojivo (granulované)" eh="0cc85c60" />
+    <e k="sf_bigBag_dap_name" v="Big Bag DAP 18-46-0" eh="fb4e9987" />
+    <e k="sf_bigBag_dap_function" v="Fosforečné hnojivo (granulované)" eh="0cc85c60" />
+    <e k="sf_bigBag_potash_name" v="Big Bag Potaš 0-0-60" eh="eb771556" />
+    <e k="sf_bigBag_potash_function" v="Draselné hnojivo (granulované)" eh="18015099" />
+    <e k="sf_bigBag_starter_name" v="Big Bag Startovní Hnojivo 10-34-0" eh="953fd6c0" />
+    <e k="sf_bigBag_starter_function" v="Startovní hnojivo (kapalné)" eh="2c36ea57" />
+</elements>
