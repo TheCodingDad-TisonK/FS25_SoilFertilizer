@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
-<elements>
+<l10n>
+    <elements>
     <e k="sf_hud_color_1" v="绿色" eh="d382816a" />
     <e k="sf_hud_color_2" v="蓝色" eh="9594eec9" />
     <e k="sf_hud_color_3" v="琥珀色" eh="88068e33" />
@@ -121,4 +122,5 @@
 		<e k="sf_hud_pos_5" v="[EN] Center Right" eh="d7afdc5a" />
 		<e k="sf_hud_pos_6" v="[EN] Custom" eh="90589c47" />
 		<e k="sf_hud_color_theme_short" v="[EN] HUD Color Theme" eh="4a73f95b" />
-		<e k="sf_hud_color_theme_long" v="[EN] Choose the color scheme for soil info display" eh="3218bca6" /></elements>
+		<e k="sf_hud_color_theme_long" v="[EN] Choose the color scheme for soil info display" eh="3218bca6" />    </elements>
+</l10n>

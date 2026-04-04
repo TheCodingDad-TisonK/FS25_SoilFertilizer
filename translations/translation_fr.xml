@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
-<elements>
+<l10n>
+    <elements>
     <e k="sf_section" v="Sol &amp; Engrais" eh="f31197fb" />
     <e k="sf_enabled_short" v="Activer le mod" eh="cf7fea13" />
     <e k="sf_enabled_long" v="Activer ou désactiver le module sol &amp; engrais" eh="a891399a" />
@@ -121,4 +122,5 @@
     <e k="sf_bigBag_potash_function" v="Engrais potassique (sec)" eh="18015099" />
     <e k="sf_bigBag_starter_name" v="Big Bag Engrais Starter 10-34-0" eh="953fd6c0" />
     <e k="sf_bigBag_starter_function" v="Engrais starter (liquide)" eh="2c36ea57" />
-</elements>
+    </elements>
+</l10n>

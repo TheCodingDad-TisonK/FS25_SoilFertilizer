@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
-<elements>
+<l10n>
+    <elements>
     <e k="sf_section" v="Talaj &amp; Műtrágya" eh="f31197fb" />
     <e k="sf_enabled_short" v="Mod engedélyezése" eh="cf7fea13" />
     <e k="sf_enabled_long" v="A talaj és műtrágya mod engedélyezése vagy tiltása" eh="a891399a" />
@@ -121,4 +122,5 @@
     <e k="sf_bigBag_potash_function" v="Kálium műtrágya (száraz)" eh="18015099" />
     <e k="sf_bigBag_starter_name" v="Big Bag Starter Műtrágya 10-34-0" eh="953fd6c0" />
     <e k="sf_bigBag_starter_function" v="Starter műtrágya (folyékony)" eh="2c36ea57" />
-</elements>
+    </elements>
+</l10n>

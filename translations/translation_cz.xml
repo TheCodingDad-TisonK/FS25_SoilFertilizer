@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
-<elements>
+<l10n>
+    <elements>
     <e k="sf_section" v="Půda &amp; Hnojivo" eh="f31197fb" />
     <e k="sf_enabled_short" v="Povolit mod" eh="cf7fea13" />
     <e k="sf_enabled_long" v="Povolit nebo zakázat mod půda &amp; hnojivo" eh="a891399a" />
@@ -121,4 +122,5 @@
     <e k="sf_bigBag_potash_function" v="Draselné hnojivo (granulované)" eh="18015099" />
     <e k="sf_bigBag_starter_name" v="Big Bag Startovní Hnojivo 10-34-0" eh="953fd6c0" />
     <e k="sf_bigBag_starter_function" v="Startovní hnojivo (kapalné)" eh="2c36ea57" />
-</elements>
+    </elements>
+</l10n>

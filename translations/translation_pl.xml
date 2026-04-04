@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
-<elements>
+<l10n>
+    <elements>
     <e k="sf_section" v="Gleba &amp; Nawóz" eh="f31197fb" />
     <e k="sf_enabled_short" v="Włącz mod" eh="cf7fea13" />
     <e k="sf_enabled_long" v="Włącz lub wyłącz mod gleby i nawozu" eh="a891399a" />
@@ -121,4 +122,5 @@
     <e k="sf_bigBag_potash_function" v="Nawóz potasowy (suchy)" eh="18015099" />
     <e k="sf_bigBag_starter_name" v="Big Bag Nawóz Startowy 10-34-0" eh="953fd6c0" />
     <e k="sf_bigBag_starter_function" v="Nawóz startowy (ciekły)" eh="2c36ea57" />
-</elements>
+    </elements>
+</l10n>
