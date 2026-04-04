@@ -204,7 +204,7 @@ function HookManager:registerCustomSprayTypes()
     local solidGroundType   = dryType and dryType.sprayGroundType or 1
 
     -- Liquid nitrogen / starter types → inherit from LIQUIDFERTILIZER
-    local liquidNames = { "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME" }
+    local liquidNames = { "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME", "INSECTICIDE", "FUNGICIDE" }
     -- Granular/solid types → inherit from FERTILIZER
     local solidNames  = { "UREA", "AMS", "MAP", "DAP", "POTASH",
                           "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM" }
@@ -931,7 +931,7 @@ function HookManager:installFillUnitHook()
 
     local solidNames  = {"UREA", "AMS", "MAP", "DAP", "POTASH",
                           "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM"}
-    local liquidNames = {"UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME"}
+    local liquidNames = {"UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME", "INSECTICIDE", "FUNGICIDE"}
 
     local solidIndices  = {}
     local liquidIndices = {}
