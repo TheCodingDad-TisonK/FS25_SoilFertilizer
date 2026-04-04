@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <l10n>
     <elements>
-    <e k="sf_hud_color_1" v="GrÃ¸n" eh="d382816a" />
-    <e k="sf_hud_color_2" v="BlÃ¥" eh="9594eec9" />
+    <e k="sf_hud_color_1" v="Grøn" eh="d382816a" />
+    <e k="sf_hud_color_2" v="Blå" eh="9594eec9" />
     <e k="sf_hud_color_3" v="Rav" eh="88068e33" />
     <e k="sf_hud_color_4" v="Mono" eh="5d9b47bd" />
-    <e k="sf_diff_short" v="SvÃ¦rhedsgrad" eh="7b29ca96" />
-    <e k="sf_diff_long" v="SvÃ¦rhedsgrad for jordstyring" eh="d6f4560c" />
+    <e k="sf_diff_short" v="Sværhedsgrad" eh="7b29ca96" />
+    <e k="sf_diff_long" v="Sværhedsgrad for jordstyring" eh="d6f4560c" />
     <e k="sf_auto_rate_short" v="Automatisk hastighedskontrol" eh="6f99137d" />
-    <e k="sf_auto_rate_long" v="Justerer automatisk gÃ¸dningsraten baseret pÃ¥ markens behov" eh="a9ca9f6b" />
+    <e k="sf_auto_rate_long" v="Justerer automatisk gødningsraten baseret på markens behov" eh="a9ca9f6b" />
 		<e k="sf_hud_theme_1" v="[EN] Green" eh="d382816a" />
 		<e k="sf_hud_theme_2" v="[EN] Blue" eh="9594eec9" />
 		<e k="sf_hud_theme_3" v="[EN] Amber" eh="88068e33" />
@@ -69,29 +69,31 @@
 		<e k="sf_map_title" v="[EN] MAP Fertilizer 11-52-0 (P)" eh="31aa2534" />
 		<e k="sf_dap_title" v="[EN] DAP Fertilizer 18-46-0 (P)" eh="5030a80a" />
 		<e k="sf_potash_title" v="[EN] Potash 0-0-60 (K)" eh="8db6c54c" />
+		<e k="sf_insecticide_title" v="[EN] Insecticide" eh="5650eeef" />
+		<e k="sf_fungicide_title" v="[EN] Fungicide" eh="e8512698" />
 		<e k="sf_report_page_info" v="[EN] Fields %d-%d of %d  |  Page %d of %d" eh="8db851d1" />
     <e k="sf_bigBag_uan32_name" v="Big Bag UAN 32-0-0" eh="7bdc4d9d" />
-    <e k="sf_bigBag_uan32_function" v="KvÃ¦lstofgÃ¸dning (flydende)" eh="27de5f41" />
+    <e k="sf_bigBag_uan32_function" v="Kvælstofgødning (flydende)" eh="27de5f41" />
     <e k="sf_bigBag_uan28_name" v="Big Bag UAN 28-0-0" eh="997781d5" />
-    <e k="sf_bigBag_uan28_function" v="KvÃ¦lstofgÃ¸dning (flydende)" eh="27de5f41" />
+    <e k="sf_bigBag_uan28_function" v="Kvælstofgødning (flydende)" eh="27de5f41" />
     <e k="sf_bigBag_anhydrous_name" v="Big Bag Vandfri Ammoniak 82-0-0" eh="44914201" />
-    <e k="sf_bigBag_anhydrous_function" v="KvÃ¦lstofgÃ¸dning (flydende)" eh="27de5f41" />
+    <e k="sf_bigBag_anhydrous_function" v="Kvælstofgødning (flydende)" eh="27de5f41" />
     <e k="sf_bigBag_urea_name" v="Big Bag Urea 46-0-0" eh="8e8cbaae" />
-    <e k="sf_bigBag_urea_function" v="KvÃ¦lstofgÃ¸dning (tÃ¸r)" eh="63efea20" />
+    <e k="sf_bigBag_urea_function" v="Kvælstofgødning (tør)" eh="63efea20" />
     <e k="sf_bigBag_ams_name" v="Big Bag AMS 21-0-0-24S" eh="7f71ee68" />
-    <e k="sf_bigBag_ams_function" v="KvÃ¦lstofgÃ¸dning (tÃ¸r)" eh="63efea20" />
+    <e k="sf_bigBag_ams_function" v="Kvælstofgødning (tør)" eh="63efea20" />
     <e k="sf_bigBag_map_name" v="Big Bag MAP 11-52-0" eh="8a5a059b" />
-    <e k="sf_bigBag_map_function" v="FosfatgÃ¸dning (tÃ¸r)" eh="0cc85c60" />
+    <e k="sf_bigBag_map_function" v="Fosfatgødning (tør)" eh="0cc85c60" />
     <e k="sf_bigBag_dap_name" v="Big Bag DAP 18-46-0" eh="fb4e9987" />
-    <e k="sf_bigBag_dap_function" v="FosfatgÃ¸dning (tÃ¸r)" eh="0cc85c60" />
+    <e k="sf_bigBag_dap_function" v="Fosfatgødning (tør)" eh="0cc85c60" />
     <e k="sf_bigBag_potash_name" v="Big Bag Kaliumklorid 0-0-60" eh="eb771556" />
-    <e k="sf_bigBag_potash_function" v="KaliumgÃ¸dning (tÃ¸r)" eh="18015099" />
-    <e k="sf_bigBag_starter_name" v="Big Bag StartgÃ¸dning 10-34-0" eh="953fd6c0" />
+    <e k="sf_bigBag_potash_function" v="Kaliumgødning (tør)" eh="18015099" />
+    <e k="sf_bigBag_starter_name" v="Big Bag Startgødning 10-34-0" eh="953fd6c0" />
     <e k="sf_bigBag_insecticide_name" v="Big Bag Insecticide" eh="fa0200a7" />
     <e k="sf_bigBag_insecticide_function" v="Insecticide (liquid)" eh="09580f6b" />
     <e k="sf_bigBag_fungicide_name" v="Big Bag Fungicide" eh="a3d4e59c" />
     <e k="sf_bigBag_fungicide_function" v="Fungicide (liquid)" eh="745c34cb" />
-    <e k="sf_bigBag_starter_function" v="StartgÃ¸dning (flydende)" eh="2c36ea57" />
+    <e k="sf_bigBag_starter_function" v="Startgødning (flydende)" eh="2c36ea57" />
 
 		<e k="sf_section" v="[EN] Soil &amp;amp; Fertilizer" eh="d30a22a9" />
 		<e k="sf_enabled_short" v="[EN] Enable Mod" eh="cf7fea13" />

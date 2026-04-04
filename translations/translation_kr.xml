@@ -2,9 +2,9 @@
 <l10n>
     <elements>
     <e k="sf_hud_color_1" v="ì´ˆë¡" eh="d382816a" />
-    <e k="sf_hud_color_2" v="íŒŒëž‘" eh="9594eec9" />
-    <e k="sf_hud_color_3" v="í˜¸ë°•ìƒ‰" eh="88068e33" />
-    <e k="sf_hud_color_4" v="ë‹¨ìƒ‰" eh="5d9b47bd" />
+    <e k="sf_hud_color_2" v="파랑" eh="9594eec9" />
+    <e k="sf_hud_color_3" v="호박색" eh="88068e33" />
+    <e k="sf_hud_color_4" v="단색" eh="5d9b47bd" />
     <e k="sf_diff_short" v="ë‚œì´ë„" eh="7b29ca96" />
     <e k="sf_diff_long" v="í† ì–‘ ê´€ë¦¬ ë‚œì´ë„ ìˆ˜ì¤€" eh="d6f4560c" />
     <e k="sf_auto_rate_short" v="ìžë™ ì‚´í¬ëŸ‰ ì¡°ì ˆ" eh="6f99137d" />
@@ -69,29 +69,31 @@
 		<e k="sf_map_title" v="[EN] MAP Fertilizer 11-52-0 (P)" eh="31aa2534" />
 		<e k="sf_dap_title" v="[EN] DAP Fertilizer 18-46-0 (P)" eh="5030a80a" />
 		<e k="sf_potash_title" v="[EN] Potash 0-0-60 (K)" eh="8db6c54c" />
+		<e k="sf_insecticide_title" v="[EN] Insecticide" eh="5650eeef" />
+		<e k="sf_fungicide_title" v="[EN] Fungicide" eh="e8512698" />
 		<e k="sf_report_page_info" v="[EN] Fields %d-%d of %d  |  Page %d of %d" eh="8db851d1" />
-    <e k="sf_bigBag_uan32_name" v="ë¹…ë°± UAN 32-0-0" eh="7bdc4d9d" />
-    <e k="sf_bigBag_uan32_function" v="ì§ˆì†Œ ë¹„ë£Œ (ì•¡ì²´)" eh="27de5f41" />
-    <e k="sf_bigBag_uan28_name" v="ë¹…ë°± UAN 28-0-0" eh="997781d5" />
-    <e k="sf_bigBag_uan28_function" v="ì§ˆì†Œ ë¹„ë£Œ (ì•¡ì²´)" eh="27de5f41" />
-    <e k="sf_bigBag_anhydrous_name" v="ë¹…ë°± ë¬´ìˆ˜ ì•”ëª¨ë‹ˆì•„ 82-0-0" eh="44914201" />
-    <e k="sf_bigBag_anhydrous_function" v="ì§ˆì†Œ ë¹„ë£Œ (ì•¡ì²´)" eh="27de5f41" />
-    <e k="sf_bigBag_urea_name" v="ë¹…ë°± ìš”ì†Œ 46-0-0" eh="8e8cbaae" />
-    <e k="sf_bigBag_urea_function" v="ì§ˆì†Œ ë¹„ë£Œ (ê³ ì²´)" eh="63efea20" />
-    <e k="sf_bigBag_ams_name" v="ë¹…ë°± AMS 21-0-0-24S" eh="7f71ee68" />
-    <e k="sf_bigBag_ams_function" v="ì§ˆì†Œ ë¹„ë£Œ (ê³ ì²´)" eh="63efea20" />
-    <e k="sf_bigBag_map_name" v="ë¹…ë°± MAP 11-52-0" eh="8a5a059b" />
+    <e k="sf_bigBag_uan32_name" v="빅백 UAN 32-0-0" eh="7bdc4d9d" />
+    <e k="sf_bigBag_uan32_function" v="질소 비료 (액체)" eh="27de5f41" />
+    <e k="sf_bigBag_uan28_name" v="빅백 UAN 28-0-0" eh="997781d5" />
+    <e k="sf_bigBag_uan28_function" v="질소 비료 (액체)" eh="27de5f41" />
+    <e k="sf_bigBag_anhydrous_name" v="빅백 무수 암모니아 82-0-0" eh="44914201" />
+    <e k="sf_bigBag_anhydrous_function" v="질소 비료 (액체)" eh="27de5f41" />
+    <e k="sf_bigBag_urea_name" v="빅백 요소 46-0-0" eh="8e8cbaae" />
+    <e k="sf_bigBag_urea_function" v="질소 비료 (고체)" eh="63efea20" />
+    <e k="sf_bigBag_ams_name" v="빅백 AMS 21-0-0-24S" eh="7f71ee68" />
+    <e k="sf_bigBag_ams_function" v="질소 비료 (고체)" eh="63efea20" />
+    <e k="sf_bigBag_map_name" v="빅백 MAP 11-52-0" eh="8a5a059b" />
     <e k="sf_bigBag_map_function" v="ì¸ì‚° ë¹„ë£Œ (ê³ ì²´)" eh="0cc85c60" />
-    <e k="sf_bigBag_dap_name" v="ë¹…ë°± DAP 18-46-0" eh="fb4e9987" />
+    <e k="sf_bigBag_dap_name" v="빅백 DAP 18-46-0" eh="fb4e9987" />
     <e k="sf_bigBag_dap_function" v="ì¸ì‚° ë¹„ë£Œ (ê³ ì²´)" eh="0cc85c60" />
-    <e k="sf_bigBag_potash_name" v="ë¹…ë°± ì¹¼ë¦¬ 0-0-60" eh="eb771556" />
-    <e k="sf_bigBag_potash_function" v="ì¹¼ë¦¬ ë¹„ë£Œ (ê³ ì²´)" eh="18015099" />
-    <e k="sf_bigBag_starter_name" v="ë¹…ë°± ìŠ¤íƒ€í„° ë¹„ë£Œ 10-34-0" eh="953fd6c0" />
+    <e k="sf_bigBag_potash_name" v="빅백 칼리 0-0-60" eh="eb771556" />
+    <e k="sf_bigBag_potash_function" v="칼리 비료 (고체)" eh="18015099" />
+    <e k="sf_bigBag_starter_name" v="빅백 스타터 비료 10-34-0" eh="953fd6c0" />
     <e k="sf_bigBag_insecticide_name" v="Big Bag Insecticide" eh="fa0200a7" />
     <e k="sf_bigBag_insecticide_function" v="Insecticide (liquid)" eh="09580f6b" />
     <e k="sf_bigBag_fungicide_name" v="Big Bag Fungicide" eh="a3d4e59c" />
     <e k="sf_bigBag_fungicide_function" v="Fungicide (liquid)" eh="745c34cb" />
-    <e k="sf_bigBag_starter_function" v="ìŠ¤íƒ€í„° ë¹„ë£Œ (ì•¡ì²´)" eh="2c36ea57" />
+    <e k="sf_bigBag_starter_function" v="스타터 비료 (액체)" eh="2c36ea57" />
 
 		<e k="sf_section" v="[EN] Soil &amp;amp; Fertilizer" eh="d30a22a9" />
 		<e k="sf_enabled_short" v="[EN] Enable Mod" eh="cf7fea13" />

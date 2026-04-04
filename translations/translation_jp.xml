@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <l10n>
     <elements>
-    <e k="sf_hud_color_1" v="ã‚°ãƒªãƒ¼ãƒ³" eh="d382816a" />
-    <e k="sf_hud_color_2" v="ãƒ–ãƒ«ãƒ¼" eh="9594eec9" />
+    <e k="sf_hud_color_1" v="グリーン" eh="d382816a" />
+    <e k="sf_hud_color_2" v="ブルー" eh="9594eec9" />
     <e k="sf_hud_color_3" v="ã‚¢ãƒ³ãƒãƒ¼" eh="88068e33" />
-    <e k="sf_hud_color_4" v="ãƒ¢ãƒŽ" eh="5d9b47bd" />
-    <e k="sf_diff_short" v="é›£æ˜“åº¦" eh="7b29ca96" />
+    <e k="sf_hud_color_4" v="モノ" eh="5d9b47bd" />
+    <e k="sf_diff_short" v="難易度" eh="7b29ca96" />
     <e k="sf_diff_long" v="åœŸå£Œç®¡ç†ã®é›£æ˜“åº¦ãƒ¬ãƒ™ãƒ«" eh="d6f4560c" />
-    <e k="sf_auto_rate_short" v="è‡ªå‹•ãƒ¬ãƒ¼ãƒˆåˆ¶å¾¡" eh="6f99137d" />
+    <e k="sf_auto_rate_short" v="自動レート制御" eh="6f99137d" />
     <e k="sf_auto_rate_long" v="åœƒå ´ã®çŠ¶æ…‹ã«åŸºã¥ã„ã¦è‚¥æ–™æ•£å¸ƒé‡ã‚’è‡ªå‹•èª¿æ•´ã—ã¾ã™" eh="a9ca9f6b" />
 		<e k="sf_hud_theme_1" v="[EN] Green" eh="d382816a" />
 		<e k="sf_hud_theme_2" v="[EN] Blue" eh="9594eec9" />
@@ -69,29 +69,31 @@
 		<e k="sf_map_title" v="[EN] MAP Fertilizer 11-52-0 (P)" eh="31aa2534" />
 		<e k="sf_dap_title" v="[EN] DAP Fertilizer 18-46-0 (P)" eh="5030a80a" />
 		<e k="sf_potash_title" v="[EN] Potash 0-0-60 (K)" eh="8db6c54c" />
+		<e k="sf_insecticide_title" v="[EN] Insecticide" eh="5650eeef" />
+		<e k="sf_fungicide_title" v="[EN] Fungicide" eh="e8512698" />
 		<e k="sf_report_page_info" v="[EN] Fields %d-%d of %d  |  Page %d of %d" eh="8db851d1" />
     <e k="sf_bigBag_uan32_name" v="ãƒ“ãƒƒã‚°ãƒãƒƒã‚° UAN 32-0-0" eh="7bdc4d9d" />
-    <e k="sf_bigBag_uan32_function" v="çª’ç´ è‚¥æ–™ï¼ˆæ¶²ä½“ï¼‰" eh="27de5f41" />
+    <e k="sf_bigBag_uan32_function" v="窒素肥料（液体）" eh="27de5f41" />
     <e k="sf_bigBag_uan28_name" v="ãƒ“ãƒƒã‚°ãƒãƒƒã‚° UAN 28-0-0" eh="997781d5" />
-    <e k="sf_bigBag_uan28_function" v="çª’ç´ è‚¥æ–™ï¼ˆæ¶²ä½“ï¼‰" eh="27de5f41" />
+    <e k="sf_bigBag_uan28_function" v="窒素肥料（液体）" eh="27de5f41" />
     <e k="sf_bigBag_anhydrous_name" v="ãƒ“ãƒƒã‚°ãƒãƒƒã‚° ç„¡æ°´ã‚¢ãƒ³ãƒ¢ãƒ‹ã‚¢ 82-0-0" eh="44914201" />
-    <e k="sf_bigBag_anhydrous_function" v="çª’ç´ è‚¥æ–™ï¼ˆæ¶²ä½“ï¼‰" eh="27de5f41" />
+    <e k="sf_bigBag_anhydrous_function" v="窒素肥料（液体）" eh="27de5f41" />
     <e k="sf_bigBag_urea_name" v="ãƒ“ãƒƒã‚°ãƒãƒƒã‚° å°¿ç´  46-0-0" eh="8e8cbaae" />
-    <e k="sf_bigBag_urea_function" v="çª’ç´ è‚¥æ–™ï¼ˆä¹¾ç‡¥ï¼‰" eh="63efea20" />
+    <e k="sf_bigBag_urea_function" v="窒素肥料（乾燥）" eh="63efea20" />
     <e k="sf_bigBag_ams_name" v="ãƒ“ãƒƒã‚°ãƒãƒƒã‚° AMS 21-0-0-24S" eh="7f71ee68" />
-    <e k="sf_bigBag_ams_function" v="çª’ç´ è‚¥æ–™ï¼ˆä¹¾ç‡¥ï¼‰" eh="63efea20" />
+    <e k="sf_bigBag_ams_function" v="窒素肥料（乾燥）" eh="63efea20" />
     <e k="sf_bigBag_map_name" v="ãƒ“ãƒƒã‚°ãƒãƒƒã‚° MAP 11-52-0" eh="8a5a059b" />
-    <e k="sf_bigBag_map_function" v="ãƒªãƒ³é…¸è‚¥æ–™ï¼ˆä¹¾ç‡¥ï¼‰" eh="0cc85c60" />
+    <e k="sf_bigBag_map_function" v="リン酸肥料（乾燥）" eh="0cc85c60" />
     <e k="sf_bigBag_dap_name" v="ãƒ“ãƒƒã‚°ãƒãƒƒã‚° DAP 18-46-0" eh="fb4e9987" />
-    <e k="sf_bigBag_dap_function" v="ãƒªãƒ³é…¸è‚¥æ–™ï¼ˆä¹¾ç‡¥ï¼‰" eh="0cc85c60" />
+    <e k="sf_bigBag_dap_function" v="リン酸肥料（乾燥）" eh="0cc85c60" />
     <e k="sf_bigBag_potash_name" v="ãƒ“ãƒƒã‚°ãƒãƒƒã‚° å¡©åŒ–ã‚«ãƒª 0-0-60" eh="eb771556" />
-    <e k="sf_bigBag_potash_function" v="ã‚«ãƒªã‚¦ãƒ è‚¥æ–™ï¼ˆä¹¾ç‡¥ï¼‰" eh="18015099" />
+    <e k="sf_bigBag_potash_function" v="カリウム肥料（乾燥）" eh="18015099" />
     <e k="sf_bigBag_starter_name" v="ãƒ“ãƒƒã‚°ãƒãƒƒã‚° ã‚¹ã‚¿ãƒ¼ã‚¿ãƒ¼è‚¥æ–™ 10-34-0" eh="953fd6c0" />
     <e k="sf_bigBag_insecticide_name" v="Big Bag Insecticide" eh="fa0200a7" />
     <e k="sf_bigBag_insecticide_function" v="Insecticide (liquid)" eh="09580f6b" />
     <e k="sf_bigBag_fungicide_name" v="Big Bag Fungicide" eh="a3d4e59c" />
     <e k="sf_bigBag_fungicide_function" v="Fungicide (liquid)" eh="745c34cb" />
-    <e k="sf_bigBag_starter_function" v="ã‚¹ã‚¿ãƒ¼ã‚¿ãƒ¼è‚¥æ–™ï¼ˆæ¶²ä½“ï¼‰" eh="2c36ea57" />
+    <e k="sf_bigBag_starter_function" v="スターター肥料（液体）" eh="2c36ea57" />
 
 		<e k="sf_section" v="[EN] Soil &amp;amp; Fertilizer" eh="d30a22a9" />
 		<e k="sf_enabled_short" v="[EN] Enable Mod" eh="cf7fea13" />

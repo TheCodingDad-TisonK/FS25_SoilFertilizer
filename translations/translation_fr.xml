@@ -3,96 +3,96 @@
     <elements>
     <e k="sf_section" v="Sol &amp; Engrais" eh="f31197fb" />
     <e k="sf_enabled_short" v="Activer le mod" eh="cf7fea13" />
-    <e k="sf_enabled_long" v="Activer ou dÃ©sactiver le module sol &amp; engrais" eh="a891399a" />
+    <e k="sf_enabled_long" v="Activer ou désactiver le module sol &amp; engrais" eh="a891399a" />
     <e k="sf_debug_short" v="Mode DEBUG" eh="2ddcdc76" />
-    <e k="sf_debug_long" v="Activer/dÃ©sactiver le mode DEBUG (journalisation supplÃ©mentaire)" eh="f6f20240" />
+    <e k="sf_debug_long" v="Activer/désactiver le mode DEBUG (journalisation supplémentaire)" eh="f6f20240" />
     <e k="sf_seasonal_effects_short" v="Effets Saisonniers" eh="c16ea608" />
-    <e k="sf_seasonal_effects_long" v="Activer/dÃ©sactiver l'impact saisonnier sur les nutriments du sol (stimulation printaniÃ¨re, ralentissement automnal)" eh="3eea94c7" />
+    <e k="sf_seasonal_effects_long" v="Activer/désactiver l'impact saisonnier sur les nutriments du sol (stimulation printanière, ralentissement automnal)" eh="3eea94c7" />
     <e k="sf_rain_effects_short" v="Effets Pluie" eh="a2a1758b" />
-    <e k="sf_rain_effects_long" v="Activer/dÃ©sactiver l'impact de la pluie sur le sol (lessivage des nutriments, changements de pH)" eh="de3b14b9" />
+    <e k="sf_rain_effects_long" v="Activer/désactiver l'impact de la pluie sur le sol (lessivage des nutriments, changements de pH)" eh="de3b14b9" />
     <e k="sf_plowing_bonus_short" v="Bonus Labour" eh="541ec752" />
-    <e k="sf_plowing_bonus_long" v="Activer/dÃ©sactiver les avantages du labour pour la fertilitÃ© du sol (amÃ©lioration de l'azote et de la matiÃ¨re organique)" eh="fe701c1c" />
+    <e k="sf_plowing_bonus_long" v="Activer/désactiver les avantages du labour pour la fertilité du sol (amélioration de l'azote et de la matière organique)" eh="fe701c1c" />
     <e k="sf_weed_pressure_short" v="Weed Pressure" eh="7f71ee68" />
     <e k="sf_weed_pressure_long" v="Enable/disable dynamic weed growth and yield impact" eh="27de5f41" />
     <e k="sf_pest_pressure_short" v="Pest Pressure" eh="eb771556" />
     <e k="sf_pest_pressure_long" v="Enable/disable insect and pest infestation system" eh="18015099" />
     <e k="sf_disease_pressure_short" v="Disease Pressure" eh="953fd6c0" />
     <e k="sf_disease_pressure_long" v="Enable/disable fungal and crop disease system" eh="2c36ea57" />
-    <e k="sf_fertility_short" v="SystÃ¨me de FertilitÃ©" eh="f7e27d58" />
-    <e k="sf_fertility_long" v="Activer/dÃ©sactiver le systÃ¨me de fertilitÃ© du sol dynamique" eh="ea074366" />
+    <e k="sf_fertility_short" v="Système de Fertilité" eh="f7e27d58" />
+    <e k="sf_fertility_long" v="Activer/désactiver le système de fertilité du sol dynamique" eh="ea074366" />
     <e k="sf_nutrients_short" v="Cycles Nutriments" eh="ffab595d" />
-    <e k="sf_nutrients_long" v="Activer/dÃ©sactiver l'Ã©puisement et le rÃ©approvisionnement rÃ©alistes des nutriments" eh="dbe9c8ff" />
-    <e k="sf_difficulty_short" v="DifficultÃ©" eh="7b29ca96" />
-    <e k="sf_difficulty_long" v="DÃ©finir le niveau de difficultÃ© : Simple, RÃ©aliste, Hardcore" eh="cfb758a4" />
+    <e k="sf_nutrients_long" v="Activer/désactiver l'épuisement et le réapprovisionnement réalistes des nutriments" eh="dbe9c8ff" />
+    <e k="sf_difficulty_short" v="Difficulté" eh="7b29ca96" />
+    <e k="sf_difficulty_long" v="Définir le niveau de difficulté : Simple, Réaliste, Hardcore" eh="cfb758a4" />
     <e k="sf_diff_1" v="Simple" eh="1fbb1e39" />
-    <e k="sf_diff_2" v="RÃ©aliste" eh="408c999f" />
+    <e k="sf_diff_2" v="Réaliste" eh="408c999f" />
     <e k="sf_diff_3" v="Hardcore" eh="1c800aa9" />
-    <e k="sf_fertilizer_cost_short" v="CoÃ»ts Engrais" eh="6870d88b" />
-    <e k="sf_fertilizer_cost_long" v="Activer/dÃ©sactiver les coÃ»ts d'achat d'engrais rÃ©alistes" eh="12b03fbb" />
+    <e k="sf_fertilizer_cost_short" v="Coûts Engrais" eh="6870d88b" />
+    <e k="sf_fertilizer_cost_long" v="Activer/désactiver les coûts d'achat d'engrais réalistes" eh="12b03fbb" />
     <e k="sf_notifications_short" v="Notifications" eh="a274f4d4" />
-    <e k="sf_notifications_long" v="Activer/dÃ©sactiver les notifications de sol et d'engrais" eh="9a872f8f" />
+    <e k="sf_notifications_long" v="Activer/désactiver les notifications de sol et d'engrais" eh="9a872f8f" />
     <e k="sf_show_hud_short" v="Afficher HUD" eh="c94fd4d7" />
     <e k="sf_show_hud_long" v="Afficher/masquer l'HUD d'info sol (F8 pour basculer temporairement)" eh="4e2e11b6" />
     <e k="sf_hud_position_short" v="Position HUD" eh="5ac371f2" />
-    <e k="sf_hud_position_long" v="Choisir oÃ¹ l'HUD d'info sol apparaÃ®t Ã  l'Ã©cran" eh="d7b9c109" />
-    <e k="sf_hud_pos_1" v="En haut Ã  droite" eh="5f9f6784" />
-    <e k="sf_hud_pos_2" v="En haut Ã  gauche" eh="ac71274a" />
-    <e k="sf_hud_pos_3" v="En bas Ã  droite" eh="4d297f5d" />
-    <e k="sf_hud_pos_4" v="En bas Ã  gauche" eh="7eb55425" />
+    <e k="sf_hud_position_long" v="Choisir où l'HUD d'info sol apparaît à l'écran" eh="d7b9c109" />
+    <e k="sf_hud_pos_1" v="En haut à droite" eh="5f9f6784" />
+    <e k="sf_hud_pos_2" v="En haut à gauche" eh="ac71274a" />
+    <e k="sf_hud_pos_3" v="En bas à droite" eh="4d297f5d" />
+    <e k="sf_hud_pos_4" v="En bas à gauche" eh="7eb55425" />
     <e k="sf_hud_pos_5" v="Centre droit" eh="d7afdc5a" />
-    <e k="sf_hud_pos_6" v="PersonnalisÃ©" eh="90589c47" />
-    <e k="sf_hud_color_theme_short" v="ThÃ¨me de couleur HUD" eh="4a73f95b" />
-    <e k="sf_hud_color_theme_long" v="Choisir le schÃ©ma de couleurs pour l'affichage des infos sol" eh="3218bca6" />
+    <e k="sf_hud_pos_6" v="Personnalisé" eh="90589c47" />
+    <e k="sf_hud_color_theme_short" v="Thème de couleur HUD" eh="4a73f95b" />
+    <e k="sf_hud_color_theme_long" v="Choisir le schéma de couleurs pour l'affichage des infos sol" eh="3218bca6" />
     <e k="sf_hud_color_1" v="Vert" eh="d382816a" />
     <e k="sf_hud_color_2" v="Bleu" eh="9594eec9" />
     <e k="sf_hud_color_3" v="Ambre" eh="88068e33" />
     <e k="sf_hud_color_4" v="Mono" eh="5d9b47bd" />
-    <e k="sf_diff_short" v="DifficultÃ©" eh="7b29ca96" />
-    <e k="sf_diff_long" v="Niveau de difficultÃ© de gestion du sol" eh="d6f4560c" />
-    <e k="sf_auto_rate_short" v="ContrÃ´le automatique du dÃ©bit" eh="6f99137d" />
+    <e k="sf_diff_short" v="Difficulté" eh="7b29ca96" />
+    <e k="sf_diff_long" v="Niveau de difficulté de gestion du sol" eh="d6f4560c" />
+    <e k="sf_auto_rate_short" v="Contrôle automatique du débit" eh="6f99137d" />
     <e k="sf_auto_rate_long" v="Ajuste automatiquement le taux d'application selon les besoins du champ" eh="a9ca9f6b" />
     <e k="sf_hud_theme_1" v="Vert" eh="d382816a" />
     <e k="sf_hud_theme_2" v="Bleu" eh="9594eec9" />
     <e k="sf_hud_theme_3" v="Ambre" eh="88068e33" />
     <e k="sf_hud_theme_4" v="Mono" eh="5d9b47bd" />
     <e k="sf_hud_font_size_short" v="Taille police HUD" eh="fd6ca64a" />
-    <e k="sf_hud_font_size_long" v="Ajuster la taille du texte pour une meilleure lisibilitÃ©" eh="c338854f" />
+    <e k="sf_hud_font_size_long" v="Ajuster la taille du texte pour une meilleure lisibilité" eh="c338854f" />
     <e k="sf_hud_font_1" v="Petit" eh="2660064e" />
     <e k="sf_hud_font_2" v="Moyen" eh="87f8a6ab" />
     <e k="sf_hud_font_3" v="Grand" eh="3a69b34c" />
     <e k="sf_hud_transparency_short" v="Transparence HUD" eh="e8a009e4" />
-    <e k="sf_hud_transparency_long" v="DÃ©finir niveau transparence fond (Clair = transparent, Solide = opaque)" eh="152e390a" />
+    <e k="sf_hud_transparency_long" v="Définir niveau transparence fond (Clair = transparent, Solide = opaque)" eh="152e390a" />
     <e k="sf_hud_trans_1" v="Clair" eh="dc30bc0c" />
-    <e k="sf_hud_trans_2" v="LÃ©ger" eh="9914a0ce" />
+    <e k="sf_hud_trans_2" v="Léger" eh="9914a0ce" />
     <e k="sf_hud_trans_3" v="Moyen" eh="87f8a6ab" />
     <e k="sf_hud_trans_4" v="Sombre" eh="a18366b2" />
     <e k="sf_hud_trans_5" v="Solide" eh="e41480b6" />
-    <e k="sf_use_imperial_short" v="UnitÃ©s impÃ©riales" eh="ff2701ad" />
-    <e k="sf_use_imperial_long" v="Afficher les doses en gal/ac et lb/ac (dÃ©sactivÃ© = L/ha et kg/ha)" eh="17efa489" />
-    <e k="sf_reset" v="RÃ©initialiser paramÃ¨tres sol" eh="467bc2f5" />
-    <e k="input_SF_TOGGLE_HUD" v="Activer/dÃ©sactiver HUD sol" eh="f0224a10" />
+    <e k="sf_use_imperial_short" v="Unités impériales" eh="ff2701ad" />
+    <e k="sf_use_imperial_long" v="Afficher les doses en gal/ac et lb/ac (désactivé = L/ha et kg/ha)" eh="17efa489" />
+    <e k="sf_reset" v="Réinitialiser paramètres sol" eh="467bc2f5" />
+    <e k="input_SF_TOGGLE_HUD" v="Activer/désactiver HUD sol" eh="f0224a10" />
     <e k="input_SF_SOIL_REPORT" v="Rapport Sol" eh="c33180ef" />
     <e k="input_SF_RATE_UP" v="Augmenter le taux d'engrais" eh="6e601ef5" />
-    <e k="input_SF_RATE_DOWN" v="RÃ©duire le taux d'engrais" eh="30712026" />
+    <e k="input_SF_RATE_DOWN" v="Réduire le taux d'engrais" eh="30712026" />
     <e k="input_SF_TOGGLE_AUTO" v="Basculer taux auto" eh="a8642cf0" />
     <e k="sf_report_title" v="Rapport Sol &amp;amp; Engrais" eh="a76f8218" />
     <e k="sf_report_fields_tracked" v="Champs Suivis:" eh="7b1e59b8" />
     <e k="sf_report_need_fert" v="Besoin d'Engrais:" eh="110b60f2" />
-    <e k="sf_report_difficulty" v="DifficultÃ©:" eh="3abaf54f" />
+    <e k="sf_report_difficulty" v="Difficulté:" eh="3abaf54f" />
     <e k="sf_report_col_field" v="Champ" eh="6f16a5f8" />
-    <e k="sf_report_col_last_crop" v="DerniÃ¨re RÃ©colte" eh="ff41e5eb" />
+    <e k="sf_report_col_last_crop" v="Dernière Récolte" eh="ff41e5eb" />
     <e k="sf_report_col_fert" v="Eng?" eh="9e6d0eb4" />
-    <e k="sf_report_no_data" v="Aucune donnÃ©e de sol disponible. Marchez sur un champ pour commencer le suivi." eh="1528a4cb" />
-    <e k="sf_report_prev" v="PrÃ©c" eh="14230d11" />
+    <e k="sf_report_no_data" v="Aucune donnée de sol disponible. Marchez sur un champ pour commencer le suivi." eh="1528a4cb" />
+    <e k="sf_report_prev" v="Préc" eh="14230d11" />
     <e k="sf_report_next" v="Suiv" eh="10ac3d04" />
     <e k="sf_report_yes" v="OUI" eh="7469a286" />
     <e k="sf_report_ok" v="OK" eh="e0aa021e" />
     <e k="sf_report_none" v="Aucun" eh="6adf97f8" />
-    <e k="sf_report_rec_n_poor" v="Azote nÃ©cessaire" eh="5dca0711" />
+    <e k="sf_report_rec_n_poor" v="Azote nécessaire" eh="5dca0711" />
     <e k="sf_report_rec_n_fair" v="Azote faible" eh="35ad072d" />
-    <e k="sf_report_rec_p_poor" v="Phosphore nÃ©cessaire" eh="e8fa326f" />
+    <e k="sf_report_rec_p_poor" v="Phosphore nécessaire" eh="e8fa326f" />
     <e k="sf_report_rec_p_fair" v="Phosphore faible" eh="077e12cf" />
-    <e k="sf_report_rec_k_poor" v="Potassium nÃ©cessaire" eh="f23194e0" />
+    <e k="sf_report_rec_k_poor" v="Potassium nécessaire" eh="f23194e0" />
     <e k="sf_report_rec_k_fair" v="Potassium faible" eh="2006c0a2" />
     <e k="sf_report_rec_ph_adjust" v="Ajuster le pH" eh="84f6bbbc" />
     <e k="sf_report_rec_ph_monitor" v="Surveiller le pH" eh="6dfcded4" />
@@ -101,31 +101,33 @@
     <e k="sf_report_rec_pest" v="Pest Risk" eh="c2a930af" />
     <e k="sf_report_rec_disease" v="Disease Risk" eh="e7655847" />
     <e k="sf_report_rec_needs" v="Besoins:" eh="3e6d95cf" />
-    <e k="sf_report_rec_optimal" v="SantÃ© sol: Optimale" eh="6ee9d19b" />
-    <e k="sf_uan32_title" v="UAN 32 Engrais azotÃ© (N)" eh="90913bb8" />
-    <e k="sf_uan28_title" v="UAN 28 Engrais azotÃ© (N)" eh="9d902cd7" />
+    <e k="sf_report_rec_optimal" v="Santé sol: Optimale" eh="6ee9d19b" />
+    <e k="sf_uan32_title" v="UAN 32 Engrais azoté (N)" eh="90913bb8" />
+    <e k="sf_uan28_title" v="UAN 28 Engrais azoté (N)" eh="9d902cd7" />
     <e k="sf_anhydrous_title" v="Ammoniac anhydre (N)" eh="3fc85c02" />
     <e k="sf_starter_title" v="Engrais starter 10-34-0 (P)" eh="8c1a1ddc" />
-    <e k="sf_urea_title" v="UrÃ©e 46-0-0 (N)" eh="659b3097" />
+    <e k="sf_urea_title" v="Urée 46-0-0 (N)" eh="659b3097" />
     <e k="sf_ams_title" v="Sulfate d'ammonium 21-0-0 (N)" eh="033d1845" />
     <e k="sf_map_title" v="Engrais MAP 11-52-0 (P)" eh="31aa2534" />
     <e k="sf_dap_title" v="Engrais DAP 18-46-0 (P)" eh="5030a80a" />
     <e k="sf_potash_title" v="Potasse 0-0-60 (K)" eh="8db6c54c" />
+		<e k="sf_insecticide_title" v="[EN] Insecticide" eh="5650eeef" />
+		<e k="sf_fungicide_title" v="[EN] Fungicide" eh="e8512698" />
     <e k="sf_report_page_info" v="Champs %d-%d sur %d  |  Page %d sur %d" eh="8db851d1" />
     <e k="sf_bigBag_uan32_name" v="Big Bag UAN 32-0-0" eh="7bdc4d9d" />
-    <e k="sf_bigBag_uan32_function" v="Engrais azotÃ© (liquide)" eh="27de5f41" />
+    <e k="sf_bigBag_uan32_function" v="Engrais azoté (liquide)" eh="27de5f41" />
     <e k="sf_bigBag_uan28_name" v="Big Bag UAN 28-0-0" eh="997781d5" />
-    <e k="sf_bigBag_uan28_function" v="Engrais azotÃ© (liquide)" eh="27de5f41" />
+    <e k="sf_bigBag_uan28_function" v="Engrais azoté (liquide)" eh="27de5f41" />
     <e k="sf_bigBag_anhydrous_name" v="Big Bag Ammoniac Anhydre 82-0-0" eh="44914201" />
-    <e k="sf_bigBag_anhydrous_function" v="Engrais azotÃ© (liquide)" eh="27de5f41" />
-    <e k="sf_bigBag_urea_name" v="Big Bag UrÃ©e 46-0-0" eh="8e8cbaae" />
-    <e k="sf_bigBag_urea_function" v="Engrais azotÃ© (sec)" eh="63efea20" />
+    <e k="sf_bigBag_anhydrous_function" v="Engrais azoté (liquide)" eh="27de5f41" />
+    <e k="sf_bigBag_urea_name" v="Big Bag Urée 46-0-0" eh="8e8cbaae" />
+    <e k="sf_bigBag_urea_function" v="Engrais azoté (sec)" eh="63efea20" />
     <e k="sf_bigBag_ams_name" v="Big Bag AMS 21-0-0-24S" eh="7f71ee68" />
-    <e k="sf_bigBag_ams_function" v="Engrais azotÃ© (sec)" eh="63efea20" />
+    <e k="sf_bigBag_ams_function" v="Engrais azoté (sec)" eh="63efea20" />
     <e k="sf_bigBag_map_name" v="Big Bag MAP 11-52-0" eh="8a5a059b" />
-    <e k="sf_bigBag_map_function" v="Engrais phosphorÃ© (sec)" eh="0cc85c60" />
+    <e k="sf_bigBag_map_function" v="Engrais phosphoré (sec)" eh="0cc85c60" />
     <e k="sf_bigBag_dap_name" v="Big Bag DAP 18-46-0" eh="fb4e9987" />
-    <e k="sf_bigBag_dap_function" v="Engrais phosphorÃ© (sec)" eh="0cc85c60" />
+    <e k="sf_bigBag_dap_function" v="Engrais phosphoré (sec)" eh="0cc85c60" />
     <e k="sf_bigBag_potash_name" v="Big Bag Potasse 0-0-60" eh="eb771556" />
     <e k="sf_bigBag_potash_function" v="Engrais potassique (sec)" eh="18015099" />
     <e k="sf_bigBag_starter_name" v="Big Bag Engrais Starter 10-34-0" eh="953fd6c0" />
