@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.3.0] - 2026-04-05
+
+### Fixed
+
+- Remaining 10000L changed to 1000L
+- Improved (extended) pest duration and added to correct hook
+- Cleaned modDesc (& becomes &amp;)
+
+
+---
+
 ## [1.4.2.0] - 2026-04-04
 
 ### Fixed

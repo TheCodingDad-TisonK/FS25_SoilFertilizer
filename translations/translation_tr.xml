@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <l10n>
     <elements>
-    <e k="sf_hud_color_1" v="YeÅŸil" eh="d382816a" />
+    <e k="sf_hud_color_1" v="Yeşil" eh="d382816a" />
     <e k="sf_hud_color_2" v="Mavi" eh="9594eec9" />
     <e k="sf_hud_color_3" v="Kehribar" eh="88068e33" />
     <e k="sf_hud_color_4" v="Mono" eh="5d9b47bd" />
     <e k="sf_diff_short" v="Zorluk" eh="7b29ca96" />
-    <e k="sf_diff_long" v="Toprak yÃ¶netimi zorluk seviyesi" eh="d6f4560c" />
-    <e k="sf_auto_rate_short" v="Otomatik doz kontrolÃ¼" eh="6f99137d" />
-    <e k="sf_auto_rate_long" v="Tarla ihtiyaÃ§larÄ±na gÃ¶re gÃ¼bre uygulama oranÄ±nÄ± otomatik olarak ayarlar" eh="a9ca9f6b" />
+    <e k="sf_diff_long" v="Toprak yönetimi zorluk seviyesi" eh="d6f4560c" />
+    <e k="sf_auto_rate_short" v="Otomatik doz kontrolü" eh="6f99137d" />
+    <e k="sf_auto_rate_long" v="Tarla ihtiyaçlarına göre gübre uygulama oranını otomatik olarak ayarlar" eh="a9ca9f6b" />
 		<e k="sf_hud_theme_1" v="[EN] Green" eh="d382816a" />
 		<e k="sf_hud_theme_2" v="[EN] Blue" eh="9594eec9" />
 		<e k="sf_hud_theme_3" v="[EN] Amber" eh="88068e33" />
@@ -32,7 +32,7 @@
 		<e k="input_SF_SOIL_REPORT" v="[EN] Soil Report" eh="c33180ef" />
 		<e k="input_SF_RATE_UP" v="[EN] Increase Fertilizer Rate" eh="6e601ef5" />
 		<e k="input_SF_RATE_DOWN" v="[EN] Decrease Fertilizer Rate" eh="30712026" />
-    <e k="input_SF_TOGGLE_AUTO" v="Otomatik dozlamayÄ± aÃ§/kapat" eh="a8642cf0" />
+    <e k="input_SF_TOGGLE_AUTO" v="Otomatik dozlamayı aç/kapat" eh="a8642cf0" />
 		<e k="sf_report_title" v="[EN] Soil &amp;amp;amp; Fertilizer Report" eh="e4d0126a" />
 		<e k="sf_report_fields_tracked" v="[EN] Fields Tracked:" eh="7b1e59b8" />
 		<e k="sf_report_need_fert" v="[EN] Need Fertilizer:" eh="110b60f2" />
@@ -69,29 +69,31 @@
 		<e k="sf_map_title" v="[EN] MAP Fertilizer 11-52-0 (P)" eh="31aa2534" />
 		<e k="sf_dap_title" v="[EN] DAP Fertilizer 18-46-0 (P)" eh="5030a80a" />
 		<e k="sf_potash_title" v="[EN] Potash 0-0-60 (K)" eh="8db6c54c" />
+		<e k="sf_insecticide_title" v="[EN] Insecticide" eh="5650eeef" />
+		<e k="sf_fungicide_title" v="[EN] Fungicide" eh="e8512698" />
 		<e k="sf_report_page_info" v="[EN] Fields %d-%d of %d  |  Page %d of %d" eh="8db851d1" />
     <e k="sf_bigBag_uan32_name" v="Big Bag UAN 32-0-0" eh="7bdc4d9d" />
-    <e k="sf_bigBag_uan32_function" v="Azotlu gÃ¼bre (sÄ±vÄ±)" eh="27de5f41" />
+    <e k="sf_bigBag_uan32_function" v="Azotlu gübre (sıvı)" eh="27de5f41" />
     <e k="sf_bigBag_uan28_name" v="Big Bag UAN 28-0-0" eh="997781d5" />
-    <e k="sf_bigBag_uan28_function" v="Azotlu gÃ¼bre (sÄ±vÄ±)" eh="27de5f41" />
+    <e k="sf_bigBag_uan28_function" v="Azotlu gübre (sıvı)" eh="27de5f41" />
     <e k="sf_bigBag_anhydrous_name" v="Big Bag Susuz Amonyak 82-0-0" eh="44914201" />
-    <e k="sf_bigBag_anhydrous_function" v="Azotlu gÃ¼bre (sÄ±vÄ±)" eh="27de5f41" />
-    <e k="sf_bigBag_urea_name" v="Big Bag Ãœre 46-0-0" eh="8e8cbaae" />
-    <e k="sf_bigBag_urea_function" v="Azotlu gÃ¼bre (kuru)" eh="63efea20" />
+    <e k="sf_bigBag_anhydrous_function" v="Azotlu gübre (sıvı)" eh="27de5f41" />
+    <e k="sf_bigBag_urea_name" v="Big Bag Üre 46-0-0" eh="8e8cbaae" />
+    <e k="sf_bigBag_urea_function" v="Azotlu gübre (kuru)" eh="63efea20" />
     <e k="sf_bigBag_ams_name" v="Big Bag AMS 21-0-0-24S" eh="7f71ee68" />
-    <e k="sf_bigBag_ams_function" v="Azotlu gÃ¼bre (kuru)" eh="63efea20" />
+    <e k="sf_bigBag_ams_function" v="Azotlu gübre (kuru)" eh="63efea20" />
     <e k="sf_bigBag_map_name" v="Big Bag MAP 11-52-0" eh="8a5a059b" />
-    <e k="sf_bigBag_map_function" v="Fosforlu gÃ¼bre (kuru)" eh="0cc85c60" />
+    <e k="sf_bigBag_map_function" v="Fosforlu gübre (kuru)" eh="0cc85c60" />
     <e k="sf_bigBag_dap_name" v="Big Bag DAP 18-46-0" eh="fb4e9987" />
-    <e k="sf_bigBag_dap_function" v="Fosforlu gÃ¼bre (kuru)" eh="0cc85c60" />
+    <e k="sf_bigBag_dap_function" v="Fosforlu gübre (kuru)" eh="0cc85c60" />
     <e k="sf_bigBag_potash_name" v="Big Bag Potas 0-0-60" eh="eb771556" />
-    <e k="sf_bigBag_potash_function" v="Potasyumlu gÃ¼bre (kuru)" eh="18015099" />
-    <e k="sf_bigBag_starter_name" v="Big Bag BaÅŸlangÄ±Ã§ GÃ¼bresi 10-34-0" eh="953fd6c0" />
+    <e k="sf_bigBag_potash_function" v="Potasyumlu gübre (kuru)" eh="18015099" />
+    <e k="sf_bigBag_starter_name" v="Big Bag Başlangıç Gübresi 10-34-0" eh="953fd6c0" />
     <e k="sf_bigBag_insecticide_name" v="Big Bag Insecticide" eh="fa0200a7" />
     <e k="sf_bigBag_insecticide_function" v="Insecticide (liquid)" eh="09580f6b" />
     <e k="sf_bigBag_fungicide_name" v="Big Bag Fungicide" eh="a3d4e59c" />
     <e k="sf_bigBag_fungicide_function" v="Fungicide (liquid)" eh="745c34cb" />
-    <e k="sf_bigBag_starter_function" v="BaÅŸlangÄ±Ã§ gÃ¼bresi (sÄ±vÄ±)" eh="2c36ea57" />
+    <e k="sf_bigBag_starter_function" v="Başlangıç gübresi (sıvı)" eh="2c36ea57" />
 
 		<e k="sf_section" v="[EN] Soil &amp;amp; Fertilizer" eh="d30a22a9" />
 		<e k="sf_enabled_short" v="[EN] Enable Mod" eh="cf7fea13" />

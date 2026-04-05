@@ -679,9 +679,18 @@ function HookManager:installSprayerAreaHook()
                 -- Check herbicide first (mutually exclusive with fertilizer profiles)
                 local herbTypes = SoilConstants.WEED_PRESSURE and SoilConstants.WEED_PRESSURE.HERBICIDE_TYPES
                 local herbEffectiveness = herbTypes and herbTypes[fillType.name]
+                
+                -- Check insecticide
+                local pestTypes = SoilConstants.PEST_PRESSURE and SoilConstants.PEST_PRESSURE.INSECTICIDE_TYPES
+                local pestEffectiveness = pestTypes and pestTypes[fillType.name]
+                
+                -- Check fungicide
+                local diseaseTypes = SoilConstants.DISEASE_PRESSURE and SoilConstants.DISEASE_PRESSURE.FUNGICIDE_TYPES
+                local diseaseEffectiveness = diseaseTypes and diseaseTypes[fillType.name]
+                
                 local isFertilizer = SoilConstants.FERTILIZER_PROFILES[fillType.name] ~= nil
 
-                if not isFertilizer and not herbEffectiveness then return end
+                if not isFertilizer and not herbEffectiveness and not pestEffectiveness and not diseaseEffectiveness then return end
 
                 -- Resolve field from vehicle root position
                 local x, _, z = getWorldTranslation(self.rootNode)
@@ -715,6 +724,16 @@ function HookManager:installSprayerAreaHook()
                 -- Herbicide application reduces weed pressure
                 if herbEffectiveness and g_SoilFertilityManager.soilSystem.onHerbicideApplied then
                     g_SoilFertilityManager.soilSystem:onHerbicideApplied(fieldId, herbEffectiveness)
+                end
+
+                -- Insecticide application reduces pest pressure
+                if pestEffectiveness and g_SoilFertilityManager.soilSystem.onInsecticideApplied then
+                    g_SoilFertilityManager.soilSystem:onInsecticideApplied(fieldId, pestEffectiveness)
+                end
+
+                -- Fungicide application reduces disease pressure
+                if diseaseEffectiveness and g_SoilFertilityManager.soilSystem.onFungicideApplied then
+                    g_SoilFertilityManager.soilSystem:onFungicideApplied(fieldId, diseaseEffectiveness)
                 end
 
                 -- Over-application burn check (nutrient fertilizers only, not lime)

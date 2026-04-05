@@ -111,8 +111,8 @@
     <e k="sf_map_title" v="MAP Fertilizer 11-52-0 (P)" eh="31aa2534" />
     <e k="sf_dap_title" v="DAP Fertilizer 18-46-0 (P)" eh="5030a80a" />
     <e k="sf_potash_title" v="Potash 0-0-60 (K)" eh="8db6c54c" />
-    <e k="sf_insecticide_title" v="Insecticide" eh="fa0200a7" />
-    <e k="sf_fungicide_title" v="Fungicide" eh="a3d4e59c" />
+    <e k="sf_insecticide_title" v="Insecticide" eh="5650eeef" />
+    <e k="sf_fungicide_title" v="Fungicide" eh="e8512698" />
     <e k="sf_report_page_info" v="Fields %d-%d of %d  |  Page %d of %d" eh="8db851d1" />
     <e k="sf_bigBag_uan32_name" v="Big Bag UAN 32-0-0" eh="7bdc4d9d" />
     <e k="sf_bigBag_uan32_function" v="Nitrogen Fertilizer (liquid)" eh="27de5f41" />

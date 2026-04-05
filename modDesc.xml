@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <modDesc descVersion="106">
     <author>TisonK</author>
-    <version>1.4.2.0</version>
+    <version>1.4.3.0</version>
     <modName>FS25_SoilFertilizer</modName>
     <title>
-        <en>Realistic Soil & Fertilizer</en>
-        <de>Realistischer Boden & Dünger</de>
-        <fr>Sol & Engrais Réalistes</fr>
-        <pl>Realistyczna Gleba & Nawóz</pl>
-        <es>Suelo & Fertilizante Realistas</es>
-        <it>Suolo & Fertilizzante Realistici</it>
-        <cz>Realistická Půda & Hnojivo</cz>
-        <br>Solo & Fertilizante Realistas</br>
+        <en>Realistic Soil &amp; Fertilizer</en>
+        <de>Realistischer Boden &amp; Dünger</de>
+        <fr>Sol &amp; Engrais Réalistes</fr>
+        <pl>Realistyczna Gleba &amp;Nawóz</pl>
+        <es>Suelo &amp; Fertilizante Realistas</es>
+        <it>Suolo &amp; Fertilizzante Realistici</it>
+        <cz>Realistická Půda &amp; Hnojivo</cz>
+        <br>Solo &amp; Fertilizante Realistas</br>
         <uk>Реалістичний грунт та добриво</uk>
         <ru>Реалистичная почва и удобрение</ru>
-        <hu>Realisztikus Talaj & Műtrágya</hu>
-        <nl>Realistische Bodem & Meststof</nl>
+        <hu>Realisztikus Talaj &amp; Műtrágya</hu>
+        <nl>Realistische Bodem &amp; Meststof</nl>
         <ea>Suelo y Fertilizante Realistas</ea>
-        <pt>Solo & Fertilizante Realistas</pt>
+        <pt>Solo &amp; Fertilizante Realistas</pt>
         <ro>Sol și Îngrășământ Realist</ro>
-        <tr>Gerçekçi Toprak & Gübre</tr>
-        <fi>Realistinen Maaperä & Lannoite</fi>
-        <no>Realistisk Jord & Gjødsel</no>
-        <sv>Realistisk Jord & Gödsel</sv>
-        <da>Realistisk Jord & Gødning</da>
+        <tr>Gerçekçi Toprak &amp; Gübre</tr>
+        <fi>Realistinen Maaperä &amp; Lannoite</fi>
+        <no>Realistisk Jord &amp; Gjødsel</no>
+        <sv>Realistisk Jord &amp; Gödsel</sv>
+        <da>Realistisk Jord &amp; Gødning</da>
         <kr>현실적인 토양 및 비료</kr>
         <jp>リアルな土壌と肥料</jp>
         <ct>真實土壤與肥料</ct>

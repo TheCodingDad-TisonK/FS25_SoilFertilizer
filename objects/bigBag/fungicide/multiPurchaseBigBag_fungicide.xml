@@ -38,7 +38,7 @@
         <fillUnitConfigurations>
             <fillUnitConfiguration>
                 <fillUnits>
-                    <fillUnit fillTypes="FUNGICIDE" capacity="10000" />
+                    <fillUnit fillTypes="FUNGICIDE" capacity="1000" />
                 </fillUnits>
             </fillUnitConfiguration>
         </fillUnitConfigurations>

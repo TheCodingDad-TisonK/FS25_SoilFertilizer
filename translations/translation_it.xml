@@ -4,26 +4,26 @@
     <e k="sf_section" v="Suolo &amp; Fertilizzante" eh="f31197fb" />
     <e k="sf_enabled_short" v="Attiva mod" eh="cf7fea13" />
     <e k="sf_enabled_long" v="Attiva o disattiva il modulo suolo &amp; fertilizzante" eh="a891399a" />
-    <e k="sf_debug_short" v="ModalitÃ  DEBUG" eh="2ddcdc76" />
-    <e k="sf_debug_long" v="Attiva/disattiva modalitÃ  DEBUG (registrazione aggiuntiva)" eh="f6f20240" />
+    <e k="sf_debug_short" v="Modalità DEBUG" eh="2ddcdc76" />
+    <e k="sf_debug_long" v="Attiva/disattiva modalità DEBUG (registrazione aggiuntiva)" eh="f6f20240" />
     <e k="sf_seasonal_effects_short" v="Effetti Stagionali" eh="c16ea608" />
     <e k="sf_seasonal_effects_long" v="Attiva/disattiva impatto stagionale sui nutrienti del suolo (spinta primaverile, rallentamento autunnale)" eh="3eea94c7" />
     <e k="sf_rain_effects_short" v="Effetti Pioggia" eh="a2a1758b" />
     <e k="sf_rain_effects_long" v="Attiva/disattiva impatto pioggia su suolo (lisciviazione nutrienti, cambiamenti pH)" eh="de3b14b9" />
     <e k="sf_plowing_bonus_short" v="Bonus Aratura" eh="541ec752" />
-    <e k="sf_plowing_bonus_long" v="Attiva/disattiva benefici aratura per fertilitÃ  suolo (miglior azoto e materia organica)" eh="fe701c1c" />
+    <e k="sf_plowing_bonus_long" v="Attiva/disattiva benefici aratura per fertilità suolo (miglior azoto e materia organica)" eh="fe701c1c" />
     <e k="sf_weed_pressure_short" v="Weed Pressure" eh="7f71ee68" />
     <e k="sf_weed_pressure_long" v="Enable/disable dynamic weed growth and yield impact" eh="27de5f41" />
     <e k="sf_pest_pressure_short" v="Pest Pressure" eh="eb771556" />
     <e k="sf_pest_pressure_long" v="Enable/disable insect and pest infestation system" eh="18015099" />
     <e k="sf_disease_pressure_short" v="Disease Pressure" eh="953fd6c0" />
     <e k="sf_disease_pressure_long" v="Enable/disable fungal and crop disease system" eh="2c36ea57" />
-    <e k="sf_fertility_short" v="Sistema FertilitÃ " eh="f7e27d58" />
-    <e k="sf_fertility_long" v="Attiva/disattiva sistema dinamico fertilitÃ  del suolo" eh="ea074366" />
+    <e k="sf_fertility_short" v="Sistema Fertilità" eh="f7e27d58" />
+    <e k="sf_fertility_long" v="Attiva/disattiva sistema dinamico fertilità del suolo" eh="ea074366" />
     <e k="sf_nutrients_short" v="Cicli Nutrienti" eh="ffab595d" />
     <e k="sf_nutrients_long" v="Attiva/disattiva esaurimento e reintegro realistici nutrienti" eh="dbe9c8ff" />
-    <e k="sf_difficulty_short" v="DifficoltÃ " eh="7b29ca96" />
-    <e k="sf_difficulty_long" v="Imposta livello difficoltÃ : Semplice, Realistico, Hardcore" eh="cfb758a4" />
+    <e k="sf_difficulty_short" v="Difficoltà" eh="7b29ca96" />
+    <e k="sf_difficulty_long" v="Imposta livello difficoltà: Semplice, Realistico, Hardcore" eh="cfb758a4" />
     <e k="sf_diff_1" v="Semplice" eh="1fbb1e39" />
     <e k="sf_diff_2" v="Realistico" eh="408c999f" />
     <e k="sf_diff_3" v="Hardcore" eh="1c800aa9" />
@@ -47,16 +47,16 @@
     <e k="sf_hud_color_2" v="Blu" eh="9594eec9" />
     <e k="sf_hud_color_3" v="Ambra" eh="88068e33" />
     <e k="sf_hud_color_4" v="Mono" eh="5d9b47bd" />
-    <e k="sf_diff_short" v="DifficoltÃ " eh="7b29ca96" />
-    <e k="sf_diff_long" v="Livello di difficoltÃ  della gestione del suolo" eh="d6f4560c" />
-    <e k="sf_auto_rate_short" v="Controllo automatico della velocitÃ " eh="6f99137d" />
+    <e k="sf_diff_short" v="Difficoltà" eh="7b29ca96" />
+    <e k="sf_diff_long" v="Livello di difficoltà della gestione del suolo" eh="d6f4560c" />
+    <e k="sf_auto_rate_short" v="Controllo automatico della velocità" eh="6f99137d" />
     <e k="sf_auto_rate_long" v="Regola automaticamente il tasso di applicazione in base alle esigenze del campo" eh="a9ca9f6b" />
     <e k="sf_hud_theme_1" v="Verde" eh="d382816a" />
     <e k="sf_hud_theme_2" v="Blu" eh="9594eec9" />
     <e k="sf_hud_theme_3" v="Ambra" eh="88068e33" />
     <e k="sf_hud_theme_4" v="Mono" eh="5d9b47bd" />
     <e k="sf_hud_font_size_short" v="Dimensione carattere HUD" eh="fd6ca64a" />
-    <e k="sf_hud_font_size_long" v="Regola dimensione testo per migliore leggibilitÃ " eh="c338854f" />
+    <e k="sf_hud_font_size_long" v="Regola dimensione testo per migliore leggibilità" eh="c338854f" />
     <e k="sf_hud_font_1" v="Piccolo" eh="2660064e" />
     <e k="sf_hud_font_2" v="Medio" eh="87f8a6ab" />
     <e k="sf_hud_font_3" v="Grande" eh="3a69b34c" />
@@ -67,25 +67,25 @@
     <e k="sf_hud_trans_3" v="Medio" eh="87f8a6ab" />
     <e k="sf_hud_trans_4" v="Scuro" eh="a18366b2" />
     <e k="sf_hud_trans_5" v="Solido" eh="e41480b6" />
-    <e k="sf_use_imperial_short" v="UnitÃ  imperiali" eh="ff2701ad" />
+    <e k="sf_use_imperial_short" v="Unità imperiali" eh="ff2701ad" />
     <e k="sf_use_imperial_long" v="Mostra le dosi in gal/ac e lb/ac (off = L/ha e kg/ha)" eh="17efa489" />
     <e k="sf_reset" v="Ripristina impostazioni suolo" eh="467bc2f5" />
     <e k="input_SF_TOGGLE_HUD" v="Attiva/disattiva HUD suolo" eh="f0224a10" />
     <e k="input_SF_SOIL_REPORT" v="Rapporto Suolo" eh="c33180ef" />
     <e k="input_SF_RATE_UP" v="Aumenta dose fertilizzante" eh="6e601ef5" />
     <e k="input_SF_RATE_DOWN" v="Riduci dose fertilizzante" eh="30712026" />
-    <e k="input_SF_TOGGLE_AUTO" v="Attiva/disattiva velocitÃ  auto" eh="a8642cf0" />
+    <e k="input_SF_TOGGLE_AUTO" v="Attiva/disattiva velocità auto" eh="a8642cf0" />
     <e k="sf_report_title" v="Rapporto Suolo &amp;amp; Fertilizzante" eh="a76f8218" />
     <e k="sf_report_fields_tracked" v="Campi Tracciati:" eh="7b1e59b8" />
     <e k="sf_report_need_fert" v="Necessitano Fertilizzante:" eh="110b60f2" />
-    <e k="sf_report_difficulty" v="DifficoltÃ :" eh="3abaf54f" />
+    <e k="sf_report_difficulty" v="Difficoltà:" eh="3abaf54f" />
     <e k="sf_report_col_field" v="Campo" eh="6f16a5f8" />
     <e k="sf_report_col_last_crop" v="Ultimo Raccolto" eh="ff41e5eb" />
     <e k="sf_report_col_fert" v="Fert?" eh="9e6d0eb4" />
     <e k="sf_report_no_data" v="Nessun dato del suolo disponibile. Cammina su un campo per iniziare il tracciamento." eh="1528a4cb" />
     <e k="sf_report_prev" v="Prec" eh="14230d11" />
     <e k="sf_report_next" v="Succ" eh="10ac3d04" />
-    <e k="sf_report_yes" v="SÃŒ" eh="7469a286" />
+    <e k="sf_report_yes" v="SÌ" eh="7469a286" />
     <e k="sf_report_ok" v="OK" eh="e0aa021e" />
     <e k="sf_report_none" v="Nessuno" eh="6adf97f8" />
     <e k="sf_report_rec_n_poor" v="Serve azoto" eh="5dca0711" />
@@ -111,6 +111,8 @@
     <e k="sf_map_title" v="Fertilizzante MAP 11-52-0 (P)" eh="31aa2534" />
     <e k="sf_dap_title" v="Fertilizzante DAP 18-46-0 (P)" eh="5030a80a" />
     <e k="sf_potash_title" v="Potassa 0-0-60 (K)" eh="8db6c54c" />
+		<e k="sf_insecticide_title" v="[EN] Insecticide" eh="5650eeef" />
+		<e k="sf_fungicide_title" v="[EN] Fungicide" eh="e8512698" />
     <e k="sf_report_page_info" v="Campi %d-%d di %d  |  Pagina %d di %d" eh="8db851d1" />
     <e k="sf_bigBag_uan32_name" v="Big Bag UAN 32-0-0" eh="7bdc4d9d" />
     <e k="sf_bigBag_uan32_function" v="Fertilizzante azotato (liquido)" eh="27de5f41" />
