@@ -323,7 +323,7 @@ function SoilFullSyncEvent:readStream(streamId, connection)
         organicMatter = validateNumber(organicMatter, SoilConstants.NUTRIENT_LIMITS.MIN, SoilConstants.NUTRIENT_LIMITS.ORGANIC_MATTER_MAX, 3.5, "organicMatter")
         pH = validateNumber(pH, SoilConstants.NUTRIENT_LIMITS.PH_MIN, SoilConstants.NUTRIENT_LIMITS.PH_MAX, 6.5, "pH")
         lastHarvest = validateNumber(lastHarvest, 0, 999999, 0, "lastHarvest")
-        fertilizerApplied = validateNumber(fertilizerApplied, 0, 10000, 0, "fertilizerApplied")
+        fertilizerApplied = validateNumber(fertilizerApplied, 0, 1000, 0, "fertilizerApplied")
 
         -- Validate fieldId
         if type(fieldId) ~= "number" or fieldId < 0 then

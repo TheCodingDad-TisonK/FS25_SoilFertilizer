@@ -38,7 +38,7 @@
         <fillUnitConfigurations>
             <fillUnitConfiguration>
                 <fillUnits>
-                    <fillUnit fillTypes="UAN28" capacity="10000" />
+                    <fillUnit fillTypes="UAN28" capacity="1000" />
                 </fillUnits>
             </fillUnitConfiguration>
         </fillUnitConfigurations>
