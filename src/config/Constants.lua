@@ -616,7 +616,7 @@ SoilConstants.PEST_PRESSURE = {
     -- Pressure points removed on a single insecticide application
     INSECTICIDE_PRESSURE_REDUCTION = 25,
     -- Days insecticide suppresses pest growth after application
-    INSECTICIDE_DURATION_DAYS = 10,
+    INSECTICIDE_DURATION_DAYS = 30,
 
     -- On harvest: pest pressure resets to this fraction of current value
     -- (insects disperse when the host crop is removed)
@@ -683,7 +683,7 @@ SoilConstants.DISEASE_PRESSURE = {
     -- Pressure points removed on a single fungicide application
     FUNGICIDE_PRESSURE_REDUCTION = 20,
     -- Days fungicide suppresses disease growth after application
-    FUNGICIDE_DURATION_DAYS = 12,
+    FUNGICIDE_DURATION_DAYS = 35,
 
     -- Harvest yield penalty at each pressure tier
     YIELD_PENALTY_LOW    = 0.00,  -- 0-20:  none
