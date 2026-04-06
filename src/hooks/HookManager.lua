@@ -93,6 +93,10 @@ function HookManager:installAll(soilSystem)
     local plowingOk = self:installPlowingHook()
     if plowingOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
+    -- Sowing / planting: clear stale lastCrop so HUD shows live crop (fix #123)
+    local sowingOk = self:installSowingHook()
+    if sowingOk then successCount = successCount + 1 else failCount = failCount + 1 end
+
     -- Patch vanilla fill units to accept custom fertilizer types
     local fillUnitOk = self:installFillUnitHook()
     if fillUnitOk then successCount = successCount + 1 else failCount = failCount + 1 end
@@ -930,7 +934,61 @@ function HookManager:installPlowingHook()
 end
 
 -- =========================================================
--- HOOK 6: Patch vehicle fill units to accept custom types
+-- HOOK 6: Sowing / planting (SowingMachine)
+-- =========================================================
+-- Clears field.lastCrop when seeds go in the ground so the HUD immediately
+-- falls through to live FieldState detection instead of showing the stale
+-- crop name from the previous harvest (fix for issue #123).
+---@return boolean success True if hook installed successfully
+function HookManager:installSowingHook()
+    if not SowingMachine or type(SowingMachine.processSowingMachineArea) ~= "function" then
+        SoilLogger.warning("Could not install sowing hook - SowingMachine.processSowingMachineArea not available")
+        return false
+    end
+
+    local original = SowingMachine.processSowingMachineArea
+    SowingMachine.processSowingMachineArea = Utils.appendedFunction(
+        original,
+        function(sowingSelf, workArea, dt)
+            if not sowingSelf.isServer then return end
+            if not g_SoilFertilityManager or
+               not g_SoilFertilityManager.soilSystem or
+               not g_SoilFertilityManager.settings.enabled then
+                return
+            end
+
+            local ok, err = pcall(function()
+                local x, _, z = getWorldTranslation(sowingSelf.rootNode)
+                if not x then return end
+
+                local fieldId = nil
+                if g_fieldManager then
+                    local field = g_fieldManager:getFieldAtWorldPosition(x, z)
+                    if field and field.farmland then
+                        fieldId = field.farmland.id
+                    end
+                end
+                if not fieldId and g_farmlandManager then
+                    local farmland = g_farmlandManager:getFarmlandAtWorldPosition(x, z)
+                    if farmland then fieldId = farmland.id end
+                end
+                if not fieldId or fieldId <= 0 then return end
+
+                g_SoilFertilityManager.soilSystem:onSowing(fieldId)
+            end)
+
+            if not ok then
+                SoilLogger.error("Sowing hook failed: %s", tostring(err))
+            end
+        end
+    )
+    self:register(SowingMachine, "processSowingMachineArea", original, "SowingMachine.processSowingMachineArea")
+    SoilLogger.info("[OK] Sowing hook installed (SowingMachine.processSowingMachineArea)")
+    return true
+end
+
+-- =========================================================
+-- HOOK 7: Patch vehicle fill units to accept custom types
 -- =========================================================
 -- Vanilla spreaders/sprayers have fillUnit#fillTypes="FERTILIZER" or "LIQUIDFERTILIZER".
 -- FS25 resolves these by NAME at parse time, yielding only the single vanilla type index.
