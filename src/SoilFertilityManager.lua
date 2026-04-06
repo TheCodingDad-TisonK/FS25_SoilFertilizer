@@ -640,6 +640,10 @@ function SoilFertilityManager:update(dt)
         self.soilSystem:update(dt)
     end
 
+    if self.soilReportDialog then
+        self.soilReportDialog:update(dt)
+    end
+
     -- FIX: Only update HUD if it exists (client side only)
     if self.soilHUD then
         -- Add pcall to prevent crashes if HUD has issues

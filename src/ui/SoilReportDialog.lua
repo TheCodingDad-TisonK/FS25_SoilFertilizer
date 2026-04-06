@@ -80,7 +80,10 @@ function SoilReportDialog:onCreate()
     end
 end
 
---- Show dialog with current soil data
+--- Show dialog with current soil data.
+--- In multiplayer, ownership data may not have synced yet for joining clients.
+--- When that happens the dialog opens immediately with a "syncing" message and
+--- an AsyncRetryHandler polls until ownership is ready, then refreshes the view.
 function SoilReportDialog:show()
     if g_gui.currentGui ~= nil then return end
 
@@ -90,9 +93,77 @@ function SoilReportDialog:show()
     end
 
     self.currentPage = 1
-    self:collectFieldData()
+
+    local ready = self:collectFieldData()
+    if not ready then
+        -- Ownership hasn't synced yet — open the dialog with a syncing message
+        -- and start a background retry loop (fix for issue #120).
+        self:showSyncingState()
+        g_gui:showDialog("SoilReportDialog")
+        self:startOwnershipSyncRetry()
+        return
+    end
+
     self:updateDisplay()
     g_gui:showDialog("SoilReportDialog")
+end
+
+--- Put the dialog into a "waiting for sync" visual state.
+function SoilReportDialog:showSyncingState()
+    -- Clear any stale rows first
+    self.sortedFieldIds = {}
+    self.fieldInfos = {}
+    self.totalPages = 1
+    self:updateDisplay()
+
+    -- Reuse the existing noDataText element to show the syncing message.
+    if self.noDataText then
+        self.noDataText:setText(tr("ui_soilReport_syncing", "Syncing field ownership data, please wait..."))
+        self.noDataText:setVisible(true)
+    end
+end
+
+--- Start an AsyncRetryHandler that re-runs collectFieldData() until ownership
+--- has synced, then refreshes the display. Retries every 2s for up to 15s.
+function SoilReportDialog:startOwnershipSyncRetry()
+    -- Cancel any previous retry that may still be running.
+    if self.ownershipRetry then
+        self.ownershipRetry:reset()
+    end
+
+    local dialog = self  -- capture for callbacks
+
+    self.ownershipRetry = AsyncRetryHandler.new({
+        name        = "SoilReport.OwnershipSync",
+        maxAttempts = 8,
+        delays      = {2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000},
+        condition   = function()
+            -- Considered ready once collectFieldData() succeeds
+            local ready = dialog:collectFieldData()
+            return ready
+        end,
+        onAttempt   = function()
+            -- condition() does the actual work; nothing extra needed here
+        end,
+        onSuccess   = function()
+            SoilLogger.info("[SoilReport] Ownership synced, refreshing dialog")
+            -- Only update if the dialog is still open
+            if g_gui.currentGui and g_gui.currentGui.name == "SoilReportDialog" then
+                dialog:updateDisplay()
+            end
+        end,
+        onFailure   = function()
+            SoilLogger.warning("[SoilReport] Ownership sync timed out after retries")
+            -- Leave the syncing message visible; player can close and reopen.
+            if dialog.noDataText then
+                dialog.noDataText:setText(tr("ui_soilReport_syncTimeout",
+                    "Could not load field ownership. Please close and reopen the report."))
+                dialog.noDataText:setVisible(true)
+            end
+        end,
+    })
+
+    self.ownershipRetry:start()
 end
 
 --- Get the local player's farm ID.
@@ -124,16 +195,51 @@ local function isFarmlandOwnedByFarm(farmlandId, localFarmId)
     return g_farmlandManager.farmlandMapping[farmlandId] == localFarmId
 end
 
+--- Returns true if farmlandMapping has synced at least one entry for the local farm.
+--- In multiplayer, ownership data arrives asynchronously after the client joins.
+--- Until at least one owned farmland entry is present we cannot distinguish
+--- "player owns nothing" from "sync not yet complete", so we treat it as not ready.
+---@param localFarmId number
+---@return boolean
+local function isOwnershipSynced(localFarmId)
+    if not g_farmlandManager or not g_farmlandManager.farmlandMapping then
+        return false
+    end
+    -- Singleplayer (farmId 1) and host always have ownership present immediately.
+    -- For joining clients in MP, the mapping starts empty and fills in asynchronously.
+    for _, ownerFarmId in pairs(g_farmlandManager.farmlandMapping) do
+        if ownerFarmId == localFarmId then
+            return true
+        end
+    end
+    -- Also consider it synced if the mapping is non-empty and the player simply owns
+    -- no farmland (edge case: spectator / farm-hand with no owned land).
+    local count = 0
+    for _ in pairs(g_farmlandManager.farmlandMapping) do count = count + 1 end
+    return count > 0
+end
+
 --- Collect field data limited to fields owned by the local player's farm.
---- Uses field.fieldState.ownerFarmId via FieldManager.farmlandIdFieldMapping.
+--- Returns true if data was collected successfully, false if ownership has not
+--- synced yet (caller should retry).
+---@return boolean ready
 function SoilReportDialog:collectFieldData()
     self.fieldInfos = {}
     self.sortedFieldIds = {}
 
     local soilSystem = g_SoilFertilityManager.soilSystem
-    if not soilSystem or not soilSystem.fieldData then return end
+    if not soilSystem or not soilSystem.fieldData then return true end
 
     local localFarmId = getLocalFarmId()
+
+    -- Guard: in multiplayer the farmlandMapping may not have synced yet for the
+    -- joining client. If it isn't ready we return false so the caller can retry
+    -- rather than falling through to the "show all fields" fallback that was
+    -- causing issue #120 (client saw the host's fields).
+    if not isOwnershipSynced(localFarmId) then
+        SoilLogger.warning("[SoilReport] Ownership data not yet synced for farmId %s - will retry", tostring(localFarmId))
+        return false
+    end
 
     local filtered = {}
     for fieldId, _ in pairs(soilSystem.fieldData) do
@@ -142,16 +248,10 @@ function SoilReportDialog:collectFieldData()
         end
     end
 
-    -- Fallback: if fieldState isn't populated yet or player owns no fields,
-    -- show all tracked fields so the dialog is never uselessly blank.
-    if #filtered == 0 then
-        SoilLogger.warning("[SoilReport] No owned fields found for farmId %s - showing all tracked fields", tostring(localFarmId))
-        for fieldId, _ in pairs(soilSystem.fieldData) do
-            table.insert(self.sortedFieldIds, fieldId)
-        end
-    else
-        self.sortedFieldIds = filtered
-    end
+    -- If ownership IS synced but the player genuinely owns no tracked fields,
+    -- leave sortedFieldIds empty (the "no data" message will show). Never fall
+    -- back to showing all fields — that was the root cause of issue #120.
+    self.sortedFieldIds = filtered
 
     table.sort(self.sortedFieldIds)
 
@@ -504,4 +604,18 @@ function SoilReportDialog:onClose()
     self.sortedFieldIds = {}
     self.currentPage = 1
     self.totalPages = 1
+    -- Cancel any in-progress ownership sync retry (fix for issue #120)
+    if self.ownershipRetry then
+        self.ownershipRetry:reset()
+        self.ownershipRetry = nil
+    end
+end
+
+--- Called from SoilFertilityManager:update(dt) every frame.
+--- Drives the AsyncRetryHandler for MP ownership sync (fix for issue #120).
+---@param dt number Delta time in milliseconds
+function SoilReportDialog:update(dt)
+    if self.ownershipRetry and self.ownershipRetry:isPending() then
+        self.ownershipRetry:update(dt)
+    end
 end
