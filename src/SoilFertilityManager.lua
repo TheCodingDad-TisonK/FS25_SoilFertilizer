@@ -647,7 +647,7 @@ function SoilFertilityManager:update(dt)
             self.soilHUD:update(dt)
         end)
         if not success and self.settings and self.settings.debugMode then
-            print("[SoilFertilizer DEBUG] HUD update error: " .. tostring(err))
+            SoilLogger.debug("HUD update error: %s", tostring(err))
         end
     end
 end
@@ -660,7 +660,7 @@ function SoilFertilityManager:draw()
             self.soilHUD:draw()
         end)
         if not success and self.settings and self.settings.debugMode then
-            print("[SoilFertilizer DEBUG] HUD draw error: " .. tostring(err))
+            SoilLogger.debug("HUD draw error: %s", tostring(err))
         end
     end
 end

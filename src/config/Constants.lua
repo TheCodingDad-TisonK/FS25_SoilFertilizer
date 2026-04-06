@@ -129,77 +129,75 @@ SoilConstants.RAIN = {
 -- ========================================
 -- CROP EXTRACTION RATES (per 1,000 liters harvested)
 -- ========================================
--- Calibrated for 0-100 nutrient scale
--- Typical 10-hectare field yields ~80,000L, resulting in 15-25% nutrient depletion
--- Example: 80,000L wheat depletes 16N, 6.4P, 12K (from defaults 50N, 40P, 45K)
+-- Calibrated for 0-100 nutrient scale (normalized by field area)
+-- Typical 1-hectare field yields ~8,000L, resulting in 15-25% nutrient depletion
+-- Example: 8,000L wheat depletes 16N, 6.4P, 12K (from defaults 50N, 40P, 45K)
 SoilConstants.CROP_EXTRACTION = {
-    wheat      = { N=0.20, P=0.08, K=0.15 },  -- Moderate N demand, standard grain
-    barley     = { N=0.18, P=0.08, K=0.14 },  -- Similar to wheat, slightly less
-    maize      = { N=0.23, P=0.10, K=0.20 },  -- High N/P demand, large biomass
-    canola     = { N=0.27, P=0.12, K=0.22 },  -- High N demand, oilseed
-    soybean    = { N=0.32, P=0.13, K=0.17 },  -- Highest N (compensates for fixation)
-    sunflower  = { N=0.25, P=0.11, K=0.23 },  -- Moderate-high demand
-    potato     = { N=0.38, P=0.17, K=0.54 },  -- Very high K demand (tuber crop)
-    sugarbeet  = { N=0.33, P=0.15, K=0.58 },  -- Extreme K demand (root crop)
-    oats       = { N=0.18, P=0.09, K=0.16 },  -- Light feeder
-    rye        = { N=0.20, P=0.08, K=0.18 },  -- Moderate demand
-    triticale  = { N=0.21, P=0.10, K=0.19 },  -- Hybrid characteristics
-    sorghum    = { N=0.23, P=0.09, K=0.18 },  -- Efficient nutrient user
-    peas       = { N=0.29, P=0.11, K=0.20 },  -- Legume, moderate demand
-    beans      = { N=0.30, P=0.12, K=0.21 },  -- Legume, similar to peas
+    wheat      = { N=2.00, P=0.80, K=1.50 },  -- Moderate N demand, standard grain
+    barley     = { N=1.80, P=0.80, K=1.40 },  -- Similar to wheat, slightly less
+    maize      = { N=2.30, P=1.00, K=2.00 },  -- High N/P demand, large biomass
+    canola     = { N=2.70, P=1.20, K=2.20 },  -- High N demand, oilseed
+    soybean    = { N=3.20, P=1.30, K=1.70 },  -- Highest N (compensates for fixation)
+    sunflower  = { N=2.50, P=1.10, K=2.30 },  -- Moderate-high demand
+    potato     = { N=3.80, P=1.70, K=5.40 },  -- Very high K demand (tuber crop)
+    sugarbeet  = { N=3.30, P=1.50, K=5.80 },  -- Extreme K demand (root crop)
+    oats       = { N=1.80, P=0.90, K=1.60 },  -- Light feeder
+    rye        = { N=2.00, P=0.80, K=1.80 },  -- Moderate demand
+    triticale  = { N=2.10, P=1.00, K=1.90 },  -- Hybrid characteristics
+    sorghum    = { N=2.30, P=0.90, K=1.80 },  -- Efficient nutrient user
+    peas       = { N=2.90, P=1.10, K=2.00 },  -- Legume, moderate demand
+    beans      = { N=3.00, P=1.20, K=2.10 },  -- Legume, similar to peas
 }
 
 -- Default extraction for unknown crops (average cereal)
-SoilConstants.CROP_EXTRACTION_DEFAULT = { N=0.21, P=0.09, K=0.17 }
+SoilConstants.CROP_EXTRACTION_DEFAULT = { N=2.10, P=0.90, K=1.70 }
 
 -- ========================================
 -- FERTILIZER PROFILES (per 1,000 liters applied)
 -- ========================================
--- Calibrated for 0-100 nutrient scale
--- Example: 2,000L liquid fertilizer restores ~13N, ~5.6P, ~10.7K
+-- Calibrated for 0-100 nutrient scale (normalized by field area)
+-- Example: 1,000L liquid fertilizer restores ~5.0N, ~2.1P, ~3.3K on 1 hectare
 --
 -- Base game fill types are recognized out of the box.
--- Extended types (UAN32, ANHYDROUS, MAP, etc.) activate automatically
--- when equipment mods register those fill type names via g_fillTypeManager.
 SoilConstants.FERTILIZER_PROFILES = {
     -- Base game
-    LIQUIDFERTILIZER  = { N=0.50, P=0.21, K=0.33 },           -- Balanced liquid NPK
-    FERTILIZER        = { N=0.67, P=0.33, K=0.25 },           -- Solid granular, high N/P
-    MANURE            = { N=0.25, P=0.17, K=0.29, OM=0.05 },  -- Organic, slow-release
-    LIQUIDMANURE      = { N=0.33, P=0.17, K=0.42, OM=0.03 },  -- Liquid organic, high K (FS25 fill type name)
-    DIGESTATE         = { N=0.42, P=0.18, K=0.46, OM=0.04 },  -- Biogas byproduct
-    LIME              = { pH=0.4 },                             -- pH adjustment
+    LIQUIDFERTILIZER  = { N=5.00, P=2.10, K=3.30 },           -- Balanced liquid NPK
+    FERTILIZER        = { N=6.70, P=3.30, K=2.50 },           -- Solid granular, high N/P
+    MANURE            = { N=2.50, P=1.70, K=2.90, OM=0.50 },  -- Organic, slow-release
+    LIQUIDMANURE      = { N=3.30, P=1.70, K=4.20, OM=0.30 },  -- Liquid organic, high K
+    DIGESTATE         = { N=4.20, P=1.80, K=4.60, OM=0.40 },  -- Biogas byproduct
+    LIME              = { pH=4.0 },                             -- pH adjustment
 
-    -- Nitrogen sources (common in NA-style equipment mods)
-    UAN32             = { N=0.87, P=0.00, K=0.00 },  -- 32-0-0 liquid
-    UAN28             = { N=0.76, P=0.00, K=0.00 },  -- 28-0-0 liquid
-    ANHYDROUS         = { N=1.00, P=0.00, K=0.00 },  -- 82-0-0, highest N concentration
-    AMS               = { N=0.46, P=0.00, K=0.00 },  -- 21-0-0-24S ammonium sulfate
-    UREA              = { N=0.95, P=0.00, K=0.00 },  -- 46-0-0 dry granular
+    -- Nitrogen sources
+    UAN32             = { N=8.70, P=0.00, K=0.00 },  -- 32-0-0 liquid
+    UAN28             = { N=7.60, P=0.00, K=0.00 },  -- 28-0-0 liquid
+    ANHYDROUS         = { N=10.0, P=0.00, K=0.00 },  -- 82-0-0
+    AMS               = { N=4.60, P=0.00, K=0.00 },  -- 21-0-0
+    UREA              = { N=9.50, P=0.00, K=0.00 },  -- 46-0-0
 
     -- Starter fertilizer
-    STARTER           = { N=0.27, P=0.68, K=0.18 },  -- High-P starter (approx 10-34-0)
+    STARTER           = { N=2.70, P=6.80, K=1.80 },  -- High-P starter
 
-    -- Gypsum (Calcium Sulfate)
-    GYPSUM            = { pH=0.1, OM=0.01 },         -- Stabilizes pH, improves structure (OM)
+    -- Gypsum
+    GYPSUM            = { pH=1.0, OM=0.10 },
 
     -- Phosphorus & potassium sources
-    MAP               = { N=0.30, P=1.41, K=0.00 },  -- 11-52-0 monoammonium phosphate
-    DAP               = { N=0.49, P=1.26, K=0.00 },  -- 18-46-0 diammonium phosphate
-    POTASH            = { N=0.00, P=0.00, K=1.63 },  -- 0-0-60 muriate of potash
+    MAP               = { N=3.00, P=14.1, K=0.00 },  -- 11-52-0
+    DAP               = { N=4.90, P=12.6, K=0.00 },  -- 18-46-0
+    POTASH            = { N=0.00, P=0.00, K=16.3 },  -- 0-0-60
 
     -- Organic / slow-release
-    COMPOST           = { N=0.08, P=0.05, K=0.06, OM=0.12 },
-    BIOSOLIDS         = { N=0.28, P=0.22, K=0.08, OM=0.07 },
-    CHICKEN_MANURE    = { N=0.35, P=0.29, K=0.18, OM=0.08 },
-    PELLETIZED_MANURE = { N=0.65, P=0.45, K=0.55, OM=0.08 },
+    COMPOST           = { N=0.80, P=0.50, K=0.60, OM=1.20 },
+    BIOSOLIDS         = { N=2.80, P=2.20, K=0.80, OM=0.70 },
+    CHICKEN_MANURE    = { N=3.50, P=2.90, K=1.80, OM=0.80 },
+    PELLETIZED_MANURE = { N=6.50, P=4.50, K=5.50, OM=0.80 },
 
     -- Lime variants
-    LIQUIDLIME        = { pH=0.3 },  -- Slightly weaker per volume than dry lime
+    LIQUIDLIME        = { pH=3.0 },
 
     -- Crop protection products
-    INSECTICIDE = { pestReduction = 1.0 },   -- effectiveness 1.0 (key signals this is insecticide)
-    FUNGICIDE   = { diseaseReduction = 1.0 }, -- effectiveness 1.0
+    INSECTICIDE = { pestReduction = 1.0 },
+    FUNGICIDE   = { diseaseReduction = 1.0 },
 }
 
 -- List of recognized fertilizer fill type names (for reference/iteration)

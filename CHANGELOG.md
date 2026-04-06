@@ -7,6 +7,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.4.0] - 2026-04-06
+
+### Fixed
+
+- **NPK not increasing after field scan with any fertilizer** (critical): The sprayer hook was
+  gated on `spec.workAreaParameters.isActive`, which FS25 only sets `true` when the vanilla
+  density map pixel actually changes. Fields already fully fertilised in the base-game system
+  return `changedArea = 0`, so `isActive` stayed `false` and every fertiliser application was
+  silently skipped — nutrients never changed. Fixed by replacing the `isActive` guard with a
+  check on `sprayFillLevel > 0` and `usage > 0`: if the sprayer has product and consumed some
+  this frame, the nutrient application is now always recorded regardless of vanilla terrain state.
+
+- **`getDifficultyName()` crash on MP client sync** (Bug #3): On full-sync receive, the settings
+  object is a plain Lua table populated field-by-field from the network stream — not a `Settings`
+  class instance. Calling `:getDifficultyName()` on it threw `attempt to call a nil value`.
+  Replaced with an inline `diffNames[]` table lookup. Also converted the surrounding `print()`
+  to `SoilLogger.info()`.
+
+- **`g_currentMission` nil crash in daily soil update** (Bug #8): Seasonal effects block accessed
+  `g_currentMission.environment` without first guarding `g_currentMission` itself. Added the
+  missing nil check — safe on dedicated server shutdown and level reload.
+
+- **Stale full-sync retry handler after level reload** (Bug #10): The module-level
+  `fullSyncRetryHandler` persisted across level reloads in its `success` or `failed` state.
+  A reconnecting MP client would call `start()` on a completed handler, which guards on
+  `state == "pending"` and is a no-op — the client never re-synced. Fixed by calling
+  `reset()` before `start()` in `SoilNetworkEvents_RequestFullSync()`.
+
+- **`math.randomseed()` polluting global PRNG during bulk field scan** (Bug #13): Calling
+  `math.randomseed(fieldId * 67890)` on every lazy field creation resets the shared Lua random
+  state. During the initial scan many fields are created in the same frame, each overwriting the
+  previous seed before its random numbers are drawn. Replaced with a Lua 5.1-compatible
+  deterministic LCG hash that produces stable, per-nutrient variation for each field without
+  touching the global PRNG.
+
+- **`listAllFields()` always printing `"?"` for FieldManager field IDs** (Bug #27): The function
+  used `field.fieldId` which is always `nil` in FS25. Fixed to use `field.farmland.id`, consistent
+  with the rest of the codebase. Converted all `print()` calls in the function to `SoilLogger`.
+
+- **DIAG / debug `print()` calls spamming the log in production** (Bug #26): Several raw
+  `print("[SoilFertilizer DIAG] ...")` calls in `SoilHUD`, `SoilReportDialog`,
+  `SoilFertilityManager`, and `SoilFertilitySystem` fired unconditionally for every player in
+  every session. Replaced with `SoilLogger.debug()` / `.warning()` / `.error()` so they are
+  gated behind `debugMode` and go through the centralised logger.
+
+---
+
 ## [1.4.3.0] - 2026-04-05
 
 ### Fixed

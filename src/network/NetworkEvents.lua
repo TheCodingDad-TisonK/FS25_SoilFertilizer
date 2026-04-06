@@ -444,8 +444,10 @@ function SoilFullSyncEvent:run(connection)
     -- Mark sync as received (stops retry timer)
     SoilNetworkEvents_OnFullSyncReceived()
 
-    print(string.format("[SoilFertilizer] Client: Settings synced - Enabled: %s, Difficulty: %s",
-        tostring(settings.enabled), settings:getDifficultyName()))
+    local diffNames = { "Simple", "Realistic", "Hardcore" }
+    local diffName  = diffNames[settings.difficulty] or "Unknown"
+    SoilLogger.info("Client: Settings synced - Enabled: %s, Difficulty: %s",
+        tostring(settings.enabled), diffName)
 end
 
 function SoilFullSyncEvent:getFieldCount()
@@ -663,6 +665,7 @@ function SoilNetworkEvents_RequestFullSync()
     if not g_client or g_server then return end
 
     SoilNetworkEvents_InitializeRetryHandler()
+    fullSyncRetryHandler:reset()  -- re-arm in case handler completed a previous cycle (e.g. level reload)
     fullSyncRetryHandler:start()
 end
 

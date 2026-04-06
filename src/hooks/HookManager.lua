@@ -618,8 +618,9 @@ function HookManager:installHarvestHook()
                 end
                 if not fieldId or fieldId <= 0 then return end
 
-                SoilLogger.debug("Harvest hook: Field %d, Crop %d, %.0fL, strawRatio=%.2f", fieldId, inputFruitType, liters, strawRatio or 0)
-                g_SoilFertilityManager.soilSystem:onHarvest(fieldId, inputFruitType, liters, strawRatio)
+                SoilLogger.debug("Harvest hook: Field %d, Crop %d, %.0fL, area=%.1fm2, strawRatio=%.2f", 
+                    fieldId, inputFruitType, liters, area, strawRatio or 0)
+                g_SoilFertilityManager.soilSystem:onHarvest(fieldId, inputFruitType, liters, strawRatio, area)
             end)
 
             if not success then
@@ -663,14 +664,23 @@ function HookManager:installSprayerAreaHook()
             local spec = self.spec_sprayer
             if not spec or not spec.workAreaParameters then return end
 
-            -- Only fire when the sprayer was actually active this frame
-            if not spec.workAreaParameters.isActive then return end
-
+            -- Guard: sprayer must have a valid fill type and consumed product this frame.
+            -- NOTE: We deliberately do NOT gate on spec.workAreaParameters.isActive here.
+            -- isActive is only set true inside processSprayerArea when FSDensityMapUtil.updateSprayArea
+            -- returns changedArea > 0 — i.e., when it actually paints terrain pixels.
+            -- On fields that are already fully fertilized in the vanilla FS25 density map,
+            -- updateSprayArea returns changedArea=0, isActive stays false, and our hook would
+            -- silently skip every application even though the sprayer IS running and product IS
+            -- being consumed. This was the root cause of "NPK never increases after field scan".
+            -- Using sprayFillLevel > 0 and usage > 0 is the correct gate: if the sprayer has
+            -- product and consumed some this frame, we should record the nutrient application.
             local fillTypeIndex = spec.workAreaParameters.sprayFillType
-            local liters = spec.workAreaParameters.usage
+            local liters        = spec.workAreaParameters.usage
+            local sprayFillLevel = spec.workAreaParameters.sprayFillLevel
 
-            if (not fillTypeIndex or fillTypeIndex <= 0) then return end
+            if not fillTypeIndex or fillTypeIndex <= 0 then return end
             if not liters or liters <= 0 then return end
+            if not sprayFillLevel or sprayFillLevel <= 0 then return end
 
             local success, errorMsg = pcall(function()
                 local fillType = g_fillTypeManager:getFillTypeByIndex(fillTypeIndex)

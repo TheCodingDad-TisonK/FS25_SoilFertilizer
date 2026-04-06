@@ -383,12 +383,10 @@ function SoilReportDialog:updateFieldRows()
                     local kPpm = tostring(math.floor(info.potassium.value * ppm.K + 0.5))
                     setColoredText(row.k, kPpm, kColor)
 
-                    -- DIAG: first row of each page — confirm ppm conversion is live
+                    -- Debug: first row of each page — confirm ppm conversion is live
                     if i == 0 then
-                        print(string.format(
-                            "[SoilFertilizer DIAG] SoilReport page row0 field=%s N=%s ppm P=%s ppm K=%s ppm",
-                            tostring(fieldId), nPpm, pPpm, kPpm
-                        ))
+                        SoilLogger.debug("SoilReport page row0 field=%s N=%s ppm P=%s ppm K=%s ppm",
+                            tostring(fieldId), nPpm, pPpm, kPpm)
                     end
 
                     -- pH (color-coded)
