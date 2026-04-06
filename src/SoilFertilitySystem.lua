@@ -27,6 +27,16 @@ function SoilFertilitySystem.new(settings)
     -- Stores the game day, not a timestamp, so the notification fires at most once per field per in-game day.
     self.fertNotifyShown = {}
 
+    -- Per-day throttle tables for crop protection pressure reductions (fieldId → game day last applied).
+    -- The sprayer hook fires every frame while the sprayer is active. Without throttling, a single
+    -- pass across a field applies the full pressure reduction 60+ times per second, instantly
+    -- resetting weed/pest/disease pressure to 0 from even 1L of product applied.
+    -- Fix: allow at most ONE reduction event per field per in-game day, matching real-world
+    -- application logic (you spray a field once per day at most, not 3600 times per minute).
+    self.herbicideAppliedDay  = {}   -- fieldId → game day herbicide last reduced pressure
+    self.insecticideAppliedDay = {}  -- fieldId → game day insecticide last reduced pressure
+    self.fungicideAppliedDay  = {}   -- fieldId → game day fungicide last reduced pressure
+
     -- Field scan retry mechanism (for delayed initialization)
     self.fieldsScanPending = true
     self.fieldsScanAttempts = 0
@@ -358,6 +368,14 @@ function SoilFertilitySystem:onHerbicideApplied(fieldId, effectiveness)
     local field = self:getOrCreateField(fieldId, false)
     if not field then return end
 
+    -- Throttle: apply pressure reduction at most once per field per in-game day.
+    -- The sprayer hook fires every frame (~60x/sec). Without this guard, a single
+    -- pass applies the full reduction hundreds of times, instantly zeroing pressure.
+    local today = (g_currentMission and g_currentMission.environment and
+                   g_currentMission.environment.currentDay) or 0
+    if self.herbicideAppliedDay[fieldId] == today then return end
+    self.herbicideAppliedDay[fieldId] = today
+
     local wp = SoilConstants.WEED_PRESSURE
     local reduction = wp.HERBICIDE_PRESSURE_REDUCTION * (effectiveness or 1.0)
     local before = field.weedPressure or 0
@@ -385,6 +403,12 @@ function SoilFertilitySystem:onInsecticideApplied(fieldId, effectiveness)
     local field = self:getOrCreateField(fieldId, false)
     if not field then return end
 
+    -- Throttle: once per field per in-game day (see onHerbicideApplied for rationale)
+    local today = (g_currentMission and g_currentMission.environment and
+                   g_currentMission.environment.currentDay) or 0
+    if self.insecticideAppliedDay[fieldId] == today then return end
+    self.insecticideAppliedDay[fieldId] = today
+
     local pp = SoilConstants.PEST_PRESSURE
     local reduction = pp.INSECTICIDE_PRESSURE_REDUCTION * (effectiveness or 1.0)
     local before = field.pestPressure or 0
@@ -410,6 +434,12 @@ function SoilFertilitySystem:onFungicideApplied(fieldId, effectiveness)
 
     local field = self:getOrCreateField(fieldId, false)
     if not field then return end
+
+    -- Throttle: once per field per in-game day (see onHerbicideApplied for rationale)
+    local today = (g_currentMission and g_currentMission.environment and
+                   g_currentMission.environment.currentDay) or 0
+    if self.fungicideAppliedDay[fieldId] == today then return end
+    self.fungicideAppliedDay[fieldId] = today
 
     local dp = SoilConstants.DISEASE_PRESSURE
     local reduction = dp.FUNGICIDE_PRESSURE_REDUCTION * (effectiveness or 1.0)

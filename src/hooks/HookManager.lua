@@ -700,7 +700,17 @@ function HookManager:installSprayerAreaHook()
                 
                 local isFertilizer = SoilConstants.FERTILIZER_PROFILES[fillType.name] ~= nil
 
-                if not isFertilizer and not herbEffectiveness and not pestEffectiveness and not diseaseEffectiveness then return end
+                -- Crop protection products (INSECTICIDE, FUNGICIDE, HERBICIDE) that are also
+                -- listed in FERTILIZER_PROFILES carry pestReduction/diseaseReduction markers
+                -- and are routed through applyFertilizer → on*Applied internally.
+                -- We must NOT also call on*Applied directly from here, or they would be
+                -- double-applied. Only use the direct path for products NOT in FERTILIZER_PROFILES
+                -- (e.g. vanilla HERBICIDE / PESTICIDE fill types that have no profile entry).
+                local herbOnlyDirect = herbEffectiveness and not isFertilizer
+                local pestOnlyDirect = pestEffectiveness and not isFertilizer
+                local diseaseOnlyDirect = diseaseEffectiveness and not isFertilizer
+
+                if not isFertilizer and not herbOnlyDirect and not pestOnlyDirect and not diseaseOnlyDirect then return end
 
                 -- Resolve field from vehicle root position
                 local x, _, z = getWorldTranslation(self.rootNode)
@@ -731,18 +741,18 @@ function HookManager:installSprayerAreaHook()
                     g_SoilFertilityManager.soilSystem:onFertilizerApplied(fieldId, fillTypeIndex, effectiveLiters)
                 end
 
-                -- Herbicide application reduces weed pressure
-                if herbEffectiveness and g_SoilFertilityManager.soilSystem.onHerbicideApplied then
+                -- Herbicide application reduces weed pressure (direct path: non-profile products only)
+                if herbOnlyDirect and g_SoilFertilityManager.soilSystem.onHerbicideApplied then
                     g_SoilFertilityManager.soilSystem:onHerbicideApplied(fieldId, herbEffectiveness)
                 end
 
-                -- Insecticide application reduces pest pressure
-                if pestEffectiveness and g_SoilFertilityManager.soilSystem.onInsecticideApplied then
+                -- Insecticide application reduces pest pressure (direct path: non-profile products only)
+                if pestOnlyDirect and g_SoilFertilityManager.soilSystem.onInsecticideApplied then
                     g_SoilFertilityManager.soilSystem:onInsecticideApplied(fieldId, pestEffectiveness)
                 end
 
-                -- Fungicide application reduces disease pressure
-                if diseaseEffectiveness and g_SoilFertilityManager.soilSystem.onFungicideApplied then
+                -- Fungicide application reduces disease pressure (direct path: non-profile products only)
+                if diseaseOnlyDirect and g_SoilFertilityManager.soilSystem.onFungicideApplied then
                     g_SoilFertilityManager.soilSystem:onFungicideApplied(fieldId, diseaseEffectiveness)
                 end
 

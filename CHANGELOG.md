@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.5.0] - 2026-04-06
+
+### Fixed
+
+- **Herbicide / insecticide / fungicide instantly resetting pressure to 0% from any dose**
+  (issue #121): The crop protection hook fired on every game frame (~60×/sec) while the
+  sprayer was active. Each frame applied the full `HERBICIDE_PRESSURE_REDUCTION` (30 pts),
+  `INSECTICIDE_PRESSURE_REDUCTION` (25 pts), or `FUNGICIDE_PRESSURE_REDUCTION` (20 pts),
+  meaning a single pass across a field applied the reduction hundreds of times and drove
+  weed / pest / disease pressure to zero regardless of how much product was actually used.
+
+  Fixed with a **per-field, per-day throttle**: each of `onHerbicideApplied`,
+  `onInsecticideApplied`, and `onFungicideApplied` now records the in-game day of the last
+  application per field (`herbicideAppliedDay`, `insecticideAppliedDay`, `fungicideAppliedDay`
+  tables on `SoilFertilitySystem`) and exits immediately if it has already fired today for
+  that field. One application event per field per in-game day — consistent with the existing
+  `fertNotifyShown` pattern used for NPK notifications.
+
+- **Double-application of INSECTICIDE / FUNGICIDE crop protection** (related to #121): Both
+  fill types are declared in `FERTILIZER_PROFILES` with `pestReduction` / `diseaseReduction`
+  markers, causing `applyFertilizer` to route them to `onInsecticideApplied` /
+  `onFungicideApplied` internally. The hook additionally called those same functions directly
+  via the `pestEffectiveness` / `diseaseEffectiveness` path — a second application in the same
+  frame. Fixed by only using the direct path for products that are **not** in
+  `FERTILIZER_PROFILES` (e.g. vanilla `HERBICIDE` / `PESTICIDE` fill types with no profile
+  entry). Profile-based products are handled exclusively through `applyFertilizer`.
+
+---
+
 ## [1.4.4.0] - 2026-04-06
 
 ### Fixed
