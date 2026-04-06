@@ -27,6 +27,16 @@ function SoilFertilitySystem.new(settings)
     -- Stores the game day, not a timestamp, so the notification fires at most once per field per in-game day.
     self.fertNotifyShown = {}
 
+    -- Per-day throttle tables for crop protection pressure reductions (fieldId → game day last applied).
+    -- The sprayer hook fires every frame while the sprayer is active. Without throttling, a single
+    -- pass across a field applies the full pressure reduction 60+ times per second, instantly
+    -- resetting weed/pest/disease pressure to 0 from even 1L of product applied.
+    -- Fix: allow at most ONE reduction event per field per in-game day, matching real-world
+    -- application logic (you spray a field once per day at most, not 3600 times per minute).
+    self.herbicideAppliedDay  = {}   -- fieldId → game day herbicide last reduced pressure
+    self.insecticideAppliedDay = {}  -- fieldId → game day insecticide last reduced pressure
+    self.fungicideAppliedDay  = {}   -- fieldId → game day fungicide last reduced pressure
+
     -- Field scan retry mechanism (for delayed initialization)
     self.fieldsScanPending = true
     self.fieldsScanAttempts = 0
@@ -125,9 +135,8 @@ end
 ---@param fruitTypeIndex number FS25 fruit type index
 ---@param liters number Amount harvested in liters
 ---@param strawRatio number 0.0-1.0 fraction of straw that was chopped (0 = dropped/collected, 1 = fully chopped)
-function SoilFertilitySystem:onHarvest(fieldId, fruitTypeIndex, liters, strawRatio)
-    -- Apply weed pressure yield penalty before nutrient update so the penalty
-    -- is applied to the actual liters harvested (not already depleted).
+function SoilFertilitySystem:onHarvest(fieldId, fruitTypeIndex, liters, strawRatio, area)
+    -- Apply weed pressure yield penalty before nutrient update
     if self.settings.weedPressure and SoilConstants.WEED_PRESSURE then
         local field = self.fieldData[fieldId]
         if field then
@@ -202,9 +211,9 @@ function SoilFertilitySystem:onHarvest(fieldId, fruitTypeIndex, liters, strawRat
         end
     end
 
-    self:updateFieldNutrients(fieldId, fruitTypeIndex, liters, strawRatio)
+    self:updateFieldNutrients(fieldId, fruitTypeIndex, liters, strawRatio, area)
 
-    SoilLogger.debug("Harvest: Field %d, Crop %d, %.0fL", fieldId, fruitTypeIndex, liters)
+    SoilLogger.debug("Harvest: Field %d, Crop %d, %.0fL, area=%.1f", fieldId, fruitTypeIndex, liters, area or 0)
 
     -- Broadcast to clients if server in multiplayer
     if g_server and g_currentMission and g_currentMission.missionDynamicInfo.isMultiplayer then
@@ -359,6 +368,14 @@ function SoilFertilitySystem:onHerbicideApplied(fieldId, effectiveness)
     local field = self:getOrCreateField(fieldId, false)
     if not field then return end
 
+    -- Throttle: apply pressure reduction at most once per field per in-game day.
+    -- The sprayer hook fires every frame (~60x/sec). Without this guard, a single
+    -- pass applies the full reduction hundreds of times, instantly zeroing pressure.
+    local today = (g_currentMission and g_currentMission.environment and
+                   g_currentMission.environment.currentDay) or 0
+    if self.herbicideAppliedDay[fieldId] == today then return end
+    self.herbicideAppliedDay[fieldId] = today
+
     local wp = SoilConstants.WEED_PRESSURE
     local reduction = wp.HERBICIDE_PRESSURE_REDUCTION * (effectiveness or 1.0)
     local before = field.weedPressure or 0
@@ -386,6 +403,12 @@ function SoilFertilitySystem:onInsecticideApplied(fieldId, effectiveness)
     local field = self:getOrCreateField(fieldId, false)
     if not field then return end
 
+    -- Throttle: once per field per in-game day (see onHerbicideApplied for rationale)
+    local today = (g_currentMission and g_currentMission.environment and
+                   g_currentMission.environment.currentDay) or 0
+    if self.insecticideAppliedDay[fieldId] == today then return end
+    self.insecticideAppliedDay[fieldId] = today
+
     local pp = SoilConstants.PEST_PRESSURE
     local reduction = pp.INSECTICIDE_PRESSURE_REDUCTION * (effectiveness or 1.0)
     local before = field.pestPressure or 0
@@ -411,6 +434,12 @@ function SoilFertilitySystem:onFungicideApplied(fieldId, effectiveness)
 
     local field = self:getOrCreateField(fieldId, false)
     if not field then return end
+
+    -- Throttle: once per field per in-game day (see onHerbicideApplied for rationale)
+    local today = (g_currentMission and g_currentMission.environment and
+                   g_currentMission.environment.currentDay) or 0
+    if self.fungicideAppliedDay[fieldId] == today then return end
+    self.fungicideAppliedDay[fieldId] = today
 
     local dp = SoilConstants.DISEASE_PRESSURE
     local reduction = dp.FUNGICIDE_PRESSURE_REDUCTION * (effectiveness or 1.0)
@@ -593,9 +622,13 @@ function SoilFertilitySystem:scanFields()
             local actualFieldId = field.farmland and field.farmland.id
 
             if actualFieldId and actualFieldId > 0 then
-                SoilLogger.debug("Found field %d", actualFieldId)
+                -- FS25: field.fieldArea is the cultivated area in hectares.
+                -- Fallback to farmland area if fieldArea is missing (though it shouldn't be).
+                local area = field.fieldArea or (field.farmland and field.farmland.area) or 1.0
+                
+                SoilLogger.debug("Found field %d (%.2f ha)", actualFieldId, area)
 
-                self:getOrCreateField(actualFieldId, true)
+                self:getOrCreateField(actualFieldId, true, area)
                 fieldCount = fieldCount + 1
             end
         end
@@ -655,11 +688,15 @@ function SoilFertilitySystem:onClientJoined(connection)
 end
 
 -- Get or create field data
-function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing)
+function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing, area)
     if not fieldId or fieldId <= 0 then return nil end
 
     -- Return existing field
     if self.fieldData[fieldId] then
+        -- Update area if provided (handles initial scan or later updates)
+        if area and area > 0 then
+            self.fieldData[fieldId].fieldArea = area
+        end
         return self.fieldData[fieldId]
     end
 
@@ -679,23 +716,39 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing)
 
     -- Allow lazy creation (HUD-safe, server-only in multiplayer)
     -- Add natural soil variation: ±10% for nutrients, ±0.5 for pH, ±0.5% for OM
-    -- This reflects real-world soil diversity across a map
-    local defaults = SoilConstants.FIELD_DEFAULTS
-
-    -- Use fieldId as deterministic seed for consistent randomization
-    -- Same field always gets same values, even after save/load
-    math.randomseed(fieldId * 67890)
-
-    local function randomize(baseValue, variation)
-        return baseValue + (math.random() * 2 - 1) * variation
+    -- This reflects real-world soil diversity across a map.
+    --
+    -- Use a deterministic hash instead of math.randomseed() to avoid polluting
+    -- the global Lua random state (math.randomseed resets the shared PRNG, which
+    -- disrupts any other code using math.random() in the same frame — e.g. during
+    -- the initial bulk field scan where many fields are created simultaneously).
+    local function hash(n)
+        -- Lua 5.1-compatible deterministic hash (LCG-style, no bitwise ops).
+        -- Produces a float in [0.0, 1.0) that is stable for the same (fieldId, slot) pair
+        -- across save/load cycles. Avoids touching math.randomseed (global state).
+        n = (n * 1664525 + 1013904223) % 4294967296
+        n = (n * 1664525 + 1013904223) % 4294967296
+        return n / 4294967296
+    end
+    local function randField(slot)
+        -- Each nutrient gets its own deterministic slot so values are independent
+        local r = hash(fieldId * 67890 + slot)
+        return r * 2.0 - 1.0  -- range [-1.0, 1.0]
     end
 
+    local function randomize(baseValue, variation, slot)
+        return baseValue + randField(slot) * variation
+    end
+
+    local defaults = SoilConstants.FIELD_DEFAULTS
+
     self.fieldData[fieldId] = {
-        nitrogen = math.floor(randomize(defaults.nitrogen, defaults.nitrogen * 0.10)),
-        phosphorus = math.floor(randomize(defaults.phosphorus, defaults.phosphorus * 0.10)),
-        potassium = math.floor(randomize(defaults.potassium, defaults.potassium * 0.10)),
-        organicMatter = math.max(1.0, math.min(10.0, randomize(defaults.organicMatter, 0.5))),
-        pH = math.max(5.0, math.min(8.5, randomize(defaults.pH, 0.5))),
+        fieldArea = area or 1.0, -- default 1ha if unknown
+        nitrogen   = math.floor(randomize(defaults.nitrogen,   defaults.nitrogen   * 0.10, 1)),
+        phosphorus = math.floor(randomize(defaults.phosphorus, defaults.phosphorus * 0.10, 2)),
+        potassium  = math.floor(randomize(defaults.potassium,  defaults.potassium  * 0.10, 3)),
+        organicMatter = math.max(1.0, math.min(10.0, randomize(defaults.organicMatter, 0.5, 4))),
+        pH            = math.max(5.0, math.min(8.5,  randomize(defaults.pH,            0.5, 5))),
         lastCrop = nil,
         lastHarvest = 0,
         fertilizerApplied = 0,
@@ -709,7 +762,7 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing)
         dryDayCount = 0,
     }
 
-    self:log("Lazy-created field %d with natural soil variation", fieldId)
+    self:log("Lazy-created field %d with area %.2f ha and natural soil variation", fieldId, self.fieldData[fieldId].fieldArea)
     return self.fieldData[fieldId]
 end
 
@@ -734,7 +787,7 @@ function SoilFertilitySystem:updateDailySoil()
         end
 
         -- Seasonal effects (if enabled)
-        if self.settings.seasonalEffects and g_currentMission.environment then
+        if self.settings.seasonalEffects and g_currentMission and g_currentMission.environment then
             local season = g_currentMission.environment.currentSeason
             if season == seasonal.SPRING_SEASON then
                 field.nitrogen = math.min(limits.MAX, field.nitrogen + seasonal.SPRING_NITROGEN_BOOST)
@@ -1041,26 +1094,19 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
 
     local limits = SoilConstants.NUTRIENT_LIMITS
 
-    -- FERTILIZER RESTORATION CALCULATION EXPLAINED:
-    --
-    -- Step 1: Calculate application factor
-    -- Formula: factor = liters applied / 1000
-    -- Why: Fertilizer profiles in Constants.lua are calibrated per 1000L
-    -- Example: 2,000L liquid fertilizer → factor = 2.0
-    local factor = liters / 1000
+    -- AREA NORMALIZATION: Calculate hectares for this field
+    local areaInHa = field.fieldArea or 1.0
+    if areaInHa <= 0 then areaInHa = 1.0 end
 
-    -- Step 2: Apply nutrients from fertilizer profile, capping at maximum limits
-    -- Scale: 0-100 nutrient points (N/P/K), 5.0-7.5 pH, 0-10 organic matter
-    -- Example: Liquid fertilizer N=0.50 per 1000L, factor=2.0
-    --          → Current N=34, Add: 34 + (0.50 × 2.0) = 34 + 1.0 = 35 nitrogen
-    --
-    -- Fertilizer type characteristics (see FERTILIZER_PROFILES in Constants):
-    -- - LIQUIDFERTILIZER: High N, moderate P/K, fast-acting
-    -- - FERTILIZER (solid): Very high N/P, balanced granular NPK
-    -- - MANURE: Lower NPK, adds organic matter (slow-release)
-    -- - SLURRY: Moderate N/K, adds organic matter (liquid organic)
-    -- - DIGESTATE: Good all-around, adds organic matter (biogas byproduct)
-    -- - LIME: Only affects pH (raises toward neutral/alkaline)
+    -- FERTILIZER RESTORATION CALCULATION:
+    -- factor = (liters per frame / 1000) / total field hectares
+    -- This distributes the applied liters across the entire field's concentration.
+    -- Example: 225L applied to 1ha → factor = 0.225 / 1.0 = 0.225
+    -- Example: 225L applied to 10ha → factor = 0.225 / 10.0 = 0.0225
+    -- (As the sprayer covers more ground, these small per-frame increases
+    -- sum up to the correct total concentration change for the whole field.)
+    local factor = (liters / 1000) / areaInHa
+
     if entry.N then field.nitrogen   = math.min(limits.MAX, field.nitrogen   + entry.N * factor) end
     if entry.P then field.phosphorus = math.min(limits.MAX, field.phosphorus + entry.P * factor) end
     if entry.K then field.potassium  = math.min(limits.MAX, field.potassium  + entry.K * factor) end
@@ -1069,7 +1115,11 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
 
     field.fertilizerApplied = (field.fertilizerApplied or 0) + liters
 
-    self:log("Fertilizer applied field %d (%s): %.0f L", fieldId, fillType.name, liters)
+    -- We only log high-precision values for fertilizer to track these small per-frame changes
+    if self.settings.debugMode then
+        self:log("Fertilizer applied field %d (%s): %.4f L -> +N %.6f (area %.2f ha)", 
+            fieldId, fillType.name, liters, (entry.N or 0) * factor, areaInHa)
+    end
 end
 
 --- Apply over-application burn penalty to a field.
@@ -1222,15 +1272,12 @@ function SoilFertilitySystem:saveToXMLFile(xmlFile, key)
 
     -- SAFETY: ensure fieldData is valid
     if not self or type(self) ~= "table" then
-        print("[SoilFertilizer ERROR] saveToXMLFile called with invalid self")
+        SoilLogger.error("saveToXMLFile called with invalid self")
         return
     end
 
     if not self.fieldData or type(self.fieldData) ~= "table" then
-        print(string.format(
-            "[SoilFertilizer WARNING] Cannot save - fieldData invalid (type: %s)",
-            type(self.fieldData)
-        ))
+        SoilLogger.warning("Cannot save - fieldData invalid (type: %s)", type(self.fieldData))
         return
     end
 
@@ -1321,22 +1368,24 @@ end
 
 -- Debug: List all fields
 function SoilFertilitySystem:listAllFields()
-    print("[SoilFertilizer] === Listing all fields ===")
+    SoilLogger.info("=== Listing all fields ===")
 
-    print("Our tracked fields:")
+    SoilLogger.info("Our tracked fields:")
     for fieldId, field in pairs(self.fieldData) do
-        print(string.format("  Field %d: N=%.1f, P=%.1f, K=%.1f, pH=%.1f, OM=%.2f%%",
-            fieldId, field.nitrogen, field.phosphorus, field.potassium, field.pH, field.organicMatter))
+        SoilLogger.info("  Field %d: N=%.1f, P=%.1f, K=%.1f, pH=%.1f, OM=%.2f%%",
+            fieldId, field.nitrogen, field.phosphorus, field.potassium, field.pH, field.organicMatter)
     end
 
     if g_fieldManager and g_fieldManager.fields then
-        print("\nFields in FieldManager:")
-        for _, field in pairs(g_fieldManager.fields) do
-            local fieldIdStr = tostring(field.fieldId or "?")
-            local nameStr = tostring(field.name or "Unknown")
-            print(string.format("  Field %s: Name=%s", fieldIdStr, nameStr))
+        SoilLogger.info("Fields in FieldManager:")
+        for _, field in ipairs(g_fieldManager.fields) do
+            -- NOTE: field.fieldId / field.id / field.index are all nil in FS25.
+            -- The correct identifier is field.farmland.id (farmland-based ID system).
+            local fieldIdStr = tostring(field.farmland and field.farmland.id or "?")
+            local nameStr    = tostring(field.name or "Unknown")
+            SoilLogger.info("  Field %s: Name=%s", fieldIdStr, nameStr)
         end
     end
 
-    print("=== End field list ===")
+    SoilLogger.info("=== End field list ===")
 end

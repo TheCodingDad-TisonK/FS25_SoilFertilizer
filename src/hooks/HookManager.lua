@@ -618,8 +618,9 @@ function HookManager:installHarvestHook()
                 end
                 if not fieldId or fieldId <= 0 then return end
 
-                SoilLogger.debug("Harvest hook: Field %d, Crop %d, %.0fL, strawRatio=%.2f", fieldId, inputFruitType, liters, strawRatio or 0)
-                g_SoilFertilityManager.soilSystem:onHarvest(fieldId, inputFruitType, liters, strawRatio)
+                SoilLogger.debug("Harvest hook: Field %d, Crop %d, %.0fL, area=%.1fm2, strawRatio=%.2f", 
+                    fieldId, inputFruitType, liters, area, strawRatio or 0)
+                g_SoilFertilityManager.soilSystem:onHarvest(fieldId, inputFruitType, liters, strawRatio, area)
             end)
 
             if not success then
@@ -663,14 +664,23 @@ function HookManager:installSprayerAreaHook()
             local spec = self.spec_sprayer
             if not spec or not spec.workAreaParameters then return end
 
-            -- Only fire when the sprayer was actually active this frame
-            if not spec.workAreaParameters.isActive then return end
-
+            -- Guard: sprayer must have a valid fill type and consumed product this frame.
+            -- NOTE: We deliberately do NOT gate on spec.workAreaParameters.isActive here.
+            -- isActive is only set true inside processSprayerArea when FSDensityMapUtil.updateSprayArea
+            -- returns changedArea > 0 — i.e., when it actually paints terrain pixels.
+            -- On fields that are already fully fertilized in the vanilla FS25 density map,
+            -- updateSprayArea returns changedArea=0, isActive stays false, and our hook would
+            -- silently skip every application even though the sprayer IS running and product IS
+            -- being consumed. This was the root cause of "NPK never increases after field scan".
+            -- Using sprayFillLevel > 0 and usage > 0 is the correct gate: if the sprayer has
+            -- product and consumed some this frame, we should record the nutrient application.
             local fillTypeIndex = spec.workAreaParameters.sprayFillType
-            local liters = spec.workAreaParameters.usage
+            local liters        = spec.workAreaParameters.usage
+            local sprayFillLevel = spec.workAreaParameters.sprayFillLevel
 
-            if (not fillTypeIndex or fillTypeIndex <= 0) then return end
+            if not fillTypeIndex or fillTypeIndex <= 0 then return end
             if not liters or liters <= 0 then return end
+            if not sprayFillLevel or sprayFillLevel <= 0 then return end
 
             local success, errorMsg = pcall(function()
                 local fillType = g_fillTypeManager:getFillTypeByIndex(fillTypeIndex)
@@ -690,7 +700,17 @@ function HookManager:installSprayerAreaHook()
                 
                 local isFertilizer = SoilConstants.FERTILIZER_PROFILES[fillType.name] ~= nil
 
-                if not isFertilizer and not herbEffectiveness and not pestEffectiveness and not diseaseEffectiveness then return end
+                -- Crop protection products (INSECTICIDE, FUNGICIDE, HERBICIDE) that are also
+                -- listed in FERTILIZER_PROFILES carry pestReduction/diseaseReduction markers
+                -- and are routed through applyFertilizer → on*Applied internally.
+                -- We must NOT also call on*Applied directly from here, or they would be
+                -- double-applied. Only use the direct path for products NOT in FERTILIZER_PROFILES
+                -- (e.g. vanilla HERBICIDE / PESTICIDE fill types that have no profile entry).
+                local herbOnlyDirect = herbEffectiveness and not isFertilizer
+                local pestOnlyDirect = pestEffectiveness and not isFertilizer
+                local diseaseOnlyDirect = diseaseEffectiveness and not isFertilizer
+
+                if not isFertilizer and not herbOnlyDirect and not pestOnlyDirect and not diseaseOnlyDirect then return end
 
                 -- Resolve field from vehicle root position
                 local x, _, z = getWorldTranslation(self.rootNode)
@@ -721,18 +741,18 @@ function HookManager:installSprayerAreaHook()
                     g_SoilFertilityManager.soilSystem:onFertilizerApplied(fieldId, fillTypeIndex, effectiveLiters)
                 end
 
-                -- Herbicide application reduces weed pressure
-                if herbEffectiveness and g_SoilFertilityManager.soilSystem.onHerbicideApplied then
+                -- Herbicide application reduces weed pressure (direct path: non-profile products only)
+                if herbOnlyDirect and g_SoilFertilityManager.soilSystem.onHerbicideApplied then
                     g_SoilFertilityManager.soilSystem:onHerbicideApplied(fieldId, herbEffectiveness)
                 end
 
-                -- Insecticide application reduces pest pressure
-                if pestEffectiveness and g_SoilFertilityManager.soilSystem.onInsecticideApplied then
+                -- Insecticide application reduces pest pressure (direct path: non-profile products only)
+                if pestOnlyDirect and g_SoilFertilityManager.soilSystem.onInsecticideApplied then
                     g_SoilFertilityManager.soilSystem:onInsecticideApplied(fieldId, pestEffectiveness)
                 end
 
-                -- Fungicide application reduces disease pressure
-                if diseaseEffectiveness and g_SoilFertilityManager.soilSystem.onFungicideApplied then
+                -- Fungicide application reduces disease pressure (direct path: non-profile products only)
+                if diseaseOnlyDirect and g_SoilFertilityManager.soilSystem.onFungicideApplied then
                     g_SoilFertilityManager.soilSystem:onFungicideApplied(fieldId, diseaseEffectiveness)
                 end
 

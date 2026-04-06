@@ -76,27 +76,63 @@ local function loadedMission(mission, node)
     sfm:onMissionLoaded()
 
     -- $modDir is not resolved in the fillTypes.xml loading context, so we patch
-    -- the HUD icon filenames directly via Lua using the captured modDirectory.
+    -- the HUD icon filenames AND overlay handles directly via Lua.
+    --
+    -- WHY BOTH FIELDS:
+    --   ft.hudOverlayFilename  – the path string stored on the fill type object.
+    --   ft.hudOverlay          – the pre-loaded overlay handle that FS25's native
+    --                            fill-level HUD (bottom-right) actually renders from.
+    --
+    -- FS25 creates ft.hudOverlay at mission load from the <image hud="..."/> entry
+    -- in fillTypes.xml.  All our solid types share the same fallback path
+    -- ($dataS/menu/hud/fillTypes/hud_fill_fertilizer.png), so every solid type
+    -- displayed the same generic icon regardless of which product was loaded.
+    -- Patching only hudOverlayFilename had no visible effect on the native HUD.
+    --
+    -- Fix: after updating the filename, also replace the overlay handle via
+    -- createImageOverlay() (the same API used by SoilHUD.lua for its own overlays).
+    -- The old handle is freed with delete() to avoid GPU resource leaks.
     if g_fillTypeManager then
         local hudDir = modDirectory .. "hud/fillTypes/"
         local icons = {
-            UAN32     = "hud_fill_UAN32.dds",
-            UAN28     = "hud_fill_UAN28.dds",
-            ANHYDROUS = "hud_fill_anhydrous.dds",
-            STARTER   = "hud_fill_Starter.dds",
-            UREA      = "hud_fill_UREA.dds",
-            AMS       = "hud_fill_AMS.dds",
-            MAP       = "hud_fill_map.dds",
-            DAP       = "hud_fill_dap.dds",
-            POTASH    = "hud_fill_potash.dds",
+            UAN32       = "hud_fill_UAN32.dds",
+            UAN28       = "hud_fill_UAN28.dds",
+            ANHYDROUS   = "hud_fill_anhydrous.dds",
+            STARTER     = "hud_fill_Starter.dds",
+            UREA        = "hud_fill_UREA.dds",
+            AMS         = "hud_fill_AMS.dds",
+            MAP         = "hud_fill_map.dds",
+            DAP         = "hud_fill_dap.dds",
+            POTASH      = "hud_fill_potash.dds",
+            INSECTICIDE = "hud_fill_insecticide.dds",
+            FUNGICIDE   = "hud_fill_fungicide.dds",
         }
+        local patched = 0
+        local failed  = 0
         for name, file in pairs(icons) do
             local ft = g_fillTypeManager:getFillTypeByName(name)
             if ft then
-                ft.hudOverlayFilename = hudDir .. file
+                local path = hudDir .. file
+                -- Update the filename string (read by some third-party mod integrations)
+                ft.hudOverlayFilename = path
+                -- Replace the overlay handle so the native FS25 fill-level HUD
+                -- renders the correct icon instead of the generic fallback.
+                if createImageOverlay ~= nil then
+                    if ft.hudOverlay ~= nil then
+                        delete(ft.hudOverlay)
+                    end
+                    ft.hudOverlay = createImageOverlay(path)
+                    patched = patched + 1
+                else
+                    failed = failed + 1
+                end
             end
         end
-        SoilLogger.info("Custom HUD icons patched for mod fill types")
+        if failed > 0 then
+            SoilLogger.warning("HUD icon patch: createImageOverlay unavailable — %d icons not updated (filename only)", failed)
+        else
+            SoilLogger.info("Custom HUD icons patched for %d mod fill types (overlay + filename)", patched)
+        end
     end
 
     -- Multiplayer client: request full state from server.

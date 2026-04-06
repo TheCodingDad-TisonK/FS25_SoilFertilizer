@@ -1164,7 +1164,7 @@ function SoilHUD:getCurrentSprayer()
         -- State change: was in sprayer, now not
         if self._lastSprayerDetected ~= false then
             self._lastSprayerDetected = false
-            print("[SoilFertilizer DIAG] getCurrentSprayer: player NOT in vehicle — rate panel hidden")
+            SoilLogger.debug("getCurrentSprayer: player NOT in vehicle — rate panel hidden")
         end
         return nil
     end
@@ -1193,13 +1193,11 @@ function SoilHUD:getCurrentSprayer()
         self._lastSprayerDetected  = (result ~= nil)
         if result then
             local isImpl = (result ~= vehicle) and "IMPLEMENT" or "DIRECT"
-            print(string.format(
-                "[SoilFertilizer DIAG] getCurrentSprayer: APPLICATOR %s id=%s cfg=%s",
-                isImpl, tostring(result.id), tostring(result.configFileName)))
+            SoilLogger.debug("getCurrentSprayer: APPLICATOR %s id=%s cfg=%s",
+                isImpl, tostring(result.id), tostring(result.configFileName))
         else
-            print(string.format(
-                "[SoilFertilizer DIAG] getCurrentSprayer: no applicator on vehicle cfg=%s — rate panel hidden",
-                tostring(vehicle.configFileName)))
+            SoilLogger.debug("getCurrentSprayer: no applicator on vehicle cfg=%s — rate panel hidden",
+                tostring(vehicle.configFileName))
         end
     end
     return result
