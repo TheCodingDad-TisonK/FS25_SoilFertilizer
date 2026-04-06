@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.6.0] - 2026-04-06
+
+### Fixed
+
+- **Soil HUD showing wrong or stale crop name (issue #123)**: The HUD was displaying
+  the crop from a previous harvest (e.g. "Oat" from 3-4 harvests ago) or showing
+  "Fallow" even when a live crop was growing. Root cause: `SoilFertilitySystem:getFieldInfo()`
+  called `fsField:getFieldState()`, which **does not exist in FS25**. `FieldState` is a
+  standalone class that must be instantiated with `FieldState.new()` and populated via
+  `fieldState:update(centerX, centerZ)`. The silent `pcall` failure meant live crop
+  detection always fell through to the stale `field.lastCrop` value.
+
+  Fix 1 (`SoilFertilitySystem.lua`): Replace the non-existent `getFieldState()` call with
+  the correct `FieldState.new()` + `:update(fsField.posX, fsField.posZ)` pattern.
+
+  Fix 2 (`HookManager.lua`): Add `installSowingHook()` on `SowingMachine.processSowingMachineArea`
+  to clear `field.lastCrop = nil` whenever seeds are planted. This prevents the previous
+  harvest's crop from showing during the gap between sowing and the next FieldState poll,
+  and ensures "Fallow" is only shown on genuinely bare/cultivated ground.
+
+---
+
 ## [1.4.5.0] - 2026-04-06
 
 ### Fixed

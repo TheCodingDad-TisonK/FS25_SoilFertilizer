@@ -285,6 +285,22 @@ function SoilFertilitySystem:onFieldOwnershipChanged(fieldId, farmlandId, farmId
     end
 end
 
+--- Hook delegate: called by HookManager when sowing/planting occurs on a field.
+--- Clears the stale lastCrop so the HUD falls through to live FieldState detection
+--- instead of showing the crop from the previous harvest (fix for issue #123).
+---@param fieldId number The field being sown
+function SoilFertilitySystem:onSowing(fieldId)
+    if not fieldId or fieldId <= 0 then return end
+    local field = self:getOrCreateField(fieldId, true)
+    if not field then return end
+    -- Clearing lastCrop here is safe: getFieldInfo() will immediately pick up the
+    -- live fruitTypeIndex from FieldState:update() once the crop is in the ground.
+    -- If FieldState somehow returns UNKNOWN in the first tick, we get "Fallow"
+    -- momentarily (correct — seeds just went in, nothing is growing yet).
+    field.lastCrop = nil
+    SoilLogger.debug("Sowing on field %d: cleared lastCrop for fresh HUD detection", fieldId)
+end
+
 --- Hook delegate: called by HookManager when plowing occurs
 --- Increases organic matter and normalizes pH
 ---@param fieldId number The field being plowed
@@ -1218,11 +1234,25 @@ function SoilFertilitySystem:getFieldInfo(fieldId)
             end
         end
         if fsField then
-            local ok, fieldState = pcall(function() return fsField:getFieldState() end)
-            if ok and fieldState and fieldState.fruitTypeIndex ~= FruitType.UNKNOWN then
-                local fruitDesc = g_fruitTypeManager and g_fruitTypeManager:getFruitTypeByIndex(fieldState.fruitTypeIndex)
-                if fruitDesc and fruitDesc.name then
-                    cropName = fruitDesc.name
+            -- Fix #123: Field:getFieldState() does NOT exist in FS25.
+            -- FieldState is a standalone class; it must be instantiated and then
+            -- populated by calling :update(worldX, worldZ) with a point inside the field.
+            -- fsField.posX / posZ are the polygon centroid, set by Field:load() via
+            -- MathUtil.getPolygonLabel(). They are always valid after field initialization.
+            local centerX = fsField.posX
+            local centerZ = fsField.posZ
+            if centerX and centerZ then
+                local ok, fieldState = pcall(function()
+                    local fs = FieldState.new()
+                    fs:update(centerX, centerZ)
+                    return fs
+                end)
+                if ok and fieldState and fieldState.fruitTypeIndex ~= FruitType.UNKNOWN then
+                    local fruitDesc = g_fruitTypeManager and
+                        g_fruitTypeManager:getFruitTypeByIndex(fieldState.fruitTypeIndex)
+                    if fruitDesc and fruitDesc.name then
+                        cropName = fruitDesc.name
+                    end
                 end
             end
         end
