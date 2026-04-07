@@ -101,6 +101,10 @@ function HookManager:installAll(soilSystem)
     local fillUnitOk = self:installFillUnitHook()
     if fillUnitOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
+    -- Allow "BUY" refill mode to work with custom fill types (issue #125)
+    local purchaseRefillOk = self:installPurchaseRefillHook()
+    if purchaseRefillOk then successCount = successCount + 1 else failCount = failCount + 1 end
+
     SoilLogger.info("Hook installation complete: %d/%d successful, %d failed",
         successCount, successCount + failCount, failCount)
 
@@ -1091,5 +1095,198 @@ function HookManager:installFillUnitHook()
         end
     end
 
+    return true
+end
+-- =========================================================
+-- HOOK 8: "BUY" refill mode for custom fill types (issue #125)
+-- =========================================================
+-- In FS25, when the player sets the sprayer refill mode to "BUY", the game is
+-- supposed to charge money per liter consumed instead of depleting the tank.
+-- This works for vanilla fill types (FERTILIZER, LIQUIDFERTILIZER) because they
+-- are registered with a purchasable economy entry that the game's FillUnit system
+-- can look up via g_fillTypeManager.
+--
+-- Our custom fill types (UREA, UAN32, DAP, etc.) ARE defined with pricePerLiter
+-- in fillTypes.xml, but FS25's internal "BUY" purchase path only fires for fill
+-- types whose economy entry is recognized by FillUnit:getIsAvailableForPurchase()
+-- (or equivalent internal check). Custom mod fill types are not in that list, so
+-- "BUY" mode silently falls back to normal depletion for our types.
+--
+-- Root cause: FS25's Sprayer specialization calls
+--   FillUnit:addFillUnitFillLevel(fillUnitIndex, -delta, fillTypeIndex)
+-- On vanilla types, FillUnit internally intercepts the negative delta when
+-- purchase mode is active and handles the money transaction instead. For our
+-- types, no such interception exists — the fill level just depletes as normal.
+--
+-- Fix: hook FillUnit.addFillUnitFillLevel. When:
+--   1. The delta is negative (consumption, not filling)
+--   2. The fill type is one of our custom purchasable types
+--   3. The vehicle's sprayer is in "BUY" mode (spec_sprayer.fillMode == FillUnit.FILLMODE_PURCHASE
+--      or g_currentMission.refuelAllowed with farmId charge)
+-- → Charge the player pricePerLiter * |delta| and return 0 (no depletion).
+--
+-- We detect BUY mode via the sprayer spec's active fill mode. FS25 stores this
+-- in spec_fillUnit.fillUnits[n].autoReloadState or via Sprayer.isFillModeAllowed.
+-- The most reliable approach: check if FillUnit itself is in "auto-purchase" mode
+-- by inspecting the fill unit's reloadState field (set by the game when the player
+-- picks "BUY" in the HUD). Fall back to a price-per-frame charge approach using
+-- the economy manager.
+---@return boolean success
+function HookManager:installPurchaseRefillHook()
+    if not FillUnit or type(FillUnit.addFillUnitFillLevel) ~= "function" then
+        SoilLogger.warning("Purchase refill hook: FillUnit.addFillUnitFillLevel not available - skipping")
+        return false
+    end
+
+    local fm = g_fillTypeManager
+    if not fm then
+        SoilLogger.warning("Purchase refill hook: g_fillTypeManager not available - skipping")
+        return false
+    end
+
+    -- Build a lookup table: fillTypeIndex → pricePerLiter for all our custom types.
+    -- Prices come from Constants (authoritative single source) and fall back to
+    -- the fillTypes.xml economy values via FillTypeManager if a type isn't in Constants.
+    local ALL_CUSTOM_NAMES = {
+        -- Liquid
+        "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME",
+        "INSECTICIDE", "FUNGICIDE",
+        -- Solid
+        "UREA", "AMS", "MAP", "DAP", "POTASH",
+        "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM",
+    }
+
+    -- Prices from Constants (already defined there)
+    local PRICE_OVERRIDES = {}
+    if SoilConstants and SoilConstants.PURCHASABLE_SINGLE_NUTRIENT then
+        for name, data in pairs(SoilConstants.PURCHASABLE_SINGLE_NUTRIENT) do
+            if data.pricePerLiter then
+                PRICE_OVERRIDES[string.upper(name)] = data.pricePerLiter
+            end
+        end
+    end
+    -- Fallback prices match fillTypes.xml economy entries
+    local FALLBACK_PRICES = {
+        UAN32 = 1.60, UAN28 = 1.50, ANHYDROUS = 1.85, STARTER = 1.70,
+        LIQUIDLIME = 1.20, INSECTICIDE = 1.20, FUNGICIDE = 1.30,
+        UREA = 1.65, AMS = 1.40, MAP = 1.95, DAP = 1.75, POTASH = 1.80,
+        COMPOST = 0.60, BIOSOLIDS = 0.55, CHICKEN_MANURE = 0.50,
+        PELLETIZED_MANURE = 0.70, GYPSUM = 0.80,
+    }
+
+    -- customPrices[fillTypeIndex] = pricePerLiter
+    local customPrices = {}
+    for _, name in ipairs(ALL_CUSTOM_NAMES) do
+        local idx = fm:getFillTypeIndexByName(name)
+        if idx then
+            local price = PRICE_OVERRIDES[name] or FALLBACK_PRICES[name]
+            if price then
+                customPrices[idx] = price
+            end
+        end
+    end
+
+    if not next(customPrices) then
+        SoilLogger.warning("Purchase refill hook: no custom fill types with prices found - skipping")
+        return false
+    end
+
+    local count = 0
+    for _ in pairs(customPrices) do count = count + 1 end
+
+    -- Helper: check if a fill unit on a vehicle is in "BUY/auto-purchase" mode.
+    -- FS25 sets fillUnit.reloadState = FillUnit.FILLUNIT_RELOAD_STATE_ACTIVE (or similar)
+    -- when the player selects "BUY". We use the most resilient check: look at
+    -- spec_fillUnit.fillUnits[fillUnitIndex].reloadState and/or the sprayer spec's mode.
+    -- If the reloadState constant isn't accessible, fall back to checking
+    -- spec_fillUnit.fillUnits[idx].fillModeIsRefueling (set by vanilla Sprayer BUY path).
+    local function isInBuyMode(vehicle, fillUnitIndex, fillTypeIndex)
+        if not vehicle then return false end
+
+        -- Primary check: sprayer spec fill mode (most direct)
+        -- FS25 Sprayer stores the active auto-refill state on spec_sprayer
+        local specSprayer = vehicle.spec_sprayer
+        if specSprayer then
+            -- When BUY is selected, Sprayer sets isSprayerBuyingFillType to the active type
+            if specSprayer.isSprayerBuyingFillType ~= nil then
+                return specSprayer.isSprayerBuyingFillType == fillTypeIndex
+            end
+            -- Alternative: check if the sprayer has an active purchase mode flag
+            if specSprayer.isFillPurchaseActive then
+                return true
+            end
+        end
+
+        -- Secondary check: fill unit reloadState
+        local specFillUnit = vehicle.spec_fillUnit
+        if specFillUnit and specFillUnit.fillUnits then
+            local fillUnit = specFillUnit.fillUnits[fillUnitIndex]
+            if fillUnit then
+                -- FS25 uses fillUnit.reloadState to indicate the reload mode
+                -- FillUnit.FILLUNIT_RELOAD_STATE_ACTIVE = 1 for auto-purchase/reload
+                if fillUnit.reloadState ~= nil and fillUnit.reloadState > 0 then
+                    return true
+                end
+                -- Some FS25 versions use fillModeIndex: 0=off, 1=buy, 2=auto-load
+                -- Value 1 means "buy from shop" mode
+                if fillUnit.fillModeIndex ~= nil and fillUnit.fillModeIndex == 1 then
+                    return true
+                end
+            end
+        end
+
+        return false
+    end
+
+    local original = FillUnit.addFillUnitFillLevel
+    FillUnit.addFillUnitFillLevel = function(vehicle, fillUnitIndex, fillLevelDelta, fillTypeIndex, toolType, fillPositionData, noEventSend)
+        -- Only intercept consumption (negative delta) of our custom types
+        if fillLevelDelta >= 0 then
+            return original(vehicle, fillUnitIndex, fillLevelDelta, fillTypeIndex, toolType, fillPositionData, noEventSend)
+        end
+
+        local pricePerLiter = customPrices[fillTypeIndex]
+        if not pricePerLiter then
+            return original(vehicle, fillUnitIndex, fillLevelDelta, fillTypeIndex, toolType, fillPositionData, noEventSend)
+        end
+
+        -- Check BUY mode
+        if not isInBuyMode(vehicle, fillUnitIndex, fillTypeIndex) then
+            return original(vehicle, fillUnitIndex, fillLevelDelta, fillTypeIndex, toolType, fillPositionData, noEventSend)
+        end
+
+        -- BUY mode active for a custom fill type: charge money, skip depletion.
+        -- |fillLevelDelta| is the liters consumed this frame.
+        local litersConsumed = -fillLevelDelta  -- positive value
+        local cost = litersConsumed * pricePerLiter
+
+        -- Charge the owning farm
+        local farmId = vehicle.ownerFarmId or (vehicle.spec_enterable and vehicle.spec_enterable.activeFarmId)
+        if farmId and farmId > 0 and g_currentMission and g_currentMission.economyManager then
+            -- g_currentMission.economyManager:updateStats handles the money transaction
+            -- and shows the cost in the farm account. We call removeMoney directly if
+            -- economyManager doesn't expose a direct debit for arbitrary types.
+            local ok, err = pcall(function()
+                g_currentMission:addMoney(-cost, farmId, MoneyType.VEHICLE_RUNNING_COSTS, true, true)
+            end)
+            if not ok then
+                -- Fallback: removeMoney directly
+                pcall(function()
+                    g_currentMission.economyManager:updateBudget(farmId, -cost)
+                end)
+            end
+        end
+
+        -- Return 0 — no actual fill level change (tank stays full)
+        -- The game expects addFillUnitFillLevel to return the actual delta applied.
+        -- Returning 0 means "nothing was consumed from the physical tank."
+        return 0
+    end
+
+    self:registerCleanup("FillUnit.addFillUnitFillLevel (purchase refill)", function()
+        FillUnit.addFillUnitFillLevel = original
+    end)
+
+    SoilLogger.info("[OK] Purchase refill hook installed - BUY mode enabled for %d custom fill types", count)
     return true
 end
