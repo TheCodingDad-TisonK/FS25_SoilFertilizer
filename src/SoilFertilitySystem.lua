@@ -971,6 +971,11 @@ function SoilFertilitySystem:updateDailySoil()
                 field.diseasePressure = math.min(100, pressure + (baseRate * seasonMult * cropMult) + rainBonus)
             end
         end
+
+        -- Burn warning countdown — decrements each day until cleared
+        if (field.burnDaysLeft or 0) > 0 then
+            field.burnDaysLeft = field.burnDaysLeft - 1
+        end
     end
 
     self:log("Daily soil update completed for %d fields", self:getFieldCount())
@@ -1157,7 +1162,7 @@ function SoilFertilitySystem:applyBurnEffect(fieldId, rateMultiplier)
     if rateMultiplier >= burnCfg.BURN_GUARANTEED_THRESHOLD then
         phDrop = burnCfg.BURN_PH_DROP_CERTAIN
         nDrain = burnCfg.BURN_N_DRAIN_CERTAIN
-        field.burnActive = true
+        field.burnDaysLeft = 3   -- show burn warning in HUD for 3 in-game days
     else
         -- Probability scales linearly between risk threshold and guaranteed threshold
         local excess = (rateMultiplier - burnCfg.BURN_RISK_THRESHOLD) /
@@ -1165,7 +1170,7 @@ function SoilFertilitySystem:applyBurnEffect(fieldId, rateMultiplier)
         if math.random() < excess then
             phDrop = burnCfg.BURN_PH_DROP_RISK
             nDrain = burnCfg.BURN_N_DRAIN_RISK
-            field.burnActive = true
+            field.burnDaysLeft = 3
         end
     end
 
@@ -1278,6 +1283,7 @@ function SoilFertilitySystem:getFieldInfo(fieldId)
         insecticideActive = (field.insecticideDaysLeft or 0) > 0,
         diseasePressure = field.diseasePressure or 0,
         fungicideActive = (field.fungicideDaysLeft or 0) > 0,
+        burnDaysLeft = field.burnDaysLeft or 0,
         needsFertilization = (
             field.nitrogen < fertThresholds.nitrogen or
             field.phosphorus < fertThresholds.phosphorus or
@@ -1319,6 +1325,7 @@ function SoilFertilitySystem:saveToXMLFile(xmlFile, key)
             local fieldKey = string.format("%s.field(%d)", key, index)
 
             setXMLInt(xmlFile, fieldKey .. "#id", fieldId)
+            setXMLFloat(xmlFile, fieldKey .. "#fieldArea", field.fieldArea or 1.0)
             setXMLFloat(xmlFile, fieldKey .. "#nitrogen", field.nitrogen or defaults.nitrogen)
             setXMLFloat(xmlFile, fieldKey .. "#phosphorus", field.phosphorus or defaults.phosphorus)
             setXMLFloat(xmlFile, fieldKey .. "#potassium", field.potassium or defaults.potassium)
@@ -1334,6 +1341,7 @@ function SoilFertilitySystem:saveToXMLFile(xmlFile, key)
             setXMLFloat(xmlFile, fieldKey .. "#diseasePressure", field.diseasePressure or 0)
             setXMLInt(xmlFile, fieldKey .. "#fungicideDaysLeft", field.fungicideDaysLeft or 0)
             setXMLInt(xmlFile, fieldKey .. "#dryDayCount", field.dryDayCount or 0)
+            setXMLInt(xmlFile, fieldKey .. "#burnDaysLeft", field.burnDaysLeft or 0)
 
             index = index + 1
         else
@@ -1363,6 +1371,7 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
         if not fieldId then break end
 
         self.fieldData[fieldId] = {
+            fieldArea = getXMLFloat(xmlFile, fieldKey .. "#fieldArea") or 1.0,
             nitrogen = getXMLFloat(xmlFile, fieldKey .. "#nitrogen") or defaults.nitrogen,
             phosphorus = getXMLFloat(xmlFile, fieldKey .. "#phosphorus") or defaults.phosphorus,
             potassium = getXMLFloat(xmlFile, fieldKey .. "#potassium") or defaults.potassium,
@@ -1378,6 +1387,7 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
             diseasePressure = getXMLFloat(xmlFile, fieldKey .. "#diseasePressure") or 0,
             fungicideDaysLeft = getXMLInt(xmlFile, fieldKey .. "#fungicideDaysLeft") or 0,
             dryDayCount = getXMLInt(xmlFile, fieldKey .. "#dryDayCount") or 0,
+            burnDaysLeft = getXMLInt(xmlFile, fieldKey .. "#burnDaysLeft") or 0,
             initialized = true
         }
 

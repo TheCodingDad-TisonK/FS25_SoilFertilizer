@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.7.0] - 2026-04-07
+
+### Fixed
+
+- **"BUY" refill mode not working with custom fill types (issue #125)**: When the player
+  (or a worker/CP) set the sprayer refill mode to "BUY", vanilla fill types
+  (FERTILIZER, LIQUIDFERTILIZER) correctly charged money per liter consumed without
+  depleting the physical tank. Custom types (UAN32, UAN28, ANHYDROUS, STARTER, UREA,
+  AMS, MAP, DAP, POTASH, INSECTICIDE, FUNGICIDE, and organic types) still depleted the
+  fill unit normally, causing workers to stop when the tank ran dry and potentially
+  switch to a vanilla fertilizer type instead.
+
+  Root cause: FS25's internal "BUY" purchase intercept only fires for fill types
+  recognized by its own economy system. Custom mod fill types have `pricePerLiter`
+  defined in `fillTypes.xml` but are not included in the game's purchasable-fill-type
+  whitelist, so `FillUnit.addFillUnitFillLevel` never intercepts their consumption.
+
+  Fix: Added `installPurchaseRefillHook()` in `HookManager.lua` (Hook 8). This hook
+  wraps `FillUnit.addFillUnitFillLevel` and intercepts negative-delta (consumption)
+  calls for custom fill types when the vehicle's fill unit is in BUY mode. When
+  intercepted, it charges the owning farm `pricePerLiter × litersConsumed` via
+  `g_currentMission:addMoney()` and returns `0` (no physical depletion). BUY mode is
+  detected via `fillUnit.fillModeIndex == 1` (primary) and `fillUnit.reloadState > 0`
+  (secondary), matching how FS25 internally signals the purchase-refill state.
+
+  Prices used for money charge match the `economy pricePerLiter` values in
+  `fillTypes.xml` and the `SoilConstants.PURCHASABLE_SINGLE_NUTRIENT` table for
+  single-nutrient types (ANHYDROUS, MAP, POTASH).
+
+---
+
 ## [1.4.6.0] - 2026-04-06
 
 ### Fixed

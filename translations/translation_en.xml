@@ -27,6 +27,8 @@
     <e k="sf_diff_1" v="Simple" eh="1fbb1e39" />
     <e k="sf_diff_2" v="Realistic" eh="408c999f" />
     <e k="sf_diff_3" v="Hardcore" eh="1c800aa9" />
+    <e k="sf_ui_soilReport_syncing" v="Syncing soil data..." eh="d9cbb1e7" />
+    <e k="sf_ui_soilReport_syncTimeout" v="Could not load field ownership. Please close and reopen the report." eh="a1b2c3d4" />
     <e k="sf_fertilizer_cost_short" v="Fertilizer Costs" eh="6870d88b" />
     <e k="sf_fertilizer_cost_long" v="Enable/disable realistic fertilizer purchase costs" eh="12b03fbb" />
     <e k="sf_notifications_short" v="Notifications" eh="a274f4d4" />
