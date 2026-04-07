@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.8.0] - 2026-04-07
+
+### Fixed
+
+- **Soil Report "Syncing" timeout in multiplayer (issue #120)**: Joining clients on
+  multiplayer servers would often hang on the "Syncing field ownership data..."
+  screen, eventually timing out after 15s. This occurred because the ownership
+  synchronization check was too restrictive, especially on maps where no land is
+  owned by default (survival starts).
+
+  Fix: Enhanced `isOwnershipSynced` in `SoilReportDialog.lua` with a multi-stage
+  verification process. The sync check now correctly identifies server-sent initial
+  state by verifying if *any* land on the map is owned by *any* farm. Added a
+  fallback that considers sync complete once the mission is fully started or the
+  game HUD is visible. Increased the sync retry window to 30s (15 attempts) for
+  better reliability on heavily modded dedicated servers.
+
+---
+
 ## [1.4.7.0] - 2026-04-07
 
 ### Fixed

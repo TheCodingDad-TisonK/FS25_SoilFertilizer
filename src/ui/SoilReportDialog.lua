@@ -124,7 +124,7 @@ function SoilReportDialog:showSyncingState()
 end
 
 --- Start an AsyncRetryHandler that re-runs collectFieldData() until ownership
---- has synced, then refreshes the display. Retries every 2s for up to 15s.
+--- has synced, then refreshes the display. Retries every 2s for up to 30s.
 function SoilReportDialog:startOwnershipSyncRetry()
     -- Cancel any previous retry that may still be running.
     if self.ownershipRetry then
@@ -135,8 +135,8 @@ function SoilReportDialog:startOwnershipSyncRetry()
 
     self.ownershipRetry = AsyncRetryHandler.new({
         name        = "SoilReport.OwnershipSync",
-        maxAttempts = 8,
-        delays      = {2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000},
+        maxAttempts = 15,
+        delays      = {2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000},
         condition   = function()
             -- Considered ready once collectFieldData() succeeds
             local ready = dialog:collectFieldData()
@@ -169,6 +169,10 @@ end
 --- Get the local player's farm ID.
 ---@return number
 local function getLocalFarmId()
+    if g_localPlayer and g_localPlayer.farmId and g_localPlayer.farmId > 0 then
+        return g_localPlayer.farmId
+    end
+
     if g_currentMission and g_currentMission.player then
         local id = g_currentMission.player.farmId
         if id and id > 0 then return id end
@@ -183,40 +187,65 @@ local function getLocalFarmId()
 end
 
 --- Returns true if the farmland is owned by the given farm.
---- Uses g_farmlandManager.farmlandMapping[farmlandId] — the authoritative
---- FS25 ownership table (confirmed in FarmlandManager.lua source).
+--- Uses g_farmlandManager:getFarmlandOwner(farmlandId) — the authoritative
+--- FS25 ownership API (confirmed in FarmlandManager.lua source).
 ---@param farmlandId number
 ---@param localFarmId number
 ---@return boolean
 local function isFarmlandOwnedByFarm(farmlandId, localFarmId)
-    if not g_farmlandManager or not g_farmlandManager.farmlandMapping then
+    if not g_farmlandManager then
         return false
     end
-    return g_farmlandManager.farmlandMapping[farmlandId] == localFarmId
+    return g_farmlandManager:getFarmlandOwner(farmlandId) == localFarmId
 end
 
---- Returns true if farmlandMapping has synced at least one entry for the local farm.
+--- Returns true if farmland data has synced.
 --- In multiplayer, ownership data arrives asynchronously after the client joins.
---- Until at least one owned farmland entry is present we cannot distinguish
---- "player owns nothing" from "sync not yet complete", so we treat it as not ready.
+--- We wait until either the player's own land is visible, or any land ownership
+--- is visible (indicating the server has sent the initial state).
 ---@param localFarmId number
 ---@return boolean
 local function isOwnershipSynced(localFarmId)
-    if not g_farmlandManager or not g_farmlandManager.farmlandMapping then
+    if not g_farmlandManager then
         return false
     end
-    -- Singleplayer (farmId 1) and host always have ownership present immediately.
+
+    -- Ensure map data is loaded
+    local farmlands = g_farmlandManager:getFarmlands()
+    if not farmlands or next(farmlands) == nil then
+        return false
+    end
+
+    -- Singleplayer and host always have ownership present immediately.
+    if not g_currentMission.missionDynamicInfo.isMultiplayer or g_currentMission:getIsServer() then
+        return true
+    end
+
     -- For joining clients in MP, the mapping starts empty and fills in asynchronously.
-    for _, ownerFarmId in pairs(g_farmlandManager.farmlandMapping) do
-        if ownerFarmId == localFarmId then
+    -- Check if we own any land.
+    local ownedIds = g_farmlandManager:getOwnedFarmlandIdsByFarmId(localFarmId)
+    if ownedIds and #ownedIds > 0 then
+        return true
+    end
+
+    -- Check if ANYONE owns land (common for map start).
+    -- Using the public API to avoid direct table access issues.
+    for id, _ in pairs(farmlands) do
+        if g_farmlandManager:getFarmlandOwner(id) ~= 0 then
             return true
         end
     end
-    -- Also consider it synced if the mapping is non-empty and the player simply owns
-    -- no farmland (edge case: spectator / farm-hand with no owned land).
-    local count = 0
-    for _ in pairs(g_farmlandManager.farmlandMapping) do count = count + 1 end
-    return count > 0
+
+    -- Fallback: if the mission is fully started/HUD is visible, assume sync is complete
+    -- even if all land is currently unowned (e.g. survival start).
+    if g_currentMission.missionDynamicInfo and g_currentMission.missionDynamicInfo.isStarted then
+        return true
+    end
+    if g_currentMission.hud ~= nil then
+        return true
+    end
+
+    return false
 end
 
 --- Collect field data limited to fields owned by the local player's farm.
