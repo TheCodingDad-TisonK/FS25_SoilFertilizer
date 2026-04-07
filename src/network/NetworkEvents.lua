@@ -166,8 +166,8 @@ function SoilSettingSyncEvent:run(connection)
         local oldValue = g_SoilFertilityManager.settings[self.settingName]
         g_SoilFertilityManager.settings[self.settingName] = self.settingValue
 
-        print(string.format("[SoilFertilizer] Client: Setting '%s' synced from %s to %s",
-            self.settingName, tostring(oldValue), tostring(self.settingValue)))
+        SoilLogger.info("Client: Setting '%s' synced from %s to %s",
+            self.settingName, tostring(oldValue), tostring(self.settingValue))
 
         -- Refresh UI if open
         if g_SoilFertilityManager.settingsUI then
@@ -220,15 +220,9 @@ function SoilRequestFullSyncEvent:run(connection)
         -- If soil system is still initializing (no fields yet), log warning
         -- Client will retry automatically via retry handler
         if soilSystem and soilSystem.fieldsScanPending then
-            print(string.format(
-                "[SoilFertilizer] Server: Sync requested but field scan still pending (%d fields ready) - client will retry",
-                fieldCount
-            ))
+            SoilLogger.warning("Server: Sync requested but field scan still pending (%d fields ready) - client will retry", fieldCount)
         else
-            print(string.format(
-                "[SoilFertilizer] Server: Sending full sync to client (%d fields)",
-                fieldCount
-            ))
+            SoilLogger.info("Server: Sending full sync to client (%d fields)", fieldCount)
         end
 
         -- Send sync event (even if empty - client needs settings)
@@ -300,6 +294,7 @@ function SoilFullSyncEvent:readStream(streamId, connection)
         local diseasePressure = streamReadFloat32(streamId)
         local diseaseDays = streamReadInt32(streamId)
         local dryDays = streamReadInt32(streamId)
+        local burnDays = streamReadInt32(streamId)
 
         -- Validate and sanitize field data
         local function validateNumber(value, min, max, default, name)
@@ -411,7 +406,7 @@ function SoilFullSyncEvent:run(connection)
     -- CLIENT ONLY: Receive full settings + field data from server
     if not g_client or not g_SoilFertilityManager then return end
 
-    print("[SoilFertilizer] Client: Received full sync from server")
+    SoilLogger.info("Client: Received full sync from server")
 
     -- Apply all settings
     local settings = g_SoilFertilityManager.settings
@@ -433,7 +428,7 @@ function SoilFullSyncEvent:run(connection)
     -- Apply field data (server-authoritative)
     if g_SoilFertilityManager.soilSystem then
         g_SoilFertilityManager.soilSystem.fieldData = self.fieldData
-        print(string.format("[SoilFertilizer] Client: Synced %d fields from server", self:getFieldCount()))
+        SoilLogger.info("Client: Synced %d fields from server", self:getFieldCount())
     end
 
     -- Refresh UI if open
@@ -558,8 +553,8 @@ function SoilFieldUpdateEvent:run(connection)
         g_SoilFertilityManager.soilSystem.fieldData[self.fieldId] = self.field
 
         if g_SoilFertilityManager.settings.debugMode then
-            print(string.format("[SoilFertilizer] Client: Field %d synced from server (N=%.1f, P=%.1f, K=%.1f)",
-                self.fieldId, self.field.nitrogen, self.field.phosphorus, self.field.potassium))
+            SoilLogger.debug("Client: Field %d synced from server (N=%.1f, P=%.1f, K=%.1f)",
+                self.fieldId, self.field.nitrogen, self.field.phosphorus, self.field.potassium)
         end
     end
 end
@@ -608,16 +603,14 @@ function SoilNetworkEvents_RequestSettingChange(settingName, value)
         g_client:getServerConnection():sendEvent(
             SoilSettingChangeEvent.new(settingName, value)
         )
-        print(string.format("[SoilFertilizer] Client: Requesting setting change '%s' = %s",
-            settingName, tostring(value)))
+        SoilLogger.info("Client: Requesting setting change '%s' = %s", settingName, tostring(value))
     else
         -- Server/Singleplayer: apply directly
         if g_SoilFertilityManager and g_SoilFertilityManager.settings then
             g_SoilFertilityManager.settings[settingName] = value
             g_SoilFertilityManager.settings:save()
 
-            print(string.format("[SoilFertilizer] Server: Setting '%s' changed to %s",
-                settingName, tostring(value)))
+            SoilLogger.info("Server: Setting '%s' changed to %s", settingName, tostring(value))
 
             -- Broadcast if multiplayer server
             if g_server then
