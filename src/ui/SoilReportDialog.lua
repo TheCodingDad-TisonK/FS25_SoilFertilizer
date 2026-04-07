@@ -118,7 +118,7 @@ function SoilReportDialog:showSyncingState()
 
     -- Reuse the existing noDataText element to show the syncing message.
     if self.noDataText then
-        self.noDataText:setText(tr("ui_soilReport_syncing", "Syncing field ownership data, please wait..."))
+        self.noDataText:setText(tr("sf_ui_soilReport_syncing", "Syncing field ownership data, please wait..."))
         self.noDataText:setVisible(true)
     end
 end
@@ -156,7 +156,7 @@ function SoilReportDialog:startOwnershipSyncRetry()
             SoilLogger.warning("[SoilReport] Ownership sync timed out after retries")
             -- Leave the syncing message visible; player can close and reopen.
             if dialog.noDataText then
-                dialog.noDataText:setText(tr("ui_soilReport_syncTimeout",
+                dialog.noDataText:setText(tr("sf_ui_soilReport_syncTimeout",
                     "Could not load field ownership. Please close and reopen the report."))
                 dialog.noDataText:setVisible(true)
             end
