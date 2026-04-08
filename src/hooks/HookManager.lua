@@ -51,9 +51,9 @@ end
 ---@param hz number Height Z
 ---@return number|nil fieldId
 function HookManager:getFieldIdFromArea(sx, sz, wx, wz, hx, hz)
-    -- Calculate center point of the work area for field detection
-    local centerX = (sx + wx + hx) / 3
-    local centerZ = (sz + wz + hz) / 3
+    -- Calculate center point of the parallelogram work area
+    local centerX = (wx + hx) / 2
+    local centerZ = (wz + hz) / 2
     return self:getFieldIdAtWorldPosition(centerX, centerZ)
 end
 

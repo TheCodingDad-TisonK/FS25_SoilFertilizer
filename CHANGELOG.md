@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.9.0] - 2026-04-08
+
+### Fixed
+- **Settings UI Crash**: Fixed a game crash occurring when players attempted to reset mod settings, replacing an invalid GUI API call (`showYesNoDialog`) with the correct FS25 `YesNoDialog.show` API.
+- **Field Detection Accuracy**: Improved the field ID detection from work areas by replacing the geometric center averaging with accurate parallelogram midpoint calculations.
+
 ## [1.4.8.0] - 2026-04-07
 
 ### Fixed
