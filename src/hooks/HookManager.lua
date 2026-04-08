@@ -686,6 +686,8 @@ function HookManager:installSprayerAreaHook()
             local liters        = spec.workAreaParameters.usage
             local sprayFillLevel = spec.workAreaParameters.sprayFillLevel
 
+            if self.getIsTurnedOn ~= nil and not self:getIsTurnedOn() then return end
+
             if not fillTypeIndex or fillTypeIndex <= 0 then return end
             if not liters or liters <= 0 then return end
             if not sprayFillLevel or sprayFillLevel <= 0 then return end
