@@ -457,16 +457,45 @@ function SoilReportDialog:getFertilizationRecommendation(info)
     local recommendationString
     local recommendationColor
 
+    -- Yield forecast penalty (same logic as SoilHUD)
+    local yieldSuffix = ""
+    local ys = SoilConstants.YIELD_SENSITIVITY
+    if ys then
+        local cropLower = info.lastCrop and string.lower(info.lastCrop) or nil
+        if not (cropLower and ys.NON_CROP_NAMES and ys.NON_CROP_NAMES[cropLower]) then
+            local tier     = (cropLower and ys.CROP_TIERS and ys.CROP_TIERS[cropLower]) or ys.DEFAULT_TIER
+            local tierData = ys.TIERS and ys.TIERS[tier]
+            local thresh   = ys.OPTIMAL_THRESHOLD or 70
+            if tierData then
+                local nDef   = math.max(0, thresh - info.nitrogen.value)   / thresh
+                local pDef   = math.max(0, thresh - info.phosphorus.value) / thresh
+                local kDef   = math.max(0, thresh - info.potassium.value)  / thresh
+                local avgDef = (nDef + pDef + kDef) / 3
+                local penalty    = math.min(ys.MAX_PENALTY, avgDef * tierData.scale)
+                local penaltyPct = math.floor(penalty * 100 + 0.5)
+                if penaltyPct > 0 then
+                    yieldSuffix = string.format(", Yield ~-%d%%", penaltyPct)
+                    if overallStatus == "Good" then overallStatus = "Fair" end
+                end
+            end
+        end
+    end
+
     if #recommendations > 0 then
-        recommendationString = tr("sf_report_rec_needs", "Needs: ") .. table.concat(recommendations, ", ")
+        recommendationString = tr("sf_report_rec_needs", "Needs: ") .. table.concat(recommendations, ", ") .. yieldSuffix
         if overallStatus == "Poor" then
             recommendationColor = SoilReportDialog.COLOR_POOR
         else
             recommendationColor = SoilReportDialog.COLOR_FAIR
         end
     else
-        recommendationString = tr("sf_report_rec_optimal", "Soil Health: Optimal")
-        recommendationColor = SoilReportDialog.COLOR_GOOD
+        if yieldSuffix ~= "" then
+            recommendationString = tr("sf_report_rec_optimal", "Soil Health: Optimal") .. yieldSuffix
+            recommendationColor = SoilReportDialog.COLOR_FAIR
+        else
+            recommendationString = tr("sf_report_rec_optimal", "Soil Health: Optimal")
+            recommendationColor = SoilReportDialog.COLOR_GOOD
+        end
     end
 
     return recommendationString, recommendationColor

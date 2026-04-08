@@ -652,9 +652,9 @@ function SoilHUD:drawPanel()
         renderText(omX, cy, 0.010 * fontMult * s, "OM")
         setTextColor(omCol[1], omCol[2], omCol[3], 1.0)
         renderText(omX + 0.020*s, cy, 0.010 * fontMult * s, string.format("%.1f%%", info.organicMatter))
-        cy = cy - SoilHUD.LINE_H * s
 
-        -- Divider
+        -- Divider below pH/OM row
+        cy = cy - SoilHUD.LINE_H * s
         cy = cy - pad * 0.5
         self:drawRect(px + pad, cy, pw - pad*2, 0.0005, SoilHUD.C_DIVIDER)
         cy = cy - pad * 0.8
@@ -696,9 +696,9 @@ function SoilHUD:drawPanel()
             setTextColor(SoilHUD.C_DIM[1], SoilHUD.C_DIM[2], SoilHUD.C_DIM[3], SoilHUD.C_DIM[4])
             renderText(px + pw - pad, cy, 0.009 * fontMult * s, tierData.label)
             setTextAlignment(RenderText.ALIGN_LEFT)
-            cy = cy - SoilHUD.LINE_H * s
 
             -- Divider before weed row
+            cy = cy - SoilHUD.LINE_H * s
             cy = cy - pad * 0.5
             self:drawRect(px + pad, cy, pw - pad*2, 0.0005, SoilHUD.C_DIVIDER)
             cy = cy - pad * 0.8
