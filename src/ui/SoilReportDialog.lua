@@ -299,6 +299,8 @@ function SoilReportDialog:collectFieldData()
     if self.totalPages < 1 then
         self.totalPages = 1
     end
+
+    return true
 end
 
 --- Update all display elements
