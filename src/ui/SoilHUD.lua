@@ -133,7 +133,7 @@ function SoilHUD:enterEditMode()
     self.dragging = false
     self.movedInEditMode = false
     if g_inputBinding and g_inputBinding.setShowMouseCursor then
-        g_inputBinding:setShowMouseCursor(true)
+        g_inputBinding:setShowMouseCursor(true, true)
     end
     if getCamera and getRotation then
         local ok, cam = pcall(getCamera)
@@ -321,9 +321,21 @@ function SoilHUD:update(dt)
         self.lastHudPosition = currentPosition
     end
 
+    -- Detection for initial RMB click when cursor might be hidden
+    if not self.editMode and self.initialized and self.settings.enabled and self.settings.showHUD and self.visible then
+        if g_inputBinding and g_inputBinding:getIsInputButtonDown(InputButton.RIGHT) then
+            -- Note: posX/posY might not be perfectly accurate if hidden, but we check last known
+            if g_inputBinding.mousePosXLast and g_inputBinding.mousePosYLast then
+                if self:isPointerOverHUD(g_inputBinding.mousePosXLast, g_inputBinding.mousePosYLast) then
+                    self:enterEditMode()
+                end
+            end
+        end
+    end
+
     if self.editMode then
         if g_inputBinding and g_inputBinding.setShowMouseCursor then
-            g_inputBinding:setShowMouseCursor(true)
+            g_inputBinding:setShowMouseCursor(true, true)
         end
         if self.savedCamRotX ~= nil and getCamera and setRotation then
             local ok, cam = pcall(getCamera)
@@ -578,13 +590,13 @@ function SoilHUD:drawPanel()
     -- Title + overall status badge
     setTextBold(true)
     setTextColor(1, 1, 1, 1)
-    renderText(tx, ty - 0.006*s, 0.012 * fontMult * s, "SOIL MONITOR")
+    renderText(tx, ty - 0.006*s, 0.012 * fontMult * s, g_i18n:getText("sf_hud_title"))
 
     if info then
         local statusLabel, statusCol = self:overallStatus(info)
         setTextAlignment(RenderText.ALIGN_RIGHT)
         setTextColor(statusCol[1], statusCol[2], statusCol[3], 1.0)
-        renderText(px + pw - pad, ty - 0.006*s, 0.011 * fontMult * s, statusLabel)
+        renderText(px + pw - pad, ty - 0.006*s, 0.011 * fontMult * s, g_i18n:getText("sf_report_rec_" .. statusLabel:lower()))
     end
     setTextBold(false)
     setTextAlignment(RenderText.ALIGN_LEFT)
@@ -595,15 +607,15 @@ function SoilHUD:drawPanel()
     -- Field / crop row
     local fieldText, cropText
     if info then
-        fieldText = string.format("Field %d", self.cachedFieldId)
+        fieldText = string.format(g_i18n:getText("sf_hud_field"), self.cachedFieldId)
         local crop = info.lastCrop
         if crop and crop ~= "" then
             cropText = crop:sub(1,1):upper() .. crop:sub(2)
         else
-            cropText = "Fallow"
+            cropText = g_i18n:getText("sf_hud_fallow")
         end
     else
-        fieldText = "Walk onto a field"
+        fieldText = g_i18n:getText("sf_hud_noField")
         cropText  = nil
     end
 
@@ -678,10 +690,10 @@ function SoilHUD:drawPanel()
             local penaltyPct = math.floor(penalty * 100 + 0.5)
 
             local yieldColor, yieldText
-            local yieldPrefix = (not cropLower or cropLower == "") and "Est. Yield" or "Yield"
+            local yieldPrefix = (not cropLower or cropLower == "") and g_i18n:getText("sf_hud_estYield") or g_i18n:getText("sf_hud_yield")
             if penaltyPct <= 0 then
                 yieldColor = SoilHUD.C_GOOD
-                yieldText  = string.format("%s: Optimal", yieldPrefix)
+                yieldText  = string.format("%s: %s", yieldPrefix, g_i18n:getText("sf_hud_optimal"))
             elseif penaltyPct < 15 then
                 yieldColor = SoilHUD.C_FAIR
                 yieldText  = string.format("%s ~-%d%%", yieldPrefix, penaltyPct)
@@ -720,7 +732,7 @@ function SoilHUD:drawPanel()
             end
 
             setTextColor(SoilHUD.C_LABEL[1], SoilHUD.C_LABEL[2], SoilHUD.C_LABEL[3], SoilHUD.C_LABEL[4])
-            renderText(tx, cy, 0.010 * fontMult * s, "Weeds")
+            renderText(tx, cy, 0.010 * fontMult * s, g_i18n:getText("sf_hud_weeds"))
 
             -- Progress bar (reuse BAR geometry)
             local barX = tx + 0.038*s
@@ -735,7 +747,7 @@ function SoilHUD:drawPanel()
 
             -- Value + herbicide indicator
             local weedLabel = string.format("%.0f%%", pressure)
-            if info.herbicideActive then weedLabel = weedLabel .. " (protected)" end
+            if info.herbicideActive then weedLabel = weedLabel .. " " .. g_i18n:getText("sf_hud_protected") end
             setTextAlignment(RenderText.ALIGN_RIGHT)
             setTextColor(weedColor[1], weedColor[2], weedColor[3], 1.0)
             renderText(px + pw - pad, cy, 0.010 * fontMult * s, weedLabel)
@@ -754,7 +766,7 @@ function SoilHUD:drawPanel()
             else pestColor = SoilHUD.C_POOR end
 
             setTextColor(SoilHUD.C_LABEL[1], SoilHUD.C_LABEL[2], SoilHUD.C_LABEL[3], SoilHUD.C_LABEL[4])
-            renderText(tx, cy, 0.010 * fontMult * s, "Pests")
+            renderText(tx, cy, 0.010 * fontMult * s, g_i18n:getText("sf_hud_pests"))
 
             local barX = tx + 0.038*s
             local barH = SoilHUD.BAR_H * s
@@ -765,7 +777,7 @@ function SoilHUD:drawPanel()
             if fill > 0 then self:drawRect(barX, barY, barW * fill, barH, pestColor) end
 
             local pestLabel = string.format("%.0f%%", pressure)
-            if info.insecticideActive then pestLabel = pestLabel .. " (protected)" end
+            if info.insecticideActive then pestLabel = pestLabel .. " " .. g_i18n:getText("sf_hud_protected") end
             setTextAlignment(RenderText.ALIGN_RIGHT)
             setTextColor(pestColor[1], pestColor[2], pestColor[3], 1.0)
             renderText(px + pw - pad, cy, 0.010 * fontMult * s, pestLabel)
@@ -784,7 +796,7 @@ function SoilHUD:drawPanel()
             else diseaseColor = SoilHUD.C_POOR end
 
             setTextColor(SoilHUD.C_LABEL[1], SoilHUD.C_LABEL[2], SoilHUD.C_LABEL[3], SoilHUD.C_LABEL[4])
-            renderText(tx, cy, 0.010 * fontMult * s, "Disease")
+            renderText(tx, cy, 0.010 * fontMult * s, g_i18n:getText("sf_hud_disease"))
 
             local barX = tx + 0.038*s
             local barH = SoilHUD.BAR_H * s
@@ -795,7 +807,7 @@ function SoilHUD:drawPanel()
             if fill > 0 then self:drawRect(barX, barY, barW * fill, barH, diseaseColor) end
 
             local diseaseLabel = string.format("%.0f%%", pressure)
-            if info.fungicideActive then diseaseLabel = diseaseLabel .. " (protected)" end
+            if info.fungicideActive then diseaseLabel = diseaseLabel .. " " .. g_i18n:getText("sf_hud_protected") end
             setTextAlignment(RenderText.ALIGN_RIGHT)
             setTextColor(diseaseColor[1], diseaseColor[2], diseaseColor[3], 1.0)
             renderText(px + pw - pad, cy, 0.010 * fontMult * s, diseaseLabel)
@@ -815,9 +827,9 @@ function SoilHUD:drawPanel()
     setTextAlignment(RenderText.ALIGN_CENTER)
     setTextColor(SoilHUD.C_HINT[1], SoilHUD.C_HINT[2], SoilHUD.C_HINT[3], SoilHUD.C_HINT[4])
     if self.editMode then
-        renderText(px + pw * 0.5, cy, 0.009 * fontMult * s, "Drag: move   Corner: resize   RMB: done")
+        renderText(px + pw * 0.5, cy, 0.009 * fontMult * s, g_i18n:getText("sf_hud_hint_edit"))
     else
-        renderText(px + pw * 0.5, cy, 0.009 * fontMult * s, "RMB: move/resize")
+        renderText(px + pw * 0.5, cy, 0.009 * fontMult * s, g_i18n:getText("sf_hud_hint_normal"))
     end
 
     -- Reset text state
