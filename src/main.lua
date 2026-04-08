@@ -56,9 +56,14 @@ local function checkModCompatibility()
         for modName, _ in pairs(g_modIsLoaded) do
             local lower = string.lower(tostring(modName))
             if lower:find("tyre") or lower:find("tire") then
-                SoilLogger.info("Tyre-related mod detected - enabling compatibility mode")
-                SAFE_MODE = true
-                break
+                -- Refine: Ignore harmless visual or placeable mods that don't affect soil logic
+                local isExempt = lower:find("placeable") or lower:find("tracks") or lower:find("texture") or lower:find("sound") or lower:find("noise") or lower:find("effect") or lower:find("particle") or lower:find("visual")
+                
+                if not isExempt then
+                    SoilLogger.info("Tyre-related physics/realism mod detected (%s) - enabling compatibility mode", modName)
+                    SAFE_MODE = true
+                    break
+                end
             end
         end
     end

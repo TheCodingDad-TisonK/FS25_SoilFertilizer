@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.0.0] - 2026-04-08
+
+### Fixed
+- **Mod Compatibility (issue #128)**: Refined the "Safe Mode" trigger to exclude harmless visual or placeable tire-related mods like `FS25_placeableTireTracks`. The check now only triggers for physics or realism mods that may conflict with soil simulation, and logs the specific mod that caused the trigger for easier troubleshooting.
+
 ## [1.4.9.0] - 2026-04-08
 
 ### Fixed
