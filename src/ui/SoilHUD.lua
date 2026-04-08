@@ -660,10 +660,11 @@ function SoilHUD:drawPanel()
         cy = cy - pad * 0.8
 
         -- Yield forecast row (Issue #81 interim HUD warning)
-        -- Only shown when a harvestable crop is currently planted.
+        -- Always shown unless the crop is a NON_CROP (like grass).
         local ys = SoilConstants.YIELD_SENSITIVITY
         local cropLower = info.lastCrop and string.lower(info.lastCrop) or nil
-        if cropLower and cropLower ~= "" and not ys.NON_CROP_NAMES[cropLower] then
+        
+        if not cropLower or cropLower == "" or not ys.NON_CROP_NAMES[cropLower] then
             local tier     = ys.CROP_TIERS[cropLower] or ys.DEFAULT_TIER
             local tierData = ys.TIERS[tier]
             local thresh   = ys.OPTIMAL_THRESHOLD
@@ -677,15 +678,16 @@ function SoilHUD:drawPanel()
             local penaltyPct = math.floor(penalty * 100 + 0.5)
 
             local yieldColor, yieldText
+            local yieldPrefix = (not cropLower or cropLower == "") and "Est. Yield" or "Yield"
             if penaltyPct <= 0 then
                 yieldColor = SoilHUD.C_GOOD
-                yieldText  = "Yield: Optimal"
+                yieldText  = string.format("%s: Optimal", yieldPrefix)
             elseif penaltyPct < 15 then
                 yieldColor = SoilHUD.C_FAIR
-                yieldText  = string.format("Yield ~-%d%%", penaltyPct)
+                yieldText  = string.format("%s ~-%d%%", yieldPrefix, penaltyPct)
             else
                 yieldColor = SoilHUD.C_POOR
-                yieldText  = string.format("Yield ~-%d%%", penaltyPct)
+                yieldText  = string.format("%s ~-%d%%", yieldPrefix, penaltyPct)
             end
 
             setTextColor(yieldColor[1], yieldColor[2], yieldColor[3], 1.0)

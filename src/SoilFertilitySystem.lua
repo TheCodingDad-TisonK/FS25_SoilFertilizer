@@ -976,6 +976,22 @@ function SoilFertilitySystem:updateDailySoil()
         if (field.burnDaysLeft or 0) > 0 then
             field.burnDaysLeft = field.burnDaysLeft - 1
         end
+
+        -- Critical Field Alerts (before planting season, e.g., early spring)
+        if self.settings.showNotifications and g_currentMission and g_currentMission.environment then
+            local season = g_currentMission.environment.currentSeason
+            local threshold = SoilConstants.CRITICAL_ALERT_THRESHOLD or 50
+            if season == (SoilConstants.SEASONAL_EFFECTS and SoilConstants.SEASONAL_EFFECTS.SPRING_SEASON or 1) then
+                local currentYear = g_currentMission.environment.currentYear or math.floor(currentDay / 12)
+                if field.lastAlertYear ~= currentYear then
+                    local urgency = self:getFieldUrgency(fieldId)
+                    if urgency > threshold then
+                        self:showNotification("Critical Field Alert", string.format("Field %d needs attention! Urgency Score: %d", fieldId, math.floor(urgency)))
+                        field.lastAlertYear = currentYear
+                    end
+                end
+            end
+        end
     end
 
     self:log("Daily soil update completed for %d fields", self:getFieldCount())
@@ -1291,6 +1307,32 @@ function SoilFertilitySystem:getFieldInfo(fieldId)
             field.pH < fertThresholds.pH
         )
     }
+end
+
+--- Calculate the urgency score (0-100) for a field
+---@param fieldId number
+---@return number
+function SoilFertilitySystem:getFieldUrgency(fieldId)
+    local info = self:getFieldInfo(fieldId)
+    if not info then return 0 end
+
+    local urgency = 0
+    local thresh = SoilConstants.YIELD_SENSITIVITY and SoilConstants.YIELD_SENSITIVITY.OPTIMAL_THRESHOLD or 70
+    
+    local nDef = math.max(0, thresh - info.nitrogen.value) / thresh
+    local pDef = math.max(0, thresh - info.phosphorus.value) / thresh
+    local kDef = math.max(0, thresh - info.potassium.value) / thresh
+
+    local phOpt = SoilConstants.PH_NORMALIZATION and SoilConstants.PH_NORMALIZATION.OPTIMAL or 6.5
+    local phMin = SoilConstants.NUTRIENT_LIMITS and SoilConstants.NUTRIENT_LIMITS.PH_MIN or 5.0
+    local phDef = math.max(0, phOpt - info.pH) / (phOpt - phMin)
+
+    local weedDef = (info.weedPressure or 0) / 100
+    local pestDef = (info.pestPressure or 0) / 100
+    local diseaseDef = (info.diseasePressure or 0) / 100
+
+    urgency = math.min(100, ((nDef + pDef + kDef + phDef + weedDef + pestDef + diseaseDef) / 7) * 100)
+    return urgency
 end
 
 -- Get field count

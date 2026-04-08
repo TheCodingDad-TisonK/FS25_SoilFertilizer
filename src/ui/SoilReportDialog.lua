@@ -282,7 +282,17 @@ function SoilReportDialog:collectFieldData()
     -- back to showing all fields — that was the root cause of issue #120.
     self.sortedFieldIds = filtered
 
-    table.sort(self.sortedFieldIds)
+    table.sort(self.sortedFieldIds, function(a, b)
+        local urgencyA = soilSystem:getFieldUrgency(a)
+        local urgencyB = soilSystem:getFieldUrgency(b)
+        
+        -- If urgencies are roughly equal, sort by field ID
+        if math.abs(urgencyA - urgencyB) < 0.1 then
+            return a < b
+        end
+        -- Highest urgency first
+        return urgencyA > urgencyB
+    end)
 
     -- Build info for each field
     for _, fieldId in ipairs(self.sortedFieldIds) do

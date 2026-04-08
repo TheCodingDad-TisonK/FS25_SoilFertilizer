@@ -27,6 +27,7 @@ function SoilSettingsGUI:registerConsoleCommands()
     addConsoleCommand("SoilSetPlowingBonus", "Enable/disable plowing bonus (true/false)", "consoleCommandSetPlowingBonus", self)
     addConsoleCommand("SoilShowSettings", "Show current settings", "consoleCommandShowSettings", self)
     addConsoleCommand("SoilFieldInfo", "Show field soil information (fieldId)", "consoleCommandFieldInfo", self)
+    addConsoleCommand("SoilFieldForecast", "Show yield forecast for field", "consoleCommandFieldForecast", self)
     addConsoleCommand("SoilListFields", "List all fields with soil data", "consoleCommandListFields", self)
     addConsoleCommand("SoilResetSettings", "Reset all settings to defaults", "consoleCommandResetSettings", self)
     addConsoleCommand("SoilSaveData", "Force save soil data", "consoleCommandSaveData", self)
@@ -239,6 +240,65 @@ function SoilSettingsGUI:consoleCommandFieldInfo(fieldId)
                 info.daysSinceHarvest,
                 info.fertilizerApplied,
                 info.needsFertilization and "Yes" or "No"
+            )
+            print(fInfo)
+            return fInfo
+        else
+            return "Field not found or not initialized"
+        end
+    end
+    return "Error: Soil Mod not initialized"
+end
+
+function SoilSettingsGUI:consoleCommandListFields()
+    if g_SoilFertilityManager and g_SoilFertilityManager.soilSystem then
+        g_SoilFertilityManager.soilSystem:listAllFields()
+        return "Field list displayed in console"
+    end
+    return "Error: Soil Mod not initialized"
+end
+
+function SoilSettingsGUI:consoleCommandResetSettings()
+    if g_SoilFertilityManager and g_SoilFertilityManager.settings then
+        g_SoilFertilityManager.settings:resetToDefaults()
+        if g_SoilFertilityManager.soilSystem then
+            g_SoilFertilityManager.soilSystem:initialize()
+        end
+        if g_SoilFertilityManager.settingsUI then
+            g_SoilFertilityManager.settingsUI:refreshUI()
+        end
+        return "Soil Mod settings reset to default!"
+    end
+    return "Error: Soil Mod not initialized"
+endthresh - info.phosphorus.value) / thresh
+            local kDef = math.max(0, thresh - info.potassium.value) / thresh
+            local avgDef = (nDef + pDef + kDef) / 3
+
+            local penalty = math.min(ys.MAX_PENALTY, avgDef * tierData.scale)
+            local penaltyPct = math.floor(penalty * 100 + 0.5)
+
+            -- Recommendations
+            local recs = {}
+            if info.nitrogen.value < thresh then table.insert(recs, "Apply Nitrogen") end
+            if info.phosphorus.value < thresh then table.insert(recs, "Apply Phosphorus") end
+            if info.potassium.value < thresh then table.insert(recs, "Apply Potassium") end
+            
+            local phOpt = SoilConstants.PH_NORMALIZATION and SoilConstants.PH_NORMALIZATION.OPTIMAL or 6.5
+            local phMin = SoilConstants.NUTRIENT_LIMITS and SoilConstants.NUTRIENT_LIMITS.PH_MIN or 5.0
+            if info.pH < 6.0 then table.insert(recs, "Apply Lime") end
+            if (info.weedPressure or 0) > 20 then table.insert(recs, "Apply Herbicide") end
+
+            local recStr = #recs > 0 and table.concat(recs, ", ") or "None required"
+
+            local fInfo = string.format(
+                "=== Field %d Yield Forecast ===\n" ..
+                "Crop Tier: %s (%s)\n" ..
+                "Projected Yield Penalty: %d%%\n" ..
+                "Overall Urgency Score: %d / 100\n" ..
+                "Recommendations: %s\n" ..
+                "================================",
+                fid, tierData.label, cropLower or "None",
+                penaltyPct, math.floor(urgency), recStr
             )
             print(fInfo)
             return fInfo
