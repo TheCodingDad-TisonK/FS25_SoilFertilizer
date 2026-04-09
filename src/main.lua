@@ -43,37 +43,11 @@ source(modDirectory .. "src/network/NetworkEvents.lua")
 
 -- Globals
 local sfm = nil
-local SAFE_MODE = false
 
 -- Helper: check if mod is initialized
 local function isEnabled()
     return sfm ~= nil
 end
-
--- Compatibility check
-local function checkModCompatibility()
-    if g_modIsLoaded then
-        for modName, _ in pairs(g_modIsLoaded) do
-            local lower = string.lower(tostring(modName))
-            if lower:find("tyre") or lower:find("tire") then
-                -- Refine: Ignore harmless visual or placeable mods that don't affect soil logic
-                local isExempt = lower:find("placeable") or lower:find("tracks") or lower:find("texture") or lower:find("sound") or lower:find("noise") or lower:find("effect") or lower:find("particle") or lower:find("visual")
-                
-                if not isExempt then
-                    SoilLogger.info("Tyre-related physics/realism mod detected (%s) - enabling compatibility mode", modName)
-                    SAFE_MODE = true
-                    break
-                end
-            end
-        end
-    end
-
-    if g_currentMission and g_currentMission:getIsServer() and not g_currentMission:getIsClient() then
-        SoilLogger.info("Dedicated server detected - enabling compatibility mode")
-        SAFE_MODE = true
-    end
-end
-checkModCompatibility()
 
 -- Called after mission loaded
 local function loadedMission(mission, node)
@@ -152,7 +126,7 @@ end
 -- Load handler
 local function load(mission)
     local isDedicatedServer = mission:getIsServer() and not mission:getIsClient()
-    local disableGUI = isDedicatedServer or SAFE_MODE or not mission:getIsClient()
+    local disableGUI = isDedicatedServer or not mission:getIsClient()
 
     if disableGUI then
         SoilLogger.info("Server/console-only mode - GUI disabled")
