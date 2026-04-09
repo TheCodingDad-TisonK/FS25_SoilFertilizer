@@ -19,7 +19,7 @@ SoilHUD.RESIZE_HANDLE_SIZE = 0.008
 
 -- ── Base panel dimensions at scale 1.0 ─────────────────
 SoilHUD.BASE_W = 0.190
-SoilHUD.BASE_H = 0.228   -- expanded to accommodate yield forecast + weed pressure rows
+SoilHUD.BASE_H = 0.228   -- Default fallback height
 
 -- ── Layout constants at scale 1.0 ──────────────────────
 SoilHUD.TITLE_H   = 0.024   -- title accent bar height
@@ -206,9 +206,51 @@ function SoilHUD:loadLayout()
 end
 
 -- ── Geometry helpers ─────────────────────────────────────
+function SoilHUD:calculateHeight()
+    local h = SoilHUD.TITLE_H + SoilHUD.PAD
+
+    local info = self.cachedFieldInfo
+    local ys = SoilConstants and SoilConstants.YIELD_SENSITIVITY
+    
+    if info then
+        h = h + SoilHUD.LINE_H
+        h = h + SoilHUD.PAD * 1.6
+        
+        h = h + SoilHUD.ROW_H * 3
+        h = h + SoilHUD.PAD * 1.3
+        
+        h = h + SoilHUD.LINE_H
+        h = h + SoilHUD.PAD * 1.3
+        
+        local cropLower = info.lastCrop and string.lower(info.lastCrop) or nil
+        if not cropLower or cropLower == "" or not (ys and ys.NON_CROP_NAMES and ys.NON_CROP_NAMES[cropLower]) then
+            h = h + SoilHUD.LINE_H
+            h = h + SoilHUD.PAD * 1.3
+        end
+        
+        local mgr = g_SoilFertilityManager
+        if mgr and mgr.settings then
+            if mgr.settings.weedPressure and (info.weedPressure or 0) >= 0 then h = h + SoilHUD.LINE_H end
+            if mgr.settings.pestPressure and (info.pestPressure or 0) >= 0 then h = h + SoilHUD.LINE_H end
+            if mgr.settings.diseasePressure and (info.diseasePressure or 0) >= 0 then h = h + SoilHUD.LINE_H end
+        end
+        
+        h = h + SoilHUD.PAD * 1.3
+    else
+        h = h + SoilHUD.LINE_H
+        h = h + SoilHUD.LINE_H * 4
+    end
+
+    h = h + SoilHUD.LINE_H
+    h = h + SoilHUD.PAD
+
+    self.currentHeight = h
+end
+
 function SoilHUD:getHUDRect()
     local s = self.scale
-    return self.panelX, self.panelY, SoilHUD.BASE_W * s, SoilHUD.BASE_H * s
+    local h = self.currentHeight or SoilHUD.BASE_H
+    return self.panelX, self.panelY, SoilHUD.BASE_W * s, h * s
 end
 
 function SoilHUD:isPointerOverHUD(posX, posY)
@@ -240,9 +282,10 @@ end
 
 function SoilHUD:clampPosition()
     local s = self.scale
-    local pw, ph = SoilHUD.BASE_W * s, SoilHUD.BASE_H * s
+    local h = self.currentHeight or SoilHUD.BASE_H
+    local pw, ph = SoilHUD.BASE_W * s, h * s
     self.panelX = math.max(0.01, math.min(1.0 - pw - 0.01, self.panelX))
-    self.panelY = math.max(ph + 0.01, math.min(0.98, self.panelY))
+    self.panelY = math.max(0.01, math.min(0.98 - ph, self.panelY))
 end
 
 -- ── Mouse event ──────────────────────────────────────────
@@ -324,23 +367,12 @@ end
 -- ── Update ───────────────────────────────────────────────
 function SoilHUD:update(dt)
     self.animTimer = self.animTimer + dt
+    self:calculateHeight()
 
     local currentPosition = self.settings.hudPosition or 1
     if not self.editMode and not self.dragging and self.lastHudPosition ~= currentPosition then
         self:updatePosition()
         self.lastHudPosition = currentPosition
-    end
-
-    -- Detection for initial RMB click when cursor might be hidden
-    if not self.editMode and self.initialized and self.settings.enabled and self.settings.showHUD and self.visible then
-        if g_inputBinding and g_inputBinding:getIsInputButtonDown(InputButton.RIGHT) then
-            -- Note: posX/posY might not be perfectly accurate if hidden, but we check last known
-            if g_inputBinding.mousePosXLast and g_inputBinding.mousePosYLast then
-                if self:isPointerOverHUD(g_inputBinding.mousePosXLast, g_inputBinding.mousePosYLast) then
-                    self:enterEditMode()
-                end
-            end
-        end
     end
 
     if self.editMode then
@@ -550,7 +582,7 @@ function SoilHUD:drawPanel()
     local px  = self.panelX
     local py  = self.panelY
     local pw  = SoilHUD.BASE_W * s
-    local ph  = SoilHUD.BASE_H * s
+    local ph  = (self.currentHeight or SoilHUD.BASE_H) * s
 
     local alpha = SoilConstants.HUD.TRANSPARENCY_LEVELS[self.settings.hudTransparency or 3]
     local fontMult = SoilConstants.HUD.FONT_SIZE_MULTIPLIERS[self.settings.hudFontSize or 2]

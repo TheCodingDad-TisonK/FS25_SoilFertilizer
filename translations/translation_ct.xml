@@ -73,6 +73,9 @@
     <e k="sf_report_rec_disease" v="Disease Risk" eh="e7655847" />
 		<e k="sf_report_rec_needs" v="[EN] Needs:" eh="3e6d95cf" />
 		<e k="sf_report_rec_optimal" v="[EN] Soil Health: Optimal" eh="6ee9d19b" />
+    <e k="sf_report_rec_good" v="Good" />
+    <e k="sf_report_rec_fair" v="Fair" />
+    <e k="sf_report_rec_poor" v="Poor" />
 		<e k="sf_uan32_title" v="[EN] UAN 32 Fertilizer (N)" eh="90913bb8" />
 		<e k="sf_uan28_title" v="[EN] UAN 28 Fertilizer (N)" eh="9d902cd7" />
 		<e k="sf_anhydrous_title" v="[EN] Anhydrous Ammonia (N)" eh="3fc85c02" />

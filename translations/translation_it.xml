@@ -115,6 +115,9 @@
     <e k="sf_report_rec_disease" v="Disease Risk" eh="e7655847" />
     <e k="sf_report_rec_needs" v="Necessita:" eh="3e6d95cf" />
     <e k="sf_report_rec_optimal" v="Salute suolo: Ottimale" eh="6ee9d19b" />
+    <e k="sf_report_rec_good" v="Good" />
+    <e k="sf_report_rec_fair" v="Fair" />
+    <e k="sf_report_rec_poor" v="Poor" />
     <e k="sf_uan32_title" v="UAN 32 Fertilizzante azotato (N)" eh="90913bb8" />
     <e k="sf_uan28_title" v="UAN 28 Fertilizzante azotato (N)" eh="9d902cd7" />
     <e k="sf_anhydrous_title" v="Ammoniaca anidra (N)" eh="3fc85c02" />
