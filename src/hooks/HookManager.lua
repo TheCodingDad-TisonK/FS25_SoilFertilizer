@@ -51,9 +51,9 @@ end
 ---@param hz number Height Z
 ---@return number|nil fieldId
 function HookManager:getFieldIdFromArea(sx, sz, wx, wz, hx, hz)
-    -- Calculate center point of the work area for field detection
-    local centerX = (sx + wx + hx) / 3
-    local centerZ = (sz + wz + hz) / 3
+    -- Calculate center point of the parallelogram work area
+    local centerX = (wx + hx) / 2
+    local centerZ = (wz + hz) / 2
     return self:getFieldIdAtWorldPosition(centerX, centerZ)
 end
 
@@ -893,8 +893,15 @@ function HookManager:installPlowingHook()
             -- Validate workArea parameter.
             -- workArea is a named-key table ({start=node, width=node, height=node}),
             -- not a sequence — #workArea always returns 0 and cannot be used as a guard.
-            if not workArea or type(workArea) ~= "table" then return end
-            if not workArea.start or not workArea.width or not workArea.height then return end
+            if not workArea or type(workArea) ~= "table" then
+                SoilLogger.debug("[PlowHook] workArea guard fired: nil or non-table (type=%s)", type(workArea))
+                return
+            end
+            if not workArea.start or not workArea.width or not workArea.height then
+                SoilLogger.debug("[PlowHook] workArea guard fired: missing key(s) start=%s width=%s height=%s",
+                    tostring(workArea.start), tostring(workArea.width), tostring(workArea.height))
+                return
+            end
 
             -- Get field ID from work area
             local sx, _, sz = getWorldTranslation(workArea.start)

@@ -347,16 +347,18 @@ function SoilSettingsUI:ensureResetButton(settingsFrame)
                         if g_dedicatedServer then
                             g_SoilFertilityManager.settings:resetToDefaults()
                         else
-                            g_gui:showYesNoDialog({
-                                text = "Reset all Soil & Fertilizer settings to defaults?",
-                                callback = function(yes)
+                            YesNoDialog.show(
+                                function(yes)
                                     if yes then
                                         if g_SoilFertilityManager.settingsGUI then
                                             g_SoilFertilityManager.settingsGUI:consoleCommandResetSettings()
                                         end
                                     end
-                                end
-                            })
+                                end,
+                                nil,
+                                "Reset all Soil & Fertilizer settings to defaults?",
+                                "Confirm Reset"
+                            )
                         end
                     else
                         g_SoilFertilityManager.settings:resetToDefaults()

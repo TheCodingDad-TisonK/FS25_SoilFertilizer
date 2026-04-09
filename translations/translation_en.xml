@@ -138,6 +138,19 @@
     <e k="sf_bigBag_fungicide_name" v="Big Bag Fungicide" eh="a3d4e59c" />
     <e k="sf_bigBag_fungicide_function" v="Fungicide (liquid)" eh="745c34cb" />
     <e k="sf_bigBag_starter_function" v="Starter Fertilizer (liquid)" eh="2c36ea57" />
+    <e k="sf_hud_title" v="SOIL MONITOR" />
+    <e k="sf_hud_field" v="Field %d" />
+    <e k="sf_hud_noField" v="Walk onto a field" />
+    <e k="sf_hud_fallow" v="Fallow" />
+    <e k="sf_hud_weeds" v="Weeds" />
+    <e k="sf_hud_pests" v="Pests" />
+    <e k="sf_hud_disease" v="Disease" />
+    <e k="sf_hud_protected" v="(protected)" />
+    <e k="sf_hud_yield" v="Yield" />
+    <e k="sf_hud_estYield" v="Est. Yield" />
+    <e k="sf_hud_optimal" v="Optimal" />
+    <e k="sf_hud_hint_edit" v="Drag: move   Corner: resize   RMB: done" />
+    <e k="sf_hud_hint_normal" v="RMB: move/resize" />
     </elements>
 </l10n>
 

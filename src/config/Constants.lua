@@ -301,6 +301,9 @@ SoilConstants.FERTILIZATION_THRESHOLDS = {
     pH = 5.5,
 }
 
+-- Urgency score threshold for critical field alerts
+SoilConstants.CRITICAL_ALERT_THRESHOLD = 50
+
 -- ========================================
 -- YIELD SENSITIVITY (Issue #81 interim HUD warning)
 -- ========================================
