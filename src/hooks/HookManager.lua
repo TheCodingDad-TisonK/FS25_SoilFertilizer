@@ -893,8 +893,15 @@ function HookManager:installPlowingHook()
             -- Validate workArea parameter.
             -- workArea is a named-key table ({start=node, width=node, height=node}),
             -- not a sequence — #workArea always returns 0 and cannot be used as a guard.
-            if not workArea or type(workArea) ~= "table" then return end
-            if not workArea.start or not workArea.width or not workArea.height then return end
+            if not workArea or type(workArea) ~= "table" then
+                SoilLogger.debug("[PlowHook] workArea guard fired: nil or non-table (type=%s)", type(workArea))
+                return
+            end
+            if not workArea.start or not workArea.width or not workArea.height then
+                SoilLogger.debug("[PlowHook] workArea guard fired: missing key(s) start=%s width=%s height=%s",
+                    tostring(workArea.start), tostring(workArea.width), tostring(workArea.height))
+                return
+            end
 
             -- Get field ID from work area
             local sx, _, sz = getWorldTranslation(workArea.start)

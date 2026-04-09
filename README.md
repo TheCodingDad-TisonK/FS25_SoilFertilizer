@@ -20,7 +20,7 @@
 
 Each field builds its own history. Nitrogen drops after a heavy wheat crop. Rain washes potassium out of sandy ground. Fallow fields slowly breathe back to life. The numbers you see in the HUD aren't arbitrary — they're the consequence of every harvest, every storm, and every bag of fertilizer you did or didn't apply.
 
-`Singleplayer` • `Multiplayer (server-authoritative)` • `Persistent saves` • `10 languages`
+`Singleplayer` • `Multiplayer (server-authoritative)` • `Persistent saves` • `26 languages`
 
 </div>
 
@@ -162,6 +162,8 @@ Open the developer console with **`~`** and type `soilfertility` for the full li
 | `SoilSetRainEffects` | `true` / `false` | Toggle rain leaching and acidification |
 | `SoilSetPlowingBonus` | `true` / `false` | Toggle plowing OM/pH bonus |
 | `SoilFieldInfo` | `<fieldId>` | Detailed soil readout for one field |
+| `SoilFieldForecast` | `<fieldId>` | Yield forecast and treatment recommendations for one field |
+| `SoilListFields` | — | List all tracked fields with current soil values |
 | `SoilShowSettings` | — | Print current settings to log |
 | `SoilResetSettings` | — | Reset everything to defaults |
 | `SoilSaveData` | — | Force-save soil state now |
