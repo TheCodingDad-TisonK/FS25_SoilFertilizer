@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.1.0] - 2026-04-09
+
+### Fixed
+
+- **HUD text missing in 24 languages (issue #130)**: The HUD overlay was showing raw
+  translation key names (`sf_hud_title`, `sf_hud_fallow`, `sf_hud_yield`, etc.) for
+  every language except English and Ukrainian. Root cause: 13 `sf_hud_*` keys were
+  added when the live HUD was implemented but never propagated to the 24 non-EN
+  language files. English text added as fallback in all 24 files — proper per-language
+  translations can follow in community PRs.
+  Credit: sava4903-coder for identifying this in issue #130.
+
+- **Mouse event double-firing in vehicles (issue #130)**: The `soilMouseHandler`
+  registered via `addModEventListener` was not checking the `eventUsed` flag before
+  processing mouse input and was not returning it afterward. In vehicles where the
+  camera or another listener had already consumed an RMB event, the HUD would still
+  try to enter edit mode from a stale or mis-positioned cursor.
+  Fix: `soilMouseHandler` now guards on `not eventUsed` and returns the flag.
+  `SoilHUD:onMouseEvent` now accepts and returns `eventUsed`, and uses
+  `Input.MOUSE_BUTTON_RIGHT` / `Input.MOUSE_BUTTON_LEFT` constants (LUADOC-verified).
+
+---
+
 ## [1.5.0.0] - 2026-04-09
 
 ### Added
