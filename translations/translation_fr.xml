@@ -67,6 +67,19 @@
     <e k="sf_hud_trans_3" v="Moyen" eh="87f8a6ab" />
     <e k="sf_hud_trans_4" v="Sombre" eh="a18366b2" />
     <e k="sf_hud_trans_5" v="Solide" eh="e41480b6" />
+    <e k="sf_hud_title" v="SOIL MONITOR" />
+    <e k="sf_hud_field" v="Field %d" />
+    <e k="sf_hud_noField" v="Walk onto a field" />
+    <e k="sf_hud_fallow" v="Fallow" />
+    <e k="sf_hud_weeds" v="Weeds" />
+    <e k="sf_hud_pests" v="Pests" />
+    <e k="sf_hud_disease" v="Disease" />
+    <e k="sf_hud_protected" v="(protected)" />
+    <e k="sf_hud_yield" v="Yield" />
+    <e k="sf_hud_estYield" v="Est. Yield" />
+    <e k="sf_hud_optimal" v="Optimal" />
+    <e k="sf_hud_hint_edit" v="Drag: move   Corner: resize   RMB: done" />
+    <e k="sf_hud_hint_normal" v="RMB: move/resize" />
     <e k="sf_use_imperial_short" v="Unités impériales" eh="ff2701ad" />
     <e k="sf_use_imperial_long" v="Afficher les doses en gal/ac et lb/ac (désactivé = L/ha et kg/ha)" eh="17efa489" />
     <e k="sf_reset" v="Réinitialiser paramètres sol" eh="467bc2f5" />

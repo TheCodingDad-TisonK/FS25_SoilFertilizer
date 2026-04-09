@@ -237,12 +237,15 @@ end)
 hookSaveLoadEvents()
 
 -- Route mouse events to SoilHUD (for drag/resize edit mode)
--- RMB only enters edit mode when cursor is over the panel (no cross-contamination)
+-- RMB only enters edit mode when cursor is over the panel (no cross-contamination).
+-- eventUsed is checked before processing and returned after, per FS25 standard pattern
+-- (prevents double-handling when vehicle camera or another listener already consumed the event).
 local soilMouseHandler = {}
 function soilMouseHandler:mouseEvent(posX, posY, isDown, isUp, button, eventUsed)
-    if sfm and sfm.soilHUD then
-        sfm.soilHUD:onMouseEvent(posX, posY, isDown, isUp, button)
+    if not eventUsed and sfm and sfm.soilHUD then
+        eventUsed = sfm.soilHUD:onMouseEvent(posX, posY, isDown, isUp, button, eventUsed) or eventUsed
     end
+    return eventUsed
 end
 addModEventListener(soilMouseHandler)
 

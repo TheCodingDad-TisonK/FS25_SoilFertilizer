@@ -246,53 +246,63 @@ function SoilHUD:clampPosition()
 end
 
 -- ── Mouse event ──────────────────────────────────────────
-function SoilHUD:onMouseEvent(posX, posY, isDown, isUp, button)
-    if not self.initialized then return end
-    if not self.settings.enabled then return end
-    if not self.settings.showHUD then return end
-    if not self.visible then return end
+-- Returns true when the event is consumed so the caller can propagate eventUsed correctly.
+function SoilHUD:onMouseEvent(posX, posY, isDown, isUp, button, eventUsed)
+    if not self.initialized then return false end
+    if not self.settings.enabled then return false end
+    if not self.settings.showHUD then return false end
+    if not self.visible then return false end
 
-    if isDown and button == 3 then
+    -- RMB: toggle edit mode (only consume when cursor is over panel or already in edit mode)
+    if isDown and button == Input.MOUSE_BUTTON_RIGHT then
         if self.editMode then
             self:exitEditMode()
+            return true
         elseif self:isPointerOverHUD(posX, posY) then
             self:enterEditMode()
+            return true
         end
-        return
+        return false
     end
 
-    if not self.editMode then return end
+    if not self.editMode then return false end
 
-    if isDown and button == 1 then
+    -- LMB down: start drag or resize
+    if isDown and button == Input.MOUSE_BUTTON_LEFT then
         local corner = self:hitTestCorner(posX, posY)
         if corner then
             self.resizing = true ; self.dragging = false
             self.resizeStartX = posX ; self.resizeStartY = posY
             self.resizeStartScale = self.scale
             self.movedInEditMode = true
-            return
+            return true
         end
         if self:isPointerOverHUD(posX, posY) then
             self.dragging = true ; self.resizing = false
             self.dragOffsetX = posX - self.panelX
             self.dragOffsetY = posY - self.panelY
             self.movedInEditMode = true
+            return true
         end
-        return
+        return false
     end
 
-    if isUp and button == 1 then
+    -- LMB up: release drag/resize
+    if isUp and button == Input.MOUSE_BUTTON_LEFT then
         if self.dragging or self.resizing then
             self.dragging = false ; self.resizing = false
             self:clampPosition()
+            return true
         end
-        return
+        return false
     end
 
+    -- Mouse move: update drag/resize/hover
     if self.dragging then
         local pw = SoilHUD.BASE_W * self.scale
         self.panelX = math.max(0.0, math.min(1.0 - pw, posX - self.dragOffsetX))
         self.panelY = math.max(0.05, math.min(0.95, posY - self.dragOffsetY))
+        return true
     end
 
     if self.resizing then
@@ -304,11 +314,11 @@ function SoilHUD:onMouseEvent(posX, posY, isDown, isUp, button)
         self.scale = math.max(SoilHUD.MIN_SCALE,
             math.min(SoilHUD.MAX_SCALE, self.resizeStartScale + delta))
         self:clampPosition()
+        return true
     end
 
-    if not self.dragging and not self.resizing then
-        self.hoverCorner = self:hitTestCorner(posX, posY)
-    end
+    self.hoverCorner = self:hitTestCorner(posX, posY)
+    return false
 end
 
 -- ── Update ───────────────────────────────────────────────
