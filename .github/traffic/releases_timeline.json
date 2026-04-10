@@ -228,5 +228,10 @@
     "published_at": "2026-04-10T12:11:00Z",
     "tag": "v1.6.0.0",
     "peak_downloads": 29
+  },
+  "v1.6.0.4": {
+    "published_at": "2026-04-10T22:47:08Z",
+    "tag": "v1.6.0.4",
+    "peak_downloads": 0
   }
 }
