@@ -61,6 +61,18 @@ Different crops take different amounts from your soil. Push the same field too h
 | 🌾 Barley / Oats / Rye | ●●●○○ | ●●○○○ | ●●●○○ | Light feeders, good rotation crops |
 | 🫛 Peas / Beans | ●●●●○ | ●●●○○ | ●●●●○ | Legumes — still need balanced soil |
 
+### 🔄 Crop Rotation
+
+The mod tracks the last **3 harvested crops** per field and actively rewards good rotation practice — and penalises lazy mono-cropping.
+
+| Situation | Effect |
+|---|---|
+| **Legume → Non-legume** (soybean, peas, or beans last season) | +0.5 N/day for the first 3 days of spring — nitrogen fixation carry-over |
+| **Same crop two seasons running** | ×1.15 extraction multiplier on that harvest — 15% extra depletion across N, P, and K |
+| **Healthy alternation** | No modifier in either direction |
+
+The Soil Report now shows your rotation status per field alongside the nutrient recommendations: *Rotation Bonus*, *Fatigue: Same Crop*, or *Rotation: OK*. History is saved with your savegame and synced in multiplayer. Can be toggled off in settings.
+
 ### 🐛 Field Health System
 
 Three pressure scores (0–100) track threats to each field independently. Left unchecked they reduce your yield at harvest. Treat them with the right product and the pressure drops within a few days.
@@ -75,19 +87,43 @@ All three are visible in the HUD and the full Soil Report. Each can be toggled o
 
 ### 💊 Fertilizer Types
 
-Six nutrient products, each with a different job:
+Over 20 products tracked, each with a different nutrient job.
+
+**Base game (always available):**
 
 | Fertilizer | N | P | K | Organic Matter | Notes |
 |---|---|---|---|---|---|
 | **Liquid Fertilizer** | ●●●○○ | ●●○○○ | ●●●○○ | — | Fast-acting, balanced NPK |
 | **Solid Fertilizer** | ●●●●○ | ●●●○○ | ●●●○○ | — | Higher N/P, granular |
-| **Manure** | ●●○○○ | ●●○○○ | ●●●○○ | ✓ builds | Slow-release, builds OM over time |
-| **Slurry** | ●●●○○ | ●●○○○ | ●●●●○ | ✓ builds | Liquid organic, strong K |
-| **Digestate** | ●●●○○ | ●●○○○ | ●●●●○ | ✓ builds | Biogas byproduct, well-rounded |
+| **Manure** | ●●○○○ | ●●○○○ | ●●●○○ | ✓ | Slow-release, builds OM over time |
+| **Slurry** | ●●●○○ | ●●○○○ | ●●●●○ | ✓ | Liquid organic, strong K |
+| **Digestate** | ●●●○○ | ●●○○○ | ●●●●○ | ✓ | Biogas byproduct, well-rounded |
 | **Lime** | — | — | — | — | Only raises pH — but nothing else works properly without it |
 
+**Custom (purchasable big bags in shop):**
+
+| Product | Type | Primary benefit |
+|---|---|---|
+| UAN-32 / UAN-28 | Liquid nitrogen | Highest N/L of liquid sources |
+| Anhydrous Ammonia | Liquid nitrogen | Maximum N concentration |
+| Urea / AMS | Dry nitrogen | Standard granular N sources |
+| MAP / DAP | Dry P+N | Phosphorus-focused blends |
+| Potash | Dry K | Pure potassium supplement |
+| Starter 10-34-0 | Liquid P | In-furrow high-P starter |
+| Liquid Lime | Liquid pH | Raises pH with sprayer equipment |
+| Gypsum | Dry pH+ | Minor pH correction + small OM gain |
+
+**Organic / slow-release (registered, obtained from compatible mods or production lines):**
+
+| Product | N | P | K | OM | Notes |
+|---|---|---|---|---|---|
+| **Compost** | Low | Low | Low | ●●●●● | Best OM builder per litre |
+| **Biosolids** | ●●○○○ | ●●○○○ | Low | ✓ | Municipal organic amendment |
+| **Chicken Manure** | ●●●○○ | ●●●○○ | ●●○○○ | ✓ | Concentrated poultry litter |
+| **Pelletized Manure** | ●●●●○ | ●●●●○ | ●●●●○ | ✓ | Dense balanced organic NPK |
+
 > [!NOTE]
-> Organic matter builds slowly with manure, slurry, and digestate — it takes many seasons to accumulate meaningfully. Soil with high OM buffers pH swings and slows nutrient loss from rain.
+> Organic matter builds slowly — it takes many seasons to accumulate meaningfully. Soil with high OM buffers pH swings and slows nutrient loss from rain.
 
 ### 🌦️ Environmental Effects
 
@@ -133,6 +169,7 @@ Open via **ESC → Settings → Game Settings → Soil & Fertilizer**.
 | **Weed pressure** | On / Off | Track weed competition per field — apply herbicide to reduce |
 | **Pest pressure** | On / Off | Track insect pest populations per field — apply insecticide to reduce |
 | **Disease pressure** | On / Off | Track crop disease per field — apply fungicide to reduce |
+| **Crop rotation** | On / Off | Enable legume rotation bonus and mono-crop fatigue multiplier |
 | **Difficulty** | Simple / Realistic / Hardcore | Scales depletion rate — 0.7× / 1× / 1.5× |
 | **HUD enabled** | On / Off | Show or hide the soil overlay |
 | **HUD position** | 5 presets | Top-right, top-left, bottom-right, bottom-left, centre-right |

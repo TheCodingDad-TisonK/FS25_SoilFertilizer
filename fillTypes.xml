@@ -122,6 +122,55 @@
             <sprayType sprayTypeStr="LIQUID"/>
         </fillType>
 
+        <!-- ── ORGANIC / SOIL AMENDMENTS ──────────────────────── -->
+        <!-- Icons patched via Lua using modDirectory (same as above).            -->
+        <!-- These types are registered here so they appear on the price table    -->
+        <!-- and can be routed by our sprayer hook when obtained from other mods  -->
+        <!-- or production lines.                                                 -->
+
+        <fillType name="GYPSUM" title="$l10n_sf_gypsum_title" showOnPriceTable="true" isBulkType="true" unitShort="$l10n_unit_literShort">
+            <physics massPerLiter="1.10" maxPhysicalSurfaceAngle="20"/>
+            <economy pricePerLiter="0.55"/>
+            <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
+            <sprayType sprayTypeStr="SOLID"/>
+        </fillType>
+
+        <fillType name="COMPOST" title="$l10n_sf_compost_title" showOnPriceTable="true" isBulkType="true" unitShort="$l10n_unit_literShort">
+            <physics massPerLiter="0.60" maxPhysicalSurfaceAngle="20"/>
+            <economy pricePerLiter="0.35"/>
+            <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
+            <sprayType sprayTypeStr="SOLID"/>
+        </fillType>
+
+        <fillType name="BIOSOLIDS" title="$l10n_sf_biosolids_title" showOnPriceTable="true" isBulkType="true" unitShort="$l10n_unit_literShort">
+            <physics massPerLiter="0.90" maxPhysicalSurfaceAngle="20"/>
+            <economy pricePerLiter="0.50"/>
+            <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
+            <sprayType sprayTypeStr="SOLID"/>
+        </fillType>
+
+        <!-- Fill type name is CHICKEN_MANURE; icon file is hud_fill_chickenlitter.dds -->
+        <fillType name="CHICKEN_MANURE" title="$l10n_sf_chicken_manure_title" showOnPriceTable="true" isBulkType="true" unitShort="$l10n_unit_literShort">
+            <physics massPerLiter="0.65" maxPhysicalSurfaceAngle="20"/>
+            <economy pricePerLiter="0.45"/>
+            <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
+            <sprayType sprayTypeStr="SOLID"/>
+        </fillType>
+
+        <fillType name="PELLETIZED_MANURE" title="$l10n_sf_pelletized_manure_title" showOnPriceTable="true" isBulkType="true" unitShort="$l10n_unit_literShort">
+            <physics massPerLiter="0.75" maxPhysicalSurfaceAngle="20"/>
+            <economy pricePerLiter="1.10"/>
+            <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
+            <sprayType sprayTypeStr="SOLID"/>
+        </fillType>
+
+        <fillType name="LIQUIDLIME" title="$l10n_sf_liquidlime_title" showOnPriceTable="true" isBulkType="false" unitShort="$l10n_unit_literShort">
+            <physics massPerLiter="1.40" maxPhysicalSurfaceAngle="0"/>
+            <economy pricePerLiter="0.28"/>
+            <image hud="$dataS/menu/hud/fillTypes/hud_fill_liquidFertilizer.png"/>
+            <sprayType sprayTypeStr="LIQUID"/>
+        </fillType>
+
     </fillTypes>
 
     <fillTypeCategories>
@@ -136,14 +185,14 @@
             names, any spreader that already accepts FERTILIZER will automatically also
             accept UREA, AMS, MAP, DAP, POTASH without any equipment mod changes.
         -->
-        <fillTypeCategory name="SPREADER">FERTILIZER UREA AMS MAP DAP POTASH</fillTypeCategory>
+        <fillTypeCategory name="SPREADER">FERTILIZER UREA AMS MAP DAP POTASH GYPSUM COMPOST BIOSOLIDS CHICKEN_MANURE PELLETIZED_MANURE</fillTypeCategory>
 
         <!--
             Same principle for liquid sprayers — extend LIQUIDFERTILIZER so vanilla sprayers
             that already accept LIQUIDFERTILIZER will also accept our liquid nitrogen products
             and starter fertilizer.
         -->
-        <fillTypeCategory name="SPRAYER">LIQUIDFERTILIZER UAN32 UAN28 ANHYDROUS STARTER INSECTICIDE FUNGICIDE LIQUID_UREA LIQUID_AMS LIQUID_MAP LIQUID_DAP LIQUID_POTASH</fillTypeCategory>
+        <fillTypeCategory name="SPRAYER">LIQUIDFERTILIZER UAN32 UAN28 ANHYDROUS STARTER INSECTICIDE FUNGICIDE LIQUID_UREA LIQUID_AMS LIQUID_MAP LIQUID_DAP LIQUID_POTASH LIQUIDLIME</fillTypeCategory>
     </fillTypeCategories>
 
 </map>

@@ -271,6 +271,7 @@ function SoilFullSyncEvent:readStream(streamId, connection)
     self.settings.diseasePressure = streamReadBool(streamId)
     self.settings.difficulty = streamReadInt32(streamId)
     self.settings.autoRateControl = streamReadBool(streamId)
+    self.settings.cropRotation = streamReadBool(streamId)
 
     -- Read field data
     self.fieldData = {}
@@ -285,6 +286,9 @@ function SoilFullSyncEvent:readStream(streamId, connection)
         local organicMatter = streamReadFloat32(streamId)
         local pH = streamReadFloat32(streamId)
         local lastCrop = streamReadString(streamId)
+        local lastCrop2 = streamReadString(streamId)
+        local lastCrop3 = streamReadString(streamId)
+        local rotationBonusDaysLeft = streamReadInt32(streamId)
         local lastHarvest = streamReadInt32(streamId)
         local fertilizerApplied = streamReadFloat32(streamId)
         local weedPressure = streamReadFloat32(streamId)
@@ -332,6 +336,9 @@ function SoilFullSyncEvent:readStream(streamId, connection)
                 organicMatter = organicMatter,
                 pH = pH,
                 lastCrop = lastCrop,
+                lastCrop2 = lastCrop2,
+                lastCrop3 = lastCrop3,
+                rotationBonusDaysLeft = rotationBonusDaysLeft,
                 lastHarvest = lastHarvest,
                 fertilizerApplied = fertilizerApplied,
                 weedPressure = weedPressure,
@@ -346,6 +353,12 @@ function SoilFullSyncEvent:readStream(streamId, connection)
             -- Clear empty strings
             if self.fieldData[fieldId].lastCrop == "" then
                 self.fieldData[fieldId].lastCrop = nil
+            end
+            if self.fieldData[fieldId].lastCrop2 == "" then
+                self.fieldData[fieldId].lastCrop2 = nil
+            end
+            if self.fieldData[fieldId].lastCrop3 == "" then
+                self.fieldData[fieldId].lastCrop3 = nil
             end
         end
     end
@@ -374,6 +387,7 @@ function SoilFullSyncEvent:writeStream(streamId, connection)
     streamWriteBool(streamId, self.settings.diseasePressure == true)
     streamWriteInt32(streamId, self.settings.difficulty)
     streamWriteBool(streamId, self.settings.autoRateControl == true)
+    streamWriteBool(streamId, self.settings.cropRotation == true)
 
     -- Write field data
     local fieldCount = 0
@@ -390,6 +404,9 @@ function SoilFullSyncEvent:writeStream(streamId, connection)
         streamWriteFloat32(streamId, field.organicMatter or 3.5)
         streamWriteFloat32(streamId, field.pH or 6.5)
         streamWriteString(streamId, field.lastCrop or "")
+        streamWriteString(streamId, field.lastCrop2 or "")
+        streamWriteString(streamId, field.lastCrop3 or "")
+        streamWriteInt32(streamId, field.rotationBonusDaysLeft or 0)
         streamWriteInt32(streamId, field.lastHarvest or 0)
         streamWriteFloat32(streamId, field.fertilizerApplied or 0)
         streamWriteFloat32(streamId, field.weedPressure or 0)
@@ -424,6 +441,7 @@ function SoilFullSyncEvent:run(connection)
     settings.diseasePressure = self.settings.diseasePressure
     settings.difficulty = self.settings.difficulty
     settings.autoRateControl = self.settings.autoRateControl
+    settings.cropRotation = self.settings.cropRotation
 
     -- Apply field data (server-authoritative)
     if g_SoilFertilityManager.soilSystem then
@@ -483,6 +501,9 @@ function SoilFieldUpdateEvent:readStream(streamId, connection)
     local organicMatter = streamReadFloat32(streamId)
     local pH = streamReadFloat32(streamId)
     local lastCrop = streamReadString(streamId)
+    local lastCrop2 = streamReadString(streamId)
+    local lastCrop3 = streamReadString(streamId)
+    local rotationBonusDaysLeft = streamReadInt32(streamId)
     local lastHarvest = streamReadInt32(streamId)
     local fertilizerApplied = streamReadFloat32(streamId)
     local weedPressure = streamReadFloat32(streamId)
@@ -506,6 +527,9 @@ function SoilFieldUpdateEvent:readStream(streamId, connection)
         pH = math.max(SoilConstants.NUTRIENT_LIMITS.PH_MIN,
                      math.min(SoilConstants.NUTRIENT_LIMITS.PH_MAX, pH)),
         lastCrop = lastCrop,
+        lastCrop2 = lastCrop2,
+        lastCrop3 = lastCrop3,
+        rotationBonusDaysLeft = math.max(0, rotationBonusDaysLeft),
         lastHarvest = math.max(0, lastHarvest),
         fertilizerApplied = math.max(0, fertilizerApplied),
         weedPressure = math.max(0, math.min(100, weedPressure)),
@@ -522,6 +546,12 @@ function SoilFieldUpdateEvent:readStream(streamId, connection)
     if self.field.lastCrop == "" then
         self.field.lastCrop = nil
     end
+    if self.field.lastCrop2 == "" then
+        self.field.lastCrop2 = nil
+    end
+    if self.field.lastCrop3 == "" then
+        self.field.lastCrop3 = nil
+    end
 
     self:run(connection)
 end
@@ -534,6 +564,9 @@ function SoilFieldUpdateEvent:writeStream(streamId, connection)
     streamWriteFloat32(streamId, self.field.organicMatter or 3.5)
     streamWriteFloat32(streamId, self.field.pH or 6.5)
     streamWriteString(streamId, self.field.lastCrop or "")
+    streamWriteString(streamId, self.field.lastCrop2 or "")
+    streamWriteString(streamId, self.field.lastCrop3 or "")
+    streamWriteInt32(streamId, self.field.rotationBonusDaysLeft or 0)
     streamWriteInt32(streamId, self.field.lastHarvest or 0)
     streamWriteFloat32(streamId, self.field.fertilizerApplied or 0)
     streamWriteFloat32(streamId, self.field.weedPressure or 0)

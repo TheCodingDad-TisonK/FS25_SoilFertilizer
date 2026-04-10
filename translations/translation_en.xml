@@ -289,7 +289,7 @@
     <!-- Category 6: Settings -->
     <e k="helpLine_sf_se_p1_title" v="Simulation Settings" eh="cbf13e3c" />
     <e k="helpLine_sf_se_p1_server_title" v="Server Settings (Admin Only in Multiplayer)" eh="49f37ed7" />
-    <e k="helpLine_sf_se_p1_server_text" v="Fertility System, Nutrient Cycles, Seasonal Effects, Rain Effects, Plowing Bonus, Weed/Pest/Disease Pressure, Fertilizer Costs, Notifications, and Auto-Rate Control. In multiplayer, only the server admin can change these. Changes sync to all clients instantly." eh="840b395c" />
+    <e k="helpLine_sf_se_p1_server_text" v="Fertility System, Nutrient Cycles, Seasonal Effects, Rain Effects, Plowing Bonus, Weed/Pest/Disease Pressure, Fertilizer Costs, Notifications, Crop Rotation, and Auto-Rate Control. In multiplayer, only the server admin can change these. Changes sync to all clients instantly." eh="840b395c" />
     <e k="helpLine_sf_se_p1_diff_title" v="Difficulty" eh="7b29ca96" />
     <e k="helpLine_sf_se_p1_diff_text" v="Simple (0.7x) reduces depletion by 30% for a relaxed experience. Realistic (1.0x) is the balanced default. Hardcore (1.5x) increases depletion by 50% for intensive soil management. Access via ESC &gt; Settings &gt; Soil &amp; Fertilizer." eh="740a3a4e" />
 
@@ -312,5 +312,21 @@
     <e k="helpLine_sf_mp_p2_workflow_title" v="Practical Workflow" eh="b6f73f04" />
     <e k="helpLine_sf_mp_p2_workflow_text" v="Use PrecisionFarming to see where in a field needs attention (sub-zone precision). Use SoilFertilizer's HUD and soil report to see what nutrient to apply. One pass satisfies both mods simultaneously and they will never give contradictory advice." eh="cde2c27c" />
 
+    <e k="sf_crop_rotation_short" v="Crop Rotation" />
+    <e k="sf_crop_rotation_long" v="Enable/disable crop rotation bonus and mono-crop fatigue (legume sequences restore nitrogen; same-crop consecutive seasons increase depletion)" />
+    <e k="sf_report_rotation_bonus" v="Rotation Bonus" />
+    <e k="sf_report_rotation_fatigue" v="Fatigue: Same Crop" />
+    <e k="sf_report_rotation_ok" v="Rotation: OK" />
+    <e k="sf_gypsum_title" v="Gypsum (pH+)" />
+    <e k="sf_compost_title" v="Compost (Organic)" />
+    <e k="sf_biosolids_title" v="Biosolids (N+P)" />
+    <e k="sf_chicken_manure_title" v="Chicken Manure (N+P)" />
+    <e k="sf_pelletized_manure_title" v="Pelletized Manure (NPK)" />
+    <e k="sf_liquidlime_title" v="Liquid Lime (pH+)" />
+    <e k="helpLine_sf_nu_p4_title" v="Crop Rotation" />
+    <e k="helpLine_sf_nu_p4_bonus_title" v="Rotation Bonus" />
+    <e k="helpLine_sf_nu_p4_bonus_text" v="Growing a legume crop (soybeans, peas, beans) after a non-legume adds a free nitrogen boost each spring for 3 days." />
+    <e k="helpLine_sf_nu_p4_fatigue_title" v="Crop Fatigue" />
+    <e k="helpLine_sf_nu_p4_fatigue_text" v="Planting the same crop two seasons in a row increases nutrient extraction by 15%. Rotate crops to avoid soil fatigue." />
     </elements>
 </l10n>

@@ -107,6 +107,16 @@ SoilConstants.SEASONAL_EFFECTS = {
 }
 
 -- ========================================
+-- CROP ROTATION
+-- ========================================
+SoilConstants.CROP_ROTATION = {
+    LEGUME_BONUS_N_PER_DAY = 0.5,   -- N added per day during bonus window
+    LEGUME_BONUS_DAYS       = 3,     -- spring bonus lasts this many days
+    FATIGUE_MULTIPLIER      = 1.15,  -- nutrient extraction ×1.15 for same-crop consecutive seasons
+    LEGUMES = { soybean = true, peas = true, beans = true },
+}
+
+-- ========================================
 -- pH NORMALIZATION (per day)
 -- ========================================
 SoilConstants.PH_NORMALIZATION = {

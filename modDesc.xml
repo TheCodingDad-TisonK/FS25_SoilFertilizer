@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <modDesc descVersion="106">
     <author>TisonK</author>
-    <version>1.5.2.0</version>
+    <version>1.6.0.0</version>
     <modName>FS25_SoilFertilizer</modName>
     <title>
         <en>Realistic Soil &amp; Fertilizer</en>
@@ -249,6 +249,17 @@
                 <paragraph>
                     <title text="$l10n_helpLine_sf_nu_p3_fallow_title" />
                     <text  text="$l10n_helpLine_sf_nu_p3_fallow_text"  />
+                </paragraph>
+            </page>
+
+            <page title="$l10n_helpLine_sf_nu_p4_title" iconSliceId="icon_contracts">
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_nu_p4_bonus_title" />
+                    <text  text="$l10n_helpLine_sf_nu_p4_bonus_text"  />
+                </paragraph>
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_nu_p4_fatigue_title" />
+                    <text  text="$l10n_helpLine_sf_nu_p4_fatigue_text"  />
                 </paragraph>
             </page>
 
