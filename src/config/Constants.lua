@@ -461,8 +461,6 @@ SoilConstants.NETWORK = {
     }
 }
 
-SoilLogger.info("Constants loaded")
-
 -- ========================================
 -- SPRAYER APPLICATION RATE
 -- ========================================
@@ -723,3 +721,5 @@ SoilConstants.DISEASE_PRESSURE = {
     MEDIUM = 50,
     HIGH   = 75,
 }
+
+SoilLogger.info("Constants loaded")

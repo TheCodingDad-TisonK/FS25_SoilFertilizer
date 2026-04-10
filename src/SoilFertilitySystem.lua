@@ -1034,8 +1034,12 @@ function SoilFertilitySystem:applyRainEffects(dt, rainScale)
 end
 
 -- Update field nutrients after harvest
+---@param fieldId number The field being harvested
+---@param fruitTypeIndex number FS25 fruit type index
+---@param harvestedLiters number Amount harvested in liters
 ---@param strawRatio number 0.0-1.0 fraction of straw chopped back into the field (adds organic matter)
-function SoilFertilitySystem:updateFieldNutrients(fieldId, fruitTypeIndex, harvestedLiters, strawRatio)
+---@param area number Area harvested in m² (unused; reserved for future area-normalised depletion)
+function SoilFertilitySystem:updateFieldNutrients(fieldId, fruitTypeIndex, harvestedLiters, strawRatio, area)
     if not self.settings.enabled or not self.settings.nutrientCycles then return end
 
     local field = self:getOrCreateField(fieldId, true)
@@ -1195,11 +1199,13 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
         self:log("Full coverage achieved field %d (%s): Application credited from %.1f L buffer", 
             fieldId, fillType.name, currentBuffer)
         
-        -- Trigger notification if it's the first application today
+        -- Trigger notification at most once per field per in-game day
+        local today = (g_currentMission and g_currentMission.environment and
+                       g_currentMission.environment.currentDay) or 0
         if not self.fertNotifyShown then self.fertNotifyShown = {} end
-        if not self.fertNotifyShown[fieldId] then
+        if self.fertNotifyShown[fieldId] ~= today then
             self:showNotification("Soil Update", string.format("Field %d fully treated with %s", fieldId, fillType.name))
-            self.fertNotifyShown[fieldId] = true
+            self.fertNotifyShown[fieldId] = today
         end
     end
 
@@ -1435,7 +1441,7 @@ function SoilFertilitySystem:getFieldUrgency(fieldId)
     local pDef = math.max(0, thresh - info.phosphorus.value) / thresh
     local kDef = math.max(0, thresh - info.potassium.value) / thresh
 
-    local phOpt = SoilConstants.PH_NORMALIZATION and SoilConstants.PH_NORMALIZATION.OPTIMAL or 6.5
+    local phOpt = 6.5  -- optimal pH target (mid-point of neutral band 6.5-7.0)
     local phMin = SoilConstants.NUTRIENT_LIMITS and SoilConstants.NUTRIENT_LIMITS.PH_MIN or 5.0
     local phDef = math.max(0, phOpt - info.pH) / (phOpt - phMin)
 

@@ -660,19 +660,6 @@ function SoilFertilityManager:update(dt)
     end
 end
 
---- Draw loop called every frame for rendering
-function SoilFertilityManager:draw()
-    -- FIX: Only draw HUD if it exists (client side only)
-    if self.soilHUD then
-        local success, err = pcall(function()
-            self.soilHUD:draw()
-        end)
-        if not success and self.settings and self.settings.debugMode then
-            SoilLogger.debug("HUD draw error: %s", tostring(err))
-        end
-    end
-end
-
 --- Cleanup on mod unload
 --- Saves soil data and uninstalls hooks
 function SoilFertilityManager:delete()
