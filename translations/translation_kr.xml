@@ -152,5 +152,17 @@
 		<e k="sf_hud_pos_5" v="[EN] Center Right" eh="d7afdc5a" />
 		<e k="sf_hud_pos_6" v="[EN] Custom" eh="90589c47" />
 		<e k="sf_hud_color_theme_short" v="[EN] HUD Color Theme" eh="4a73f95b" />
-		<e k="sf_hud_color_theme_long" v="[EN] Choose the color scheme for soil info display" eh="3218bca6" />    </elements>
+		<e k="sf_hud_color_theme_long" v="[EN] Choose the color scheme for soil info display" eh="3218bca6" />    <e k="sf_report_detail_n_ok" v="Nitrogen: Optimal" />
+    <e k="sf_report_detail_p_ok" v="Phosphorus: Optimal" />
+    <e k="sf_report_detail_k_ok" v="Potassium: Optimal" />
+    <e k="sf_report_status_monitor" v="Monitor" />
+    <e k="sf_report_status_adjust" v="Adjust" />
+    <e k="sf_report_status_maintain" v="Maintain" />
+    <e k="sf_report_status_increase" v="Increase" />
+    <e k="sf_report_pressure_low" v="Low" />
+    <e k="sf_report_pressure_moderate" v="Moderate" />
+    <e k="sf_report_pressure_high" v="High" />
+    <e k="sf_report_yield_hint" v="Based on N/P/K vs optimal threshold" />
+    <e k="sf_report_yield_loss" v="Yield ~-%d%%" />
+    </elements>
 </l10n>

@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.2.0] - 2026-04-10
+
+### Fixed
+
+- **Pressure values displayed as 4-digit percentages in Soil Report**: Weed, pest, and disease
+  pressure are stored internally as 0–100. The report dialog was multiplying them by 100 again,
+  producing values like "6500%" and always rendering red status regardless of actual severity.
+  Fixed in table rows and in the detail view. *(Silent bug — only visible when any pressure > 0.)*
+
+- **Overall status badge ignores pH, OM, and bio-pressures**: The "Good / Fair / Poor" status
+  shown in the Soil Report table and the HUD title bar only considered N/P/K. A field with poor
+  pH, low organic matter, or high weed/pest/disease pressure could still show "Good". Now all
+  five soil parameters plus all three pressure scores are included in the worst-case ranking.
+
+- **Farm Health % uses uneven scoring weights**: Farm Health was calculated using 100 / 55 / 10
+  for Good / Fair / Poor. The non-linear gap between Fair (55) and Poor (10) made the percentage
+  drop unnaturally sharp. Changed to 100 / 50 / 0 — a clean linear scale.
+
+### Improved
+
+- **Soil Report detail view fully localized**: Several status labels in the field detail panel
+  were hardcoded English strings — including pH status ("Optimal" / "Monitor" / "Adjust"),
+  OM status ("Optimal" / "Maintain" / "Increase"), pressure level labels ("Low" / "Moderate" /
+  "High"), yield hint text, and the N/P/K "optimal" hint lines. All replaced with `tr()` calls
+  backed by 12 new i18n keys. DE, FR, ES/EA, and PL receive translated values; remaining 21
+  languages carry EN fallbacks and can be improved by community PRs.
+
+- **`yieldSuffix` pattern in recommendation engine removed**: The
+  `getFertilizationRecommendation()` function assembled a yield penalty suffix as a separate
+  string then stripped its leading comma with `string.gsub`. Replaced with a direct
+  `table.insert` into the recommendations list — same output, no roundabout string surgery.
+
+- **Weed/pest/disease HUD rows extracted to `drawPressureRow()` helper**: The three pressure bar
+  rows in `SoilHUD:drawPanel()` were near-identical 30-line blocks. Extracted to a single
+  reusable method, removing ~60 lines of duplication. Color scale simplified to 3 levels
+  (green / yellow / red) to match N/P/K bars and avoid the inconsistent orange tier.
+
+---
+
 ## [1.5.1.0] - 2026-04-09
 
 ### Fixed

@@ -262,22 +262,73 @@ function SoilReportDialog:collectFieldData()
     return true
 end
 
+-- ── Status color helpers ──────────────────────────────────────────────
+
+local function getStatusColor(status)
+    if status == "Good" then return SoilReportDialog.COLOR_GOOD
+    elseif status == "Fair" then return SoilReportDialog.COLOR_FAIR
+    elseif status == "Poor" then return SoilReportDialog.COLOR_POOR
+    end
+    return SoilReportDialog.COLOR_WHITE
+end
+
+local function getPHColor(ph)
+    local rc = SoilConstants.REPORT_COLORS
+    if ph >= rc.PH_GOOD_LOW and ph <= rc.PH_GOOD_HIGH then return SoilReportDialog.COLOR_GOOD
+    elseif ph >= rc.PH_FAIR_LOW and ph <= rc.PH_FAIR_HIGH then return SoilReportDialog.COLOR_FAIR
+    end
+    return SoilReportDialog.COLOR_POOR
+end
+
+local function getOMColor(om)
+    local rc = SoilConstants.REPORT_COLORS
+    if om >= rc.OM_GOOD then return SoilReportDialog.COLOR_GOOD
+    elseif om >= rc.OM_FAIR then return SoilReportDialog.COLOR_FAIR
+    end
+    return SoilReportDialog.COLOR_POOR
+end
+
+local function getPressureColor(pct)
+    if pct < 25 then return SoilReportDialog.COLOR_GOOD
+    elseif pct < 60 then return SoilReportDialog.COLOR_FAIR
+    else return SoilReportDialog.COLOR_POOR end
+end
+
 -- ── Overall status helpers ────────────────────────────────────────────
 
---- Compute the overall field status (worst of N/P/K/pH/OM).
+--- Compute the overall field status (worst of N/P/K/pH/OM/weed/pest/disease).
 ---@param info table
 ---@return string "Good"|"Fair"|"Poor"
 ---@return table color RGBA
 local function getOverallStatus(info)
-    local function nutrientRank(s)
-        if s == "Poor" then return 3
-        elseif s == "Fair" then return 2
+    local function colorRank(c)
+        if c == SoilReportDialog.COLOR_POOR then return 3
+        elseif c == SoilReportDialog.COLOR_FAIR then return 2
         else return 1 end
     end
     local worst = 1
+    -- N / P / K
     for _, key in ipairs({"nitrogen", "phosphorus", "potassium"}) do
-        local r = nutrientRank(info[key].status)
+        local s = info[key].status
+        local r = (s == "Poor") and 3 or (s == "Fair") and 2 or 1
         if r > worst then worst = r end
+    end
+    -- pH and OM
+    if info.pH then
+        local r = colorRank(getPHColor(info.pH))
+        if r > worst then worst = r end
+    end
+    if info.organicMatter then
+        local r = colorRank(getOMColor(info.organicMatter))
+        if r > worst then worst = r end
+    end
+    -- Weed / pest / disease pressures (stored as 0-100)
+    for _, key in ipairs({"weedPressure", "pestPressure", "diseasePressure"}) do
+        local val = info[key]
+        if val and val >= 0 then
+            local r = colorRank(getPressureColor(math.floor(val + 0.5)))
+            if r > worst then worst = r end
+        end
     end
     if worst == 3 then return "Poor", SoilReportDialog.COLOR_POOR
     elseif worst == 2 then return "Fair", SoilReportDialog.COLOR_FAIR
@@ -297,8 +348,8 @@ function SoilReportDialog:computeFarmHealth()
         if info then
             local status, _ = getOverallStatus(info)
             if status == "Good" then scoreSum = scoreSum + 100
-            elseif status == "Fair" then scoreSum = scoreSum + 55
-            else scoreSum = scoreSum + 10 end
+            elseif status == "Fair" then scoreSum = scoreSum + 50
+            else scoreSum = scoreSum + 0 end
         end
     end
 
@@ -373,38 +424,6 @@ function SoilReportDialog:setDetailMode(isDetail)
     if self.backSep    then self.backSep:setVisible(isDetail) end
 end
 
--- ── Status color helpers ──────────────────────────────────────────────
-
-local function getStatusColor(status)
-    if status == "Good" then return SoilReportDialog.COLOR_GOOD
-    elseif status == "Fair" then return SoilReportDialog.COLOR_FAIR
-    elseif status == "Poor" then return SoilReportDialog.COLOR_POOR
-    end
-    return SoilReportDialog.COLOR_WHITE
-end
-
-local function getPHColor(ph)
-    local rc = SoilConstants.REPORT_COLORS
-    if ph >= rc.PH_GOOD_LOW and ph <= rc.PH_GOOD_HIGH then return SoilReportDialog.COLOR_GOOD
-    elseif ph >= rc.PH_FAIR_LOW and ph <= rc.PH_FAIR_HIGH then return SoilReportDialog.COLOR_FAIR
-    end
-    return SoilReportDialog.COLOR_POOR
-end
-
-local function getOMColor(om)
-    local rc = SoilConstants.REPORT_COLORS
-    if om >= rc.OM_GOOD then return SoilReportDialog.COLOR_GOOD
-    elseif om >= rc.OM_FAIR then return SoilReportDialog.COLOR_FAIR
-    end
-    return SoilReportDialog.COLOR_POOR
-end
-
-local function getPressureColor(pct)
-    if pct < 25 then return SoilReportDialog.COLOR_GOOD
-    elseif pct < 60 then return SoilReportDialog.COLOR_FAIR
-    else return SoilReportDialog.COLOR_POOR end
-end
-
 --- Set text and color on a text element
 local function setColoredText(element, text, color)
     if element then
@@ -471,7 +490,7 @@ function SoilReportDialog:getFertilizationRecommendation(info)
         overallStatus = "Poor"
     end
 
-    local yieldSuffix = ""
+    -- Yield penalty entry (added directly to recommendations list)
     local ys = SoilConstants.YIELD_SENSITIVITY
     if ys then
         local cropLower = info.lastCrop and string.lower(info.lastCrop) or nil
@@ -480,13 +499,13 @@ function SoilReportDialog:getFertilizationRecommendation(info)
             local tierData = ys.TIERS and ys.TIERS[tier]
             local thresh   = ys.OPTIMAL_THRESHOLD or 70
             if tierData then
-                local nDef   = math.max(0, thresh - info.nitrogen.value)   / thresh
-                local pDef   = math.max(0, thresh - info.phosphorus.value) / thresh
-                local kDef   = math.max(0, thresh - info.potassium.value)  / thresh
+                local nDef       = math.max(0, thresh - info.nitrogen.value)   / thresh
+                local pDef       = math.max(0, thresh - info.phosphorus.value) / thresh
+                local kDef       = math.max(0, thresh - info.potassium.value)  / thresh
                 local penalty    = math.min(ys.MAX_PENALTY, (nDef + pDef + kDef) / 3 * tierData.scale)
                 local penaltyPct = math.floor(penalty * 100 + 0.5)
                 if penaltyPct > 0 then
-                    yieldSuffix = string.format(", Yield ~-%d%%", penaltyPct)
+                    table.insert(recommendations, string.format(tr("sf_report_yield_loss", "Yield ~-%d%%"), penaltyPct))
                     if overallStatus == "Good" then overallStatus = "Fair" end
                 end
             end
@@ -498,35 +517,21 @@ function SoilReportDialog:getFertilizationRecommendation(info)
         -- Format as bulleted grid, 3 items per line
         local lines = {}
         local currentLine = {}
-        
-        for i, rec in ipairs(recommendations) do
+        for _, rec in ipairs(recommendations) do
             table.insert(currentLine, "- " .. rec)
             if #currentLine >= 3 then
                 table.insert(lines, table.concat(currentLine, "   "))
                 currentLine = {}
             end
         end
-        
-        if yieldSuffix ~= "" then
-            -- Yield suffix is typically the last item, remove the leading comma/space if any
-            local yieldText = "- " .. string.gsub(yieldSuffix, "^,%s*", "")
-            table.insert(currentLine, yieldText)
-        end
-        
         if #currentLine > 0 then
             table.insert(lines, table.concat(currentLine, "   "))
         end
-
         recStr   = table.concat(lines, "\n")
         recColor = (overallStatus == "Poor") and SoilReportDialog.COLOR_POOR or SoilReportDialog.COLOR_FAIR
     else
-        if yieldSuffix ~= "" then
-            recStr   = tr("sf_report_rec_optimal", "Soil Health: Optimal") .. yieldSuffix
-            recColor = SoilReportDialog.COLOR_FAIR
-        else
-            recStr   = tr("sf_report_rec_optimal", "Soil Health: Optimal")
-            recColor = SoilReportDialog.COLOR_GOOD
-        end
+        recStr   = tr("sf_report_rec_optimal", "Soil Health: Optimal")
+        recColor = SoilReportDialog.COLOR_GOOD
     end
 
     return recStr, recColor, overallStatus
@@ -562,18 +567,16 @@ function SoilReportDialog:updateFieldRows()
                     -- Organic Matter
                     setColoredText(row.om, string.format("%.1f", info.organicMatter), getOMColor(info.organicMatter))
 
-                    -- Weed pressure
+                    -- Weed pressure (stored as 0-100)
                     if row.weed then
-                        local wp = info.weedPressure or 0
-                        local wpPct = math.floor(wp * 100 + 0.5)
-                        setColoredText(row.weed, string.format("%d%%", wpPct), getPressureColor(wpPct))
+                        local wp = math.floor((info.weedPressure or 0) + 0.5)
+                        setColoredText(row.weed, string.format("%d%%", wp), getPressureColor(wp))
                     end
 
-                    -- Pest pressure
+                    -- Pest pressure (stored as 0-100)
                     if row.pest then
-                        local pp = info.pestPressure or 0
-                        local ppPct = math.floor(pp * 100 + 0.5)
-                        setColoredText(row.pest, string.format("%d%%", ppPct), getPressureColor(ppPct))
+                        local pp = math.floor((info.pestPressure or 0) + 0.5)
+                        setColoredText(row.pest, string.format("%d%%", pp), getPressureColor(pp))
                     end
 
                     -- Last Crop
@@ -693,21 +696,21 @@ function SoilReportDialog:updateDetailView(fieldId)
         if hintEl then hintEl:setText(hintText or "") end
     end
 
-    local nHint = (info.nitrogen.status == "Poor") and tr("sf_report_rec_n_poor", "Apply nitrogen fertilizer")
-               or (info.nitrogen.status == "Fair") and tr("sf_report_rec_n_fair", "Consider light N top-dress")
-               or "Nitrogen levels optimal"
+    local nHint = (info.nitrogen.status == "Poor") and tr("sf_report_rec_n_poor", "Needs Nitrogen")
+               or (info.nitrogen.status == "Fair") and tr("sf_report_rec_n_fair", "Low Nitrogen")
+               or tr("sf_report_detail_n_ok", "Nitrogen: Optimal")
     fillNutrient(self.detailN, self.detailNStat, self.detailNHint,
         info.nitrogen.value,   ppm.N, info.nitrogen.status,   nHint)
 
-    local pHint = (info.phosphorus.status == "Poor") and tr("sf_report_rec_p_poor", "Apply phosphorus fertilizer")
-               or (info.phosphorus.status == "Fair") and tr("sf_report_rec_p_fair", "Monitor phosphorus levels")
-               or "Phosphorus levels optimal"
+    local pHint = (info.phosphorus.status == "Poor") and tr("sf_report_rec_p_poor", "Needs Phosphorus")
+               or (info.phosphorus.status == "Fair") and tr("sf_report_rec_p_fair", "Low Phosphorus")
+               or tr("sf_report_detail_p_ok", "Phosphorus: Optimal")
     fillNutrient(self.detailP, self.detailPStat, self.detailPHint,
         info.phosphorus.value, ppm.P, info.phosphorus.status, pHint)
 
-    local kHint = (info.potassium.status == "Poor") and tr("sf_report_rec_k_poor", "Apply potash fertilizer")
-               or (info.potassium.status == "Fair") and tr("sf_report_rec_k_fair", "Monitor potassium levels")
-               or "Potassium levels optimal"
+    local kHint = (info.potassium.status == "Poor") and tr("sf_report_rec_k_poor", "Needs Potassium")
+               or (info.potassium.status == "Fair") and tr("sf_report_rec_k_fair", "Low Potassium")
+               or tr("sf_report_detail_k_ok", "Potassium: Optimal")
     fillNutrient(self.detailK, self.detailKStat, self.detailKHint,
         info.potassium.value,  ppm.K, info.potassium.status,  kHint)
 
@@ -719,9 +722,9 @@ function SoilReportDialog:updateDetailView(fieldId)
     end
     if self.detailPHStat then
         local phColor = getPHColor(info.pH)
-        local phStatus = (phColor == SoilReportDialog.COLOR_GOOD) and "Optimal"
-                      or (phColor == SoilReportDialog.COLOR_FAIR) and "Monitor"
-                      or "Adjust"
+        local phStatus = (phColor == SoilReportDialog.COLOR_GOOD) and tr("sf_hud_optimal", "Optimal")
+                      or (phColor == SoilReportDialog.COLOR_FAIR) and tr("sf_report_status_monitor", "Monitor")
+                      or tr("sf_report_status_adjust", "Adjust")
         self.detailPHStat:setText(phStatus)
         self.detailPHStat:setTextColor(phColor[1], phColor[2], phColor[3], 1)
     end
@@ -734,18 +737,20 @@ function SoilReportDialog:updateDetailView(fieldId)
     end
     if self.detailOMStat then
         local omColor = getOMColor(info.organicMatter)
-        local omStatus = (omColor == SoilReportDialog.COLOR_GOOD) and "Optimal"
-                      or (omColor == SoilReportDialog.COLOR_FAIR) and "Maintain"
-                      or "Increase"
+        local omStatus = (omColor == SoilReportDialog.COLOR_GOOD) and tr("sf_hud_optimal", "Optimal")
+                      or (omColor == SoilReportDialog.COLOR_FAIR) and tr("sf_report_status_maintain", "Maintain")
+                      or tr("sf_report_status_increase", "Increase")
         self.detailOMStat:setText(omStatus)
         self.detailOMStat:setTextColor(omColor[1], omColor[2], omColor[3], 1)
     end
 
     -- Pressures
     local function fillPressure(valueEl, statEl, hintEl, rawVal, protectedFlag, protectedKey)
-        local pct = math.floor((rawVal or 0) * 100 + 0.5)
+        local pct = math.floor((rawVal or 0) + 0.5)   -- stored as 0-100
         local color = getPressureColor(pct)
-        local level = (pct < 25) and "Low" or (pct < 60) and "Moderate" or "High"
+        local level = (pct < 25) and tr("sf_report_pressure_low", "Low")
+                   or (pct < 60) and tr("sf_report_pressure_moderate", "Moderate")
+                   or tr("sf_report_pressure_high", "High")
         if valueEl then
             valueEl:setText(string.format("%d%%", pct))
             valueEl:setTextColor(color[1], color[2], color[3], 1)
@@ -785,7 +790,7 @@ function SoilReportDialog:updateDetailView(fieldId)
                 local penalty    = math.min(ys.MAX_PENALTY, (nDef + pDef + kDef) / 3 * tierData.scale)
                 local penaltyPct = math.floor(penalty * 100 + 0.5)
                 if penaltyPct > 0 then
-                    yieldText  = string.format("~-%d%% loss", penaltyPct)
+                    yieldText  = string.format(tr("sf_report_yield_loss", "Yield ~-%d%%"), penaltyPct)
                     yieldColor = (penaltyPct >= 20) and SoilReportDialog.COLOR_POOR or SoilReportDialog.COLOR_FAIR
                 end
             end
@@ -795,8 +800,7 @@ function SoilReportDialog:updateDetailView(fieldId)
         self.detailYield:setTextColor(yieldColor[1], yieldColor[2], yieldColor[3], 1)
     end
     if self.detailYieldHint then
-        local hint = "Based on N/P/K vs optimal threshold"
-        self.detailYieldHint:setText(hint)
+        self.detailYieldHint:setText(tr("sf_report_yield_hint", "Based on N/P/K vs optimal threshold"))
     end
 
     -- Recommendations summary

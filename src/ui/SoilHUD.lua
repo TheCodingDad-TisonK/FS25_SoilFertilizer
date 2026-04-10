@@ -540,9 +540,32 @@ end
 function SoilHUD:overallStatus(info)
     local rank = {Good = 1, Fair = 2, Poor = 3}
     local worst = 1
+    -- N / P / K
     for _, key in ipairs({"nitrogen", "phosphorus", "potassium"}) do
         local r = rank[info[key].status] or 3
         if r > worst then worst = r end
+    end
+    -- pH
+    if info.pH then
+        local r = rank[self:pHColor(info.pH) == SoilHUD.C_POOR and "Poor"
+                    or self:pHColor(info.pH) == SoilHUD.C_FAIR and "Fair"
+                    or "Good"] or 1
+        if r > worst then worst = r end
+    end
+    -- OM
+    if info.organicMatter then
+        local r = rank[self:omColor(info.organicMatter) == SoilHUD.C_POOR and "Poor"
+                    or self:omColor(info.organicMatter) == SoilHUD.C_FAIR and "Fair"
+                    or "Good"] or 1
+        if r > worst then worst = r end
+    end
+    -- Weed / pest / disease pressures (0-100, 3-level: <25 Good, <60 Fair, else Poor)
+    for _, key in ipairs({"weedPressure", "pestPressure", "diseasePressure"}) do
+        local val = info[key]
+        if val and val >= 0 then
+            local r = (val >= 60) and 3 or (val >= 25) and 2 or 1
+            if r > worst then worst = r end
+        end
     end
     if worst == 1 then return "Good", SoilHUD.C_GOOD
     elseif worst == 2 then return "Fair", SoilHUD.C_FAIR
@@ -758,103 +781,21 @@ function SoilHUD:drawPanel()
             cy = cy - pad * 0.8
         end
 
-        -- Weed pressure row (always shown when info available and setting enabled)
-        if g_SoilFertilityManager and g_SoilFertilityManager.settings.weedPressure then
-            local pressure = info.weedPressure or 0
-            local wp = SoilConstants.WEED_PRESSURE
-            local weedColor
-            if pressure < wp.LOW then
-                weedColor = SoilHUD.C_GOOD
-            elseif pressure < wp.MEDIUM then
-                weedColor = SoilHUD.C_FAIR
-            elseif pressure < wp.HIGH then
-                weedColor = {1.0, 0.55, 0.10, 1.0}  -- orange
-            else
-                weedColor = SoilHUD.C_POOR
+        -- Weed / pest / disease pressure rows
+        local mgr = g_SoilFertilityManager
+        if mgr then
+            if mgr.settings.weedPressure then
+                cy = self:drawPressureRow("sf_hud_weeds", info.weedPressure or 0,
+                    info.herbicideActive, px, cy, pw, s, fontMult)
             end
-
-            setTextColor(SoilHUD.C_LABEL[1], SoilHUD.C_LABEL[2], SoilHUD.C_LABEL[3], SoilHUD.C_LABEL[4])
-            renderText(tx, cy, 0.010 * fontMult * s, g_i18n:getText("sf_hud_weeds"))
-
-            -- Progress bar (reuse BAR geometry)
-            local barX = tx + 0.038*s
-            local barH = SoilHUD.BAR_H * s
-            local barW = SoilHUD.BAR_W * s
-            local barY = cy + (SoilHUD.LINE_H * s - barH) * 0.5
-            self:drawRect(barX, barY, barW, barH, SoilHUD.C_BAR_BG)
-            local fill = math.max(0, math.min(1, pressure / 100))
-            if fill > 0 then
-                self:drawRect(barX, barY, barW * fill, barH, weedColor)
+            if mgr.settings.pestPressure then
+                cy = self:drawPressureRow("sf_hud_pests", info.pestPressure or 0,
+                    info.insecticideActive, px, cy, pw, s, fontMult)
             end
-
-            -- Value + herbicide indicator
-            local weedLabel = string.format("%.0f%%", pressure)
-            if info.herbicideActive then weedLabel = weedLabel .. " " .. g_i18n:getText("sf_hud_protected") end
-            setTextAlignment(RenderText.ALIGN_RIGHT)
-            setTextColor(weedColor[1], weedColor[2], weedColor[3], 1.0)
-            renderText(px + pw - pad, cy, 0.010 * fontMult * s, weedLabel)
-            setTextAlignment(RenderText.ALIGN_LEFT)
-            cy = cy - SoilHUD.LINE_H * s
-        end
-
-        -- Pest pressure row
-        if g_SoilFertilityManager and g_SoilFertilityManager.settings.pestPressure then
-            local pressure = info.pestPressure or 0
-            local pp = SoilConstants.PEST_PRESSURE
-            local pestColor
-            if pressure < pp.LOW then pestColor = SoilHUD.C_GOOD
-            elseif pressure < pp.MEDIUM then pestColor = SoilHUD.C_FAIR
-            elseif pressure < pp.HIGH then pestColor = {1.0, 0.55, 0.10, 1.0}
-            else pestColor = SoilHUD.C_POOR end
-
-            setTextColor(SoilHUD.C_LABEL[1], SoilHUD.C_LABEL[2], SoilHUD.C_LABEL[3], SoilHUD.C_LABEL[4])
-            renderText(tx, cy, 0.010 * fontMult * s, g_i18n:getText("sf_hud_pests"))
-
-            local barX = tx + 0.038*s
-            local barH = SoilHUD.BAR_H * s
-            local barW = SoilHUD.BAR_W * s
-            local barY = cy + (SoilHUD.LINE_H * s - barH) * 0.5
-            self:drawRect(barX, barY, barW, barH, SoilHUD.C_BAR_BG)
-            local fill = math.max(0, math.min(1, pressure / 100))
-            if fill > 0 then self:drawRect(barX, barY, barW * fill, barH, pestColor) end
-
-            local pestLabel = string.format("%.0f%%", pressure)
-            if info.insecticideActive then pestLabel = pestLabel .. " " .. g_i18n:getText("sf_hud_protected") end
-            setTextAlignment(RenderText.ALIGN_RIGHT)
-            setTextColor(pestColor[1], pestColor[2], pestColor[3], 1.0)
-            renderText(px + pw - pad, cy, 0.010 * fontMult * s, pestLabel)
-            setTextAlignment(RenderText.ALIGN_LEFT)
-            cy = cy - SoilHUD.LINE_H * s
-        end
-
-        -- Disease pressure row
-        if g_SoilFertilityManager and g_SoilFertilityManager.settings.diseasePressure then
-            local pressure = info.diseasePressure or 0
-            local dp = SoilConstants.DISEASE_PRESSURE
-            local diseaseColor
-            if pressure < dp.LOW then diseaseColor = SoilHUD.C_GOOD
-            elseif pressure < dp.MEDIUM then diseaseColor = SoilHUD.C_FAIR
-            elseif pressure < dp.HIGH then diseaseColor = {1.0, 0.55, 0.10, 1.0}
-            else diseaseColor = SoilHUD.C_POOR end
-
-            setTextColor(SoilHUD.C_LABEL[1], SoilHUD.C_LABEL[2], SoilHUD.C_LABEL[3], SoilHUD.C_LABEL[4])
-            renderText(tx, cy, 0.010 * fontMult * s, g_i18n:getText("sf_hud_disease"))
-
-            local barX = tx + 0.038*s
-            local barH = SoilHUD.BAR_H * s
-            local barW = SoilHUD.BAR_W * s
-            local barY = cy + (SoilHUD.LINE_H * s - barH) * 0.5
-            self:drawRect(barX, barY, barW, barH, SoilHUD.C_BAR_BG)
-            local fill = math.max(0, math.min(1, pressure / 100))
-            if fill > 0 then self:drawRect(barX, barY, barW * fill, barH, diseaseColor) end
-
-            local diseaseLabel = string.format("%.0f%%", pressure)
-            if info.fungicideActive then diseaseLabel = diseaseLabel .. " " .. g_i18n:getText("sf_hud_protected") end
-            setTextAlignment(RenderText.ALIGN_RIGHT)
-            setTextColor(diseaseColor[1], diseaseColor[2], diseaseColor[3], 1.0)
-            renderText(px + pw - pad, cy, 0.010 * fontMult * s, diseaseLabel)
-            setTextAlignment(RenderText.ALIGN_LEFT)
-            cy = cy - SoilHUD.LINE_H * s
+            if mgr.settings.diseasePressure then
+                cy = self:drawPressureRow("sf_hud_disease", info.diseasePressure or 0,
+                    info.fungicideActive, px, cy, pw, s, fontMult)
+            end
         end
 
         -- Divider before hint
@@ -946,6 +887,46 @@ function SoilHUD:drawNutrientRow(label, nutrient, px, cy, pw, s, fontMult)
     setTextAlignment(RenderText.ALIGN_LEFT)
 
     return cy
+end
+
+-- ── Pressure bar row ─────────────────────────────────────
+-- Draws a single weed/pest/disease pressure row.
+-- pressure is 0-100.  isProtected shows "(protected)" suffix when true.
+-- Returns updated cy after the row.
+function SoilHUD:drawPressureRow(labelKey, pressure, isProtected, px, cy, pw, s, fontMult)
+    local pad  = SoilHUD.PAD * s
+    local barH = SoilHUD.BAR_H * s
+    local barW = SoilHUD.BAR_W * s
+    local tx   = px + pad
+
+    -- 3-level color (matches getPressureColor in SoilReportDialog)
+    local col
+    if pressure < 25 then     col = SoilHUD.C_GOOD
+    elseif pressure < 60 then col = SoilHUD.C_FAIR
+    else                      col = SoilHUD.C_POOR end
+
+    -- Label
+    setTextColor(SoilHUD.C_LABEL[1], SoilHUD.C_LABEL[2], SoilHUD.C_LABEL[3], SoilHUD.C_LABEL[4])
+    renderText(tx, cy, 0.010 * fontMult * s, g_i18n:getText(labelKey))
+
+    -- Bar
+    local barX = tx + 0.038*s
+    local barY = cy + (SoilHUD.LINE_H * s - barH) * 0.5
+    self:drawRect(barX, barY, barW, barH, SoilHUD.C_BAR_BG)
+    local fill = math.max(0, math.min(1, pressure / 100))
+    if fill > 0 then
+        self:drawRect(barX, barY, barW * fill, barH, col)
+    end
+
+    -- Value + protection tag
+    local label = string.format("%.0f%%", pressure)
+    if isProtected then label = label .. " " .. g_i18n:getText("sf_hud_protected") end
+    setTextAlignment(RenderText.ALIGN_RIGHT)
+    setTextColor(col[1], col[2], col[3], 1.0)
+    renderText(px + pw - pad, cy, 0.010 * fontMult * s, label)
+    setTextAlignment(RenderText.ALIGN_LEFT)
+
+    return cy - SoilHUD.LINE_H * s
 end
 
 -- ── Sprayer fill-type helpers ─────────────────────────────

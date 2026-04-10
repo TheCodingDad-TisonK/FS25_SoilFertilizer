@@ -152,5 +152,17 @@
     <e k="sf_bigBag_fungicide_name" v="Big Bag Fungicide" eh="a3d4e59c" />
     <e k="sf_bigBag_fungicide_function" v="Fungicide (liquid)" eh="745c34cb" />
     <e k="sf_bigBag_starter_function" v="Starterdünger (flüssig)" eh="2c36ea57" />
+    <e k="sf_report_detail_n_ok" v="Stickstoff: Optimal" />
+    <e k="sf_report_detail_p_ok" v="Phosphor: Optimal" />
+    <e k="sf_report_detail_k_ok" v="Kalium: Optimal" />
+    <e k="sf_report_status_monitor" v="Überwachen" />
+    <e k="sf_report_status_adjust" v="Anpassen" />
+    <e k="sf_report_status_maintain" v="Halten" />
+    <e k="sf_report_status_increase" v="Erhöhen" />
+    <e k="sf_report_pressure_low" v="Niedrig" />
+    <e k="sf_report_pressure_moderate" v="Mittel" />
+    <e k="sf_report_pressure_high" v="Hoch" />
+    <e k="sf_report_yield_hint" v="Basierend auf N/P/K vs. optimalem Schwellenwert" />
+    <e k="sf_report_yield_loss" v="Ertrag ~-%d%%" />
     </elements>
 </l10n>
