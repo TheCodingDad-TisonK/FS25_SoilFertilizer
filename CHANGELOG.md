@@ -57,6 +57,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   credited to the field once ~90% of the volume required for full coverage has been
   applied. Buffers are cleared daily, requiring same-day completion for credit.
 
+- **Improved HUD rate resolution for low-volume products**: Insecticide and Fungicide
+  (which have very low base rates) no longer display as "0 L/ha" or "0 gal/ac" in the 
+  sprayer rate panel. The HUD now shows 1 decimal place for products with base rates
+  below 10.0, ensuring the rate control is responsive and accurate.
+
 - **Pressure values displayed as 4-digit percentages in Soil Report**: Weed, pest, and disease
   pressure are stored internally as 0–100. The report dialog was multiplying them by 100 again,
   producing values like "6500%" and always rendering red status regardless of actual severity.
@@ -163,30 +168,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **"BUY" refill mode not working with custom fill types (issue #125)**: When the player
-  (or a worker/CP) set the sprayer refill mode to "BUY", vanilla fill types
-  (FERTILIZER, LIQUIDFERTILIZER) correctly charged money per liter consumed without
-  depleting the physical tank. Custom types (UAN32, UAN28, ANHYDROUS, STARTER, UREA,
-  AMS, MAP, DAP, POTASH, INSECTICIDE, FUNGICIDE, and organic types) still depleted the
-  fill unit normally, causing workers to stop when the tank ran dry and potentially
-  switch to a vanilla fertilizer type instead.
-
-  Root cause: FS25's internal "BUY" purchase intercept only fires for fill types
-  recognized by its own economy system. Custom mod fill types have `pricePerLiter`
-  defined in `fillTypes.xml` but are not included in the game's purchasable-fill-type
-  whitelist, so `FillUnit.addFillUnitFillLevel` never intercepts their consumption.
-
-  Fix: Added `installPurchaseRefillHook()` in `HookManager.lua` (Hook 8). This hook
-  wraps `FillUnit.addFillUnitFillLevel` and intercepts negative-delta (consumption)
-  calls for custom fill types when the vehicle's fill unit is in BUY mode. When
-  intercepted, it charges the owning farm `pricePerLiter × litersConsumed` via
-  `g_currentMission:addMoney()` and returns `0` (no physical depletion). BUY mode is
-  detected via `fillUnit.fillModeIndex == 1` (primary) and `fillUnit.reloadState > 0`
-  (secondary), matching how FS25 internally signals the purchase-refill state.
-
-  Prices used for money charge match the `economy pricePerLiter` values in
-  `fillTypes.xml` and the `SoilConstants.PURCHASABLE_SINGLE_NUTRIENT` table for
-  single-nutrient types (ANHYDROUS, MAP, POTASH).
+- **"BUY" refill mode not working with custom fill types** (issue #125): AI workers and
+  Courseplay now correctly use the "Buy" helper setting with custom products. Fixed
+  a bug where the tank would still deplete or the worker would stop when empty.
+  The system now correctly intercepts consumption, charges the farm account, and
+  tricks the engine into continuing application without depleting physical stock.
 
 ---
 
