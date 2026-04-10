@@ -45,6 +45,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Calibrated application rates for custom fill types** (issue #142): Custom fertilizers like
+  UAN32, Anhydrous, and Urea now have their `litersPerSecond` calibrated to match their
+  intended `BASE_RATES` (e.g. 60 L/ha for UAN32) instead of inheriting the vanilla 93.5 L/ha
+  rate. This ensures tank consumption and nutrient application are perfectly synced with
+  the HUD display and agronomic profiles.
+
+- **Required full field coverage for fertilizer effect** (issue #143): Realism improvement.
+  Nutrient levels no longer update instantly on application. Instead, applied liters are
+  buffered per product. Nutrients are only credited to the field once ~90% of the volume
+  required for full coverage (based on field area and product base rate) has been applied.
+  Buffers are cleared daily, requiring same-day completion for credit.
+
 - **Pressure values displayed as 4-digit percentages in Soil Report**: Weed, pest, and disease
   pressure are stored internally as 0–100. The report dialog was multiplying them by 100 again,
   producing values like "6500%" and always rendering red status regardless of actual severity.

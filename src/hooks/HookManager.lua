@@ -206,10 +206,19 @@ function HookManager:registerCustomSprayTypes()
         return
     end
 
-    local liquidLPS         = liqType and liqType.litersPerSecond or 0
+    local liquidLPS         = liqType and liqType.litersPerSecond or 0.0081
     local liquidGroundType  = liqType and liqType.sprayGroundType or 1
-    local solidLPS          = dryType and dryType.litersPerSecond or 0
+    local solidLPS          = dryType and dryType.litersPerSecond or 0.0060
     local solidGroundType   = dryType and dryType.sprayGroundType or 1
+
+    -- Use BASE_RATES from Constants to calibrate LPS for each custom product.
+    -- FS25 base LPS (liquid=0.0081, solid=0.0060) yields the base game application
+    -- rates (93.5 L/ha and 225 kg/ha). By scaling the LPS by the ratio of our
+    -- desired rate to the base rate, we ensure the tank drains at the correct
+    -- speed for each individual product.
+    local baseRates = SoilConstants.SPRAYER_RATE.BASE_RATES
+    local liqBase = baseRates.LIQUIDFERTILIZER.value
+    local dryBase = baseRates.FERTILIZER.value
 
     -- Liquid nitrogen / starter types → inherit from LIQUIDFERTILIZER
     local liquidNames = { "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME", "INSECTICIDE", "FUNGICIDE",
@@ -223,8 +232,11 @@ function HookManager:registerCustomSprayTypes()
 
     for _, name in ipairs(liquidNames) do
         if g_fillTypeManager:getFillTypeByName(name) then
+            local customRate = baseRates[name] and baseRates[name].value or liqBase
+            local customLPS  = liquidLPS * (customRate / liqBase)
+
             -- addSprayType is idempotent: if already registered it updates the entry
-            g_sprayTypeManager:addSprayType(name, liquidLPS, "FERTILIZER", liquidGroundType, false)
+            g_sprayTypeManager:addSprayType(name, customLPS, "FERTILIZER", liquidGroundType, false)
             registered = registered + 1
         else
             skipped = skipped + 1
@@ -233,7 +245,10 @@ function HookManager:registerCustomSprayTypes()
 
     for _, name in ipairs(solidNames) do
         if g_fillTypeManager:getFillTypeByName(name) then
-            g_sprayTypeManager:addSprayType(name, solidLPS, "FERTILIZER", solidGroundType, false)
+            local customRate = baseRates[name] and baseRates[name].value or dryBase
+            local customLPS  = solidLPS * (customRate / dryBase)
+
+            g_sprayTypeManager:addSprayType(name, customLPS, "FERTILIZER", solidGroundType, false)
             registered = registered + 1
         else
             skipped = skipped + 1
@@ -241,7 +256,7 @@ function HookManager:registerCustomSprayTypes()
     end
 
     SoilLogger.info(
-        "[OK] Custom spray types registered: %d types (liquid LPS=%.5f, solid LPS=%.5f, %d skipped/unavailable)",
+        "[OK] Custom spray types registered: %d types (calibrated LPS: liquid base=%.5f, solid base=%.5f, %d skipped/unavailable)",
         registered, liquidLPS, solidLPS, skipped
     )
 end
@@ -1134,16 +1149,14 @@ end
 -- Fix: hook FillUnit.addFillUnitFillLevel. When:
 --   1. The delta is negative (consumption, not filling)
 --   2. The fill type is one of our custom purchasable types
---   3. The vehicle's sprayer is in "BUY" mode (spec_sprayer.fillMode == FillUnit.FILLMODE_PURCHASE
---      or g_currentMission.refuelAllowed with farmId charge)
+--   3. AI is active on the vehicle AND the player has opted in via helper settings
+--      (helperBuyFertilizer / helperSlurrySource==2 / helperManureSource==2)
 -- → Charge the player pricePerLiter * |delta| and return 0 (no depletion).
 --
--- We detect BUY mode via the sprayer spec's active fill mode. FS25 stores this
--- in spec_fillUnit.fillUnits[n].autoReloadState or via Sprayer.isFillModeAllowed.
--- The most reliable approach: check if FillUnit itself is in "auto-purchase" mode
--- by inspecting the fill unit's reloadState field (set by the game when the player
--- picks "BUY" in the HUD). Fall back to a price-per-frame charge approach using
--- the economy manager.
+-- Detection: per LUADOC Sprayer:getIsSprayerExternallyFilled, BUY mode is an
+-- AI-only feature controlled by g_currentMission.missionInfo.helperBuyFertilizer
+-- (and the slurry/manure equivalents). There are no per-vehicle spec fields for
+-- this — checking spec_sprayer or fillUnit reloadState is incorrect.
 ---@return boolean success
 function HookManager:installPurchaseRefillHook()
     if not FillUnit or type(FillUnit.addFillUnitFillLevel) ~= "function" then
@@ -1210,44 +1223,31 @@ function HookManager:installPurchaseRefillHook()
     for _ in pairs(customPrices) do count = count + 1 end
 
     -- Helper: check if a fill unit on a vehicle is in "BUY/auto-purchase" mode.
-    -- FS25 sets fillUnit.reloadState = FillUnit.FILLUNIT_RELOAD_STATE_ACTIVE (or similar)
-    -- when the player selects "BUY". We use the most resilient check: look at
-    -- spec_fillUnit.fillUnits[fillUnitIndex].reloadState and/or the sprayer spec's mode.
-    -- If the reloadState constant isn't accessible, fall back to checking
-    -- spec_fillUnit.fillUnits[idx].fillModeIsRefueling (set by vanilla Sprayer BUY path).
+    --
+    -- Per LUADOC (Sprayer:getIsSprayerExternallyFilled), BUY mode is exclusively
+    -- an AI/helper feature — it only activates when the vehicle is AI-controlled
+    -- AND the player has opted in via the helper settings panel. For a human player
+    -- driving manually, the tank always depletes normally (no BUY mode exists).
+    --
+    -- The three authoritative mission flags:
+    --   helperBuyFertilizer   → "Buy Fertilizer" on in helper settings (covers all spray types)
+    --   helperSlurrySource==2 → "Buy Slurry" from shop (covers liquid manure/digestate)
+    --   helperManureSource==2 → "Buy Manure" from shop (covers solid manure)
     local function isInBuyMode(vehicle, fillUnitIndex, fillTypeIndex)
         if not vehicle then return false end
 
-        -- Primary check: sprayer spec fill mode (most direct)
-        -- FS25 Sprayer stores the active auto-refill state on spec_sprayer
-        local specSprayer = vehicle.spec_sprayer
-        if specSprayer then
-            -- When BUY is selected, Sprayer sets isSprayerBuyingFillType to the active type
-            if specSprayer.isSprayerBuyingFillType ~= nil then
-                return specSprayer.isSprayerBuyingFillType == fillTypeIndex
-            end
-            -- Alternative: check if the sprayer has an active purchase mode flag
-            if specSprayer.isFillPurchaseActive then
-                return true
-            end
+        -- Only applies when AI (game helper or Courseplay) is driving
+        local ok, isAI = pcall(function() return vehicle:getIsAIActive() end)
+        if not (ok and isAI) then
+            return false
         end
 
-        -- Secondary check: fill unit reloadState
-        local specFillUnit = vehicle.spec_fillUnit
-        if specFillUnit and specFillUnit.fillUnits then
-            local fillUnit = specFillUnit.fillUnits[fillUnitIndex]
-            if fillUnit then
-                -- FS25 uses fillUnit.reloadState to indicate the reload mode
-                -- FillUnit.FILLUNIT_RELOAD_STATE_ACTIVE = 1 for auto-purchase/reload
-                if fillUnit.reloadState ~= nil and fillUnit.reloadState > 0 then
-                    return true
-                end
-                -- Some FS25 versions use fillModeIndex: 0=off, 1=buy, 2=auto-load
-                -- Value 1 means "buy from shop" mode
-                if fillUnit.fillModeIndex ~= nil and fillUnit.fillModeIndex == 1 then
-                    return true
-                end
-            end
+        -- AI is active — check the player's opt-in flags in mission settings
+        if g_currentMission and g_currentMission.missionInfo then
+            local mi = g_currentMission.missionInfo
+            if mi.helperBuyFertilizer then return true end
+            if mi.helperSlurrySource  and mi.helperSlurrySource  == 2 then return true end
+            if mi.helperManureSource  and mi.helperManureSource  == 2 then return true end
         end
 
         return false
