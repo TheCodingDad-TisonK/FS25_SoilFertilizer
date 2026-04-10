@@ -770,18 +770,18 @@ function HookManager:installSprayerAreaHook()
                 end
 
                 -- Herbicide application reduces weed pressure (direct path: non-profile products only)
-                if herbOnlyDirect and g_SoilFertilityManager.soilSystem.onHerbicideApplied then
-                    g_SoilFertilityManager.soilSystem:onHerbicideApplied(fieldId, herbEffectiveness)
+                if herbOnlyDirect and g_SoilFertilityManager.soilSystem.onHerbicideAppliedDirect then
+                    g_SoilFertilityManager.soilSystem:onHerbicideAppliedDirect(fieldId, herbEffectiveness, effectiveLiters)
                 end
 
                 -- Insecticide application reduces pest pressure (direct path: non-profile products only)
-                if pestOnlyDirect and g_SoilFertilityManager.soilSystem.onInsecticideApplied then
-                    g_SoilFertilityManager.soilSystem:onInsecticideApplied(fieldId, pestEffectiveness)
+                if pestOnlyDirect and g_SoilFertilityManager.soilSystem.onInsecticideAppliedDirect then
+                    g_SoilFertilityManager.soilSystem:onInsecticideAppliedDirect(fieldId, pestEffectiveness, effectiveLiters)
                 end
 
                 -- Fungicide application reduces disease pressure (direct path: non-profile products only)
-                if diseaseOnlyDirect and g_SoilFertilityManager.soilSystem.onFungicideApplied then
-                    g_SoilFertilityManager.soilSystem:onFungicideApplied(fieldId, diseaseEffectiveness)
+                if diseaseOnlyDirect and g_SoilFertilityManager.soilSystem.onFungicideAppliedDirect then
+                    g_SoilFertilityManager.soilSystem:onFungicideAppliedDirect(fieldId, diseaseEffectiveness, effectiveLiters)
                 end
 
                 -- Over-application burn check (nutrient fertilizers only, not lime)
