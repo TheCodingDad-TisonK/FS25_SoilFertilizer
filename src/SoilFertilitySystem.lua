@@ -236,21 +236,6 @@ function SoilFertilitySystem:onFertilizerApplied(fieldId, fillTypeIndex, liters)
 
     SoilLogger.debug("Fertilizer: Field %d, %s, %.0fL", fieldId, fillType and fillType.name or "unknown", liters)
 
-    -- Show application confirmation notification (singleplayer only; MP clients see HUD refresh via SoilFieldUpdateEvent)
-    -- Shown at most once per field per in-game day to avoid spam (hook fires every frame while spraying)
-    if self.settings.showNotifications and
-       g_currentMission and not g_currentMission.missionDynamicInfo.isMultiplayer then
-        local today = (g_currentMission.environment and g_currentMission.environment.currentDay) or 0
-        if self.fertNotifyShown[fieldId] ~= today then
-            self.fertNotifyShown[fieldId] = today
-            local typeName = fillType and fillType.title or (fillType and fillType.name) or "Fertilizer"
-            self:showNotification(
-                "Fertilizer Recorded",
-                string.format("%s on Field %d — nutrients absorb next game day", typeName, fieldId)
-            )
-        end
-    end
-
     -- Broadcast to clients if server in multiplayer
     if g_server and g_currentMission and g_currentMission.missionDynamicInfo.isMultiplayer then
         local field = self.fieldData[fieldId]
