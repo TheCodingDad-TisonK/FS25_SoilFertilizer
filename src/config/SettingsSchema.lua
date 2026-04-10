@@ -149,6 +149,12 @@ SettingsSchema.definitions = {
         default = true,
         uiId = "sf_auto_rate",
     },
+    {
+        id = "cropRotation",
+        type = "boolean",
+        default = true,
+        uiId = "sf_crop_rotation",
+    },
 }
 
 -- Build lookup table by id for fast access

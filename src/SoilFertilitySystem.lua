@@ -766,6 +766,9 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing, area)
         organicMatter = math.max(1.0, math.min(10.0, randomize(defaults.organicMatter, 0.5, 4))),
         pH            = math.max(5.0, math.min(8.5,  randomize(defaults.pH,            0.5, 5))),
         lastCrop = nil,
+        lastCrop2 = nil,
+        lastCrop3 = nil,
+        rotationBonusDaysLeft = 0,
         lastHarvest = 0,
         fertilizerApplied = 0,
         initialized = true,
@@ -809,6 +812,29 @@ function SoilFertilitySystem:updateDailySoil()
                 field.nitrogen = math.min(limits.MAX, field.nitrogen + seasonal.SPRING_NITROGEN_BOOST)
             elseif season == seasonal.FALL_SEASON then
                 field.nitrogen = math.max(limits.MIN, field.nitrogen - seasonal.FALL_NITROGEN_LOSS)
+            end
+        end
+
+        -- Crop rotation spring bonus
+        if self.settings.cropRotation and g_currentMission and g_currentMission.environment then
+            local season = g_currentMission.environment.currentSeason
+            -- On first day of spring: initialise bonus counter for qualifying fields
+            if season == seasonal.SPRING_SEASON and self.lastSeason ~= seasonal.SPRING_SEASON then
+                if field.lastCrop and field.lastCrop2 then
+                    local cr = SoilConstants.CROP_ROTATION
+                    local c1 = string.lower(field.lastCrop)
+                    local c2 = string.lower(field.lastCrop2)
+                    if cr.LEGUMES[c1] and not cr.LEGUMES[c2]
+                       and (field.rotationBonusDaysLeft or 0) == 0 then
+                        field.rotationBonusDaysLeft = cr.LEGUME_BONUS_DAYS
+                    end
+                end
+            end
+            -- Apply bonus while counter > 0 in spring
+            if season == seasonal.SPRING_SEASON and (field.rotationBonusDaysLeft or 0) > 0 then
+                local cr = SoilConstants.CROP_ROTATION
+                field.nitrogen = math.min(limits.MAX, field.nitrogen + cr.LEGUME_BONUS_N_PER_DAY)
+                field.rotationBonusDaysLeft = field.rotationBonusDaysLeft - 1
             end
         end
 
@@ -994,6 +1020,11 @@ function SoilFertilitySystem:updateDailySoil()
         end
     end
 
+    -- Track season for spring-transition detection (crop rotation bonus)
+    if g_currentMission and g_currentMission.environment then
+        self.lastSeason = g_currentMission.environment.currentSeason
+    end
+
     self:log("Daily soil update completed for %d fields", self:getFieldCount())
 end
 
@@ -1030,6 +1061,10 @@ function SoilFertilitySystem:updateFieldNutrients(fieldId, fruitTypeIndex, harve
         return
     end
 
+    -- Shift crop history before recording new crop (lastCrop → lastCrop2 → lastCrop3)
+    field.lastCrop3 = field.lastCrop2
+    field.lastCrop2 = field.lastCrop
+
     -- Look up crop-specific extraction rates (how much N/P/K this crop removes from soil)
     -- Different crops have different nutrient demands:
     -- - Wheat/Barley: High nitrogen demand (leafy growth)
@@ -1057,7 +1092,14 @@ function SoilFertilitySystem:updateFieldNutrients(fieldId, fruitTypeIndex, harve
         factor = factor * diffMultiplier
     end
 
-    -- Step 3: Deplete nutrients from field
+    -- Step 3a: Crop rotation fatigue — same crop two seasons running depletes more
+    if self.settings.cropRotation and field.lastCrop2 and field.lastCrop2 == fruitDesc.name then
+        factor = factor * SoilConstants.CROP_ROTATION.FATIGUE_MULTIPLIER
+        self:log("Rotation fatigue on field %d (%s harvested twice) — factor ×%.2f",
+            fieldId, fruitDesc.name, SoilConstants.CROP_ROTATION.FATIGUE_MULTIPLIER)
+    end
+
+    -- Step 3b: Deplete nutrients from field
     -- Formula: new_value = max(0, current_value - (extraction_rate × factor))
     -- Scale: 0-100 nutrient points
     -- Example: N=50, wheat extraction=0.20, factor=80
@@ -1291,6 +1333,7 @@ function SoilFertilitySystem:getFieldInfo(fieldId)
         organicMatter = field.organicMatter,
         pH = field.pH,
         lastCrop = cropName,
+        lastCrop2 = field.lastCrop2,
         daysSinceHarvest = field.lastHarvest > 0 and (currentDay - field.lastHarvest) or 0,
         fertilizerApplied = field.fertilizerApplied or 0,
         weedPressure = field.weedPressure or 0,
@@ -1374,6 +1417,9 @@ function SoilFertilitySystem:saveToXMLFile(xmlFile, key)
             setXMLFloat(xmlFile, fieldKey .. "#organicMatter", field.organicMatter or defaults.organicMatter)
             setXMLFloat(xmlFile, fieldKey .. "#pH", field.pH or defaults.pH)
             setXMLString(xmlFile, fieldKey .. "#lastCrop", field.lastCrop or "")
+            setXMLString(xmlFile, fieldKey .. "#lastCrop2", field.lastCrop2 or "")
+            setXMLString(xmlFile, fieldKey .. "#lastCrop3", field.lastCrop3 or "")
+            setXMLInt(xmlFile, fieldKey .. "#rotationBonusDaysLeft", field.rotationBonusDaysLeft or 0)
             setXMLInt(xmlFile, fieldKey .. "#lastHarvest", field.lastHarvest or 0)
             setXMLFloat(xmlFile, fieldKey .. "#fertilizerApplied", field.fertilizerApplied or 0)
             setXMLFloat(xmlFile, fieldKey .. "#weedPressure", field.weedPressure or 0)
@@ -1420,6 +1466,9 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
             organicMatter = getXMLFloat(xmlFile, fieldKey .. "#organicMatter") or defaults.organicMatter,
             pH = getXMLFloat(xmlFile, fieldKey .. "#pH") or defaults.pH,
             lastCrop = getXMLString(xmlFile, fieldKey .. "#lastCrop"),
+            lastCrop2 = getXMLString(xmlFile, fieldKey .. "#lastCrop2"),
+            lastCrop3 = getXMLString(xmlFile, fieldKey .. "#lastCrop3"),
+            rotationBonusDaysLeft = getXMLInt(xmlFile, fieldKey .. "#rotationBonusDaysLeft") or 0,
             lastHarvest = getXMLInt(xmlFile, fieldKey .. "#lastHarvest") or 0,
             fertilizerApplied = getXMLFloat(xmlFile, fieldKey .. "#fertilizerApplied") or 0,
             weedPressure = getXMLFloat(xmlFile, fieldKey .. "#weedPressure") or 0,
@@ -1436,6 +1485,12 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
         -- Clear empty strings
         if self.fieldData[fieldId].lastCrop == "" then
             self.fieldData[fieldId].lastCrop = nil
+        end
+        if self.fieldData[fieldId].lastCrop2 == "" then
+            self.fieldData[fieldId].lastCrop2 = nil
+        end
+        if self.fieldData[fieldId].lastCrop3 == "" then
+            self.fieldData[fieldId].lastCrop3 = nil
         end
 
         index = index + 1

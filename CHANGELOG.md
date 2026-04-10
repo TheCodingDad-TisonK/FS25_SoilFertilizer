@@ -7,7 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.5.2.0] - 2026-04-10
+## [1.6.0.0] - 2026-04-10
+
+### Added
+
+- **Crop rotation tracking** (issue #132): Each field now tracks the last 3 harvested crops
+  (`lastCrop`, `lastCrop2`, `lastCrop3`). On harvest the history shifts automatically so the
+  full 3-season sequence is always available. History is saved to `soilData.xml` and synced
+  to all clients in multiplayer.
+
+- **Rotation bonus**: When a legume (soybean, peas, or beans) follows a non-legume in the
+  previous season, the field receives +0.5 N per day for the first 3 days of spring, modelling
+  nitrogen fixation carry-over. The counter is saved and survives mid-spring save/reload.
+
+- **Mono-crop fatigue multiplier**: When the same crop is harvested two seasons running, all
+  nutrient extraction rates are multiplied by 1.15× — an extra 15% depletion for that harvest
+  to represent diminishing returns from repeated cropping. Does not stack beyond 2 seasons.
+
+- **Crop rotation status in the Soil Report**: The per-field recommendation panel now shows one
+  of three rotation status strings alongside the nutrient advice: *Rotation Bonus* (legume bonus
+  active), *Fatigue: Same Crop* (mono-crop penalty in effect), or *Rotation: OK* (healthy
+  alternation, no effect either way).
+
+- **Crop Rotation toggle**: New server-authoritative setting in the mod settings panel. When
+  disabled, no bonus or fatigue fires but the crop history is still recorded so turning it back
+  on takes effect immediately.
+
+- **Six new purchasable fertilizer fill types** (issue #133): GYPSUM, COMPOST, BIOSOLIDS,
+  CHICKEN_MANURE, PELLETIZED_MANURE, and LIQUIDLIME are now formally registered in
+  `fillTypes.xml`. They appear in the price table, are added to the SPREADER and SPRAYER fill
+  type categories, and are routed through the nutrient hook with their pre-existing profiles.
+  Note: big bag shop objects for the new organic types are planned for a future patch.
+
+- **Liquid equivalents for all custom fertilizer types** (#137): Added LIQUID_UREA, LIQUID_AMS,
+  LIQUID_MAP, LIQUID_DAP, and LIQUID_POTASH to support sprayer application, with big bags and
+  BUY-mode support.
 
 ### Fixed
 
@@ -28,21 +62,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Improved
 
 - **Soil Report detail view fully localized**: Several status labels in the field detail panel
-  were hardcoded English strings — including pH status ("Optimal" / "Monitor" / "Adjust"),
-  OM status ("Optimal" / "Maintain" / "Increase"), pressure level labels ("Low" / "Moderate" /
-  "High"), yield hint text, and the N/P/K "optimal" hint lines. All replaced with `tr()` calls
-  backed by 12 new i18n keys. DE, FR, ES/EA, and PL receive translated values; remaining 21
-  languages carry EN fallbacks and can be improved by community PRs.
+  were hardcoded English strings. All replaced with `tr()` calls backed by new i18n keys.
 
-- **`yieldSuffix` pattern in recommendation engine removed**: The
-  `getFertilizationRecommendation()` function assembled a yield penalty suffix as a separate
-  string then stripped its leading comma with `string.gsub`. Replaced with a direct
-  `table.insert` into the recommendations list — same output, no roundabout string surgery.
-
-- **Weed/pest/disease HUD rows extracted to `drawPressureRow()` helper**: The three pressure bar
-  rows in `SoilHUD:drawPanel()` were near-identical 30-line blocks. Extracted to a single
-  reusable method, removing ~60 lines of duplication. Color scale simplified to 3 levels
-  (green / yellow / red) to match N/P/K bars and avoid the inconsistent orange tier.
+- **Weed/pest/disease HUD rows extracted to `drawPressureRow()` helper**: Removed ~60 lines
+  of duplication; color scale simplified to 3 levels to match N/P/K bars.
 
 ---
 

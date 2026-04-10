@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <modDesc descVersion="106">
     <author>TisonK</author>
-    <version>1.5.2.0</version>
+    <version>1.6.0.0</version>
     <modName>FS25_SoilFertilizer</modName>
     <title>
         <en>Realistic Soil &amp; Fertilizer</en>
@@ -114,25 +114,287 @@
         <storeItem xmlFilename="objects/bigBag/uan32/multiPurchaseBigBag_uan32.xml"/>
         <storeItem xmlFilename="objects/bigBag/uan28/multiPurchaseBigBag_uan28.xml"/>
         <storeItem xmlFilename="objects/bigBag/anhydrous/multiPurchaseBigBag_anhydrous.xml"/>
+        <storeItem xmlFilename="objects/bigBag/starter/multiPurchaseBigBag_starter.xml"/>
+        <storeItem xmlFilename="objects/bigBag/liquid_urea/multiPurchaseBigBag_liquid_urea.xml"/>
+        <storeItem xmlFilename="objects/bigBag/liquid_ams/multiPurchaseBigBag_liquid_ams.xml"/>
+        <storeItem xmlFilename="objects/bigBag/liquid_map/multiPurchaseBigBag_liquid_map.xml"/>
+        <storeItem xmlFilename="objects/bigBag/liquid_dap/multiPurchaseBigBag_liquid_dap.xml"/>
+        <storeItem xmlFilename="objects/bigBag/liquid_potash/multiPurchaseBigBag_liquid_potash.xml"/>
         <storeItem xmlFilename="objects/bigBag/urea/multiPurchaseBigBag_urea.xml"/>
         <storeItem xmlFilename="objects/bigBag/ams/multiPurchaseBigBag_ams.xml"/>
         <storeItem xmlFilename="objects/bigBag/map/multiPurchaseBigBag_map.xml"/>
         <storeItem xmlFilename="objects/bigBag/dap/multiPurchaseBigBag_dap.xml"/>
         <storeItem xmlFilename="objects/bigBag/potash/multiPurchaseBigBag_potash.xml"/>
-        <storeItem xmlFilename="objects/bigBag/starter/multiPurchaseBigBag_starter.xml"/>
         <storeItem xmlFilename="objects/bigBag/insecticide/multiPurchaseBigBag_insecticide.xml"/>
         <storeItem xmlFilename="objects/bigBag/fungicide/multiPurchaseBigBag_fungicide.xml"/>
         <storeItem xmlFilename="objects/bigBag/uan32/bigBag_uan32.xml"/>
         <storeItem xmlFilename="objects/bigBag/uan28/bigBag_uan28.xml"/>
         <storeItem xmlFilename="objects/bigBag/anhydrous/bigBag_anhydrous.xml"/>
+        <storeItem xmlFilename="objects/bigBag/starter/bigBag_starter.xml"/>
+        <storeItem xmlFilename="objects/bigBag/liquid_urea/bigBag_liquid_urea.xml"/>
+        <storeItem xmlFilename="objects/bigBag/liquid_ams/bigBag_liquid_ams.xml"/>
+        <storeItem xmlFilename="objects/bigBag/liquid_map/bigBag_liquid_map.xml"/>
+        <storeItem xmlFilename="objects/bigBag/liquid_dap/bigBag_liquid_dap.xml"/>
+        <storeItem xmlFilename="objects/bigBag/liquid_potash/bigBag_liquid_potash.xml"/>
         <storeItem xmlFilename="objects/bigBag/urea/bigBag_urea.xml"/>
         <storeItem xmlFilename="objects/bigBag/ams/bigBag_ams.xml"/>
         <storeItem xmlFilename="objects/bigBag/map/bigBag_map.xml"/>
         <storeItem xmlFilename="objects/bigBag/dap/bigBag_dap.xml"/>
         <storeItem xmlFilename="objects/bigBag/potash/bigBag_potash.xml"/>
-        <storeItem xmlFilename="objects/bigBag/starter/bigBag_starter.xml"/>
         <storeItem xmlFilename="objects/bigBag/insecticide/bigBag_insecticide.xml"/>
         <storeItem xmlFilename="objects/bigBag/fungicide/bigBag_fungicide.xml"/>
     </storeItems>
+
+
+    <!-- ═══════════════════════════════════════════════════════════
+         HELP LINES  —  ESC > Help > Realistic Soil & Fertilizer
+         ═══════════════════════════════════════════════════════════ -->
+    <helpLines>
+
+        <!-- ── Category 1: Overview ──────────────────────────── -->
+        <category title="$l10n_helpLine_sf_cat_overview">
+
+            <page title="$l10n_helpLine_sf_ov_p1_title" iconSliceId="icon_contracts">
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_ov_p1_intro_title" />
+                    <text  text="$l10n_helpLine_sf_ov_p1_intro_text"  />
+                </paragraph>
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_ov_p1_flow_title" />
+                    <text  text="$l10n_helpLine_sf_ov_p1_flow_text"  />
+                </paragraph>
+            </page>
+
+            <page title="$l10n_helpLine_sf_ov_p2_title" iconSliceId="icon_contracts">
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_ov_p2_rain_title" />
+                    <text  text="$l10n_helpLine_sf_ov_p2_rain_text"  />
+                </paragraph>
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_ov_p2_season_title" />
+                    <text  text="$l10n_helpLine_sf_ov_p2_season_text"  />
+                </paragraph>
+            </page>
+
+        </category>
+
+        <!-- ── Category 2: Getting Started ───────────────────── -->
+        <category title="$l10n_helpLine_sf_cat_started">
+
+            <page title="$l10n_helpLine_sf_gs_p1_title" iconSliceId="icon_contracts">
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_gs_p1_hud_title" />
+                    <text  text="$l10n_helpLine_sf_gs_p1_hud_text"  />
+                </paragraph>
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_gs_p1_report_title" />
+                    <text  text="$l10n_helpLine_sf_gs_p1_report_text"  />
+                </paragraph>
+            </page>
+
+            <page title="$l10n_helpLine_sf_gs_p2_title" iconSliceId="icon_shop">
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_gs_p2_fert_title" />
+                    <text  text="$l10n_helpLine_sf_gs_p2_fert_text"  />
+                </paragraph>
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_gs_p2_harvest_title" />
+                    <text  text="$l10n_helpLine_sf_gs_p2_harvest_text"  />
+                </paragraph>
+            </page>
+
+            <page title="$l10n_helpLine_sf_gs_p3_title" iconSliceId="icon_contracts">
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_gs_p3_levels_title" />
+                    <text  text="$l10n_helpLine_sf_gs_p3_levels_text"  />
+                </paragraph>
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_gs_p3_access_title" />
+                    <text  text="$l10n_helpLine_sf_gs_p3_access_text"  />
+                </paragraph>
+            </page>
+
+        </category>
+
+        <!-- ── Category 3: Soil Nutrients ────────────────────── -->
+        <category title="$l10n_helpLine_sf_cat_nutrients">
+
+            <page title="$l10n_helpLine_sf_nu_p1_title" iconSliceId="icon_contracts">
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_nu_p1_n_title" />
+                    <text  text="$l10n_helpLine_sf_nu_p1_n_text"  />
+                </paragraph>
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_nu_p1_p_title" />
+                    <text  text="$l10n_helpLine_sf_nu_p1_p_text"  />
+                </paragraph>
+            </page>
+
+            <page title="$l10n_helpLine_sf_nu_p2_title" iconSliceId="icon_contracts">
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_nu_p2_k_title" />
+                    <text  text="$l10n_helpLine_sf_nu_p2_k_text"  />
+                </paragraph>
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_nu_p2_ph_title" />
+                    <text  text="$l10n_helpLine_sf_nu_p2_ph_text"  />
+                </paragraph>
+            </page>
+
+            <page title="$l10n_helpLine_sf_nu_p3_title" iconSliceId="icon_contracts">
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_nu_p3_om_title" />
+                    <text  text="$l10n_helpLine_sf_nu_p3_om_text"  />
+                </paragraph>
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_nu_p3_fallow_title" />
+                    <text  text="$l10n_helpLine_sf_nu_p3_fallow_text"  />
+                </paragraph>
+            </page>
+
+            <page title="$l10n_helpLine_sf_nu_p4_title" iconSliceId="icon_contracts">
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_nu_p4_bonus_title" />
+                    <text  text="$l10n_helpLine_sf_nu_p4_bonus_text"  />
+                </paragraph>
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_nu_p4_fatigue_title" />
+                    <text  text="$l10n_helpLine_sf_nu_p4_fatigue_text"  />
+                </paragraph>
+            </page>
+
+        </category>
+
+        <!-- ── Category 4: Fertilizers ───────────────────────── -->
+        <category title="$l10n_helpLine_sf_cat_fertilizers">
+
+            <page title="$l10n_helpLine_sf_fe_p1_title" iconSliceId="icon_shop">
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_fe_p1_base_title" />
+                    <text  text="$l10n_helpLine_sf_fe_p1_base_text"  />
+                </paragraph>
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_fe_p1_lime_title" />
+                    <text  text="$l10n_helpLine_sf_fe_p1_lime_text"  />
+                </paragraph>
+            </page>
+
+            <page title="$l10n_helpLine_sf_fe_p2_title" iconSliceId="icon_shop">
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_fe_p2_n_title" />
+                    <text  text="$l10n_helpLine_sf_fe_p2_n_text"  />
+                </paragraph>
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_fe_p2_pk_title" />
+                    <text  text="$l10n_helpLine_sf_fe_p2_pk_text"  />
+                </paragraph>
+            </page>
+
+            <page title="$l10n_helpLine_sf_fe_p3_title" iconSliceId="icon_shop">
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_fe_p3_organic_title" />
+                    <text  text="$l10n_helpLine_sf_fe_p3_organic_text"  />
+                </paragraph>
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_fe_p3_burn_title" />
+                    <text  text="$l10n_helpLine_sf_fe_p3_burn_text"  />
+                </paragraph>
+            </page>
+
+        </category>
+
+        <!-- ── Category 5: HUD & Soil Report ─────────────────── -->
+        <category title="$l10n_helpLine_sf_cat_hud">
+
+            <page title="$l10n_helpLine_sf_hu_p1_title" iconSliceId="icon_hud_speedometer">
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_hu_p1_toggle_title" />
+                    <text  text="$l10n_helpLine_sf_hu_p1_toggle_text"  />
+                </paragraph>
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_hu_p1_status_title" />
+                    <text  text="$l10n_helpLine_sf_hu_p1_status_text"  />
+                </paragraph>
+            </page>
+
+            <page title="$l10n_helpLine_sf_hu_p2_title" iconSliceId="icon_hud_speedometer">
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_hu_p2_press_title" />
+                    <text  text="$l10n_helpLine_sf_hu_p2_press_text"  />
+                </paragraph>
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_hu_p2_treat_title" />
+                    <text  text="$l10n_helpLine_sf_hu_p2_treat_text"  />
+                </paragraph>
+            </page>
+
+            <page title="$l10n_helpLine_sf_hu_p3_title" iconSliceId="icon_hud_speedometer">
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_hu_p3_open_title" />
+                    <text  text="$l10n_helpLine_sf_hu_p3_open_text"  />
+                </paragraph>
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_hu_p3_detail_title" />
+                    <text  text="$l10n_helpLine_sf_hu_p3_detail_text"  />
+                </paragraph>
+            </page>
+
+        </category>
+
+        <!-- ── Category 6: Settings ──────────────────────────── -->
+        <category title="$l10n_helpLine_sf_cat_settings">
+
+            <page title="$l10n_helpLine_sf_se_p1_title" iconSliceId="icon_contracts">
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_se_p1_server_title" />
+                    <text  text="$l10n_helpLine_sf_se_p1_server_text"  />
+                </paragraph>
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_se_p1_diff_title" />
+                    <text  text="$l10n_helpLine_sf_se_p1_diff_text"  />
+                </paragraph>
+            </page>
+
+            <page title="$l10n_helpLine_sf_se_p2_title" iconSliceId="icon_hud_speedometer">
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_se_p2_hud_title" />
+                    <text  text="$l10n_helpLine_sf_se_p2_hud_text"  />
+                </paragraph>
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_se_p2_rate_title" />
+                    <text  text="$l10n_helpLine_sf_se_p2_rate_text"  />
+                </paragraph>
+            </page>
+
+        </category>
+
+        <!-- ── Category 7: Multiplayer & PrecisionFarming ────── -->
+        <category title="$l10n_helpLine_sf_cat_multiplayer">
+
+            <page title="$l10n_helpLine_sf_mp_p1_title" iconSliceId="icon_multiplayer">
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_mp_p1_auth_title" />
+                    <text  text="$l10n_helpLine_sf_mp_p1_auth_text"  />
+                </paragraph>
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_mp_p1_ded_title" />
+                    <text  text="$l10n_helpLine_sf_mp_p1_ded_text"  />
+                </paragraph>
+            </page>
+
+            <page title="$l10n_helpLine_sf_mp_p2_title" iconSliceId="icon_multiplayer">
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_mp_p2_compat_title" />
+                    <text  text="$l10n_helpLine_sf_mp_p2_compat_text"  />
+                </paragraph>
+                <paragraph>
+                    <title text="$l10n_helpLine_sf_mp_p2_workflow_title" />
+                    <text  text="$l10n_helpLine_sf_mp_p2_workflow_text"  />
+                </paragraph>
+            </page>
+
+        </category>
+
+    </helpLines>
 
 </modDesc>

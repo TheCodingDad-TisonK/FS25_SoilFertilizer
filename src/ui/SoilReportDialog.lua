@@ -490,6 +490,25 @@ function SoilReportDialog:getFertilizationRecommendation(info)
         overallStatus = "Poor"
     end
 
+    -- Crop rotation status
+    if SoilConstants.CROP_ROTATION
+       and g_SoilFertilityManager and g_SoilFertilityManager.settings
+       and g_SoilFertilityManager.settings.cropRotation then
+        local cr = SoilConstants.CROP_ROTATION
+        local crop  = info.lastCrop  and string.lower(info.lastCrop)  or nil
+        local crop2 = info.lastCrop2 and string.lower(info.lastCrop2) or nil
+        if crop and crop2 then
+            if cr.LEGUMES[crop] and not cr.LEGUMES[crop2] then
+                table.insert(recommendations, tr("sf_report_rotation_bonus", "Rotation Bonus"))
+            elseif info.lastCrop == info.lastCrop2 then
+                table.insert(recommendations, tr("sf_report_rotation_fatigue", "Fatigue: Same Crop"))
+                if overallStatus == "Good" then overallStatus = "Fair" end
+            else
+                table.insert(recommendations, tr("sf_report_rotation_ok", "Rotation: OK"))
+            end
+        end
+    end
+
     -- Yield penalty entry (added directly to recommendations list)
     local ys = SoilConstants.YIELD_SENSITIVITY
     if ys then
