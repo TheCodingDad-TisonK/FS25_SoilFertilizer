@@ -87,6 +87,41 @@
             <sprayType sprayTypeStr="LIQUID"/>
         </fillType>
 
+        <fillType name="LIQUID_UREA" title="$l10n_sf_liquid_urea_title" showOnPriceTable="true" isBulkType="false" unitShort="$l10n_unit_literShort">
+            <physics massPerLiter="1.10" maxPhysicalSurfaceAngle="0"/>
+            <economy pricePerLiter="1.70"/>
+            <image hud="$dataS/menu/hud/fillTypes/hud_fill_liquidFertilizer.png"/>
+            <sprayType sprayTypeStr="LIQUID"/>
+        </fillType>
+
+        <fillType name="LIQUID_AMS" title="$l10n_sf_liquid_ams_title" showOnPriceTable="true" isBulkType="false" unitShort="$l10n_unit_literShort">
+            <physics massPerLiter="1.15" maxPhysicalSurfaceAngle="0"/>
+            <economy pricePerLiter="1.45"/>
+            <image hud="$dataS/menu/hud/fillTypes/hud_fill_liquidFertilizer.png"/>
+            <sprayType sprayTypeStr="LIQUID"/>
+        </fillType>
+
+        <fillType name="LIQUID_MAP" title="$l10n_sf_liquid_map_title" showOnPriceTable="true" isBulkType="false" unitShort="$l10n_unit_literShort">
+            <physics massPerLiter="1.20" maxPhysicalSurfaceAngle="0"/>
+            <economy pricePerLiter="2.00"/>
+            <image hud="$dataS/menu/hud/fillTypes/hud_fill_liquidFertilizer.png"/>
+            <sprayType sprayTypeStr="LIQUID"/>
+        </fillType>
+
+        <fillType name="LIQUID_DAP" title="$l10n_sf_liquid_dap_title" showOnPriceTable="true" isBulkType="false" unitShort="$l10n_unit_literShort">
+            <physics massPerLiter="1.20" maxPhysicalSurfaceAngle="0"/>
+            <economy pricePerLiter="1.80"/>
+            <image hud="$dataS/menu/hud/fillTypes/hud_fill_liquidFertilizer.png"/>
+            <sprayType sprayTypeStr="LIQUID"/>
+        </fillType>
+
+        <fillType name="LIQUID_POTASH" title="$l10n_sf_liquid_potash_title" showOnPriceTable="true" isBulkType="false" unitShort="$l10n_unit_literShort">
+            <physics massPerLiter="1.25" maxPhysicalSurfaceAngle="0"/>
+            <economy pricePerLiter="1.85"/>
+            <image hud="$dataS/menu/hud/fillTypes/hud_fill_liquidFertilizer.png"/>
+            <sprayType sprayTypeStr="LIQUID"/>
+        </fillType>
+
     </fillTypes>
 
     <fillTypeCategories>
@@ -108,7 +143,7 @@
             that already accept LIQUIDFERTILIZER will also accept our liquid nitrogen products
             and starter fertilizer.
         -->
-        <fillTypeCategory name="SPRAYER">LIQUIDFERTILIZER UAN32 UAN28 ANHYDROUS STARTER INSECTICIDE FUNGICIDE</fillTypeCategory>
+        <fillTypeCategory name="SPRAYER">LIQUIDFERTILIZER UAN32 UAN28 ANHYDROUS STARTER INSECTICIDE FUNGICIDE LIQUID_UREA LIQUID_AMS LIQUID_MAP LIQUID_DAP LIQUID_POTASH</fillTypeCategory>
     </fillTypeCategories>
 
 </map>

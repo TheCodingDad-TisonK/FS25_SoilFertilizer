@@ -212,7 +212,8 @@ function HookManager:registerCustomSprayTypes()
     local solidGroundType   = dryType and dryType.sprayGroundType or 1
 
     -- Liquid nitrogen / starter types → inherit from LIQUIDFERTILIZER
-    local liquidNames = { "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME", "INSECTICIDE", "FUNGICIDE" }
+    local liquidNames = { "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME", "INSECTICIDE", "FUNGICIDE",
+                          "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH" }
     -- Granular/solid types → inherit from FERTILIZER
     local solidNames  = { "UREA", "AMS", "MAP", "DAP", "POTASH",
                           "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM" }
@@ -290,7 +291,8 @@ function HookManager:installEffectTypeHook()
         end
     end
     if liqIdx then
-        for _, name in ipairs({ "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME" }) do
+        for _, name in ipairs({ "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME",
+                                 "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH" }) do
             local idx = fm:getFillTypeIndexByName(name)
             if idx then remap[idx] = liqIdx end
         end
@@ -443,7 +445,8 @@ function HookManager:installSprayTypeEffectsHook()
     local solidNames  = { "UREA", "AMS", "MAP", "DAP", "POTASH",
                           "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM" }
     -- Liquid custom types visually match LIQUIDFERTILIZER spraying
-    local liquidNames = { "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME" }
+    local liquidNames = { "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME",
+                          "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH" }
 
     -- Shared helper: walk a vehicle's sprayType entries and inject our names
     local function patchVehicleSprayTypes(vehicle)
@@ -1041,7 +1044,8 @@ function HookManager:installFillUnitHook()
 
     local solidNames  = {"UREA", "AMS", "MAP", "DAP", "POTASH",
                           "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM"}
-    local liquidNames = {"UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME", "INSECTICIDE", "FUNGICIDE"}
+    local liquidNames = {"UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME", "INSECTICIDE", "FUNGICIDE",
+                         "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH"}
 
     local solidIndices  = {}
     local liquidIndices = {}
@@ -1160,6 +1164,7 @@ function HookManager:installPurchaseRefillHook()
         -- Liquid
         "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME",
         "INSECTICIDE", "FUNGICIDE",
+        "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH",
         -- Solid
         "UREA", "AMS", "MAP", "DAP", "POTASH",
         "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM",
@@ -1178,6 +1183,7 @@ function HookManager:installPurchaseRefillHook()
     local FALLBACK_PRICES = {
         UAN32 = 1.60, UAN28 = 1.50, ANHYDROUS = 1.85, STARTER = 1.70,
         LIQUIDLIME = 1.20, INSECTICIDE = 1.20, FUNGICIDE = 1.30,
+        LIQUID_UREA = 1.70, LIQUID_AMS = 1.45, LIQUID_MAP = 2.00, LIQUID_DAP = 1.80, LIQUID_POTASH = 1.85,
         UREA = 1.65, AMS = 1.40, MAP = 1.95, DAP = 1.75, POTASH = 1.80,
         COMPOST = 0.60, BIOSOLIDS = 0.55, CHICKEN_MANURE = 0.50,
         PELLETIZED_MANURE = 0.70, GYPSUM = 0.80,

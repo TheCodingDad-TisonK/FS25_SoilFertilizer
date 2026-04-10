@@ -7,7 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.5.2.0] - 2026-04-10
+## [1.6.0.0] - 2026-04-10
+
+### Added
+
+- **Liquid equivalents for all custom fertilizer types**: Added LIQUID_UREA, LIQUID_AMS,
+  LIQUID_MAP, LIQUID_DAP, and LIQUID_POTASH to support sprayer application.
+- **New shop items**: Added big bags for all new liquid fertilizer types.
+- **Enhanced sprayer compatibility**: Sprayers now correctly recognize and apply the new
+  liquid fertilizer types with full visual effects and nutrient tracking.
+- **"BUY" mode support**: New liquid types are fully compatible with the sprayer's "BUY"
+  refill mode, charging the farm budget per liter consumed.
 
 ### Fixed
 

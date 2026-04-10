@@ -186,6 +186,13 @@ SoilConstants.FERTILIZER_PROFILES = {
     DAP               = { N=4.90, P=12.6, K=0.00 },  -- 18-46-0
     POTASH            = { N=0.00, P=0.00, K=16.3 },  -- 0-0-60
 
+    -- Liquid equivalents
+    LIQUID_UREA       = { N=9.50, P=0.00, K=0.00 },
+    LIQUID_AMS        = { N=4.60, P=0.00, K=0.00 },
+    LIQUID_MAP        = { N=3.00, P=14.1, K=0.00 },
+    LIQUID_DAP        = { N=4.90, P=12.6, K=0.00 },
+    LIQUID_POTASH     = { N=0.00, P=0.00, K=16.3 },
+
     -- Organic / slow-release
     COMPOST           = { N=0.80, P=0.50, K=0.60, OM=1.20 },
     BIOSOLIDS         = { N=2.80, P=2.20, K=0.80, OM=0.70 },
@@ -212,6 +219,8 @@ SoilConstants.FERTILIZER_TYPES = {
     "GYPSUM",
     -- P&K sources
     "MAP", "DAP", "POTASH",
+    -- Liquid equivalents
+    "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH",
     -- Organic
     "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE",
     -- Lime variants
@@ -487,11 +496,16 @@ SoilConstants.SPRAYER_RATE = {
         ANHYDROUS         = { value =    28.0, unit = "liquid" },  -- ~3 gal/ac
         AMS               = { value =   168.0, unit = "dry"    },  -- ~150 lb/ac
         UREA              = { value =   168.0, unit = "dry"    },
+        LIQUID_UREA       = { value =   168.0, unit = "liquid" },
+        LIQUID_AMS        = { value =   168.0, unit = "liquid" },
         -- Starter / P&K sources
         STARTER           = { value =    46.8, unit = "liquid" },  -- ~5 gal/ac
         MAP               = { value =   225.0, unit = "dry"    },
         DAP               = { value =   225.0, unit = "dry"    },
         POTASH            = { value =   225.0, unit = "dry"    },
+        LIQUID_MAP        = { value =   225.0, unit = "liquid" },
+        LIQUID_DAP        = { value =   225.0, unit = "liquid" },
+        LIQUID_POTASH     = { value =   225.0, unit = "liquid" },
         -- Organic / slow-release
         PELLETIZED_MANURE = { value =   450.0, unit = "dry"    },  -- ~400 lb/ac
         COMPOST           = { value =  5000.0, unit = "dry"    },
