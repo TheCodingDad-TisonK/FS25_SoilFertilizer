@@ -112,7 +112,7 @@ Fully customisable: 5 positions, 4 colour themes, 5 transparency levels, 3 font 
 
 ### 📋 Full Farm Soil Report
 
-Press **`K`** to open a field-by-field breakdown of every nutrient, pH, organic matter level, and last crop across your whole farm. Fields flagged red need attention now.
+Press **`K`** to open a full farm overview sorted by urgency — the fields that need the most attention appear at the top. Each row shows N/P/K, pH, OM, weed and pest pressure, and an overall status badge. Click **►** on any row to open a field detail view with a complete breakdown, yield forecast, and specific treatment recommendations.
 
 ---
 
@@ -242,7 +242,7 @@ This mod is licensed under **[CC BY-NC-ND 4.0](https://creativecommons.org/licen
 
 You may share it in its original form with attribution. You may not sell it, modify and redistribute it, or reupload it under a different name or authorship. Contributions via pull request are explicitly permitted and encouraged.
 
-**Author:** TisonK &nbsp;·&nbsp; **Version:** 1.5.1.0
+**Author:** TisonK &nbsp;·&nbsp; **Version:** 1.5.2.0
 
 © 2026 TisonK — See [LICENSE](LICENSE) for full terms.
 
