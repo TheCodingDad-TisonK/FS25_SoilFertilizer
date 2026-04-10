@@ -1325,6 +1325,21 @@ function SoilFertilitySystem:getFieldInfo(fieldId)
         cropName = field.lastCrop
     end
 
+    -- Compute crop rotation status for external consumers (e.g. FarmTablet)
+    local rotationStatus = nil
+    if SoilConstants.CROP_ROTATION and field.lastCrop and field.lastCrop2 then
+        local cr      = SoilConstants.CROP_ROTATION
+        local crop1   = string.lower(field.lastCrop)
+        local crop2   = string.lower(field.lastCrop2)
+        if cr.LEGUMES[crop1] and not cr.LEGUMES[crop2] then
+            rotationStatus = "Bonus"
+        elseif field.lastCrop == field.lastCrop2 then
+            rotationStatus = "Fatigue"
+        else
+            rotationStatus = "OK"
+        end
+    end
+
     return {
         fieldId = fieldId,
         nitrogen = { value = math.floor(field.nitrogen), status = nutrientStatus(field.nitrogen, "nitrogen") },
@@ -1334,6 +1349,7 @@ function SoilFertilitySystem:getFieldInfo(fieldId)
         pH = field.pH,
         lastCrop = cropName,
         lastCrop2 = field.lastCrop2,
+        rotationStatus = rotationStatus,
         daysSinceHarvest = field.lastHarvest > 0 and (currentDay - field.lastHarvest) or 0,
         fertilizerApplied = field.fertilizerApplied or 0,
         weedPressure = field.weedPressure or 0,
