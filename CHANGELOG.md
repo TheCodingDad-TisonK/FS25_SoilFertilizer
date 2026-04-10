@@ -7,6 +7,110 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.6.0.4] - 2026-04-11
+
+### Fixed
+
+- **Pressure color thresholds aligned with Constants**: The HUD's `drawPressureRow` and the Soil
+  Report's `getPressureColor` function were using hardcoded 25/60 boundaries. These now use
+  `SoilConstants.WEED_PRESSURE.LOW` (20) and `MEDIUM` (50) — matching the tier boundaries used
+  by the yield-penalty system and the recommendation engine. A field at 22% weed pressure was
+  previously showing Green despite a -5% yield penalty already being applied.
+
+- **HUD panel height calculation**: The `calculateHeight()` guard `(info.weedPressure or 0) >= 0`
+  was always true (pressure never goes negative), so the panel added an extra line of height even
+  when weed/pest/disease pressure was exactly zero. Fixed to `> 0`.
+
+- **Soil Report `getOverallStatus` dead check**: The `val >= 0` guard on pressure values in the
+  overall-status worst-case ranking was also always true. Fixed to `val > 0` for clarity.
+
+- **Console commands bypass MP network layer**: All setting-change console commands
+  (`SoilSetFertility`, `SoilSetDifficulty`, `SoilEnable`, etc.) were directly mutating
+  `g_SoilFertilityManager.settings` without going through the network event layer. In
+  multiplayer, server-side console changes would not broadcast to clients. All commands now route
+  through `SoilNetworkEvents_RequestSettingChange()` so the full server → broadcast flow is
+  respected. A local `requestSettingChange` helper in `SoilSettingsGUI.lua` provides a
+  graceful fallback when the network layer is not yet initialised.
+
+- **`SoilFieldForecast` urgency score inconsistency**: The console command was calculating
+  urgency as an NPK-only average deficit, which differed from the score used to sort fields in
+  the Soil Report (which includes pH, weed, pest, and disease factors). The command now calls
+  `soilSystem:getFieldUrgency()` so the reported score matches the in-game display.
+
+- **`SoilFieldForecast` missing from help output**: The command was registered and functional
+  but not printed by `soilfertility` / `SoilHelp`. Added.
+
+---
+
+## [1.6.0.3] - 2026-04-11
+
+### Fixed
+
+- **Multiplayer stream desync (critical)**: `SoilFullSyncEvent:writeStream` was writing 19
+  values per field but `readStream` was reading 20 — `burnDaysLeft` was read but never written.
+  On a server with any burn-damaged fields, a joining client's field data would be silently
+  corrupted for every field after the first. Fixed by adding the missing
+  `streamWriteInt32(streamId, field.burnDaysLeft or 0)` to the write path, and storing the
+  read value in the field table. The same field was also missing from `SoilFieldUpdateEvent`.
+
+- **Fertilization notification permanent silencing**: `fertNotifyShown[fieldId]` stored `true`
+  on first notification — meaning a field would never produce another notification for the rest
+  of the save, not just for the current day. The flag now stores the current game day and is
+  checked with `~= today`, matching the documented per-day intent.
+
+- **Dead `SoilFertilityManager:draw()` method**: The method existed but was never called —
+  `main.lua` hooks `FSBaseMission.draw` directly to `sfm.soilHUD:draw()`. Removed.
+
+- **Dead constant reference in `getFieldUrgency`**: Used `SoilConstants.PH_NORMALIZATION.OPTIMAL`
+  which does not exist in Constants.lua. Replaced with the correct literal `6.5` (optimal pH
+  mid-point of the 6.5–7.0 neutral band).
+
+---
+
+## [1.6.0.2] - 2026-04-11
+
+### Fixed
+
+- **HUD sprayer rate display for low-volume products**: Insecticide and Fungicide (very low base
+  rates) were rounding to `0 L/ha` or `0 gal/ac` at lower multiplier settings. The formatter now
+  uses one decimal place when the product's base rate is below 10.0, ensuring the rate panel
+  always shows a meaningful, non-zero value.
+
+- **HERBICIDE missing from sprayer rate BASE_RATES**: HERBICIDE had no entry, so the HUD fell
+  back to the DEFAULT rate config regardless of the product loaded in the sprayer. Added a
+  dedicated HERBICIDE entry with the correct base rate and `liquid` unit type.
+
+- **AI purchase refill hook return value (issue #125)**: The `FillUnit.addFillUnitFillLevel`
+  hook was returning `true` in BUY mode to signal "handled" — but the FS25 hook convention
+  requires returning the original function's return value to keep the call chain intact.
+  Changed to return the original `fillDelta` from the base function, which allows other hooks
+  and the engine to proceed correctly.
+
+---
+
+## [1.6.0.1] - 2026-04-10
+
+### Fixed
+
+- **AI purchase refill BUY mode detection (issue #125)**: The hook was checking three spec
+  fields that do not exist in FS25 (`isSprayerBuyingFillType`, `isFillPurchaseActive`,
+  `reloadState`), causing the check to always return false and the tank to deplete normally.
+  Fixed to use the correct FS25 pattern: `vehicle:getIsAIActive()` combined with
+  `g_currentMission.missionInfo.helperBuyFertilizer` (and the slurry / manure equivalents).
+
+- **Coverage buffer requirement extended to crop protection products (issue #143)**: The 90%
+  coverage buffer introduced in 1.6.0.0 was only applied to nutrient fertilizers. Insecticide,
+  Fungicide, and Herbicide were still applying their effects instantly on any area pass. The
+  buffer now covers all five product categories (N, P, K, herbicide, insecticide/fungicide).
+
+- **Instant field notification removed**: A `g_currentMission:addIngameNotification()` call
+  fired immediately on mod load, producing a confusing popup before the player had done anything.
+  Removed.
+
+- **FS25_MoistureSystem added to compatibility list** (issue #141).
+
+---
+
 ## [1.6.0.0] - 2026-04-10
 
 ### Added
@@ -52,10 +156,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the HUD display and agronomic profiles.
 
 - **Required full field coverage for fertilizer effect** (issue #143): Realism improvement.
-  Nutrient levels no longer update instantly on application. Instead, applied liters are
-  buffered per product. Nutrients are only credited to the field once ~90% of the volume
-  required for full coverage (based on field area and product base rate) has been applied.
-  Buffers are cleared daily, requiring same-day completion for credit.
+  Nutrient levels and crop protection effects (Insecticide/Fungicide/Herbicide) no longer
+  update instantly. Instead, applied liters are buffered per product. Effects are only
+  credited to the field once ~90% of the volume required for full coverage has been
+  applied. Buffers are cleared daily, requiring same-day completion for credit.
+
+- **Improved HUD rate resolution for low-volume products**: Insecticide and Fungicide
+  (which have very low base rates) no longer display as "0 L/ha" or "0 gal/ac" in the 
+  sprayer rate panel. The HUD now shows 1 decimal place for products with base rates
+  below 10.0, ensuring the rate control is responsive and accurate.
 
 - **Pressure values displayed as 4-digit percentages in Soil Report**: Weed, pest, and disease
   pressure are stored internally as 0–100. The report dialog was multiplying them by 100 again,
@@ -163,30 +272,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **"BUY" refill mode not working with custom fill types (issue #125)**: When the player
-  (or a worker/CP) set the sprayer refill mode to "BUY", vanilla fill types
-  (FERTILIZER, LIQUIDFERTILIZER) correctly charged money per liter consumed without
-  depleting the physical tank. Custom types (UAN32, UAN28, ANHYDROUS, STARTER, UREA,
-  AMS, MAP, DAP, POTASH, INSECTICIDE, FUNGICIDE, and organic types) still depleted the
-  fill unit normally, causing workers to stop when the tank ran dry and potentially
-  switch to a vanilla fertilizer type instead.
-
-  Root cause: FS25's internal "BUY" purchase intercept only fires for fill types
-  recognized by its own economy system. Custom mod fill types have `pricePerLiter`
-  defined in `fillTypes.xml` but are not included in the game's purchasable-fill-type
-  whitelist, so `FillUnit.addFillUnitFillLevel` never intercepts their consumption.
-
-  Fix: Added `installPurchaseRefillHook()` in `HookManager.lua` (Hook 8). This hook
-  wraps `FillUnit.addFillUnitFillLevel` and intercepts negative-delta (consumption)
-  calls for custom fill types when the vehicle's fill unit is in BUY mode. When
-  intercepted, it charges the owning farm `pricePerLiter × litersConsumed` via
-  `g_currentMission:addMoney()` and returns `0` (no physical depletion). BUY mode is
-  detected via `fillUnit.fillModeIndex == 1` (primary) and `fillUnit.reloadState > 0`
-  (secondary), matching how FS25 internally signals the purchase-refill state.
-
-  Prices used for money charge match the `economy pricePerLiter` values in
-  `fillTypes.xml` and the `SoilConstants.PURCHASABLE_SINGLE_NUTRIENT` table for
-  single-nutrient types (ANHYDROUS, MAP, POTASH).
+- **"BUY" refill mode not working with custom fill types** (issue #125): AI workers and
+  Courseplay now correctly use the "Buy" helper setting with custom products. Fixed
+  a bug where the tank would still deplete or the worker would stop when empty.
+  The system now correctly intercepts consumption, charges the farm account, and
+  tricks the engine into continuing application without depleting physical stock.
 
 ---
 

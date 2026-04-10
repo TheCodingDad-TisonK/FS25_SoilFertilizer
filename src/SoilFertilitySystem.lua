@@ -236,21 +236,6 @@ function SoilFertilitySystem:onFertilizerApplied(fieldId, fillTypeIndex, liters)
 
     SoilLogger.debug("Fertilizer: Field %d, %s, %.0fL", fieldId, fillType and fillType.name or "unknown", liters)
 
-    -- Show application confirmation notification (singleplayer only; MP clients see HUD refresh via SoilFieldUpdateEvent)
-    -- Shown at most once per field per in-game day to avoid spam (hook fires every frame while spraying)
-    if self.settings.showNotifications and
-       g_currentMission and not g_currentMission.missionDynamicInfo.isMultiplayer then
-        local today = (g_currentMission.environment and g_currentMission.environment.currentDay) or 0
-        if self.fertNotifyShown[fieldId] ~= today then
-            self.fertNotifyShown[fieldId] = today
-            local typeName = fillType and fillType.title or (fillType and fillType.name) or "Fertilizer"
-            self:showNotification(
-                "Fertilizer Recorded",
-                string.format("%s on Field %d — nutrients absorb next game day", typeName, fieldId)
-            )
-        end
-    end
-
     -- Broadcast to clients if server in multiplayer
     if g_server and g_currentMission and g_currentMission.missionDynamicInfo.isMultiplayer then
         local field = self.fieldData[fieldId]
@@ -1049,8 +1034,12 @@ function SoilFertilitySystem:applyRainEffects(dt, rainScale)
 end
 
 -- Update field nutrients after harvest
+---@param fieldId number The field being harvested
+---@param fruitTypeIndex number FS25 fruit type index
+---@param harvestedLiters number Amount harvested in liters
 ---@param strawRatio number 0.0-1.0 fraction of straw chopped back into the field (adds organic matter)
-function SoilFertilitySystem:updateFieldNutrients(fieldId, fruitTypeIndex, harvestedLiters, strawRatio)
+---@param area number Area harvested in m² (unused; reserved for future area-normalised depletion)
+function SoilFertilitySystem:updateFieldNutrients(fieldId, fruitTypeIndex, harvestedLiters, strawRatio, area)
     if not self.settings.enabled or not self.settings.nutrientCycles then return end
 
     local field = self:getOrCreateField(fieldId, true)
@@ -1159,22 +1148,6 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
         return
     end
 
-    -- Route crop protection products (they don't add N/P/K, they reduce pressure)
-    if entry.pestReduction then
-        local effectiveness = SoilConstants.PEST_PRESSURE.INSECTICIDE_TYPES[fillType.name] or 0
-        if effectiveness > 0 then
-            self:onInsecticideApplied(fieldId, effectiveness)
-        end
-        return
-    end
-    if entry.diseaseReduction then
-        local effectiveness = SoilConstants.DISEASE_PRESSURE.FUNGICIDE_TYPES[fillType.name] or 0
-        if effectiveness > 0 then
-            self:onFungicideApplied(fieldId, effectiveness)
-        end
-        return
-    end
-
     local limits = SoilConstants.NUTRIENT_LIMITS
 
     -- AREA NORMALIZATION: Calculate hectares for this field
@@ -1193,41 +1166,97 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
     local baseRateEntry = SoilConstants.SPRAYER_RATE.BASE_RATES[fillType.name] or 
                          SoilConstants.SPRAYER_RATE.BASE_RATES.DEFAULT
     local targetVolume = areaInHa * baseRateEntry.value
-    local coverageThreshold = targetVolume * 0.90  -- 90% coverage requirement
+    local coverageThreshold = targetVolume * SoilConstants.SPRAYER_RATE.FERTILIZER_COVERAGE_THRESHOLD
 
     if currentBuffer >= coverageThreshold then
-        -- Apply nutrients (scaled by the total buffer volume we're now "releasing")
-        local factor = (currentBuffer / 1000) / areaInHa
+        -- Full coverage achieved!
+        
+        -- 1. Route crop protection products (they don't add N/P/K, they reduce pressure)
+        if entry.pestReduction then
+            local effectiveness = SoilConstants.PEST_PRESSURE.INSECTICIDE_TYPES[fillType.name] or 0
+            if effectiveness > 0 then
+                self:onInsecticideApplied(fieldId, effectiveness)
+            end
+        elseif entry.diseaseReduction then
+            local effectiveness = SoilConstants.DISEASE_PRESSURE.FUNGICIDE_TYPES[fillType.name] or 0
+            if effectiveness > 0 then
+                self:onFungicideApplied(fieldId, effectiveness)
+            end
+        else
+            -- 2. Apply standard nutrients (scaled by the total buffer volume we're now "releasing")
+            local factor = (currentBuffer / 1000) / areaInHa
 
-        if entry.N then field.nitrogen   = math.min(limits.MAX, field.nitrogen   + entry.N * factor) end
-        if entry.P then field.phosphorus = math.min(limits.MAX, field.phosphorus + entry.P * factor) end
-        if entry.K then field.potassium  = math.min(limits.MAX, field.potassium  + entry.K * factor) end
-        if entry.pH then field.pH        = math.min(limits.PH_MAX, field.pH + entry.pH * factor) end
-        if entry.OM then field.organicMatter = math.min(limits.ORGANIC_MATTER_MAX, field.organicMatter + entry.OM * factor) end
+            if entry.N then field.nitrogen   = math.min(limits.MAX, field.nitrogen   + entry.N * factor) end
+            if entry.P then field.phosphorus = math.min(limits.MAX, field.phosphorus + entry.P * factor) end
+            if entry.K then field.potassium  = math.min(limits.MAX, field.potassium  + entry.K * factor) end
+            if entry.pH then field.pH        = math.min(limits.PH_MAX, field.pH + entry.pH * factor) end
+            if entry.OM then field.organicMatter = math.min(limits.ORGANIC_MATTER_MAX, field.organicMatter + entry.OM * factor) end
+        end
 
         -- Clear buffer for this product after successful application
         field.nutrientBuffer[fillTypeIndex] = 0
 
-        self:log("Full coverage achieved field %d (%s): Nutrients credited from %.1f L buffer", 
+        self:log("Full coverage achieved field %d (%s): Application credited from %.1f L buffer", 
             fieldId, fillType.name, currentBuffer)
         
-        -- Trigger notification if it's the first application today (consistent with other events)
-        if not self.fertNotifyShown then
-            self.fertNotifyShown = {}
-        end
-        if not self.fertNotifyShown[fieldId] then
-            self:showNotification("Soil Update", string.format("Field %d fully fertilized with %s", fieldId, fillType.name))
-            self.fertNotifyShown[fieldId] = true
+        -- Trigger notification at most once per field per in-game day
+        local today = (g_currentMission and g_currentMission.environment and
+                       g_currentMission.environment.currentDay) or 0
+        if not self.fertNotifyShown then self.fertNotifyShown = {} end
+        if self.fertNotifyShown[fieldId] ~= today then
+            self:showNotification("Soil Update", string.format("Field %d fully treated with %s", fieldId, fillType.name))
+            self.fertNotifyShown[fieldId] = today
         end
     end
 
     field.fertilizerApplied = (field.fertilizerApplied or 0) + liters
 
-    -- We only log high-precision values for fertilizer to track these small per-frame changes
+    -- Logging
     if self.settings.debugMode then
         local progress = (currentBuffer / targetVolume) * 100
-        self:log("Fertilizer buffered field %d (%s): %.4f L -> Progress %.1f%% (Target %.1f L)", 
+        self:log("Product buffered field %d (%s): %.4f L -> Progress %.1f%% (Target %.1f L)", 
             fieldId, fillType.name, liters, math.min(100, progress), targetVolume)
+    end
+end
+
+--- Direct-path buffering for non-profile products (Herbicide/Insecticide/Fungicide)
+--- Called by HookManager for products not found in FERTILIZER_PROFILES.
+function SoilFertilitySystem:onHerbicideAppliedDirect(fieldId, effectiveness, liters)
+    self:applyProductBufferedDirect(fieldId, "HERBICIDE", effectiveness, liters, self.onHerbicideApplied)
+end
+
+function SoilFertilitySystem:onInsecticideAppliedDirect(fieldId, effectiveness, liters)
+    self:applyProductBufferedDirect(fieldId, "INSECTICIDE", effectiveness, liters, self.onInsecticideApplied)
+end
+
+function SoilFertilitySystem:onFungicideAppliedDirect(fieldId, effectiveness, liters)
+    self:applyProductBufferedDirect(fieldId, "FUNGICIDE", effectiveness, liters, self.onFungicideApplied)
+end
+
+--- Internal helper for buffering non-profile products
+function SoilFertilitySystem:applyProductBufferedDirect(fieldId, productType, effectiveness, liters, callback)
+    local field = self:getOrCreateField(fieldId, true)
+    if not field then return end
+
+    -- Use high virtual indices for direct-path buffers to avoid collision with fillTypeManager indices
+    local virtualIdx = (productType == "HERBICIDE" and 99991) or (productType == "INSECTICIDE" and 99992) or 99993
+    if not field.nutrientBuffer then field.nutrientBuffer = {} end
+    local currentBuffer = (field.nutrientBuffer[virtualIdx] or 0) + liters
+    field.nutrientBuffer[virtualIdx] = currentBuffer
+
+    local areaInHa = field.fieldArea or 1.0
+    local baseRate = SoilConstants.SPRAYER_RATE.BASE_RATES[productType] and SoilConstants.SPRAYER_RATE.BASE_RATES[productType].value or 
+                     SoilConstants.SPRAYER_RATE.BASE_RATES.DEFAULT.value
+    local targetVolume = areaInHa * baseRate
+    local threshold = targetVolume * SoilConstants.SPRAYER_RATE.FERTILIZER_COVERAGE_THRESHOLD
+
+    if currentBuffer >= threshold then
+        callback(self, fieldId, effectiveness)
+        field.nutrientBuffer[virtualIdx] = 0
+        
+        if self.settings.debugMode then
+            self:log("[Direct] Full coverage achieved field %d (%s): Credit released", fieldId, productType)
+        end
     end
 end
 
@@ -1412,7 +1441,7 @@ function SoilFertilitySystem:getFieldUrgency(fieldId)
     local pDef = math.max(0, thresh - info.phosphorus.value) / thresh
     local kDef = math.max(0, thresh - info.potassium.value) / thresh
 
-    local phOpt = SoilConstants.PH_NORMALIZATION and SoilConstants.PH_NORMALIZATION.OPTIMAL or 6.5
+    local phOpt = 6.5  -- optimal pH target (mid-point of neutral band 6.5-7.0)
     local phMin = SoilConstants.NUTRIENT_LIMITS and SoilConstants.NUTRIENT_LIMITS.PH_MIN or 5.0
     local phDef = math.max(0, phOpt - info.pH) / (phOpt - phMin)
 

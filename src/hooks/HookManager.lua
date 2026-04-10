@@ -770,18 +770,18 @@ function HookManager:installSprayerAreaHook()
                 end
 
                 -- Herbicide application reduces weed pressure (direct path: non-profile products only)
-                if herbOnlyDirect and g_SoilFertilityManager.soilSystem.onHerbicideApplied then
-                    g_SoilFertilityManager.soilSystem:onHerbicideApplied(fieldId, herbEffectiveness)
+                if herbOnlyDirect and g_SoilFertilityManager.soilSystem.onHerbicideAppliedDirect then
+                    g_SoilFertilityManager.soilSystem:onHerbicideAppliedDirect(fieldId, herbEffectiveness, effectiveLiters)
                 end
 
                 -- Insecticide application reduces pest pressure (direct path: non-profile products only)
-                if pestOnlyDirect and g_SoilFertilityManager.soilSystem.onInsecticideApplied then
-                    g_SoilFertilityManager.soilSystem:onInsecticideApplied(fieldId, pestEffectiveness)
+                if pestOnlyDirect and g_SoilFertilityManager.soilSystem.onInsecticideAppliedDirect then
+                    g_SoilFertilityManager.soilSystem:onInsecticideAppliedDirect(fieldId, pestEffectiveness, effectiveLiters)
                 end
 
                 -- Fungicide application reduces disease pressure (direct path: non-profile products only)
-                if diseaseOnlyDirect and g_SoilFertilityManager.soilSystem.onFungicideApplied then
-                    g_SoilFertilityManager.soilSystem:onFungicideApplied(fieldId, diseaseEffectiveness)
+                if diseaseOnlyDirect and g_SoilFertilityManager.soilSystem.onFungicideAppliedDirect then
+                    g_SoilFertilityManager.soilSystem:onFungicideAppliedDirect(fieldId, diseaseEffectiveness, effectiveLiters)
                 end
 
                 -- Over-application burn check (nutrient fertilizers only, not lime)
@@ -1236,18 +1236,49 @@ function HookManager:installPurchaseRefillHook()
     local function isInBuyMode(vehicle, fillUnitIndex, fillTypeIndex)
         if not vehicle then return false end
 
-        -- Only applies when AI (game helper or Courseplay) is driving
-        local ok, isAI = pcall(function() return vehicle:getIsAIActive() end)
-        if not (ok and isAI) then
+        -- 1. Check if AI is active (Standard Helper or Courseplay)
+        -- We check both getIsAIActive and the spec_aiVehicle presence
+        local isAI = false
+        local ok, res = pcall(function() return vehicle:getIsAIActive() end)
+        if ok and res then 
+            isAI = true 
+        elseif vehicle.spec_aiVehicle and vehicle.spec_aiVehicle.isActive then
+            isAI = true
+        end
+
+        if not isAI then
             return false
         end
 
-        -- AI is active — check the player's opt-in flags in mission settings
+        -- 2. AI is active — check the mission settings for buy mode
         if g_currentMission and g_currentMission.missionInfo then
             local mi = g_currentMission.missionInfo
-            if mi.helperBuyFertilizer then return true end
-            if mi.helperSlurrySource  and mi.helperSlurrySource  == 2 then return true end
-            if mi.helperManureSource  and mi.helperManureSource  == 2 then return true end
+            
+            -- Identify product category to check the right helper setting
+            local fillType = g_fillTypeManager:getFillTypeByIndex(fillTypeIndex)
+            local ftName = fillType and fillType.name or "UNKNOWN"
+            
+            local isSlurry = (ftName == "LIQUIDMANURE" or ftName == "DIGESTATE")
+            local isManure = (ftName == "MANURE")
+            
+            local buyActive = false
+            if isSlurry then
+                buyActive = (mi.helperSlurrySource == 2)
+            elseif isManure then
+                buyActive = (mi.helperManureSource == 2)
+            else
+                -- Fertilizer, Lime, Herbicide, and all our custom NPK/Crop-Protection types
+                buyActive = mi.helperBuyFertilizer
+            end
+
+            -- Detailed debug logging (only when AI is active to avoid spam)
+            if SoilLogger then
+                SoilLogger.debug("BUY check: veh=%d, type=%s, buyActive=%s (AI=%s, SlurrySrc=%s, ManureSrc=%s, BuyFert=%s)",
+                    vehicle.id or 0, ftName, tostring(buyActive), tostring(isAI),
+                    tostring(mi.helperSlurrySource), tostring(mi.helperManureSource), tostring(mi.helperBuyFertilizer))
+            end
+
+            return buyActive
         end
 
         return false
@@ -1270,32 +1301,31 @@ function HookManager:installPurchaseRefillHook()
             return original(vehicle, fillUnitIndex, fillLevelDelta, fillTypeIndex, toolType, fillPositionData, noEventSend)
         end
 
-        -- BUY mode active for a custom fill type: charge money, skip depletion.
-        -- |fillLevelDelta| is the liters consumed this frame.
-        local litersConsumed = -fillLevelDelta  -- positive value
+        -- |fillLevelDelta| is the liters consumed this frame (negative value).
+        local litersConsumed = -fillLevelDelta
         local cost = litersConsumed * pricePerLiter
 
         -- Charge the owning farm
         local farmId = vehicle.ownerFarmId or (vehicle.spec_enterable and vehicle.spec_enterable.activeFarmId)
         if farmId and farmId > 0 and g_currentMission and g_currentMission.economyManager then
-            -- g_currentMission.economyManager:updateStats handles the money transaction
-            -- and shows the cost in the farm account. We call removeMoney directly if
-            -- economyManager doesn't expose a direct debit for arbitrary types.
             local ok, err = pcall(function()
-                g_currentMission:addMoney(-cost, farmId, MoneyType.VEHICLE_RUNNING_COSTS, true, true)
+                g_currentMission:addMoney(-cost, farmId, MoneyType.PURCHASE_FERTILIZER, true, true)
             end)
             if not ok then
-                -- Fallback: removeMoney directly
                 pcall(function()
                     g_currentMission.economyManager:updateBudget(farmId, -cost)
                 end)
             end
         end
 
-        -- Return 0 — no actual fill level change (tank stays full)
-        -- The game expects addFillUnitFillLevel to return the actual delta applied.
-        -- Returning 0 means "nothing was consumed from the physical tank."
-        return 0
+        -- Return the original delta — this tells the game "yes, we consumed this much"
+        -- so the sprayer logic continues normally, but since we didn't call the 
+        -- original function, the physical tank level is never actually subtracted.
+        if SoilLogger and SoilLogger.debug then
+            SoilLogger.debug("BUY SUCCESS: veh=%d, type=%d, liters=%.2f, cost=%.2f (returned delta %.4f)", 
+                vehicle.id or 0, fillTypeIndex, litersConsumed, cost, fillLevelDelta)
+        end
+        return fillLevelDelta
     end
 
     self:registerCleanup("FillUnit.addFillUnitFillLevel (purchase refill)", function()

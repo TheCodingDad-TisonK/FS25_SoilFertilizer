@@ -230,9 +230,9 @@ function SoilHUD:calculateHeight()
         
         local mgr = g_SoilFertilityManager
         if mgr and mgr.settings then
-            if mgr.settings.weedPressure and (info.weedPressure or 0) >= 0 then h = h + SoilHUD.LINE_H end
-            if mgr.settings.pestPressure and (info.pestPressure or 0) >= 0 then h = h + SoilHUD.LINE_H end
-            if mgr.settings.diseasePressure and (info.diseasePressure or 0) >= 0 then h = h + SoilHUD.LINE_H end
+            if mgr.settings.weedPressure and (info.weedPressure or 0) > 0 then h = h + SoilHUD.LINE_H end
+            if mgr.settings.pestPressure and (info.pestPressure or 0) > 0 then h = h + SoilHUD.LINE_H end
+            if mgr.settings.diseasePressure and (info.diseasePressure or 0) > 0 then h = h + SoilHUD.LINE_H end
         end
         
         h = h + SoilHUD.PAD * 1.3
@@ -899,11 +899,12 @@ function SoilHUD:drawPressureRow(labelKey, pressure, isProtected, px, cy, pw, s,
     local barW = SoilHUD.BAR_W * s
     local tx   = px + pad
 
-    -- 3-level color (matches getPressureColor in SoilReportDialog)
+    -- 3-level color (matches getPressureColor in SoilReportDialog — aligned with Constants thresholds)
+    local wp = SoilConstants.WEED_PRESSURE  -- LOW=20, MEDIUM=50 (shared by weed/pest/disease)
     local col
-    if pressure < 25 then     col = SoilHUD.C_GOOD
-    elseif pressure < 60 then col = SoilHUD.C_FAIR
-    else                      col = SoilHUD.C_POOR end
+    if pressure < wp.LOW    then col = SoilHUD.C_GOOD
+    elseif pressure < wp.MEDIUM then col = SoilHUD.C_FAIR
+    else                         col = SoilHUD.C_POOR end
 
     -- Label
     setTextColor(SoilHUD.C_LABEL[1], SoilHUD.C_LABEL[2], SoilHUD.C_LABEL[3], SoilHUD.C_LABEL[4])
@@ -968,17 +969,22 @@ function SoilHUD:formatRate(multiplier, rateConfig)
     local imperial = (self.settings.useImperialUnits ~= false)
     local conv     = SoilConstants.SPRAYER_RATE
 
+    -- For very low base rates (Insecticide/Fungicide), show 1 decimal place
+    local fmt = (rateConfig.value < 10.0) and "%.1f" or "%.0f"
+
     if rateConfig.unit == "liquid" then
         if imperial then
-            return string.format("%d gal/ac", math.floor(value * conv.L_PER_HA_TO_GAL_PER_AC + 0.5))
+            local impVal = value * conv.L_PER_HA_TO_GAL_PER_AC
+            return string.format(fmt .. " gal/ac", impVal)
         else
-            return string.format("%d L/ha", math.floor(value + 0.5))
+            return string.format(fmt .. " L/ha", value)
         end
     else
         if imperial then
-            return string.format("%d lb/ac", math.floor(value * conv.KG_PER_HA_TO_LB_PER_AC + 0.5))
+            local impVal = value * conv.KG_PER_HA_TO_LB_PER_AC
+            return string.format(fmt .. " lb/ac", impVal)
         else
-            return string.format("%d kg/ha", math.floor(value + 0.5))
+            return string.format(fmt .. " kg/ha", value)
         end
     end
 end
@@ -989,17 +995,20 @@ function SoilHUD:formatRateNumber(multiplier, rateConfig)
     local imperial = (self.settings.useImperialUnits ~= false)
     local conv     = SoilConstants.SPRAYER_RATE
 
+    -- For very low base rates, show 1 decimal place
+    local fmt = (rateConfig.value < 10.0) and "%.1f" or "%.0f"
+
     if rateConfig.unit == "liquid" then
         if imperial then
-            return string.format("%d", math.floor(value * conv.L_PER_HA_TO_GAL_PER_AC + 0.5))
+            return string.format(fmt, value * conv.L_PER_HA_TO_GAL_PER_AC)
         else
-            return string.format("%d", math.floor(value + 0.5))
+            return string.format(fmt, value)
         end
     else
         if imperial then
-            return string.format("%d", math.floor(value * conv.KG_PER_HA_TO_LB_PER_AC + 0.5))
+            return string.format(fmt, value * conv.KG_PER_HA_TO_LB_PER_AC)
         else
-            return string.format("%d", math.floor(value + 0.5))
+            return string.format(fmt, value)
         end
     end
 end

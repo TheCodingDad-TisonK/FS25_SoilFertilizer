@@ -1,5 +1,5 @@
 -- =========================================================
--- FS25 Realistic Soil & Fertilizer (version 1.0.6.0)
+-- FS25 Realistic Soil & Fertilizer - Settings
 -- =========================================================
 -- Settings domain object - uses SettingsSchema for defaults/validation
 -- =========================================================

@@ -348,6 +348,7 @@ function SoilFullSyncEvent:readStream(streamId, connection)
                 diseasePressure = diseasePressure,
                 fungicideDaysLeft = diseaseDays,
                 dryDayCount = dryDays,
+                burnDaysLeft = burnDays,
                 initialized = true
             }
             -- Clear empty strings
@@ -416,6 +417,7 @@ function SoilFullSyncEvent:writeStream(streamId, connection)
         streamWriteFloat32(streamId, field.diseasePressure or 0)
         streamWriteInt32(streamId, field.fungicideDaysLeft or 0)
         streamWriteInt32(streamId, field.dryDayCount or 0)
+        streamWriteInt32(streamId, field.burnDaysLeft or 0)
     end
 end
 
@@ -513,6 +515,7 @@ function SoilFieldUpdateEvent:readStream(streamId, connection)
     local diseasePressure = streamReadFloat32(streamId)
     local diseaseDays = streamReadInt32(streamId)
     local dryDays = streamReadInt32(streamId)
+    local burnDays = streamReadInt32(streamId)
 
     -- Clamp all values to valid ranges
     self.field = {
@@ -539,6 +542,7 @@ function SoilFieldUpdateEvent:readStream(streamId, connection)
         diseasePressure = math.max(0, math.min(100, diseasePressure)),
         fungicideDaysLeft = math.max(0, diseaseDays),
         dryDayCount = math.max(0, dryDays),
+        burnDaysLeft = math.max(0, burnDays),
         initialized = true
     }
 
@@ -576,6 +580,7 @@ function SoilFieldUpdateEvent:writeStream(streamId, connection)
     streamWriteFloat32(streamId, self.field.diseasePressure or 0)
     streamWriteInt32(streamId, self.field.fungicideDaysLeft or 0)
     streamWriteInt32(streamId, self.field.dryDayCount or 0)
+    streamWriteInt32(streamId, self.field.burnDaysLeft or 0)
 end
 
 function SoilFieldUpdateEvent:run(connection)

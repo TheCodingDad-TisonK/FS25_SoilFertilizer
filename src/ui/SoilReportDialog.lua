@@ -289,8 +289,10 @@ local function getOMColor(om)
 end
 
 local function getPressureColor(pct)
-    if pct < 25 then return SoilReportDialog.COLOR_GOOD
-    elseif pct < 60 then return SoilReportDialog.COLOR_FAIR
+    -- Aligned with SoilConstants.WEED_PRESSURE thresholds (LOW=20, MEDIUM=50, same for pest/disease)
+    local wp = SoilConstants.WEED_PRESSURE
+    if pct < wp.LOW    then return SoilReportDialog.COLOR_GOOD
+    elseif pct < wp.MEDIUM then return SoilReportDialog.COLOR_FAIR
     else return SoilReportDialog.COLOR_POOR end
 end
 
@@ -325,7 +327,7 @@ local function getOverallStatus(info)
     -- Weed / pest / disease pressures (stored as 0-100)
     for _, key in ipairs({"weedPressure", "pestPressure", "diseasePressure"}) do
         local val = info[key]
-        if val and val >= 0 then
+        if val and val > 0 then
             local r = colorRank(getPressureColor(math.floor(val + 0.5)))
             if r > worst then worst = r end
         end
