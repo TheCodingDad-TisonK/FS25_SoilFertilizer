@@ -130,5 +130,23 @@
     "views_unique": 164,
     "clones_total": 148,
     "clones_unique": 76
+  },
+  "2026-04-06": {
+    "views_total": 648,
+    "views_unique": 124,
+    "clones_total": 112,
+    "clones_unique": 51
+  },
+  "2026-04-07": {
+    "views_total": 562,
+    "views_unique": 139,
+    "clones_total": 101,
+    "clones_unique": 47
+  },
+  "2026-04-08": {
+    "views_total": 383,
+    "views_unique": 89,
+    "clones_total": 126,
+    "clones_unique": 54
   }
 }
