@@ -230,9 +230,9 @@ function SoilHUD:calculateHeight()
         
         local mgr = g_SoilFertilityManager
         if mgr and mgr.settings then
-            if mgr.settings.weedPressure and (info.weedPressure or 0) >= 0 then h = h + SoilHUD.LINE_H end
-            if mgr.settings.pestPressure and (info.pestPressure or 0) >= 0 then h = h + SoilHUD.LINE_H end
-            if mgr.settings.diseasePressure and (info.diseasePressure or 0) >= 0 then h = h + SoilHUD.LINE_H end
+            if mgr.settings.weedPressure and (info.weedPressure or 0) > 0 then h = h + SoilHUD.LINE_H end
+            if mgr.settings.pestPressure and (info.pestPressure or 0) > 0 then h = h + SoilHUD.LINE_H end
+            if mgr.settings.diseasePressure and (info.diseasePressure or 0) > 0 then h = h + SoilHUD.LINE_H end
         end
         
         h = h + SoilHUD.PAD * 1.3
@@ -899,11 +899,12 @@ function SoilHUD:drawPressureRow(labelKey, pressure, isProtected, px, cy, pw, s,
     local barW = SoilHUD.BAR_W * s
     local tx   = px + pad
 
-    -- 3-level color (matches getPressureColor in SoilReportDialog)
+    -- 3-level color (matches getPressureColor in SoilReportDialog — aligned with Constants thresholds)
+    local wp = SoilConstants.WEED_PRESSURE  -- LOW=20, MEDIUM=50 (shared by weed/pest/disease)
     local col
-    if pressure < 25 then     col = SoilHUD.C_GOOD
-    elseif pressure < 60 then col = SoilHUD.C_FAIR
-    else                      col = SoilHUD.C_POOR end
+    if pressure < wp.LOW    then col = SoilHUD.C_GOOD
+    elseif pressure < wp.MEDIUM then col = SoilHUD.C_FAIR
+    else                         col = SoilHUD.C_POOR end
 
     -- Label
     setTextColor(SoilHUD.C_LABEL[1], SoilHUD.C_LABEL[2], SoilHUD.C_LABEL[3], SoilHUD.C_LABEL[4])

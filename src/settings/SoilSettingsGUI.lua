@@ -8,6 +8,17 @@
 SoilSettingsGUI = {}
 local SoilSettingsGUI_mt = Class(SoilSettingsGUI)
 
+-- Route a setting change through the network layer so all MP clients are notified.
+-- Falls back to direct mutation only when the network layer is not yet ready.
+local function requestSettingChange(settingId, value)
+    if SoilNetworkEvents_RequestSettingChange then
+        SoilNetworkEvents_RequestSettingChange(settingId, value)
+    else
+        g_SoilFertilityManager.settings[settingId] = value
+        g_SoilFertilityManager.settings:save()
+    end
+end
+
 function SoilSettingsGUI.new()
     local self = setmetatable({}, SoilSettingsGUI_mt)
     return self
@@ -52,6 +63,7 @@ function SoilSettingsGUI:consoleCommandHelp()
     print("SoilSetPlowingBonus true|false - Toggle plowing bonus")
     print("SoilShowSettings - Show current settings")
     print("SoilFieldInfo <fieldId> - Show soil info for field")
+    print("SoilFieldForecast <fieldId> - Show yield forecast for field")
     print("SoilListFields - List all fields with soil data")
     print("SoilResetSettings - Reset to defaults")
     print("SoilSaveData - Force save soil data")
@@ -67,17 +79,16 @@ function SoilSettingsGUI:consoleCommandSetDifficulty(difficulty)
         return "Invalid difficulty"
     end
     if g_SoilFertilityManager and g_SoilFertilityManager.settings then
-        g_SoilFertilityManager.settings:setDifficulty(diff)
-        g_SoilFertilityManager.settings:save()
-        return string.format("Difficulty set to: %s", g_SoilFertilityManager.settings:getDifficultyName())
+        requestSettingChange("difficulty", diff)
+        local diffNames = {[1]="Simple", [2]="Realistic", [3]="Hardcore"}
+        return string.format("Difficulty set to: %s", diffNames[diff] or tostring(diff))
     end
     return "Error: Soil Mod not initialized"
 end
 
 function SoilSettingsGUI:consoleCommandSoilEnable()
     if g_SoilFertilityManager and g_SoilFertilityManager.settings then
-        g_SoilFertilityManager.settings.enabled = true
-        g_SoilFertilityManager.settings:save()
+        requestSettingChange("enabled", true)
         if g_SoilFertilityManager.soilSystem then
             g_SoilFertilityManager.soilSystem:initialize()
         end
@@ -88,8 +99,7 @@ end
 
 function SoilSettingsGUI:consoleCommandSoilDisable()
     if g_SoilFertilityManager and g_SoilFertilityManager.settings then
-        g_SoilFertilityManager.settings.enabled = false
-        g_SoilFertilityManager.settings:save()
+        requestSettingChange("enabled", false)
         return "Soil & Fertilizer Mod disabled"
     end
     return "Error: Soil Mod not initialized"
@@ -100,9 +110,9 @@ function SoilSettingsGUI:consoleCommandSetFertility(enabled)
     local enable = enabled:lower()
     if enable ~= "true" and enable ~= "false" then return "Invalid value. Use 'true' or 'false'" end
     if g_SoilFertilityManager and g_SoilFertilityManager.settings then
-        g_SoilFertilityManager.settings.fertilitySystem = (enable == "true")
-        g_SoilFertilityManager.settings:save()
-        return string.format("Fertility system %s", g_SoilFertilityManager.settings.fertilitySystem and "enabled" or "disabled")
+        local newVal = (enable == "true")
+        requestSettingChange("fertilitySystem", newVal)
+        return string.format("Fertility system %s", newVal and "enabled" or "disabled")
     end
     return "Error: Soil Mod not initialized"
 end
@@ -112,9 +122,9 @@ function SoilSettingsGUI:consoleCommandSetNutrients(enabled)
     local enable = enabled:lower()
     if enable ~= "true" and enable ~= "false" then return "Invalid value. Use 'true' or 'false'" end
     if g_SoilFertilityManager and g_SoilFertilityManager.settings then
-        g_SoilFertilityManager.settings.nutrientCycles = (enable == "true")
-        g_SoilFertilityManager.settings:save()
-        return string.format("Nutrient cycles %s", g_SoilFertilityManager.settings.nutrientCycles and "enabled" or "disabled")
+        local newVal = (enable == "true")
+        requestSettingChange("nutrientCycles", newVal)
+        return string.format("Nutrient cycles %s", newVal and "enabled" or "disabled")
     end
     return "Error: Soil Mod not initialized"
 end
@@ -124,9 +134,9 @@ function SoilSettingsGUI:consoleCommandSetFertilizerCosts(enabled)
     local enable = enabled:lower()
     if enable ~= "true" and enable ~= "false" then return "Invalid value. Use 'true' or 'false'" end
     if g_SoilFertilityManager and g_SoilFertilityManager.settings then
-        g_SoilFertilityManager.settings.fertilizerCosts = (enable == "true")
-        g_SoilFertilityManager.settings:save()
-        return string.format("Fertilizer costs %s", g_SoilFertilityManager.settings.fertilizerCosts and "enabled" or "disabled")
+        local newVal = (enable == "true")
+        requestSettingChange("fertilizerCosts", newVal)
+        return string.format("Fertilizer costs %s", newVal and "enabled" or "disabled")
     end
     return "Error: Soil Mod not initialized"
 end
@@ -136,9 +146,9 @@ function SoilSettingsGUI:consoleCommandSetNotifications(enabled)
     local enable = enabled:lower()
     if enable ~= "true" and enable ~= "false" then return "Invalid value. Use 'true' or 'false'" end
     if g_SoilFertilityManager and g_SoilFertilityManager.settings then
-        g_SoilFertilityManager.settings.showNotifications = (enable == "true")
-        g_SoilFertilityManager.settings:save()
-        return string.format("Notifications %s", g_SoilFertilityManager.settings.showNotifications and "enabled" or "disabled")
+        local newVal = (enable == "true")
+        requestSettingChange("showNotifications", newVal)
+        return string.format("Notifications %s", newVal and "enabled" or "disabled")
     end
     return "Error: Soil Mod not initialized"
 end
@@ -149,9 +159,9 @@ function SoilSettingsGUI:consoleCommandSetSeasonalEffects(enabled)
     local enable = enabled:lower()
     if enable ~= "true" and enable ~= "false" then return "Invalid value. Use 'true' or 'false'" end
     if g_SoilFertilityManager and g_SoilFertilityManager.settings then
-        g_SoilFertilityManager.settings.seasonalEffects = (enable == "true")
-        g_SoilFertilityManager.settings:save()
-        return string.format("Seasonal effects %s", g_SoilFertilityManager.settings.seasonalEffects and "enabled" or "disabled")
+        local newVal = (enable == "true")
+        requestSettingChange("seasonalEffects", newVal)
+        return string.format("Seasonal effects %s", newVal and "enabled" or "disabled")
     end
     return "Error: Soil Mod not initialized"
 end
@@ -161,9 +171,9 @@ function SoilSettingsGUI:consoleCommandSetRainEffects(enabled)
     local enable = enabled:lower()
     if enable ~= "true" and enable ~= "false" then return "Invalid value. Use 'true' or 'false'" end
     if g_SoilFertilityManager and g_SoilFertilityManager.settings then
-        g_SoilFertilityManager.settings.rainEffects = (enable == "true")
-        g_SoilFertilityManager.settings:save()
-        return string.format("Rain effects %s", g_SoilFertilityManager.settings.rainEffects and "enabled" or "disabled")
+        local newVal = (enable == "true")
+        requestSettingChange("rainEffects", newVal)
+        return string.format("Rain effects %s", newVal and "enabled" or "disabled")
     end
     return "Error: Soil Mod not initialized"
 end
@@ -173,18 +183,18 @@ function SoilSettingsGUI:consoleCommandSetPlowingBonus(enabled)
     local enable = enabled:lower()
     if enable ~= "true" and enable ~= "false" then return "Invalid value. Use 'true' or 'false'" end
     if g_SoilFertilityManager and g_SoilFertilityManager.settings then
-        g_SoilFertilityManager.settings.plowingBonus = (enable == "true")
-        g_SoilFertilityManager.settings:save()
-        return string.format("Plowing bonus %s", g_SoilFertilityManager.settings.plowingBonus and "enabled" or "disabled")
+        local newVal = (enable == "true")
+        requestSettingChange("plowingBonus", newVal)
+        return string.format("Plowing bonus %s", newVal and "enabled" or "disabled")
     end
     return "Error: Soil Mod not initialized"
 end
 
 function SoilSettingsGUI:consoleCommandDebug()
     if g_SoilFertilityManager and g_SoilFertilityManager.settings then
-        g_SoilFertilityManager.settings.debugMode = not g_SoilFertilityManager.settings.debugMode
-        g_SoilFertilityManager.settings:save()
-        return string.format("Debug mode %s", g_SoilFertilityManager.settings.debugMode and "enabled" or "disabled")
+        local newVal = not g_SoilFertilityManager.settings.debugMode
+        requestSettingChange("debugMode", newVal)
+        return string.format("Debug mode %s", newVal and "enabled" or "disabled")
     end
     return "Error: Soil Mod not initialized"
 end
@@ -275,7 +285,8 @@ function SoilSettingsGUI:consoleCommandFieldForecast(fieldId)
 
             local penalty    = math.min(ys.MAX_PENALTY, avgDef * tierData.scale)
             local penaltyPct = math.floor(penalty * 100 + 0.5)
-            local urgency    = math.floor(avgDef * 100 + 0.5)
+            -- Use getFieldUrgency so this score matches the Soil Report sort order
+            local urgency    = math.floor(soilSystem:getFieldUrgency(fid) + 0.5)
 
             -- Recommendations
             local recs = {}
