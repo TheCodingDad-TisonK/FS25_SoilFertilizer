@@ -229,6 +229,7 @@ All integrations are detected automatically at runtime and fail gracefully if th
 | **Precision Farming DLC** | Compatible — both mods run independently. No conflicts. |
 | **FS25_SeasonalCropStress** | Soil pH and organic matter influence evapotranspiration rates per field. |
 | **FS25_NPCFavor** | NPC neighbour favour quests can reference your fields' soil state. |
+| **FS25_MoistureSystem** | Compatible — both mods use independent hooks. No conflicts. |
 
 ---
 
