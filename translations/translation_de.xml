@@ -67,6 +67,19 @@
     <e k="sf_hud_trans_3" v="Mittel" eh="87f8a6ab" />
     <e k="sf_hud_trans_4" v="Dunkel" eh="a18366b2" />
     <e k="sf_hud_trans_5" v="Fest" eh="e41480b6" />
+    <e k="sf_hud_title" v="SOIL MONITOR" />
+    <e k="sf_hud_field" v="Field %d" />
+    <e k="sf_hud_noField" v="Walk onto a field" />
+    <e k="sf_hud_fallow" v="Fallow" />
+    <e k="sf_hud_weeds" v="Weeds" />
+    <e k="sf_hud_pests" v="Pests" />
+    <e k="sf_hud_disease" v="Disease" />
+    <e k="sf_hud_protected" v="(protected)" />
+    <e k="sf_hud_yield" v="Yield" />
+    <e k="sf_hud_estYield" v="Est. Yield" />
+    <e k="sf_hud_optimal" v="Optimal" />
+    <e k="sf_hud_hint_edit" v="Drag: move   Corner: resize   RMB: done" />
+    <e k="sf_hud_hint_normal" v="RMB: move/resize" />
     <e k="sf_use_imperial_short" v="Imperiale Einheiten" eh="ff2701ad" />
     <e k="sf_use_imperial_long" v="Ausbringmengen in gal/ac und lb/ac (aus = L/ha und kg/ha)" eh="17efa489" />
     <e k="sf_reset" v="Bodeneinstellungen zurücksetzen" eh="467bc2f5" />
@@ -102,6 +115,9 @@
     <e k="sf_report_rec_disease" v="Disease Risk" eh="e7655847" />
     <e k="sf_report_rec_needs" v="Bedarf:" eh="3e6d95cf" />
     <e k="sf_report_rec_optimal" v="Bodengesundheit: Optimal" eh="6ee9d19b" />
+    <e k="sf_report_rec_good" v="Good" />
+    <e k="sf_report_rec_fair" v="Fair" />
+    <e k="sf_report_rec_poor" v="Poor" />
     <e k="sf_uan32_title" v="UAN 32 Stickstoffdünger (N)" eh="90913bb8" />
     <e k="sf_uan28_title" v="UAN 28 Stickstoffdünger (N)" eh="9d902cd7" />
     <e k="sf_anhydrous_title" v="Flüssigammoniak (N)" eh="3fc85c02" />
@@ -136,5 +152,17 @@
     <e k="sf_bigBag_fungicide_name" v="Big Bag Fungicide" eh="a3d4e59c" />
     <e k="sf_bigBag_fungicide_function" v="Fungicide (liquid)" eh="745c34cb" />
     <e k="sf_bigBag_starter_function" v="Starterdünger (flüssig)" eh="2c36ea57" />
+    <e k="sf_report_detail_n_ok" v="Stickstoff: Optimal" />
+    <e k="sf_report_detail_p_ok" v="Phosphor: Optimal" />
+    <e k="sf_report_detail_k_ok" v="Kalium: Optimal" />
+    <e k="sf_report_status_monitor" v="Überwachen" />
+    <e k="sf_report_status_adjust" v="Anpassen" />
+    <e k="sf_report_status_maintain" v="Halten" />
+    <e k="sf_report_status_increase" v="Erhöhen" />
+    <e k="sf_report_pressure_low" v="Niedrig" />
+    <e k="sf_report_pressure_moderate" v="Mittel" />
+    <e k="sf_report_pressure_high" v="Hoch" />
+    <e k="sf_report_yield_hint" v="Basierend auf N/P/K vs. optimalem Schwellenwert" />
+    <e k="sf_report_yield_loss" v="Ertrag ~-%d%%" />
     </elements>
 </l10n>

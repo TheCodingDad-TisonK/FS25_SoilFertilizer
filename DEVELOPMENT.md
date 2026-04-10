@@ -1,7 +1,7 @@
 # FS25_SoilFertilizer - Developer Guide
 
-**Version**: 1.5.0.0
-**Last Updated**: 2026-04-07
+**Version**: 1.5.2.0
+**Last Updated**: 2026-04-10
 
 ---
 

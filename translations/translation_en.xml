@@ -77,9 +77,11 @@
     <e k="input_SF_RATE_UP" v="Increase Fertilizer Rate" eh="6e601ef5" />
     <e k="input_SF_RATE_DOWN" v="Decrease Fertilizer Rate" eh="30712026" />
     <e k="input_SF_TOGGLE_AUTO" v="Toggle Auto Rate" eh="a8642cf0" />
-    <e k="sf_report_title" v="Soil &amp;amp; Fertilizer Report" eh="e4d0126a" />
+    <e k="sf_report_title" v="Soil &amp; Fertilizer Report" eh="e4d0126a" />
     <e k="sf_report_fields_tracked" v="Fields Tracked:" eh="7b1e59b8" />
     <e k="sf_report_need_fert" v="Need Fertilizer:" eh="110b60f2" />
+    <e k="sf_report_farm_health" v="Farm Health:" />
+    <e k="sf_report_back" v="Back" />
     <e k="sf_report_difficulty" v="Difficulty:" eh="3abaf54f" />
     <e k="sf_report_col_field" v="Field" eh="6f16a5f8" />
     <e k="sf_report_col_last_crop" v="Last Crop" eh="ff41e5eb" />
@@ -104,6 +106,9 @@
     <e k="sf_report_rec_disease" v="Disease Risk" eh="c342956b" />
     <e k="sf_report_rec_needs" v="Needs:" eh="3e6d95cf" />
     <e k="sf_report_rec_optimal" v="Soil Health: Optimal" eh="6ee9d19b" />
+    <e k="sf_report_rec_good" v="Good" />
+    <e k="sf_report_rec_fair" v="Fair" />
+    <e k="sf_report_rec_poor" v="Poor" />
     <e k="sf_uan32_title" v="UAN 32 Fertilizer (N)" eh="90913bb8" />
     <e k="sf_uan28_title" v="UAN 28 Fertilizer (N)" eh="9d902cd7" />
     <e k="sf_anhydrous_title" v="Anhydrous Ammonia (N)" eh="3fc85c02" />
@@ -151,6 +156,18 @@
     <e k="sf_hud_optimal" v="Optimal" />
     <e k="sf_hud_hint_edit" v="Drag: move   Corner: resize   RMB: done" />
     <e k="sf_hud_hint_normal" v="RMB: move/resize" />
+    <e k="sf_report_detail_n_ok" v="Nitrogen: Optimal" />
+    <e k="sf_report_detail_p_ok" v="Phosphorus: Optimal" />
+    <e k="sf_report_detail_k_ok" v="Potassium: Optimal" />
+    <e k="sf_report_status_monitor" v="Monitor" />
+    <e k="sf_report_status_adjust" v="Adjust" />
+    <e k="sf_report_status_maintain" v="Maintain" />
+    <e k="sf_report_status_increase" v="Increase" />
+    <e k="sf_report_pressure_low" v="Low" />
+    <e k="sf_report_pressure_moderate" v="Moderate" />
+    <e k="sf_report_pressure_high" v="High" />
+    <e k="sf_report_yield_hint" v="Based on N/P/K vs optimal threshold" />
+    <e k="sf_report_yield_loss" v="Yield ~-%d%%" />
     </elements>
 </l10n>
 

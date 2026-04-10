@@ -102,6 +102,9 @@
     <e k="sf_report_rec_disease" v="Ризик хвороб" eh="e7655847" />
     <e k="sf_report_rec_needs" v="Потреби:" eh="3e6d95cf" />
     <e k="sf_report_rec_optimal" v="Здоров'я ґрунту: Оптимальне" eh="6ee9d19b" />
+    <e k="sf_report_rec_good" v="Good" />
+    <e k="sf_report_rec_fair" v="Fair" />
+    <e k="sf_report_rec_poor" v="Poor" />
     <e k="sf_uan32_title" v="UAN 32 Азотне добриво (N)" eh="90913bb8" />
     <e k="sf_uan28_title" v="UAN 28 Азотне добриво (N)" eh="9d902cd7" />
     <e k="sf_anhydrous_title" v="Безводний аміак (N)" eh="3fc85c02" />
@@ -149,5 +152,17 @@
     <e k="sf_hud_optimal" v="Оптимально" />
     <e k="sf_hud_hint_edit" v="Перетягування: рух   Кут: розмір   ПКМ: готово" />
     <e k="sf_hud_hint_normal" v="ПКМ: рух/розмір" />
+    <e k="sf_report_detail_n_ok" v="Nitrogen: Optimal" />
+    <e k="sf_report_detail_p_ok" v="Phosphorus: Optimal" />
+    <e k="sf_report_detail_k_ok" v="Potassium: Optimal" />
+    <e k="sf_report_status_monitor" v="Monitor" />
+    <e k="sf_report_status_adjust" v="Adjust" />
+    <e k="sf_report_status_maintain" v="Maintain" />
+    <e k="sf_report_status_increase" v="Increase" />
+    <e k="sf_report_pressure_low" v="Low" />
+    <e k="sf_report_pressure_moderate" v="Moderate" />
+    <e k="sf_report_pressure_high" v="High" />
+    <e k="sf_report_yield_hint" v="Based on N/P/K vs optimal threshold" />
+    <e k="sf_report_yield_loss" v="Yield ~-%d%%" />
     </elements>
 </l10n>
