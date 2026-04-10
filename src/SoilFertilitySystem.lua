@@ -779,6 +779,7 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing, area)
         diseasePressure = 0,
         fungicideDaysLeft = 0,
         dryDayCount = 0,
+        nutrientBuffer = {},  -- Tracks [fillTypeIndex] = litersApplied (reset daily)
     }
 
     self:log("Lazy-created field %d with area %.2f ha and natural soil variation", fieldId, self.fieldData[fieldId].fieldArea)
@@ -796,6 +797,9 @@ function SoilFertilitySystem:updateDailySoil()
     local phNorm = SoilConstants.PH_NORMALIZATION
 
     for fieldId, field in pairs(self.fieldData) do
+        -- Clear fertilizer buffers daily - require same-day full coverage
+        field.nutrientBuffer = {}
+
         -- Natural nutrient recovery for fallow fields
         local daysSinceFallow = currentDay - (field.lastHarvest or 0)
         if daysSinceFallow > SoilConstants.TIMING.FALLOW_THRESHOLD then
@@ -1178,26 +1182,52 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
     if areaInHa <= 0 then areaInHa = 1.0 end
 
     -- FERTILIZER RESTORATION CALCULATION:
-    -- factor = (liters per frame / 1000) / total field hectares
-    -- This distributes the applied liters across the entire field's concentration.
-    -- Example: 225L applied to 1ha → factor = 0.225 / 1.0 = 0.225
-    -- Example: 225L applied to 10ha → factor = 0.225 / 10.0 = 0.0225
-    -- (As the sprayer covers more ground, these small per-frame increases
-    -- sum up to the correct total concentration change for the whole field.)
-    local factor = (liters / 1000) / areaInHa
+    -- V1.6 Feedback Update: require ~90% field coverage before crediting nutrients.
+    -- Volume needed for full coverage = areaInHa * BASE_RATE
+    -- We track applied liters in a per-product buffer (nutrientBuffer[fillTypeIndex]).
+    -- Once buffer >= 90% of target, the nutrients are applied to the field and buffer reset.
+    if not field.nutrientBuffer then field.nutrientBuffer = {} end
+    local currentBuffer = (field.nutrientBuffer[fillTypeIndex] or 0) + liters
+    field.nutrientBuffer[fillTypeIndex] = currentBuffer
 
-    if entry.N then field.nitrogen   = math.min(limits.MAX, field.nitrogen   + entry.N * factor) end
-    if entry.P then field.phosphorus = math.min(limits.MAX, field.phosphorus + entry.P * factor) end
-    if entry.K then field.potassium  = math.min(limits.MAX, field.potassium  + entry.K * factor) end
-    if entry.pH then field.pH        = math.min(limits.PH_MAX, field.pH + entry.pH * factor) end
-    if entry.OM then field.organicMatter = math.min(limits.ORGANIC_MATTER_MAX, field.organicMatter + entry.OM * factor) end
+    local baseRateEntry = SoilConstants.SPRAYER_RATE.BASE_RATES[fillType.name] or 
+                         SoilConstants.SPRAYER_RATE.BASE_RATES.DEFAULT
+    local targetVolume = areaInHa * baseRateEntry.value
+    local coverageThreshold = targetVolume * 0.90  -- 90% coverage requirement
+
+    if currentBuffer >= coverageThreshold then
+        -- Apply nutrients (scaled by the total buffer volume we're now "releasing")
+        local factor = (currentBuffer / 1000) / areaInHa
+
+        if entry.N then field.nitrogen   = math.min(limits.MAX, field.nitrogen   + entry.N * factor) end
+        if entry.P then field.phosphorus = math.min(limits.MAX, field.phosphorus + entry.P * factor) end
+        if entry.K then field.potassium  = math.min(limits.MAX, field.potassium  + entry.K * factor) end
+        if entry.pH then field.pH        = math.min(limits.PH_MAX, field.pH + entry.pH * factor) end
+        if entry.OM then field.organicMatter = math.min(limits.ORGANIC_MATTER_MAX, field.organicMatter + entry.OM * factor) end
+
+        -- Clear buffer for this product after successful application
+        field.nutrientBuffer[fillTypeIndex] = 0
+
+        self:log("Full coverage achieved field %d (%s): Nutrients credited from %.1f L buffer", 
+            fieldId, fillType.name, currentBuffer)
+        
+        -- Trigger notification if it's the first application today (consistent with other events)
+        if not self.fertNotifyShown then
+            self.fertNotifyShown = {}
+        end
+        if not self.fertNotifyShown[fieldId] then
+            self:showNotification("Soil Update", string.format("Field %d fully fertilized with %s", fieldId, fillType.name))
+            self.fertNotifyShown[fieldId] = true
+        end
+    end
 
     field.fertilizerApplied = (field.fertilizerApplied or 0) + liters
 
     -- We only log high-precision values for fertilizer to track these small per-frame changes
     if self.settings.debugMode then
-        self:log("Fertilizer applied field %d (%s): %.4f L -> +N %.6f (area %.2f ha)", 
-            fieldId, fillType.name, liters, (entry.N or 0) * factor, areaInHa)
+        local progress = (currentBuffer / targetVolume) * 100
+        self:log("Fertilizer buffered field %d (%s): %.4f L -> Progress %.1f%% (Target %.1f L)", 
+            fieldId, fillType.name, liters, math.min(100, progress), targetVolume)
     end
 end
 

@@ -487,6 +487,7 @@ SoilConstants.SPRAYER_RATE = {
     BURN_PH_DROP_CERTAIN      = 0.30,  -- pH units lost on guaranteed burn
     BURN_N_DRAIN_RISK         = 5.0,   -- N points lost on probabilistic burn
     BURN_N_DRAIN_CERTAIN      = 12.0,  -- N points lost on guaranteed burn
+    FERTILIZER_COVERAGE_THRESHOLD = 0.90, -- % field coverage needed before nutrients are credited (V1.6 Realism Update)
 
     -- Reference application rates at 1.0x (step 10) per fill type.
     -- unit = "liquid" → value in L/ha;  unit = "dry" → value in kg/ha.
