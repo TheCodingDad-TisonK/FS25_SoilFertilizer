@@ -87,7 +87,7 @@ All three are visible in the HUD and the full Soil Report. Each can be toggled o
 
 ### 💊 Fertilizer Types
 
-Over 20 products tracked, each with a different nutrient job.
+25+ products tracked, each with a different nutrient job.
 
 **Base game (always available):**
 
@@ -100,7 +100,7 @@ Over 20 products tracked, each with a different nutrient job.
 | **Digestate** | ●●●○○ | ●●○○○ | ●●●●○ | ✓ | Biogas byproduct, well-rounded |
 | **Lime** | — | — | — | — | Only raises pH — but nothing else works properly without it |
 
-**Custom (purchasable big bags in shop):**
+**Custom dry/liquid (purchasable big bags in shop):**
 
 | Product | Type | Primary benefit |
 |---|---|---|
@@ -110,17 +110,29 @@ Over 20 products tracked, each with a different nutrient job.
 | MAP / DAP | Dry P+N | Phosphorus-focused blends |
 | Potash | Dry K | Pure potassium supplement |
 | Starter 10-34-0 | Liquid P | In-furrow high-P starter |
-| Liquid Lime | Liquid pH | Raises pH with sprayer equipment |
-| Gypsum | Dry pH+ | Minor pH correction + small OM gain |
 
-**Organic / slow-release (registered, obtained from compatible mods or production lines):**
+**Liquid equivalents for sprayer compatibility (purchasable big bags in shop):**
 
-| Product | N | P | K | OM | Notes |
-|---|---|---|---|---|---|
-| **Compost** | Low | Low | Low | ●●●●● | Best OM builder per litre |
-| **Biosolids** | ●●○○○ | ●●○○○ | Low | ✓ | Municipal organic amendment |
-| **Chicken Manure** | ●●●○○ | ●●●○○ | ●●○○○ | ✓ | Concentrated poultry litter |
-| **Pelletized Manure** | ●●●●○ | ●●●●○ | ●●●●○ | ✓ | Dense balanced organic NPK |
+All five dry granular products above have a liquid equivalent that works in standard sprayers instead of spreaders.
+
+| Product | Type | Primary benefit |
+|---|---|---|
+| Liquid Urea | Liquid N | Dissolved urea for sprayer application |
+| Liquid AMS | Liquid N | Liquid ammonium sulphate |
+| Liquid MAP | Liquid P+N | High-P liquid blend |
+| Liquid DAP | Liquid P+N | Liquid DAP equivalent |
+| Liquid Potash | Liquid K | Dissolved potassium for sprayers |
+
+**Organic / soil amendments (registered, obtained from compatible mods or production lines):**
+
+| Product | Application | N | P | K | OM | Notes |
+|---|---|---|---|---|---|---|
+| **Compost** | Spreader | Low | Low | Low | ●●●●● | Best OM builder per litre |
+| **Biosolids** | Spreader | ●●○○○ | ●●○○○ | Low | ✓ | Municipal organic amendment |
+| **Chicken Manure** | Spreader | ●●●○○ | ●●●○○ | ●●○○○ | ✓ | Concentrated poultry litter |
+| **Pelletized Manure** | Spreader | ●●●●○ | ●●●●○ | ●●●●○ | ✓ | Dense balanced organic NPK |
+| **Gypsum** | Spreader | — | — | — | Low | pH correction, minor OM gain |
+| **Liquid Lime** | Sprayer | — | — | — | — | Raises pH via sprayer equipment |
 
 > [!NOTE]
 > Organic matter builds slowly — it takes many seasons to accumulate meaningfully. Soil with high OM buffers pH swings and slows nutrient loss from rain.
@@ -279,7 +291,7 @@ This mod is licensed under **[CC BY-NC-ND 4.0](https://creativecommons.org/licen
 
 You may share it in its original form with attribution. You may not sell it, modify and redistribute it, or reupload it under a different name or authorship. Contributions via pull request are explicitly permitted and encouraged.
 
-**Author:** TisonK &nbsp;·&nbsp; **Version:** 1.5.2.0
+**Author:** TisonK &nbsp;·&nbsp; **Version:** 1.6.0.0
 
 © 2026 TisonK — See [LICENSE](LICENSE) for full terms.
 
