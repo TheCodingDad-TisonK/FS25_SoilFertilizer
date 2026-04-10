@@ -526,6 +526,7 @@ SoilConstants.SPRAYER_RATE = {
         -- Crop protection
         INSECTICIDE = { value = 1.5, unit = "liquid" },  -- ~0.16 gal/ac
         FUNGICIDE   = { value = 1.5, unit = "liquid" },  -- ~0.16 gal/ac
+        HERBICIDE   = { value = 1.5, unit = "liquid" },
         -- Fallback for unrecognized fill types
         DEFAULT           = { value =    93.5, unit = "liquid" },
     },
