@@ -184,11 +184,12 @@ Open via **ESC → Settings → Game Settings → Soil & Fertilizer**.
 | **Crop rotation** | On / Off | Enable legume rotation bonus and mono-crop fatigue multiplier |
 | **Difficulty** | Simple / Realistic / Hardcore | Scales depletion rate — 0.7× / 1× / 1.5× |
 | **HUD enabled** | On / Off | Show or hide the soil overlay |
-| **HUD position** | 5 presets | Top-right, top-left, bottom-right, bottom-left, centre-right |
+| **HUD position** | 6 options | Top-right, top-left, bottom-right, bottom-left, centre-right, or custom (drag to any position) |
 | **HUD colour theme** | 4 themes | Green / Blue / Amber / Mono |
 | **HUD transparency** | Clear → Solid | 5 levels from 25% to 100% opacity |
 | **HUD font size** | Small / Medium / Large | Scales all HUD text |
-| **Compact mode** | On / Off | One line per nutrient instead of full bars |
+| **Use imperial units** | On / Off | Sprayer rate shown in gal/ac and lb/ac instead of L/ha and kg/ha |
+| **Auto rate control** | On / Off | Sprayer rate automatically adjusts toward the target application rate for the current product |
 
 > [!NOTE]
 > In multiplayer, settings are **server-authoritative** — the host's settings are pushed to all clients on join. Clients cannot override locked settings.
@@ -292,7 +293,7 @@ This mod is licensed under **[CC BY-NC-ND 4.0](https://creativecommons.org/licen
 
 You may share it in its original form with attribution. You may not sell it, modify and redistribute it, or reupload it under a different name or authorship. Contributions via pull request are explicitly permitted and encouraged.
 
-**Author:** TisonK &nbsp;·&nbsp; **Version:** 1.6.0.0
+**Author:** TisonK &nbsp;·&nbsp; **Version:** 1.6.0.4
 
 © 2026 TisonK — See [LICENSE](LICENSE) for full terms.
 
