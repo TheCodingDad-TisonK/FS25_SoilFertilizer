@@ -206,10 +206,19 @@ function HookManager:registerCustomSprayTypes()
         return
     end
 
-    local liquidLPS         = liqType and liqType.litersPerSecond or 0
+    local liquidLPS         = liqType and liqType.litersPerSecond or 0.0081
     local liquidGroundType  = liqType and liqType.sprayGroundType or 1
-    local solidLPS          = dryType and dryType.litersPerSecond or 0
+    local solidLPS          = dryType and dryType.litersPerSecond or 0.0060
     local solidGroundType   = dryType and dryType.sprayGroundType or 1
+
+    -- Use BASE_RATES from Constants to calibrate LPS for each custom product.
+    -- FS25 base LPS (liquid=0.0081, solid=0.0060) yields the base game application
+    -- rates (93.5 L/ha and 225 kg/ha). By scaling the LPS by the ratio of our
+    -- desired rate to the base rate, we ensure the tank drains at the correct
+    -- speed for each individual product.
+    local baseRates = SoilConstants.SPRAYER_RATE.BASE_RATES
+    local liqBase = baseRates.LIQUIDFERTILIZER.value
+    local dryBase = baseRates.FERTILIZER.value
 
     -- Liquid nitrogen / starter types → inherit from LIQUIDFERTILIZER
     local liquidNames = { "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME", "INSECTICIDE", "FUNGICIDE",
@@ -223,8 +232,11 @@ function HookManager:registerCustomSprayTypes()
 
     for _, name in ipairs(liquidNames) do
         if g_fillTypeManager:getFillTypeByName(name) then
+            local customRate = baseRates[name] and baseRates[name].value or liqBase
+            local customLPS  = liquidLPS * (customRate / liqBase)
+
             -- addSprayType is idempotent: if already registered it updates the entry
-            g_sprayTypeManager:addSprayType(name, liquidLPS, "FERTILIZER", liquidGroundType, false)
+            g_sprayTypeManager:addSprayType(name, customLPS, "FERTILIZER", liquidGroundType, false)
             registered = registered + 1
         else
             skipped = skipped + 1
@@ -233,7 +245,10 @@ function HookManager:registerCustomSprayTypes()
 
     for _, name in ipairs(solidNames) do
         if g_fillTypeManager:getFillTypeByName(name) then
-            g_sprayTypeManager:addSprayType(name, solidLPS, "FERTILIZER", solidGroundType, false)
+            local customRate = baseRates[name] and baseRates[name].value or dryBase
+            local customLPS  = solidLPS * (customRate / dryBase)
+
+            g_sprayTypeManager:addSprayType(name, customLPS, "FERTILIZER", solidGroundType, false)
             registered = registered + 1
         else
             skipped = skipped + 1
@@ -241,7 +256,7 @@ function HookManager:registerCustomSprayTypes()
     end
 
     SoilLogger.info(
-        "[OK] Custom spray types registered: %d types (liquid LPS=%.5f, solid LPS=%.5f, %d skipped/unavailable)",
+        "[OK] Custom spray types registered: %d types (calibrated LPS: liquid base=%.5f, solid base=%.5f, %d skipped/unavailable)",
         registered, liquidLPS, solidLPS, skipped
     )
 end
