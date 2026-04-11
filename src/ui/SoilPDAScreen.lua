@@ -93,10 +93,12 @@ end
 
 function SoilPDAScreen:initialize()
     SoilPDAScreen:superClass().initialize(self)
-    -- Standard back button only — no custom footer buttons needed
-    self:setMenuButtonInfo({
+    
+    self.menuButtonInfo = {
         {inputAction = "MENU_BACK"},
-    })
+        {inputAction = "MENU_ACCEPT", text = tr("sf_pda_filter_all", "Filter"), callback = function() self:onClickFilter() end},
+    }
+    self:setMenuButtonInfo(self.menuButtonInfo)
 end
 
 -- ── Static registration ───────────────────────────────────
