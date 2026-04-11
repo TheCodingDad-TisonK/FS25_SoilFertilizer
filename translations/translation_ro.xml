@@ -281,5 +281,100 @@
     <e k="helpLine_sf_nu_p4_bonus_text" v="Growing a legume crop (soybeans, peas, beans) after a non-legume adds a free nitrogen boost each spring for 3 days." />
     <e k="helpLine_sf_nu_p4_fatigue_title" v="Crop Fatigue" />
     <e k="helpLine_sf_nu_p4_fatigue_text" v="Planting the same crop two seasons in a row increases nutrient extraction by 15%. Rotate crops to avoid soil fatigue." />
+
+    <!-- Soil PDA Screen (SoilPDAScreen.lua) -->
+    <e k="sf_pda_screen_title" v="Soil &amp; Fertilizer" />
+    <e k="sf_pda_tab_map" v="Soil Map" />
+    <e k="sf_pda_tab_fields" v="Fields" />
+    <e k="sf_pda_tab_treatment" v="Treatment Plan" />
+    <e k="sf_pda_section_farm_overview" v="Farm Overview" />
+    <e k="sf_pda_fields_tracked_label" v="Fields Tracked" />
+    <e k="sf_pda_fields_owned_label" v="Fields Owned" />
+    <e k="sf_pda_section_avg_nutrients" v="Avg. Nutrients" />
+    <e k="sf_pda_avg_n_label" v="Nitrogen (N)" />
+    <e k="sf_pda_avg_p_label" v="Phosphorus (P)" />
+    <e k="sf_pda_avg_k_label" v="Potassium (K)" />
+    <e k="sf_pda_avg_ph_label" v="pH Level" />
+    <e k="sf_pda_avg_om_label" v="Organic Matter" />
+    <e k="sf_pda_section_pressure" v="Crop Pressure" />
+    <e k="sf_pda_weed_label" v="Weed" />
+    <e k="sf_pda_pest_label" v="Pest" />
+    <e k="sf_pda_disease_label" v="Disease" />
+    <e k="sf_pda_section_attention" v="Needs Attention" />
+    <e k="sf_pda_needs_fert_label" v="Need Fertilizer" />
+    <e k="sf_pda_no_data_left" v="No field data yet." />
+    <!-- Map Tab -->
+    <e k="sf_pda_map_section_title" v="Soil Map Layers" />
+    <e k="sf_pda_map_active_layer" v="Active Layer" />
+    <e k="sf_pda_map_layer_off_desc" v="No soil layer active. Press Shift+M to cycle layers." />
+    <e k="sf_pda_map_layer_n_desc" v="Nitrogen content across all fields. Green = good, red = depleted." />
+    <e k="sf_pda_map_layer_p_desc" v="Phosphorus content across all fields. Green = good, red = depleted." />
+    <e k="sf_pda_map_layer_k_desc" v="Potassium content across all fields. Green = good, red = depleted." />
+    <e k="sf_pda_map_layer_ph_desc" v="Soil pH level. Optimal range is 6.5-7.0 (green)." />
+    <e k="sf_pda_map_layer_om_desc" v="Organic matter content. Higher is better for long-term fertility." />
+    <e k="sf_pda_map_layer_urgency_desc" v="Combined treatment urgency. Red = needs immediate attention." />
+    <e k="sf_pda_map_layer_weed_desc" v="Weed pressure level. Red = high infestation, apply herbicide." />
+    <e k="sf_pda_map_layer_pest_desc" v="Pest pressure level. Red = high infestation, apply insecticide." />
+    <e k="sf_pda_map_layer_disease_desc" v="Disease pressure level. Red = active outbreak, apply fungicide." />
+    <e k="sf_pda_map_legend_title" v="Map Legend" />
+    <e k="sf_pda_map_legend_good" v="Good" />
+    <e k="sf_pda_map_legend_fair" v="Fair" />
+    <e k="sf_pda_map_legend_poor" v="Poor / Low" />
+    <e k="sf_pda_map_legend_low" v="Low" />
+    <e k="sf_pda_map_legend_medium" v="Medium" />
+    <e k="sf_pda_map_legend_high" v="High" />
+    <e k="sf_pda_map_legend_excess" v="Excess" />
+    <e k="sf_pda_map_instructions" v="Press Shift+M in-game to cycle soil map layers." />
+    <e k="sf_pda_map_open_btn" v="Open Soil Map" />
+    <!-- Fields Tab -->
+    <e k="sf_pda_fields_section_title" v="All Fields" />
+    <e k="sf_pda_col_field" v="Field" />
+    <e k="sf_pda_col_n" v="N%" />
+    <e k="sf_pda_col_p" v="P%" />
+    <e k="sf_pda_col_k" v="K%" />
+    <e k="sf_pda_col_ph" v="pH" />
+    <e k="sf_pda_col_om" v="OM" />
+    <e k="sf_pda_col_status" v="Status" />
+    <e k="sf_pda_no_fields" v="No field data recorded yet." />
+    <e k="sf_pda_status_good" v="Good" />
+    <e k="sf_pda_status_fair" v="Fair" />
+    <e k="sf_pda_status_poor" v="Poor" />
+    <!-- Treatment Tab -->
+    <e k="sf_pda_treatment_section_title" v="Treatment Plan" />
+    <e k="sf_pda_col_priority" v="Urgency" />
+    <e k="sf_pda_col_needs" v="Needs" />
+    <e k="sf_pda_no_treatment" v="All fields are in good condition." />
+    <e k="sf_pda_need_n" v="Nitrogen" />
+    <e k="sf_pda_need_p" v="Phosphorus" />
+    <e k="sf_pda_need_k" v="Potassium" />
+    <e k="sf_pda_need_ph" v="pH Adjust" />
+    <e k="sf_pda_need_weed" v="Herbicide" />
+    <e k="sf_pda_need_pest" v="Insecticide" />
+    <e k="sf_pda_need_disease" v="Fungicide" />
+    <e k="sf_pda_need_multiple" v="Multiple" />
+    <e k="sf_pda_treatment_minor" v="Minor" />
+    <!-- Field Detail Dialog (SoilFieldDetailDialog.lua) -->
+    <e k="sf_detail_title" v="Field Detail" />
+    <e k="sf_detail_close" v="Close" />
+    <e k="sf_detail_field_label" v="Field #" />
+    <e k="sf_detail_urgency_label" v="Urgency:" />
+    <e k="sf_detail_section_nutrients" v="Soil Nutrients" />
+    <e k="sf_detail_section_pressure" v="Crop Pressure" />
+    <e k="sf_detail_section_history" v="Crop History" />
+    <e k="sf_detail_n_label" v="Nitrogen (N)" />
+    <e k="sf_detail_p_label" v="Phosphorus (P)" />
+    <e k="sf_detail_k_label" v="Potassium (K)" />
+    <e k="sf_detail_ph_label" v="pH Level" />
+    <e k="sf_detail_om_label" v="Organic Matter" />
+    <e k="sf_detail_weed_label" v="Weed Pressure" />
+    <e k="sf_detail_pest_label" v="Pest Pressure" />
+    <e k="sf_detail_disease_label" v="Disease Pressure" />
+    <e k="sf_detail_last_crop_label" v="Last Crop" />
+    <e k="sf_detail_rotation_label" v="Rotation Status" />
+    <e k="sf_detail_rotation_ok" v="OK" />
+    <e k="sf_detail_rotation_bonus" v="Legume Bonus (+N)" />
+    <e k="sf_detail_rotation_fatigue" v="Fatigue (x1.15 depletion)" />
+    <e k="sf_detail_no_field" v="No data available." />
+    <e k="sf_detail_no_crop" v="None recorded" />
     </elements>
 </l10n>

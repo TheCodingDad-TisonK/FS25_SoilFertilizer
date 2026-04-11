@@ -545,6 +545,18 @@ SoilConstants.SPRAYER_RATE = {
 }
 
 -- ========================================
+-- MAP OVERLAY (v1.7.0)
+-- ========================================
+SoilConstants.MAP_OVERLAY = {
+    OVERLAY_RESOLUTION = {512, 512},
+    ALPHA         = 0.70,
+    LEGEND_W_FRAC = 0.18,   -- legend panel width as fraction of map width
+    LEGEND_H_FRAC = 0.13,   -- legend panel height as fraction of map height
+    LEGEND_MARGIN = 0.02,   -- margin from map edge (fraction of map width)
+    LAYER_COUNT   = 9,
+}
+
+-- ========================================
 -- WEED PRESSURE (Issue #98)
 -- ========================================
 -- Field-level 0-100 score representing weed density.

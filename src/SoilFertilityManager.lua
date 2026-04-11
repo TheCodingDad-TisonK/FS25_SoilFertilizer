@@ -93,6 +93,29 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
             SoilLogger.info("Soil Report dialog created")
         end
 
+        -- Field Detail dialog (opened from PDA Screen fields/treatment lists)
+        if SoilFieldDetailDialog and g_gui then
+            SoilFieldDetailDialog.register(modDirectory)
+            SoilLogger.info("Soil Field Detail dialog registered")
+        end
+
+        -- Map overlay (client only)
+        if SoilMapOverlay then
+            self.soilMapOverlay = SoilMapOverlay.new(self.soilSystem, self.settings)
+            self.soilMapOverlay:initialize()
+            SoilLogger.info("Soil Map Overlay created")
+        end
+
+        -- Map frame sidebar page (client only)
+        -- Injects a native sub-page into InGameMenuMapFrame (PDA map sidebar)
+        -- so the player can select the active soil layer from the map panel.
+        -- Requires soilMapOverlay to exist first (it drives the actual drawing).
+        if SoilMapFrame and self.soilMapOverlay then
+            self.soilMapFrame = SoilMapFrame.new(self.soilMapOverlay, self.settings)
+            self.soilMapFrame:installHooks()
+            SoilLogger.info("Soil Map Frame sidebar page created")
+        end
+
         -- Hook PlayerInputComponent.registerActionEvents to register J/K in the PLAYER context.
         -- PLAYER context is reused (not recreated) when the player returns on foot, so these
         -- events persist across vehicle entry/exit cycles.
@@ -134,6 +157,22 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
                     if repOk and repId then
                         g_SoilFertilityManager.soilReportEventId = repId
                         SoilLogger.info("Soil Report (K) registered in PLAYER context")
+                    end
+                end
+
+                -- Map layer cycle (Shift+M) — registered in PLAYER context only
+                -- (pause-menu map is accessible regardless of context, but the key
+                --  is intended for on-foot use; Shift+M avoids VEHICLE conflicts)
+                if g_SoilFertilityManager.soilMapOverlay then
+                    local mapOk, mapId = g_inputBinding:registerActionEvent(
+                        InputAction.SF_CYCLE_MAP_LAYER, g_SoilFertilityManager,
+                        g_SoilFertilityManager.onCycleMapLayerInput,
+                        false, true, false, true
+                    )
+                    if mapOk and mapId then
+                        g_SoilFertilityManager.cycleMapLayerEventId = mapId
+                        g_inputBinding:setActionEventTextVisibility(mapId, false)
+                        SoilLogger.info("Map layer cycle (Shift+M) registered in PLAYER context")
                     end
                 end
 
@@ -487,6 +526,12 @@ function SoilFertilityManager:onToggleAutoInput()
     if rm then
         local newState = rm:toggleAutoMode(vehicle.id)
         SoilNetworkEvents_SendSprayerAutoMode(vehicle.id, newState)
+    end
+end
+
+function SoilFertilityManager:onCycleMapLayerInput()
+    if self.soilMapOverlay then
+        self.soilMapOverlay:cycleLayer()
     end
 end
 
@@ -890,10 +935,25 @@ function SoilFertilityManager:delete()
         self.toggleAutoEventId = nil
     end
 
+    if self.cycleMapLayerEventId and g_inputBinding then
+        g_inputBinding:removeActionEvent(self.cycleMapLayerEventId)
+        self.cycleMapLayerEventId = nil
+    end
+
     if self.soilReportDialog then
         if g_gui then g_gui:closeDialogByName("SoilReportDialog") end
         self.soilReportDialog = nil
         SoilReportDialog.instance = nil
+    end
+
+    if self.soilMapOverlay then
+        self.soilMapOverlay:delete()
+        self.soilMapOverlay = nil
+    end
+
+    if self.soilMapFrame then
+        self.soilMapFrame:delete()
+        self.soilMapFrame = nil
     end
 
     if self.soilHUD then

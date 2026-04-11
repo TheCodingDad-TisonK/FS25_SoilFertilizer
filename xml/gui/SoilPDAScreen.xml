@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<!--
+    Soil PDA Screen
+    InGameMenu page — follows EmployeeManager / MDM pattern (no newLayer, no fullScreenBackground).
+    Controller: SoilPDAScreen (src/ui/SoilPDAScreen.lua)
+-->
+<GUI name="menuSoilFertilizer">
+  <GuiElement profile="fs25_menuContainer">
+
+    <!-- Header bar with icon, title -->
+    <GuiElement profile="fs25_menuHeaderPanel" position="-200px 90px" width="800px">
+      <Bitmap profile="fs25_menuHeaderIconBg">
+        <Bitmap profile="SF_IconMenu"/>
+      </Bitmap>
+      <Text profile="fs25_menuHeaderTitle" id="screenTitle" text="$l10n_sf_pda_screen_title"/>
+    </GuiElement>
+
+    <!-- Two-column layout container -->
+    <GuiElement profile="fs25_subCategorySelectorTabbedContainer" position="0px 0px">
+
+      <!-- LEFT COLUMN: Farm summary stats -->
+      <ThreePartBitmap width="460px" height="700px" position="0px 100px">
+        <GuiElement profile="fs25_subCategoryContainer" width="420px">
+
+          <!-- Farm Overview header -->
+          <Text profile="sf_sectionHeader" text="$l10n_sf_pda_section_farm_overview" position="10px -10px"/>
+
+          <!-- Field counts -->
+          <Text profile="sf_statLabel" text="$l10n_sf_pda_fields_tracked_label" position="10px -45px"/>
+          <Text profile="sf_statValue" id="statsFieldsTracked" text="0" position="220px -45px"/>
+
+          <Text profile="sf_statLabel" text="$l10n_sf_pda_fields_owned_label" position="10px -70px"/>
+          <Text profile="sf_statValue" id="statsFieldsOwned" text="0" position="220px -70px"/>
+
+          <!-- Nutrients sub-header -->
+          <Text profile="sf_subHeader" text="$l10n_sf_pda_section_avg_nutrients" position="10px -110px"/>
+
+          <!-- N/P/K rows -->
+          <Text profile="sf_statLabel" text="$l10n_sf_pda_avg_n_label" position="10px -140px"/>
+          <Text profile="sf_statValue" id="statsAvgN" text="--" position="220px -140px"/>
+
+          <Text profile="sf_statLabel" text="$l10n_sf_pda_avg_p_label" position="10px -165px"/>
+          <Text profile="sf_statValue" id="statsAvgP" text="--" position="220px -165px"/>
+
+          <Text profile="sf_statLabel" text="$l10n_sf_pda_avg_k_label" position="10px -190px"/>
+          <Text profile="sf_statValue" id="statsAvgK" text="--" position="220px -190px"/>
+
+          <Text profile="sf_statLabel" text="$l10n_sf_pda_avg_ph_label" position="10px -215px"/>
+          <Text profile="sf_statValue" id="statsAvgPH" text="--" position="220px -215px"/>
+
+          <Text profile="sf_statLabel" text="$l10n_sf_pda_avg_om_label" position="10px -240px"/>
+          <Text profile="sf_statValue" id="statsAvgOM" text="--" position="220px -240px"/>
+
+          <!-- Pressure sub-header -->
+          <Text profile="sf_subHeader" text="$l10n_sf_pda_section_pressure" position="10px -285px"/>
+
+          <Text profile="sf_statLabel" text="$l10n_sf_pda_weed_label" position="10px -315px"/>
+          <Text profile="sf_statValue" id="statsWeedFields" text="0" position="220px -315px"/>
+
+          <Text profile="sf_statLabel" text="$l10n_sf_pda_pest_label" position="10px -340px"/>
+          <Text profile="sf_statValue" id="statsPestFields" text="0" position="220px -340px"/>
+
+          <Text profile="sf_statLabel" text="$l10n_sf_pda_disease_label" position="10px -365px"/>
+          <Text profile="sf_statValue" id="statsDiseaseFields" text="0" position="220px -365px"/>
+
+          <!-- Attention sub-header -->
+          <Text profile="sf_subHeader" text="$l10n_sf_pda_section_attention" position="10px -410px"/>
+
+          <Text profile="sf_statLabel" text="$l10n_sf_pda_needs_fert_label" position="10px -440px"/>
+          <Text profile="sf_statValue" id="statsNeedsAttention" text="0" position="220px -440px"/>
+
+          <!-- No data hint -->
+          <Text profile="sf_noDataHint" id="leftNoDataHint" text="$l10n_sf_pda_no_data_left"
+                position="10px -500px" size="390px 120px" wrapText="true" autoFitHeight="true" visible="false"/>
+
+        </GuiElement>
+      </ThreePartBitmap>
+
+      <!-- RIGHT COLUMN: Tabbed detail panels -->
+      <GuiElement id="rightPanel" position="500px 100px" width="1000px" height="700px">
+
+        <!-- ═══════════════════════════════════════════════════
+             TAB 1: SOIL MAP
+             Shows active layer info, legend, and open map button.
+             ═══════════════════════════════════════════════════ -->
+        <GuiElement id="mapContent" position="0px 0px" width="1000px" height="668px" debugEnabled="false">
+
+          <Text profile="sf_sectionHeader" id="mapSectionHeader"
+                text="$l10n_sf_pda_map_section_title" position="0px 658px"/>
+
+          <!-- Active layer row -->
+          <Text profile="sf_detailLabel" text="$l10n_sf_pda_map_active_layer"
+                position="0px 618px" size="200px 24px"/>
+          <Text profile="sf_detailValueLarge" id="mapLayerName"
+                text="--" position="210px 618px" size="700px 24px"/>
+
+          <!-- Layer description -->
+          <Text profile="sf_detailLabel" id="mapLayerDesc"
+                text="" position="0px 578px" size="960px 60px" wrapText="true" autoFitHeight="true"/>
+
+          <!-- Legend section (only visible when layer active) -->
+          <GuiElement id="mapLegendGroup" position="0px 400px" width="600px" height="155px" visible="false">
+            <Text profile="sf_subHeader" text="$l10n_sf_pda_map_legend_title"
+                  position="0px 130px" size="400px 24px"/>
+
+            <!-- Color indicators — background color set in Lua via setTextColor on label -->
+            <Text profile="sf_legendBlock" id="mapLegendGoodBlock"
+                  text=" " position="0px 98px" size="24px 20px"/>
+            <Text profile="sf_legendLabel" id="mapLegendGoodText"
+                  text="$l10n_sf_pda_map_legend_good" position="30px 98px" size="400px 20px"/>
+
+            <Text profile="sf_legendBlock" id="mapLegendFairBlock"
+                  text=" " position="0px 72px" size="24px 20px"/>
+            <Text profile="sf_legendLabel" id="mapLegendFairText"
+                  text="$l10n_sf_pda_map_legend_fair" position="30px 72px" size="400px 20px"/>
+
+            <Text profile="sf_legendBlock" id="mapLegendPoorBlock"
+                  text=" " position="0px 46px" size="24px 20px"/>
+            <Text profile="sf_legendLabel" id="mapLegendPoorText"
+                  text="$l10n_sf_pda_map_legend_poor" position="30px 46px" size="400px 20px"/>
+
+            <Text profile="sf_legendBlock" id="mapLegendExcessBlock"
+                  text=" " position="0px 20px" size="24px 20px"/>
+            <Text profile="sf_legendLabel" id="mapLegendExcessText"
+                  text="" position="30px 20px" size="400px 20px"/>
+          </GuiElement>
+
+          <!-- Instructions text -->
+          <Text profile="sf_instructionsText" id="mapInstructions"
+                text="$l10n_sf_pda_map_instructions"
+                position="0px 200px" size="960px 80px" wrapText="true" autoFitHeight="true"/>
+
+          <!-- Open Map button -->
+          <Button profile="buttonActivate" id="btnOpenMap"
+                  text="$l10n_sf_pda_map_open_btn"
+                  onClick="onClickOpenMap"
+                  position="0px 30px" size="220px 36px"/>
+        </GuiElement>
+
+        <!-- ═══════════════════════════════════════════════════
+             TAB 2: FIELDS TABLE
+             SmoothList of all tracked fields with nutrient values.
+             ═══════════════════════════════════════════════════ -->
+        <GuiElement id="fieldsContent" position="0px 0px" width="1000px" height="668px"
+                    visible="false" debugEnabled="false">
+
+          <Text profile="sf_sectionHeader" id="fieldsSectionHeader"
+                text="$l10n_sf_pda_fields_section_title" position="0px 658px"/>
+
+          <!-- Column headers — match cell positions exactly -->
+          <Text profile="sf_colHeader" text="$l10n_sf_pda_col_field"
+                position="8px 623px"   size="80px  28px"/>
+          <Text profile="sf_colHeaderRight" text="$l10n_sf_pda_col_n"
+                position="90px 623px"  size="100px 28px"/>
+          <Text profile="sf_colHeaderRight" text="$l10n_sf_pda_col_p"
+                position="195px 623px" size="100px 28px"/>
+          <Text profile="sf_colHeaderRight" text="$l10n_sf_pda_col_k"
+                position="300px 623px" size="100px 28px"/>
+          <Text profile="sf_colHeaderRight" text="$l10n_sf_pda_col_ph"
+                position="405px 623px" size="100px 28px"/>
+          <Text profile="sf_colHeaderRight" text="$l10n_sf_pda_col_om"
+                position="510px 623px" size="100px 28px"/>
+          <Text profile="sf_colHeaderRight" text="$l10n_sf_pda_col_status"
+                position="615px 623px" size="200px 28px"/>
+
+          <!-- Fields list container -->
+          <GuiElement id="fieldListContainer" position="0px 80px"
+                      width="1000px" height="510px">
+            <SmoothList id="fieldList" profile="sf_smoothList"
+                        startClipperElementName="fieldListStart"
+                        endClipperElementName="fieldListEnd">
+              <ListItem profile="sf_listRow" onClick="onClickFieldRow">
+                <Bitmap profile="sf_rowBg" name="alternating"/>
+                <Text profile="sf_cellLeft"  name="fieldRowId"     size="80px  28px"/>
+                <Text profile="sf_cellRight" name="fieldRowN"      position="90px 0"  size="100px 28px"/>
+                <Text profile="sf_cellRight" name="fieldRowP"      position="195px 0" size="100px 28px"/>
+                <Text profile="sf_cellRight" name="fieldRowK"      position="300px 0" size="100px 28px"/>
+                <Text profile="sf_cellRight" name="fieldRowPH"     position="405px 0" size="100px 28px"/>
+                <Text profile="sf_cellRight" name="fieldRowOM"     position="510px 0" size="100px 28px"/>
+                <Text profile="sf_cellRight" name="fieldRowStatus" position="615px 0" size="200px 28px"/>
+              </ListItem>
+            </SmoothList>
+
+            <Bitmap profile="fs25_secondaryMenuStartClipper" name="fieldListStart"/>
+            <Bitmap profile="fs25_secondaryMenuStopClipper"  name="fieldListEnd"/>
+
+            <ThreePartBitmap profile="fs25_subCategoryListSliderBox">
+              <Slider profile="fs25_listSlider" dataElementId="fieldList"/>
+            </ThreePartBitmap>
+          </GuiElement>
+
+          <Text profile="sf_emptyHint" id="fieldsEmptyHint"
+                text="$l10n_sf_pda_no_fields"
+                position="0px 350px" size="1000px 40px"/>
+        </GuiElement>
+
+        <!-- ═══════════════════════════════════════════════════
+             TAB 3: TREATMENT PLAN
+             Fields sorted by urgency with what they need.
+             ═══════════════════════════════════════════════════ -->
+        <GuiElement id="treatmentContent" position="0px 0px" width="1000px" height="668px"
+                    visible="false" debugEnabled="false">
+
+          <Text profile="sf_sectionHeader" id="treatmentSectionHeader"
+                text="$l10n_sf_pda_treatment_section_title" position="0px 658px"/>
+
+          <!-- Column headers -->
+          <Text profile="sf_colHeader" text="$l10n_sf_pda_col_field"
+                position="8px 623px"   size="80px  28px"/>
+          <Text profile="sf_colHeaderRight" text="$l10n_sf_pda_col_priority"
+                position="90px 623px"  size="120px 28px"/>
+          <Text profile="sf_colHeader" text="$l10n_sf_pda_col_needs"
+                position="220px 623px" size="760px 28px"/>
+
+          <!-- Treatment list container -->
+          <GuiElement id="treatmentListContainer" position="0px 80px"
+                      width="1000px" height="510px">
+            <SmoothList id="treatmentList" profile="sf_smoothList"
+                        startClipperElementName="treatListStart"
+                        endClipperElementName="treatListEnd">
+              <ListItem profile="sf_listRow" onClick="onClickTreatmentRow">
+                <Bitmap profile="sf_rowBg" name="alternating"/>
+                <Text profile="sf_cellLeft"  name="treatRowId"      size="80px 28px"/>
+                <Text profile="sf_cellRight" name="treatRowUrgency" position="90px 0"  size="120px 28px"/>
+                <Text profile="sf_cellLeft"  name="treatRowNeeds"   position="220px 0" size="760px 28px"/>
+              </ListItem>
+            </SmoothList>
+
+            <Bitmap profile="fs25_secondaryMenuStartClipper" name="treatListStart"/>
+            <Bitmap profile="fs25_secondaryMenuStopClipper"  name="treatListEnd"/>
+
+            <ThreePartBitmap profile="fs25_subCategoryListSliderBox">
+              <Slider profile="fs25_listSlider" dataElementId="treatmentList"/>
+            </ThreePartBitmap>
+          </GuiElement>
+
+          <Text profile="sf_emptyHint" id="treatmentEmptyHint"
+                text="$l10n_sf_pda_no_treatment"
+                position="0px 350px" size="1000px 40px" visible="false"/>
+        </GuiElement>
+
+        <!-- Tab bar — declared LAST so it receives click priority -->
+        <GuiElement id="tabBar" profile="emptyPanel" position="0px 668px" width="1000px" height="30px">
+          <!-- Tab 1: Map -->
+          <Button profile="sf_tabBtnHit" onClick="onClickTabMap"    position="0px 0px"   size="200px 28px"/>
+          <Text   profile="sf_tabLabel"  id="tabLabelMap"    text="$l10n_sf_pda_tab_map"       onClick="onClickTabMap"    position="0px 28px"   size="200px 28px"/>
+          <Bitmap profile="sf_tabUnderline" id="tabUnderlineMap"    position="0px 0px"   size="200px 2px"/>
+
+          <!-- Tab 2: Fields -->
+          <Button profile="sf_tabBtnHit" onClick="onClickTabFields"    position="210px 0px" size="200px 28px"/>
+          <Text   profile="sf_tabLabel"  id="tabLabelFields"  text="$l10n_sf_pda_tab_fields"     onClick="onClickTabFields"  position="210px 28px" size="200px 28px"/>
+          <Bitmap profile="sf_tabUnderline" id="tabUnderlineFields"    position="210px 0px" size="200px 2px" visible="false"/>
+
+          <!-- Tab 3: Treatment -->
+          <Button profile="sf_tabBtnHit" onClick="onClickTabTreatment"  position="420px 0px" size="220px 28px"/>
+          <Text   profile="sf_tabLabel"  id="tabLabelTreatment" text="$l10n_sf_pda_tab_treatment" onClick="onClickTabTreatment" position="420px 28px" size="220px 28px"/>
+          <Bitmap profile="sf_tabUnderline" id="tabUnderlineTreatment"  position="420px 0px" size="220px 2px" visible="false"/>
+        </GuiElement>
+
+        <!-- Thin divider line below tab bar -->
+        <Bitmap profile="sf_tabDivider" position="0px 666px" size="1000px 2px"/>
+
+      </GuiElement>
+    </GuiElement>
+  </GuiElement>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       INLINE PROFILES
+       ═══════════════════════════════════════════════════════════════ -->
+  <GUIProfiles>
+
+    <!-- Mod icon for header -->
+    <Profile name="SF_IconMenu" extends="baseReference" with="anchorMiddleCenter">
+      <size value="50px 50px"/>
+      <imageSliceId value="noSlice"/>
+      <imageFilename value="g_SFIconMenu"/>
+      <imageColor value="$preset_fs25_colorMainDark"/>
+    </Profile>
+
+    <!-- Tab hit area (invisible, handles click) -->
+    <Profile name="sf_tabBtnHit" extends="emptyPanel">
+      <isFocusable value="true"/>
+    </Profile>
+
+    <!-- Tab label text -->
+    <Profile name="sf_tabLabel" extends="fs25_textDefault" with="anchorTopLeft">
+      <isFocusable value="true"/>
+      <textSize value="14px"/>
+      <textBold value="true"/>
+      <textUpperCase value="true"/>
+      <textAlignment value="center"/>
+      <textColor value="$preset_colorWhite_50"/>
+    </Profile>
+
+    <!-- Active tab underline: soil green -->
+    <Profile name="sf_tabUnderline" extends="baseReference" with="anchorBottomLeft">
+      <imageColor value="0.35 0.85 0.40 1.0"/>
+    </Profile>
+
+    <!-- Tab divider: subtle white line -->
+    <Profile name="sf_tabDivider" extends="baseReference" with="anchorTopLeft">
+      <imageColor value="1.0 1.0 1.0 0.12"/>
+    </Profile>
+
+    <!-- Section headers: soil green uppercase -->
+    <Profile name="sf_sectionHeader" extends="fs25_textDefault" with="anchorTopLeft">
+      <textSize value="18px"/>
+      <textBold value="true"/>
+      <textUpperCase value="true"/>
+      <textColor value="0.35 0.85 0.40 1.0"/>
+    </Profile>
+
+    <!-- Sub-headers: muted uppercase -->
+    <Profile name="sf_subHeader" extends="fs25_textDefault" with="anchorTopLeft">
+      <textSize value="13px"/>
+      <textBold value="true"/>
+      <textUpperCase value="true"/>
+      <textColor value="$preset_colorWhite_50"/>
+    </Profile>
+
+    <!-- Stat label (left-aligned dim text) -->
+    <Profile name="sf_statLabel" extends="fs25_textDefault" with="anchorTopLeft">
+      <textSize value="14px"/>
+      <textColor value="$preset_colorWhite_50"/>
+      <textAlignment value="left"/>
+      <size value="200px 24px"/>
+    </Profile>
+
+    <!-- Stat value (right side, highlighted) -->
+    <Profile name="sf_statValue" extends="fs25_textDefault" with="anchorTopLeft">
+      <textSize value="14px"/>
+      <textBold value="true"/>
+      <textColor value="$preset_colorWhite"/>
+      <textAlignment value="right"/>
+      <size value="180px 24px"/>
+    </Profile>
+
+    <!-- Detail label (right panel, dimmed) -->
+    <Profile name="sf_detailLabel" extends="fs25_textDefault" with="anchorTopLeft">
+      <textSize value="14px"/>
+      <textColor value="$preset_colorWhite_50"/>
+    </Profile>
+
+    <!-- Detail value large (right panel) -->
+    <Profile name="sf_detailValueLarge" extends="fs25_textDefault" with="anchorTopLeft">
+      <textSize value="16px"/>
+      <textBold value="true"/>
+      <textColor value="0.35 0.85 0.40 1.0"/>
+    </Profile>
+
+    <!-- Instructions text (dimmer, multi-line) -->
+    <Profile name="sf_instructionsText" extends="fs25_textDefault" with="anchorTopLeft">
+      <textSize value="14px"/>
+      <textColor value="$preset_colorWhite_50"/>
+      <textAlignment value="left"/>
+    </Profile>
+
+    <!-- Legend color block (solid square using text background trick) -->
+    <Profile name="sf_legendBlock" extends="fs25_textDefault" with="anchorTopLeft">
+      <textSize value="14px"/>
+    </Profile>
+
+    <!-- Legend label text -->
+    <Profile name="sf_legendLabel" extends="fs25_textDefault" with="anchorTopLeft">
+      <textSize value="14px"/>
+      <textColor value="$preset_colorWhite"/>
+    </Profile>
+
+    <!-- No-data hint (centered, dimmed) -->
+    <Profile name="sf_noDataHint" extends="fs25_textDefault" with="anchorTopLeft">
+      <textSize value="13px"/>
+      <textColor value="$preset_colorWhite_50"/>
+      <textAlignment value="left"/>
+    </Profile>
+
+    <!-- Column headers -->
+    <Profile name="sf_colHeader" extends="fs25_textDefault" with="anchorTopLeft">
+      <textSize value="13px"/>
+      <textBold value="true"/>
+      <textUpperCase value="true"/>
+      <textColor value="$preset_colorWhite_50"/>
+      <textAlignment value="left"/>
+    </Profile>
+    <Profile name="sf_colHeaderRight" extends="sf_colHeader">
+      <textAlignment value="right"/>
+    </Profile>
+
+    <!-- SmoothList base -->
+    <Profile name="sf_smoothList" extends="emptyPanel"
+             with="anchorStretchingYLeft pivotTopLeft"/>
+
+    <!-- List row -->
+    <Profile name="sf_listRow" extends="emptyPanel" with="anchorTopStretchingX pivotTopLeft">
+      <height value="28px"/>
+    </Profile>
+
+    <!-- Row background (alternating) -->
+    <Profile name="sf_rowBg" extends="baseReference" with="anchorStretchingYStretchingX">
+      <imageColor value="$preset_fs25_colorGrey"/>
+      <imageSelectedColor value="0.25 0.65 0.30 0.9"/>
+      <alternateBackgroundColor value="$preset_fs25_colorGreyDark_50"/>
+    </Profile>
+
+    <!-- Cell text: left-aligned -->
+    <Profile name="sf_cellLeft" extends="fs25_textDefault" with="anchorStretchingYLeft">
+      <position value="8px 0"/>
+      <textSize value="13px"/>
+      <textAlignment value="left"/>
+      <textColor value="$preset_fs25_colorMainLight"/>
+      <textSelectedColor value="$preset_fs25_colorMainDark"/>
+    </Profile>
+
+    <!-- Cell text: right-aligned -->
+    <Profile name="sf_cellRight" extends="sf_cellLeft">
+      <textAlignment value="right"/>
+    </Profile>
+
+    <!-- Empty list hint (centered) -->
+    <Profile name="sf_emptyHint" extends="fs25_textDefault" with="anchorTopLeft">
+      <textSize value="14px"/>
+      <textAlignment value="center"/>
+      <textColor value="$preset_colorWhite_50"/>
+    </Profile>
+
+  </GUIProfiles>
+</GUI>

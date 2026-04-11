@@ -32,7 +32,6 @@ function SoilSettingsGUI:registerConsoleCommands()
     addConsoleCommand("SoilSetNutrients", "Enable/disable nutrient cycles (true/false)", "consoleCommandSetNutrients", self)
     addConsoleCommand("SoilSetFertilizerCosts", "Enable/disable fertilizer costs (true/false)", "consoleCommandSetFertilizerCosts", self)
     addConsoleCommand("SoilSetNotifications", "Enable/disable notifications (true/false)", "consoleCommandSetNotifications", self)
-    -- NEW CONSOLE COMMANDS
     addConsoleCommand("SoilSetSeasonalEffects", "Enable/disable seasonal effects (true/false)", "consoleCommandSetSeasonalEffects", self)
     addConsoleCommand("SoilSetRainEffects", "Enable/disable rain effects (true/false)", "consoleCommandSetRainEffects", self)
     addConsoleCommand("SoilSetPlowingBonus", "Enable/disable plowing bonus (true/false)", "consoleCommandSetPlowingBonus", self)
@@ -57,7 +56,6 @@ function SoilSettingsGUI:consoleCommandHelp()
     print("SoilSetNutrients true|false - Toggle nutrient cycles")
     print("SoilSetFertilizerCosts true|false - Toggle fertilizer costs")
     print("SoilSetNotifications true|false - Toggle notifications")
-    -- NEW COMMANDS IN HELP
     print("SoilSetSeasonalEffects true|false - Toggle seasonal effects")
     print("SoilSetRainEffects true|false - Toggle rain effects")
     print("SoilSetPlowingBonus true|false - Toggle plowing bonus")
@@ -153,7 +151,6 @@ function SoilSettingsGUI:consoleCommandSetNotifications(enabled)
     return "Error: Soil Mod not initialized"
 end
 
--- NEW CONSOLE COMMAND FUNCTIONS
 function SoilSettingsGUI:consoleCommandSetSeasonalEffects(enabled)
     if enabled == nil then return "Usage: SoilSetSeasonalEffects true|false" end
     local enable = enabled:lower()
@@ -286,7 +283,7 @@ function SoilSettingsGUI:consoleCommandFieldForecast(fieldId)
             local penalty    = math.min(ys.MAX_PENALTY, avgDef * tierData.scale)
             local penaltyPct = math.floor(penalty * 100 + 0.5)
             -- Use getFieldUrgency so this score matches the Soil Report sort order
-            local urgency    = math.floor(soilSystem:getFieldUrgency(fid) + 0.5)
+            local urgency    = math.floor(g_SoilFertilityManager.soilSystem:getFieldUrgency(fid) + 0.5)
 
             -- Recommendations
             local recs = {}

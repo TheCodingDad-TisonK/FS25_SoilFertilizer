@@ -14,6 +14,20 @@
 local modDirectory = g_currentModDirectory
 local modName = g_currentModName
 
+-- Menu icon global (resolved by XML imageFilename="g_SFIconMenu" via GuiOverlay hook below)
+g_SFIconMenu = Utils.getFilename("icon.dds", g_currentModDirectory)
+
+-- Resolve g_SFIconMenu in XML imageFilename attributes (EmployeeManager/MDM pattern)
+local SF_ICON_GLOBALS = { g_SFIconMenu = true }
+local function sfResolveFilename(self, superFunc)
+    local filename = superFunc(self)
+    if SF_ICON_GLOBALS[filename] then
+        return _G[filename]
+    end
+    return filename
+end
+GuiOverlay.resolveFilename = Utils.overwrittenFunction(GuiOverlay.resolveFilename, sfResolveFilename)
+
 -- Source all required files (order matters: dependencies first)
 -- 1. Utilities and config (no dependencies)
 source(modDirectory .. "src/utils/Logger.lua")
@@ -37,6 +51,10 @@ source(modDirectory .. "src/utils/UIHelper.lua")
 source(modDirectory .. "src/settings/SoilSettingsUI.lua")
 source(modDirectory .. "src/ui/SoilHUD.lua")
 source(modDirectory .. "src/ui/SoilReportDialog.lua")
+source(modDirectory .. "src/ui/SoilMapOverlay.lua")
+source(modDirectory .. "src/ui/SoilMapFrame.lua")
+source(modDirectory .. "src/ui/SoilPDAScreen.lua")
+source(modDirectory .. "src/ui/SoilFieldDetailDialog.lua")
 
 -- 5. Network
 source(modDirectory .. "src/network/NetworkEvents.lua")
@@ -238,12 +256,16 @@ hookSaveLoadEvents()
 
 -- Route mouse events to SoilHUD (for drag/resize edit mode)
 -- RMB only enters edit mode when cursor is over the panel (no cross-contamination).
--- eventUsed is checked before processing and returned after, per FS25 standard pattern
--- (prevents double-handling when vehicle camera or another listener already consumed the event).
+-- We always call onMouseEvent regardless of eventUsed — SoilHUD:onMouseEvent only
+-- returns true (consumes the event) when cursor is over the panel OR already in edit
+-- mode, so we never steal clicks from game systems.  The old `not eventUsed` guard
+-- prevented RMB from reaching the HUD when the game had already tagged the event
+-- (e.g. player controller on foot), breaking cursor activation on foot.
 local soilMouseHandler = {}
 function soilMouseHandler:mouseEvent(posX, posY, isDown, isUp, button, eventUsed)
-    if not eventUsed and sfm and sfm.soilHUD then
-        eventUsed = sfm.soilHUD:onMouseEvent(posX, posY, isDown, isUp, button, eventUsed) or eventUsed
+    if sfm and sfm.soilHUD then
+        local consumed = sfm.soilHUD:onMouseEvent(posX, posY, isDown, isUp, button, eventUsed)
+        eventUsed = consumed or eventUsed
     end
     return eventUsed
 end

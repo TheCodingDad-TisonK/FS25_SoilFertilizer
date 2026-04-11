@@ -7,30 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.6.0.5] - 2026-04-11
+## [1.8.0.0] - 2026-04-11
 
 ### Added
 
-- **Auto-rate control fully implemented**: The Auto Rate feature (`autoRateControl` setting) now
-  actively adjusts the sprayer rate index every 5 seconds when a player has auto mode engaged
-  (`SoilToggleAutoRate` key). Previously the toggle, HUD display, and target hints were wired up
-  but no code ever computed or applied the rate — it was a visual stub.
+- **PDA InGameMenu page** (`SoilPDAScreen`) — a full dedicated page in the FS25 in-game menu
+  (Shift+P shortcut), built on the `TabbedMenuFrameElement` pattern matching FS25 native screens.
+  Left sidebar shows live farm-wide averages for N, P, K, pH, Organic Matter, and crop pressure
+  counts. Three sub-tabs:
+  - **Soil Map tab** — shows the active overlay layer name and description, a colour legend, and
+    a button to jump directly to the interactive soil map.
+  - **Fields tab** — `SmoothList` of all tracked fields with per-field N/P/K/pH/OM columns and
+    an overall status indicator. Click any row to open the Field Detail dialog.
+  - **Treatment Plan tab** — urgency-sorted list of fields needing attention with the primary
+    deficiency identified. Minor-urgency fields grouped at the bottom.
 
-  **How it works**:
-  - Reads the soil data for the currently occupied field (`SoilHUD.cachedFieldId`)
-  - Looks up the fertilizer profile for the loaded fill type (`SoilConstants.FERTILIZER_PROFILES`)
-  - **Nutrient fertilizers** (N/P/K/pH/OM products): computes a weighted deficit fraction using
-    each nutrient's profile contribution value as the weight, maps that fraction linearly to the
-    safe range **0.20x – 1.20x** (capped just below `BURN_RISK_THRESHOLD = 1.25x` to prevent
-    accidental burns). Fully stocked soil → 0.20x; completely depleted → 1.20x.
-  - **Crop protection** (`INSECTICIDE`, `FUNGICIDE`): scales with pest/disease pressure
-    (0% pressure → 0.20x, 100% → 1.0x).
-  - **Herbicide types** (`HERBICIDE`, `PESTICIDE` fill types not in profiles): scales with
-    weed pressure (same 0.20x–1.0x range).
-  - Rate is unchanged while the vehicle is off-field or the tank is empty; the HUD continues to
-    show `AUTO: ON` with the target-nutrient hint line.
-  - A network event is sent only when the computed index actually changes, avoiding unnecessary
-    MP traffic.
+- **Field Detail dialog** (`SoilFieldDetailDialog`) — per-field popup (opened from Fields or
+  Treatment tab) showing all nutrient values with Good/Fair/Poor colour-coded status, weed/pest/
+  disease pressure with active-treatment asterisk notation, last crop, and crop rotation status
+  with Legume Bonus / Fatigue / OK indicators.
+
+- **`menuIcon.dds`** — dedicated 512×512 white-on-transparent silhouette icon for the PDA tab
+  header and tab bar, keeping the mod browser `icon.dds` visually distinct from the in-game UI.
+
+- **Refreshed `icon.dds`** — new flat-design badge icon: seedling with three leaves sprouting
+  from a soil mound, "SOIL &amp; FERTILIZER / Realistic Mod" text on dark background, consistent
+  with the FS25 mod collection visual style.
+
+- **`SF_SOIL_PDA` action** — new ONFOOT input action bound to Shift+P, opens the PDA page
+  directly from anywhere in-game.
+
+- **84 new localisation keys** across all 26 supported languages (en, de, fr, nl, it, pl, es,
+  ea, pt, br, ru, uk, cz, hu, ro, tr, fi, no, sv, da, kr, jp, ct, fc, id, vi) covering all PDA
+  screen text, map legend labels, treatment plan descriptions, and Field Detail dialog strings.
+
+- **`build.py`** — Python build/deploy script as an alternative to `build.sh`.
 
 ---
 
