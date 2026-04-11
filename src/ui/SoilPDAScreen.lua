@@ -531,8 +531,8 @@ function SoilPDAScreen:_openTreatmentDetail(index)
     local entry = self.treatmentData[index]
     SoilLogger.info("SoilPDAScreen: _openTreatmentDetail index=%s, fieldId=%s", tostring(index), tostring(entry and entry.fieldId))
     if not entry then return end
-    if SoilFieldDetailDialog then
-        SoilFieldDetailDialog.show(entry.fieldId)
+    if SoilTreatmentDialog then
+        SoilTreatmentDialog.show(entry.fieldId)
     end
 end
 

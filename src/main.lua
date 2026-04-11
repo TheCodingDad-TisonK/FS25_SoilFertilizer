@@ -55,6 +55,7 @@ source(modDirectory .. "src/ui/SoilMapOverlay.lua")
 source(modDirectory .. "src/ui/SoilMapFrame.lua")
 source(modDirectory .. "src/ui/SoilPDAScreen.lua")
 source(modDirectory .. "src/ui/SoilFieldDetailDialog.lua")
+source(modDirectory .. "src/ui/SoilTreatmentDialog.lua")
 
 -- 5. Network
 source(modDirectory .. "src/network/NetworkEvents.lua")

@@ -376,5 +376,32 @@
     <e k="sf_detail_rotation_fatigue" v="Fatigue (x1.15 depletion)" />
     <e k="sf_detail_no_field" v="No data available." />
     <e k="sf_detail_no_crop" v="None recorded" />
+    <e k="sf_detail_rotation_label" v="Rotatiestatus" />
+
+    <!-- Treatment Prescription Dialog (SoilTreatmentDialog.lua) -->
+    <e k="sf_treat_title" v="Behandelingsvoorschrift" />
+    <e k="sf_treat_section_soil" v="Bodemverbetering" />
+    <e k="sf_treat_section_fert" v="Voedingsstoffen Toepassing" />
+    <e k="sf_treat_section_prot" v="Gewasbescherming" />
+    <e k="sf_treat_hint" v="Raadpleeg de sectie 'Producten' in de winkel voor gespecialiseerde meststoffen." />
+    <e k="sf_treat_action_optimal" v="Optimaal - Geen actie nodig." />
+    <e k="sf_treat_action_lime" v="Gebruik KALK of VLOEIBARE KALK om pH te verhogen." />
+    <e k="sf_treat_action_gypsum" v="Gebruik GYPSUM om pH te verlagen / structuur te verbeteren." />
+    <e k="sf_treat_action_om_low" v="Ploeg MEST, COMPOST onder of gebruik de strohakselaar." />
+    <e k="sf_treat_action_om_fair" v="Monitoren. Houd organische input op peil." />
+    <e k="sf_treat_action_n_poor" v="Gebruik UAN32, UREUM of WATERVRIJ AMMONIAK." />
+    <e k="sf_treat_action_n_fair" v="Gebruik AMS of STARTER meststof." />
+    <e k="sf_treat_action_p_poor" v="Gebruik MAP of DAP (Fosfor)." />
+    <e k="sf_treat_action_p_fair" v="Gebruik gemengde KUNSTMEST." />
+    <e k="sf_treat_action_k_poor" v="Gebruik POTASH (Kalium)." />
+    <e k="sf_treat_action_k_fair" v="Gebruik gemengde KUNSTMEST." />
+    <e k="sf_treat_action_weed" v="Onmiddellijk HERBICIDE toepassen." />
+    <e k="sf_treat_action_pest" v="Onmiddellijk INSECTICIDE toepassen." />
+    <e k="sf_treat_action_disease" v="Onmiddellijk FUNGICIDE toepassen." />
+    <e k="sf_detail_rotation_ok" v="OK" />
+    <e k="sf_detail_rotation_bonus" v="Leguminosen Bonus (+N)" />
+    <e k="sf_detail_rotation_fatigue" v="Bodemmoeheid (x1.15 uitputting)" />
+    <e k="sf_detail_no_field" v="Geen gegevens beschikbaar." />
+    <e k="sf_detail_no_crop" v="Geen geregistreerd" />
     </elements>
 </l10n>

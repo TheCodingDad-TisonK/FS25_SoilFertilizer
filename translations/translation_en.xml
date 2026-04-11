@@ -438,6 +438,27 @@
     <e k="sf_detail_disease_label" v="Disease Pressure" />
     <e k="sf_detail_last_crop_label" v="Last Crop" />
     <e k="sf_detail_rotation_label" v="Rotation Status" />
+
+    <!-- Treatment Prescription Dialog (SoilTreatmentDialog.lua) -->
+    <e k="sf_treat_title" v="Treatment Prescription" />
+    <e k="sf_treat_section_soil" v="Soil Amelioration" />
+    <e k="sf_treat_section_fert" v="Nutrient Application" />
+    <e k="sf_treat_section_prot" v="Crop Protection" />
+    <e k="sf_treat_hint" v="Refer to the 'Products' section of the shop for specialized fertilizers." />
+    <e k="sf_treat_action_optimal" v="Optimal - No action needed." />
+    <e k="sf_treat_action_lime" v="Apply LIME or LIQUID LIME to raise pH." />
+    <e k="sf_treat_action_gypsum" v="Apply GYPSUM to lower pH / improve structure." />
+    <e k="sf_treat_action_om_low" v="Plow in MANURE, COMPOST, or chop straw." />
+    <e k="sf_treat_action_om_fair" v="Monitor. Maintain organic inputs." />
+    <e k="sf_treat_action_n_poor" v="Apply UAN32, UREA, or ANHYDROUS." />
+    <e k="sf_treat_action_n_fair" v="Apply AMS or STARTER fertilizer." />
+    <e k="sf_treat_action_p_poor" v="Apply MAP or DAP (Phosphorus)." />
+    <e k="sf_treat_action_p_fair" v="Apply blended FERTILIZER." />
+    <e k="sf_treat_action_k_poor" v="Apply POTASH (Potassium)." />
+    <e k="sf_treat_action_k_fair" v="Apply blended FERTILIZER." />
+    <e k="sf_treat_action_weed" v="Apply HERBICIDE immediately." />
+    <e k="sf_treat_action_pest" v="Apply INSECTICIDE immediately." />
+    <e k="sf_treat_action_disease" v="Apply FUNGICIDE immediately." />
     <e k="sf_detail_rotation_ok" v="OK" />
     <e k="sf_detail_rotation_bonus" v="Legume Bonus (+N)" />
     <e k="sf_detail_rotation_fatigue" v="Fatigue (x1.15 depletion)" />

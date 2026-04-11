@@ -93,10 +93,16 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
             SoilLogger.info("Soil Report dialog created")
         end
 
-        -- Field Detail dialog (opened from PDA Screen fields/treatment lists)
+        -- Field Detail dialog (opened from PDA Screen fields list)
         if SoilFieldDetailDialog and g_gui then
             SoilFieldDetailDialog.register(modDirectory)
             SoilLogger.info("Soil Field Detail dialog registered")
+        end
+
+        -- Treatment Detail dialog (opened from PDA Screen treatment list)
+        if SoilTreatmentDialog and g_gui then
+            SoilTreatmentDialog.register(modDirectory)
+            SoilLogger.info("Soil Treatment dialog registered")
         end
 
         -- Map overlay (client only)
