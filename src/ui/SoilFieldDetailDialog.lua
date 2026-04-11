@@ -5,15 +5,14 @@
 -- Opened by clicking a row in the Fields or Treatment tab
 -- of SoilPDAScreen.
 --
--- Base class: MessageDialog (NOT DialogElement — see pitfalls).
--- Callback names: onClickClose (NOT onClose — reserved by GUI lifecycle).
+-- Pattern: ScreenElement (proven pattern for popups in this mod).
 -- =========================================================
 -- Author: TisonK
 -- =========================================================
 
 ---@class SoilFieldDetailDialog
 SoilFieldDetailDialog = {}
-local SoilFieldDetailDialog_mt = Class(SoilFieldDetailDialog, MessageDialog)
+local SoilFieldDetailDialog_mt = Class(SoilFieldDetailDialog, ScreenElement)
 
 -- Capture mod name at source-time
 local SF_DETAIL_MOD_NAME = g_currentModName
@@ -48,31 +47,7 @@ end
 -- ── Constructor ───────────────────────────────────────────
 
 function SoilFieldDetailDialog.new(target, customMt)
-    local self = MessageDialog.new(target, customMt or SoilFieldDetailDialog_mt)
-
-    -- Cached element references (set in onGuiSetupFinished)
-    self.detailTitle         = nil
-    self.detailFieldId       = nil
-    self.detailUrgency       = nil
-    self.detailN             = nil
-    self.detailNStatus       = nil
-    self.detailP             = nil
-    self.detailPStatus       = nil
-    self.detailK             = nil
-    self.detailKStatus       = nil
-    self.detailPH            = nil
-    self.detailPHStatus      = nil
-    self.detailOM            = nil
-    self.detailOMStatus      = nil
-    self.detailWeed          = nil
-    self.detailWeedStatus    = nil
-    self.detailPest          = nil
-    self.detailPestStatus    = nil
-    self.detailDisease       = nil
-    self.detailDiseaseStatus = nil
-    self.detailLastCrop      = nil
-    self.detailRotation      = nil
-    self.detailNoData        = nil
+    local self = ScreenElement.new(target, customMt or SoilFieldDetailDialog_mt)
 
     -- Current field ID being shown
     self._fieldId = nil
@@ -89,7 +64,10 @@ function SoilFieldDetailDialog.register(modDirectory)
 
     SF_DETAIL_MOD_DIR = modDirectory -- Global to store for later lazy-reloads
     SoilFieldDetailDialog.xmlPath = modDirectory .. "xml/gui/SoilFieldDetailDialog.xml"
+    
     SoilFieldDetailDialog.INSTANCE = SoilFieldDetailDialog.new()
+    SoilLogger.info("SoilFieldDetailDialog: registering from %s", SoilFieldDetailDialog.xmlPath)
+    
     local ok, err = pcall(function()
         g_gui:loadGui(
             SoilFieldDetailDialog.xmlPath,
@@ -97,17 +75,19 @@ function SoilFieldDetailDialog.register(modDirectory)
             SoilFieldDetailDialog.INSTANCE
         )
     end)
+    
     if not ok then
-        SoilLogger.error("SoilFieldDetailDialog: loadGui failed: " .. tostring(err))
+        SoilLogger.error("SoilFieldDetailDialog: loadGui failed: %s", tostring(err))
         SoilFieldDetailDialog.INSTANCE = nil
     else
-        SoilLogger.info("SoilFieldDetailDialog: registered")
+        SoilLogger.info("SoilFieldDetailDialog: registered successfully")
     end
 end
 
 ---@param fieldId number
 function SoilFieldDetailDialog.show(fieldId)
     SoilLogger.info("SoilFieldDetailDialog.show(fieldId=%s)", tostring(fieldId))
+    
     -- Lazy-register if not yet loaded
     if SoilFieldDetailDialog.INSTANCE == nil then
         SoilLogger.info("SoilFieldDetailDialog: lazy-registering from show()")
@@ -121,49 +101,57 @@ function SoilFieldDetailDialog.show(fieldId)
     end
 
     inst._fieldId = fieldId
-    g_gui:showDialog("SoilFieldDetailDialog")
+    
+    -- Ensure we are in a state to show a dialog
+    if g_gui:getIsGuiVisible() then
+        SoilLogger.info("SoilFieldDetailDialog: showing dialog via showDialog()")
+        g_gui:showDialog("SoilFieldDetailDialog")
+    else
+        -- PDA might be closed, but we were called somehow?
+        SoilLogger.info("SoilFieldDetailDialog: showing via showGui()")
+        g_gui:showGui("SoilFieldDetailDialog")
+    end
 end
 
 -- ── Lifecycle ─────────────────────────────────────────────
 
 function SoilFieldDetailDialog:onGuiSetupFinished()
     SoilFieldDetailDialog:superClass().onGuiSetupFinished(self)
+    SoilLogger.info("SoilFieldDetailDialog: onGuiSetupFinished")
 
-    -- Cache references using target:getFirstDescendant (MessageDialog pattern)
-    local function get(id)
-        return self.target and self.target:getFirstDescendant(id)
-    end
-
-    self.detailTitle         = get("detailTitle")
-    self.detailFieldId       = get("detailFieldId")
-    self.detailUrgency       = get("detailUrgency")
-    self.detailN             = get("detailN")
-    self.detailNStatus       = get("detailNStatus")
-    self.detailP             = get("detailP")
-    self.detailPStatus       = get("detailPStatus")
-    self.detailK             = get("detailK")
-    self.detailKStatus       = get("detailKStatus")
-    self.detailPH            = get("detailPH")
-    self.detailPHStatus      = get("detailPHStatus")
-    self.detailOM            = get("detailOM")
-    self.detailOMStatus      = get("detailOMStatus")
-    self.detailWeed          = get("detailWeed")
-    self.detailWeedStatus    = get("detailWeedStatus")
-    self.detailPest          = get("detailPest")
-    self.detailPestStatus    = get("detailPestStatus")
-    self.detailDisease       = get("detailDisease")
-    self.detailDiseaseStatus = get("detailDiseaseStatus")
-    self.detailLastCrop      = get("detailLastCrop")
-    self.detailRotation      = get("detailRotation")
-    self.detailNoData        = get("detailNoData")
+    -- Cache references
+    self.detailTitle         = self:getDescendantById("detailTitle")
+    self.detailFieldId       = self:getDescendantById("detailFieldId")
+    self.detailUrgency       = self:getDescendantById("detailUrgency")
+    self.detailN             = self:getDescendantById("detailN")
+    self.detailNStatus       = self:getDescendantById("detailNStatus")
+    self.detailP             = self:getDescendantById("detailP")
+    self.detailPStatus       = self:getDescendantById("detailPStatus")
+    self.detailK             = self:getDescendantById("detailK")
+    self.detailKStatus       = self:getDescendantById("detailKStatus")
+    self.detailPH            = self:getDescendantById("detailPH")
+    self.detailPHStatus      = self:getDescendantById("detailPHStatus")
+    self.detailOM            = self:getDescendantById("detailOM")
+    self.detailOMStatus      = self:getDescendantById("detailOMStatus")
+    self.detailWeed          = self:getDescendantById("detailWeed")
+    self.detailWeedStatus    = self:getDescendantById("detailWeedStatus")
+    self.detailPest          = self:getDescendantById("detailPest")
+    self.detailPestStatus    = self:getDescendantById("detailPestStatus")
+    self.detailDisease       = self:getDescendantById("detailDisease")
+    self.detailDiseaseStatus = self:getDescendantById("detailDiseaseStatus")
+    self.detailLastCrop      = self:getDescendantById("detailLastCrop")
+    self.detailRotation      = self:getDescendantById("detailRotation")
+    self.detailNoData        = self:getDescendantById("detailNoData")
 end
 
 function SoilFieldDetailDialog:onOpen()
+    SoilLogger.info("SoilFieldDetailDialog: onOpen(fieldId=%s)", tostring(self._fieldId))
     SoilFieldDetailDialog:superClass().onOpen(self)
     self:_populateData()
 end
 
 function SoilFieldDetailDialog:onClose()
+    SoilLogger.info("SoilFieldDetailDialog: onClose()")
     SoilFieldDetailDialog:superClass().onClose(self)
     self._fieldId = nil
 end
@@ -178,7 +166,7 @@ end
 -- ── Close helper ─────────────────────────────────────────
 
 function SoilFieldDetailDialog:close()
-    g_gui:closeDialog(self)
+    g_gui:closeDialogByName("SoilFieldDetailDialog")
 end
 
 -- ── Data population ───────────────────────────────────────

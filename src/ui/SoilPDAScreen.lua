@@ -82,6 +82,8 @@ function SoilPDAScreen.new()
     self.refreshTimer   = 0
     self.returnScreenName = ""
     self.menuButtonInfo   = {}
+    
+    self.lastPopupTime  = 0     -- Guard against multiple clicks/spam
 
     return self
 end
@@ -375,6 +377,10 @@ end
 
 -- Manual mouse-click fallback for tab labels (mirrors MDM pattern)
 function SoilPDAScreen:mouseEvent(posX, posY, isDown, isUp, button, eventUsed)
+    if not self:getIsVisible() or eventUsed then
+        return SoilPDAScreen:superClass().mouseEvent(self, posX, posY, isDown, isUp, button, eventUsed)
+    end
+
     if isDown and button == Input.MOUSE_BUTTON_LEFT then
         local tabs = {
             { el = self.tabLabelMap,       cb = SoilPDAScreen.onClickTabMap       },
@@ -382,7 +388,7 @@ function SoilPDAScreen:mouseEvent(posX, posY, isDown, isUp, button, eventUsed)
             { el = self.tabLabelTreatment, cb = SoilPDAScreen.onClickTabTreatment },
         }
         for _, t in ipairs(tabs) do
-            if t.el then
+            if t.el and t.el:getIsVisible() then
                 local ap = t.el.absPosition
                 local as = t.el.absSize
                 if ap and as and as[1] and as[2] and
@@ -457,16 +463,6 @@ function SoilPDAScreen:onClickOpenMap()
     end
 end
 
--- ── Fields list row click ─────────────────────────────────
-
-function SoilPDAScreen:onClickFieldRow(element)
-    -- Selection index is set in onListSelectionChanged
-end
-
-function SoilPDAScreen:onClickTreatmentRow(element)
-    -- Selection index is set in onListSelectionChanged
-end
-
 -- ── SmoothList Data Source ────────────────────────────────
 
 function SoilPDAScreen:getNumberOfItemsInSection(list, section)
@@ -491,10 +487,8 @@ end
 function SoilPDAScreen:onListSelectionChanged(list, section, index)
     if list == self.fieldList and index > 0 then
         self.selectedFieldIndex = index
-        self:_openFieldDetail(index)
     elseif list == self.treatmentList and index > 0 then
         self.selectedTreatmentIndex = index
-        self:_openTreatmentDetail(index)
     end
 end
 
@@ -502,8 +496,11 @@ end
 
 --- Called by ListItem.onClick in PDA Fields tab (XML)
 function SoilPDAScreen:onClickFieldRow(element)
-    -- SmoothList items usually have the index in their context or data.
-    -- However, we can simply use the list's selected index.
+    -- Guard against spam
+    local now = g_currentMission.time
+    if now - self.lastPopupTime < 500 then return end
+    self.lastPopupTime = now
+
     local index = self.fieldList and self.fieldList.selectedIndex
     SoilLogger.info("SoilPDAScreen: onClickFieldRow index: %s", tostring(index))
     if index and index > 0 then
@@ -513,6 +510,11 @@ end
 
 --- Called by ListItem.onClick in PDA Treatment tab (XML)
 function SoilPDAScreen:onClickTreatmentRow(element)
+    -- Guard against spam
+    local now = g_currentMission.time
+    if now - self.lastPopupTime < 500 then return end
+    self.lastPopupTime = now
+
     local index = self.treatmentList and self.treatmentList.selectedIndex
     SoilLogger.info("SoilPDAScreen: onClickTreatmentRow index: %s", tostring(index))
     if index and index > 0 then
