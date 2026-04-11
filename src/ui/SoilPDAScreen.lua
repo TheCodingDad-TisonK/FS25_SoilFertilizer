@@ -501,18 +501,19 @@ end
 -- ── Row Click Handlers ────────────────────────────────────
 
 --- Called by ListItem.onClick in PDA Fields tab (XML)
-function SoilPDAScreen:onClickFieldRow(index)
-    if index and index > 0 then
-        self.selectedFieldIndex = index
-        self:_openFieldDetail(index)
+function SoilPDAScreen:onClickFieldRow(element)
+    -- element is the ListItem. Its parent list's selectedIndex or the element's own context should be used.
+    -- However, SmoothList calls onListSelectionChanged automatically which already handles the detail opening.
+    -- We can keep these as empty stubs or ensure they don't crash if called manually.
+    if self.fieldList and self.fieldList.selectedIndex > 0 then
+        self:_openFieldDetail(self.fieldList.selectedIndex)
     end
 end
 
 --- Called by ListItem.onClick in PDA Treatment tab (XML)
-function SoilPDAScreen:onClickTreatmentRow(index)
-    if index and index > 0 then
-        self.selectedTreatmentIndex = index
-        self:_openTreatmentDetail(index)
+function SoilPDAScreen:onClickTreatmentRow(element)
+    if self.treatmentList and self.treatmentList.selectedIndex > 0 then
+        self:_openTreatmentDetail(self.treatmentList.selectedIndex)
     end
 end
 
