@@ -162,6 +162,29 @@ Fully customisable: 5 positions, 4 colour themes, 5 transparency levels, 3 font 
 
 Press **`K`** to open a full farm overview sorted by urgency — the fields that need the most attention appear at the top. Each row shows N/P/K, pH, OM, weed and pest pressure, and an overall status badge. Click **►** on any row to open a field detail view with a complete breakdown, yield forecast, and specific treatment recommendations.
 
+### 📱 Soil PDA Page
+
+Press **`Shift+P`** to open the dedicated Soil & Fertilizer page inside the FS25 in-game menu (PDA). Accessible any time — on foot, in a vehicle, or while paused.
+
+**Left sidebar** — live farm-wide snapshot updated each time the page opens:
+- Fields tracked and fields owned
+- Average N, P, K, pH, and Organic Matter across all your fields
+- Weed, Pest, and Disease pressure field counts
+- Fields currently below fertilizer threshold
+
+**Three tabs:**
+
+| Tab | What you see |
+|---|---|
+| **Soil Map** | Active overlay layer name and description, colour legend (Good / Fair / Poor), and a one-click button to jump to the interactive soil map |
+| **Fields** | Full list of every tracked field — N%, P%, K%, pH, OM, and an overall status badge. Click any row to open a per-field detail popup |
+| **Treatment Plan** | Fields sorted by urgency (worst first) with the primary deficiency or pressure identified. Minor-urgency fields grouped at the bottom |
+
+**Field Detail popup** (click any row in Fields or Treatment Plan):
+- All five nutrient values with colour-coded Good / Fair / Poor status
+- Weed, Pest, and Disease pressure — asterisk (`*`) shown when a protection product is active
+- Last harvested crop and crop rotation status (Legume Bonus / Fatigue / OK)
+
 ---
 
 ## ⚙️ Settings

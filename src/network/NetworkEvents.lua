@@ -59,7 +59,7 @@ end
 
 function SoilSettingChangeEvent:run(connection)
     -- SERVER ONLY: Validate and apply setting change
-    if not g_server then return end
+    if g_server == nil then return end
 
     -- Local-only settings should never be routed through the server; reject silently
     local def = SettingsSchema and SettingsSchema.byId and SettingsSchema.byId[self.settingName]
@@ -156,7 +156,7 @@ end
 
 function SoilSettingSyncEvent:run(connection)
     -- CLIENT ONLY: Receive setting update from server
-    if not g_client then return end
+    if g_client == nil then return end
 
     -- Local-only settings are never synced from server; keep each player's own value
     local def = SettingsSchema and SettingsSchema.byId and SettingsSchema.byId[self.settingName]
@@ -202,7 +202,7 @@ end
 
 function SoilRequestFullSyncEvent:run(connection)
     -- SERVER ONLY: Send full settings + field data to requesting client
-    if not g_server or not connection then return end
+    if g_server == nil or not connection then return end
 
     if g_SoilFertilityManager and g_SoilFertilityManager.settings then
         -- Validate that soil system has initialized field data
@@ -585,7 +585,7 @@ end
 
 function SoilFieldUpdateEvent:run(connection)
     -- CLIENT ONLY: Apply server-authoritative field data
-    if not g_client then return end
+    if g_client == nil then return end
 
     if g_SoilFertilityManager and g_SoilFertilityManager.soilSystem then
         g_SoilFertilityManager.soilSystem.fieldData[self.fieldId] = self.field
@@ -756,7 +756,7 @@ function SoilSprayerRateEvent:run(connection)
     rm:setIndex(self.vehicleId, self.rateIndex)
 
     -- Server rebroadcasts to all other clients
-    if g_server then
+    if g_server ~= nil then
         g_server:broadcastEvent(
             SoilSprayerRateEvent.new(self.vehicleId, self.rateIndex),
             nil,        -- send to all
@@ -840,4 +840,4 @@ function SoilNetworkEvents_SendSprayerAutoMode(vehicleId, enabled)
     end
 end
 
-SoilLogger.info("Network events system loaded")
+SoilLogger.info("Network events system loaded")s system loaded")

@@ -556,6 +556,13 @@ function SoilFertilityManager.isFertilizerApplicator(vehicle)
         return false
     end
 
+    -- Return cached result if we've already checked this vehicle
+    if vehicle._sfIsApplicator ~= nil then
+        return vehicle._sfIsApplicator
+    end
+
+    local isApplicator = false
+
     -- Fast path: check for dedicated applicator specializations.
     -- All of these are set at vehicle load time and are always reliable even when empty.
     --   spec_sprayer              → liquid sprayers (Patriot 50, anhydrous applicators, etc.)
@@ -572,38 +579,41 @@ function SoilFertilityManager.isFertilizerApplicator(vehicle)
     or vehicle.spec_fertilizingCultivator
     or vehicle.spec_fertilizingSowingMachine
     or vehicle.spec_manureBarrel then
-        return true
-    end
-
-    -- Slow path: applicators whose specialization we don't directly recognize.
-    -- Checks whether any supported fill type is one our system tracks in FERTILIZER_PROFILES.
-    --
-    -- IMPORTANT guard: also require spec_workArea.
-    -- All implements that ACTIVELY apply material to the ground have spec_workArea
-    -- (sprayers, spreaders, cultivators, seeders). Transport wagons, grain trailers,
-    -- overload belts, and auger wagons do NOT have spec_workArea even when they
-    -- support fill types like LIME or POTASH (e.g., via category mods like
-    -- FS25_0_THDefaultTypes adding LIME to the BULK fill type category).
-    -- This guard eliminates false positives from transport equipment.
-    if vehicle.spec_workArea and vehicle.spec_fillUnit and g_fillTypeManager then
-        local fillUnits = vehicle.spec_fillUnit.fillUnits
-        if fillUnits then
-            for _, fillUnit in ipairs(fillUnits) do
-                if fillUnit.supportedFillTypes then
-                    for fillTypeIndex, supported in pairs(fillUnit.supportedFillTypes) do
-                        if supported then
-                            local ft = g_fillTypeManager:getFillTypeByIndex(fillTypeIndex)
-                            if ft and ft.name and SoilConstants.FERTILIZER_PROFILES[ft.name] then
-                                return true
+        isApplicator = true
+    else
+        -- Slow path: applicators whose specialization we don't directly recognize.
+        -- Checks whether any supported fill type is one our system tracks in FERTILIZER_PROFILES.
+        --
+        -- IMPORTANT guard: also require spec_workArea.
+        -- All implements that ACTIVELY apply material to the ground have spec_workArea
+        -- (sprayers, spreaders, cultivators, seeders). Transport wagons, grain trailers,
+        -- overload belts, and auger wagons do NOT have spec_workArea even when they
+        -- support fill types like LIME or POTASH (e.g., via category mods like
+        -- FS25_0_THDefaultTypes adding LIME to the BULK fill type category).
+        -- This guard eliminates false positives from transport equipment.
+        if vehicle.spec_workArea and vehicle.spec_fillUnit and g_fillTypeManager then
+            local fillUnits = vehicle.spec_fillUnit.fillUnits
+            if fillUnits then
+                for _, fillUnit in ipairs(fillUnits) do
+                    if fillUnit.supportedFillTypes then
+                        for fillTypeIndex, supported in pairs(fillUnit.supportedFillTypes) do
+                            if supported then
+                                local ft = g_fillTypeManager:getFillTypeByIndex(fillTypeIndex)
+                                if ft and ft.name and SoilConstants.FERTILIZER_PROFILES[ft.name] then
+                                    isApplicator = true
+                                    break
+                                end
                             end
                         end
                     end
+                    if isApplicator then break end
                 end
             end
         end
     end
 
-    return false
+    vehicle._sfIsApplicator = isApplicator
+    return isApplicator
 end
 
 --- Save soil data to XML file

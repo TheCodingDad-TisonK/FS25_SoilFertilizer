@@ -343,7 +343,7 @@ function SoilSettingsUI:ensureResetButton(settingsFrame)
                 end
 
                 if g_SoilFertilityManager and g_SoilFertilityManager.settings then
-                    if g_client then
+                    if g_client ~= nil then
                         if g_dedicatedServer then
                             g_SoilFertilityManager.settings:resetToDefaults()
                         else

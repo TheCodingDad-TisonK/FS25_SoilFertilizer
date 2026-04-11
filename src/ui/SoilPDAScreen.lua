@@ -24,7 +24,7 @@ SoilPDAScreen._mt = Class(SoilPDAScreen, TabbedMenuFrameElement)
 SoilPDAScreen.CLASS_NAME     = "SoilPDAScreen"
 SoilPDAScreen.MENU_PAGE_NAME = "menuSoilFertilizer"
 SoilPDAScreen.XML_FILENAME   = "xml/gui/SoilPDAScreen.xml"
-SoilPDAScreen.MENU_ICON_PATH = "icon.dds"
+SoilPDAScreen.MENU_ICON_PATH = "images/menuIcon.dds"
 
 -- Capture mod directory at source-time (valid during loading only)
 local SF_PDA_MOD_DIR = g_currentModDirectory
@@ -177,9 +177,8 @@ function SoilPDAScreen._performRegistration(modDir)
 
     -- Add tab icon to the InGameMenu tab bar
     local iconFile = Utils.getFilename(SoilPDAScreen.MENU_ICON_PATH, modDir)
-    local uvs = {0, 0, 512, 512}
-    if iconFile and type(inGameMenu.addPageTab) == "function" and GuiUtils ~= nil then
-        local okTab, errTab = pcall(inGameMenu.addPageTab, inGameMenu, screen, iconFile, GuiUtils.getUVs(uvs))
+    if iconFile and type(inGameMenu.addPageTab) == "function" then
+        local okTab, errTab = pcall(inGameMenu.addPageTab, inGameMenu, screen, iconFile, GuiUtils.getUVs({0, 0, 1024, 1024}))
         if not okTab then
             SoilLogger.warning("SoilPDAScreen: addPageTab failed: " .. tostring(errTab))
         end
