@@ -675,7 +675,7 @@ end
 --- Wire this up from your multiplayer join / connection-accepted handler.
 ---@param connection table The network connection object for the joining client
 function SoilFertilitySystem:onClientJoined(connection)
-    if not g_server then return end
+    if g_server == nil then return end
     if not connection then return end
     if not SoilFieldUpdateEvent then return end
 
@@ -709,7 +709,7 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing, area)
     -- MULTIPLAYER SAFETY: Only server should create new fields
     -- Clients must wait for sync to avoid desync issues with randomized initial values
     if g_currentMission and g_currentMission.missionDynamicInfo.isMultiplayer then
-        if not g_server then
+        if g_server == nil then
             -- Client in multiplayer - return nil and wait for server sync
             return nil
         end

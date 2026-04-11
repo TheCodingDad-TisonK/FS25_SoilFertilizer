@@ -80,7 +80,7 @@ function SettingsManager:saveSettings(settingsObject)
     end
 
     -- Only server should save (or singleplayer)
-    if g_client and not g_server then
+    if g_client ~= nil and g_server == nil then
         SoilLogger.debug("Client skipping save (settings saved on server)")
         return
     end

@@ -274,7 +274,7 @@
       <size value="50px 50px"/>
       <imageSliceId value="noSlice"/>
       <imageFilename value="g_SFIconMenu"/>
-      <imageColor value="$preset_fs25_colorMainDark"/>
+      <imageColor value="$preset_colorTransparent"/>
     </Profile>
 
     <!-- Tab hit area (invisible, handles click) -->

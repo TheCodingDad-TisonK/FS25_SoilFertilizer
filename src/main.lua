@@ -15,7 +15,7 @@ local modDirectory = g_currentModDirectory
 local modName = g_currentModName
 
 -- Menu icon global (resolved by XML imageFilename="g_SFIconMenu" via GuiOverlay hook below)
-g_SFIconMenu = Utils.getFilename("icon.dds", g_currentModDirectory)
+g_SFIconMenu = Utils.getFilename("images/menuIcon.dds", g_currentModDirectory)
 
 -- Resolve g_SFIconMenu in XML imageFilename attributes (EmployeeManager/MDM pattern)
 local SF_ICON_GLOBALS = { g_SFIconMenu = true }
@@ -136,7 +136,7 @@ local function loadedMission(mission, node)
     -- SoilRequestFullSyncEvent asks the server for all settings + field data.
     -- The retry handler (AsyncRetryHandler) makes up to 3 attempts with delay
     -- in case the server-side soil system hasn't finished initializing yet.
-    if g_client and not g_server and SoilNetworkEvents_RequestFullSync then
+    if g_client ~= nil and g_server == nil and SoilNetworkEvents_RequestFullSync then
         SoilNetworkEvents_RequestFullSync()
     end
 end
@@ -210,7 +210,7 @@ local function hookSaveLoadEvents()
             function(missionInfo)
                 -- In multiplayer only the server holds authoritative soil data
                 if g_currentMission and g_currentMission.missionDynamicInfo.isMultiplayer then
-                    if not g_server then return end
+                    if g_server == nil then return end
                 end
                 if g_SoilFertilityManager then
                     g_SoilFertilityManager:saveSoilData()

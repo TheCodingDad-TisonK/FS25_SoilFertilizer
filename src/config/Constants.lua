@@ -545,18 +545,6 @@ SoilConstants.SPRAYER_RATE = {
 }
 
 -- ========================================
--- MAP OVERLAY (v1.7.0)
--- ========================================
-SoilConstants.MAP_OVERLAY = {
-    OVERLAY_RESOLUTION = {512, 512},
-    ALPHA         = 0.70,
-    LEGEND_W_FRAC = 0.18,   -- legend panel width as fraction of map width
-    LEGEND_H_FRAC = 0.13,   -- legend panel height as fraction of map height
-    LEGEND_MARGIN = 0.02,   -- margin from map edge (fraction of map width)
-    LAYER_COUNT   = 9,
-}
-
--- ========================================
 -- WEED PRESSURE (Issue #98)
 -- ========================================
 -- Field-level 0-100 score representing weed density.
@@ -732,6 +720,16 @@ SoilConstants.DISEASE_PRESSURE = {
     LOW    = 20,
     MEDIUM = 50,
     HIGH   = 75,
+}
+
+-- ========================================
+-- SOIL MAP OVERLAY (SoilMapOverlay.lua)
+-- ========================================
+-- Legend panel geometry expressed as fractions of the map render area.
+SoilConstants.MAP_OVERLAY = {
+    LEGEND_MARGIN  = 0.02,  -- gap from map corner (fraction of map width)
+    LEGEND_W_FRAC  = 0.13,  -- legend panel width   (fraction of map width)
+    LEGEND_H_FRAC  = 0.17,  -- legend panel height  (fraction of map height)
 }
 
 SoilLogger.info("Constants loaded")

@@ -59,7 +59,7 @@ end
 
 --- Install all game hooks for the soil system
 --- Installs hooks for harvest, fertilizer (all sprayer/spreader types), plowing, ownership, and weather
---- When Precision Farming is active, skips nutrient-modifying hooks for efficiency
+--- Runs independently alongside Precision Farming for full compatibility
 --- Stores references for proper cleanup on uninstall
 ---@param soilSystem SoilFertilitySystem The soil system instance to connect hooks to
 function HookManager:installAll(soilSystem)
