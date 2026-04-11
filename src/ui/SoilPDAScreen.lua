@@ -475,6 +475,9 @@ function SoilPDAScreen:getNumberOfItemsInSection(list, section)
 end
 
 function SoilPDAScreen:populateCellForItemInSection(list, section, index, cell)
+    -- Store index on cell for onClick handlers
+    cell.rowDataIndex = index
+    
     if list == self.fieldList then
         self:_populateFieldCell(index, cell)
     elseif list == self.treatmentList then
@@ -496,12 +499,8 @@ end
 
 --- Called by ListItem.onClick in PDA Fields tab (XML)
 function SoilPDAScreen:onClickFieldRow(element)
-    -- Guard against spam
-    local now = g_currentMission.time
-    if now - self.lastPopupTime < 500 then return end
-    self.lastPopupTime = now
-
-    local index = self.fieldList and self.fieldList.selectedIndex
+    -- Use stored index from population
+    local index = element and element.rowDataIndex
     SoilLogger.info("SoilPDAScreen: onClickFieldRow index: %s", tostring(index))
     if index and index > 0 then
         self:_openFieldDetail(index)
@@ -510,12 +509,7 @@ end
 
 --- Called by ListItem.onClick in PDA Treatment tab (XML)
 function SoilPDAScreen:onClickTreatmentRow(element)
-    -- Guard against spam
-    local now = g_currentMission.time
-    if now - self.lastPopupTime < 500 then return end
-    self.lastPopupTime = now
-
-    local index = self.treatmentList and self.treatmentList.selectedIndex
+    local index = element and element.rowDataIndex
     SoilLogger.info("SoilPDAScreen: onClickTreatmentRow index: %s", tostring(index))
     if index and index > 0 then
         self:_openTreatmentDetail(index)
