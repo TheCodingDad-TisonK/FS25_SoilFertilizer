@@ -93,11 +93,27 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
             SoilLogger.info("Soil Report dialog created")
         end
 
+        -- Field Detail dialog (opened from PDA Screen fields/treatment lists)
+        if SoilFieldDetailDialog and g_gui then
+            SoilFieldDetailDialog.register(modDirectory)
+            SoilLogger.info("Soil Field Detail dialog registered")
+        end
+
         -- Map overlay (client only)
         if SoilMapOverlay then
             self.soilMapOverlay = SoilMapOverlay.new(self.soilSystem, self.settings)
             self.soilMapOverlay:initialize()
             SoilLogger.info("Soil Map Overlay created")
+        end
+
+        -- Map frame sidebar page (client only)
+        -- Injects a native sub-page into InGameMenuMapFrame (PDA map sidebar)
+        -- so the player can select the active soil layer from the map panel.
+        -- Requires soilMapOverlay to exist first (it drives the actual drawing).
+        if SoilMapFrame and self.soilMapOverlay then
+            self.soilMapFrame = SoilMapFrame.new(self.soilMapOverlay, self.settings)
+            self.soilMapFrame:installHooks()
+            SoilLogger.info("Soil Map Frame sidebar page created")
         end
 
         -- Hook PlayerInputComponent.registerActionEvents to register J/K in the PLAYER context.
@@ -933,6 +949,11 @@ function SoilFertilityManager:delete()
     if self.soilMapOverlay then
         self.soilMapOverlay:delete()
         self.soilMapOverlay = nil
+    end
+
+    if self.soilMapFrame then
+        self.soilMapFrame:delete()
+        self.soilMapFrame = nil
     end
 
     if self.soilHUD then

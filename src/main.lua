@@ -14,6 +14,20 @@
 local modDirectory = g_currentModDirectory
 local modName = g_currentModName
 
+-- Menu icon global (resolved by XML imageFilename="g_SFIconMenu" via GuiOverlay hook below)
+g_SFIconMenu = Utils.getFilename("icon.dds", g_currentModDirectory)
+
+-- Resolve g_SFIconMenu in XML imageFilename attributes (EmployeeManager/MDM pattern)
+local SF_ICON_GLOBALS = { g_SFIconMenu = true }
+local function sfResolveFilename(self, superFunc)
+    local filename = superFunc(self)
+    if SF_ICON_GLOBALS[filename] then
+        return _G[filename]
+    end
+    return filename
+end
+GuiOverlay.resolveFilename = Utils.overwrittenFunction(GuiOverlay.resolveFilename, sfResolveFilename)
+
 -- Source all required files (order matters: dependencies first)
 -- 1. Utilities and config (no dependencies)
 source(modDirectory .. "src/utils/Logger.lua")
@@ -38,6 +52,9 @@ source(modDirectory .. "src/settings/SoilSettingsUI.lua")
 source(modDirectory .. "src/ui/SoilHUD.lua")
 source(modDirectory .. "src/ui/SoilReportDialog.lua")
 source(modDirectory .. "src/ui/SoilMapOverlay.lua")
+source(modDirectory .. "src/ui/SoilMapFrame.lua")
+source(modDirectory .. "src/ui/SoilPDAScreen.lua")
+source(modDirectory .. "src/ui/SoilFieldDetailDialog.lua")
 
 -- 5. Network
 source(modDirectory .. "src/network/NetworkEvents.lua")
