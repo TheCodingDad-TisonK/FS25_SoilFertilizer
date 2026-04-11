@@ -502,18 +502,21 @@ end
 
 --- Called by ListItem.onClick in PDA Fields tab (XML)
 function SoilPDAScreen:onClickFieldRow(element)
-    -- element is the ListItem. Its parent list's selectedIndex or the element's own context should be used.
-    -- However, SmoothList calls onListSelectionChanged automatically which already handles the detail opening.
-    -- We can keep these as empty stubs or ensure they don't crash if called manually.
-    if self.fieldList and self.fieldList.selectedIndex > 0 then
-        self:_openFieldDetail(self.fieldList.selectedIndex)
+    -- SmoothList items usually have the index in their context or data.
+    -- However, we can simply use the list's selected index.
+    local index = self.fieldList and self.fieldList.selectedIndex
+    SoilLogger.info("SoilPDAScreen: onClickFieldRow index: %s", tostring(index))
+    if index and index > 0 then
+        self:_openFieldDetail(index)
     end
 end
 
 --- Called by ListItem.onClick in PDA Treatment tab (XML)
 function SoilPDAScreen:onClickTreatmentRow(element)
-    if self.treatmentList and self.treatmentList.selectedIndex > 0 then
-        self:_openTreatmentDetail(self.treatmentList.selectedIndex)
+    local index = self.treatmentList and self.treatmentList.selectedIndex
+    SoilLogger.info("SoilPDAScreen: onClickTreatmentRow index: %s", tostring(index))
+    if index and index > 0 then
+        self:_openTreatmentDetail(index)
     end
 end
 
@@ -521,6 +524,7 @@ end
 
 function SoilPDAScreen:_openFieldDetail(index)
     local entry = self.fieldData[index]
+    SoilLogger.info("SoilPDAScreen: _openFieldDetail index=%s, fieldId=%s", tostring(index), tostring(entry and entry.fieldId))
     if not entry then return end
     if SoilFieldDetailDialog then
         SoilFieldDetailDialog.show(entry.fieldId)
@@ -529,6 +533,7 @@ end
 
 function SoilPDAScreen:_openTreatmentDetail(index)
     local entry = self.treatmentData[index]
+    SoilLogger.info("SoilPDAScreen: _openTreatmentDetail index=%s, fieldId=%s", tostring(index), tostring(entry and entry.fieldId))
     if not entry then return end
     if SoilFieldDetailDialog then
         SoilFieldDetailDialog.show(entry.fieldId)

@@ -107,8 +107,10 @@ end
 
 ---@param fieldId number
 function SoilFieldDetailDialog.show(fieldId)
+    SoilLogger.info("SoilFieldDetailDialog.show(fieldId=%s)", tostring(fieldId))
     -- Lazy-register if not yet loaded
     if SoilFieldDetailDialog.INSTANCE == nil then
+        SoilLogger.info("SoilFieldDetailDialog: lazy-registering from show()")
         SoilFieldDetailDialog.register(SF_DETAIL_MOD_DIR)
     end
 
