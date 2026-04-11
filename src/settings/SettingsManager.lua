@@ -29,7 +29,7 @@ function SettingsManager:getSavegameXmlFilePath()
         return path
     end
 
-    print("[SoilFertilizer WARNING] Savegame directory not available yet")
+    SoilLogger.warning("Savegame directory not available yet")
     return nil
 end
 
@@ -37,7 +37,7 @@ function SettingsManager:loadSettings(settingsObject)
     local xmlPath = self:getSavegameXmlFilePath()
 
     if not xmlPath then
-        print("[SoilFertilizer] Cannot load settings - savegame path not available, using defaults")
+        SoilLogger.info("Cannot load settings - savegame path not available, using defaults")
         self:applyDefaults(settingsObject)
         return
     end
@@ -56,12 +56,12 @@ function SettingsManager:loadSettings(settingsObject)
             end
 
             xml:delete()
-            print(string.format("[SoilFertilizer] Settings loaded from server savegame: %s", xmlPath))
+            SoilLogger.info("Settings loaded from server savegame: %s", xmlPath)
             return
         end
     end
 
-    print("[SoilFertilizer] No saved settings found, using defaults")
+    SoilLogger.info("No saved settings found, using defaults")
     self:applyDefaults(settingsObject)
 end
 
@@ -75,13 +75,13 @@ function SettingsManager:saveSettings(settingsObject)
     local xmlPath = self:getSavegameXmlFilePath()
 
     if not xmlPath then
-        print("[SoilFertilizer ERROR] Cannot save settings - savegame path not available")
+        SoilLogger.error("Cannot save settings - savegame path not available")
         return
     end
 
     -- Only server should save (or singleplayer)
     if g_client and not g_server then
-        print("[SoilFertilizer] Client skipping save (settings saved on server)")
+        SoilLogger.debug("Client skipping save (settings saved on server)")
         return
     end
 
@@ -100,8 +100,8 @@ function SettingsManager:saveSettings(settingsObject)
         xml:save()
         xml:delete()
 
-        print(string.format("[SoilFertilizer] Settings saved to server savegame: %s", xmlPath))
+        SoilLogger.info("Settings saved to server savegame: %s", xmlPath)
     else
-        print("[SoilFertilizer ERROR] Failed to create settings XML file")
+        SoilLogger.error("Failed to create settings XML file")
     end
 end

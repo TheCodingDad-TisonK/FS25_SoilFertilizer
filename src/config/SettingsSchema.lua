@@ -158,11 +158,11 @@ SettingsSchema.definitions = {
     {
         id = "activeMapLayer",
         type = "number",
-        default = 0,
+        default = 0,  -- 0=Off, 1=N, 2=P, 3=K, 4=pH, 5=OM, 6=Urgency, 7=Weed, 8=Pest, 9=Disease
         min = 0,
         max = 9,
-        localOnly = true,   -- per-player map layer choice, not synced to server
-        uiId = "sf_map_layer",
+        uiId = "sf_active_map_layer",
+        localOnly = true,  -- per-player map view, not synced to server
     },
 }
 
