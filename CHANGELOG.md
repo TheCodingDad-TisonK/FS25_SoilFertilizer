@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.7.0.0] - 2026-04-11
+
+### Added
+
+- **Soil Map Overlay**: The pause-menu fullscreen map (ESC → Map) now supports a colored per-field
+  soil overlay. Press **Shift+M** to cycle through 9 layers: Off, Nitrogen (N), Phosphorus (P),
+  Potassium (K), pH, Organic Matter, Field Urgency, Weed Pressure, Pest Pressure, and Disease
+  Pressure. Each field is colored green (good), yellow (fair), or red (poor/high) based on its
+  current soil data. Nutrient layers use green = high value; pressure/urgency layers use green =
+  low pressure (inverted scale).
+- **Legend panel**: A compact panel in the bottom-left corner of the map shows the active layer
+  name, three color swatches (Low/Med/High), and the Shift+M hint. The panel uses a semi-transparent
+  dark background consistent with the Soil HUD style.
+- **Layer persistence**: The selected layer is stored as a local-only setting (`activeMapLayer`) and
+  persists across game sessions. Each player in multiplayer sees their own independent layer choice.
+- **Unowned fields transparent**: Only fields tracked in the soil system are colored; unowned or
+  untracked fields remain transparent (no color), matching the base game's farmland layer behavior.
+- New input action `SF_CYCLE_MAP_LAYER` (Shift+M) registered in the PLAYER context.
+- 15 new localization keys added to all 26 language files (English values as placeholders for
+  non-English languages).
+
+---
+
 ## [1.6.0.5] - 2026-04-11
 
 ### Added

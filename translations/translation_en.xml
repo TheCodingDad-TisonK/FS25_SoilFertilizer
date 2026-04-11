@@ -328,5 +328,20 @@
     <e k="helpLine_sf_nu_p4_bonus_text" v="Growing a legume crop (soybeans, peas, beans) after a non-legume adds a free nitrogen boost each spring for 3 days." />
     <e k="helpLine_sf_nu_p4_fatigue_title" v="Crop Fatigue" />
     <e k="helpLine_sf_nu_p4_fatigue_text" v="Planting the same crop two seasons in a row increases nutrient extraction by 15%. Rotate crops to avoid soil fatigue." />
+    <e k="sf_map_layer_off" v="Off" />
+    <e k="sf_map_layer_n" v="Nitrogen (N)" />
+    <e k="sf_map_layer_p" v="Phosphorus (P)" />
+    <e k="sf_map_layer_k" v="Potassium (K)" />
+    <e k="sf_map_layer_ph" v="pH" />
+    <e k="sf_map_layer_om" v="Organic Matter" />
+    <e k="sf_map_layer_urgency" v="Field Urgency" />
+    <e k="sf_map_layer_weed" v="Weed Pressure" />
+    <e k="sf_map_layer_pest" v="Pest Pressure" />
+    <e k="sf_map_layer_disease" v="Disease Pressure" />
+    <e k="sf_map_overlay_cycle" v="Shift+M: Cycle Layer" />
+    <e k="sf_map_overlay_low" v="Low" />
+    <e k="sf_map_overlay_med" v="Med" />
+    <e k="sf_map_overlay_high" v="High" />
+    <e k="input_SF_CYCLE_MAP_LAYER" v="Cycle Soil Map Layer" />
     </elements>
 </l10n>

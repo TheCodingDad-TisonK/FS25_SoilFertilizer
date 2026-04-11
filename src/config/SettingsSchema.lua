@@ -155,6 +155,15 @@ SettingsSchema.definitions = {
         default = true,
         uiId = "sf_crop_rotation",
     },
+    {
+        id = "activeMapLayer",
+        type = "number",
+        default = 0,
+        min = 0,
+        max = 9,
+        localOnly = true,   -- per-player map layer choice, not synced to server
+        uiId = "sf_map_layer",
+    },
 }
 
 -- Build lookup table by id for fast access
