@@ -4,7 +4,7 @@
     <parentFile xmlFilename="$data/objects/bigBag/bigBag.xml">
         <attributes>
             <set path="vehicle.storeData.name"                                                                    value="$l10n_sf_bigBag_liquid_potash_name"/>
-            <set path="vehicle.storeData.image"                                                                   value="$data/objects/pallets/liquidFertilizerPallet/store_liquidFertilizerPallet.png"/>
+            <set path="vehicle.storeData.image"                                                                   value="$moddir$/objects/bigBag/potash/store_bigBagHelm_fertilizer_potash.dds"/>
             <set path="vehicle.storeData.price"                                                                   value="1850"/>
             <set path="vehicle.storeData.brand"                                                                   value="LIZARD"/>
             <set path="vehicle.storeData.functions.function"                                                      value="$l10n_sf_bigBag_liquid_potash_function"/>
@@ -22,7 +22,7 @@
 
     <storeData>
         <name>$l10n_sf_bigBag_liquid_potash_name</name>
-        <image>$data/objects/pallets/liquidFertilizerPallet/store_liquidFertilizerPallet.png</image>
+        <image>objects/bigBag/potash/store_bigBagHelm_fertilizer_potash.dds</image>
         <brand>LIZARD</brand>
         <category>bigbags</category>
         <storeIconRendering>

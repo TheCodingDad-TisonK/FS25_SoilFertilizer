@@ -6,7 +6,7 @@
         <name>$l10n_sf_bigBag_liquid_dap_name</name>
         <specs><weight ignore="true"/></specs>
         <functions><function>$l10n_sf_bigBag_liquid_dap_function</function></functions>
-        <image>$data/objects/pallets/liquidFertilizerPallet/store_liquidFertilizerPallet.png</image>
+        <image>objects/bigBag/dap/store_bigBagHelm_fertilizer_dap.dds</image>
         <price>1800</price>
         <lifetime>600</lifetime>
         <allowLeasing>false</allowLeasing>

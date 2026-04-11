@@ -6,7 +6,7 @@
         <name>$l10n_sf_bigBag_liquid_map_name</name>
         <specs><weight ignore="true"/></specs>
         <functions><function>$l10n_sf_bigBag_liquid_map_function</function></functions>
-        <image>$data/objects/pallets/liquidFertilizerPallet/store_liquidFertilizerPallet.png</image>
+        <image>objects/bigBag/map/store_bigBagHelm_fertilizer_map.dds</image>
         <price>2000</price>
         <lifetime>600</lifetime>
         <allowLeasing>false</allowLeasing>

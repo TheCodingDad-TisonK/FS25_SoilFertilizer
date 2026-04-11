@@ -498,6 +498,24 @@ function SoilPDAScreen:onListSelectionChanged(list, section, index)
     end
 end
 
+-- ── Row Click Handlers ────────────────────────────────────
+
+--- Called by ListItem.onClick in PDA Fields tab (XML)
+function SoilPDAScreen:onClickFieldRow(index)
+    if index and index > 0 then
+        self.selectedFieldIndex = index
+        self:_openFieldDetail(index)
+    end
+end
+
+--- Called by ListItem.onClick in PDA Treatment tab (XML)
+function SoilPDAScreen:onClickTreatmentRow(index)
+    if index and index > 0 then
+        self.selectedTreatmentIndex = index
+        self:_openTreatmentDetail(index)
+    end
+end
+
 -- ── Detail Dialog ─────────────────────────────────────────
 
 function SoilPDAScreen:_openFieldDetail(index)

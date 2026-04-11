@@ -43,11 +43,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **`build.py`** — Python build/deploy script as an alternative to `build.sh`.
 
----
-
-## [1.6.0.4] - 2026-04-11
-
 ### Fixed
+
+- **Field Detail dialog access** — Fixed `onClickFieldRow` and `onClickTreatmentRow` missing
+  from PDA screen controller, enabling the detailed per-field popup to open upon clicking rows.
+- **Liquid Big Bag icons** — Replaced missing/generic liquid big bag shop icons with the
+  proper big-bag silhouette icons for AMS, Urea, MAP, DAP, and Potash.
+- **Issue #149** — Resolved bug where fertilizer would disappear on savegame reload and
+  implement emptying was blocked due to missing pallet definitions in `fillTypes.xml`.
+- **Applicator detection** — Cached `isFertilizerApplicator` result on the vehicle object,
+  significantly reducing CPU overhead during field application.
 
 - **Pressure color thresholds aligned with Constants**: The HUD's `drawPressureRow` and the Soil
   Report's `getPressureColor` function were using hardcoded 25/60 boundaries. These now use

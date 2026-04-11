@@ -80,12 +80,14 @@ function SoilFieldDetailDialog.new(target, customMt)
     return self
 end
 
--- ── Singleton access ──────────────────────────────────────
+-- Capture mod directory at source-time (valid during loading only)
+local SF_DETAIL_MOD_DIR = g_currentModDirectory
 
 ---@param modDirectory string  Path to mod directory (with trailing slash)
 function SoilFieldDetailDialog.register(modDirectory)
     if SoilFieldDetailDialog.INSTANCE ~= nil then return end
 
+    SF_DETAIL_MOD_DIR = modDirectory -- Global to store for later lazy-reloads
     SoilFieldDetailDialog.xmlPath = modDirectory .. "xml/gui/SoilFieldDetailDialog.xml"
     SoilFieldDetailDialog.INSTANCE = SoilFieldDetailDialog.new()
     local ok, err = pcall(function()
