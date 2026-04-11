@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.6.0.5] - 2026-04-11
+
+### Added
+
+- **Auto-rate control fully implemented**: The Auto Rate feature (`autoRateControl` setting) now
+  actively adjusts the sprayer rate index every 5 seconds when a player has auto mode engaged
+  (`SoilToggleAutoRate` key). Previously the toggle, HUD display, and target hints were wired up
+  but no code ever computed or applied the rate — it was a visual stub.
+
+  **How it works**:
+  - Reads the soil data for the currently occupied field (`SoilHUD.cachedFieldId`)
+  - Looks up the fertilizer profile for the loaded fill type (`SoilConstants.FERTILIZER_PROFILES`)
+  - **Nutrient fertilizers** (N/P/K/pH/OM products): computes a weighted deficit fraction using
+    each nutrient's profile contribution value as the weight, maps that fraction linearly to the
+    safe range **0.20x – 1.20x** (capped just below `BURN_RISK_THRESHOLD = 1.25x` to prevent
+    accidental burns). Fully stocked soil → 0.20x; completely depleted → 1.20x.
+  - **Crop protection** (`INSECTICIDE`, `FUNGICIDE`): scales with pest/disease pressure
+    (0% pressure → 0.20x, 100% → 1.0x).
+  - **Herbicide types** (`HERBICIDE`, `PESTICIDE` fill types not in profiles): scales with
+    weed pressure (same 0.20x–1.0x range).
+  - Rate is unchanged while the vehicle is off-field or the tank is empty; the HUD continues to
+    show `AUTO: ON` with the target-nutrient hint line.
+  - A network event is sent only when the computed index actually changes, avoiding unnecessary
+    MP traffic.
+
+---
+
 ## [1.6.0.4] - 2026-04-11
 
 ### Fixed

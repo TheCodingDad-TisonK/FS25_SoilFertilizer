@@ -53,6 +53,7 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
 
     -- Sprayer rate manager (always active — not GUI-dependent)
     self.sprayerRateManager = SprayerRateManager.new()
+    self._autoRateTimer = 0  -- throttle timer for auto-rate updates
 
     -- GUI initialization (client only)
     -- Hooks are installed at file-load time in SoilSettingsUI.lua (runs once).
@@ -658,6 +659,172 @@ function SoilFertilityManager:update(dt)
             SoilLogger.debug("HUD update error: %s", tostring(err))
         end
     end
+
+    -- Auto-rate control: adjust sprayer rate based on current field soil data
+    self:updateAutoRates(dt)
+end
+
+--- Auto-rate control update — throttled, client-side only.
+--- Reads the current field soil data and the loaded fill type, then computes the
+--- optimal sprayer rate index via calculateAutoRateIndex.  Sends a network rate
+--- event only when the index actually changes to avoid unnecessary traffic.
+---@param dt number Delta time in milliseconds
+function SoilFertilityManager:updateAutoRates(dt)
+    -- Only meaningful on clients with the setting enabled
+    if not self.settings or not self.settings.autoRateControl then return end
+    if not g_currentMission or not g_currentMission:getIsClient() then return end
+
+    -- Throttle to 5-second intervals (5000 ms)
+    self._autoRateTimer = self._autoRateTimer + dt
+    if self._autoRateTimer < 5000 then return end
+    self._autoRateTimer = 0
+
+    -- Need HUD for fill-type and field-id access (client-only objects)
+    if not self.soilHUD then return end
+
+    -- Find the player's active applicator vehicle
+    local vehicle = getApplicatorVehicle()
+    if not vehicle then return end
+
+    -- Only act when auto mode is engaged for this vehicle
+    local rm = self.sprayerRateManager
+    if not rm or not rm:getAutoMode(vehicle.id) then return end
+
+    -- Use the HUD's cached field id (updated every frame in SoilHUD:update)
+    local fieldId = self.soilHUD.cachedFieldId
+    if not fieldId or fieldId <= 0 then return end
+
+    -- Retrieve live soil data for this field
+    if not self.soilSystem then return end
+    local fieldData = self.soilSystem:getFieldInfo(fieldId)
+    if not fieldData then return end
+
+    -- Get the fill type currently loaded in the vehicle
+    local fillType = self.soilHUD:getSprayerFillType(vehicle)
+    if not fillType then return end
+
+    -- Calculate the ideal index and send if it changed
+    local newIdx = self:calculateAutoRateIndex(fieldData, fillType)
+    local currentIdx = rm:getIndex(vehicle.id)
+    if newIdx ~= currentIdx then
+        rm:setIndex(vehicle.id, newIdx)
+        SoilNetworkEvents_SendSprayerRate(vehicle.id, newIdx)
+        SoilLogger.debug(
+            "Auto-rate: vehicle %d → index %d (%.2fx) [%s on field %d]",
+            vehicle.id, newIdx,
+            SoilConstants.SPRAYER_RATE.STEPS[newIdx],
+            fillType.name, fieldId)
+    end
+end
+
+--- Calculate the optimal sprayer rate index for a given field state and fill type.
+--- Uses the fertilizer profile's per-nutrient contribution values as weights,
+--- computing a weighted average of nutrient deficit fractions, then maps that
+--- fraction linearly to the safe rate range 0.20x–1.20x (indices 2–12).
+---
+--- Crop-protection products (INSECTICIDE, FUNGICIDE, HERBICIDE/PESTICIDE) use
+--- the relevant pressure value instead of nutrient deficits.
+---
+--- The cap of 1.20x keeps the rate below BURN_RISK_THRESHOLD (1.25x) even when
+--- the field is completely depleted, protecting the player from accidental burns.
+---
+---@param fieldData table  Return value of SoilFertilitySystem:getFieldInfo()
+---@param fillType  table  FillType object (has .name string)
+---@return number          1-based index into SoilConstants.SPRAYER_RATE.STEPS
+function SoilFertilityManager:calculateAutoRateIndex(fieldData, fillType)
+    local steps   = SoilConstants.SPRAYER_RATE.STEPS
+    local targets = SoilConstants.SPRAYER_RATE.AUTO_RATE_TARGETS
+    local limits  = SoilConstants.NUTRIENT_LIMITS
+    local phMin   = limits and limits.PH_MIN or 5.0
+
+    -- Safe multiplier bounds — never exceed BURN_RISK_THRESHOLD
+    local MULT_MIN = 0.20
+    local MULT_MAX = 1.20
+
+    local multiplier = 1.0  -- default fallback
+
+    local profile = SoilConstants.FERTILIZER_PROFILES[fillType.name]
+
+    if profile then
+        if profile.pestReduction then
+            -- Insecticide: scale with pest pressure (full pressure → 1.0x, no pressure → 0.20x)
+            local pressure = fieldData.pestPressure or 0
+            multiplier = math.max(MULT_MIN, math.min(1.0, pressure / 100))
+
+        elseif profile.diseaseReduction then
+            -- Fungicide: scale with disease pressure
+            local pressure = fieldData.diseasePressure or 0
+            multiplier = math.max(MULT_MIN, math.min(1.0, pressure / 100))
+
+        else
+            -- Nutrient fertilizer: weighted deficit across profile nutrients
+            local totalWeight     = 0
+            local weightedDeficit = 0
+
+            if profile.N and profile.N > 0 then
+                local deficit = math.max(0, targets.N - fieldData.nitrogen.value) / targets.N
+                weightedDeficit = weightedDeficit + deficit * profile.N
+                totalWeight     = totalWeight     + profile.N
+            end
+            if profile.P and profile.P > 0 then
+                local deficit = math.max(0, targets.P - fieldData.phosphorus.value) / targets.P
+                weightedDeficit = weightedDeficit + deficit * profile.P
+                totalWeight     = totalWeight     + profile.P
+            end
+            if profile.K and profile.K > 0 then
+                local deficit = math.max(0, targets.K - fieldData.potassium.value) / targets.K
+                weightedDeficit = weightedDeficit + deficit * profile.K
+                totalWeight     = totalWeight     + profile.K
+            end
+            if profile.pH and profile.pH > 0 then
+                -- pH: how far below target (7.0) normalised to the possible range [5.0, 7.0]
+                local phRange = targets.pH - phMin
+                if phRange > 0 then
+                    local deficit = math.max(0, targets.pH - fieldData.pH) / phRange
+                    weightedDeficit = weightedDeficit + deficit * profile.pH
+                    totalWeight     = totalWeight     + profile.pH
+                end
+            end
+            if profile.OM and profile.OM > 0 then
+                local deficit = math.max(0, targets.OM - fieldData.organicMatter) / targets.OM
+                weightedDeficit = weightedDeficit + deficit * profile.OM
+                totalWeight     = totalWeight     + profile.OM
+            end
+
+            if totalWeight > 0 then
+                -- Map [0, 1] deficit fraction → [0.20, 1.20] multiplier
+                local deficitFraction = weightedDeficit / totalWeight
+                multiplier = MULT_MIN + deficitFraction * (MULT_MAX - MULT_MIN)
+                SoilLogger.debug(
+                    "Auto-rate calc: %s | deficit=%.3f | target multiplier=%.3f",
+                    fillType.name, deficitFraction, multiplier)
+            end
+        end
+
+    else
+        -- Not in FERTILIZER_PROFILES — check if it is a herbicide type
+        local herbTypes = SoilConstants.WEED_PRESSURE and SoilConstants.WEED_PRESSURE.HERBICIDE_TYPES
+        if herbTypes and herbTypes[fillType.name] then
+            local pressure = fieldData.weedPressure or 0
+            multiplier = math.max(MULT_MIN, math.min(1.0, pressure / 100))
+        end
+        -- Unknown product type: leave at 1.0 (no adjustment)
+    end
+
+    -- Clamp to safe range before finding closest step
+    multiplier = math.max(MULT_MIN, math.min(MULT_MAX, multiplier))
+
+    -- Find the closest STEPS index to the desired multiplier
+    local bestIdx  = SoilConstants.SPRAYER_RATE.DEFAULT_INDEX
+    local bestDiff = math.huge
+    for i, step in ipairs(steps) do
+        local diff = math.abs(step - multiplier)
+        if diff < bestDiff then
+            bestDiff = diff
+            bestIdx  = i
+        end
+    end
+    return bestIdx
 end
 
 --- Cleanup on mod unload
