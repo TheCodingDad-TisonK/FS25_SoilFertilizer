@@ -364,6 +364,8 @@
     <e k="sf_pda_col_field" v="Field" eh="6f16a5f8" />
     <e k="sf_pda_col_n" v="N%" eh="30740562" />
     <e k="sf_pda_col_p" v="P%" eh="0a5e03bc" />
+		<e k="sf_pda_filter_all" v="[EN] Filter: All Fields" eh="a46a8cb2" />
+		<e k="sf_pda_filter_owned" v="[EN] Filter: Owned Only" eh="258cb971" />
     <e k="sf_pda_col_k" v="K%" eh="43e4d0bf" />
     <e k="sf_pda_col_ph" v="pH" eh="397dff20" />
     <e k="sf_pda_col_om" v="OM" eh="bfbebc07" />

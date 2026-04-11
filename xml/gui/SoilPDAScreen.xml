@@ -147,6 +147,12 @@
           <Text profile="sf_sectionHeader" id="fieldsSectionHeader"
                 text="$l10n_sf_pda_fields_section_title" position="0px 658px"/>
 
+          <!-- Filter Toggle -->
+          <Button profile="buttonActivate" id="btnFilterFields"
+                  text="$l10n_sf_pda_filter_all"
+                  onClick="onClickFilter"
+                  position="700px 650px" size="300px 32px"/>
+
           <!-- Column headers — match cell positions exactly -->
           <Text profile="sf_colHeader" text="$l10n_sf_pda_col_field"
                 position="8px 623px"   size="80px  28px"/>
@@ -203,6 +209,12 @@
 
           <Text profile="sf_sectionHeader" id="treatmentSectionHeader"
                 text="$l10n_sf_pda_treatment_section_title" position="0px 658px"/>
+
+          <!-- Filter Toggle -->
+          <Button profile="buttonActivate" id="btnFilterTreatment"
+                  text="$l10n_sf_pda_filter_all"
+                  onClick="onClickFilter"
+                  position="700px 650px" size="300px 32px"/>
 
           <!-- Column headers -->
           <Text profile="sf_colHeader" text="$l10n_sf_pda_col_field"

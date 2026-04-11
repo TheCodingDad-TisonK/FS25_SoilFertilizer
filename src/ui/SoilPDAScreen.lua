@@ -84,6 +84,7 @@ function SoilPDAScreen.new()
     self.menuButtonInfo   = {}
     
     self.lastPopupTime  = 0     -- Guard against multiple clicks/spam
+    self.filterOwnedOnly = false -- Filter: All Fields vs Owned Only
 
     return self
 end
@@ -271,10 +272,12 @@ function SoilPDAScreen:onGuiSetupFinished()
     -- Fields tab
     self.fieldList        = self:getDescendantById("fieldList")
     self.fieldsEmptyHint  = self:getDescendantById("fieldsEmptyHint")
+    self.btnFilterFields  = self:getDescendantById("btnFilterFields")
 
     -- Treatment tab
     self.treatmentList    = self:getDescendantById("treatmentList")
     self.treatmentEmptyHint = self:getDescendantById("treatmentEmptyHint")
+    self.btnFilterTreatment = self:getDescendantById("btnFilterTreatment")
 
     -- Tab labels + underlines
     self.tabLabelMap        = self:getDescendantById("tabLabelMap")
@@ -311,6 +314,7 @@ function SoilPDAScreen:onOpen()
     self:_rebuildAllData()
     self:_refreshSummaryStats()
     self:_refreshMapTab()
+    self:_refreshFilterButtons()
     self:_reloadLists()
     self:setActiveTab(self.activeTab)
 end
@@ -463,6 +467,27 @@ function SoilPDAScreen:onClickOpenMap()
     end
 end
 
+-- ── Filter Toggle ─────────────────────────────────────────
+
+function SoilPDAScreen:onClickFilter()
+    self.filterOwnedOnly = not self.filterOwnedOnly
+    self:_rebuildAllData()
+    self:_refreshFilterButtons()
+    self:_reloadLists()
+end
+
+function SoilPDAScreen:_refreshFilterButtons()
+    local textKey = self.filterOwnedOnly and "sf_pda_filter_owned" or "sf_pda_filter_all"
+    local text = tr(textKey, self.filterOwnedOnly and "Filter: Owned Only" or "Filter: All Fields")
+    
+    if self.btnFilterFields then
+        self.btnFilterFields:setText(text)
+    end
+    if self.btnFilterTreatment then
+        self.btnFilterTreatment:setText(text)
+    end
+end
+
 -- ── SmoothList Data Source ────────────────────────────────
 
 function SoilPDAScreen:getNumberOfItemsInSection(list, section)
@@ -549,22 +574,37 @@ function SoilPDAScreen:_buildFieldData()
     local sfm = g_SoilFertilityManager
     if sfm == nil or sfm.soilSystem == nil then return end
 
-    for fieldId, _ in pairs(sfm.soilSystem.fieldData) do
-        local ok, info = pcall(function()
-            return sfm.soilSystem:getFieldInfo(fieldId)
-        end)
-        if ok and info then
-            local urgency = 0
-            local urgOk, urgVal = pcall(function()
-                return sfm.soilSystem:getFieldUrgency(fieldId)
-            end)
-            if urgOk then urgency = urgVal end
+    local farmId = g_localPlayer and g_localPlayer.farmId
 
-            table.insert(self.fieldData, {
-                fieldId = fieldId,
-                info    = info,
-                urgency = urgency,
-            })
+    for fieldId, _ in pairs(sfm.soilSystem.fieldData) do
+        local isAllowed = true
+        
+        -- Check filter
+        if self.filterOwnedOnly and farmId and farmId > 0 and g_farmlandManager then
+            local farmlandId = g_fieldManager:getFarmlandIdByFieldId(fieldId)
+            local owner = g_farmlandManager:getFarmlandOwner(farmlandId)
+            if owner ~= farmId then
+                isAllowed = false
+            end
+        end
+
+        if isAllowed then
+            local ok, info = pcall(function()
+                return sfm.soilSystem:getFieldInfo(fieldId)
+            end)
+            if ok and info then
+                local urgency = 0
+                local urgOk, urgVal = pcall(function()
+                    return sfm.soilSystem:getFieldUrgency(fieldId)
+                end)
+                if urgOk then urgency = urgVal end
+
+                table.insert(self.fieldData, {
+                    fieldId = fieldId,
+                    info    = info,
+                    urgency = urgency,
+                })
+            end
         end
     end
 
@@ -618,7 +658,18 @@ function SoilPDAScreen:_refreshSummaryStats()
         return
     end
 
-    local totalFields = #self.fieldData
+    -- Note: Summary stats always reflect ALL fields or all OWNED fields depending on overall Mod philosophy?
+    -- Usually summary reflects everything. But let's count properly.
+    
+    local allFields = {}
+    for fieldId, _ in pairs(sfm.soilSystem.fieldData) do
+        local ok, info = pcall(function() return sfm.soilSystem:getFieldInfo(fieldId) end)
+        if ok and info then
+            table.insert(allFields, {fieldId = fieldId, info = info})
+        end
+    end
+
+    local totalFields = #allFields
     if self.statsFieldsTracked then
         self.statsFieldsTracked:setText(tostring(totalFields))
     end
@@ -646,7 +697,7 @@ function SoilPDAScreen:_refreshSummaryStats()
     local weedCount, pestCount, diseaseCount, attentionCount = 0, 0, 0, 0
     local n = totalFields
 
-    for _, entry in ipairs(self.fieldData) do
+    for _, entry in ipairs(allFields) do
         local info = entry.info
         sumN  = sumN  + info.nitrogen.value
         sumP  = sumP  + info.phosphorus.value
