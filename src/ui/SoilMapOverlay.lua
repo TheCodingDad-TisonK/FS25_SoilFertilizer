@@ -116,9 +116,20 @@ function SoilMapOverlay:initialize()
 
     local overlay = self
 
+    -- Helper: returns true only for the fullscreen PDA map element, not the
+    -- farm-overview preview (IngameMapPreviewElement). The preview element does
+    -- not have ingameMap.isFullscreen and calling setCustomLayout on its nil
+    -- internal state crashes the game (IngameMapPreviewElement.lua:48/64).
+    local function isFullscreenMap(mapElem)
+        return mapElem
+            and mapElem.ingameMap ~= nil
+            and mapElem.ingameMap.isFullscreen == true
+    end
+
     -- Draw hook: renders the sidebar + density overlay on the fullscreen map each frame
     self._drawHook = function(mapElem)
-        if overlay and g_SoilFertilityManager and g_SoilFertilityManager.soilMapOverlay then
+        if isFullscreenMap(mapElem)
+           and overlay and g_SoilFertilityManager and g_SoilFertilityManager.soilMapOverlay then
             overlay:onMapElementDraw(mapElem)
         end
     end
@@ -126,7 +137,8 @@ function SoilMapOverlay:initialize()
 
     -- Open hook: mark map open + trigger overlay generation when player opens map
     self._openHook = function(mapElem)
-        if overlay and g_SoilFertilityManager and g_SoilFertilityManager.soilMapOverlay then
+        if isFullscreenMap(mapElem)
+           and overlay and g_SoilFertilityManager and g_SoilFertilityManager.soilMapOverlay then
             overlay.isMapOpen = true
             overlay:requestGenerate()
         end
@@ -135,7 +147,8 @@ function SoilMapOverlay:initialize()
 
     -- Close hook: clear map-open flag
     self._closeHook = function(mapElem)
-        if overlay and g_SoilFertilityManager and g_SoilFertilityManager.soilMapOverlay then
+        if isFullscreenMap(mapElem)
+           and overlay and g_SoilFertilityManager and g_SoilFertilityManager.soilMapOverlay then
             overlay.isMapOpen = false
         end
     end
@@ -145,9 +158,8 @@ function SoilMapOverlay:initialize()
     -- Appended so IngameMapElement's own handler (zoom/pan) runs first; we only
     -- consume clicks that land within our sidebar button rects.
     self._mouseHook = function(mapElem, posX, posY, isDown, isUp, button, eventUsed)
-        if not eventUsed and overlay
-           and g_SoilFertilityManager and g_SoilFertilityManager.soilMapOverlay
-           and mapElem.ingameMap and mapElem.ingameMap.isFullscreen then
+        if not eventUsed and isFullscreenMap(mapElem)
+           and overlay and g_SoilFertilityManager and g_SoilFertilityManager.soilMapOverlay then
             if overlay:onMapMouseEvent(posX, posY, isDown, isUp, button) then
                 return true   -- consumed — prevents further propagation
             end

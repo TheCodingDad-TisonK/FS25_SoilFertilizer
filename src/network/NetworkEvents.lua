@@ -280,6 +280,7 @@ function SoilFullSyncEvent:readStream(streamId, connection)
 
     for i = 1, fieldCount do
         local fieldId = streamReadInt32(streamId)
+        local fieldArea = streamReadFloat32(streamId)
         local nitrogen = streamReadFloat32(streamId)
         local phosphorus = streamReadFloat32(streamId)
         local potassium = streamReadFloat32(streamId)
@@ -299,6 +300,15 @@ function SoilFullSyncEvent:readStream(streamId, connection)
         local diseaseDays = streamReadInt32(streamId)
         local dryDays = streamReadInt32(streamId)
         local burnDays = streamReadInt32(streamId)
+
+        -- Read nutrient buffer (V1.7)
+        local buffer = {}
+        local bufferCount = streamReadInt32(streamId)
+        for j = 1, bufferCount do
+            local ftIdx = streamReadInt32(streamId)
+            local amount = streamReadFloat32(streamId)
+            buffer[ftIdx] = amount
+        end
 
         -- Validate and sanitize field data
         local function validateNumber(value, min, max, default, name)
@@ -330,6 +340,7 @@ function SoilFullSyncEvent:readStream(streamId, connection)
             corruptionDetected = true
         else
             self.fieldData[fieldId] = {
+                fieldArea = math.max(0.01, fieldArea or 1.0),
                 nitrogen = nitrogen,
                 phosphorus = phosphorus,
                 potassium = potassium,
@@ -399,6 +410,7 @@ function SoilFullSyncEvent:writeStream(streamId, connection)
 
     for fieldId, field in pairs(self.fieldData) do
         streamWriteInt32(streamId, fieldId)
+        streamWriteFloat32(streamId, field.fieldArea or 1.0)
         streamWriteFloat32(streamId, field.nitrogen or 50)
         streamWriteFloat32(streamId, field.phosphorus or 40)
         streamWriteFloat32(streamId, field.potassium or 45)
@@ -418,6 +430,16 @@ function SoilFullSyncEvent:writeStream(streamId, connection)
         streamWriteInt32(streamId, field.fungicideDaysLeft or 0)
         streamWriteInt32(streamId, field.dryDayCount or 0)
         streamWriteInt32(streamId, field.burnDaysLeft or 0)
+
+        -- Write nutrient buffer (V1.7)
+        local buffer = field.nutrientBuffer or {}
+        local bCount = 0
+        for _ in pairs(buffer) do bCount = bCount + 1 end
+        streamWriteInt32(streamId, bCount)
+        for ftIdx, amount in pairs(buffer) do
+            streamWriteInt32(streamId, ftIdx)
+            streamWriteFloat32(streamId, amount)
+        end
     end
 end
 
@@ -497,6 +519,7 @@ function SoilFieldUpdateEvent:readStream(streamId, connection)
     self.fieldId = streamReadInt32(streamId)
 
     -- Read values with clamping to valid ranges (NPCFavor pattern)
+    local fieldArea = streamReadFloat32(streamId)
     local nitrogen = streamReadFloat32(streamId)
     local phosphorus = streamReadFloat32(streamId)
     local potassium = streamReadFloat32(streamId)
@@ -517,8 +540,18 @@ function SoilFieldUpdateEvent:readStream(streamId, connection)
     local dryDays = streamReadInt32(streamId)
     local burnDays = streamReadInt32(streamId)
 
+    -- Read nutrient buffer (V1.7)
+    local buffer = {}
+    local bCount = streamReadInt32(streamId)
+    for i = 1, bCount do
+        local ftIdx = streamReadInt32(streamId)
+        local amount = streamReadFloat32(streamId)
+        buffer[ftIdx] = amount
+    end
+
     -- Clamp all values to valid ranges
     self.field = {
+        fieldArea = math.max(0.01, fieldArea or 1.0),
         nitrogen = math.max(SoilConstants.NUTRIENT_LIMITS.MIN,
                            math.min(SoilConstants.NUTRIENT_LIMITS.MAX, nitrogen)),
         phosphorus = math.max(SoilConstants.NUTRIENT_LIMITS.MIN,
@@ -543,6 +576,7 @@ function SoilFieldUpdateEvent:readStream(streamId, connection)
         fungicideDaysLeft = math.max(0, diseaseDays),
         dryDayCount = math.max(0, dryDays),
         burnDaysLeft = math.max(0, burnDays),
+        nutrientBuffer = buffer,
         initialized = true
     }
 
@@ -562,6 +596,7 @@ end
 
 function SoilFieldUpdateEvent:writeStream(streamId, connection)
     streamWriteInt32(streamId, self.fieldId)
+    streamWriteFloat32(streamId, self.field.fieldArea or 1.0)
     streamWriteFloat32(streamId, self.field.nitrogen or 50)
     streamWriteFloat32(streamId, self.field.phosphorus or 40)
     streamWriteFloat32(streamId, self.field.potassium or 45)
@@ -581,6 +616,16 @@ function SoilFieldUpdateEvent:writeStream(streamId, connection)
     streamWriteInt32(streamId, self.field.fungicideDaysLeft or 0)
     streamWriteInt32(streamId, self.field.dryDayCount or 0)
     streamWriteInt32(streamId, self.field.burnDaysLeft or 0)
+
+    -- Write nutrient buffer (V1.7)
+    local buffer = self.field.nutrientBuffer or {}
+    local bCount = 0
+    for _ in pairs(buffer) do bCount = bCount + 1 end
+    streamWriteInt32(streamId, bCount)
+    for ftIdx, amount in pairs(buffer) do
+        streamWriteInt32(streamId, ftIdx)
+        streamWriteFloat32(streamId, amount)
+    end
 end
 
 function SoilFieldUpdateEvent:run(connection)
@@ -606,7 +651,7 @@ function SoilNetworkEvents_IsPlayerAdmin()
     if not g_currentMission then return false end
 
     -- Single player = always admin
-    if not g_currentMission.missionDynamicInfo.isMultiplayer then
+    if not (g_currentMission and g_currentMission.missionDynamicInfo and g_currentMission.missionDynamicInfo.isMultiplayer) then
         return true
     end
 
@@ -840,4 +885,4 @@ function SoilNetworkEvents_SendSprayerAutoMode(vehicleId, enabled)
     end
 end
 
-SoilLogger.info("Network events system loaded")s system loaded")
+SoilLogger.info("Network events system loaded")

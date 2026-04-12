@@ -166,53 +166,51 @@ SoilConstants.CROP_EXTRACTION_DEFAULT = { N=2.10, P=0.90, K=1.70 }
 -- FERTILIZER PROFILES (per 1,000 liters applied)
 -- ========================================
 -- Calibrated for 0-100 nutrient scale (normalized by field area)
--- Example: 1,000L liquid fertilizer restores ~5.0N, ~2.1P, ~3.3K on 1 hectare
---
--- Base game fill types are recognized out of the box.
+-- UPDATED V1.7: Coefficients are now volume-normalized relative to baseRates
+-- to produce realistic soil-test responses (Mehlich-3 ppm) in one pass.
+-- Formula: coeff = (target_ppm / display_mult) / (baseRate * 0.9 / 1000)
 SoilConstants.FERTILIZER_PROFILES = {
-    -- Base game
-    LIQUIDFERTILIZER  = { N=5.00, P=2.10, K=3.30 },           -- Balanced liquid NPK
-    FERTILIZER        = { N=6.70, P=3.30, K=2.50 },           -- Solid granular, high N/P
-    MANURE            = { N=2.50, P=1.70, K=2.90, OM=0.50 },  -- Organic, slow-release
-    LIQUIDMANURE      = { N=3.30, P=1.70, K=4.20, OM=0.30 },  -- Liquid organic, high K
-    DIGESTATE         = { N=4.20, P=1.80, K=4.60, OM=0.40 },  -- Biogas byproduct
-    LIME              = { pH=4.0 },                             -- pH adjustment
+    -- Base game (NPK balanced)
+    LIQUIDFERTILIZER  = { N=79.2, P=198.0, K=44.5 },          -- 93.5 L/ha: ~20N, ~10P, ~15K ppm
+    FERTILIZER        = { N=41.1, P=164.6, K=24.7 },          -- 225 kg/ha: ~25N, ~20P, ~20K ppm
+    MANURE            = { N=0.53, P=1.59,  K=0.60, OM=0.04 }, -- 14000 L/ha: ~20N, ~12P, ~30K ppm
+    LIQUIDMANURE      = { N=0.42, P=1.59,  K=0.80, OM=0.03 }, -- Slurry
+    DIGESTATE         = { N=0.58, P=1.85,  K=1.10, OM=0.04 }, -- Digestate
+    LIME              = { pH=0.31 },                          -- 2500 kg/ha: +0.7 pH shift
+    LIQUIDLIME        = { pH=0.20 },                          -- 2800 L/ha: +0.5 pH shift
 
-    -- Nitrogen sources
-    UAN32             = { N=8.70, P=0.00, K=0.00 },  -- 32-0-0 liquid
-    UAN28             = { N=7.60, P=0.00, K=0.00 },  -- 28-0-0 liquid
-    ANHYDROUS         = { N=10.0, P=0.00, K=0.00 },  -- 82-0-0
-    AMS               = { N=4.60, P=0.00, K=0.00 },  -- 21-0-0
-    UREA              = { N=9.50, P=0.00, K=0.00 },  -- 46-0-0
+    -- Nitrogen sources (high-concentration)
+    UAN32             = { N=243.6, P=0.00, K=0.00 }, -- 60.8 L/ha: ~40N ppm
+    UAN28             = { N=210.0, P=0.00, K=0.00 }, -- 60.8 L/ha: ~35N ppm
+    ANHYDROUS         = { N=793.6, P=0.00, K=0.00 }, -- 28.0 L/ha: ~60N ppm (strongest)
+    AMS               = { N=66.2,  P=0.00, K=0.00 }, -- 168 kg/ha: ~30N ppm
+    UREA              = { N=154.6, P=0.00, K=0.00 }, -- 168 kg/ha: ~70N ppm
 
-    -- Starter fertilizer
-    STARTER           = { N=2.70, P=6.80, K=1.80 },  -- High-P starter
+    -- Starter fertilizer (High-P pop-up)
+    STARTER           = { N=63.5, P=595.0, K=44.6 }, -- 46.8 L/ha: ~8N, ~15P ppm
 
-    -- Gypsum
-    GYPSUM            = { pH=1.0, OM=0.10 },
+    -- Gypsum (Fix: No pH effect)
+    GYPSUM            = { pH=0.0, OM=0.22 }, -- 1500 kg/ha: pure OM/sulfur boost
 
-    -- Phosphorus & potassium sources
-    MAP               = { N=3.00, P=14.1, K=0.00 },  -- 11-52-0
-    DAP               = { N=4.90, P=12.6, K=0.00 },  -- 18-46-0
-    POTASH            = { N=0.00, P=0.00, K=16.3 },  -- 0-0-60
+    -- Phosphorus & potassium sources (Dry bulk)
+    MAP               = { N=11.1, P=411.5, K=0.00 }, -- 225 kg/ha: ~45P ppm
+    DAP               = { N=16.4, P=329.2, K=0.00 }, -- 225 kg/ha: ~40P ppm
+    POTASH            = { N=0.00, P=0.00, K=55.5 },  -- 225 kg/ha: ~45K ppm
 
-    -- Liquid equivalents
-    LIQUID_UREA       = { N=9.50, P=0.00, K=0.00 },
-    LIQUID_AMS        = { N=4.60, P=0.00, K=0.00 },
-    LIQUID_MAP        = { N=3.00, P=14.1, K=0.00 },
-    LIQUID_DAP        = { N=4.90, P=12.6, K=0.00 },
-    LIQUID_POTASH     = { N=0.00, P=0.00, K=16.3 },
+    -- Liquid equivalents (match dry profiles)
+    LIQUID_UREA       = { N=154.6, P=0.00, K=0.00 },
+    LIQUID_AMS        = { N=66.2,  P=0.00, K=0.00 },
+    LIQUID_MAP        = { N=11.1, P=411.5, K=0.00 },
+    LIQUID_DAP        = { N=16.4, P=329.2, K=0.00 },
+    LIQUID_POTASH     = { N=0.00, P=0.00, K=55.5 },
 
     -- Organic / slow-release
-    COMPOST           = { N=0.80, P=0.50, K=0.60, OM=1.20 },
-    BIOSOLIDS         = { N=2.80, P=2.20, K=0.80, OM=0.70 },
-    CHICKEN_MANURE    = { N=3.50, P=2.90, K=1.80, OM=0.80 },
-    PELLETIZED_MANURE = { N=6.50, P=4.50, K=5.50, OM=0.80 },
+    COMPOST           = { N=0.74, P=0.55, K=0.55, OM=0.60 }, -- 5000 kg/ha
+    BIOSOLIDS         = { N=2.05, P=6.17, K=1.23, OM=0.45 }, -- 4500 kg/ha
+    CHICKEN_MANURE    = { N=3.70, P=13.9, K=2.78, OM=0.55 }, -- 2000 kg/ha
+    PELLETIZED_MANURE = { N=16.4, P=41.1, K=18.5, OM=0.40 }, -- 450 kg/ha
 
-    -- Lime variants
-    LIQUIDLIME        = { pH=3.0 },
-
-    -- Crop protection products
+    -- Crop protection products (Handled via effectiveness calculation)
     INSECTICIDE = { pestReduction = 1.0 },
     FUNGICIDE   = { diseaseReduction = 1.0 },
 }

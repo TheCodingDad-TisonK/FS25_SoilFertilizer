@@ -155,7 +155,7 @@ local function load(mission)
         SoilLogger.info("Initializing...")
 
         -- Log multiplayer status
-        if mission.missionDynamicInfo.isMultiplayer then
+        if mission.missionDynamicInfo and mission.missionDynamicInfo.isMultiplayer then
             if mission:getIsServer() then
                 SoilLogger.info("Running as MULTIPLAYER SERVER")
             else
@@ -210,7 +210,7 @@ local function hookSaveLoadEvents()
             FSCareerMissionInfo.saveToXMLFile,
             function(missionInfo)
                 -- In multiplayer only the server holds authoritative soil data
-                if g_currentMission and g_currentMission.missionDynamicInfo.isMultiplayer then
+                if g_currentMission and g_currentMission.missionDynamicInfo and g_currentMission.missionDynamicInfo.isMultiplayer then
                     if g_server == nil then return end
                 end
                 if g_SoilFertilityManager then
@@ -303,7 +303,7 @@ end
 function soilStatus()
     if g_SoilFertilityManager and g_SoilFertilityManager.settings then
         local s = g_SoilFertilityManager.settings
-        local isMultiplayer = g_currentMission and g_currentMission.missionDynamicInfo.isMultiplayer
+        local isMultiplayer = g_currentMission and g_currentMission.missionDynamicInfo and g_currentMission.missionDynamicInfo.isMultiplayer
         local isServer = g_server ~= nil
         local isClient = g_client ~= nil
 

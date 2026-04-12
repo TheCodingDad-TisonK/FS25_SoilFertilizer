@@ -77,6 +77,8 @@
     <e k="input_SF_RATE_UP" v="Increase Fertilizer Rate" eh="6e601ef5" />
     <e k="input_SF_RATE_DOWN" v="Decrease Fertilizer Rate" eh="30712026" />
     <e k="input_SF_TOGGLE_AUTO" v="Toggle Auto Rate" eh="a8642cf0" />
+        <e k="input_SF_CYCLE_MAP_LAYER" v="Cycle Soil Map Layer" />
+        <e k="input_SF_SOIL_PDA" v="Open Soil PDA" />
     <e k="sf_report_title" v="Soil &amp; Fertilizer Report" eh="a76f8218" />
     <e k="sf_report_fields_tracked" v="Fields Tracked:" eh="7b1e59b8" />
     <e k="sf_report_need_fert" v="Need Fertilizer:" eh="110b60f2" />
@@ -369,6 +371,7 @@
     <e k="sf_pda_disease_label" v="Disease" eh="e7067a8c" />
     <e k="sf_pda_section_attention" v="Needs Attention" eh="80e48bc3" />
     <e k="sf_pda_needs_fert_label" v="Need Fertilizer" eh="fa9ded5e" />
+    <e k="sf_pda_total_urgent_label" v="Total needing attention" />
     <e k="sf_pda_no_data_left" v="No field data yet." eh="ba71c6b1" />
     <!-- Map Tab -->
     <e k="sf_pda_map_section_title" v="Soil Map Layers" eh="85d63132" />
@@ -392,9 +395,12 @@
     <e k="sf_pda_map_legend_high" v="High" eh="655d20c1" />
     <e k="sf_pda_map_legend_excess" v="Excess" eh="d1d25b9f" />
     <e k="sf_pda_map_instructions" v="Press Shift+M in-game to cycle soil map layers. (currently not working)" eh="b13603aa" />
-    <e k="sf_pda_map_open_btn" v="→ Open Full Map" eh="0901ae30" />
-    <e k="sf_pda_map_unavailable" v="Map preview unavailable" eh="00000000" />
-    <!-- Fields Tab -->
+    <e k="sf_pda_map_jump_hint" v="Click a field to jump to it on the map" />
+    <e k="sf_pda_map_open_btn" v="DEV NOTE" eh="0901ae30" />
+    <e k="sf_pda_btn_help" v="Dev Note" />
+    <e k="sf_pda_help_text" v="Hi there, it's me the developer! As you can see, this page is still very much a work-in-progress. The map layers are currently just visual previews (non-functional for selection), and many UI elements still need their final polish and calibration." eh="00000001" />
+    <e k="sf_pda_help_github" v="YOUR FEEDBACK MATTERS! If you encounter any bugs, have suggestions for new features, or want to contribute to the code, please visit the project on GitHub. You can open an Issue or a Pull Request at any time to help make this mod better for everyone. Thank you for testing!" eh="00000002" />
+    <e k="sf_pda_map_unavailable" v="Map preview unavailable" eh="00000000" />    <!-- Fields Tab -->
     <e k="sf_pda_fields_section_title" v="All Fields" eh="48729e0b" />
     <e k="sf_pda_col_field" v="Field" eh="6f16a5f8" />
     <e k="sf_pda_col_n" v="N%" eh="30740562" />
@@ -414,6 +420,7 @@
     <e k="sf_pda_col_priority" v="Urgency" eh="c94e3850" />
     <e k="sf_pda_col_needs" v="Needs" eh="94d6125d" />
     <e k="sf_pda_no_treatment" v="All fields are in good condition." eh="fa985166" />
+    <e k="sf_pda_treatment_hint" v="Fields listed on the right need treatment. Click a row to see recommended inputs and estimated quantities." />
     <e k="sf_pda_need_n" v="Nitrogen" eh="1e9ef3ba" />
     <e k="sf_pda_need_p" v="Phosphorus" eh="eb4f2688" />
     <e k="sf_pda_need_k" v="Potassium" eh="3a4edc67" />

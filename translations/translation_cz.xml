@@ -90,6 +90,8 @@
     <e k="input_SF_RATE_UP" v="Zvýšit dávku hnojiva" eh="6e601ef5" />
     <e k="input_SF_RATE_DOWN" v="Snížit dávku hnojiva" eh="30712026" />
     <e k="input_SF_TOGGLE_AUTO" v="Přepnout automatickou dávku" eh="a8642cf0" />
+        <e k="input_SF_CYCLE_MAP_LAYER" v="Cycle Soil Map Layer" />
+        <e k="input_SF_SOIL_PDA" v="Open Soil PDA" />
     <e k="sf_report_title" v="Zpráva o Půdě &amp;amp; Hnojivu" eh="a76f8218" />
     <e k="sf_report_fields_tracked" v="Sledovaná Pole:" eh="7b1e59b8" />
     <e k="sf_report_need_fert" v="Potřebují Hnojivo:" eh="110b60f2" />

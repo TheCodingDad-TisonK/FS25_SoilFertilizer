@@ -90,6 +90,8 @@
     <e k="input_SF_RATE_UP" v="Düngerrate erhöhen" eh="6e601ef5" />
     <e k="input_SF_RATE_DOWN" v="Düngerrate verringern" eh="30712026" />
     <e k="input_SF_TOGGLE_AUTO" v="Auto-Rate umschalten" eh="a8642cf0" />
+        <e k="input_SF_CYCLE_MAP_LAYER" v="Cycle Soil Map Layer" />
+        <e k="input_SF_SOIL_PDA" v="Open Soil PDA" />
     <e k="sf_report_title" v="Boden- &amp;amp; Düngerbericht" eh="a76f8218" />
     <e k="sf_report_fields_tracked" v="Verfolgte Felder:" eh="7b1e59b8" />
     <e k="sf_report_need_fert" v="Brauchen Dünger:" eh="110b60f2" />
