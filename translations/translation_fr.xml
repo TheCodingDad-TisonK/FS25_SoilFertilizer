@@ -359,6 +359,7 @@
     <e k="sf_pda_map_legend_excess" v="Excès" eh="d1d25b9f" />
     <e k="sf_pda_map_instructions" v="Appuyez sur Maj+M en jeu pour faire défiler les couches de sol." eh="b13603aa" />
     <e k="sf_pda_map_open_btn" v="Ouvrir la carte du sol" eh="0901ae30" />
+    <e k="sf_pda_map_unavailable" v="Map preview unavailable" eh="00000000" />
     <!-- Fields Tab -->
     <e k="sf_pda_fields_section_title" v="Tous les champs" eh="48729e0b" />
     <e k="sf_pda_col_field" v="Champ" eh="6f16a5f8" />

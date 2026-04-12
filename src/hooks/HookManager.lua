@@ -790,6 +790,57 @@ function HookManager:installSprayerAreaHook()
                 if isNutrientFertilizer and rateMultiplier > SoilConstants.SPRAYER_RATE.BURN_RISK_THRESHOLD then
                     g_SoilFertilityManager.soilSystem:applyBurnEffect(fieldId, rateMultiplier)
                 end
+
+                -- BUY mode backup refill (issue #125).
+                -- SpecializationUtil.registerFunction may cache function references before
+                -- our FillUnit.addFillUnitFillLevel hook installs, so the class-level hook
+                -- may be bypassed. Here we handle BUY mode reliably: the tank already depleted
+                -- (original ran first), so we add the consumed liters back and charge the farm.
+                local hookMgr = g_SoilFertilityManager.hookManager
+                local buyPrices = hookMgr and hookMgr.customFillTypePrices
+                local pricePerLiter = buyPrices and buyPrices[fillTypeIndex]
+                if pricePerLiter then
+                    local isAI = false
+                    local okAI, resAI = pcall(function() return self:getIsAIActive() end)
+                    if (okAI and resAI) then isAI = true end
+                    if not isAI and self.spec_aiJobVehicle and self.spec_aiJobVehicle.job ~= nil then
+                        isAI = true
+                    end
+                    if isAI and g_currentMission and g_currentMission.missionInfo then
+                        local mi = g_currentMission.missionInfo
+                        local ftName = fillType.name
+                        local buyActive = false
+                        if ftName == "LIQUIDMANURE" or ftName == "DIGESTATE" then
+                            buyActive = (mi.helperSlurrySource == 2)
+                        elseif ftName == "MANURE" then
+                            buyActive = (mi.helperManureSource == 2)
+                        else
+                            buyActive = (mi.helperBuyFertilizer == true)
+                        end
+                        if buyActive then
+                            -- Only refill if this wasn't already handled by the FillUnit hook.
+                            -- We check via a per-vehicle stamp set by the FillUnit hook.
+                            local alreadyHandled = self._soilBuyHandledAt and (g_currentMission.time - self._soilBuyHandledAt) < 200
+                            if not alreadyHandled then
+                                local fillUnitIndex = 1
+                                local okFui, fuiVal = pcall(function() return self:getSprayerFillUnitIndex() end)
+                                if okFui and fuiVal then fillUnitIndex = fuiVal end
+                                local farmId = self:getOwnerFarmId()
+                                pcall(function()
+                                    self:addFillUnitFillLevel(farmId, fillUnitIndex, liters, fillTypeIndex, ToolType.UNDEFINED, nil)
+                                end)
+                                local cost = liters * pricePerLiter
+                                if farmId and farmId > 0 then
+                                    pcall(function()
+                                        g_currentMission:addMoney(-cost, farmId, MoneyType.PURCHASE_FERTILIZER, true, true)
+                                    end)
+                                end
+                                SoilLogger.debug("BUY REFILL (sprayer hook): veh=%d, type=%s, liters=%.2f, cost=%.2f",
+                                    self.id or 0, ftName, liters, cost)
+                            end
+                        end
+                    end
+                end
             end)
 
             if not success then
@@ -1284,53 +1335,56 @@ function HookManager:installPurchaseRefillHook()
         return false
     end
 
+    -- FS25 real signature: FillUnit:addFillUnitFillLevel(farmId, fillUnitIndex, fillLevelDelta, fillTypeIndex, toolType, fillPositionData)
+    -- When replaced as a class method, 'vehicle' is the implicit self (the vehicle with FillUnit spec).
     local original = FillUnit.addFillUnitFillLevel
-    FillUnit.addFillUnitFillLevel = function(vehicle, fillUnitIndex, fillLevelDelta, fillTypeIndex, toolType, fillPositionData, noEventSend)
+    FillUnit.addFillUnitFillLevel = function(vehicle, farmId, fillUnitIndex, fillLevelDelta, fillTypeIndex, toolType, fillPositionData)
         -- Only intercept consumption (negative delta) of our custom types
         if fillLevelDelta >= 0 then
-            return original(vehicle, fillUnitIndex, fillLevelDelta, fillTypeIndex, toolType, fillPositionData, noEventSend)
+            return original(vehicle, farmId, fillUnitIndex, fillLevelDelta, fillTypeIndex, toolType, fillPositionData)
         end
 
         local pricePerLiter = customPrices[fillTypeIndex]
         if not pricePerLiter then
-            return original(vehicle, fillUnitIndex, fillLevelDelta, fillTypeIndex, toolType, fillPositionData, noEventSend)
+            return original(vehicle, farmId, fillUnitIndex, fillLevelDelta, fillTypeIndex, toolType, fillPositionData)
         end
 
         -- Check BUY mode
         if not isInBuyMode(vehicle, fillUnitIndex, fillTypeIndex) then
-            return original(vehicle, fillUnitIndex, fillLevelDelta, fillTypeIndex, toolType, fillPositionData, noEventSend)
+            return original(vehicle, farmId, fillUnitIndex, fillLevelDelta, fillTypeIndex, toolType, fillPositionData)
         end
 
         -- |fillLevelDelta| is the liters consumed this frame (negative value).
         local litersConsumed = -fillLevelDelta
         local cost = litersConsumed * pricePerLiter
 
-        -- Charge the owning farm
-        local farmId = vehicle.ownerFarmId or (vehicle.spec_enterable and vehicle.spec_enterable.activeFarmId)
-        if farmId and farmId > 0 and g_currentMission and g_currentMission.economyManager then
-            local ok, err = pcall(function()
-                g_currentMission:addMoney(-cost, farmId, MoneyType.PURCHASE_FERTILIZER, true, true)
+        -- Charge the owning farm (use the farmId arg — it is the authoritative owner)
+        local chargeFarmId = (farmId and farmId > 0) and farmId
+            or vehicle.ownerFarmId
+            or (vehicle.spec_enterable and vehicle.spec_enterable.activeFarmId)
+        if chargeFarmId and chargeFarmId > 0 and g_currentMission then
+            pcall(function()
+                g_currentMission:addMoney(-cost, chargeFarmId, MoneyType.PURCHASE_FERTILIZER, true, true)
             end)
-            if not ok then
-                pcall(function()
-                    g_currentMission.economyManager:updateBudget(farmId, -cost)
-                end)
-            end
         end
 
-        -- Return the original delta — this tells the game "yes, we consumed this much"
-        -- so the sprayer logic continues normally, but since we didn't call the 
-        -- original function, the physical tank level is never actually subtracted.
-        if SoilLogger and SoilLogger.debug then
-            SoilLogger.debug("BUY SUCCESS: veh=%d, type=%d, liters=%.2f, cost=%.2f (returned delta %.4f)", 
-                vehicle.id or 0, fillTypeIndex, litersConsumed, cost, fillLevelDelta)
+        -- Stamp this vehicle so the sprayer-hook backup knows we already handled this frame.
+        if g_currentMission then
+            vehicle._soilBuyHandledAt = g_currentMission.time
         end
+        -- Return the original delta so sprayer logic continues, but skip calling original
+        -- so the physical fill level is never subtracted.
+        SoilLogger.debug("BUY SUCCESS (FillUnit hook): veh=%d, type=%d, liters=%.2f, cost=%.2f",
+            vehicle.id or 0, fillTypeIndex, litersConsumed, cost)
         return fillLevelDelta
     end
 
     self:registerCleanup("FillUnit.addFillUnitFillLevel (purchase refill)", function()
         FillUnit.addFillUnitFillLevel = original
     end)
+
+    -- Share the price table with the sprayer hook (used as a reliable backup path)
+    self.customFillTypePrices = customPrices
 
     SoilLogger.info("[OK] Purchase refill hook installed - BUY mode enabled for %d custom fill types", count)
     return true

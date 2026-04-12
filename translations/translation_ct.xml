@@ -393,6 +393,7 @@
     <e k="sf_pda_map_legend_excess" v="過量" eh="d1d25b9f" />
     <e k="sf_pda_map_instructions" v="在遊戲中按 Shift+M 切換土壤地圖圖層。" eh="b13603aa" />
     <e k="sf_pda_map_open_btn" v="打開土壤地圖" eh="0901ae30" />
+    <e k="sf_pda_map_unavailable" v="Map preview unavailable" eh="00000000" />
     <!-- Fields Tab -->
     <e k="sf_pda_fields_section_title" v="所有田地" eh="48729e0b" />
     <e k="sf_pda_col_field" v="田地" eh="6f16a5f8" />

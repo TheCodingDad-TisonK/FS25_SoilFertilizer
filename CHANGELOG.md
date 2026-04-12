@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.8.1.0] - 2026-04-12
+
+### Fixed
+
+- **Issue #150 — Nil crash in update loop**: `SoilNetworkEvents_SendSprayerRate` was called
+  unconditionally at three sites in `SoilFertilityManager.lua`. If `NetworkEvents.lua` failed to
+  load (missing file, load-order problem, or earlier Lua error), all three call sites would crash
+  the per-frame update loop. Added nil guards (`if SoilNetworkEvents_SendSprayerRate then`) at
+  all three sites.
+
+- **Issue #125 — AI helper BUY mode fertilizer never consumed**: The
+  `FillUnit.addFillUnitFillLevel` hook in `HookManager.lua` had an incorrect function signature —
+  the `farmId` argument (first real param after `self`) was missing, shifting every subsequent
+  argument by one position. The `fillLevelDelta >= 0` guard was evaluating `fillUnitIndex >= 0`
+  (always true), so the BUY-mode intercept fired on every call without ever matching a valid price
+  or consuming product. Fixed the full signature to
+  `(vehicle, farmId, fillUnitIndex, fillLevelDelta, fillTypeIndex, toolType, fillPositionData)`,
+  corrected all internal references, and added a reliable backup refill path inside the sprayer
+  area hook with per-vehicle timestamp deduplication to prevent double-charging.
+
+- **PDA field filter ownership check**: The "Owned Fields" filter in the PDA screen was calling
+  `g_fieldManager:getFieldByIndex(fieldId)` where `fieldId` is actually a farmland ID (as stored
+  by the sprayer hook via `field.farmland.id`). `getFieldByIndex` returns nil for farmland IDs,
+  so every field silently passed the filter regardless of ownership. Fixed to use
+  `g_farmlandManager:getFarmlandOwner(fieldId)` directly.
+
+- **PDA filter footer button label not syncing**: After toggling the ownership filter, the footer
+  button label remained stale ("All Fields" / "Owned Fields" out of sync with actual state).
+  `_refreshFilterButtons()` now also updates `menuButtonInfo[2].text` and calls
+  `setMenuButtonInfo()` so the footer button reflects the current filter state.
+
+---
+
 ## [1.8.0.0] - 2026-04-11
 
 ### Added

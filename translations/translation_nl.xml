@@ -360,6 +360,7 @@
     <e k="sf_pda_map_legend_excess" v="Overschot" eh="d1d25b9f" />
     <e k="sf_pda_map_instructions" v="Druk op Shift+M in de game om door de bodemkaartlagen te wisselen." eh="b13603aa" />
     <e k="sf_pda_map_open_btn" v="Open Bodemkaart" eh="0901ae30" />
+    <e k="sf_pda_map_unavailable" v="Map preview unavailable" eh="00000000" />
     <e k="sf_pda_fields_section_title" v="Alle Velden" eh="48729e0b" />
     <e k="sf_pda_col_field" v="Veld" eh="6f16a5f8" />
     <e k="sf_pda_col_n" v="N%" eh="30740562" />

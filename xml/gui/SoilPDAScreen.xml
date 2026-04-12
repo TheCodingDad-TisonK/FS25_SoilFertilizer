@@ -385,6 +385,7 @@
       <textAlignment value="left"/>
     </Profile>
 
+
     <!-- Column headers -->
     <Profile name="sf_colHeader" extends="fs25_textDefault" with="anchorTopLeft">
       <textSize value="13px"/>

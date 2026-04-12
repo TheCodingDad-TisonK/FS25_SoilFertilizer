@@ -481,12 +481,18 @@ end
 function SoilPDAScreen:_refreshFilterButtons()
     local textKey = self.filterOwnedOnly and "sf_pda_filter_owned" or "sf_pda_filter_all"
     local text = tr(textKey, self.filterOwnedOnly and "Filter: Owned Only" or "Filter: All Fields")
-    
+
     if self.btnFilterFields then
         self.btnFilterFields:setText(text)
     end
     if self.btnFilterTreatment then
         self.btnFilterTreatment:setText(text)
+    end
+
+    -- Keep the footer bar button in sync with the current filter state
+    if self.menuButtonInfo and self.menuButtonInfo[2] then
+        self.menuButtonInfo[2].text = text
+        self:setMenuButtonInfo(self.menuButtonInfo)
     end
 end
 
@@ -581,10 +587,11 @@ function SoilPDAScreen:_buildFieldData()
     for fieldId, _ in pairs(sfm.soilSystem.fieldData) do
         local isAllowed = true
         
-        -- Check filter
+        -- Check filter.
+        -- fieldId in soilSystem is the FARMLAND ID (set from field.farmland.id in the
+        -- sprayer hook), so we query getFarmlandOwner directly — no field lookup needed.
         if self.filterOwnedOnly and farmId and farmId > 0 and g_farmlandManager then
-            local farmlandId = g_fieldManager:getFarmlandIdByFieldId(fieldId)
-            local owner = g_farmlandManager:getFarmlandOwner(farmlandId)
+            local owner = g_farmlandManager:getFarmlandOwner(fieldId)
             if owner ~= farmId then
                 isAllowed = false
             end

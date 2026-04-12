@@ -359,6 +359,7 @@
     <e k="sf_pda_map_legend_excess" v="Excesso" eh="d1d25b9f" />
     <e k="sf_pda_map_instructions" v="Pressione Shift+M no jogo para alternar as camadas do mapa de solo." eh="b13603aa" />
     <e k="sf_pda_map_open_btn" v="Abrir Mapa do Solo" eh="0901ae30" />
+    <e k="sf_pda_map_unavailable" v="Map preview unavailable" eh="00000000" />
     <!-- Fields Tab -->
     <e k="sf_pda_fields_section_title" v="Todos os Campos" eh="48729e0b" />
     <e k="sf_pda_col_field" v="Campo" eh="6f16a5f8" />
