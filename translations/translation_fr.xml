@@ -90,6 +90,8 @@
     <e k="input_SF_RATE_UP" v="Augmenter le taux d'engrais" eh="6e601ef5" />
     <e k="input_SF_RATE_DOWN" v="Réduire le taux d'engrais" eh="30712026" />
     <e k="input_SF_TOGGLE_AUTO" v="Basculer taux auto" eh="a8642cf0" />
+        <e k="input_SF_CYCLE_MAP_LAYER" v="Cycle Soil Map Layer" />
+        <e k="input_SF_SOIL_PDA" v="Open Soil PDA" />
     <e k="sf_report_title" v="Rapport Sol &amp;amp; Engrais" eh="a76f8218" />
     <e k="sf_report_fields_tracked" v="Champs Suivis:" eh="7b1e59b8" />
     <e k="sf_report_need_fert" v="Besoin d'Engrais:" eh="110b60f2" />

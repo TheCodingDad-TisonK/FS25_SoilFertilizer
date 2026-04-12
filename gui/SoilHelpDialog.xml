@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<GUI onOpen="onOpen" onClose="onClose" onCreate="onCreate">
+    <GuiElement profile="newLayer" />
+    <Bitmap profile="dialogFullscreenBg" id="dialogBg" />
+
+    <GuiElement profile="fs25_dialogBg" id="dialogElement" size="900px 600px" baseHeight="600px">
+        <ThreePartBitmap profile="fs25_dialogBgMiddle" />
+        <ThreePartBitmap profile="fs25_dialogBgTop" />
+        <ThreePartBitmap profile="fs25_dialogBgBottom" />
+
+        <GuiElement profile="fs25_dialogContentContainer">
+            <!-- Title -->
+            <Text profile="fs25_dialogTitle" id="dialogTitle"
+                  position="0px -40px" text="$l10n_sf_pda_screen_title"/>
+
+            <!-- Section 1: Developer Message -->
+            <Text profile="fs25_dialogText" id="textSection1"
+                  position="0px -100px" size="820px 180px"
+                  textAlignment="left" wordWrap="true"
+                  text="$l10n_sf_pda_help_text"/>
+
+            <!-- Divider -->
+            <Bitmap profile="fs25_dialogButtonBoxSeparator" position="0px -300px" size="820px 1px" />
+
+            <!-- Section 2: Instructions / GitHub -->
+            <Text profile="fs25_dialogText" id="textSection2"
+                  position="0px -340px" size="820px 180px"
+                  textAlignment="left" wordWrap="true"
+                  text="$l10n_sf_pda_help_github"/>
+        </GuiElement>
+
+        <!-- Close button -->
+        <BoxLayout profile="fs25_dialogButtonBox">
+            <Button profile="buttonOK" id="closeButton"
+                    text="$l10n_sf_report_ok" onClick="onCloseClick"/>
+        </BoxLayout>
+    </GuiElement>
+</GUI>

@@ -90,6 +90,8 @@
     <e k="input_SF_RATE_UP" v="增加肥料施用量" eh="6e601ef5" />
     <e k="input_SF_RATE_DOWN" v="減少肥料施用量" eh="30712026" />
     <e k="input_SF_TOGGLE_AUTO" v="切換自動施用量" eh="a8642cf0" />
+        <e k="input_SF_CYCLE_MAP_LAYER" v="Cycle Soil Map Layer" />
+        <e k="input_SF_SOIL_PDA" v="Open Soil PDA" />
     <e k="sf_report_title" v="土壤與肥料報告" eh="a76f8218" />
     <e k="sf_report_fields_tracked" v="追蹤的田地：" eh="7b1e59b8" />
     <e k="sf_report_need_fert" v="需要肥料：" eh="110b60f2" />

@@ -124,6 +124,7 @@ function SoilMapFrame:_onFrameOpen(frame)
     -- Inject exactly once
     if not self._injected then
         self:_injectPage(frame)
+        self:_injectMenuButton(frame)
     end
 
     -- Always sync the selector to the current layer
@@ -135,6 +136,38 @@ function SoilMapFrame:_onFrameOpen(frame)
         local layer = self.settings and self.settings.activeMapLayer or 0
         if layer > 0 and not self.soilMapOverlay.isReady then
             self.soilMapOverlay:requestGenerate()
+        end
+    end
+end
+
+function SoilMapFrame:_injectMenuButton(frame)
+    if not frame or not frame.menuButtonInfo then return end
+
+    if not self._pdaButton then
+        self._pdaButton = {
+            inputAction = InputAction.MENU_EXTRA_1,
+            text = tr("sf_pda_open_btn", "Open Soil PDA"),
+            callback = function()
+                if SoilPDAScreen then
+                    SoilPDAScreen.toggle()
+                end
+            end,
+            showWhenPaused = true
+        }
+    end
+
+    local exists = false
+    for _, btn in ipairs(frame.menuButtonInfo) do
+        if btn == self._pdaButton then
+            exists = true
+            break
+        end
+    end
+
+    if not exists then
+        table.insert(frame.menuButtonInfo, self._pdaButton)
+        if frame.setMenuButtonInfoDirty then
+            frame:setMenuButtonInfoDirty()
         end
     end
 end

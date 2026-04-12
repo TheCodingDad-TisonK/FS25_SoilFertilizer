@@ -705,10 +705,15 @@ function SoilHUD:drawPanel()
     cy = cy - pad * 0.8
 
     if info then
+        -- Detect current sprayer activity for "Projected" ghost bars
+        local sprayer = self:getCurrentSprayer()
+        local fillType = self:getSprayerFillType(sprayer)
+        local profile = fillType and SoilConstants.FERTILIZER_PROFILES[fillType.name]
+
         -- N / P / K rows
-        cy = self:drawNutrientRow("N", info.nitrogen,   px, cy, pw, s, fontMult)
-        cy = self:drawNutrientRow("P", info.phosphorus,  px, cy, pw, s, fontMult)
-        cy = self:drawNutrientRow("K", info.potassium,   px, cy, pw, s, fontMult)
+        cy = self:drawNutrientRow("N", info.nitrogen,   px, cy, pw, s, fontMult, info, profile, fillType)
+        cy = self:drawNutrientRow("P", info.phosphorus,  px, cy, pw, s, fontMult, info, profile, fillType)
+        cy = self:drawNutrientRow("K", info.potassium,   px, cy, pw, s, fontMult, info, profile, fillType)
 
         -- Divider
         cy = cy - pad * 0.5
@@ -825,7 +830,7 @@ end
 -- ── Nutrient bar row ─────────────────────────────────────
 -- Returns the new cy after drawing the row.
 -- label must be "N", "P", or "K" — used to look up ppm conversion + thresholds.
-function SoilHUD:drawNutrientRow(label, nutrient, px, cy, pw, s, fontMult)
+function SoilHUD:drawNutrientRow(label, nutrient, px, cy, pw, s, fontMult, info, profile, fillType)
     local pad    = SoilHUD.PAD * s
     local rowH   = SoilHUD.ROW_H * s
     local barH   = SoilHUD.BAR_H * s
@@ -844,14 +849,41 @@ function SoilHUD:drawNutrientRow(label, nutrient, px, cy, pw, s, fontMult)
     local barX = tx + 0.015*s
     local barY = cy + (rowH - barH) * 0.5
     self:drawRect(barX, barY, barW, barH, SoilHUD.C_BAR_BG)
+    
     local fill = math.max(0, math.min(1, nutrient.value / 100))
     if fill > 0 then
         self:drawRect(barX, barY, barW * fill, barH, col)
     end
 
-    -- Threshold tick marks (Poor and Fair/Good boundary lines on bar)
-    -- Tick at the poor→fair boundary and the fair→good boundary.
-    -- Map lookup: "N"→nitrogen, "P"→phosphorus, "K"→potassium
+    -- Projected "Ghost Bar" (V1.7 Realism Update)
+    -- Shows the expected nutrient gain for the remainder of the current application pass.
+    local projectedDelta = 0
+    if profile and profile[label] and info and info.nutrientBuffer then
+        local fillTypeIndex = fillType and fillType.index
+        if fillTypeIndex then
+            local currentBuffer = info.nutrientBuffer[fillTypeIndex] or 0
+            local br = SoilConstants.SPRAYER_RATE.BASE_RATES
+            local baseRate = (fillType and br[fillType.name]) or br.DEFAULT
+            
+            if baseRate then
+                local targetVolume = (info.fieldArea or 1.0) * baseRate.value
+                
+                -- Ghost bar shows the gain remaining to reach the 90% threshold
+                local threshold = targetVolume * (SoilConstants.SPRAYER_RATE.FERTILIZER_COVERAGE_THRESHOLD or 0.90)
+                local remaining = math.max(0, threshold - currentBuffer)
+                
+                if remaining > 0 then
+                    projectedDelta = profile[label] * (remaining / 1000) / (info.fieldArea or 1.0)
+                    local ghostFill = math.min(1.0 - fill, projectedDelta / 100)
+                    if ghostFill > 0 then
+                        self:drawRect(barX + barW * fill, barY, barW * ghostFill, barH, col, 0.35)
+                    end
+                end
+            end
+        end
+    end
+
+    -- Threshold tick marks
     local thresholdKey = label == "N" and "nitrogen"
                       or label == "P" and "phosphorus"
                       or label == "K" and "potassium"
@@ -860,7 +892,7 @@ function SoilHUD:drawNutrientRow(label, nutrient, px, cy, pw, s, fontMult)
         local th = SoilConstants.STATUS_THRESHOLDS[thresholdKey]
         if th then
             local tickW  = 0.0005 * s
-            local tickH  = barH + 0.002 * s          -- slightly taller than bar
+            local tickH  = barH + 0.002 * s
             local tickY  = barY - 0.001 * s
             local poorX  = barX + barW * (th.poor / 100) - tickW * 0.5
             local fairX  = barX + barW * (th.fair / 100) - tickW * 0.5
@@ -869,18 +901,22 @@ function SoilHUD:drawNutrientRow(label, nutrient, px, cy, pw, s, fontMult)
         end
     end
 
-    -- Value displayed in ppm (soil-test units).
-    -- SoilConstants.PPM_DISPLAY[label] converts internal 0-100 → agronomic ppm.
-    -- The unit "(ppm)" is shown once on the divider above the N/P/K block,
-    -- not per-row, to avoid inline sizing/positioning issues.
+    -- Value displayed in ppm
     local ppmMult = SoilConstants.PPM_DISPLAY and SoilConstants.PPM_DISPLAY[label] or 1.0
     local ppmVal  = math.floor(nutrient.value * ppmMult + 0.5)
     local valX    = barX + barW + 0.006*s
     setTextColor(col[1], col[2], col[3], 1.0)
-    renderText(valX, cy + (rowH - 0.010*s) * 0.5, 0.010 * fontMult * s,
-        string.format("%d", ppmVal))
+    
+    local valStr = string.format("%d", ppmVal)
+    if projectedDelta > 0 then
+        local projPpm = math.floor(projectedDelta * ppmMult + 0.5)
+        if projPpm > 0 then
+            valStr = valStr .. string.format(" (+%d)", projPpm)
+        end
+    end
+    renderText(valX, cy + (rowH - 0.010*s) * 0.5, 0.010 * fontMult * s, valStr)
 
-    -- Status label (right-aligned)
+    -- Status label
     setTextAlignment(RenderText.ALIGN_RIGHT)
     setTextColor(col[1], col[2], col[3], 0.80)
     renderText(px + pw - pad, cy + (rowH - 0.009*s) * 0.5, 0.009 * fontMult * s, nutrient.status)
@@ -933,6 +969,7 @@ end
 -- ── Sprayer fill-type helpers ─────────────────────────────
 --- Returns the FillType object currently loaded in the sprayer, or nil.
 function SoilHUD:getSprayerFillType(sprayer)
+    if not sprayer then return nil end
     local fillTypeIndex
 
     -- Try workAreaParameters first (populated while actively spraying)

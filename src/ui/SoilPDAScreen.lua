@@ -2,7 +2,11 @@
 -- FS25 Soil & Fertilizer — PDA Screen
 -- =========================================================
 -- Registers a dedicated page in the InGameMenu (PDA) with
--- three tabs: Soil Map overview, Fields table, Treatment plan.
+-- three tabs: Farm Overview, Soil Map, Treatment Plan.
+-- Left sidebar is context-sensitive per tab:
+--   Overview  → full field list (N/P/K/pH/OM/Status)
+--   Soil Map  → simple jump list (click to center mini-map)
+--   Treatment → summary stats + hint
 --
 -- Pattern: identical to FS25_MarketDynamics MDMMarketScreen.
 --   - Extends TabbedMenuFrameElement
@@ -30,9 +34,29 @@ SoilPDAScreen.MENU_ICON_PATH = "images/menuIcon.dds"
 local SF_PDA_MOD_DIR = g_currentModDirectory
 local SF_PDA_MOD_NAME = g_currentModName
 
--- Tabs
-local TAB_MAP       = 1
-local TAB_FIELDS    = 2
+SoilPDAScreen.CONTROLS = {
+    "statsFieldsTracked", "statsFieldsOwned",
+    "statsAvgN", "statsAvgP", "statsAvgK", "statsAvgPH", "statsAvgOM",
+    "statsWeedFields", "statsPestFields", "statsDiseaseFields",
+    "statsNeedsAttention",
+    "mapLayerName", "mapLayerDesc", "mapLegendGroup",
+    "mapLegendGoodBlock", "mapLegendGoodText",
+    "mapLegendFairBlock", "mapLegendFairText",
+    "mapLegendPoorBlock", "mapLegendPoorText",
+    "mapLegendExcessBlock", "mapLegendExcessText",
+    "soilMiniMap", "sidebarFieldList", "sidebarMapList", "treatmentList",
+    "sidebarOverview", "sidebarMap", "sidebarTreatment",
+    "overviewContent", "mapContent", "treatmentContent",
+    "tabLabelOverview", "tabLabelMap", "tabLabelTreatment",
+    "tabUnderlineOverview", "tabUnderlineMap", "tabUnderlineTreatment",
+    "treatStatNeedsFert", "treatStatWeed", "treatStatPest",
+    "treatStatDisease", "treatStatTotal", "treatHintText",
+    "treatmentEmptyHint", "leftNoDataHint"
+}
+
+-- Tabs (3 tabs: Fields tab removed, sidebar is now context-sensitive)
+local TAB_OVERVIEW  = 1
+local TAB_MAP       = 2
 local TAB_TREATMENT = 3
 
 -- How often to rebuild all data while PDA is open (ms)
@@ -74,7 +98,7 @@ function SoilPDAScreen.new()
     self.name      = "SoilPDAScreen"
     self.className = "SoilPDAScreen"
 
-    self.activeTab      = TAB_MAP
+    self.activeTab      = TAB_OVERVIEW
     self.fieldData      = {}    -- sorted list of {fieldId, info, urgency}
     self.treatmentData  = {}    -- subset: fields with urgency > 0, sorted desc
     self.selectedFieldIndex     = 0
@@ -82,7 +106,8 @@ function SoilPDAScreen.new()
     self.refreshTimer   = 0
     self.returnScreenName = ""
     self.menuButtonInfo   = {}
-    
+    self.sidebarMapList   = nil  -- simple jump list on Map tab
+
     self.lastPopupTime  = 0     -- Guard against multiple clicks/spam
     self.filterOwnedOnly = false -- Filter: All Fields vs Owned Only
 
@@ -93,12 +118,23 @@ end
 
 function SoilPDAScreen:initialize()
     SoilPDAScreen:superClass().initialize(self)
-    
+
     self.menuButtonInfo = {
         {inputAction = "MENU_BACK"},
         {inputAction = "MENU_ACCEPT", text = tr("sf_pda_filter_all", "Filter"), callback = function() self:onClickFilter() end},
+        {inputAction = InputAction.SF_CYCLE_MAP_LAYER, text = tr("input_SF_CYCLE_MAP_LAYER", "Cycle Map Layer"), callback = function() self:onCycleLayerInput() end},
+        {inputAction = "MENU_EXTRA_1", text = tr("sf_pda_btn_help", "Dev Note"), callback = function() self:onClickHelp() end},
     }
     self:setMenuButtonInfo(self.menuButtonInfo)
+end
+
+function SoilPDAScreen:onCycleLayerInput()
+    if g_SoilFertilityManager then
+        g_SoilFertilityManager:onCycleMapLayerInput()
+        if self.activeTab == TAB_MAP then
+            self:_refreshMapTab()
+        end
+    end
 end
 
 -- ── Static registration ───────────────────────────────────
@@ -237,7 +273,7 @@ end
 function SoilPDAScreen:onGuiSetupFinished()
     SoilPDAScreen:superClass().onGuiSetupFinished(self)
 
-    -- Left column stat elements
+    -- Overview stats
     self.statsFieldsTracked  = self:getDescendantById("statsFieldsTracked")
     self.statsFieldsOwned    = self:getDescendantById("statsFieldsOwned")
     self.statsAvgN           = self:getDescendantById("statsAvgN")
@@ -251,48 +287,64 @@ function SoilPDAScreen:onGuiSetupFinished()
     self.statsNeedsAttention = self:getDescendantById("statsNeedsAttention")
     self.leftNoDataHint      = self:getDescendantById("leftNoDataHint")
 
-    -- Right panel: content panels
+    -- Right panel: content panels (3 tabs)
+    self.overviewContent  = self:getDescendantById("overviewContent")
     self.mapContent       = self:getDescendantById("mapContent")
-    self.fieldsContent    = self:getDescendantById("fieldsContent")
     self.treatmentContent = self:getDescendantById("treatmentContent")
 
     -- Map tab elements
-    self.mapLayerName     = self:getDescendantById("mapLayerName")
-    self.mapLayerDesc     = self:getDescendantById("mapLayerDesc")
-    self.mapLegendGroup   = self:getDescendantById("mapLegendGroup")
+    self.mapLayerName        = self:getDescendantById("mapLayerName")
+    self.mapLayerDesc        = self:getDescendantById("mapLayerDesc")
+    self.mapLegendGroup      = self:getDescendantById("mapLegendGroup")
     self.mapLegendGoodBlock  = self:getDescendantById("mapLegendGoodBlock")
     self.mapLegendFairBlock  = self:getDescendantById("mapLegendFairBlock")
     self.mapLegendPoorBlock  = self:getDescendantById("mapLegendPoorBlock")
-    self.mapLegendExcessBlock = self:getDescendantById("mapLegendExcessBlock")
+    self.mapLegendExcessBlock= self:getDescendantById("mapLegendExcessBlock")
     self.mapLegendGoodText   = self:getDescendantById("mapLegendGoodText")
     self.mapLegendFairText   = self:getDescendantById("mapLegendFairText")
     self.mapLegendPoorText   = self:getDescendantById("mapLegendPoorText")
     self.mapLegendExcessText = self:getDescendantById("mapLegendExcessText")
-    self.mapInstructions  = self:getDescendantById("mapInstructions")
-    self.btnOpenMap       = self:getDescendantById("btnOpenMap")
+    self.soilMiniMap         = self:getDescendantById("soilMiniMap")
 
-    -- Fields tab
-    self.fieldList        = self:getDescendantById("fieldList")
-    self.fieldsEmptyHint  = self:getDescendantById("fieldsEmptyHint")
-    self.btnFilterFields  = self:getDescendantById("btnFilterFields")
+    -- Left sidebar panels
+    self.sidebarOverview   = self:getDescendantById("sidebarOverview")
+    self.sidebarMap        = self:getDescendantById("sidebarMap")
+    self.sidebarTreatment  = self:getDescendantById("sidebarTreatment")
+
+    -- Sidebar A: full field list (Overview tab)
+    self.sidebarFieldList = self:getDescendantById("sidebarFieldList")
+
+    -- Sidebar B: simple jump list (Map tab)
+    self.sidebarMapList   = self:getDescendantById("sidebarMapList")
+
+    -- Sidebar C: treatment summary stats
+    self.treatStatNeedsFert = self:getDescendantById("treatStatNeedsFert")
+    self.treatStatWeed      = self:getDescendantById("treatStatWeed")
+    self.treatStatPest      = self:getDescendantById("treatStatPest")
+    self.treatStatDisease   = self:getDescendantById("treatStatDisease")
+    self.treatStatTotal     = self:getDescendantById("treatStatTotal")
+    self.treatHintText      = self:getDescendantById("treatHintText")
 
     -- Treatment tab
-    self.treatmentList    = self:getDescendantById("treatmentList")
+    self.treatmentList      = self:getDescendantById("treatmentList")
     self.treatmentEmptyHint = self:getDescendantById("treatmentEmptyHint")
-    self.btnFilterTreatment = self:getDescendantById("btnFilterTreatment")
 
-    -- Tab labels + underlines
-    self.tabLabelMap        = self:getDescendantById("tabLabelMap")
-    self.tabLabelFields     = self:getDescendantById("tabLabelFields")
-    self.tabLabelTreatment  = self:getDescendantById("tabLabelTreatment")
+    -- Tab labels + underlines (3 tabs)
+    self.tabLabelOverview      = self:getDescendantById("tabLabelOverview")
+    self.tabLabelMap           = self:getDescendantById("tabLabelMap")
+    self.tabLabelTreatment     = self:getDescendantById("tabLabelTreatment")
+    self.tabUnderlineOverview  = self:getDescendantById("tabUnderlineOverview")
     self.tabUnderlineMap       = self:getDescendantById("tabUnderlineMap")
-    self.tabUnderlineFields    = self:getDescendantById("tabUnderlineFields")
     self.tabUnderlineTreatment = self:getDescendantById("tabUnderlineTreatment")
 
     -- Wire SmoothList data sources
-    if self.fieldList then
-        self.fieldList.dataSource = self
-        self.fieldList.delegate   = self
+    if self.sidebarFieldList then
+        self.sidebarFieldList.dataSource = self
+        self.sidebarFieldList.delegate   = self
+    end
+    if self.sidebarMapList then
+        self.sidebarMapList.dataSource = self
+        self.sidebarMapList.delegate   = self
     end
     if self.treatmentList then
         self.treatmentList.dataSource = self
@@ -307,22 +359,180 @@ function SoilPDAScreen:onGuiSetupFinished()
             SoilLogger.warning("SoilPDAScreen:setText failed for " .. tostring(key) .. ": " .. tostring(err))
         end
     end
-    setText(self.mapInstructions, "sf_pda_map_instructions",
-        "Open the fullscreen map (ESC → Map) to see the live soil overlay. Press Shift+M to cycle through soil layers.")
 end
 
 function SoilPDAScreen:onOpen()
     SoilPDAScreen:superClass().onOpen(self)
+
+    -- Initialize interactive map state
+    self.mapZoom = 3.5
+    local px, pz = 0, 0
+    if g_localPlayer and g_localPlayer.rootNode then
+        local ok, x, y, z = pcall(getWorldTranslation, g_localPlayer.rootNode)
+        if ok and x then px, pz = x, z end
+    end
+    self.mapCenterX = px
+    self.mapCenterZ = pz
+    self.isMapDragging = false
+    self.lastMouseX = 0
+    self.lastMouseY = 0
+
     self:_rebuildAllData()
     self:_refreshSummaryStats()
-    self:_refreshMapTab()
-    self:_refreshFilterButtons()
+    self:_refreshTreatmentSidebar()
+    self:_updateFilterButtonText()
     self:_reloadLists()
+    -- setActiveTab handles _refreshMapTab + _showMiniMap — do NOT call them separately here
     self:setActiveTab(self.activeTab)
 end
 
 function SoilPDAScreen:onClose()
     SoilPDAScreen:superClass().onClose(self)
+    self:_hideMiniMap()
+end
+
+-- Show the mini-map: call setIngameMap then make it visible.
+-- IngameMapPreviewElement.draw() crashes if called while visible=true
+-- but before setIngameMap has run (internal C++ map object is nil).
+-- We keep visible=false in the XML and only flip to true here.
+function SoilPDAScreen:_showMiniMap()
+    if not self.soilMiniMap then return end
+
+    -- Wire the internal IngameMap C++ object -- must happen before setVisible(true)
+    local ingameMap = g_currentMission and g_currentMission.hud and g_currentMission.hud:getIngameMap()
+    if not ingameMap then
+        SoilLogger.warning("SoilPDAScreen:_showMiniMap: getIngameMap() returned nil, minimap unavailable")
+        return
+    end
+    self.soilMiniMap:setIngameMap(ingameMap)
+    self.soilMiniMap:setCenterToWorldPosition(self.mapCenterX or 0, self.mapCenterZ or 0)
+    self.soilMiniMap:setMapZoom(self.mapZoom or 3.5)
+    self.soilMiniMap:setMapAlpha(1)
+    
+    -- Suppress hotspots (vehicles, sell points, etc) from drawing on our clean mini-map
+    -- but keep Field Numbers and the Player Marker!
+    if not self.soilMiniMap._drawHooked then
+        local oldDraw = self.soilMiniMap.draw
+        self.soilMiniMap.draw = function(mapSelf, clipX1, clipY1, clipX2, clipY2)
+            local im = mapSelf.ingameMap
+            if im and type(im.filter) == "table" then
+                -- Backup the global map filter and disable everything
+                local origFilter = {}
+                for k, v in pairs(im.filter) do
+                    origFilter[k] = v
+                    im.filter[k] = false
+                end
+                
+                -- Re-enable only the Field numbers and Player marker
+                if MapHotspot then
+                    if MapHotspot.CATEGORY_FIELD   ~= nil then im.filter[MapHotspot.CATEGORY_FIELD]   = true end
+                    if MapHotspot.CATEGORY_PLAYER  ~= nil then im.filter[MapHotspot.CATEGORY_PLAYER]  = true end
+                    if MapHotspot.CATEGORY_DEFAULT ~= nil then im.filter[MapHotspot.CATEGORY_DEFAULT] = true end
+                end
+                
+                local ok, err = pcall(oldDraw, mapSelf, clipX1, clipY1, clipX2, clipY2)
+                
+                -- Restore the exact original filter state immediately
+                for k, v in pairs(origFilter) do
+                    im.filter[k] = v
+                end
+                
+                if not ok then error(err) end
+                
+                -- After drawing map and hotspots, render our density overlay if a layer is active
+                local overlay = g_SoilFertilityManager and g_SoilFertilityManager.soilMapOverlay
+                if overlay and overlay.overlayHandle and overlay.overlayHandle ~= 0 then
+                    -- Poll async generation readiness if it's currently generating
+                    if overlay.isGenerating then
+                        if getIsDensityMapVisualizationOverlayReady and getIsDensityMapVisualizationOverlayReady(overlay.overlayHandle) then
+                            overlay.isReady = true
+                            overlay.isGenerating = false
+                            if overlay.pendingRegen then overlay:requestGenerate() end
+                        end
+                    end
+
+                    if overlay.isReady then
+                        local layerIdx = overlay.settings.activeMapLayer or 0
+                        if layerIdx > 0 then
+                            -- Use the absolute screen position/size of our GUI element (normalized 0-1)
+                            local mapX, mapY = mapSelf.absPosition[1], mapSelf.absPosition[2]
+                            local mapW, mapH = mapSelf.size[1], mapSelf.size[2]
+                            
+                            -- Aspect Ratio Fix: The GUI element box is 960x340 (wide), but the map is square.
+                            -- Giants letterboxes the map to fit the SHORTEST side.
+                            local renderW, renderH = mapW, mapH
+                            local renderX, renderY = mapX, mapY
+                            
+                            if mapW > mapH then
+                                -- Box is wider than it is tall: map is a square of height, centered horizontally
+                                renderW = mapH
+                                renderX = mapX + (mapW - mapH) * 0.5
+                            elseif mapH > mapW then
+                                -- Box is taller than it is wide: map is a square of width, centered vertically
+                                renderH = mapW
+                                renderY = mapY + (mapH - mapW) * 0.5
+                            end
+
+                            if self._lastRenderedLayer ~= layerIdx then
+                                SoilLogger.debug("SoilPDAScreen: Rendering layer %d inside mini-map (%.3f, %.3f, %.3f, %.3f)", layerIdx, renderX, renderY, renderW, renderH)
+                                self._lastRenderedLayer = layerIdx
+                            end
+
+                            -- Alignment Fix: Sync UVs with the actual background map's zoom/pan
+                            local uvs = nil
+                            if im.mapOverlay and im.mapOverlay.uvs then
+                                uvs = im.mapOverlay.uvs
+                            end
+
+                            -- Fallback to manual UV calculation ONLY if internal UVs are missing
+                            if not uvs then
+                                local worldSize = (g_currentMission and g_currentMission.terrainSize) or 2048
+                                local zoom = self.mapZoom or 3.5
+                                local cx, cz = self.mapCenterX or 0, self.mapCenterZ or 0
+                                local uCenter = (cx + worldSize * 0.5) / worldSize
+                                local vCenter = (worldSize * 0.5 - cz) / worldSize
+                                local halfUV = 0.5 / zoom
+                                uvs = {uCenter - halfUV, vCenter - halfUV,  -- BL
+                                       uCenter - halfUV, vCenter + halfUV,  -- TL
+                                       uCenter + halfUV, vCenter - halfUV,  -- BR
+                                       uCenter + halfUV, vCenter + halfUV}  -- TR
+                            end
+
+                            if uvs and setOverlayUVs then
+                                setOverlayUVs(overlay.overlayHandle, unpack(uvs))
+                            end
+
+                            if setOverlayColor then setOverlayColor(overlay.overlayHandle, 1, 1, 1, SoilMapOverlay.ALPHA) end
+                            if renderOverlay then
+                                renderOverlay(overlay.overlayHandle, renderX, renderY, renderW, renderH)
+                            end
+                        end
+                    end
+                end
+            else
+                oldDraw(mapSelf, clipX1, clipY1, clipX2, clipY2)
+            end
+        end
+        self.soilMiniMap._drawHooked = true
+    end
+
+    -- We called onClose() in _hideMiniMap, so we must call onOpen() here to restore layout state
+    if type(self.soilMiniMap.onOpen) == "function" then
+        self.soilMiniMap:onOpen()
+    end
+    
+    self.soilMiniMap:setVisible(true)
+end
+
+-- Tear down the mini-map: call onClose then hide it.
+-- This mirrors AFMGuiVehicleFrame:onFrameClose which calls itemDetailsMap:onClose().
+function SoilPDAScreen:_hideMiniMap()
+    if not self.soilMiniMap then return end
+    -- Prevent Giants Engine crash: IngameMapPreviewElement:onClose() assumes self.ingameMap is not nil.
+    if self.soilMiniMap.ingameMap ~= nil then
+        self.soilMiniMap:onClose()
+    end
+    self.soilMiniMap:setVisible(false)
 end
 
 function SoilPDAScreen:update(dt)
@@ -332,6 +542,7 @@ function SoilPDAScreen:update(dt)
         self.refreshTimer = 0
         self:_rebuildAllData()
         self:_refreshSummaryStats()
+        self:_refreshTreatmentSidebar()
         if self.activeTab == TAB_MAP then
             self:_refreshMapTab()
         end
@@ -353,13 +564,13 @@ function SoilPDAScreen:inputEvent(action, value, eventUsed)
     if not eventUsed and value > 0 then
         if action == InputAction.MENU_PAGE_PREV then
             local newTab = self.activeTab - 1
-            if newTab < TAB_MAP then newTab = TAB_TREATMENT end
+            if newTab < TAB_OVERVIEW then newTab = TAB_TREATMENT end
             self:setActiveTab(newTab)
             return true
         end
         if action == InputAction.MENU_PAGE_NEXT then
             local newTab = self.activeTab + 1
-            if newTab > TAB_TREATMENT then newTab = TAB_MAP end
+            if newTab > TAB_TREATMENT then newTab = TAB_OVERVIEW end
             self:setActiveTab(newTab)
             return true
         end
@@ -369,12 +580,12 @@ end
 
 -- ── Tab switching ─────────────────────────────────────────
 
-function SoilPDAScreen:onClickTabMap()
-    self:setActiveTab(TAB_MAP)
+function SoilPDAScreen:onClickTabOverview()
+    self:setActiveTab(TAB_OVERVIEW)
 end
 
-function SoilPDAScreen:onClickTabFields()
-    self:setActiveTab(TAB_FIELDS)
+function SoilPDAScreen:onClickTabMap()
+    self:setActiveTab(TAB_MAP)
 end
 
 function SoilPDAScreen:onClickTabTreatment()
@@ -387,10 +598,56 @@ function SoilPDAScreen:mouseEvent(posX, posY, isDown, isUp, button, eventUsed)
         return SoilPDAScreen:superClass().mouseEvent(self, posX, posY, isDown, isUp, button, eventUsed)
     end
 
+    local overMap = false
+    if self.soilMiniMap and self.soilMiniMap:getIsVisible() then
+        local mp = self.soilMiniMap.absPosition
+        local ms = self.soilMiniMap.absSize
+        if posX >= mp[1] and posX <= mp[1] + ms[1] and posY >= mp[2] and posY <= mp[2] + ms[2] then
+            overMap = true
+        end
+    end
+
+    -- Scroll Wheel Zoom
+    if overMap then
+        local zoomDelta = 0
+        if button == Input.MOUSE_BUTTON_WHEEL_UP then zoomDelta = 0.5
+        elseif button == Input.MOUSE_BUTTON_WHEEL_DOWN then zoomDelta = -0.5 end
+        
+        if zoomDelta ~= 0 then
+            local currentZoom = self.mapZoom or 3.5
+            self.mapZoom = math.clamp(currentZoom + zoomDelta, 1.0, 15.0)
+            SoilLogger.debug("SoilPDAScreen: zoom changed to %f", self.mapZoom)
+            
+            -- Recalculate allowed center bounds for the new zoom level immediately
+            local worldSize = (g_currentMission and g_currentMission.terrainSize) or 2048
+            local halfWorld = worldSize * 0.5
+            local halfView = halfWorld / self.mapZoom
+            local maxCenter = math.max(0, halfWorld - halfView)
+            
+            self.mapCenterX = math.clamp(self.mapCenterX or 0, -maxCenter, maxCenter)
+            self.mapCenterZ = math.clamp(self.mapCenterZ or 0, -maxCenter, maxCenter)
+            
+            if self.soilMiniMap then
+                pcall(function()
+                    self.soilMiniMap:setMapZoom(self.mapZoom)
+                    self.soilMiniMap:setCenterToWorldPosition(self.mapCenterX, self.mapCenterZ)
+                end)
+            end
+            return true
+        end
+    end
+
+    -- Left Click Drag (Pan)
     if isDown and button == Input.MOUSE_BUTTON_LEFT then
+        if overMap then
+            self.isMapDragging = true
+            self.lastMouseX = posX
+            self.lastMouseY = posY
+        end
+
         local tabs = {
+            { el = self.tabLabelOverview,  cb = SoilPDAScreen.onClickTabOverview  },
             { el = self.tabLabelMap,       cb = SoilPDAScreen.onClickTabMap       },
-            { el = self.tabLabelFields,    cb = SoilPDAScreen.onClickTabFields    },
             { el = self.tabLabelTreatment, cb = SoilPDAScreen.onClickTabTreatment },
         }
         for _, t in ipairs(tabs) do
@@ -406,32 +663,80 @@ function SoilPDAScreen:mouseEvent(posX, posY, isDown, isUp, button, eventUsed)
             end
         end
     end
+
+    -- Panning Logic (Movement Delta)
+    if self.isMapDragging then
+        if isUp and button == Input.MOUSE_BUTTON_LEFT then
+            self.isMapDragging = false
+        else
+            -- REVERT INVERSION: posX - lastMouseX (moves with mouse)
+            local dx = posX - self.lastMouseX
+            local dy = posY - self.lastMouseY
+
+            if dx ~= 0 or dy ~= 0 then
+                local worldSize = (g_currentMission and g_currentMission.terrainSize) or 2048
+                local mapSize = (self.soilMiniMap and self.soilMiniMap.absSize and self.soilMiniMap.absSize[1]) or 0
+                local zoom = self.mapZoom or 1.0
+                
+                if mapSize > 0 and zoom > 0 then
+                    -- World delta = (Pixel delta / Map Screen Size) * (Full World Size / Zoom)
+                    local worldDX = (dx / mapSize) * (worldSize / zoom)
+                    local worldDZ = (dy / mapSize) * (worldSize / zoom)
+                    
+                    -- CRITICAL FIX: Zoom-Aware Clamping
+                    local halfWorld = worldSize * 0.5
+                    local halfView = halfWorld / zoom
+                    local maxCenter = math.max(0, halfWorld - halfView)
+                    
+                    self.mapCenterX = math.clamp((self.mapCenterX or 0) + worldDX, -maxCenter, maxCenter)
+                    self.mapCenterZ = math.clamp((self.mapCenterZ or 0) + worldDZ, -maxCenter, maxCenter)
+                    
+                    if self.soilMiniMap then
+                        pcall(function()
+                            self.soilMiniMap:setCenterToWorldPosition(self.mapCenterX, self.mapCenterZ)
+                        end)
+                    end
+                end
+                
+                self.lastMouseX = posX
+                self.lastMouseY = posY
+                return true
+            end
+        end
+    end
+
     return SoilPDAScreen:superClass().mouseEvent(self, posX, posY, isDown, isUp, button, eventUsed)
 end
 
----@param tab number TAB_MAP | TAB_FIELDS | TAB_TREATMENT
+---@param tab number TAB_OVERVIEW | TAB_MAP | TAB_TREATMENT
 function SoilPDAScreen:setActiveTab(tab)
     self.activeTab = tab
 
-    -- Show/hide content panels
+    -- Show/hide content panels (Right side)
+    if self.overviewContent  then self.overviewContent:setVisible(tab == TAB_OVERVIEW) end
     if self.mapContent       then self.mapContent:setVisible(tab == TAB_MAP) end
-    if self.fieldsContent    then self.fieldsContent:setVisible(tab == TAB_FIELDS) end
     if self.treatmentContent then self.treatmentContent:setVisible(tab == TAB_TREATMENT) end
 
-    -- Trigger layout update on newly visible panels
-    if tab == TAB_FIELDS and self.fieldsContent then
-        if type(self.fieldsContent.updateAbsolutePosition) == "function" then
-            self.fieldsContent:updateAbsolutePosition()
-        end
-        if self.fieldList then self.fieldList:reloadData() end
-    elseif tab == TAB_TREATMENT and self.treatmentContent then
-        if type(self.treatmentContent.updateAbsolutePosition) == "function" then
-            self.treatmentContent:updateAbsolutePosition()
-        end
-        if self.treatmentList then self.treatmentList:reloadData() end
-    elseif tab == TAB_MAP then
-        self:_refreshMapTab()
+    -- Show/hide sidebars (Left side)
+    if self.sidebarOverview  then self.sidebarOverview:setVisible(tab == TAB_OVERVIEW) end
+    if self.sidebarMap       then self.sidebarMap:setVisible(tab == TAB_MAP) end
+    if self.sidebarTreatment then self.sidebarTreatment:setVisible(tab == TAB_TREATMENT) end
+
+    -- Mini-map must be explicitly managed: show only on map tab.
+    if tab == TAB_MAP then
+        self:_showMiniMap()
+    else
+        self:_hideMiniMap()
     end
+
+    -- Trigger layout update on newly visible panels
+    if tab == TAB_MAP then
+        self:_refreshMapTab()
+    elseif tab == TAB_TREATMENT then
+        self:_refreshTreatmentSidebar()
+    end
+    
+    self:_reloadLists()
 
     -- Color active tab label green, inactive labels dim
     local function setTabColor(el, isActive)
@@ -442,30 +747,24 @@ function SoilPDAScreen:setActiveTab(tab)
             el:setTextColor(1.0, 1.0, 1.0, 0.40)
         end
     end
+    setTabColor(self.tabLabelOverview,  tab == TAB_OVERVIEW)
     setTabColor(self.tabLabelMap,       tab == TAB_MAP)
-    setTabColor(self.tabLabelFields,    tab == TAB_FIELDS)
     setTabColor(self.tabLabelTreatment, tab == TAB_TREATMENT)
 
     -- Underline active tab only
+    if self.tabUnderlineOverview  then self.tabUnderlineOverview:setVisible(tab == TAB_OVERVIEW) end
     if self.tabUnderlineMap       then self.tabUnderlineMap:setVisible(tab == TAB_MAP) end
-    if self.tabUnderlineFields    then self.tabUnderlineFields:setVisible(tab == TAB_FIELDS) end
     if self.tabUnderlineTreatment then self.tabUnderlineTreatment:setVisible(tab == TAB_TREATMENT) end
 end
 
 -- ── Map Tab button ────────────────────────────────────────
 
-function SoilPDAScreen:onClickOpenMap()
-    -- Navigate to the InGameMenu Map page (where our SoilMapOverlay already renders)
-    local inGameMenu = g_gui.screenControllers[InGameMenu] or g_inGameMenu
-    if inGameMenu == nil then return end
-    local mapPage = inGameMenu.pageMapOverview or inGameMenu["pageMapOverview"]
-    if mapPage then
-        inGameMenu:goToPage(mapPage)
-    else
-        -- Fallback: switch to the InGameMenu map frame by name
-        if type(inGameMenu.showPage) == "function" then
-            inGameMenu:showPage("pageMapOverview")
-        end
+function SoilPDAScreen:onClickHelp()
+    if InfoDialog then
+        local msg = g_i18n:getText("sf_pda_help_text") .. "\n\n" .. 
+                    "--------------------------------------------------\n\n" ..
+                    g_i18n:getText("sf_pda_help_github")
+        InfoDialog.show(msg, nil, g_i18n:getText("sf_pda_screen_title"))
     end
 end
 
@@ -474,20 +773,13 @@ end
 function SoilPDAScreen:onClickFilter()
     self.filterOwnedOnly = not self.filterOwnedOnly
     self:_rebuildAllData()
-    self:_refreshFilterButtons()
+    self:_updateFilterButtonText()
     self:_reloadLists()
 end
 
-function SoilPDAScreen:_refreshFilterButtons()
+function SoilPDAScreen:_updateFilterButtonText()
     local textKey = self.filterOwnedOnly and "sf_pda_filter_owned" or "sf_pda_filter_all"
     local text = tr(textKey, self.filterOwnedOnly and "Filter: Owned Only" or "Filter: All Fields")
-
-    if self.btnFilterFields then
-        self.btnFilterFields:setText(text)
-    end
-    if self.btnFilterTreatment then
-        self.btnFilterTreatment:setText(text)
-    end
 
     -- Keep the footer bar button in sync with the current filter state
     if self.menuButtonInfo and self.menuButtonInfo[2] then
@@ -499,7 +791,7 @@ end
 -- ── SmoothList Data Source ────────────────────────────────
 
 function SoilPDAScreen:getNumberOfItemsInSection(list, section)
-    if list == self.fieldList then
+    if list == self.sidebarFieldList or list == self.sidebarMapList then
         return #self.fieldData
     elseif list == self.treatmentList then
         return #self.treatmentData
@@ -510,9 +802,11 @@ end
 function SoilPDAScreen:populateCellForItemInSection(list, section, index, cell)
     -- Store index on cell for onClick handlers
     cell.rowDataIndex = index
-    
-    if list == self.fieldList then
+
+    if list == self.sidebarFieldList then
         self:_populateFieldCell(index, cell)
+    elseif list == self.sidebarMapList then
+        self:_populateMapJumpCell(index, cell)
     elseif list == self.treatmentList then
         self:_populateTreatmentCell(index, cell)
     end
@@ -521,16 +815,37 @@ end
 -- ── SmoothList Delegate ───────────────────────────────────
 
 function SoilPDAScreen:onListSelectionChanged(list, section, index)
-    if list == self.fieldList and index > 0 then
-        self.selectedFieldIndex = index
-    elseif list == self.treatmentList and index > 0 then
-        self.selectedTreatmentIndex = index
+    if index > 0 then
+        if list == self.sidebarFieldList or list == self.sidebarMapList then
+            self.selectedFieldIndex = index
+            local entry = self.fieldData[index]
+            if entry and entry.fieldId then
+                self:_centerMapOnField(entry.fieldId)
+            end
+        elseif list == self.treatmentList then
+            self.selectedTreatmentIndex = index
+        end
     end
 end
 
 -- ── Row Click Handlers ────────────────────────────────────
 
---- Called by ListItem.onClick in PDA Fields tab (XML)
+--- Called by ListItem.onClick in Map Sidebar (XML)
+function SoilPDAScreen:onClickMapJumpRow(element)
+    local index = element and element.rowDataIndex
+    if index and index > 0 then
+        local entry = self.fieldData[index]
+        if entry and entry.fieldId then
+            self:_centerMapOnField(entry.fieldId)
+            -- If we were on Overview and clicked a jump row, move to Map tab
+            if self.activeTab ~= TAB_MAP then
+                self:setActiveTab(TAB_MAP)
+            end
+        end
+    end
+end
+
+--- Called by ListItem.onClick in PDA Overview (XML)
 function SoilPDAScreen:onClickFieldRow(element)
     -- Use stored index from population
     local index = element and element.rowDataIndex
@@ -803,6 +1118,24 @@ local MAP_LAYER_DESC_FALLBACKS = {
 -- Inverted layers (Urgency, Weed, Pest, Disease): high = bad
 local INVERTED_LAYERS = {[6]=true, [7]=true, [8]=true, [9]=true}
 
+function SoilPDAScreen:_centerMapOnField(fieldId)
+    local mission = g_currentMission
+    if mission and mission.fieldManager then
+        local field = mission.fieldManager:getFieldById(fieldId)
+        if field then
+            local x, z = field.posX, field.posZ
+            self.mapCenterX = x
+            self.mapCenterZ = z
+            
+            if self.soilMiniMap then
+                pcall(function()
+                    self.soilMiniMap:setCenterToWorldPosition(self.mapCenterX, self.mapCenterZ)
+                end)
+            end
+        end
+    end
+end
+
 function SoilPDAScreen:_refreshMapTab()
     local sfm = g_SoilFertilityManager
     local layerIdx = 0
@@ -897,18 +1230,72 @@ function SoilPDAScreen:_refreshMapTab()
     end
 end
 
+function SoilPDAScreen:_refreshTreatmentSidebar()
+    local sfm = g_SoilFertilityManager
+    if not sfm or not sfm.soilSystem then return end
+
+    local needsFert, weedCount, pestCount, diseaseCount = 0, 0, 0, 0
+    for _, entry in ipairs(self.fieldData) do
+        local info = entry.info
+        if info.needsFertilization then needsFert = needsFert + 1 end
+        if (info.weedPressure    or 0) >= PRESSURE_THRESHOLD then weedCount    = weedCount    + 1 end
+        if (info.pestPressure    or 0) >= PRESSURE_THRESHOLD then pestCount    = pestCount    + 1 end
+        if (info.diseasePressure or 0) >= PRESSURE_THRESHOLD then diseaseCount = diseaseCount + 1 end
+    end
+
+    local function setText(el, val)
+        if el then el:setText(tostring(val)) end
+    end
+
+    setText(self.treatStatNeedsFert, needsFert)
+    setText(self.treatStatWeed,      weedCount)
+    setText(self.treatStatPest,      pestCount)
+    setText(self.treatStatDisease,   diseaseCount)
+    setText(self.treatStatTotal,     #self.treatmentData)
+
+    if self.treatHintText then
+        self.treatHintText:setText(tr("sf_pda_treatment_hint", "Fields listed on the right need treatment. Click a row to see recommended inputs and estimated quantities."))
+    end
+end
+
 -- ── List reload ───────────────────────────────────────────
 
 function SoilPDAScreen:_reloadLists()
-    if self.fieldList    then self.fieldList:reloadData() end
-    if self.treatmentList then self.treatmentList:reloadData() end
+    if self.sidebarFieldList then self.sidebarFieldList:reloadData() end
+    if self.sidebarMapList   then self.sidebarMapList:reloadData() end
+    if self.treatmentList    then self.treatmentList:reloadData() end
 
-    -- Toggle empty hints
+    -- Empty hints
     if self.fieldsEmptyHint then
         self.fieldsEmptyHint:setVisible(#self.fieldData == 0)
     end
     if self.treatmentEmptyHint then
         self.treatmentEmptyHint:setVisible(#self.treatmentData == 0)
+    end
+end
+
+-- ── Cell population: Map Jump list ───────────────────────
+
+function SoilPDAScreen:_populateMapJumpCell(index, cell)
+    local entry = self.fieldData[index]
+    if not entry then return end
+
+    local idEl     = cell:getDescendantByName("jumpRowId")
+    local statusEl = cell:getDescendantByName("jumpRowStatus")
+
+    if idEl then idEl:setText(tostring(entry.fieldId)) end
+
+    if statusEl then
+        if entry.urgency >= 60 then
+            statusEl:setText(tr("sf_pda_status_poor", "Poor"))
+            statusEl:setTextColor(unpack(COLOR_POOR))
+        elseif entry.urgency >= 25 then
+            statusEl:setText(tr("sf_pda_status_fair", "Fair"))
+            statusEl:setTextColor(unpack(COLOR_FAIR))
+        else
+            statusEl:setText(tr("sf_pda_status_good", "Good"))
+            statusEl:setTextColor(unpack(COLOR_GOOD))
+        end
     end
 end
 
@@ -1073,21 +1460,11 @@ local function _onDelete(mission)
 end
 
 -- Register a keyboard shortcut (SF_SOIL_PDA → Shift+P) for quick PDA toggle
+-- (Removed: Shift P toggle is now a UI button)
 local function _registerToggleAction(mission)
-    if not InputAction or not InputAction.SF_SOIL_PDA then return end
-    local ok, eventId = pcall(function()
-        return g_inputBinding:registerActionEvent(
-            InputAction.SF_SOIL_PDA, nil, SoilPDAScreen.toggle,
-            false, true, false, true
-        )
-    end)
-    if ok and eventId then
-        pcall(g_inputBinding.setActionEventTextVisibility, g_inputBinding, eventId, false)
-        SoilLogger.info("SoilPDAScreen: SF_SOIL_PDA toggle registered")
-    end
+    -- No-op
 end
 
 Mission00.loadMission00Finished = Utils.appendedFunction(Mission00.loadMission00Finished, _onMissionLoaded)
-Mission00.loadMission00Finished = Utils.appendedFunction(Mission00.loadMission00Finished, _registerToggleAction)
 FSBaseMission.update            = Utils.appendedFunction(FSBaseMission.update,            _onUpdate)
 FSBaseMission.delete            = Utils.appendedFunction(FSBaseMission.delete,            _onDelete)
