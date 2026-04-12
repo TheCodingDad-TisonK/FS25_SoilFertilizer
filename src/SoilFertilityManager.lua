@@ -506,9 +506,11 @@ function SoilFertilityManager:onSprayerRateUpInput()
     local rm = self.sprayerRateManager
     if rm then
         local newIdx = rm:cycleUp(vehicle.id)
-        SoilLogger.debug("Rate UP input: vehicle %d, new index %d (multiplier %.2f)", 
+        SoilLogger.debug("Rate UP input: vehicle %d, new index %d (multiplier %.2f)",
             vehicle.id, newIdx, rm:getMultiplier(vehicle.id))
-        SoilNetworkEvents_SendSprayerRate(vehicle.id, newIdx)
+        if SoilNetworkEvents_SendSprayerRate then
+            SoilNetworkEvents_SendSprayerRate(vehicle.id, newIdx)
+        end
     end
 end
 
@@ -518,9 +520,11 @@ function SoilFertilityManager:onSprayerRateDownInput()
     local rm = self.sprayerRateManager
     if rm then
         local newIdx = rm:cycleDown(vehicle.id)
-        SoilLogger.debug("Rate DOWN input: vehicle %d, new index %d (multiplier %.2f)", 
+        SoilLogger.debug("Rate DOWN input: vehicle %d, new index %d (multiplier %.2f)",
             vehicle.id, newIdx, rm:getMultiplier(vehicle.id))
-        SoilNetworkEvents_SendSprayerRate(vehicle.id, newIdx)
+        if SoilNetworkEvents_SendSprayerRate then
+            SoilNetworkEvents_SendSprayerRate(vehicle.id, newIdx)
+        end
     end
 end
 
@@ -769,7 +773,9 @@ function SoilFertilityManager:updateAutoRates(dt)
     local currentIdx = rm:getIndex(vehicle.id)
     if newIdx ~= currentIdx then
         rm:setIndex(vehicle.id, newIdx)
-        SoilNetworkEvents_SendSprayerRate(vehicle.id, newIdx)
+        if SoilNetworkEvents_SendSprayerRate then
+            SoilNetworkEvents_SendSprayerRate(vehicle.id, newIdx)
+        end
         SoilLogger.debug(
             "Auto-rate: vehicle %d → index %d (%.2fx) [%s on field %d]",
             vehicle.id, newIdx,

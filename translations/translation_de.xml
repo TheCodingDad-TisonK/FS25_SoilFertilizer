@@ -359,6 +359,7 @@
     <e k="sf_pda_map_legend_excess" v="Überschuss" eh="d1d25b9f" />
     <e k="sf_pda_map_instructions" v="Drücken Sie Umschalt+M im Spiel, um Bodenebenen zu wechseln." eh="b13603aa" />
     <e k="sf_pda_map_open_btn" v="Bodenkarte öffnen" eh="0901ae30" />
+    <e k="sf_pda_map_unavailable" v="Map preview unavailable" eh="00000000" />
     <!-- Fields Tab -->
     <e k="sf_pda_fields_section_title" v="Alle Felder" eh="48729e0b" />
     <e k="sf_pda_col_field" v="Feld" eh="6f16a5f8" />

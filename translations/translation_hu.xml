@@ -359,6 +359,7 @@
     <e k="sf_pda_map_legend_excess" v="Excess" eh="d1d25b9f" />
     <e k="sf_pda_map_instructions" v="Press Shift+M in-game to cycle soil map layers." eh="b13603aa" />
     <e k="sf_pda_map_open_btn" v="Open Soil Map" eh="0901ae30" />
+    <e k="sf_pda_map_unavailable" v="Map preview unavailable" eh="00000000" />
     <!-- Fields Tab -->
     <e k="sf_pda_fields_section_title" v="All Fields" eh="48729e0b" />
     <e k="sf_pda_col_field" v="Field" eh="6f16a5f8" />
