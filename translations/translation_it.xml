@@ -433,5 +433,11 @@
     <e k="sf_detail_rotation_fatigue" v="Fatigue (x1.15 depletion)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="No data available." eh="c6d95d5e" />
     <e k="sf_detail_no_crop" v="None recorded" eh="a4b5a996" />
+    <e k="sf_pda_btn_help" v="Nota dello sviluppatore" />
+    <e k="sf_pda_help_github" v="IL TUO FEEDBACK CONTA! Se riscontri bug, hai suggerimenti per nuove funzionalità o vuoi contribuire al codice, visita il progetto su GitHub. Puoi aprire un Issue o una Pull Request in qualsiasi momento per aiutare a migliorare questa mod per tutti. Grazie per i test!" />
+    <e k="sf_pda_help_text" v="Ciao, sono io lo sviluppatore! Come puoi vedere, questa pagina è ancora molto in lavorazione. I livelli della mappa sono attualmente solo anteprime visive (non funzionali per la selezione) e molti elementi dell'interfaccia richiedono ancora la rifinitura finale." />
+    <e k="sf_pda_map_jump_hint" v="Clicca su un campo per saltare ad esso sulla mappa" />
+    <e k="sf_pda_total_urgent_label" v="Totale che richiede attenzione" />
+    <e k="sf_pda_treatment_hint" v="I campi elencati a destra necessitano di trattamento. Clicca su una riga per vedere gli input consigliati e le quantità stimate." />
     </elements>
 </l10n>

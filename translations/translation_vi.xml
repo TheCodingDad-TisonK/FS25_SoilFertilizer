@@ -433,5 +433,11 @@
     <e k="sf_detail_rotation_fatigue" v="Fatigue (x1.15 depletion)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="No data available." eh="c6d95d5e" />
     <e k="sf_detail_no_crop" v="None recorded" eh="a4b5a996" />
+    <e k="sf_pda_btn_help" v="Ghi chú Dev" />
+    <e k="sf_pda_help_github" v="PHẢN HỒI CỦA BẠN RẤT QUAN TRỌNG! Nếu bạn gặp lỗi, có gợi ý về tính năng mới hoặc muốn đóng góp vào mã nguồn, hãy truy cập dự án trên GitHub. Bạn có thể mở Issue hoặc Pull Request bất kỳ lúc nào để giúp cải thiện mod này cho mọi người. Cảm ơn bạn đã kiểm thử!" />
+    <e k="sf_pda_help_text" v="Xin chào, tôi là nhà phát triển! Như bạn có thể thấy, trang này vẫn đang được phát triển. Các lớp bản đồ hiện chỉ là bản xem trước trực quan (chưa có chức năng chọn) và nhiều phần tử giao diện vẫn cần được tinh chỉnh lần cuối." />
+    <e k="sf_pda_map_jump_hint" v="Nhấp vào một cánh đồng để chuyển đến nó trên bản đồ" />
+    <e k="sf_pda_total_urgent_label" v="Tổng số cần chú ý" />
+    <e k="sf_pda_treatment_hint" v="Các cánh đồng được liệt kê bên phải cần được xử lý. Nhấp vào một hàng để xem đầu vào được đề xuất và số lượng ước tính." />
     </elements>
 </l10n>

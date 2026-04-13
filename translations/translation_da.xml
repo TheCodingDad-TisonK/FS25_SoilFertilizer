@@ -433,5 +433,11 @@
     <e k="sf_detail_rotation_fatigue" v="Fatigue (x1.15 depletion)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="No data available." eh="c6d95d5e" />
     <e k="sf_detail_no_crop" v="None recorded" eh="a4b5a996" />
+    <e k="sf_pda_btn_help" v="Udviklernote" />
+    <e k="sf_pda_help_github" v="DIN FEEDBACK BETYDER NOGET! Hvis du støder på fejl, har forslag til nye funktioner eller ønsker at bidrage til koden, kan du besøge projektet på GitHub. Du kan åbne et Issue eller en Pull Request til enhver tid for at hjælpe med at gøre denne mod bedre for alle. Tak for testningen!" />
+    <e k="sf_pda_help_text" v="Hej, det er mig, udvikleren! Som du kan se, er denne side stadig meget under opbygning. Kortlagene er i øjeblikket kun visuelle forhåndsvisninger (ikke-funktionelle til valg), og mange UI-elementer mangler stadig deres endelige finish." />
+    <e k="sf_pda_map_jump_hint" v="Klik på et felt for at hoppe til det på kortet" />
+    <e k="sf_pda_total_urgent_label" v="I alt kræver opmærksomhed" />
+    <e k="sf_pda_treatment_hint" v="Felterne opført til højre kræver behandling. Klik på en række for at se anbefalede inputs og estimerede mængder." />
     </elements>
 </l10n>

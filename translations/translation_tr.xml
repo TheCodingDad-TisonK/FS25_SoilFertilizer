@@ -433,5 +433,11 @@
     <e k="sf_detail_rotation_fatigue" v="Fatigue (x1.15 depletion)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="No data available." eh="c6d95d5e" />
     <e k="sf_detail_no_crop" v="None recorded" eh="a4b5a996" />
+    <e k="sf_pda_btn_help" v="Geliştirici Notu" />
+    <e k="sf_pda_help_github" v="GERİ BİLDİRİMİNİZ ÖNEMLİ! Hata bulursanız, yeni özellik önerileriniz varsa veya koda katkıda bulunmak istiyorsanız GitHub'daki projeyi ziyaret edin. Bu modu herkes için daha iyi hale getirmeye yardımcı olmak için istediğiniz zaman bir Issue veya Pull Request açabilirsiniz. Test ettiğiniz için teşekkürler!" />
+    <e k="sf_pda_help_text" v="Merhaba, geliştirici benim! Gördüğünüz gibi bu sayfa hâlâ yapım aşamasında. Harita katmanları şu an yalnızca görsel önizlemeler (seçim için işlevsel değil) ve pek çok arayüz öğesi hâlâ son rötuşlara ihtiyaç duyuyor." />
+    <e k="sf_pda_map_jump_hint" v="Haritada o noktaya atlamak için bir tarlaya tıklayın" />
+    <e k="sf_pda_total_urgent_label" v="Toplam dikkat gerektiren" />
+    <e k="sf_pda_treatment_hint" v="Sağda listelenen tarlalar tedavi gerektiriyor. Önerilen girdileri ve tahmini miktarları görmek için bir satıra tıklayın." />
     </elements>
 </l10n>

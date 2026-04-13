@@ -433,5 +433,11 @@
     <e k="sf_detail_rotation_fatigue" v="Fatigue (x1.15 depletion)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="No data available." eh="c6d95d5e" />
     <e k="sf_detail_no_crop" v="None recorded" eh="a4b5a996" />
+    <e k="sf_pda_btn_help" v="開発者メモ" />
+    <e k="sf_pda_help_github" v="フィードバックをお待ちしています！バグを発見した場合、新機能の提案がある場合、またはコードに貢献したい場合は、GitHubのプロジェクトをご覧ください。いつでもIssueまたはPull Requestを開いて、このModをより良くするお手伝いができます。テストへのご協力ありがとうございます！" />
+    <e k="sf_pda_help_text" v="こんにちは、開発者です！ご覧の通り、このページはまだ開発中です。マップレイヤーは現在ビジュアルプレビューのみ（選択機能は未実装）であり、多くのUI要素はまだ最終調整が必要です。" />
+    <e k="sf_pda_map_jump_hint" v="フィールドをクリックしてマップ上でジャンプ" />
+    <e k="sf_pda_total_urgent_label" v="要対応の合計" />
+    <e k="sf_pda_treatment_hint" v="右側に表示されているフィールドは処理が必要です。行をクリックすると推奨する投入物と推定量が確認できます。" />
     </elements>
 </l10n>

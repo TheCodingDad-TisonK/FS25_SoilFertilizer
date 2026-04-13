@@ -433,5 +433,11 @@
     <e k="sf_detail_rotation_fatigue" v="Fatigue (x1.15 depletion)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="No data available." eh="c6d95d5e" />
     <e k="sf_detail_no_crop" v="None recorded" eh="a4b5a996" />
+    <e k="sf_pda_btn_help" v="Kehittäjän huomio" />
+    <e k="sf_pda_help_github" v="PALAUTTEESI ON TÄRKEÄÄ! Jos kohtaat virheitä, sinulla on ehdotuksia uusista ominaisuuksista tai haluat osallistua koodiin, käy projektin GitHub-sivulla. Voit avata Issues- tai Pull Request -pyynnön milloin tahansa auttaaksesi parantamaan tätä modia kaikille. Kiitos testauksesta!" />
+    <e k="sf_pda_help_text" v="Hei, täällä kehittäjä! Kuten näet, tämä sivu on vielä hyvin kesken. Karttatasot ovat tällä hetkellä vain visuaalisia esikatseluja (eivät toiminnallisia valinnassa), ja monet käyttöliittymäelementit tarvitsevat vielä viimeistelyä." />
+    <e k="sf_pda_map_jump_hint" v="Napsauta kenttää siirtyäksesi siihen kartalla" />
+    <e k="sf_pda_total_urgent_label" v="Yhteensä huomiota vaativat" />
+    <e k="sf_pda_treatment_hint" v="Oikealla luetellut pellot tarvitsevat hoitoa. Napsauta riviä nähdäksesi suositellut panokset ja arvioidut määrät." />
     </elements>
 </l10n>

@@ -433,5 +433,11 @@
     <e k="sf_detail_rotation_fatigue" v="Fatigue (x1.15 depletion)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="No data available." eh="c6d95d5e" />
     <e k="sf_detail_no_crop" v="None recorded" eh="a4b5a996" />
+    <e k="sf_pda_btn_help" v="Catatan Dev" />
+    <e k="sf_pda_help_github" v="MASUKAN ANDA PENTING! Jika Anda menemukan bug, memiliki saran fitur baru, atau ingin berkontribusi pada kode, kunjungi proyek di GitHub. Anda dapat membuka Issue atau Pull Request kapan saja untuk membantu membuat mod ini lebih baik bagi semua orang. Terima kasih telah menguji!" />
+    <e k="sf_pda_help_text" v="Halo, saya sang pengembang! Seperti yang Anda lihat, halaman ini masih dalam pengerjaan. Layer peta saat ini hanya pratinjau visual (tidak berfungsi untuk pemilihan), dan banyak elemen UI masih memerlukan polesan akhir." />
+    <e k="sf_pda_map_jump_hint" v="Klik bidang untuk melompat ke sana di peta" />
+    <e k="sf_pda_total_urgent_label" v="Total yang memerlukan perhatian" />
+    <e k="sf_pda_treatment_hint" v="Bidang yang tercantum di sebelah kanan memerlukan perawatan. Klik baris untuk melihat input yang disarankan dan perkiraan jumlahnya." />
     </elements>
 </l10n>

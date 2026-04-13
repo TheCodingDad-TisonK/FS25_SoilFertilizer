@@ -433,5 +433,11 @@
     <e k="sf_detail_rotation_fatigue" v="Fadiga (x1.15 esgotamento)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="Sem dados disponíveis." eh="c6d95d5e" />
     <e k="sf_detail_no_crop" v="Nenhum registrado" eh="a4b5a996" />
+    <e k="sf_pda_btn_help" v="Nota do Dev" />
+    <e k="sf_pda_help_github" v="SEU FEEDBACK IMPORTA! Se você encontrar bugs, tiver sugestões de novos recursos ou quiser contribuir com o código, acesse o projeto no GitHub. Você pode abrir uma Issue ou Pull Request a qualquer momento para ajudar a melhorar este mod para todos. Obrigado por testar!" />
+    <e k="sf_pda_help_text" v="Olá, sou eu, o desenvolvedor! Como você pode ver, esta página ainda está em desenvolvimento. As camadas do mapa são apenas visualizações (não funcionais para seleção), e muitos elementos da interface ainda precisam de ajustes finais." />
+    <e k="sf_pda_map_jump_hint" v="Clique em um campo para ir até ele no mapa" />
+    <e k="sf_pda_total_urgent_label" v="Total que necessita atenção" />
+    <e k="sf_pda_treatment_hint" v="Os campos listados à direita precisam de tratamento. Clique em uma linha para ver os insumos recomendados e as quantidades estimadas." />
     </elements>
 </l10n>

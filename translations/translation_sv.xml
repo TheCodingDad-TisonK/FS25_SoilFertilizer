@@ -433,5 +433,11 @@
     <e k="sf_detail_rotation_fatigue" v="Fatigue (x1.15 depletion)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="No data available." eh="c6d95d5e" />
     <e k="sf_detail_no_crop" v="None recorded" eh="a4b5a996" />
+    <e k="sf_pda_btn_help" v="Utvecklarnotering" />
+    <e k="sf_pda_help_github" v="DIN FEEDBACK SPELAR ROLL! Om du stöter på buggar, har förslag på nya funktioner eller vill bidra till koden, besök projektet på GitHub. Du kan öppna en Issue eller en Pull Request när som helst för att hjälpa till att förbättra den här modden för alla. Tack för testningen!" />
+    <e k="sf_pda_help_text" v="Hej, det är jag, utvecklaren! Som du kan se är den här sidan fortfarande under uppbyggnad. Kartlagren är för närvarande bara visuella förhandsvisningar (ej funktionella för val), och många UI-element behöver fortfarande sin slutliga finish." />
+    <e k="sf_pda_map_jump_hint" v="Klicka på ett fält för att hoppa till det på kartan" />
+    <e k="sf_pda_total_urgent_label" v="Totalt behöver uppmärksamhet" />
+    <e k="sf_pda_treatment_hint" v="Fälten listade till höger behöver behandling. Klicka på en rad för att se rekommenderade insatsmedel och uppskattade mängder." />
     </elements>
 </l10n>

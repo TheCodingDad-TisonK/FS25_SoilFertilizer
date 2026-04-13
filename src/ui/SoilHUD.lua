@@ -375,6 +375,18 @@ function SoilHUD:update(dt)
         self.lastHudPosition = currentPosition
     end
 
+    -- Detection for initial RMB click when cursor might be hidden
+    if not self.editMode and self.initialized and self.settings.enabled and self.settings.showHUD and self.visible then
+        if g_inputBinding and g_inputBinding:getIsInputButtonDown(InputButton.RIGHT) then
+            -- Note: posX/posY might not be perfectly accurate if hidden, but we check last known
+            if g_inputBinding.mousePosXLast and g_inputBinding.mousePosYLast then
+                if self:isPointerOverHUD(g_inputBinding.mousePosXLast, g_inputBinding.mousePosYLast) then
+                    self:enterEditMode()
+                end
+            end
+        end
+    end
+
     if self.editMode then
         if g_inputBinding and g_inputBinding.setShowMouseCursor then
             g_inputBinding:setShowMouseCursor(true, true)

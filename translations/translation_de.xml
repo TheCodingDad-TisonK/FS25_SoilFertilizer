@@ -433,5 +433,11 @@
     <e k="sf_detail_rotation_fatigue" v="Ermüdung (x1,15 Verarmung)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="Keine Daten verfügbar." eh="c6d95d5e" />
     <e k="sf_detail_no_crop" v="Nichts aufgezeichnet" eh="a4b5a996" />
+    <e k="sf_pda_btn_help" v="Entwicklernotiz" />
+    <e k="sf_pda_help_github" v="DEIN FEEDBACK ZÄHLT! Wenn du Fehler findest, Vorschläge für neue Funktionen hast oder zum Code beitragen möchtest, besuche das Projekt auf GitHub. Du kannst jederzeit ein Issue oder einen Pull Request öffnen, um diesen Mod für alle zu verbessern. Danke fürs Testen!" />
+    <e k="sf_pda_help_text" v="Hallo, ich bin der Entwickler! Wie du sehen kannst, ist diese Seite noch stark in Arbeit. Die Kartenebenen sind derzeit nur visuelle Vorschauen (für die Auswahl nicht funktionsfähig), und viele UI-Elemente brauchen noch den letzten Schliff." />
+    <e k="sf_pda_map_jump_hint" v="Klicke auf ein Feld, um es auf der Karte anzuzeigen" />
+    <e k="sf_pda_total_urgent_label" v="Gesamt benötigt Aufmerksamkeit" />
+    <e k="sf_pda_treatment_hint" v="Die rechts aufgelisteten Felder benötigen Behandlung. Klicke auf eine Zeile, um empfohlene Mittel und geschätzte Mengen zu sehen." />
     </elements>
 </l10n>
