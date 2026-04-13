@@ -433,5 +433,11 @@
     <e k="sf_detail_rotation_fatigue" v="Fatigue (x1.15 depletion)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="No data available." eh="c6d95d5e" />
     <e k="sf_detail_no_crop" v="None recorded" eh="a4b5a996" />
+    <e k="sf_pda_btn_help" v="Notă dev" />
+    <e k="sf_pda_help_github" v="FEEDBACK-UL TĂU CONTEAZĂ! Dacă întâlnești erori, ai sugestii pentru funcții noi sau dorești să contribui la cod, vizitează proiectul pe GitHub. Poți deschide un Issue sau un Pull Request oricând pentru a ajuta la îmbunătățirea acestui mod pentru toți. Mulțumim pentru testare!" />
+    <e k="sf_pda_help_text" v="Salut, eu sunt dezvoltatorul! După cum poți vedea, această pagină este încă în lucru. Straturile hărții sunt în prezent doar previzualizări vizuale (nefuncționale pentru selecție) și multe elemente UI mai au nevoie de finisare." />
+    <e k="sf_pda_map_jump_hint" v="Faceți clic pe un câmp pentru a sări la el pe hartă" />
+    <e k="sf_pda_total_urgent_label" v="Total necesită atenție" />
+    <e k="sf_pda_treatment_hint" v="Câmpurile listate în dreapta necesită tratament. Faceți clic pe un rând pentru a vedea inputurile recomandate și cantitățile estimate." />
     </elements>
 </l10n>

@@ -433,5 +433,11 @@
     <e k="sf_detail_rotation_fatigue" v="Fatigue (x1.15 depletion)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="No data available." eh="c6d95d5e" />
     <e k="sf_detail_no_crop" v="None recorded" eh="a4b5a996" />
+    <e k="sf_pda_btn_help" v="Fejlesztői megjegyzés" />
+    <e k="sf_pda_help_github" v="A VISSZAJELZÉSED SZÁMÍT! Ha hibákat találsz, új funkciókra vonatkozó javaslataid vannak, vagy szeretnél hozzájárulni a kódhoz, látogasd meg a projektet a GitHubon. Bármikor megnyithatsz egy Issue-t vagy Pull Request-et, hogy segítsd jobbá tenni ezt a modot mindenki számára. Köszönöm a tesztelést!" />
+    <e k="sf_pda_help_text" v="Szia, én vagyok a fejlesztő! Ahogy láthatod, ez az oldal még nagyon fejlesztés alatt áll. A térképrétegek jelenleg csak vizuális előnézetek (kiválasztásra nem működnek), és sok felhasználói felület elem még véglegesítésre vár." />
+    <e k="sf_pda_map_jump_hint" v="Kattints egy mezőre, hogy a térképen is megjelenjen" />
+    <e k="sf_pda_total_urgent_label" v="Összesen figyelmet igényel" />
+    <e k="sf_pda_treatment_hint" v="A jobb oldalon felsorolt mezők kezelést igényelnek. Kattints egy sorra az ajánlott bemenetek és becsült mennyiségek megtekintéséhez." />
     </elements>
 </l10n>

@@ -432,5 +432,11 @@
     <e k="sf_treat_action_weed" v="Onmiddellijk HERBICIDE toepassen." eh="625551c5" />
     <e k="sf_treat_action_pest" v="Onmiddellijk INSECTICIDE toepassen." eh="f4db9a03" />
     <e k="sf_treat_action_disease" v="Onmiddellijk FUNGICIDE toepassen." eh="9228323a" />
+    <e k="sf_pda_btn_help" v="Ontwikkelaarsnoot" />
+    <e k="sf_pda_help_github" v="JOUW FEEDBACK TELT! Als je bugs tegenkomt, suggesties hebt voor nieuwe functies of wil bijdragen aan de code, bezoek dan het project op GitHub. Je kunt op elk moment een Issue of Pull Request openen om deze mod beter te maken voor iedereen. Bedankt voor het testen!" />
+    <e k="sf_pda_help_text" v="Hoi, ik ben de ontwikkelaar! Zoals je kunt zien, is deze pagina nog volop in ontwikkeling. De kaartlagen zijn momenteel slechts visuele previews (niet functioneel voor selectie) en veel UI-elementen moeten nog hun definitieve afwerking krijgen." />
+    <e k="sf_pda_map_jump_hint" v="Klik op een veld om ernaar te springen op de kaart" />
+    <e k="sf_pda_total_urgent_label" v="Totaal dat aandacht nodig heeft" />
+    <e k="sf_pda_treatment_hint" v="De velden rechts hebben behandeling nodig. Klik op een rij om aanbevolen inputs en geschatte hoeveelheden te zien." />
     </elements>
 </l10n>

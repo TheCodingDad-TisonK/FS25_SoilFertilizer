@@ -467,5 +467,11 @@
     <e k="sf_detail_rotation_fatigue" v="連作疲勞 (x1.15 耗損)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="無可用數據。" eh="c6d95d5e" />
     <e k="sf_detail_no_crop" v="無記錄" eh="a4b5a996" />
+    <e k="sf_pda_btn_help" v="Nota del Dev" />
+    <e k="sf_pda_help_github" v="EL TEU COMENTARI IMPORTA! Si trobes errors, tens suggeriments de noves funcions o vols contribuir al codi, visita el projecte a GitHub. Pots obrir un Issue o una Pull Request en qualsevol moment per ajudar a millorar aquest mod per a tothom. Gràcies per provar-lo!" />
+    <e k="sf_pda_help_text" v="Hola, sóc jo, el desenvolupador! Com pots veure, aquesta pàgina encara està en construcció. Les capes del mapa ara mateix són només previsualitzacions visuals (no funcionals per a la selecció), i molts elements de la interfície encara necessiten el seu acabat final." />
+    <e k="sf_pda_map_jump_hint" v="Feu clic en un camp per saltar-hi al mapa" />
+    <e k="sf_pda_total_urgent_label" v="Total que necessita atenció" />
+    <e k="sf_pda_treatment_hint" v="Els camps llistats a la dreta necessiten tractament. Feu clic en una fila per veure els inputs recomanats i les quantitats estimades." />
     </elements>
 </l10n>

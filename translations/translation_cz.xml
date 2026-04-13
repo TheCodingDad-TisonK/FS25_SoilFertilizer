@@ -433,5 +433,11 @@
     <e k="sf_detail_rotation_fatigue" v="Fatigue (x1.15 depletion)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="No data available." eh="c6d95d5e" />
     <e k="sf_detail_no_crop" v="None recorded" eh="a4b5a996" />
+    <e k="sf_pda_btn_help" v="Poznámka vývojáře" />
+    <e k="sf_pda_help_github" v="VAŠE ZPĚTNÁ VAZBA JE DŮLEŽITÁ! Pokud narazíte na chyby, máte návrhy na nové funkce nebo chcete přispět ke kódu, navštivte projekt na GitHubu. Kdykoli můžete otevřít Issue nebo Pull Request a pomoci zlepšit tento mod pro všechny. Děkujeme za testování!" />
+    <e k="sf_pda_help_text" v="Ahoj, jsem to já, vývojář! Jak vidíte, tato stránka je stále ve vývoji. Vrstvy mapy jsou momentálně jen vizuální náhledy (nefunkční pro výběr) a mnoho prvků uživatelského rozhraní stále potřebuje finální úpravy." />
+    <e k="sf_pda_map_jump_hint" v="Kliknutím na pole přejdete na něj v mapě" />
+    <e k="sf_pda_total_urgent_label" v="Celkem vyžaduje pozornost" />
+    <e k="sf_pda_treatment_hint" v="Pole uvedená vpravo potřebují ošetření. Kliknutím na řádek zobrazíte doporučené vstupy a odhadované množství." />
     </elements>
 </l10n>

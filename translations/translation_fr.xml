@@ -433,5 +433,11 @@
     <e k="sf_detail_rotation_fatigue" v="Fatigue (épuisement x1.15)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="Aucune donnée disponible." eh="c6d95d5e" />
     <e k="sf_detail_no_crop" v="Aucun enregistré" eh="a4b5a996" />
+    <e k="sf_pda_btn_help" v="Note du dev" />
+    <e k="sf_pda_help_github" v="VOS RETOURS COMPTENT ! Si vous rencontrez des bugs, avez des suggestions de nouvelles fonctionnalités ou souhaitez contribuer au code, rendez-vous sur le projet GitHub. Vous pouvez ouvrir une Issue ou une Pull Request à tout moment pour aider à améliorer ce mod pour tout le monde. Merci pour vos tests !" />
+    <e k="sf_pda_help_text" v="Bonjour, c'est moi le développeur ! Comme vous pouvez le voir, cette page est encore très en cours de développement. Les couches de carte sont actuellement de simples aperçus visuels (non fonctionnels pour la sélection) et de nombreux éléments d'interface nécessitent encore leur finition." />
+    <e k="sf_pda_map_jump_hint" v="Cliquez sur un champ pour y accéder sur la carte" />
+    <e k="sf_pda_total_urgent_label" v="Total nécessitant attention" />
+    <e k="sf_pda_treatment_hint" v="Les champs listés à droite nécessitent un traitement. Cliquez sur une ligne pour voir les intrants recommandés et les quantités estimées." />
     </elements>
 </l10n>

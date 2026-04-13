@@ -433,5 +433,11 @@
     <e k="sf_detail_rotation_fatigue" v="Fatigue (x1.15 depletion)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="No data available." eh="c6d95d5e" />
     <e k="sf_detail_no_crop" v="None recorded" eh="a4b5a996" />
+    <e k="sf_pda_btn_help" v="Notatka dewelopera" />
+    <e k="sf_pda_help_github" v="TWOJA OPINIA MA ZNACZENIE! Jeśli napotkasz błędy, masz sugestie dotyczące nowych funkcji lub chcesz wnieść wkład w kod, odwiedź projekt na GitHubie. Możesz otworzyć Issue lub Pull Request w dowolnym momencie, aby pomóc ulepszyć ten mod dla wszystkich. Dziękujemy za testowanie!" />
+    <e k="sf_pda_help_text" v="Cześć, jestem deweloperem! Jak widzisz, ta strona jest jeszcze w trakcie budowy. Warstwy mapy to obecnie tylko podglądy wizualne (niedziałające do zaznaczania), a wiele elementów interfejsu wymaga jeszcze ostatecznych poprawek." />
+    <e k="sf_pda_map_jump_hint" v="Kliknij pole, aby przejść do niego na mapie" />
+    <e k="sf_pda_total_urgent_label" v="Łącznie wymaga uwagi" />
+    <e k="sf_pda_treatment_hint" v="Pola wymienione po prawej stronie wymagają leczenia. Kliknij wiersz, aby zobaczyć zalecane środki i szacowane ilości." />
     </elements>
 </l10n>

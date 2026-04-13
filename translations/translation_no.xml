@@ -433,5 +433,11 @@
     <e k="sf_detail_rotation_fatigue" v="Fatigue (x1.15 depletion)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="No data available." eh="c6d95d5e" />
     <e k="sf_detail_no_crop" v="None recorded" eh="a4b5a996" />
+    <e k="sf_pda_btn_help" v="Utviklernotat" />
+    <e k="sf_pda_help_github" v="TILBAKEMELDINGEN DIN BETYR NOE! Hvis du oppdager feil, har forslag til nye funksjoner eller ønsker å bidra til koden, besøk prosjektet på GitHub. Du kan åpne en Issue eller en Pull Request når som helst for å hjelpe med å gjøre denne moden bedre for alle. Takk for testingen!" />
+    <e k="sf_pda_help_text" v="Hei, det er jeg, utvikleren! Som du kan se, er denne siden fortsatt veldig under utvikling. Kartlagene er for øyeblikket bare visuelle forhåndsvisninger (ikke-funksjonelle for valg), og mange UI-elementer trenger fortsatt sin endelige finpuss." />
+    <e k="sf_pda_map_jump_hint" v="Klikk på et jorde for å hoppe til det på kartet" />
+    <e k="sf_pda_total_urgent_label" v="Totalt som trenger oppmerksomhet" />
+    <e k="sf_pda_treatment_hint" v="Jordene som er oppført til høyre trenger behandling. Klikk på en rad for å se anbefalte innsatsmidler og estimerte mengder." />
     </elements>
 </l10n>
