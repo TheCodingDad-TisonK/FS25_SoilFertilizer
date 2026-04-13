@@ -255,6 +255,30 @@ end)
 -- Install save/load hooks
 hookSaveLoadEvents()
 
+-- =========================================================
+-- DEDICATED SERVER FIX: Force fillType registration
+-- FS25 dedicated servers sometimes ignore <fillTypes> in modDesc.xml for script mods.
+-- We must manually inject our fillTypes.xml into FillTypeManager before it loads mod filltypes.
+-- =========================================================
+if FillTypeManager and type(FillTypeManager.loadModFillTypes) == "function" then
+    local function injectSFModFillTypes(fillTypeManager)
+        if fillTypeManager.modsToLoad then
+            local alreadyAdded = false
+            for _, data in ipairs(fillTypeManager.modsToLoad) do
+                if data[2] == modDirectory then
+                    alreadyAdded = true
+                    break
+                end
+            end
+            if not alreadyAdded then
+                SoilLogger.info("Dedi Server Fix: Forcing fillTypes.xml into modsToLoad queue")
+                table.insert(fillTypeManager.modsToLoad, {modDirectory .. "fillTypes.xml", modDirectory, modName})
+            end
+        end
+    end
+    FillTypeManager.loadModFillTypes = Utils.prependedFunction(FillTypeManager.loadModFillTypes, injectSFModFillTypes)
+end
+
 -- Route mouse events to SoilHUD (for drag/resize edit mode)
 -- RMB only enters edit mode when cursor is over the panel (no cross-contamination).
 -- We always call onMouseEvent regardless of eventUsed — SoilHUD:onMouseEvent only
