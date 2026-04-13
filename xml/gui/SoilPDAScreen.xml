@@ -214,9 +214,9 @@
     </Profile>
     <Profile name="SF_IconMenu" extends="baseReference" with="anchorMiddleCenter">
       <size value="50px 50px"/>
-      <imageSliceId value="noSlice"/>
-      <imageFilename value="g_SFIconMenu"/>
-      <imageColor value="$preset_colorTransparent"/>
+      <imageFilename value="dataS/menu/menu_atlas.png"/>
+      <imageSliceId value="icon_crops"/>
+      <imageColor value="$preset_colorWhite"/>
     </Profile>
     <Profile name="sf_tabLabel" extends="fs25_textDefault" with="anchorTopLeft">
       <isFocusable value="true"/>
