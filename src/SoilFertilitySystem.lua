@@ -1001,18 +1001,25 @@ function SoilFertilitySystem:updateDailySoil()
             field.burnDaysLeft = field.burnDaysLeft - 1
         end
 
-        -- Critical Field Alerts (before planting season, e.g., early spring)
+        -- Critical Field Alerts (once per season per owned field)
         if self.settings.showNotifications and g_currentMission and g_currentMission.environment then
             local season = g_currentMission.environment.currentSeason
             local threshold = SoilConstants.CRITICAL_ALERT_THRESHOLD or 50
-            if season == (SoilConstants.SEASONAL_EFFECTS and SoilConstants.SEASONAL_EFFECTS.SPRING_SEASON or 1) then
-                local currentYear = g_currentMission.environment.currentYear or math.floor(currentDay / 12)
-                if field.lastAlertYear ~= currentYear then
-                    local urgency = self:getFieldUrgency(fieldId)
-                    if urgency > threshold then
-                        self:showNotification("Critical Field Alert", string.format("Field %d needs attention! Urgency Score: %d", fieldId, math.floor(urgency)))
-                        field.lastAlertYear = currentYear
+            if field.lastAlertSeason ~= season then
+                local urgency = self:getFieldUrgency(fieldId)
+                if urgency > threshold then
+                    local isOwned = false
+                    local farmId = g_localPlayer and g_localPlayer.farmId
+                    if farmId and farmId > 0 and g_farmlandManager then
+                        local owner = g_farmlandManager:getFarmlandOwner(fieldId)
+                        if owner == farmId then
+                            isOwned = true
+                        end
                     end
+                    if isOwned then
+                        self:showNotification("Critical Care Alert", string.format("Field %d requires immediate attention! Urgency: %d%%", fieldId, math.floor(urgency)))
+                    end
+                    field.lastAlertSeason = season
                 end
             end
         end
