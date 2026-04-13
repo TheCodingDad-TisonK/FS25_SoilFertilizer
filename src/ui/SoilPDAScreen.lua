@@ -110,6 +110,7 @@ function SoilPDAScreen.new()
 
     self.lastPopupTime  = 0     -- Guard against multiple clicks/spam
     self.filterOwnedOnly = false -- Filter: All Fields vs Owned Only
+    self.isMapLocked     = false -- Lock zoom/pan when field selected
 
     return self
 end
@@ -608,25 +609,25 @@ function SoilPDAScreen:mouseEvent(posX, posY, isDown, isUp, button, eventUsed)
     end
 
     -- Scroll Wheel Zoom
-    if overMap then
+    if overMap and not self.isMapLocked then
         local zoomDelta = 0
         if button == Input.MOUSE_BUTTON_WHEEL_UP then zoomDelta = 0.5
         elseif button == Input.MOUSE_BUTTON_WHEEL_DOWN then zoomDelta = -0.5 end
-        
+
         if zoomDelta ~= 0 then
             local currentZoom = self.mapZoom or 3.5
             self.mapZoom = math.clamp(currentZoom + zoomDelta, 1.0, 15.0)
             SoilLogger.debug("SoilPDAScreen: zoom changed to %f", self.mapZoom)
-            
+
             -- Recalculate allowed center bounds for the new zoom level immediately
             local worldSize = (g_currentMission and g_currentMission.terrainSize) or 2048
             local halfWorld = worldSize * 0.5
             local halfView = halfWorld / self.mapZoom
             local maxCenter = math.max(0, halfWorld - halfView)
-            
+
             self.mapCenterX = math.clamp(self.mapCenterX or 0, -maxCenter, maxCenter)
             self.mapCenterZ = math.clamp(self.mapCenterZ or 0, -maxCenter, maxCenter)
-            
+
             if self.soilMiniMap then
                 pcall(function()
                     self.soilMiniMap:setMapZoom(self.mapZoom)
@@ -640,11 +641,16 @@ function SoilPDAScreen:mouseEvent(posX, posY, isDown, isUp, button, eventUsed)
     -- Left Click Drag (Pan)
     if isDown and button == Input.MOUSE_BUTTON_LEFT then
         if overMap then
-            self.isMapDragging = true
-            self.lastMouseX = posX
-            self.lastMouseY = posY
+            if self.isMapLocked then
+                self.isMapLocked = false
+                SoilLogger.info("SoilPDAScreen: Map unlocked via click")
+                return true
+            else
+                self.isMapDragging = true
+                self.lastMouseX = posX
+                self.lastMouseY = posY
+            end
         end
-
         local tabs = {
             { el = self.tabLabelOverview,  cb = SoilPDAScreen.onClickTabOverview  },
             { el = self.tabLabelMap,       cb = SoilPDAScreen.onClickTabMap       },
@@ -815,6 +821,7 @@ end
 -- ── SmoothList Delegate ───────────────────────────────────
 
 function SoilPDAScreen:onListSelectionChanged(list, section, index)
+    SoilLogger.info("SoilPDAScreen: onListSelectionChanged index: %s", tostring(index))
     if index > 0 then
         if list == self.sidebarFieldList or list == self.sidebarMapList then
             self.selectedFieldIndex = index
@@ -833,6 +840,7 @@ end
 --- Called by ListItem.onClick in Map Sidebar (XML)
 function SoilPDAScreen:onClickMapJumpRow(element)
     local index = element and element.rowDataIndex
+    SoilLogger.info("SoilPDAScreen: onClickMapJumpRow element.index=%s, element.rowDataIndex=%s", tostring(element and element.index), tostring(index))
     if index and index > 0 then
         local entry = self.fieldData[index]
         if entry and entry.fieldId then
@@ -1119,23 +1127,52 @@ local MAP_LAYER_DESC_FALLBACKS = {
 local INVERTED_LAYERS = {[6]=true, [7]=true, [8]=true, [9]=true}
 
 function SoilPDAScreen:_centerMapOnField(fieldId)
-    local mission = g_currentMission
-    if mission and mission.fieldManager then
-        local field = mission.fieldManager:getFieldById(fieldId)
-        if field then
-            local x, z = field.posX, field.posZ
+    SoilLogger.info("SoilPDAScreen: _centerMapOnField(fieldId=%s)", tostring(fieldId))
+    
+    local fields = g_fieldManager and g_fieldManager.fields
+    if fields then
+        local foundField = nil
+        for _, field in ipairs(fields) do
+            if field and field.farmland and field.farmland.id == fieldId then
+                foundField = field
+                break
+            end
+        end
+
+        if foundField then
+            local x, z = foundField.posX, foundField.posZ
+            SoilLogger.info("SoilPDAScreen: Focusing map on field %s at %.1f, %.1f", tostring(fieldId), x, z)
+            
             self.mapCenterX = x
             self.mapCenterZ = z
-            
+            self.mapZoom = 5.0
+            self.isMapLocked = true
+
+            -- Ensure a layer is active (default to Urgency layer if off)
+            local sfm = g_SoilFertilityManager
+            if sfm and sfm.settings then
+                local currentLayer = sfm.settings.activeMapLayer or 0
+                if currentLayer == 0 then
+                    sfm.settings.activeMapLayer = 6 -- Urgency
+                    if self.activeTab == TAB_MAP then
+                        self:_refreshMapTab()
+                    end
+                end
+            end
+
             if self.soilMiniMap then
                 pcall(function()
+                    self.soilMiniMap:setMapZoom(self.mapZoom)
                     self.soilMiniMap:setCenterToWorldPosition(self.mapCenterX, self.mapCenterZ)
                 end)
             end
+        else
+            SoilLogger.warning("SoilPDAScreen: Could not find field with farmland ID %s in g_fieldManager", tostring(fieldId))
         end
+    else
+        SoilLogger.warning("SoilPDAScreen: g_fieldManager.fields not available")
     end
 end
-
 function SoilPDAScreen:_refreshMapTab()
     local sfm = g_SoilFertilityManager
     local layerIdx = 0

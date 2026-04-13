@@ -7,15 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.8.2.0] - 2026-04-13
-
-### Changed
-
-- **Soil PDA Screen refactoring**: Overhauled the PDA Menu (`K` key) for better context sensitivity.
-- **Map Sidebar Jump**: The Soil Map tab now includes a field list sidebar. Clicking a field centers the mini-map on that field immediately.
-- **Treatment Sidebar Stats**: The Treatment Plan tab sidebar now shows summary counts for fields needing fertilizer, herbicide, insecticide, or fungicide.
-- **UI UX Improvements**: Removed the redundant "Fields" tab, consolidating its data into the Overview and Map sidebars.
-
 ## [1.8.1.0] - 2026-04-12
 
 ### Fixed
