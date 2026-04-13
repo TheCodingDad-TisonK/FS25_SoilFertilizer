@@ -616,7 +616,7 @@ function SoilPDAScreen:mouseEvent(posX, posY, isDown, isUp, button, eventUsed)
 
         if zoomDelta ~= 0 then
             local currentZoom = self.mapZoom or 3.5
-            self.mapZoom = math.clamp(currentZoom + zoomDelta, 1.0, 15.0)
+            self.mapZoom = math.max(1.0, math.min(15.0, currentZoom + zoomDelta))
             SoilLogger.debug("SoilPDAScreen: zoom changed to %f", self.mapZoom)
 
             -- Recalculate allowed center bounds for the new zoom level immediately
@@ -1357,9 +1357,9 @@ function SoilPDAScreen:_populateFieldCell(index, cell)
     local function setNutrient(el, value, statusStr)
         if not el then return end
         el:setText(tostring(value))
-        if statusStr == "good" then
+        if statusStr == "Good" then
             el:setTextColor(unpack(COLOR_GOOD))
-        elseif statusStr == "fair" then
+        elseif statusStr == "Fair" then
             el:setTextColor(unpack(COLOR_FAIR))
         else
             el:setTextColor(unpack(COLOR_POOR))
