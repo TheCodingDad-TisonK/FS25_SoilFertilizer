@@ -247,16 +247,16 @@
   "v1.8.2.0": {
     "published_at": "2026-04-12T23:10:27Z",
     "tag": "v1.8.2.0",
-    "peak_downloads": 41
+    "peak_downloads": 42
   },
   "v1.8.3.0": {
     "published_at": "2026-04-13T14:23:32Z",
     "tag": "v1.8.3.0",
-    "peak_downloads": 27
+    "peak_downloads": 28
   },
   "v1.8.4.0": {
     "published_at": "2026-04-13T17:44:21Z",
     "tag": "v1.8.4.0",
-    "peak_downloads": 17
+    "peak_downloads": 23
   }
 }
