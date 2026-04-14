@@ -76,13 +76,13 @@ function SettingsManager:saveSettings(settingsObject)
 
     if not xmlPath then
         SoilLogger.error("Cannot save settings - savegame path not available")
-        return
+        return false
     end
 
     -- Only server should save (or singleplayer)
     if g_client ~= nil and g_server == nil then
         SoilLogger.debug("Client skipping save (settings saved on server)")
-        return
+        return false
     end
 
     local xml = XMLFile.create("sf_Config", xmlPath, self.XMLTAG)
@@ -101,7 +101,10 @@ function SettingsManager:saveSettings(settingsObject)
         xml:delete()
 
         SoilLogger.info("Settings saved to server savegame: %s", xmlPath)
+        return true
     else
         SoilLogger.error("Failed to create settings XML file")
     end
+
+    return false
 end

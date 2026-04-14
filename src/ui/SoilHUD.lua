@@ -296,16 +296,14 @@ function SoilHUD:onMouseEvent(posX, posY, isDown, isUp, button, eventUsed)
     if not self.settings.showHUD then return false end
     if not self.visible then return false end
 
-    -- RMB: toggle edit mode (only consume when cursor is over panel or already in edit mode)
-    if isDown and button == Input.MOUSE_BUTTON_RIGHT then
+    -- RMB: toggle edit mode
+    if isDown and button == 3 then
         if self.editMode then
             self:exitEditMode()
-            return true
-        elseif self:isPointerOverHUD(posX, posY) then
+        else
             self:enterEditMode()
-            return true
         end
-        return false
+        return
     end
 
     if not self.editMode then return false end
@@ -377,9 +375,9 @@ function SoilHUD:update(dt)
 
     -- Detection for initial RMB click when cursor might be hidden
     if not self.editMode and self.initialized and self.settings.enabled and self.settings.showHUD and self.visible then
-        if g_inputBinding and g_inputBinding:getIsInputButtonDown(InputButton.RIGHT) then
+        if Input and Input.isMouseButtonPressed and Input.isMouseButtonPressed(Input.MOUSE_BUTTON_RIGHT) then
             -- Note: posX/posY might not be perfectly accurate if hidden, but we check last known
-            if g_inputBinding.mousePosXLast and g_inputBinding.mousePosYLast then
+            if g_inputBinding and g_inputBinding.mousePosXLast and g_inputBinding.mousePosYLast then
                 if self:isPointerOverHUD(g_inputBinding.mousePosXLast, g_inputBinding.mousePosYLast) then
                     self:enterEditMode()
                 end
