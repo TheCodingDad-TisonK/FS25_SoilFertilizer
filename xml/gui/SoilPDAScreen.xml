@@ -143,24 +143,6 @@
       <!-- TAB 2: SOIL MAP -->
       <GuiElement id="mapContent" position="0px 0px" width="1000px" height="668px" visible="false">
         <Text profile="sf_sectionHeader" text="$l10n_sf_pda_map_section_title" position="0px 658px"/>
-        <ThreePartBitmap width="960px" height="170px" position="0px 468px">
-          <GuiElement profile="fs25_subCategoryContainer" width="920px">
-            <Text profile="sf_detailLabel"      text="$l10n_sf_pda_map_active_layer" position="10px -25px"  size="200px 24px"/>
-            <Text profile="sf_detailValueLarge" id="mapLayerName" text="--"           position="220px -25px" size="700px 24px"/>
-            <Text profile="sf_detailLabel"      id="mapLayerDesc" text=""             position="10px -55px"  size="900px 40px" wrapText="true" autoFitHeight="true"/>
-            <GuiElement id="mapLegendGroup" position="10px -95px" width="900px" height="70px" visible="false">
-              <Text profile="sf_subHeader" text="$l10n_sf_pda_map_legend_title" position="0px 60px" size="400px 24px"/>
-              <Text profile="sf_legendBlock" id="mapLegendGoodBlock"   text=" " position="0px   25px" size="24px 20px"/>
-              <Text profile="sf_legendLabel" id="mapLegendGoodText"    text="$l10n_sf_pda_map_legend_good" position="30px   25px" size="180px 20px"/>
-              <Text profile="sf_legendBlock" id="mapLegendFairBlock"   text=" " position="220px 25px" size="24px 20px"/>
-              <Text profile="sf_legendLabel" id="mapLegendFairText"    text="$l10n_sf_pda_map_legend_fair" position="250px 25px" size="180px 20px"/>
-              <Text profile="sf_legendBlock" id="mapLegendPoorBlock"   text=" " position="440px 25px" size="24px 20px"/>
-              <Text profile="sf_legendLabel" id="mapLegendPoorText"    text="$l10n_sf_pda_map_legend_poor" position="470px 25px" size="180px 20px"/>
-              <Text profile="sf_legendBlock" id="mapLegendExcessBlock" text=" " position="660px 25px" size="24px 20px"/>
-              <Text profile="sf_legendLabel" id="mapLegendExcessText"  text=""  position="690px 25px" size="180px 20px"/>
-            </GuiElement>
-          </GuiElement>
-        </ThreePartBitmap>
         <InGameMapPreview profile="sf_soilMiniMapFull" id="soilMiniMap"/>
       </GuiElement>
 
@@ -271,6 +253,51 @@
       <textSize value="16px"/>
       <textBold value="true"/>
       <textColor value="0.35 0.85 0.40 1.0"/>
+    </Profile>
+    <Profile name="sf_legendBlock" extends="fs25_textDefault" with="anchorTopLeft">
+      <textSize value="14px"/>
+    </Profile>
+    <Profile name="sf_legendLabel" extends="fs25_textDefault" with="anchorTopLeft">
+      <textSize value="14px"/>
+      <textColor value="$preset_colorWhite"/>
+    </Profile>
+    <Profile name="sf_colHeader" extends="fs25_textDefault" with="anchorTopLeft">
+      <textSize value="13px"/>
+      <textBold value="true"/>
+      <textUpperCase value="true"/>
+      <textColor value="$preset_colorWhite_50"/>
+      <textAlignment value="left"/>
+    </Profile>
+    <Profile name="sf_colHeaderRight" extends="sf_colHeader">
+      <textAlignment value="right"/>
+    </Profile>
+    <Profile name="sf_smoothList" extends="emptyPanel" with="anchorStretchingYLeft pivotTopLeft"/>
+    <Profile name="sf_listRow" extends="emptyPanel" with="anchorTopStretchingX pivotTopLeft">
+      <height value="28px"/>
+    </Profile>
+    <Profile name="sf_rowBg" extends="baseReference" with="anchorStretchingYStretchingX">
+      <imageColor value="$preset_fs25_colorGrey"/>
+      <imageSelectedColor value="0.25 0.65 0.30 0.9"/>
+      <alternateBackgroundColor value="$preset_fs25_colorGreyDark_50"/>
+    </Profile>
+    <Profile name="sf_cellLeft" extends="fs25_textDefault" with="anchorStretchingYLeft">
+      <position value="8px 0"/>
+      <textSize value="13px"/>
+      <textAlignment value="left"/>
+      <textColor value="$preset_fs25_colorMainLight"/>
+      <textSelectedColor value="$preset_fs25_colorMainDark"/>
+    </Profile>
+    <Profile name="sf_cellRight" extends="sf_cellLeft">
+      <textAlignment value="right"/>
+    </Profile>
+    <Profile name="sf_emptyHint" extends="fs25_textDefault" with="anchorTopLeft">
+      <textSize value="14px"/>
+      <textAlignment value="center"/>
+      <textColor value="$preset_colorWhite_50"/>
+    </Profile>
+  </GUIProfiles>
+</GUI>
+or value="0.35 0.85 0.40 1.0"/>
     </Profile>
     <Profile name="sf_legendBlock" extends="fs25_textDefault" with="anchorTopLeft">
       <textSize value="14px"/>

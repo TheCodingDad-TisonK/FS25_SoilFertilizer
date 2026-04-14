@@ -39,11 +39,6 @@ SoilPDAScreen.CONTROLS = {
     "statsAvgN", "statsAvgP", "statsAvgK", "statsAvgPH", "statsAvgOM",
     "statsWeedFields", "statsPestFields", "statsDiseaseFields",
     "statsNeedsAttention",
-    "mapLayerName", "mapLayerDesc", "mapLegendGroup",
-    "mapLegendGoodBlock", "mapLegendGoodText",
-    "mapLegendFairBlock", "mapLegendFairText",
-    "mapLegendPoorBlock", "mapLegendPoorText",
-    "mapLegendExcessBlock", "mapLegendExcessText",
     "soilMiniMap", "sidebarFieldList", "sidebarMapList", "treatmentList",
     "sidebarOverview", "sidebarMap", "sidebarTreatment",
     "overviewContent", "mapContent", "treatmentContent",
@@ -123,19 +118,9 @@ function SoilPDAScreen:initialize()
     self.menuButtonInfo = {
         {inputAction = "MENU_BACK"},
         {inputAction = "MENU_ACCEPT", text = tr("sf_pda_filter_all", "Filter"), callback = function() self:onClickFilter() end},
-        {inputAction = InputAction.SF_CYCLE_MAP_LAYER, text = tr("input_SF_CYCLE_MAP_LAYER", "Cycle Map Layer"), callback = function() self:onCycleLayerInput() end},
         {inputAction = "MENU_EXTRA_1", text = tr("sf_pda_btn_help", "Dev Note"), callback = function() self:onClickHelp() end},
     }
     self:setMenuButtonInfo(self.menuButtonInfo)
-end
-
-function SoilPDAScreen:onCycleLayerInput()
-    if g_SoilFertilityManager then
-        g_SoilFertilityManager:onCycleMapLayerInput()
-        if self.activeTab == TAB_MAP then
-            self:_refreshMapTab()
-        end
-    end
 end
 
 -- ── Static registration ───────────────────────────────────
@@ -294,17 +279,6 @@ function SoilPDAScreen:onGuiSetupFinished()
     self.treatmentContent = self:getDescendantById("treatmentContent")
 
     -- Map tab elements
-    self.mapLayerName        = self:getDescendantById("mapLayerName")
-    self.mapLayerDesc        = self:getDescendantById("mapLayerDesc")
-    self.mapLegendGroup      = self:getDescendantById("mapLegendGroup")
-    self.mapLegendGoodBlock  = self:getDescendantById("mapLegendGoodBlock")
-    self.mapLegendFairBlock  = self:getDescendantById("mapLegendFairBlock")
-    self.mapLegendPoorBlock  = self:getDescendantById("mapLegendPoorBlock")
-    self.mapLegendExcessBlock= self:getDescendantById("mapLegendExcessBlock")
-    self.mapLegendGoodText   = self:getDescendantById("mapLegendGoodText")
-    self.mapLegendFairText   = self:getDescendantById("mapLegendFairText")
-    self.mapLegendPoorText   = self:getDescendantById("mapLegendPoorText")
-    self.mapLegendExcessText = self:getDescendantById("mapLegendExcessText")
     self.soilMiniMap         = self:getDescendantById("soilMiniMap")
 
     -- Left sidebar panels
@@ -439,77 +413,6 @@ function SoilPDAScreen:_showMiniMap()
                 end
                 
                 if not ok then error(err) end
-                
-                -- After drawing map and hotspots, render our density overlay if a layer is active
-                local overlay = g_SoilFertilityManager and g_SoilFertilityManager.soilMapOverlay
-                if overlay and overlay.overlayHandle and overlay.overlayHandle ~= 0 then
-                    -- Poll async generation readiness if it's currently generating
-                    if overlay.isGenerating then
-                        if getIsDensityMapVisualizationOverlayReady and getIsDensityMapVisualizationOverlayReady(overlay.overlayHandle) then
-                            overlay.isReady = true
-                            overlay.isGenerating = false
-                            if overlay.pendingRegen then overlay:requestGenerate() end
-                        end
-                    end
-
-                    if overlay.isReady then
-                        local layerIdx = overlay.settings.activeMapLayer or 0
-                        if layerIdx > 0 then
-                            -- Use the absolute screen position/size of our GUI element (normalized 0-1)
-                            local mapX, mapY = mapSelf.absPosition[1], mapSelf.absPosition[2]
-                            local mapW, mapH = mapSelf.size[1], mapSelf.size[2]
-                            
-                            -- Aspect Ratio Fix: The GUI element box is 960x340 (wide), but the map is square.
-                            -- Giants letterboxes the map to fit the SHORTEST side.
-                            local renderW, renderH = mapW, mapH
-                            local renderX, renderY = mapX, mapY
-                            
-                            if mapW > mapH then
-                                -- Box is wider than it is tall: map is a square of height, centered horizontally
-                                renderW = mapH
-                                renderX = mapX + (mapW - mapH) * 0.5
-                            elseif mapH > mapW then
-                                -- Box is taller than it is wide: map is a square of width, centered vertically
-                                renderH = mapW
-                                renderY = mapY + (mapH - mapW) * 0.5
-                            end
-
-                            if self._lastRenderedLayer ~= layerIdx then
-                                SoilLogger.debug("SoilPDAScreen: Rendering layer %d inside mini-map (%.3f, %.3f, %.3f, %.3f)", layerIdx, renderX, renderY, renderW, renderH)
-                                self._lastRenderedLayer = layerIdx
-                            end
-
-                            -- Alignment Fix: Sync UVs with the actual background map's zoom/pan
-                            local uvs = nil
-                            if im.mapOverlay and im.mapOverlay.uvs then
-                                uvs = im.mapOverlay.uvs
-                            end
-
-                            -- Fallback to manual UV calculation ONLY if internal UVs are missing
-                            if not uvs then
-                                local worldSize = (g_currentMission and g_currentMission.terrainSize) or 2048
-                                local zoom = self.mapZoom or 3.5
-                                local cx, cz = self.mapCenterX or 0, self.mapCenterZ or 0
-                                local uCenter = (cx + worldSize * 0.5) / worldSize
-                                local vCenter = (worldSize * 0.5 - cz) / worldSize
-                                local halfUV = 0.5 / zoom
-                                uvs = {uCenter - halfUV, vCenter - halfUV,  -- BL
-                                       uCenter - halfUV, vCenter + halfUV,  -- TL
-                                       uCenter + halfUV, vCenter - halfUV,  -- BR
-                                       uCenter + halfUV, vCenter + halfUV}  -- TR
-                            end
-
-                            if uvs and setOverlayUVs then
-                                setOverlayUVs(overlay.overlayHandle, unpack(uvs))
-                            end
-
-                            if setOverlayColor then setOverlayColor(overlay.overlayHandle, 1, 1, 1, SoilMapOverlay.ALPHA) end
-                            if renderOverlay then
-                                renderOverlay(overlay.overlayHandle, renderX, renderY, renderW, renderH)
-                            end
-                        end
-                    end
-                end
             else
                 oldDraw(mapSelf, clipX1, clipY1, clipX2, clipY2)
             end
@@ -544,9 +447,6 @@ function SoilPDAScreen:update(dt)
         self:_rebuildAllData()
         self:_refreshSummaryStats()
         self:_refreshTreatmentSidebar()
-        if self.activeTab == TAB_MAP then
-            self:_refreshMapTab()
-        end
         self:_reloadLists()
     end
 end
@@ -736,9 +636,7 @@ function SoilPDAScreen:setActiveTab(tab)
     end
 
     -- Trigger layout update on newly visible panels
-    if tab == TAB_MAP then
-        self:_refreshMapTab()
-    elseif tab == TAB_TREATMENT then
+    if tab == TAB_TREATMENT then
         self:_refreshTreatmentSidebar()
     end
     
@@ -1092,40 +990,6 @@ function SoilPDAScreen:_refreshSummaryStats()
     setCountStat(self.statsNeedsAttention, attentionCount)
 end
 
--- ── Map Tab Refresh ───────────────────────────────────────
-
--- Descriptions per layer index
-local MAP_LAYER_DESCS = {
-    [0] = "sf_pda_map_layer_off_desc",
-    [1] = "sf_pda_map_layer_n_desc",
-    [2] = "sf_pda_map_layer_p_desc",
-    [3] = "sf_pda_map_layer_k_desc",
-    [4] = "sf_pda_map_layer_ph_desc",
-    [5] = "sf_pda_map_layer_om_desc",
-    [6] = "sf_pda_map_layer_urgency_desc",
-    [7] = "sf_pda_map_layer_weed_desc",
-    [8] = "sf_pda_map_layer_pest_desc",
-    [9] = "sf_pda_map_layer_disease_desc",
-}
-
--- Fallback descriptions (English hardcoded, used when l10n key missing)
-local MAP_LAYER_DESC_FALLBACKS = {
-    [0] = "Soil map overlay is currently off. Press Shift+M to activate a layer.",
-    [1] = "Nitrogen (N): Primary growth driver. Shows per-field N availability.",
-    [2] = "Phosphorus (P): Root development and flowering. Shows per-field P availability.",
-    [3] = "Potassium (K): Disease resistance and water regulation. Shows per-field K availability.",
-    [4] = "pH Level: Soil acidity/alkalinity. Optimal range 6.5–7.0. Apply lime to raise pH.",
-    [5] = "Organic Matter: Improves soil structure and nutrient retention. Plow to increase OM.",
-    [6] = "Field Urgency: Combined score of all deficits. High = immediate treatment needed.",
-    [7] = "Weed Pressure: Active weed infestation level. Apply herbicide to reduce.",
-    [8] = "Pest Pressure: Insect pest population. Apply insecticide to reduce.",
-    [9] = "Disease Pressure: Fungal/bacterial disease level. Apply fungicide to reduce.",
-}
-
--- Color themes per layer (Good, Fair, Poor, Excess descriptors)
--- Inverted layers (Urgency, Weed, Pest, Disease): high = bad
-local INVERTED_LAYERS = {[6]=true, [7]=true, [8]=true, [9]=true}
-
 function SoilPDAScreen:_centerMapOnField(fieldId)
     SoilLogger.info("SoilPDAScreen: _centerMapOnField(fieldId=%s)", tostring(fieldId))
     
@@ -1148,18 +1012,6 @@ function SoilPDAScreen:_centerMapOnField(fieldId)
             self.mapZoom = 5.0
             self.isMapLocked = true
 
-            -- Ensure a layer is active (default to Urgency layer if off)
-            local sfm = g_SoilFertilityManager
-            if sfm and sfm.settings then
-                local currentLayer = sfm.settings.activeMapLayer or 0
-                if currentLayer == 0 then
-                    sfm.settings.activeMapLayer = 6 -- Urgency
-                    if self.activeTab == TAB_MAP then
-                        self:_refreshMapTab()
-                    end
-                end
-            end
-
             if self.soilMiniMap then
                 pcall(function()
                     self.soilMiniMap:setMapZoom(self.mapZoom)
@@ -1171,99 +1023,6 @@ function SoilPDAScreen:_centerMapOnField(fieldId)
         end
     else
         SoilLogger.warning("SoilPDAScreen: g_fieldManager.fields not available")
-    end
-end
-function SoilPDAScreen:_refreshMapTab()
-    local sfm = g_SoilFertilityManager
-    local layerIdx = 0
-    if sfm and sfm.soilMapOverlay and sfm.settings then
-        layerIdx = sfm.settings.activeMapLayer or 0
-    end
-
-    -- Active layer name
-    local layerKeys = SoilMapOverlay and SoilMapOverlay.LAYER_KEYS or {}
-    local layerKey = layerKeys[layerIdx] or "sf_map_layer_off"
-    local layerName = tr(layerKey, "Layer " .. layerIdx)
-    if self.mapLayerName then
-        self.mapLayerName:setText(layerName)
-        if layerIdx > 0 then
-            self.mapLayerName:setTextColor(unpack(COLOR_GREEN))
-        else
-            self.mapLayerName:setTextColor(0.60, 0.60, 0.60, 1.0)
-        end
-    end
-
-    -- Layer description
-    local descKey = MAP_LAYER_DESCS[layerIdx]
-    local descFallback = MAP_LAYER_DESC_FALLBACKS[layerIdx] or ""
-    local descText = descKey and tr(descKey, descFallback) or descFallback
-    if self.mapLayerDesc then
-        self.mapLayerDesc:setText(descText)
-    end
-
-    -- Legend (only when a layer is active)
-    local showLegend = layerIdx > 0
-    if self.mapLegendGroup then
-        self.mapLegendGroup:setVisible(showLegend)
-    end
-
-    if showLegend then
-        local isInverted = INVERTED_LAYERS[layerIdx]
-
-        -- For inverted layers: Good = low, Poor = high
-        -- For normal layers: Good = high, Poor = low
-        local goodColor, fairColor, poorColor
-        if isInverted then
-            goodColor = COLOR_GOOD   -- low value = good (green)
-            fairColor = COLOR_FAIR   -- mid = fair (amber)
-            poorColor = COLOR_POOR   -- high = bad (red)
-        else
-            goodColor = COLOR_GOOD   -- high value = good (green)
-            fairColor = COLOR_FAIR
-            poorColor = COLOR_POOR
-        end
-
-        -- Set legend block background-ish using text color on solid block character
-        local function setBlock(el, color)
-            if not el then return end
-            el:setTextColor(color[1], color[2], color[3], color[4])
-        end
-
-        setBlock(self.mapLegendGoodBlock,  goodColor)
-        setBlock(self.mapLegendFairBlock,  fairColor)
-        setBlock(self.mapLegendPoorBlock,  poorColor)
-
-        -- Legend labels
-        local function setLegendLabel(el, key, fallback)
-            if el then el:setText(tr(key, fallback)) end
-        end
-
-        if isInverted then
-            setLegendLabel(self.mapLegendGoodText,  "sf_pda_map_legend_low",    "Low (Good)")
-            setLegendLabel(self.mapLegendFairText,  "sf_pda_map_legend_medium", "Medium")
-            setLegendLabel(self.mapLegendPoorText,  "sf_pda_map_legend_high",   "High (Bad)")
-        else
-            setLegendLabel(self.mapLegendGoodText,  "sf_pda_map_legend_good",   "Good (High)")
-            setLegendLabel(self.mapLegendFairText,  "sf_pda_map_legend_fair",   "Fair (Medium)")
-            setLegendLabel(self.mapLegendPoorText,  "sf_pda_map_legend_poor",   "Poor (Low)")
-        end
-
-        -- Excess block (for pH: too alkaline is also bad)
-        if layerIdx == 4 then  -- pH layer
-            if self.mapLegendExcessBlock  then
-                self.mapLegendExcessBlock:setTextColor(unpack(COLOR_POOR))
-            end
-            if self.mapLegendExcessText then
-                self.mapLegendExcessText:setText(tr("sf_pda_map_legend_excess", "High pH (Alkaline)"))
-                self.mapLegendExcessText:setVisible(true)
-            end
-            if self.mapLegendExcessBlock then
-                self.mapLegendExcessBlock:setVisible(true)
-            end
-        else
-            if self.mapLegendExcessText   then self.mapLegendExcessText:setVisible(false) end
-            if self.mapLegendExcessBlock  then self.mapLegendExcessBlock:setVisible(false) end
-        end
     end
 end
 
