@@ -3,7 +3,7 @@
     <GuiElement profile="newLayer" />
     <Bitmap profile="dialogFullscreenBg" id="dialogBg" />
 
-    <GuiElement profile="fs25_dialogBg" id="dialogElement" size="900px 600px" baseHeight="600px">
+    <GuiElement profile="fs25_dialogBg" id="dialogElement" size="900px 850px" baseHeight="850px">
         <ThreePartBitmap profile="fs25_dialogBgMiddle" />
         <ThreePartBitmap profile="fs25_dialogBgTop" />
         <ThreePartBitmap profile="fs25_dialogBgBottom" />
@@ -27,6 +27,15 @@
                   position="0px -340px" size="820px 180px"
                   textAlignment="left" wordWrap="true"
                   text="$l10n_sf_pda_help_github"/>
+            
+            <!-- Divider -->
+            <Bitmap profile="fs25_dialogButtonBoxSeparator" position="0px -540px" size="820px 1px" />
+
+            <!-- Section 3: Additional Notes -->
+            <Text profile="fs25_dialogText" id="textSection3"
+                  position="0px -580px" size="820px 180px"
+                  textAlignment="left" wordWrap="true"
+                  text="$l10n_sf_pda_help_note"/>
         </GuiElement>
 
         <!-- Close button -->

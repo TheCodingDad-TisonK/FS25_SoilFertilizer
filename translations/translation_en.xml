@@ -401,6 +401,7 @@
     <e k="sf_pda_btn_help" v="Dev Note" />
     <e k="sf_pda_help_text" v="Hi there, it's me the developer! I've moved the soil map layers to the native PDA Map (ESC &gt; Map) for a more seamless experience. You can now select layers directly from the sidebar. The PDA page is still being polished, so stay tuned for more updates!" eh="00000001" />
     <e k="sf_pda_help_github" v="YOUR FEEDBACK MATTERS! If you encounter any bugs, have suggestions for new features, or want to contribute to the code, please visit the project on GitHub. You can open an Issue or a Pull Request at any time to help make this mod better for everyone. Thank you for testing!" eh="00000002" />
+    <e k="sf_pda_help_note" v="Note: The soil layers tab on the map page is NOT WORKING. Im aware of the issue and working on a fix. (which might take some time)" eh="00000003" />
     <e k="sf_pda_map_unavailable" v="Map preview unavailable" eh="00000000" />
     <e k="sf_map_health_overall" v="Average Soil Health" />
     <!-- Fields Tab -->
