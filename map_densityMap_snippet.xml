@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!--
+    =========================================================
+    FS25 Realistic Soil & Fertilizer — Density Map Declarations
+    =========================================================
+    PURPOSE:
+        This snippet must be merged into your map's map.xml file.
+        It declares the five custom soil nutrient density map
+        layers so the FS25 engine loads and tracks them at runtime.
+
+    WHAT TO DO:
+        1.  Open your map's map.xml (usually at maps/<MapName>/map.xml).
+        2.  Find the existing <densityMaps> block.
+        3.  Copy the five <densityMap> entries below into that block.
+        4.  Ensure the five GRLE files exist in your savegame folder
+            (see GRLE_SETUP below).
+
+    GRLE_SETUP:
+        On a FRESH installation the GRLE files do not exist yet.
+        SoilLayerSystem.lua will gracefully fall back to the
+        fieldData-only path in that case and log a warning.
+
+        To pre-create blank GRLE files at the correct resolution
+        run the helper script:
+
+            python3 tools/create_soil_grle.py --map-size 2048
+
+        Or copy any existing same-size GRLE from the savegame
+        (e.g. infoLayer_sprayLevel.grle) and zero it out with a
+        hex editor — the format is a flat array of 8-bit values.
+
+        Alternatively, launch the game once with this snippet in
+        map.xml and the engine will auto-create placeholder files
+        in the savegame folder (confirmed FS25 behaviour for
+        8-bit infoLayers declared with createType="8BIT").
+
+    LAYER DETAILS:
+        infoLayer_soilN   — Nitrogen    0-100 → encoded 0-255
+        infoLayer_soilP   — Phosphorus  0-100 → encoded 0-255
+        infoLayer_soilK   — Potassium   0-100 → encoded 0-255
+        infoLayer_soilPH  — pH          5.0-7.5 → encoded 0-255
+        infoLayer_soilOM  — Organic Matter 0-10 → encoded 0-255
+
+    NOTE ON channelOffset:
+        All five layers occupy all 8 bits of their GRLE file
+        (firstChannel=0, numChannels=8). This gives 256 discrete
+        levels per nutrient — more than enough for smooth heatmaps.
+        If you need to pack multiple layers into a single GRLE you
+        can reduce numChannels to 4 and use channelOffset, but
+        single-layer files are far easier to debug and are what
+        the SoilLayerSystem.lua expects by default.
+    =========================================================
+-->
+
+<!--
+    PASTE THE BLOCK BELOW INTO YOUR MAP.XML <densityMaps> SECTION:
+
+    <densityMaps>
+        ... (existing game density maps) ...
+
+        === SOIL & FERTILIZER MOD LAYERS — START ===
+-->
+        <densityMap name="infoLayer_soilN"
+                    numChannels="8"
+                    createType="8BIT"
+                    filename="infoLayer_soilN.grle"/>
+
+        <densityMap name="infoLayer_soilP"
+                    numChannels="8"
+                    createType="8BIT"
+                    filename="infoLayer_soilP.grle"/>
+
+        <densityMap name="infoLayer_soilK"
+                    numChannels="8"
+                    createType="8BIT"
+                    filename="infoLayer_soilK.grle"/>
+
+        <densityMap name="infoLayer_soilPH"
+                    numChannels="8"
+                    createType="8BIT"
+                    filename="infoLayer_soilPH.grle"/>
+
+        <densityMap name="infoLayer_soilOM"
+                    numChannels="8"
+                    createType="8BIT"
+                    filename="infoLayer_soilOM.grle"/>
+<!--
+        === SOIL & FERTILIZER MOD LAYERS — END ===
+    </densityMaps>
+-->

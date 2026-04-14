@@ -77,6 +77,7 @@ end
 -- ── Delete ────────────────────────────────────────────────
 
 function SoilMapOverlay:delete()
+    if self.pointPool then self.pointPool:clear() end
     self.samplePoints = {}
     SoilLogger.info("SoilMapOverlay: deleted")
 end
@@ -146,7 +147,12 @@ function SoilMapOverlay:updateSamplePoints(force)
     end
 
     self.nextSampleUpdateTime = now + SoilMapOverlay.SAMPLE_UPDATE_INTERVAL_MS
-    self.samplePoints = {}
+    
+    -- Return existing points to the pool to prevent GC stutters
+    for _, pt in ipairs(self.samplePoints) do
+        self.pointPool:returnToPool(pt)
+    end
+    table.clear(self.samplePoints)
 
     local layerIdx = self.settings.activeMapLayer or 0
     if layerIdx <= 0 then 
@@ -176,11 +182,13 @@ function SoilMapOverlay:updateSamplePoints(force)
                 local info = self.soilSystem:getFieldInfo(farmlandId)
                 if info then
                     local r, g, b = self:getLayerColor(layerIdx, info, farmlandId)
-                    table.insert(self.samplePoints, {
-                        x = worldX,
-                        z = worldZ,
-                        r = r, g = g, b = b
-                    })
+                    local pt = self.pointPool:getOrCreateNext()
+                    pt.x = worldX
+                    pt.z = worldZ
+                    pt.r = r
+                    pt.g = g
+                    pt.b = b
+                    table.insert(self.samplePoints, pt)
                 end
             end
         end
@@ -189,7 +197,8 @@ function SoilMapOverlay:updateSamplePoints(force)
     -- Cap points if needed
     if #self.samplePoints > SoilMapOverlay.MAX_POINTS then
         for i = #self.samplePoints, SoilMapOverlay.MAX_POINTS + 1, -1 do
-            table.remove(self.samplePoints, i)
+            local pt = table.remove(self.samplePoints, i)
+            self.pointPool:returnToPool(pt)
         end
     end
     

@@ -37,6 +37,7 @@ source(modDirectory .. "src/config/SettingsSchema.lua")
 
 -- 2. Core systems
 source(modDirectory .. "src/hooks/HookManager.lua")
+source(modDirectory .. "src/ui/SoilLayerSystem.lua")
 source(modDirectory .. "src/SprayerRateManager.lua")
 source(modDirectory .. "src/SoilFertilitySystem.lua")
 source(modDirectory .. "src/SoilFertilityManager.lua")

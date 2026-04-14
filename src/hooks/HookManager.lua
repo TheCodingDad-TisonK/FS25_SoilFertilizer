@@ -24,22 +24,40 @@ end
 function HookManager:getFieldIdAtWorldPosition(x, z)
     if not g_fieldManager then return nil end
     
-    -- Try direct field lookup first (most accurate)
+    -- Initialize the native MapDataGrid cache on first use (requires map to be loaded)
+    if not self.fieldIdCache then
+        local mapSize = g_currentMission and g_currentMission.terrainSize or 2048
+        -- 2m block size provides high resolution for field boundaries
+        self.fieldIdCache = MapDataGrid.createFromBlockSize(mapSize, 2)
+    end
+
+    -- Fast path: Check the native C++ backed spatial grid cache
+    local cachedId = self.fieldIdCache:getValueAtWorldPos(x, z)
+    if cachedId ~= nil then
+        if cachedId == -1 then return nil end -- -1 indicates known empty space
+        return cachedId
+    end
+    
+    -- Slow path: Direct field polygon lookup (computationally expensive)
+    local fieldId = nil
     local field = g_fieldManager:getFieldAtWorldPosition(x, z)
     if field and field.farmland and field.farmland.id then
-        return field.farmland.id
+        fieldId = field.farmland.id
     end
     
     -- Fallback to farmland detection
-    if g_farmlandManager then
+    if not fieldId and g_farmlandManager then
         local farmland = g_farmlandManager:getFarmlandAtWorldPosition(x, z)
         if farmland and farmland.id then
             -- Convert farmland ID to field ID (usually same in FS25)
-            return farmland.id
+            fieldId = farmland.id
         end
     end
     
-    return nil
+    -- Cache the result (using -1 to cache nil/empty lookups to prevent repeated slow paths)
+    self.fieldIdCache:setValueAtWorldPos(x, z, fieldId or -1)
+    
+    return fieldId
 end
 
 --- Helper to get field ID from work area coordinates
@@ -765,6 +783,13 @@ function HookManager:installSprayerAreaHook()
                 SoilLogger.debug("Sprayer/Spreader hook: Field %d, %s, %.1fL (x%.2f rate)",
                     fieldId, fillType.name, effectiveLiters, rateMultiplier)
 
+                -- Cache sprayer world position for density-map pixel writes in applyFertilizer
+                if g_SoilFertilityManager.soilSystem then
+                    local spx, _, spz = getWorldTranslation(self.rootNode)
+                    g_SoilFertilityManager.soilSystem._lastSprayX = spx
+                    g_SoilFertilityManager.soilSystem._lastSprayZ = spz
+                end
+
                 if isFertilizer then
                     g_SoilFertilityManager.soilSystem:onFertilizerApplied(fieldId, fillTypeIndex, effectiveLiters)
                 end
@@ -951,7 +976,7 @@ function HookManager:installPlowingHook()
     local original = Cultivator.processCultivatorArea
     Cultivator.processCultivatorArea = Utils.appendedFunction(
         original,
-        function(cultivatorSelf, superFunc, workArea, dt)
+        function(cultivatorSelf, workArea, dt)
             if not g_SoilFertilityManager or
                not g_SoilFertilityManager.soilSystem or
                not g_SoilFertilityManager.settings.enabled or
