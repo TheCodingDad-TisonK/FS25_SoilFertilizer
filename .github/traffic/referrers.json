@@ -513,5 +513,57 @@
       "count": 6,
       "uniques": 5
     }
+  ],
+  "2026-04-15": [
+    {
+      "referrer": "github.com",
+      "count": 1480,
+      "uniques": 157
+    },
+    {
+      "referrer": "kingmods.net",
+      "count": 1344,
+      "uniques": 330
+    },
+    {
+      "referrer": "Google",
+      "count": 728,
+      "uniques": 127
+    },
+    {
+      "referrer": "Bing",
+      "count": 115,
+      "uniques": 30
+    },
+    {
+      "referrer": "symbaloo.com",
+      "count": 18,
+      "uniques": 1
+    },
+    {
+      "referrer": "reddit.com",
+      "count": 16,
+      "uniques": 9
+    },
+    {
+      "referrer": "Yahoo",
+      "count": 13,
+      "uniques": 9
+    },
+    {
+      "referrer": "com.reddit.frontpage",
+      "count": 11,
+      "uniques": 9
+    },
+    {
+      "referrer": "forbidden-mods.de",
+      "count": 7,
+      "uniques": 7
+    },
+    {
+      "referrer": "l.facebook.com",
+      "count": 6,
+      "uniques": 5
+    }
   ]
 }
