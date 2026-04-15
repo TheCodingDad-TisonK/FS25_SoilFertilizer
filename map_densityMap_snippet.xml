@@ -20,19 +20,16 @@
         SoilLayerSystem.lua will gracefully fall back to the
         fieldData-only path in that case and log a warning.
 
-        To pre-create blank GRLE files at the correct resolution
-        run the helper script:
+        To create them:
+        1.  Launch the game once with this snippet in map.xml and the 
+            engine will auto-create placeholder files in the savegame 
+            folder (confirmed FS25 behaviour for 8-bit infoLayers 
+            declared with createType="8BIT").
 
-            python3 tools/create_soil_grle.py --map-size 2048
-
-        Or copy any existing same-size GRLE from the savegame
-        (e.g. infoLayer_sprayLevel.grle) and zero it out with a
-        hex editor — the format is a flat array of 8-bit values.
-
-        Alternatively, launch the game once with this snippet in
-        map.xml and the engine will auto-create placeholder files
-        in the savegame folder (confirmed FS25 behaviour for
-        8-bit infoLayers declared with createType="8BIT").
+        2.  Alternatively, copy any existing same-size GRLE from the 
+            savegame (e.g. infoLayer_sprayLevel.grle) and zero it out 
+            with a hex editor — the format is a flat array of 8-bit 
+            values when using 8BIT creation type.
 
     LAYER DETAILS:
         infoLayer_soilN   — Nitrogen    0-100 → encoded 0-255
