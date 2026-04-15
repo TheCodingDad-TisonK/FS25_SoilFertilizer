@@ -1,7 +1,7 @@
 # FS25_SoilFertilizer - Developer Guide
 
-**Version**: 1.8.2.0
-**Last Updated**: 2026-04-13
+**Version**: 1.8.5.0
+**Last Updated**: 2026-04-15
 
 ---
 
@@ -17,7 +17,8 @@
 8. [HUD System](#hud-system)
 9. [Testing Your Changes](#testing-your-changes)
 10. [Common Gotchas](#common-gotchas)
-11. [Build & Release](#build--release)
+11. [Soil Density Map Layers](#soil-density-map-layers)
+12. [Build & Release](#build--release)
 
 ---
 
@@ -513,6 +514,33 @@ local actualFieldId =
 ```
 
 Using the loop key directly causes data to be stored under the wrong ID on some maps.
+
+---
+
+## Soil Density Map Layers
+
+To enable per-pixel nutrient maps, you must declare the five custom soil nutrient density map layers in your map's `map.xml` file.
+
+### 1. Update map.xml
+
+Find the existing `<densityMaps>` block in your map's `map.xml` and add the following entries:
+
+```xml
+<densityMap name="infoLayer_soilN" numChannels="8" createType="8BIT" filename="infoLayer_soilN.grle"/>
+<densityMap name="infoLayer_soilP" numChannels="8" createType="8BIT" filename="infoLayer_soilP.grle"/>
+<densityMap name="infoLayer_soilK" numChannels="8" createType="8BIT" filename="infoLayer_soilK.grle"/>
+<densityMap name="infoLayer_soilPH" numChannels="8" createType="8BIT" filename="infoLayer_soilPH.grle"/>
+<densityMap name="infoLayer_soilOM" numChannels="8" createType="8BIT" filename="infoLayer_soilOM.grle"/>
+```
+
+### 2. GRLE Setup
+
+On a fresh installation, the GRLE files do not exist yet. `SoilLayerSystem.lua` will gracefully fall back to the fieldData-only path in that case and log a warning.
+
+To create them:
+1.  **Launch the game once** with the `map.xml` changes applied.
+2.  The Giants Engine will **auto-create placeholder files** in the savegame folder (confirmed FS25 behavior for 8-bit infoLayers declared with `createType="8BIT"`).
+3.  Alternatively, copy any existing same-size GRLE from the savegame (e.g., `infoLayer_sprayLevel.grle`) and zero it out with a hex editor. The format is a flat array of 8-bit values when using `8BIT` creation type.
 
 ---
 

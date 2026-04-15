@@ -14,12 +14,12 @@
   <GuiElement profile="fs25_menuContainer">
 
     <!-- Header bar with icon, title -->
-    <GuiElement profile="fs25_menuHeaderPanel" position="-200px 90px" width="800px">
-      <Bitmap profile="fs25_menuHeaderIconBg">
-        <Bitmap profile="SF_IconMenu"/>
-      </Bitmap>
-      <Text profile="fs25_menuHeaderTitle" id="screenTitle" text="$l10n_sf_pda_screen_title"/>
-    </GuiElement>
+<GuiElement profile="fs25_menuHeaderPanel" position="-200px 90px" width="800px">
+<Bitmap profile="fs25_menuHeaderIconBg">
+<Bitmap profile="SF_IconMenu"/>
+</Bitmap>
+<Text profile="fs25_menuHeaderTitle" id="categoryHeaderText" text="$l10n_sf_pda_screen_title"/>
+</GuiElement>
 
     <!-- ══════════════════════════════════════════════════════════════
          LEFT COLUMN — 460px wide, 700px tall, context-sensitive
@@ -30,13 +30,13 @@
         <!-- SIDEBAR A: Full field list shown on Overview tab -->
         <GuiElement id="sidebarOverview" position="0px 0px" width="420px" height="640px">
           <Text profile="sf_sectionHeader" text="$l10n_sf_pda_tab_fields" position="10px -10px"/>
-          <Text profile="sf_colHeader"      text="$l10n_sf_pda_col_field"  position="10px  -45px" size="60px 24px"/>
-          <Text profile="sf_colHeaderRight" text="N"                        position="76px  -45px" size="58px 24px"/>
-          <Text profile="sf_colHeaderRight" text="P"                        position="138px -45px" size="58px 24px"/>
-          <Text profile="sf_colHeaderRight" text="K"                        position="200px -45px" size="58px 24px"/>
-          <Text profile="sf_colHeaderRight" text="pH"                       position="262px -45px" size="48px 24px"/>
-          <Text profile="sf_colHeaderRight" text="$l10n_sf_pda_col_status" position="314px -45px" size="96px 24px"/>
-          <GuiElement position="0px -80px" width="420px" height="530px">
+          <Text profile="sf_colHeader"      text="$l10n_sf_pda_col_field"  position="10px  -50px" size="60px 24px"/>
+          <Text profile="sf_colHeader"      text="N"                        position="76px  -50px" size="58px 24px"/>
+          <Text profile="sf_colHeader"      text="P"                        position="138px -50px" size="58px 24px"/>
+          <Text profile="sf_colHeader"      text="K"                        position="200px -50px" size="58px 24px"/>
+          <Text profile="sf_colHeader"      text="pH"                       position="262px -50px" size="48px 24px"/>
+          <Text profile="sf_colHeader"      text="$l10n_sf_pda_col_status" position="314px -50px" size="96px 24px"/>
+          <GuiElement position="0px -78px" width="420px" height="552px">
             <SmoothList id="sidebarFieldList" profile="sf_smoothList"
                         startClipperElementName="sideListStart"
                         endClipperElementName="sideListEnd">
@@ -58,8 +58,8 @@
         <!-- SIDEBAR B: Simple jump list shown on Map tab -->
         <GuiElement id="sidebarMap" position="0px 0px" width="420px" height="640px" visible="false">
           <Text profile="sf_sectionHeader" text="$l10n_sf_pda_tab_fields" position="10px -10px"/>
-          <Text profile="sf_subHeader" text="$l10n_sf_pda_map_jump_hint" position="10px -42px" size="400px 22px"/>
-          <GuiElement position="0px -72px" width="420px" height="550px">
+          <Text profile="sf_subHeader" text="$l10n_sf_pda_map_jump_hint" position="10px -38px" size="400px 22px"/>
+          <GuiElement position="0px -65px" width="420px" height="555px">
             <SmoothList id="sidebarMapList" profile="sf_smoothList"
                         startClipperElementName="sideMapStart"
                         endClipperElementName="sideMapEnd">
@@ -77,23 +77,23 @@
         <!-- SIDEBAR C: Treatment summary shown on Treatment tab -->
         <GuiElement id="sidebarTreatment" position="0px 0px" width="420px" height="640px" visible="false">
           <Text profile="sf_sectionHeader" text="$l10n_sf_pda_section_attention" position="10px -10px"/>
-          <ThreePartBitmap width="400px" height="210px" position="10px -50px">
+          <ThreePartBitmap width="400px" height="220px" position="10px -42px">
             <GuiElement profile="fs25_subCategoryContainer" width="360px">
-              <Text profile="sf_statLabel" text="$l10n_sf_pda_needs_fert_label"   position="10px -28px"  size="230px 22px"/>
-              <Text profile="sf_statValue" id="treatStatNeedsFert" text="0"        position="245px -28px" size="100px 22px"/>
-              <Text profile="sf_statLabel" text="$l10n_sf_pda_weed_label"         position="10px -58px"  size="230px 22px"/>
-              <Text profile="sf_statValue" id="treatStatWeed"      text="0"        position="245px -58px" size="100px 22px"/>
-              <Text profile="sf_statLabel" text="$l10n_sf_pda_pest_label"         position="10px -88px"  size="230px 22px"/>
-              <Text profile="sf_statValue" id="treatStatPest"      text="0"        position="245px -88px" size="100px 22px"/>
-              <Text profile="sf_statLabel" text="$l10n_sf_pda_disease_label"      position="10px -118px" size="230px 22px"/>
-              <Text profile="sf_statValue" id="treatStatDisease"   text="0"        position="245px -118px" size="100px 22px"/>
-              <Text profile="sf_statLabel" text="$l10n_sf_pda_total_urgent_label" position="10px -162px" size="230px 22px"/>
-              <Text profile="sf_statValue" id="treatStatTotal"     text="0"        position="245px -162px" size="100px 22px"/>
+              <Text profile="sf_statLabel" text="$l10n_sf_pda_needs_fert_label"   position="10px -20px"  size="230px 22px"/>
+              <Text profile="sf_statValue" id="treatStatNeedsFert" text="0"        position="245px -20px" size="100px 22px"/>
+              <Text profile="sf_statLabel" text="$l10n_sf_pda_weed_label"         position="10px -48px"  size="230px 22px"/>
+              <Text profile="sf_statValue" id="treatStatWeed"      text="0"        position="245px -48px" size="100px 22px"/>
+              <Text profile="sf_statLabel" text="$l10n_sf_pda_pest_label"         position="10px -76px"  size="230px 22px"/>
+              <Text profile="sf_statValue" id="treatStatPest"      text="0"        position="245px -76px" size="100px 22px"/>
+              <Text profile="sf_statLabel" text="$l10n_sf_pda_disease_label"      position="10px -104px" size="230px 22px"/>
+              <Text profile="sf_statValue" id="treatStatDisease"   text="0"        position="245px -104px" size="100px 22px"/>
+              <Text profile="sf_statLabel" text="$l10n_sf_pda_total_urgent_label" position="10px -148px" size="230px 22px"/>
+              <Text profile="sf_statValue" id="treatStatTotal"     text="0"        position="245px -148px" size="100px 22px"/>
             </GuiElement>
           </ThreePartBitmap>
           <Text profile="sf_hintText" id="treatHintText"
                 text="$l10n_sf_pda_treatment_hint"
-                position="10px -280px" size="390px 140px" wrapText="true" autoFitHeight="true"/>
+                position="10px -275px" size="390px 220px" wrapText="true" textMaxNumLines="6" autoFitHeight="true"/>
         </GuiElement>
 
       </GuiElement>
@@ -106,7 +106,7 @@
 
       <!-- TAB 1: FARM OVERVIEW -->
       <GuiElement id="overviewContent" position="0px 0px" width="1000px" height="668px">
-        <Text profile="sf_sectionHeader" text="$l10n_sf_pda_section_farm_overview" position="0px 658px"/>
+        <Text profile="sf_sectionHeader" text="$l10n_sf_pda_section_farm_overview" position="0px 648px"/>
         <ThreePartBitmap width="960px" height="600px" position="0px 40px">
           <GuiElement profile="fs25_subCategoryContainer" width="920px">
             <Text profile="sf_statLabel" text="$l10n_sf_report_fields_tracked"   position="10px -30px"  size="300px 24px"/>
@@ -143,34 +143,17 @@
       <!-- TAB 2: SOIL MAP -->
       <GuiElement id="mapContent" position="0px 0px" width="1000px" height="668px" visible="false">
         <Text profile="sf_sectionHeader" text="$l10n_sf_pda_map_section_title" position="0px 658px"/>
-        <ThreePartBitmap width="960px" height="190px" position="0px 420px">
-          <GuiElement profile="fs25_subCategoryContainer" width="920px">
-            <Text profile="sf_detailLabel"      text="$l10n_sf_pda_map_active_layer" position="10px -25px"  size="200px 24px"/>
-            <Text profile="sf_detailValueLarge" id="mapLayerName" text="--"           position="220px -25px" size="700px 24px"/>
-            <Text profile="sf_detailLabel"      id="mapLayerDesc" text=""             position="10px -60px"  size="900px 40px" wrapText="true" autoFitHeight="true"/>
-            <GuiElement id="mapLegendGroup" position="10px -100px" width="900px" height="80px" visible="false">
-              <Text profile="sf_subHeader" text="$l10n_sf_pda_map_legend_title" position="0px 65px" size="400px 24px"/>
-              <Text profile="sf_legendBlock" id="mapLegendGoodBlock"   text=" " position="0px   30px" size="24px 20px"/>
-              <Text profile="sf_legendLabel" id="mapLegendGoodText"    text="$l10n_sf_pda_map_legend_good" position="30px   30px" size="180px 20px"/>
-              <Text profile="sf_legendBlock" id="mapLegendFairBlock"   text=" " position="220px 30px" size="24px 20px"/>
-              <Text profile="sf_legendLabel" id="mapLegendFairText"    text="$l10n_sf_pda_map_legend_fair" position="250px 30px" size="180px 20px"/>
-              <Text profile="sf_legendBlock" id="mapLegendPoorBlock"   text=" " position="440px 30px" size="24px 20px"/>
-              <Text profile="sf_legendLabel" id="mapLegendPoorText"    text="$l10n_sf_pda_map_legend_poor" position="470px 30px" size="180px 20px"/>
-              <Text profile="sf_legendBlock" id="mapLegendExcessBlock" text=" " position="660px 30px" size="24px 20px"/>
-              <Text profile="sf_legendLabel" id="mapLegendExcessText"  text=""  position="690px 30px" size="180px 20px"/>
-            </GuiElement>
-          </GuiElement>
-        </ThreePartBitmap>
         <InGameMapPreview profile="sf_soilMiniMapFull" id="soilMiniMap"/>
       </GuiElement>
 
       <!-- TAB 3: TREATMENT PLAN -->
       <GuiElement id="treatmentContent" position="0px 0px" width="1000px" height="668px" visible="false">
-        <Text profile="sf_sectionHeader" text="$l10n_sf_pda_treatment_section_title" position="0px 658px"/>
-        <Text profile="sf_colHeader"      text="$l10n_sf_pda_col_field"    position="8px   623px" size="80px  28px"/>
-        <Text profile="sf_colHeaderRight" text="$l10n_sf_pda_col_priority" position="90px  623px" size="120px 28px"/>
-        <Text profile="sf_colHeader"      text="$l10n_sf_pda_col_needs"    position="220px 623px" size="760px 28px"/>
-        <GuiElement id="treatmentListContainer" position="0px 80px" width="1000px" height="510px">
+        <Text profile="sf_sectionHeader" text="$l10n_sf_pda_treatment_section_title" position="0px 648px"/>
+        <Text profile="sf_colHeader"      text="$l10n_sf_pda_col_field"    position="8px   618px" size="80px  24px"/>
+        <Text profile="sf_colHeader"      text="$l10n_sf_pda_col_priority" position="90px  618px" size="120px 24px"/>
+        <Text profile="sf_colHeader"      text="$l10n_sf_pda_col_needs"    position="220px 618px" size="560px 24px"/>
+        <Text profile="sf_colHeader"      text="$l10n_sf_pda_col_status"   position="790px 618px" size="170px 24px"/>
+        <GuiElement id="treatmentListContainer" position="0px 100px" width="1000px" height="508px">
           <SmoothList id="treatmentList" profile="sf_smoothList"
                       startClipperElementName="tlStart"
                       endClipperElementName="tlEnd">
@@ -192,14 +175,14 @@
               position="0px 350px" size="1000px 40px" visible="false"/>
       </GuiElement>
 
-      <!-- Tab bar — 3 tabs -->
+      <!-- Tab bar — 3 tabs, evenly spaced -->
       <GuiElement id="tabBar" profile="emptyPanel" position="0px 668px" width="1000px" height="58px">
-        <Text   profile="sf_tabLabel"     id="tabLabelOverview"      text="$l10n_sf_pda_section_farm_overview" onClick="onClickTabOverview"   position="0px   30px" size="310px 28px"/>
-        <Bitmap profile="sf_tabUnderline" id="tabUnderlineOverview"                                                                            position="0px   28px" size="310px 2px"/>
-        <Text   profile="sf_tabLabel"     id="tabLabelMap"           text="$l10n_sf_pda_tab_map"               onClick="onClickTabMap"        position="330px 30px" size="300px 28px"/>
-        <Bitmap profile="sf_tabUnderline" id="tabUnderlineMap"                                                                                 position="330px 28px" size="300px 2px" visible="false"/>
-        <Text   profile="sf_tabLabel"     id="tabLabelTreatment"     text="$l10n_sf_pda_tab_treatment"         onClick="onClickTabTreatment"  position="650px 30px" size="300px 28px"/>
-        <Bitmap profile="sf_tabUnderline" id="tabUnderlineTreatment"                                                                           position="650px 28px" size="300px 2px" visible="false"/>
+        <Text   profile="sf_tabLabel"     id="tabLabelOverview"      text="$l10n_sf_pda_section_farm_overview" onClick="onClickTabOverview"   position="0px   30px" size="333px 28px"/>
+        <Bitmap profile="sf_tabUnderline" id="tabUnderlineOverview"                                                                            position="0px   28px" size="333px 2px"/>
+        <Text   profile="sf_tabLabel"     id="tabLabelMap"           text="$l10n_sf_pda_tab_map"               onClick="onClickTabMap"         position="333px 30px" size="334px 28px"/>
+        <Bitmap profile="sf_tabUnderline" id="tabUnderlineMap"                                                                                  position="333px 28px" size="334px 2px" visible="false"/>
+        <Text   profile="sf_tabLabel"     id="tabLabelTreatment"     text="$l10n_sf_pda_tab_treatment"         onClick="onClickTabTreatment"   position="667px 30px" size="333px 28px"/>
+        <Bitmap profile="sf_tabUnderline" id="tabUnderlineTreatment"                                                                            position="667px 28px" size="333px 2px" visible="false"/>
       </GuiElement>
 
       <Bitmap profile="sf_tabDivider" position="0px 666px" size="1000px 2px"/>
@@ -214,9 +197,9 @@
     </Profile>
     <Profile name="SF_IconMenu" extends="baseReference" with="anchorMiddleCenter">
       <size value="50px 50px"/>
-      <imageFilename value="dataS/menu/menu_atlas.png"/>
-      <imageSliceId value="icon_crops"/>
-      <imageColor value="$preset_colorWhite"/>
+      <imageSliceId value="noSlice"/>
+      <imageFilename value="g_SFIconMenu"/>
+      <imageColor value="$preset_colorTransparent"/>
     </Profile>
     <Profile name="sf_tabLabel" extends="fs25_textDefault" with="anchorTopLeft">
       <isFocusable value="true"/>
@@ -270,6 +253,51 @@
       <textSize value="16px"/>
       <textBold value="true"/>
       <textColor value="0.35 0.85 0.40 1.0"/>
+    </Profile>
+    <Profile name="sf_legendBlock" extends="fs25_textDefault" with="anchorTopLeft">
+      <textSize value="14px"/>
+    </Profile>
+    <Profile name="sf_legendLabel" extends="fs25_textDefault" with="anchorTopLeft">
+      <textSize value="14px"/>
+      <textColor value="$preset_colorWhite"/>
+    </Profile>
+    <Profile name="sf_colHeader" extends="fs25_textDefault" with="anchorTopLeft">
+      <textSize value="13px"/>
+      <textBold value="true"/>
+      <textUpperCase value="true"/>
+      <textColor value="$preset_colorWhite_50"/>
+      <textAlignment value="left"/>
+    </Profile>
+    <Profile name="sf_colHeaderRight" extends="sf_colHeader">
+      <textAlignment value="right"/>
+    </Profile>
+    <Profile name="sf_smoothList" extends="emptyPanel" with="anchorStretchingYLeft pivotTopLeft"/>
+    <Profile name="sf_listRow" extends="emptyPanel" with="anchorTopStretchingX pivotTopLeft">
+      <height value="28px"/>
+    </Profile>
+    <Profile name="sf_rowBg" extends="baseReference" with="anchorStretchingYStretchingX">
+      <imageColor value="$preset_fs25_colorGrey"/>
+      <imageSelectedColor value="0.25 0.65 0.30 0.9"/>
+      <alternateBackgroundColor value="$preset_fs25_colorGreyDark_50"/>
+    </Profile>
+    <Profile name="sf_cellLeft" extends="fs25_textDefault" with="anchorStretchingYLeft">
+      <position value="8px 0"/>
+      <textSize value="13px"/>
+      <textAlignment value="left"/>
+      <textColor value="$preset_fs25_colorMainLight"/>
+      <textSelectedColor value="$preset_fs25_colorMainDark"/>
+    </Profile>
+    <Profile name="sf_cellRight" extends="sf_cellLeft">
+      <textAlignment value="right"/>
+    </Profile>
+    <Profile name="sf_emptyHint" extends="fs25_textDefault" with="anchorTopLeft">
+      <textSize value="14px"/>
+      <textAlignment value="center"/>
+      <textColor value="$preset_colorWhite_50"/>
+    </Profile>
+  </GUIProfiles>
+</GUI>
+or value="0.35 0.85 0.40 1.0"/>
     </Profile>
     <Profile name="sf_legendBlock" extends="fs25_textDefault" with="anchorTopLeft">
       <textSize value="14px"/>

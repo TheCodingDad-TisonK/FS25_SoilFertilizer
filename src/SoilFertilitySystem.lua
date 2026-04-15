@@ -21,6 +21,7 @@ function SoilFertilitySystem.new(settings)
     self.isInitialized = false
     self.lastUpdateDay = 0
     self.hookManager = HookManager.new()
+    self.layerSystem = SoilLayerSystem and SoilLayerSystem.new() or nil
 
     -- Per-day flag table for fertilizer application notifications (fieldId → game day last shown)
     -- Prevents notification spam since the sprayer hook fires every frame while active.
@@ -70,6 +71,11 @@ function SoilFertilitySystem:initialize()
 
     -- Install hooks via HookManager
     self.hookManager:installAll(self)
+
+    -- Initialize density map layer integration (per-pixel soil maps)
+    if self.layerSystem then
+        self.layerSystem:initialize()
+    end
 
     self.isInitialized = true
     self:info("Soil Fertility System initialized successfully")
@@ -125,6 +131,10 @@ end
 -- Cleanup hooks and resources
 function SoilFertilitySystem:delete()
     self.hookManager:uninstallAll()
+    if self.layerSystem then
+        self.layerSystem:delete()
+        self.layerSystem = nil
+    end
     self.fieldData = {}
     self.isInitialized = false
 end
@@ -629,7 +639,15 @@ function SoilFertilitySystem:scanFields()
                 
                 SoilLogger.debug("Found field %d (%.2f ha)", actualFieldId, area)
 
+                local isNew = self.fieldData[actualFieldId] == nil
                 self:getOrCreateField(actualFieldId, true, area)
+
+                -- If this is a newly created field and density layers are available,
+                -- read existing layer values (pre-seeded GRLE) instead of using defaults.
+                if isNew and self.layerSystem and self.layerSystem.available and field.farmland then
+                    self.layerSystem:readFieldFromLayers(actualFieldId, self.fieldData[actualFieldId], field.farmland)
+                end
+
                 fieldCount = fieldCount + 1
             end
         end
@@ -1200,6 +1218,21 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
         if entry.K then field.potassium  = math.min(limits.MAX, field.potassium  + entry.K * factor) end
         if entry.pH then field.pH        = math.max(limits.PH_MIN, math.min(limits.PH_MAX, field.pH + entry.pH * factor)) end
         if entry.OM then field.organicMatter = math.min(limits.ORGANIC_MATTER_MAX, field.organicMatter + entry.OM * factor) end
+
+        -- Write updated values to density map layers (per-pixel, at sprayer position)
+        if self.layerSystem and self.layerSystem.available then
+            local x, _, z = getWorldTranslation(0)  -- fallback; sprayer hook sets vehicle pos via soilSystem
+            if self._lastSprayX and self._lastSprayZ then
+                x, z = self._lastSprayX, self._lastSprayZ
+            end
+            if x and z then
+                if entry.N then self.layerSystem:updatePixelForField("nitrogen",      x, z, field.nitrogen,      2.0) end
+                if entry.P then self.layerSystem:updatePixelForField("phosphorus",    x, z, field.phosphorus,    2.0) end
+                if entry.K then self.layerSystem:updatePixelForField("potassium",     x, z, field.potassium,     2.0) end
+                if entry.pH then self.layerSystem:updatePixelForField("pH",           x, z, field.pH,            2.0) end
+                if entry.OM then self.layerSystem:updatePixelForField("organicMatter",x, z, field.organicMatter, 2.0) end
+            end
+        end
     end
 
     field.fertilizerApplied = (field.fertilizerApplied or 0) + liters
@@ -1609,6 +1642,24 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
     end
 
     self:info("Loaded data for %d fields", index)
+
+    -- Push loaded values to density map layers so visual heatmap reflects saved state.
+    -- This runs after loadFromXMLFile, so layerSystem may not be initialized yet
+    -- (it initializes in SoilFertilitySystem:initialize which fires before loadSoilData).
+    -- Guard: only run if the layer system is available.
+    if self.layerSystem and self.layerSystem.available and g_farmlandManager then
+        local pushed = 0
+        for fieldId, data in pairs(self.fieldData) do
+            local farmland = g_farmlandManager:getFarmlandById(fieldId)
+            if farmland then
+                self.layerSystem:writeFieldToLayers(fieldId, data, farmland)
+                pushed = pushed + 1
+            end
+        end
+        if pushed > 0 then
+            self:info("Pushed %d fields to density map layers after load", pushed)
+        end
+    end
 
     -- Re-broadcast after load so clients that were connected during a
     -- save/load cycle get up-to-date values immediately.

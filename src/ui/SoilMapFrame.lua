@@ -156,19 +156,38 @@ function SoilMapFrame:_injectMenuButton(frame)
         }
     end
 
-    local exists = false
-    for _, btn in ipairs(frame.menuButtonInfo) do
-        if btn == self._pdaButton then
-            exists = true
-            break
-        end
+    if not self._devNoteButton then
+        self._devNoteButton = {
+            inputAction = InputAction.MENU_EXTRA_2,
+            text = tr("sf_pda_btn_help", "Dev Note"),
+            callback = function()
+                if SoilHelpDialog then
+                    SoilHelpDialog.show()
+                end
+            end,
+            showWhenPaused = true
+        }
     end
 
-    if not exists then
+    local pdaExists = false
+    local devNoteExists = false
+    for _, btn in ipairs(frame.menuButtonInfo) do
+        if btn == self._pdaButton then pdaExists = true end
+        if btn == self._devNoteButton then devNoteExists = true end
+    end
+
+    local dirty = false
+    if not pdaExists then
         table.insert(frame.menuButtonInfo, self._pdaButton)
-        if frame.setMenuButtonInfoDirty then
-            frame:setMenuButtonInfoDirty()
-        end
+        dirty = true
+    end
+    if not devNoteExists then
+        table.insert(frame.menuButtonInfo, self._devNoteButton)
+        dirty = true
+    end
+
+    if dirty and frame.setMenuButtonInfoDirty then
+        frame:setMenuButtonInfoDirty()
     end
 end
 

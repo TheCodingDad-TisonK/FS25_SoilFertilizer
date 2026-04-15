@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.8.5.0] - 2026-04-15
+
+### Added
+- Add ownership check and seasonal pings for critical field alerts
+
+### Fixed
+- Resolve PDA crash and disappearing fill types on dedicated servers
+- Improve RMB mouse event handling
+- Remove wonky layer rendering in the PDA Screen
+- Update all translation files
+- Various minor bug fixes and development documentation updates
+
 ## [1.8.2.0] - 2026-04-13
 
 ### Changed

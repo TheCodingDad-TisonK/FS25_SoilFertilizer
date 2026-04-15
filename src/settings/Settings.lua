@@ -82,7 +82,6 @@ function Settings:save()
     end
 
     self.manager:saveSettings(self)
-    SoilLogger.info("Settings saved. Difficulty: %s", self:getDifficultyName())
 end
 
 ---@param saveImmediately boolean

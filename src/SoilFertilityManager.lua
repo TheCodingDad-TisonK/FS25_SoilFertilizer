@@ -112,16 +112,6 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
             SoilLogger.info("Soil Map Overlay created")
         end
 
-        -- Map frame sidebar page (client only)
-        -- Injects a native sub-page into InGameMenuMapFrame (PDA map sidebar)
-        -- so the player can select the active soil layer from the map panel.
-        -- Requires soilMapOverlay to exist first (it drives the actual drawing).
-        if SoilMapFrame and self.soilMapOverlay then
-            self.soilMapFrame = SoilMapFrame.new(self.soilMapOverlay, self.settings)
-            self.soilMapFrame:installHooks()
-            SoilLogger.info("Soil Map Frame sidebar page created")
-        end
-
         -- Hook PlayerInputComponent.registerActionEvents to register J/K in the PLAYER context.
         -- PLAYER context is reused (not recreated) when the player returns on foot, so these
         -- events persist across vehicle entry/exit cycles.
@@ -971,11 +961,6 @@ function SoilFertilityManager:delete()
     if self.soilMapOverlay then
         self.soilMapOverlay:delete()
         self.soilMapOverlay = nil
-    end
-
-    if self.soilMapFrame then
-        self.soilMapFrame:delete()
-        self.soilMapFrame = nil
     end
 
     if self.soilHUD then

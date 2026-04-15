@@ -1,0 +1,765 @@
+GIANTS Engine Runtime 10.0.0 (45386) 64bit Steam (Build Date: Mar 31 2026)
+Copyright (c) 2008-2026, GIANTS Software GmbH (giants-software.com), All Rights Reserved.
+Copyright (c) 2003-2026, Christian Ammann and Stefan Geiger, All Rights Reserved.
+Application: FarmingSimulator2025
+PID: 35128
+Main System
+  CPU: AMD Ryzen 5 5500                               
+  Virtual Cores: 12
+  Memory: 16254 MB
+  Motherboard : AB350M Pro4
+  BIOS Manufacturer : American Megatrends Inc.
+  BIOS Version : P7.20
+  BIOS Release Date : 05/03/2022
+  OS: Windows NT 11.0 64-bit
+[DirectStorage] Configured for base game on a HDD drive
+[DirectStorage] No GPU decompression for GDeflate
+[DirectStorage] No GPU decompression for GDeflate
+[DirectStorage] GDeflate Compression Support for 'FileQueueHigh' : DSTORAGE_COMPRESSION_SUPPORT_CPU_FALLBACK
+[DirectStorage] GDeflate Compression Support for 'FileQueueNormal' : DSTORAGE_COMPRESSION_SUPPORT_CPU_FALLBACK
+[DirectStorage] GDeflate Compression Support for 'MemoryQueueRealtime' : DSTORAGE_COMPRESSION_SUPPORT_CPU_FALLBACK
+[DirectStorage] Init success
+Physics System
+  Version: 6.3.7
+  Thread(s): 2
+Audio System
+  Driver: SoftMixer WASAPI Stereo Headphones
+  Version: 2018.11
+  Frequency: 48000
+  Max. active sources: 256
+Render System
+  Driver: Direct 3D 12
+  Card Vendor: NVIDIA Corporation
+  Renderer: NVIDIA GeForce GTX 1650 3.8GB
+  Revision: 161
+  Driver version: 32.0.15.9186
+  Driver version is up to date.
+  Hardware Feature Level : 12_1
+  DirectX 12 AgilitySDK  : 610
+  Windowed Mode : off
+  V-Sync : on
+  Allow Tearing : off
+  HDR : off
+  Validation Layer : off
+  Effective Window Size : 1920 x 1080px
+  Effective Swap Chain Size : 1280 x 720px
+Started 3 threads for threadpool 'GIANTS Render threadpool'
+Hardware Profile
+  Level: Custom Medium
+  Recommended Window Size: 1280 x 720px
+  UI Scaling Factor: 1.000000
+  3D Scaling Factor: 1.000000
+  View Distance Factor: 0.850000
+  LOD Distance Factor: 0.900000
+  Terrain LOD Distance Factor: 1.200000
+  Foliage View Distance Factor: 1.050000
+  Foliage LOD Distance Factor: 0.900000
+  Displacement View Distance Factor: 1.800000
+  Foliage Shadows: true
+  Volume Mesh Tesselation Factor: 1.400000
+  Tyre Track Segments Factor: 0.500000
+  Shadow Quality: 1.000000
+  Shadow Distance Quality: Medium
+  Allow Shadow Focus Box: false
+  Shadowmap Size: 1024
+  Shadowmap Filter Size: 4
+  Max. Number of Shadow Lights: 3
+  Shader Quality: Medium
+  Skip Mipmaps: 1
+  Texture Filtering mode: Aniso 4
+  Reflection Map Ratio: 1.000000
+  Terrain Quality: Medium
+  Max. Full Terrain Tile Rendered Per Frame: 16
+  Max. Partial Terrain Tile Rendered Per Frame: 32
+  MSAA: Off
+  Post-process AA: TAA
+  DLSS Quality: Off
+  DLSS Frame Generation: Off
+  AMD FidelityFx SR Quality: Off
+  AMD FidelityFx SR 3.0 Quality: Off
+  AMD FidelityFx SR 3.0 Frame Interpolation Mode: false
+  Intel XeSS Quality: Off
+  Intel XeSS Frame Interpolation Mode: Off
+  DRS Quality: Off
+  DRS Target FPS: 60
+  Sharpness: 1.000000
+  Max. Number of Lights: 256
+  Max. Number of Dir Lights: 4
+  Max. Number of Lights Per Cluster: 32
+  SSAO Quality: Low
+  Bloom Quality: High
+  Depth-of-Field Quality: Default
+  Lensflare Quality: Off
+  Enable Texture Streaming: true
+  Enable Envmap Blending: true
+  Enable Dynamic Specular Envmap: false
+  Atmosphere Quality: Low
+  Volumetric Fog Quality: Low
+  Max. Number of Volumetric Lights: 50
+  Shading Rate Quality: Medium
+  Texture Streaming Memory Budget: 4294967296
+  Texture Streaming Downgrade Delay: 5000.000000
+  Texture Streaming Target Texel-to-Pixel Ratio: 1.000000
+  Shadow Filter Quality: PCF
+  Shadow Denoising Quality: Off
+  Intel VALAR Quality: Off
+  Intel VALAR Power Mode: Low
+  Screenspace Shadows Quality: Off
+  Cloud Shadows Quality: Off
+  Rain Amount Factor: 1.000000
+  Shadow Buffer Pixel Quality: 8 Bit
+  Screenspace Reflections Quality: Off
+  Screenspace Reflections Upsampling Quality: High
+  Precipitation Quality: High
+Input System
+  Keyboard enabled
+  Mouse enabled
+  Gamepad/Joystick enabled
+  Force Feedback disabled
+[ImageDescIndexer] Loaded 24459 imageDescs from database
+ Used Start Parameters:
+    exe x64/FarmingSimulator2025Game.exe 
+Platform: loading defaults
+Platform: loading Steam
+  Setting 'Master Volume': 1.000
+  Setting 'Is Train Tabbable': true
+  Setting 'Radio Vehicle Only': false
+  Setting 'Radio Active': false
+  Setting 'Use Colorblind Mode': false
+  Setting 'Easy Arm Control': true
+  Setting 'Show Trigger Marker': true
+  Setting 'Show Help Trigger': true
+  Setting 'Show Field-Info': true
+  Setting 'Invert Y-Look': false
+  Setting 'Show Help Icons': true
+  Setting 'Radio Volume': 0.600
+  Setting 'Vehicle Volume': 1.000
+  Setting 'Environment Volume': 0.700
+  Setting 'Character Volume': 0.700
+  Setting 'GUI Volume': 0.500
+  Setting 'Game Volume While Not In Focus': 0.000
+  Setting 'Master Volume': 1.000
+  Setting 'Music Volume': 0.450
+Farming Simulator 25 (Steam)
+  Game-Version: 1.18.0.0
+  Build-Id: b38794
+  Build-Revision: 76267
+  Available Languages: en de jp pl cz fr es ru it pt hu nl cs ct br tr ro kr ea da fi no sv fc uk vi id
+  Language: en
+  Time: 2026-04-14 22:48:58
+  ModDesc Version: 108
+  Mod Directory: C:/Users/tison/Documents/My Games/FarmingSimulator2025/mods/
+dataS/character/playerAnimations/animations.i3d (161.27 ms)
+dataS/character/playerAnimations/animationsVehicleCharacter.i3d (1.27 ms)
+dataS/character/playerAnimations/animationsPedestrians.i3d (35.07 ms)
+Available mod: (Hash: 9dc5802d04d0957374ffc4ed99f71152) (Version: 1.4.1.0) FS25_0_TerraFarm
+Available mod: (Hash: c185f543c8cc9ca8239946a9ee05602e) (Version: 1.0.0.2) FS25_0_TerraFarmMachines
+Available mod: (Hash: ea98bc2ced33117cddad1ad61f7a8670) (Version: 1.1.0.7) FS25_0_THPFConfigurator
+Available mod: (Hash: 1aa6fc8d94ff4a18aecc24e8080809e2) (Version: 1.0.1.1) FS25_autoTurnOffTurnLights
+Available mod: (Hash: 70299a89b4ca9648d23a17df10f37c08) (Version: 1.0.0.0) FS25_BMW_3Series_2020
+Available mod: (Hash: d45bb91ba9176dc29bc634a8fb3098c1) (Version: 1.0.0.0) FS25_Cat_374F
+Available mod: (Hash: b9dfc51335bc77d2e9616e9c31792eed) (Version: 1.0.0.1) FS25_CropRotation
+Available mod: (Hash: 00a292890b4b0bcd8df063405c29e47b) (Version: 1.0.7.0) FS25_CustomTriggerCreator
+Available mod: (Hash: 81bf2dde7f1ab70db11ff658cf834383) (Version: 1.2.0.0) FS25_EasyDevControls
+Available mod: (Hash: 2bcade1194d9bc654cc58f94769a4542) (Version: 0.0.6-build-2) FS25_EmployeeManager
+Available mod: (Hash: e95bf81e08e55dc1ade9f89bfc34812d) (Version: 1.1.7.1) FS25_EnhancedVehicle
+Available mod: (Hash: 0edbf150aa746c1dc07162442f23d08e) (Version: 2.1.9.0) FS25_FarmTablet
+Available mod: (Hash: 08794cf9e0f9c8e429834e9845f7d9ef) (Version: 1.2.0.0) FS25_Fendt600Vario
+Available mod: (Hash: 826ed3a0d6d97abc8a128cb0aacd69d2) (Version: 1.0.9.2) FS25_Fendt_700_Agribumper
+Available mod: (Hash: 18d1edb9a0ec8290fc82b45469892cb6) (Version: 0.0.0.4) FS25_FuturesMission
+Available mod: (Hash: 1addacf5c6b305680aa7c35eb12c3b13) (Version: 1.0.0.0) FS25_honkToOpen
+Available mod: (Hash: c03193b086925f04248fc77fdc7f555e) (Version: 2.1.4.0) FS25_IncomeMod
+Available mod: (Hash: a69ff20e4fe330e5b25c1a86b3034113) (Version: 1.2.0.1) FS25_interactiveControl
+Available mod: (Hash: 9ad53dceba966390c4062079451bc19c) (Version: 1.0.0.1) FS25_Ivoy_Cereal
+Available mod: (Hash: 4db24f146b59c0417164475206ab490d) (Version: 1.0.0.0) FS25_Ivoy_Farm_Garage
+Available mod: (Hash: 90d801869ef10a9ab43a522616f25957) (Version: 1.0.0.0) FS25_Ivoy_Piggery
+Available mod: (Hash: c1bfd77e03be78554635048e7e1cc94f) (Version: 1.0.0.0) FS25_Ivoy_Straw_Hangar
+Available mod: (Hash: 26148449c4df9b031daed5e36e61170c) (Version: 1.0.0.1) FS25_JJ_LimitedSuperduty
+Available mod: (Hash: a6965f20a22f01f0ef5b67b4b3fe5a27) (Version: 2.0.5.1) FS25_JohnDeere6R_AB
+Warning: Duplicate l10n entry 'ZiernahtFarbeSitz' in 'C:/Users/tison/Documents/My Games/FarmingSimulator2025/mods/FS25_JohnDeere6R_AB/translations/l10n_en.xml'. Ignoring this definition.
+Available mod: (Hash: e3951bff9f4eebc5b8aa4d860e2fa38d) (Version: 1.3.0.0) FS25_johnDeereSeries7010_SLM
+Available mod: (Hash: ec908c83bf80e4e467a7ba5e54375065) (Version: 1.0.0.0) FS25_manualAttach
+Available mod: (Hash: 2c73df8c17ed531031d5959d5f1b212c) (Version: 1.0.0.2) FS25_MAN_TGS_TG3_Trucks
+Available mod: (Hash: 5a58025c068abb88df344c684e169f4d) (Version: 1.1.1.0) FS25_MarketDynamics
+Available mod: (Hash: 50ef06bf0764ed8a74924e9834950db6) (Version: 1.4.0.0) FS25_Mercedes_Benz_G65_AMG
+Available mod: (Hash: 44bc8ff5f60b1ed99cb3d56f178b26d8) (Version: 1.0.0.0) FS25_Mercedes_Benz_Sprinter_2021
+Available mod: (Hash: 6105e009f7b8468f629251b80d432f51) (Version: 1.0.5.0) FS25_MudSystemPhysics
+Available mod: (Hash: 1ea2ea75b29ff5b772379a618f961d83) (Version: 1.2.2.6-beta) FS25_NPCFavor
+Available mod: (Hash: 736a1a454dd19caab3bd9a43a7ddc3df) (Version: 1.0.0.0) FS25_Old_Sheep_Barn
+Available mod: (Hash: 200a56e4764495e11842770a006f8359) (Version: 1.0.0.2) FS25_onlyInsideVehicleCameras
+Available mod: (Hash: 61a8f3e6b8c86aa5751f93c57161972e) (Version: 1.4.1.0) FS25_precisionFarming
+Available mod: (Hash: 38ba90278962ba0d17a5cbfe0b2a0bd2) (Version: 2.1.3.0) FS25_RandomWorldEvents
+Available mod: (Hash: 607ce34385c6b7fa4ba126f81a3fa2e6) (Version: 0.9.5.2) FS25_realGPS
+Available mod: (Hash: 95aacb08d61946e923a7334d0e616919) (Version: 3.0.1.0) FS25_RealisticAnimalNames
+Available mod: (Hash: 0dc3abc675f3d6d7dfc1d653ac8d56a0) (Version: 1.3.2.0) FS25_RealisticHarvesting
+Available mod: (Hash: 6479eb5ed67b2f3a1b343aaf27e60e0a) (Version: 0.4.0) FS25_RoleplayPhone
+Available mod: (Hash: 4d5e34bae8a7ac98fd732e53706b33da) (Version: 1.1.0.0) FS25_SCANIA_NTGP320_RollOn
+Available mod: (Hash: eebd4d35d0ebb1d465067fc439b5736c) (Version: 1.0.9.0) FS25_SeasonalCropStress
+Available mod: (Hash: 67216743f37c74a6bc8f1d535e8e8774) (Version: 1.8.5.0) FS25_SoilFertilizer
+Available mod: (Hash: ea826d3486bd577eef0305bb0ed21cb3) (Version: 1.0.0.0) FS25_stema_bauma
+Available mod: (Hash: f4884e0f022a4de6fa1ed44cdc2f5361) (Version: 1.0.0.0) FS25_Stihl_RE581
+Available mod: (Hash: 8fe3dc99aeb2b9cca099431b9f58c5df) (Version: 1.0.1.0) FS25_storeDeliveries
+Available mod: (Hash: 213f3c7117929cf0945f9c6e3073d6e8) (Version: 1.0.0.1) FS25_Straw_Shed_Old
+Available mod: (Hash: 4002d1d29353cd27af3115d972fcb99c) (Version: 1.0.0.0) FS25_TestMap
+Available mod: (Hash: 18d65208d006b9e85ad21541763e8632) (Version: 1.1.0.0) FS25_The_Pichonniere_Buildings_Pack
+Available mod: (Hash: ff539a52e6faf3b2b16300d15e96183f) (Version: 1.1.0.1) FS25_The_Pichonniere_Valley
+Warning: No l10n file(s) found for prefix "languages/l10n"' (e.g. 'languages/l10nen.xml') in mod "FS25_The_Pichonniere_Valley"
+Available mod: (Hash: cd8c4cc18e4cae34f2b098ca21fd6875) (Version: 1.0.0.0) FS25_Unimog_U1600
+Available mod: (Hash: 820758ee57c28b23670905858389e74b) (Version: 2.15.4.97) FS25_UsedPlus
+Available mod: (Hash: 6c9ec8d6dab92267341682d7863fb6ea) (Version: 1.0.0.3) FS25_useYourTyres
+Available mod: (Hash: cb8addb6c3f700fc918abcb92b7959e9) (Version: 1.0.0.2) FS25_VolvoFH16Custom
+Available mod: (Hash: 86f65edbb914c167538637f6b072ad42) (Version: 1.0.9.0) FS25_WorkerCosts
+Available mod: (Hash: eb5a69788a4e0928479e94ad4bea3cb7) (Version: 1.0.9.0) FS25_WorkplaceTriggers
+  Warning: Missing l10n 'input_CTC_OPEN' in mod 'FS25_CustomTriggerCreator'
+Error: Missing dds file 'C:/Users/tison/Documents/My Games/FarmingSimulator2025/mods/FS25_The_Pichonniere_Valley/data/WHEEL_ICON.dds'
+Error: Missing dds file 'C:/Users/tison/Documents/My Games/FarmingSimulator2025/mods/FS25_The_Pichonniere_Valley/data/WHEEL_ICON.dds'
+Error: Can't load resource 'C:/Users/tison/Documents/My Games/FarmingSimulator2025/mods/FS25_The_Pichonniere_Valley/data/WHEEL_ICON.dds'.
+Error: Missing dds file 'C:/Users/tison/Documents/My Games/FarmingSimulator2025/mods/FS25_The_Pichonniere_Valley/data/ROT2_ICON.dds'
+Error: Missing dds file 'C:/Users/tison/Documents/My Games/FarmingSimulator2025/mods/FS25_The_Pichonniere_Valley/data/ROT2_ICON.dds'
+Error: Can't load resource 'C:/Users/tison/Documents/My Games/FarmingSimulator2025/mods/FS25_The_Pichonniere_Valley/data/ROT2_ICON.dds'.
+Error: Missing dds file 'C:/Users/tison/Documents/My Games/FarmingSimulator2025/mods/FS25_The_Pichonniere_Valley/data/ROT3_ICON.dds'
+Error: Missing dds file 'C:/Users/tison/Documents/My Games/FarmingSimulator2025/mods/FS25_The_Pichonniere_Valley/data/ROT3_ICON.dds'
+Error: Can't load resource 'C:/Users/tison/Documents/My Games/FarmingSimulator2025/mods/FS25_The_Pichonniere_Valley/data/ROT3_ICON.dds'.
+2026-04-14 22:49:13.919 Error: Mod 'FS25_RealisticHarvesting' in version '1.3.2.0' and lower is outdated and not working properly. Please update the mod to resolve this!
+2026-04-14 22:49:22.337   Info: Starting singleplayer game...
+2026-04-14 22:49:22.415   Info: Loaded "vehicle" specializations
+2026-04-14 22:49:22.427   Info: Loaded "placeable" specializations
+2026-04-14 22:49:22.431   Info: Loaded "handTool" specializations
+2026-04-14 22:49:22.441   Loaded vehicle types
+2026-04-14 22:49:22.443   Loaded placeable types
+2026-04-14 22:49:22.443   Loaded handTool types
+2026-04-14 22:49:22.445   Info:   Loaded construction brush types
+2026-04-14 22:49:22.447   Load mod: FS25_0_TerraFarm
+2026-04-14 22:49:22.468 C:/Users/tison/Documents/My Games/FarmingSimulator2025/mods/FS25_0_TerraFarm/data/visualTarget.i3d (0.79 ms)
+2026-04-14 22:49:22.473   Register machineType 'compactor'
+2026-04-14 22:49:22.473   Register machineType 'discharger'
+2026-04-14 22:49:22.473   Register machineType 'excavatorRipper'
+2026-04-14 22:49:22.473   Register machineType 'excavatorShovel'
+2026-04-14 22:49:22.473   Register machineType 'leveler'
+2026-04-14 22:49:22.473   Register machineType 'ripper'
+2026-04-14 22:49:22.473   Register machineType 'shovel'
+2026-04-14 22:49:22.473   Register machineType 'trencher'
+2026-04-14 22:49:22.720 data/shared/materialHolders/waterSimulationMaterialHolder.i3d (222.43 ms)
+2026-04-14 22:49:22.738 C:/Users/tison/Documents/My Games/FarmingSimulator2025/mods/FS25_0_TerraFarm/data/areaBorderLine.i3d (17.93 ms)
+2026-04-14 22:49:22.925   Load mod: FS25_0_TerraFarmMachines
+2026-04-14 22:49:22.925   Load mod: FS25_autoTurnOffTurnLights
+2026-04-14 22:49:22.926   Load mod: FS25_BMW_3Series_2020
+2026-04-14 22:49:22.926   Load mod: FS25_Cat_374F
+2026-04-14 22:49:22.926   Load mod: FS25_CropRotation
+2026-04-14 22:49:22.938   Load mod: FS25_CustomTriggerCreator
+2026-04-14 22:49:22.938 [CTC] Starting FS25_CustomTriggerCreator v1.0.7.0 ...
+2026-04-14 22:49:22.946 [CTC] [DialogLoader] Loaded
+2026-04-14 22:49:22.949 [CTC] All modules loaded
+2026-04-14 22:49:22.949 [CTC] Hooks registered — mod ready
+2026-04-14 22:49:22.949   Load mod: FS25_EasyDevControls
+2026-04-14 22:49:23.010   Load mod: FS25_EnhancedVehicle
+2026-04-14 22:49:23.018   Load mod: FS25_FarmTablet
+2026-04-14 22:49:23.024   Info: [FunctionHooks] Utility loaded
+2026-04-14 22:49:23.043   Info: [FarmTablet v2] Module loaded.
+2026-04-14 22:49:23.043   Load mod: FS25_Fendt600Vario
+2026-04-14 22:49:23.044   Load mod: FS25_Fendt_700_Agribumper
+2026-04-14 22:49:23.044   Load mod: FS25_FuturesMission
+2026-04-14 22:49:23.051   Load mod: FS25_honkToOpen
+2026-04-14 22:49:23.053   Load mod: FS25_IncomeMod
+2026-04-14 22:49:23.057 ============================================
+2026-04-14 22:49:23.057     FS25 Income Mod v2.0.0.5 LOADED        
+2026-04-14 22:49:23.057     Hourly/Daily income | Seasonal mods    
+2026-04-14 22:49:23.057     Per-farm MP support | Type 'income'    
+2026-04-14 22:49:23.057 ============================================
+2026-04-14 22:49:23.057   Load mod: FS25_interactiveControl
+2026-04-14 22:49:23.066   InteractiveControl: Register clickIcon 'CROSS'
+2026-04-14 22:49:23.066   InteractiveControl: Register clickIcon 'IGNITIONKEY'
+2026-04-14 22:49:23.066   InteractiveControl: Register clickIcon 'CRUISE_CONTROL'
+2026-04-14 22:49:23.066   InteractiveControl: Register clickIcon 'GPS'
+2026-04-14 22:49:23.066   InteractiveControl: Register clickIcon 'TURN_ON'
+2026-04-14 22:49:23.066   InteractiveControl: Register clickIcon 'ATTACHERJOINT_LOWER'
+2026-04-14 22:49:23.066   InteractiveControl: Register clickIcon 'ATTACHERJOINT_LIFT'
+2026-04-14 22:49:23.066   InteractiveControl: Register clickIcon 'ATTACHERJOINT'
+2026-04-14 22:49:23.066   InteractiveControl: Register clickIcon 'LIGHT_HIGH'
+2026-04-14 22:49:23.066   InteractiveControl: Register clickIcon 'LIGHT'
+2026-04-14 22:49:23.066   InteractiveControl: Register clickIcon 'TURNLIGHT_LEFT'
+2026-04-14 22:49:23.066   InteractiveControl: Register clickIcon 'TURNLIGHT_RIGHT'
+2026-04-14 22:49:23.066   InteractiveControl: Register clickIcon 'BEACON_LIGHT'
+2026-04-14 22:49:23.066   InteractiveControl: Register clickIcon 'ARROW'
+2026-04-14 22:49:23.066   InteractiveControl: Register clickIcon 'PIPE_FOLDING'
+2026-04-14 22:49:23.071   Load mod: FS25_Ivoy_Cereal
+2026-04-14 22:49:23.071   Load mod: FS25_Ivoy_Farm_Garage
+2026-04-14 22:49:23.071   Load mod: FS25_Ivoy_Piggery
+2026-04-14 22:49:23.071   Load mod: FS25_Ivoy_Straw_Hangar
+2026-04-14 22:49:23.071   Load mod: FS25_JohnDeere6R_AB
+2026-04-14 22:49:23.071   Load mod: FS25_johnDeereSeries7010_SLM
+2026-04-14 22:49:23.071   Load mod: FS25_MAN_TGS_TG3_Trucks
+2026-04-14 22:49:23.071   Load mod: FS25_manualAttach
+2026-04-14 22:49:23.080   Load mod: FS25_MarketDynamics
+2026-04-14 22:49:23.084   Info: [MDM] PriceHook: EconomyManager.getPricePerLiter captured for vanilla snapshots
+2026-04-14 22:49:23.084   Info: [MDM] PriceHook: SellingStation.getEffectiveFillTypePrice hooked
+2026-04-14 22:49:23.084   Info: [MDM] PriceHook: SellingStation.sellFillType hooked for futures tracking
+2026-04-14 22:49:23.086   Info: [MDM] SettingsUI: onFrameOpen hook installed
+2026-04-14 22:49:23.089   Info: [MDM] MarketScreen: lifecycle hooks installed
+2026-04-14 22:49:23.092   Load mod: FS25_Mercedes_Benz_G65_AMG
+2026-04-14 22:49:23.092   Load mod: FS25_Mercedes_Benz_Sprinter_2021
+2026-04-14 22:49:23.092   Load mod: FS25_MudSystemPhysics
+2026-04-14 22:49:23.104   Load mod: FS25_NPCFavor
+2026-04-14 22:49:23.105 [NPC Favor] Starting mod initialization...
+2026-04-14 22:49:23.105 [NPC Favor] Loading utility files...
+2026-04-14 22:49:23.108 [NPC Favor] NPCStateSyncEvent loaded
+2026-04-14 22:49:23.109 [NPC Favor] NPCSettingsSyncEvent loaded
+2026-04-14 22:49:23.109 [NPC Favor] Loading core systems...
+2026-04-14 22:49:23.124 [NPC Favor] DialogLoader loaded
+2026-04-14 22:49:23.125 [NPC Favor] NPCDialog loaded
+2026-04-14 22:49:23.126 [NPC Favor] NPCListDialog loaded
+2026-04-14 22:49:23.127 [NPC Favor] NPCFavorManagementDialog loaded
+2026-04-14 22:49:23.128 [NPC Favor] NPCAdminListDialog loaded
+2026-04-14 22:49:23.128 [NPC Favor] NPCAdminEditDialog loaded
+2026-04-14 22:49:23.133 [NPC Favor] All files loaded successfully
+2026-04-14 22:49:23.133 [NPC Favor] Setting up game hooks...
+2026-04-14 22:49:23.133 [NPC Favor] Hooking Mission00.load
+2026-04-14 22:49:23.133 [NPC Favor] Hooking Mission00.loadMission00Finished
+2026-04-14 22:49:23.133 [NPC Favor] Hooking FSBaseMission.delete
+2026-04-14 22:49:23.133 [NPC Favor] Hooking FSBaseMission.update
+2026-04-14 22:49:23.133 [NPC Favor] Hooking FSBaseMission.draw
+2026-04-14 22:49:23.133 ========================================
+2026-04-14 22:49:23.133      FS25 NPC Favor v1.2.2.6-beta LOADED     
+2026-04-14 22:49:23.133      Living Neighborhood System         
+2026-04-14 22:49:23.133      Type 'npcHelp' in console          
+2026-04-14 22:49:23.133      for available commands             
+2026-04-14 22:49:23.133 ========================================
+2026-04-14 22:49:23.133 [NPC Favor] Mod initialization complete
+2026-04-14 22:49:23.134   Load mod: FS25_Old_Sheep_Barn
+2026-04-14 22:49:23.134   Load mod: FS25_onlyInsideVehicleCameras
+2026-04-14 22:49:23.135   Load mod: FS25_RandomWorldEvents
+2026-04-14 22:49:23.136   Info: ========================================
+2026-04-14 22:49:23.136   Info:    FS25 Random World Events v2.1.3.0   
+2026-04-14 22:49:23.136   Info:            Successfully Loaded          
+2026-04-14 22:49:23.136   Info:      Type 'rwe' in console for help     
+2026-04-14 22:49:23.136   Info: ========================================
+2026-04-14 22:49:23.139   Info: [EffectHooks] EconomyManager.getPricePerLiter hooked
+2026-04-14 22:49:23.139   Info: [EffectHooks] Vehicle.addDamageAmount not available in this build — durability scaling disabled
+2026-04-14 22:49:23.139   Info: [EffectHooks] Module loaded successfully
+2026-04-14 22:49:23.140   Info: [EconomicEvents] Added to pending registrations
+2026-04-14 22:49:23.140   Info: [EconomicEvents] Module loaded successfully
+2026-04-14 22:49:23.141   Info: [VehicleEvents] Added to pending registrations
+2026-04-14 22:49:23.141   Info: [VehicleEvents] Module loaded successfully
+2026-04-14 22:49:23.142   Info: [FieldEvents] Added to pending registrations
+2026-04-14 22:49:23.142   Info: [FieldEvents] Module loaded successfully
+2026-04-14 22:49:23.143   Info: [AnimalEvents] Added to pending registrations
+2026-04-14 22:49:23.143   Info: [AnimalEvents] Module loaded successfully
+2026-04-14 22:49:23.144   Info: [SpecialEvents] Added to pending registrations
+2026-04-14 22:49:23.144   Info: [SpecialEvents] Module loaded successfully
+2026-04-14 22:49:23.144   Info: [PhysicsUtils] Queued for deferred initialization
+2026-04-14 22:49:23.144   Info: [PhysicsUtils] Module loaded successfully
+2026-04-14 22:49:23.145   Info: [RWEBaseAPI] Mixin loaded
+2026-04-14 22:49:23.146   Info: [RWEEconomicAPI] Queued for deferred registration
+2026-04-14 22:49:23.146   Info: [RWEEconomicAPI] Module loaded (v2.0.0)
+2026-04-14 22:49:23.147   Info: [RWEFieldAPI] Queued for deferred registration
+2026-04-14 22:49:23.147   Info: [RWEFieldAPI] Module loaded (v2.0.0)
+2026-04-14 22:49:23.147   Info: [RWEWildlifeAPI] Queued for deferred registration
+2026-04-14 22:49:23.148   Info: [RWEWildlifeAPI] Module loaded (v2.0.0)
+2026-04-14 22:49:23.148   Info: [RWEVehicleAPI] Queued for deferred registration
+2026-04-14 22:49:23.148   Info: [RWEVehicleAPI] Module loaded (v2.0.0)
+2026-04-14 22:49:23.148   Info: [RWESpecialAPI] Queued for deferred registration
+2026-04-14 22:49:23.148   Info: [RWESpecialAPI] Module loaded (v2.0.0)
+2026-04-14 22:49:23.149   Load mod: FS25_realGPS
+2026-04-14 22:49:23.154   Load mod: FS25_RoleplayPhone
+2026-04-14 22:49:23.161 [UsedPlusCompat] Loaded – UsedPlus integration inactive (UsedPlus not detected)
+2026-04-14 22:49:23.166 [RoleplayPhone] API self-registered into shared env (10 functions)
+2026-04-14 22:49:23.172   Load mod: FS25_SCANIA_NTGP320_RollOn
+2026-04-14 22:49:23.172   Load mod: FS25_SeasonalCropStress
+2026-04-14 22:49:23.173 [CropStress] WeatherIntegration module loaded
+2026-04-14 22:49:23.184 [CropStress] CsDialogLoader loaded
+2026-04-14 22:49:23.187 [CropStress] PlayerInputComponent hook installed
+2026-04-14 22:49:23.187 [CropStress] Vehicle action hook installed for in-vehicle HUD keys
+2026-04-14 22:49:23.190   Load mod: FS25_SoilFertilizer
+2026-04-14 22:49:23.200 [SoilFertilizer] Constants loaded
+2026-04-14 22:49:23.203 [SoilFertilizer] Settings schema loaded
+2026-04-14 22:49:23.232 [SoilFertilizer] Settings UI hooks installed (file-load time)
+2026-04-14 22:49:23.242 [SoilFertilizer] SoilMapOverlay loaded
+2026-04-14 22:49:23.245 [SoilFertilizer] SoilMapHooks: installed on InGameMenuMapFrame (Manual UI Mode)
+2026-04-14 22:49:23.257 [SoilFertilizer] Network events system loaded
+2026-04-14 22:49:23.257 [SoilFertilizer] Save hook installed on FSCareerMissionInfo:saveToXMLFile
+2026-04-14 22:49:23.257 ========================================
+2026-04-14 22:49:23.257   FS25 Soil & Fertilizer Mod LOADED     
+2026-04-14 22:49:23.257   Realistic soil management system      
+2026-04-14 22:49:23.257   Type 'soilfertility' for commands     
+2026-04-14 22:49:23.257 ========================================
+2026-04-14 22:49:23.258   Load mod: FS25_stema_bauma
+2026-04-14 22:49:23.258   Load mod: FS25_Stihl_RE581
+2026-04-14 22:49:23.258   Load mod: FS25_storeDeliveries
+2026-04-14 22:49:23.261   Load mod: FS25_Straw_Shed_Old
+2026-04-14 22:49:23.261   Load mod: FS25_The_Pichonniere_Buildings_Pack
+2026-04-14 22:49:23.262   Load mod: FS25_The_Pichonniere_Valley
+2026-04-14 22:49:23.262   Load mod: FS25_Unimog_U1600
+2026-04-14 22:49:23.265   Load mod: FS25_UsedPlus
+2026-04-14 22:49:23.552   Load mod: FS25_useYourTyres
+2026-04-14 22:49:23.565   Load mod: FS25_VolvoFH16Custom
+2026-04-14 22:49:23.565   Error: Could not find specialization 'FS25_VolvoFH16Custom.pdlc_highlandsFishingPack.palletCrane' for vehicle type 'FS25_VolvoFH16Custom.craneImplement'.
+2026-04-14 22:49:23.565   Load mod: FS25_WorkerCosts
+2026-04-14 22:49:23.578   Info: [Worker Costs] v1.0.7.0 loaded — type 'workerCosts' in console for help
+2026-04-14 22:49:23.578   Load mod: FS25_WorkplaceTriggers
+2026-04-14 22:49:23.579 [WorkplaceTriggers] Starting mod initialization...
+2026-04-14 22:49:23.579 [WorkplaceTriggers] Loading source files...
+2026-04-14 22:49:23.582 [WorkplaceTriggers] WTDialogLoader loaded
+2026-04-14 22:49:23.583 [WorkplaceTriggers] WTListDialog loaded
+2026-04-14 22:49:23.584 [WorkplaceTriggers] WTEditDialog loaded
+2026-04-14 22:49:23.585 [WorkplaceTriggers] SettingsIntegration: Hooks installed on InGameMenuSettingsFrame
+2026-04-14 22:49:23.586 [WorkplaceTriggers] WorkplaceMultiplayerEvent loaded
+2026-04-14 22:49:23.587 [WorkplaceTriggers] NPCFavorIntegration loaded
+2026-04-14 22:49:23.587 [WorkplaceTriggers] WorkerCostsIntegration loaded
+2026-04-14 22:49:23.587 [WorkplaceTriggers] All source files loaded
+2026-04-14 22:49:23.587 [WorkplaceTriggers] Setting up game hooks...
+2026-04-14 22:49:23.587 ==============================================
+2026-04-14 22:49:23.587   FS25 Workplace Triggers v1.0.9.0 LOADED
+2026-04-14 22:49:23.587   Turn any location into a workplace!
+2026-04-14 22:49:23.587   Pay schedules: Hourly / Flat / Daily
+2026-04-14 22:49:23.587   Type 'wtHelp' for console commands
+2026-04-14 22:49:23.587 ==============================================
+2026-04-14 22:49:23.748   Register configuration 'baseColor'
+2026-04-14 22:49:23.748   Register configuration 'vehicleType'
+2026-04-14 22:49:23.748   Register configuration 'component'
+2026-04-14 22:49:23.748   Register configuration 'design'
+2026-04-14 22:49:23.748   Register configuration 'designColor'
+2026-04-14 22:49:23.748   Register configuration 'design2'
+2026-04-14 22:49:23.748   Register configuration 'designColor2'
+2026-04-14 22:49:23.748   Register configuration 'design3'
+2026-04-14 22:49:23.748   Register configuration 'designColor3'
+2026-04-14 22:49:23.748   Register configuration 'design4'
+2026-04-14 22:49:23.748   Register configuration 'designColor4'
+2026-04-14 22:49:23.748   Register configuration 'design5'
+2026-04-14 22:49:23.748   Register configuration 'designColor5'
+2026-04-14 22:49:23.748   Register configuration 'design6'
+2026-04-14 22:49:23.748   Register configuration 'designColor6'
+2026-04-14 22:49:23.748   Register configuration 'design7'
+2026-04-14 22:49:23.748   Register configuration 'designColor7'
+2026-04-14 22:49:23.748   Register configuration 'design8'
+2026-04-14 22:49:23.748   Register configuration 'designColor8'
+2026-04-14 22:49:23.748   Register configuration 'design9'
+2026-04-14 22:49:23.748   Register configuration 'designColor9'
+2026-04-14 22:49:23.748   Register configuration 'design10'
+2026-04-14 22:49:23.748   Register configuration 'designColor10'
+2026-04-14 22:49:23.748   Register configuration 'design11'
+2026-04-14 22:49:23.748   Register configuration 'designColor11'
+2026-04-14 22:49:23.748   Register configuration 'design12'
+2026-04-14 22:49:23.748   Register configuration 'designColor12'
+2026-04-14 22:49:23.748   Register configuration 'design13'
+2026-04-14 22:49:23.748   Register configuration 'designColor13'
+2026-04-14 22:49:23.748   Register configuration 'design14'
+2026-04-14 22:49:23.748   Register configuration 'designColor14'
+2026-04-14 22:49:23.748   Register configuration 'design15'
+2026-04-14 22:49:23.748   Register configuration 'designColor15'
+2026-04-14 22:49:23.748   Register configuration 'design16'
+2026-04-14 22:49:23.748   Register configuration 'designColor16'
+2026-04-14 22:49:23.837   Register configuration 'color'
+2026-04-14 22:49:23.840   Register configuration 'ai'
+2026-04-14 22:49:23.840   Register configuration 'animation'
+2026-04-14 22:49:23.844   Register configuration 'inputAttacherJoint'
+2026-04-14 22:49:23.845   Register configuration 'attacherJoint'
+2026-04-14 22:49:23.848   Register configuration 'automaticArmControlForwarder'
+2026-04-14 22:49:23.848   Register configuration 'automaticArmControlHarvester'
+2026-04-14 22:49:23.853   Register configuration 'baler'
+2026-04-14 22:49:23.853   Register workAreaType 'BALER'
+2026-04-14 22:49:23.875 data/shared/ai/trafficCollision.i3d (34.89 ms)
+2026-04-14 22:49:23.882   Register configuration 'wrappingColor'
+2026-04-14 22:49:23.882   Register configuration 'wrappingAnimation'
+2026-04-14 22:49:23.886   Register configuration 'multipleItemPurchaseAmount'
+2026-04-14 22:49:23.887   Register workAreaType 'COMBINECHOPPER'
+2026-04-14 22:49:23.887   Register workAreaType 'COMBINESWATH'
+2026-04-14 22:49:23.919   Register configuration 'consumable'
+2026-04-14 22:49:23.919   Register configuration 'consumable2'
+2026-04-14 22:49:23.923   Register configuration 'cover'
+2026-04-14 22:49:23.924   Register workAreaType 'CULTIVATOR'
+2026-04-14 22:49:23.924   Register workAreaType 'CUTTER'
+2026-04-14 22:49:23.924   Register workAreaType 'HAULMDROP'
+2026-04-14 22:49:23.929   Register configuration 'cylindered'
+2026-04-14 22:49:23.936   Register configuration 'dischargeable'
+2026-04-14 22:49:23.948   Register configuration 'enterablePassenger'
+2026-04-14 22:49:23.955   Register configuration 'fillUnit'
+2026-04-14 22:49:23.966   Register configuration 'fillVolume'
+2026-04-14 22:49:23.966   Register configuration 'folding'
+2026-04-14 22:49:23.967   Register workAreaType 'FORAGEWAGON'
+2026-04-14 22:49:23.972   Register configuration 'frontloader'
+2026-04-14 22:49:23.972   Register workAreaType 'FRUITPREPARER'
+2026-04-14 22:49:23.973   Register configuration 'groundAdjustedNode'
+2026-04-14 22:49:23.973   Register configuration 'handToolHolder'
+2026-04-14 22:49:23.986   Register configuration 'liftableAxle'
+2026-04-14 22:49:23.986   Register configuration 'beaconLight'
+2026-04-14 22:49:23.988   Register configuration 'logGrab'
+2026-04-14 22:49:23.992   Register configuration 'motor'
+2026-04-14 22:49:24.011   Register workAreaType 'MULCHER'
+2026-04-14 22:49:24.014   Register workAreaType 'MOWER'
+2026-04-14 22:49:24.020   Register configuration 'pipe'
+2026-04-14 22:49:24.021   Register configuration 'plow'
+2026-04-14 22:49:24.021   Register workAreaType 'PLOW'
+2026-04-14 22:49:24.021   Register workAreaType 'PLOWSHARE'
+2026-04-14 22:49:24.023   Register configuration 'powerConsumer'
+2026-04-14 22:49:24.030   Register workAreaType 'RIDGEFORMER'
+2026-04-14 22:49:24.031   Register configuration 'ridgeMarker'
+2026-04-14 22:49:24.031   Register workAreaType 'RIDGEMARKER'
+2026-04-14 22:49:24.031   Register configuration 'roller'
+2026-04-14 22:49:24.031   Register workAreaType 'ROLLER'
+2026-04-14 22:49:24.032   Register workAreaType 'SALTSPREADER'
+2026-04-14 22:49:24.037   Register configuration 'slopeCompensation'
+2026-04-14 22:49:24.037   Register workAreaType 'SOWINGMACHINE'
+2026-04-14 22:49:24.040   Register workAreaType 'SPRAYER'
+2026-04-14 22:49:24.050   Register workAreaType 'STONEPICKER'
+2026-04-14 22:49:24.058   Register workAreaType 'STUMPCUTTER'
+2026-04-14 22:49:24.068   Register workAreaType 'TEDDER'
+2026-04-14 22:49:24.071   Register configuration 'tensionBelts'
+2026-04-14 22:49:24.073   Register configuration 'trailer'
+2026-04-14 22:49:24.074   Register configuration 'treeSaplingType'
+2026-04-14 22:49:24.082   Register configuration 'variableWorkWidth'
+2026-04-14 22:49:24.082   Register configuration 'vineCutter'
+2026-04-14 22:49:24.084   Register workAreaType 'WEEDER'
+2026-04-14 22:49:24.085   Register configuration 'wheel'
+2026-04-14 22:49:24.085   Register configuration 'rimColor'
+2026-04-14 22:49:24.096   Register configuration 'winch'
+2026-04-14 22:49:24.100   Register workAreaType 'WINDROWER'
+2026-04-14 22:49:24.103   Register configuration 'woodContainer'
+2026-04-14 22:49:24.114   Register workAreaType 'DEFAULT'
+2026-04-14 22:49:24.114   Register workAreaType 'AUXILIARY'
+2026-04-14 22:49:24.114   Register configuration 'workArea'
+2026-04-14 22:49:24.114   Register configuration 'workMode'
+2026-04-14 22:49:24.139   Register configuration 'enterableAddon'
+2026-04-14 22:49:24.139   Register configuration 'realGPS'
+2026-04-14 22:49:24.139   Register configuration 'interactiveControl'
+2026-04-14 22:49:24.140   Register configuration 'incomePerHour'
+2026-04-14 22:49:24.141   Register configuration 'solarPanels'
+2026-04-14 22:49:24.141   Register configuration 'dogHouse'
+2026-04-14 22:49:24.141   Register configuration 'bunkerSilo'
+2026-04-14 22:49:24.141   Register configuration 'productionPoint'
+2026-04-14 22:49:24.141   Register configuration 'milk'
+2026-04-14 22:49:24.385 Error: Failed to open xml file 'C:/Users/tison/Documents/My Games/FarmingSimulator2025/mods/FS25_The_Pichonniere_Valley/maps/mapEU.xml'.
+2026-04-14 22:49:24.385 Error: Running LUA method 'update'.
+dataS/scripts/mission00.lua:148: attempt to index nil with 'getHandle'
+2026-04-14 22:49:24.404 [WorkplaceTriggers] load() called
+2026-04-14 22:49:24.404 [WorkplaceTriggers] Creating WorkplaceSystem v1.0.9.0
+2026-04-14 22:49:24.404 [WorkplaceTriggers] WorkplaceSystem created
+2026-04-14 22:49:24.404 [WorkplaceTriggers] WorkplaceSystem created successfully
+2026-04-14 22:49:24.404   Info: [Worker Costs] Initializing...
+2026-04-14 22:49:24.404   Info: Worker Costs Mod: Settings initialized
+2026-04-14 22:49:24.404   Info: Worker Costs Mod console commands registered
+2026-04-14 22:49:24.404   Info: Worker Costs Mod: Using default settings
+2026-04-14 22:49:24.404   Info: Worker Costs Mod: Settings loaded. Enabled: true, Wage Level: Medium, Cost Mode: Hourly
+2026-04-14 22:49:24.404   Info: [Worker Costs] Initialized successfully
+2026-04-14 22:49:24.404 [SoilFertilizer] Initializing...
+2026-04-14 22:49:24.404 [SoilFertilizer] Running in SINGLEPLAYER mode
+2026-04-14 22:49:24.404 [SoilFertilizer] Initialized
+2026-04-14 22:49:24.404 [SoilFertilizer] Initializing GUI elements...
+2026-04-14 22:49:24.404 [SoilFertilizer] Console commands registered
+2026-04-14 22:49:24.404 [SoilFertilizer] Soil HUD created
+2026-04-14 22:49:24.442 [SoilFertilizer] Soil Report dialog created
+2026-04-14 22:49:24.442 [SoilFertilizer] SoilFieldDetailDialog: registering from C:/Users/tison/Documents/My Games/FarmingSimulator2025/mods/FS25_SoilFertilizer/xml/gui/SoilFieldDetailDialog.xml
+2026-04-14 22:49:24.449 [SoilFertilizer] SoilFieldDetailDialog: onGuiSetupFinished
+2026-04-14 22:49:24.449 [SoilFertilizer] SoilFieldDetailDialog: registered successfully
+2026-04-14 22:49:24.449 [SoilFertilizer] Soil Field Detail dialog registered
+2026-04-14 22:49:24.449 [SoilFertilizer] SoilTreatmentDialog: registering from C:/Users/tison/Documents/My Games/FarmingSimulator2025/mods/FS25_SoilFertilizer/xml/gui/SoilTreatmentDialog.xml
+2026-04-14 22:49:24.454 [SoilFertilizer] SoilTreatmentDialog: registered successfully
+2026-04-14 22:49:24.454 [SoilFertilizer] Soil Treatment dialog registered
+2026-04-14 22:49:24.454 [SoilFertilizer] SoilMapOverlay: initialized (DMF Heatmap Mode)
+2026-04-14 22:49:24.454 [SoilFertilizer] Soil Map Overlay created
+2026-04-14 22:49:24.454 [SoilFertilizer] PlayerInputComponent hook installed for J/K (PLAYER context)
+2026-04-14 22:49:24.454 [SoilFertilizer] InputBinding.endActionEventsModification hooked for VEHICLE context keys
+2026-04-14 22:49:24.455 [SoilFertilizer] No saved settings found, using defaults
+2026-04-14 22:49:24.455 [SoilFertilizer] Settings loaded. Enabled: true, Difficulty: Realistic
+2026-04-14 22:49:24.455 [SoilFertilizer] CropRotation detected — no conflict; separate crop tracking data
+2026-04-14 22:49:24.455 [SoilFertilizer] MudSystem/terrain mod detected — no conflict with soil nutrients
+2026-04-14 22:49:24.455 [SoilFertilizer] Initialized in full mode
+2026-04-14 22:49:24.455   Info: [RandomWorldEvents] Initializing...
+2026-04-14 22:49:24.455   Info: [RandomWorldEvents] Settings loaded
+2026-04-14 22:49:24.455   Info: [RandomWorldEvents] Console commands registered
+2026-04-14 22:49:24.455   Info: [RandomWorldEvents] Core initialized successfully
+2026-04-14 22:49:24.455   Info: [RWE] Processing 11 pending registrations
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: government_subsidy
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: market_boom
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: market_crash
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: sudden_expense
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: farmer_donation
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: seed_discount
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: fertilizer_discount
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: fuel_discount
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: equipment_discount
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: insurance_bonus
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: tax_refund
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: price_fixing
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: loan_interest
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: export_opportunity
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: economic_crisis
+2026-04-14 22:49:24.455   Info: [RWE] Registered tick handler: economicEvents
+2026-04-14 22:49:24.455   Info: [EconomicEvents] Registered 15 economic events
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: vehicle_speed_boost
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: vehicle_fuel_bonus
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: vehicle_fuel_penalty
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: vehicle_accident
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: vehicle_repair_bill
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: vehicle_free_upgrade
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: vehicle_cleaning_bonus
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: vehicle_engine_trouble
+2026-04-14 22:49:24.455   Info: [RWE] Registered tick handler: vehicleEvents
+2026-04-14 22:49:24.455   Info: [VehicleEvents] Registered 8 vehicle events
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: crop_yield_bonus
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: crop_yield_penalty
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: fertilizer_bonus
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: fertilizer_penalty
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: seed_growth_bonus
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: seed_growth_penalty
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: harvest_bonus
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: harvest_penalty
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: field_sale_bonus
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: field_sale_penalty
+2026-04-14 22:49:24.455   Info: [RWE] Registered tick handler: fieldEvents
+2026-04-14 22:49:24.455   Info: [FieldEvents] Registered 10 field events
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: animal_product_bonus
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: animal_product_penalty
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: wolf_sighting
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: bumper_wool_season
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: disease_scare
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: feed_shortage
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: veterinary_windfall
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: wildlife_pest_invasion
+2026-04-14 22:49:24.455   Info: [RWE] Registered tick handler: animalEvents
+2026-04-14 22:49:24.455   Info: [AnimalEvents] Registered 8 wildlife/animal events
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: time_acceleration
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: time_slowdown
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: bonus_xp
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: malus_xp
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: money_bonus
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: money_malus
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: special_event_festival
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: equipment_durability_boost
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: equipment_durability_drop
+2026-04-14 22:49:24.455   Info: [RWE] Registered event: bonus_trade_prices
+2026-04-14 22:49:24.455   Info: [RWE] Registered tick handler: specialEvents
+2026-04-14 22:49:24.455   Info: [SpecialEvents] Registered 10 special events
+2026-04-14 22:49:24.455   Info: [PhysicsUtils] Initialized
+2026-04-14 22:49:24.455   Info: [RWE] Subsystem registered: economic
+2026-04-14 22:49:24.455   Info: [RWEEconomicAPI] v2.0.0 registered with RWE core
+2026-04-14 22:49:24.455   Info: [RWE] Subsystem registered: field
+2026-04-14 22:49:24.455   Info: [RWEFieldAPI] v2.0.0 registered with RWE core
+2026-04-14 22:49:24.455   Info: [RWE] Subsystem registered: wildlife
+2026-04-14 22:49:24.455   Info: [RWEWildlifeAPI] v2.0.0 registered with RWE core
+2026-04-14 22:49:24.455   Info: [RWE] Subsystem registered: vehicle
+2026-04-14 22:49:24.455   Info: [RWEVehicleAPI] v2.0.0 registered with RWE core
+2026-04-14 22:49:24.455   Info: [RWE] Subsystem registered: special
+2026-04-14 22:49:24.455   Info: [RWESpecialAPI] v2.0.0 registered with RWE core
+2026-04-14 22:49:24.455   Info: [RWE] All pending registrations processed
+2026-04-14 22:49:24.455   Info: [RWE] Loaded 51 events
+2026-04-14 22:49:24.455   Info: [RandomWorldEvents] Initialized successfully with 51 events
+2026-04-14 22:49:24.455 [NPC Favor] Load function called
+2026-04-14 22:49:24.455 [NPC Favor] Initializing version 1.2.2.6-beta...
+2026-04-14 22:49:24.455 [NPC Favor] Creating NPCSystem instance...
+2026-04-14 22:49:24.455 [NPCSystem] Creating new NPCSystem instance
+2026-04-14 22:49:24.455 [NPCSystem] Initializing subsystems...
+2026-04-14 22:49:24.455 [NPCSystem] NPCSystem instance created successfully
+2026-04-14 22:49:24.455 [NPC Favor] NPCSystem instance created successfully
+2026-04-14 22:49:24.455 [NPC Favor] Registering console commands...
+2026-04-14 22:49:24.456 [NPC Favor] Console commands registered successfully
+2026-04-14 22:49:24.456   Info: [MDM] MarketEngine initialized
+2026-04-14 22:49:24.456   Info: [MDM] WorldEventSystem initialized
+2026-04-14 22:49:24.456   Info: [MDM] FuturesMarket initialized
+2026-04-14 22:49:24.456   Info: [MDM] MarketDynamics created — v1.1.1.0
+2026-04-14 22:49:24.544   Info: Income Mod v2.0.0.5: Initializing...
+2026-04-14 22:49:24.544   Info: Income Mod: Settings initialized
+2026-04-14 22:49:24.558   Info: Income Mod console commands registered
+2026-04-14 22:49:24.558   Info: Income Mod: Settings loaded. Enabled=true, Mode=Hourly, Difficulty=Normal, Amount=$2400, Seasonal=false
+2026-04-14 22:49:24.558   Info: Income Mod v2.0.0.5: Initialized successfully
+2026-04-14 22:49:24.558   Info: [FarmTablet v2] Initializing...
+2026-04-14 22:49:24.558   Info: Farm Tablet: Settings initialized
+2026-04-14 22:49:24.558   Info: Farm Tablet: Settings Loaded. Enabled: true, Key: T, Startup: DASHBOARD
+2026-04-14 22:49:24.558   Info: Farm Tablet console commands registered
+2026-04-14 22:49:24.558   Info: [FarmTablet v2] Ready.
+2026-04-14 22:49:24.592   Info: [Easy Development Controls] Default user settings loaded successfully. (Revision: 3)
+2026-04-14 22:49:24.592 Warning (script): 'getXMLString': Argument 1 has wrong type. Expected: Int. Actual: Nil
+
+  D:\auto_builder\cache\svn\3e58da700f1dc64aaeda39cfc7698a31\src\base\scripting\lua\LuauScriptSystem.cpp (1127): expectedType == Value::VoidType || expectedType == Value::ClassType2026-04-14 22:49:24.592 
+Script error: 'getXMLString': Argument 1 has wrong type. Expected: Int. Actual: Nil
+
+LUA call stack:
+  =[C]:-1 getXMLString
+  =dataS/scripts/BaseMission.lua:514 loadEnvironment
+  =dataS/scripts/mission00.lua:333 load
+  =dataS/scripts/utils/Utils.lua:690 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:690 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/FSBaseMission.lua:940 onConnectionRequestAcceptedLoad
+  =dataS/scripts/gui/MPLoadingScreen.lua:323 update
+  =dataS/scripts/gui/base/Gui.lua:758 update
+  =dataS/scripts/main.lua:1250 update
+2026-04-14 22:49:24.677 data/sky/sky.i3d (80.93 ms)
+2026-04-14 22:49:24.750 Warning (script): 'loadXMLFile': Argument 2 has wrong type. Expected: String. Actual: Nil
+
+  D:\auto_builder\cache\svn\3e58da700f1dc64aaeda39cfc7698a31\src\base\scripting\lua\LuauScriptSystem.cpp (1127): expectedType == Value::VoidType || expectedType == Value::ClassType2026-04-14 22:49:24.750 
+Script error: 'loadXMLFile': Argument 2 has wrong type. Expected: String. Actual: Nil
+
+LUA call stack:
+  =[C]:-1 loadXMLFile
+  =dataS/scripts/xml/XMLFile.lua:25 load
+  =dataS/scripts/environment/Environment.lua:162 load
+  =dataS/scripts/BaseMission.lua:516 loadEnvironment
+  =dataS/scripts/mission00.lua:333 load
+  =dataS/scripts/utils/Utils.lua:690 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:690 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/FSBaseMission.lua:940 onConnectionRequestAcceptedLoad
+  =dataS/scripts/gui/MPLoadingScreen.lua:323 update
+  =dataS/scripts/gui/base/Gui.lua:758 update
+  =dataS/scripts/main.lua:1250 update
+2026-04-14 22:49:24.750 Warning (script): 'getXMLRootName': Argument 1 has wrong type. Expected: Int. Actual: Nil
+
+  D:\auto_builder\cache\svn\3e58da700f1dc64aaeda39cfc7698a31\src\base\scripting\lua\LuauScriptSystem.cpp (1127): expectedType == Value::VoidType || expectedType == Value::ClassType2026-04-14 22:49:24.750 
+Script error: 'getXMLRootName': Argument 1 has wrong type. Expected: Int. Actual: Nil
+
+LUA call stack:
+  =[C]:-1 getXMLRootName
+  =dataS/scripts/xml/XMLFile.lua:364 getRootName
+  =C:/Users/tison/Documents/My Games/FarmingSimulator2025/mods/FS25_interactiveControl/src/misc/XMLInjectionsManager.lua:158 checkParentXMLData
+  =C:/Users/tison/Documents/My Games/FarmingSimulator2025/mods/FS25_interactiveControl/src/main.lua:205 preInitInheritance
+  =dataS/scripts/utils/Utils.lua:705 
+  =dataS/scripts/utils/Utils.lua:690 
+  =dataS/scripts/xml/XMLFile.lua:109 new
+  =dataS/scripts/xml/XMLFile.lua:52 load
+  =dataS/scripts/environment/Environment.lua:162 load
+  =dataS/scripts/BaseMission.lua:516 loadEnvironment
+  =dataS/scripts/mission00.lua:333 load
+  =dataS/scripts/utils/Utils.lua:690 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:690 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/utils/Utils.lua:706 
+  =dataS/scripts/FSBaseMission.lua:940 onConnectionRequestAcceptedLoad
+  =dataS/scripts/gui/MPLoadingScreen.lua:323 update
+  =dataS/scripts/gui/base/Gui.lua:758 update
+  =dataS/scripts/main.lua:1250 update
+2026-04-14 22:49:24.750 Error: Running LUA method 'update'.
+C:/Users/tison/Documents/My Games/FarmingSimulator2025/mods/FS25_interactiveControl/src/misc/XMLInjectionsManager.lua:159: attempt to concatenate nil with string
+2026-04-14 22:50:53.020 Console command: quit
+2026-04-14 22:50:53.020 quit = true
