@@ -23,7 +23,7 @@ SoilMapOverlay.ALPHA          = 0.72
 
 -- Sampling constants
 SoilMapOverlay.SAMPLE_UPDATE_INTERVAL_MS = 4500
-SoilMapOverlay.MAX_POINTS       = 3000   -- increased to support full polygon fill
+SoilMapOverlay.MAX_POINTS       = 15000   -- increased to support full polygon fill
 SoilMapOverlay.POLYGON_STEP     = 15     -- world-unit grid spacing for polygon sampling (meters)
 
 -- Status colors (match SoilHUD palette)

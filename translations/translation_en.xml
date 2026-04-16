@@ -404,7 +404,7 @@
     <e k="sf_pda_help_note" v="Note: The soil layers tab on the map page is NOT WORKING. Im aware of the issue and working on a fix. (which might take some time)" eh="00000003" />
     <e k="sf_pda_map_unavailable" v="Map preview unavailable" eh="00000000" />
     <e k="sf_map_health_overall" v="Average Soil Health" />
-    <e k="sf_map_btn_report" v="Open Soil Report (BROKEN)" />
+    <e k="sf_map_btn_report" v="Open Farm Overview" />
     <e k="sf_map_btn_help" v="Dev Note (NOT WORKING YET)" />
     <!-- Fields Tab -->
     <e k="sf_pda_fields_section_title" v="All Fields" eh="48729e0b" />
