@@ -23,7 +23,8 @@ SoilMapOverlay.ALPHA          = 0.72
 
 -- Sampling constants
 SoilMapOverlay.SAMPLE_UPDATE_INTERVAL_MS = 4500
-SoilMapOverlay.MAX_POINTS = 850
+SoilMapOverlay.MAX_POINTS       = 3000   -- increased to support full polygon fill
+SoilMapOverlay.POLYGON_STEP     = 15     -- world-unit grid spacing for polygon sampling (meters)
 
 -- Status colors (match SoilHUD palette)
 SoilMapOverlay.C_POOR = {0.88, 0.25, 0.25}
@@ -77,6 +78,10 @@ function SoilMapOverlay.new(soilSystem, settings)
     self.isMapOpen = false
     self.isReady = false
 
+    -- Cache of polygon fill points per field: fieldId → array of {x, z} world coords.
+    -- Populated lazily in getFieldFillPoints; cleared on requestRefresh.
+    self.fieldPolyCache = {}
+
     -- Manual Button Rects for click detection
     self.buttonRects = {}
 
@@ -129,6 +134,7 @@ end
 
 function SoilMapOverlay:requestRefresh()
     self.nextSampleUpdateTime = 0
+    self.fieldPolyCache = {}
 end
 
 -- ── Layer selection ───────────────────────────────────────
@@ -173,6 +179,101 @@ function SoilMapOverlay:onSideBarClick(posX, posY)
     return false
 end
 
+-- ── Polygon Fill Helpers ──────────────────────────────────
+
+-- Ray-casting point-in-polygon test (2D, XZ plane).
+-- verts is an array of {x, z} tables.
+local function isPointInPoly(px, pz, verts)
+    local n = #verts
+    if n < 3 then return false end
+    local inside = false
+    local j = n
+    for i = 1, n do
+        local xi, zi = verts[i].x, verts[i].z
+        local xj, zj = verts[j].x, verts[j].z
+        if ((zi > pz) ~= (zj > pz)) and
+           (px < (xj - xi) * (pz - zi) / (zj - zi) + xi) then
+            inside = not inside
+        end
+        j = i
+    end
+    return inside
+end
+
+--- Return an array of world {x, z} sample points that fill the field polygon.
+--- Results are cached in self.fieldPolyCache keyed by fsField.fieldId (or a fallback key).
+--- The grid step is SoilMapOverlay.POLYGON_STEP meters; points outside the polygon are rejected.
+---@param fsField table FS25 Field object with polygonPoints and fieldId
+---@return table Array of {x, z}
+function SoilMapOverlay:getFieldFillPoints(fsField)
+    local cacheKey = fsField.fieldId or tostring(fsField)
+    if self.fieldPolyCache[cacheKey] then
+        return self.fieldPolyCache[cacheKey]
+    end
+
+    local pts = {}
+
+    -- Collect polygon vertices from the i3d node array
+    local polyNodes = fsField.polygonPoints
+    local verts = {}
+    if polyNodes and #polyNodes > 0 then
+        for i = 1, #polyNodes do
+            local nodeId = polyNodes[i]
+            if nodeId and nodeId ~= 0 then
+                local ok, wx, _, wz = pcall(getWorldTranslation, nodeId)
+                if ok and wx then
+                    table.insert(verts, {x = wx, z = wz})
+                end
+            end
+        end
+    end
+
+    -- Fallback: if polygon data unavailable, return the single centroid point
+    if #verts < 3 then
+        if fsField.posX and fsField.posZ then
+            table.insert(pts, {x = fsField.posX, z = fsField.posZ})
+        end
+        self.fieldPolyCache[cacheKey] = pts
+        return pts
+    end
+
+    -- Compute bounding box
+    local minX, maxX = verts[1].x, verts[1].x
+    local minZ, maxZ = verts[1].z, verts[1].z
+    for i = 2, #verts do
+        if verts[i].x < minX then minX = verts[i].x end
+        if verts[i].x > maxX then maxX = verts[i].x end
+        if verts[i].z < minZ then minZ = verts[i].z end
+        if verts[i].z > maxZ then maxZ = verts[i].z end
+    end
+
+    -- Grid-sample the bounding box, keep points inside the polygon
+    local step = SoilMapOverlay.POLYGON_STEP
+    -- Offset start by half-step so points land near field centre, not edges
+    local startX = minX + step * 0.5
+    local startZ = minZ + step * 0.5
+    local x = startX
+    while x <= maxX do
+        local z = startZ
+        while z <= maxZ do
+            if isPointInPoly(x, z, verts) then
+                table.insert(pts, {x = x, z = z})
+            end
+            z = z + step
+        end
+        x = x + step
+    end
+
+    -- Ensure at least the centroid if the grid produced nothing
+    -- (can happen for very small or narrow fields)
+    if #pts == 0 and fsField.posX and fsField.posZ then
+        table.insert(pts, {x = fsField.posX, z = fsField.posZ})
+    end
+
+    self.fieldPolyCache[cacheKey] = pts
+    return pts
+end
+
 -- ── Point Sampling (DMF Pattern) ─────────────────────────
 
 function SoilMapOverlay:updateSamplePoints(force)
@@ -196,29 +297,39 @@ function SoilMapOverlay:updateSamplePoints(force)
         return
     end
 
-    -- One dot per field at its polygon centroid (fsField.posX/posZ, set by Field:load()).
-    -- We match fields to our soil data via farmland.id (that is the key fieldData uses).
+    -- Fill each field polygon with a grid of coloured sample points.
+    -- We match fields to our soil data via farmland.id (the key fieldData uses).
+    -- getFieldFillPoints() handles the grid sampling and caching; it falls back to
+    -- a single centroid point for very small fields or when polygon data is absent.
     local fields = g_fieldManager.fields
     if fields == nil then
         SoilLogger.info("SoilMapOverlay: g_fieldManager.fields is nil")
         return
     end
 
+    local totalPoints = 0
     for _, fsField in ipairs(fields) do
-        if fsField and fsField.farmland and fsField.posX and fsField.posZ then
+        if fsField and fsField.farmland then
             local farmlandId = fsField.farmland.id
             if farmlandId and farmlandId > 0 then
                 local info = self.soilSystem:getFieldInfo(farmlandId)
                 if info then
                     local r, g, b = self:getLayerColor(layerIdx, info, farmlandId)
-                    table.insert(self.samplePoints, {x = fsField.posX, z = fsField.posZ, r = r, g = g, b = b})
+                    local polyPts = self:getFieldFillPoints(fsField)
+                    for _, pt in ipairs(polyPts) do
+                        if totalPoints < SoilMapOverlay.MAX_POINTS then
+                            table.insert(self.samplePoints, {x = pt.x, z = pt.z, r = r, g = g, b = b})
+                            totalPoints = totalPoints + 1
+                        end
+                    end
                 end
             end
         end
     end
 
-    if #self.samplePoints > 0 then
-        SoilLogger.info("SoilMapOverlay: Sampled %d field centroids for layer %d", #self.samplePoints, layerIdx)
+    if totalPoints > 0 then
+        SoilLogger.info("SoilMapOverlay: Sampled %d polygon fill points for layer %d (fields: %d)",
+                        totalPoints, layerIdx, #fields)
     else
         SoilLogger.info("SoilMapOverlay: No fields found to sample (fields count: %d)", #fields)
     end
@@ -241,23 +352,18 @@ function SoilMapOverlay:onDraw(frame, mapElement, ingameMap, pageIndex)
     local mapMaxX = mapX + mapWidth
     local mapMaxY = mapY + mapHeight
 
+    -- Pre-compute normalised dot size once (same for all points)
+    local sizeX, sizeY = getNormalizedScreenValues(10, 10)
+    local halfX, halfY = sizeX * 0.5, sizeY * 0.5
+
     for _, point in ipairs(self.samplePoints) do
         local screenX, screenY = self:worldToScreenPosition(ingameMap, point.x, point.z)
         if screenX ~= nil and screenY ~= nil
            and screenX >= mapX and screenX <= mapMaxX
            and screenY >= mapY and screenY <= mapMaxY then
-            -- Draw a solid dot with a dark border for readability
-            local sizePx = 14
-            local borderPx = 2
-            local sizeX, sizeY = getNormalizedScreenValues(sizePx, sizePx)
-            local borderX, borderY = getNormalizedScreenValues(borderPx, borderPx)
-            -- Border (dark)
-            drawFilledRect(screenX - sizeX * 0.5 - borderX, screenY - sizeY * 0.5 - borderY,
-                           sizeX + borderX * 2, sizeY + borderY * 2,
-                           0, 0, 0, 0.7)
-            -- Colored fill
-            drawFilledRect(screenX - sizeX * 0.5, screenY - sizeY * 0.5, sizeX, sizeY,
-                           point.r, point.g, point.b, 0.92)
+            -- Draw polygon fill tile (no per-tile border — too expensive at 3000+ pts)
+            drawFilledRect(screenX - halfX, screenY - halfY, sizeX, sizeY,
+                           point.r, point.g, point.b, SoilMapOverlay.ALPHA)
         end
     end
 end

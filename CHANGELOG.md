@@ -7,6 +7,70 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.8.7.0] - 2026-04-16
+
+### Fixed
+
+- **Custom fill types blocked from vehicle-to-vehicle transfer**: UREA, UAN32, DAP, and all
+  other custom fill types could only be loaded from a shop big-bag trigger. Discharging from
+  an auger wagon into a spreader, or pumping from a tanker into a sprayer, was blocked because
+  `Dischargeable:dischargeToObject` calls `getFillUnitSupportsFillType` before transferring —
+  a method some FS25 versions route through a C++ fast-path that bypasses the `supportedFillTypes`
+  table we already patched. Fixed by also hooking `FillUnit.getFillUnitSupportsFillType` directly:
+  if the vehicle supports the vanilla base type (FERTILIZER or LIQUIDFERTILIZER), it now also
+  returns `true` for the matching custom type.
+
+### Improved
+
+- **Soil map overlay fills entire field polygon**: The overlay previously placed a single dot at
+  each field's centroid. It now fills the full field area with a 15-metre grid of coloured tiles
+  so field boundaries are clearly visible on the map. Field polygon vertices are read from the
+  i3d scene via `Field.polygonPoints`; a ray-casting point-in-polygon test filters out grid
+  positions outside the boundary. Polygon points are cached per-field and invalidated on layer
+  switch. Dot size reduced from 14 px to 10 px; per-tile borders removed for performance.
+  `MAX_POINTS` raised from 850 to 3000 to accommodate larger maps.
+
+---
+
+## [1.8.6.0] - 2026-04-16
+
+### Fixed
+
+- **Soil map overlay dots never rendered**: The `onDrawPostIngameMap` callback targeted by
+  the soil map hook does not exist as a callable method in FS25. The appended function was
+  registering silently but never firing, so no overlay dots were drawn on the in-game map.
+  Fixed by hooking `IngameMapElement.draw` at the class level instead. The new hook walks
+  the parent chain (up to 6 levels) to locate the `InGameMenuMapFrame` that owns the element,
+  then checks whether the soil map page is active before delegating to `SoilMapOverlay:onDraw()`.
+
+- **Lua multi-return truncation in `getMapRenderBounds`**: Chained `return` of multiple
+  return values caused single-value truncation in some call sites. Fixed by assigning to
+  explicit local variables before returning.
+
+- **`worldToScreenPosition` inconsistent layout reference**: Now consistently uses
+  `fullScreenLayout` instead of mixing layout sources across callers.
+
+- **`pointPool` nil crash**: The pool system was referenced in `delete()` but never
+  initialized, causing a nil-index crash on mod unload. Removed entirely; `samplePoints`
+  is now a plain table reset on each update cycle.
+
+- **Overlay sampling switched to per-field centroids**: `updateSamplePoints` was using a
+  34×34 world-space grid, producing dots at arbitrary coordinates unrelated to actual fields.
+  Now samples one dot per tracked field using `fsField.posX / posZ` — one correctly coloured
+  dot per field, no off-field scatter.
+
+- **Missing `cycleLayer()` and `requestGenerate()` on `SoilMapOverlay`**: The PDA screen and
+  map frame called these methods but they were never defined, causing nil-call crashes when
+  switching layers or refreshing the overlay. Both are now implemented.
+
+- **Sidebar layer toggle re-click behaviour**: Re-clicking the currently active overlay layer
+  button now turns the overlay off (toggles to layer 0) instead of re-selecting the same layer.
+
+- **Dark border on map dots**: Added a 1-pixel dark outline to each overlay dot for readability
+  against light terrain colours.
+
+---
+
 ## [1.8.5.0] - 2026-04-15
 
 ### Added

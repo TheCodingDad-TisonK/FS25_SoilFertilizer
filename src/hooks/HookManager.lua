@@ -1181,6 +1181,48 @@ function HookManager:installFillUnitHook()
     self:register(FillUnit, "onPostLoad", original, "FillUnit.onPostLoad")
     SoilLogger.info("[OK] FillUnit hook installed - custom types injected into compatible vehicles")
 
+    -- Build customToBase: custom fill type index → vanilla base type index.
+    -- Used by getFillUnitSupportsFillType hook below.
+    local customToBase = {}
+    if fertIndex then
+        for _, idx in ipairs(solidIndices) do
+            customToBase[idx] = fertIndex
+        end
+    end
+    if liqFertIndex then
+        for _, idx in ipairs(liquidIndices) do
+            customToBase[idx] = liqFertIndex
+        end
+    end
+
+    -- Hook getFillUnitSupportsFillType so Dischargeable:dischargeToObject (vehicle-to-vehicle
+    -- auger wagon → spreader, tanker → sprayer, etc.) passes the fill type check for our
+    -- custom types. Patching supportedFillTypes covers the table lookup, but some FS25
+    -- versions / specializations call this method via a C++ fast-path that bypasses the Lua
+    -- table. Wrapping the method directly is the belt-and-suspenders fix.
+    --
+    -- Logic: if the vehicle supports the corresponding vanilla base type (FERTILIZER or
+    -- LIQUIDFERTILIZER), it also supports the matching custom type.
+    if FillUnit.getFillUnitSupportsFillType then
+        local origGetSupports = FillUnit.getFillUnitSupportsFillType
+        FillUnit.getFillUnitSupportsFillType = function(vehicleSelf, fillUnitIndex, fillType)
+            -- Short-circuit: original already knows about this type (vanilla or already patched table)
+            if origGetSupports(vehicleSelf, fillUnitIndex, fillType) then
+                return true
+            end
+            -- Custom type? Check if the vehicle supports the corresponding vanilla base type.
+            local baseType = customToBase[fillType]
+            if baseType then
+                return origGetSupports(vehicleSelf, fillUnitIndex, baseType)
+            end
+            return false
+        end
+        self:register(FillUnit, "getFillUnitSupportsFillType", origGetSupports, "FillUnit.getFillUnitSupportsFillType")
+        SoilLogger.info("[OK] getFillUnitSupportsFillType hook installed - vehicle-to-vehicle transfer enabled")
+    else
+        SoilLogger.warning("FillUnit.getFillUnitSupportsFillType not available - skipping transfer hook")
+    end
+
     -- Retroactively patch all vehicles already in memory.
     -- On save/load, FillUnit.onPostLoad fires during Mission00.load (before our deferred
     -- hook installation runs), so saved sprayers miss the injection entirely. Patching them
