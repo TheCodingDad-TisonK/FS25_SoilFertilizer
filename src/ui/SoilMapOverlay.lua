@@ -2,6 +2,21 @@
 SoilMapOverlay = {}
 local SoilMapOverlay_mt = Class(SoilMapOverlay)
 
+-- ── i18n helper ───────────────────────────────────────────
+local SF_MOD_NAME = g_currentModName
+
+local function tr(key, fallback)
+    local modEnv = g_modEnvironments and g_modEnvironments[SF_MOD_NAME]
+    local i18n   = (modEnv and modEnv.i18n) or g_i18n
+    if i18n then
+        local text = i18n:getText(key)
+        if text and text ~= "" and text ~= ("$l10n_" .. key) then
+            return text
+        end
+    end
+    return fallback or key
+end
+
 -- ── Constants ─────────────────────────────────────────────
 SoilMapOverlay.LAYER_COUNT    = 9
 SoilMapOverlay.ALPHA          = 0.72
@@ -141,8 +156,18 @@ end
 function SoilMapOverlay:onSideBarClick(posX, posY)
     for _, rect in ipairs(self.buttonRects) do
         if posX >= rect.x1 and posX <= rect.x2 and posY >= rect.y1 and posY <= rect.y2 then
-            self:setLayer(rect.index)
-            return true
+            if rect.action == "report" then
+                if SoilPDAScreen then SoilPDAScreen.toggle() end
+                return true
+            elseif rect.action == "help" then
+                if SoilHelpDialog then SoilHelpDialog.show() end
+                return true
+            elseif rect.index then
+                -- Toggle: re-clicking the active layer turns the overlay off
+                local newIdx = (self.settings.activeMapLayer == rect.index) and 0 or rect.index
+                self:setLayer(newIdx)
+                return true
+            end
         end
     end
     return false
@@ -328,7 +353,48 @@ function SoilMapOverlay:onDrawHud(frame)
         currentY = currentY - buttonH - marginY
     end
 
-    -- 2. Draw Health Summary (Anchored to BOTTOM area per DMF pattern)
+    -- 2. Separator line
+    local _, sepH    = getNormalizedScreenValues(0, 1)
+    local _, sepGap  = getNormalizedScreenValues(0, 6)
+    currentY = currentY - sepGap
+    drawFilledRect(panelX, currentY, panelWidth, sepH, 0.45, 0.45, 0.45, 0.45)
+    currentY = currentY - sepH - sepGap
+
+    -- 3. Action buttons
+    local _, actionH      = getNormalizedScreenValues(0, 30)
+    local _, actionMargin = getNormalizedScreenValues(0, 3)
+
+    local actionButtons = {
+        { key = "sf_map_btn_report", label = "Field Report", action = "report" },
+        { key = "sf_map_btn_help",   label = "Help",         action = "help"   },
+    }
+
+    for _, btn in ipairs(actionButtons) do
+        drawFilledRect(panelX, currentY, panelWidth, actionH, 0.07, 0.07, 0.13, 0.88)
+        drawFilledRect(panelX, currentY, accentW, actionH, 0.55, 0.55, 0.78, 1.0)
+        self:drawThinBorder(panelX, currentY, panelWidth, actionH, 0.4, 0.4, 0.6, 0.55)
+
+        setTextBold(false)
+        setTextColor(0.80, 0.80, 1.0, 1)
+        setTextAlignment(RenderText.ALIGN_LEFT)
+        renderText(panelX + padX + accentW, currentY + actionH * 0.28, textSize,
+                   tr(btn.key, btn.label))
+
+        table.insert(self.buttonRects, {
+            x1 = panelX, y1 = currentY,
+            x2 = panelX + panelWidth, y2 = currentY + actionH,
+            action = btn.action,
+        })
+
+        currentY = currentY - actionH - actionMargin
+    end
+
+    -- 4. Color legend (only when a layer is active)
+    if activeIdx > 0 then
+        self:drawLegend(panelX, currentY - sepGap, panelWidth)
+    end
+
+    -- 5. Draw Health Summary (Anchored to BOTTOM area per DMF pattern)
     local _, summaryH = getNormalizedScreenValues(0, 74)
     local _, panelMargin = getNormalizedScreenValues(0, 8)
     local _, safeY = getNormalizedScreenValues(0, 6)
@@ -390,6 +456,43 @@ function SoilMapOverlay:drawSummaryAt(frame, panelX, panelY, panelWidth, panelHe
     renderText(barX, statusY, statusSize, statusText)
     
     setTextColor(1, 1, 1, 1)
+end
+
+-- ── Color Legend ─────────────────────────────────────────
+
+function SoilMapOverlay:drawLegend(panelX, bottomY, panelWidth)
+    local _, legendH   = getNormalizedScreenValues(0, 24)
+    local padX, _      = getNormalizedScreenValues(10, 0)
+    local dotSzX, dotSzY = getNormalizedScreenValues(9, 9)
+    local _, textSz    = getNormalizedScreenValues(0, 11)
+    local dotGapX, _   = getNormalizedScreenValues(4, 0)
+
+    local legendY = bottomY - legendH
+
+    drawFilledRect(panelX, legendY, panelWidth, legendH, 0.04, 0.04, 0.04, 0.80)
+    self:drawThinBorder(panelX, legendY, panelWidth, legendH, 0.35, 0.35, 0.35, 0.5)
+
+    local items = {
+        { r = SoilMapOverlay.C_POOR[1], g = SoilMapOverlay.C_POOR[2], b = SoilMapOverlay.C_POOR[3],
+          key = "sf_pda_map_legend_poor", label = "Poor" },
+        { r = SoilMapOverlay.C_FAIR[1], g = SoilMapOverlay.C_FAIR[2], b = SoilMapOverlay.C_FAIR[3],
+          key = "sf_pda_map_legend_fair", label = "Fair" },
+        { r = SoilMapOverlay.C_GOOD[1], g = SoilMapOverlay.C_GOOD[2], b = SoilMapOverlay.C_GOOD[3],
+          key = "sf_pda_map_legend_good", label = "Good" },
+    }
+
+    local colWidth = (panelWidth - padX * 2) / #items
+    local dotCenterY = legendY + (legendH - dotSzY) * 0.5
+
+    for i, item in ipairs(items) do
+        local itemX = panelX + padX + (i - 1) * colWidth
+        drawFilledRect(itemX, dotCenterY, dotSzX, dotSzY, item.r, item.g, item.b, 0.92)
+        self:drawThinBorder(itemX, dotCenterY, dotSzX, dotSzY, 0, 0, 0, 0.5)
+        setTextBold(false)
+        setTextColor(0.72, 0.72, 0.72, 1)
+        setTextAlignment(RenderText.ALIGN_LEFT)
+        renderText(itemX + dotSzX + dotGapX, dotCenterY, textSz, tr(item.key, item.label))
+    end
 end
 
 function SoilMapOverlay:drawThinBorder(x, y, width, height, r, g, b, a)
