@@ -6,9 +6,8 @@ local SoilMapOverlay_mt = Class(SoilMapOverlay)
 SoilMapOverlay.LAYER_COUNT    = 9
 SoilMapOverlay.ALPHA          = 0.72
 
--- Sampling constants from DMF
+-- Sampling constants
 SoilMapOverlay.SAMPLE_UPDATE_INTERVAL_MS = 4500
-SoilMapOverlay.SAMPLE_GRID_COUNT = 34
 SoilMapOverlay.MAX_POINTS = 850
 
 -- Status colors (match SoilHUD palette)
@@ -56,15 +55,16 @@ function SoilMapOverlay.new(soilSystem, settings)
     local self = setmetatable({}, SoilMapOverlay_mt)
     self.soilSystem    = soilSystem
     self.settings      = settings
-    
+
     self.samplePoints = {}
     self.displayValues = nil
     self.nextSampleUpdateTime = 0
     self.isMapOpen = false
-    
+    self.isReady = false
+
     -- Manual Button Rects for click detection
     self.buttonRects = {}
-    
+
     return self
 end
 
@@ -77,7 +77,6 @@ end
 -- ── Delete ────────────────────────────────────────────────
 
 function SoilMapOverlay:delete()
-    if self.pointPool then self.pointPool:clear() end
     self.samplePoints = {}
     SoilLogger.info("SoilMapOverlay: deleted")
 end
@@ -126,6 +125,17 @@ function SoilMapOverlay:setLayer(layerIdx)
     SoilLogger.info("SoilMapOverlay: layer set to %d (%s)", layerIdx, g_i18n:getText(SoilMapOverlay.LAYER_KEYS[layerIdx] or "unknown"))
 end
 
+function SoilMapOverlay:cycleLayer()
+    local active = self.settings.activeMapLayer or 0
+    local next = (active % SoilMapOverlay.LAYER_COUNT) + 1
+    self:setLayer(next)
+end
+
+-- Alias used by SoilMapFrame; equivalent to requestRefresh
+function SoilMapOverlay:requestGenerate()
+    self:requestRefresh()
+end
+
 -- ── Sidebar Clicks ────────────────────────────────────────
 
 function SoilMapOverlay:onSideBarClick(posX, posY)
@@ -147,65 +157,45 @@ function SoilMapOverlay:updateSamplePoints(force)
     end
 
     self.nextSampleUpdateTime = now + SoilMapOverlay.SAMPLE_UPDATE_INTERVAL_MS
-    
-    -- Return existing points to the pool to prevent GC stutters
-    for _, pt in ipairs(self.samplePoints) do
-        self.pointPool:returnToPool(pt)
-    end
-    table.clear(self.samplePoints)
+
+    self.samplePoints = {}
 
     local layerIdx = self.settings.activeMapLayer or 0
-    if layerIdx <= 0 then 
+    if layerIdx <= 0 then
         SoilLogger.debug("SoilMapOverlay: No active layer selected")
-        return 
-    end
-
-    if g_currentMission == nil or g_farmlandManager == nil then
-        SoilLogger.info("SoilMapOverlay: Sampling aborted - mission or farmlandManager nil")
         return
     end
 
-    -- FS25 terrains are centered at 0,0. 2k map = -1024 to 1024.
-    local worldSize = g_currentMission.terrainSize or 2048
-    local half = worldSize * 0.5
-    local gridCount = SoilMapOverlay.SAMPLE_GRID_COUNT
-    local gridStep = worldSize / math.max(gridCount - 1, 1)
+    if g_currentMission == nil or g_fieldManager == nil then
+        SoilLogger.info("SoilMapOverlay: Sampling aborted - mission or fieldManager nil")
+        return
+    end
 
-    for gx = 0, gridCount - 1 do
-        local worldX = -half + gx * gridStep
-        for gz = 0, gridCount - 1 do
-            local worldZ = -half + gz * gridStep
-            
-            -- Filter: Only points on actual farmland
-            local farmlandId = g_farmlandManager:getFarmlandIdAtWorldPosition(worldX, worldZ)
+    -- One dot per field at its polygon centroid (fsField.posX/posZ, set by Field:load()).
+    -- We match fields to our soil data via farmland.id (that is the key fieldData uses).
+    local fields = g_fieldManager.fields
+    if fields == nil then
+        SoilLogger.info("SoilMapOverlay: g_fieldManager.fields is nil")
+        return
+    end
+
+    for _, fsField in ipairs(fields) do
+        if fsField and fsField.farmland and fsField.posX and fsField.posZ then
+            local farmlandId = fsField.farmland.id
             if farmlandId and farmlandId > 0 then
                 local info = self.soilSystem:getFieldInfo(farmlandId)
                 if info then
                     local r, g, b = self:getLayerColor(layerIdx, info, farmlandId)
-                    local pt = self.pointPool:getOrCreateNext()
-                    pt.x = worldX
-                    pt.z = worldZ
-                    pt.r = r
-                    pt.g = g
-                    pt.b = b
-                    table.insert(self.samplePoints, pt)
+                    table.insert(self.samplePoints, {x = fsField.posX, z = fsField.posZ, r = r, g = g, b = b})
                 end
             end
         end
     end
 
-    -- Cap points if needed
-    if #self.samplePoints > SoilMapOverlay.MAX_POINTS then
-        for i = #self.samplePoints, SoilMapOverlay.MAX_POINTS + 1, -1 do
-            local pt = table.remove(self.samplePoints, i)
-            self.pointPool:returnToPool(pt)
-        end
-    end
-    
     if #self.samplePoints > 0 then
-        SoilLogger.info("SoilMapOverlay: Sampled %d points for layer %d", #self.samplePoints, layerIdx)
+        SoilLogger.info("SoilMapOverlay: Sampled %d field centroids for layer %d", #self.samplePoints, layerIdx)
     else
-        SoilLogger.info("SoilMapOverlay: No farmland points found in terrain (Sampled %d grid points, range %d to %d)", gridCount * gridCount, -half, half)
+        SoilLogger.info("SoilMapOverlay: No fields found to sample (fields count: %d)", #fields)
     end
 end
 
@@ -231,17 +221,27 @@ function SoilMapOverlay:onDraw(frame, mapElement, ingameMap, pageIndex)
         if screenX ~= nil and screenY ~= nil
            and screenX >= mapX and screenX <= mapMaxX
            and screenY >= mapY and screenY <= mapMaxY then
-            local sizePx = 16
+            -- Draw a solid dot with a dark border for readability
+            local sizePx = 14
+            local borderPx = 2
             local sizeX, sizeY = getNormalizedScreenValues(sizePx, sizePx)
+            local borderX, borderY = getNormalizedScreenValues(borderPx, borderPx)
+            -- Border (dark)
+            drawFilledRect(screenX - sizeX * 0.5 - borderX, screenY - sizeY * 0.5 - borderY,
+                           sizeX + borderX * 2, sizeY + borderY * 2,
+                           0, 0, 0, 0.7)
+            -- Colored fill
             drawFilledRect(screenX - sizeX * 0.5, screenY - sizeY * 0.5, sizeX, sizeY,
-                           point.r, point.g, point.b, 0.95)
+                           point.r, point.g, point.b, 0.92)
         end
     end
 end
 
 function SoilMapOverlay:worldToScreenPosition(ingameMap, worldX, worldZ)
-    if ingameMap == nil or ingameMap.layout == nil then return nil, nil end
-    if ingameMap.layout.getMapObjectPosition == nil then return nil, nil end
+    if ingameMap == nil then return nil, nil end
+    -- Use fullScreenLayout when available (matches getMapRenderBounds), fall back to active layout
+    local layout = ingameMap.fullScreenLayout or ingameMap.layout
+    if layout == nil or layout.getMapObjectPosition == nil then return nil, nil end
 
     local worldSizeX = ingameMap.worldSizeX or g_currentMission.terrainSize or 2048
     local worldSizeZ = ingameMap.worldSizeZ or g_currentMission.terrainSize or 2048
@@ -255,7 +255,7 @@ function SoilMapOverlay:worldToScreenPosition(ingameMap, worldX, worldZ)
     objectX = objectX * (ingameMap.mapExtensionScaleFactor or 1) + (ingameMap.mapExtensionOffsetX or 0)
     objectZ = objectZ * (ingameMap.mapExtensionScaleFactor or 1) + (ingameMap.mapExtensionOffsetZ or 0)
 
-    return ingameMap.layout:getMapObjectPosition(objectX, objectZ, 0, 0)
+    return layout:getMapObjectPosition(objectX, objectZ, 0, 0)
 end
 
 -- ── Sidebar Rendering ─────────────────────────────────────
@@ -433,7 +433,9 @@ function SoilMapOverlay:getMapRenderBounds(frame, ingameMap)
         return nil, nil, nil, nil
     end
 
-    return layout:getMapPosition(), layout:getMapSize()
+    local mapX, mapY = layout:getMapPosition()
+    local mapW, mapH = layout:getMapSize()
+    return mapX, mapY, mapW, mapH
 end
 
 -- ── Layer color logic ─────────────────────────────────────
