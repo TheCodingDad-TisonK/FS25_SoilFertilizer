@@ -150,19 +150,30 @@ function SoilMapHooks:generateOverviewOverlay()
     end
 end
 
-function SoilMapHooks:onDrawPostIngameMap(...)
-    if not isSoilPageActive(self) then return end
+-- Called from IngameMapElement.draw (appended at class level).
+-- `elementSelf` is the IngameMapElement instance being drawn.
+-- We walk up the parent chain to find whichever InGameMenuMapFrame owns it,
+-- then check if our soil page is active before drawing.
+function SoilMapHooks.onDrawIngameMapElement(elementSelf, ...)
+    if elementSelf == nil or elementSelf.ingameMap == nil then return end
 
-    local mapElement = select(1, ...)
-    local ingameMap  = select(2, ...)
-    if ingameMap == nil and mapElement ~= nil then
-        ingameMap = mapElement.ingameMap
+    -- Walk up (max 6 levels) to find the frame that has soilMapPageIndex
+    local frame = elementSelf.parent
+    local depth = 0
+    while frame ~= nil and depth < 6 do
+        if frame.soilMapPageIndex ~= nil then break end
+        frame = frame.parent
+        depth = depth + 1
     end
 
-    local soilOverlay = getSoilOverlay(self)
+    if frame == nil or frame.soilMapPageIndex == nil then return end
+    if frame.mapOverviewSelector == nil then return end
+    if frame.mapOverviewSelector:getState() ~= frame.soilMapPageIndex then return end
+
+    local soilOverlay = g_SoilFertilityManager and g_SoilFertilityManager.soilMapOverlay
     if soilOverlay == nil then return end
 
-    soilOverlay:onDraw(self, mapElement, ingameMap, self.soilMapPageIndex)
+    soilOverlay:onDraw(frame, elementSelf, elementSelf.ingameMap, frame.soilMapPageIndex)
 end
 
 function SoilMapHooks:onDrawOverlayHud()
@@ -228,10 +239,6 @@ if InGameMenuMapFrame ~= nil then
         InGameMenuMapFrame.generateOverviewOverlay = Utils.appendedFunction(InGameMenuMapFrame.generateOverviewOverlay, SoilMapHooks.generateOverviewOverlay)
     end
 
-    if InGameMenuMapFrame.onDrawPostIngameMap ~= nil then
-        InGameMenuMapFrame.onDrawPostIngameMap = Utils.appendedFunction(InGameMenuMapFrame.onDrawPostIngameMap, SoilMapHooks.onDrawPostIngameMap)
-    end
-
     if InGameMenuMapFrame.draw ~= nil then
         InGameMenuMapFrame.draw = Utils.appendedFunction(InGameMenuMapFrame.draw, SoilMapHooks.onDrawOverlayHud)
     elseif InGameMenuMapFrame.onDraw ~= nil then
@@ -249,6 +256,16 @@ if InGameMenuMapFrame ~= nil then
     if InGameMenuMapFrame.onFrameClose ~= nil then
         InGameMenuMapFrame.onFrameClose = Utils.appendedFunction(InGameMenuMapFrame.onFrameClose, SoilMapHooks.onFrameClose)
     end
-    
+
     SoilLogger.info("SoilMapHooks: installed on InGameMenuMapFrame (Manual UI Mode)")
+end
+
+-- Hook IngameMapElement.draw at class level so we can draw overlay dots after the
+-- map texture renders, regardless of whether InGameMenuMapFrame.onDrawPostIngameMap
+-- exists as a callback target in the game's XML.
+if IngameMapElement ~= nil then
+    IngameMapElement.draw = Utils.appendedFunction(IngameMapElement.draw, SoilMapHooks.onDrawIngameMapElement)
+    SoilLogger.info("SoilMapHooks: IngameMapElement.draw hook installed for overlay drawing")
+else
+    SoilLogger.warning("SoilMapHooks: IngameMapElement not available — map overlay dots will not draw")
 end
