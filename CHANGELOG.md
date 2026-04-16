@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.8.7.0] - 2026-04-16
+
+### Fixed
+
+- **Custom fill types blocked from vehicle-to-vehicle transfer**: UREA, UAN32, DAP, and all
+  other custom fill types could only be loaded from a shop big-bag trigger. Discharging from
+  an auger wagon into a spreader, or pumping from a tanker into a sprayer, was blocked because
+  `Dischargeable:dischargeToObject` calls `getFillUnitSupportsFillType` before transferring —
+  a method some FS25 versions route through a C++ fast-path that bypasses the `supportedFillTypes`
+  table we already patched. Fixed by also hooking `FillUnit.getFillUnitSupportsFillType` directly:
+  if the vehicle supports the vanilla base type (FERTILIZER or LIQUIDFERTILIZER), it now also
+  returns `true` for the matching custom type.
+
+### Improved
+
+- **Soil map overlay fills entire field polygon**: The overlay previously placed a single dot at
+  each field's centroid. It now fills the full field area with a 15-metre grid of coloured tiles
+  so field boundaries are clearly visible on the map. Field polygon vertices are read from the
+  i3d scene via `Field.polygonPoints`; a ray-casting point-in-polygon test filters out grid
+  positions outside the boundary. Polygon points are cached per-field and invalidated on layer
+  switch. Dot size reduced from 14 px to 10 px; per-tile borders removed for performance.
+  `MAX_POINTS` raised from 850 to 3000 to accommodate larger maps.
+
+---
+
 ## [1.8.6.0] - 2026-04-16
 
 ### Fixed
