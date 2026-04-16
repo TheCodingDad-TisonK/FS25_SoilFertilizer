@@ -257,7 +257,7 @@
   "v1.8.4.0": {
     "published_at": "2026-04-13T17:44:21Z",
     "tag": "v1.8.4.0",
-    "peak_downloads": 111
+    "peak_downloads": 112
   },
   "v1.8.5.0": {
     "published_at": "2026-04-15T21:03:48Z",
@@ -267,6 +267,11 @@
   "v1.8.6.0": {
     "published_at": "2026-04-16T14:12:40Z",
     "tag": "v1.8.6.0",
-    "peak_downloads": 30
+    "peak_downloads": 46
+  },
+  "v1.8.7.0": {
+    "published_at": "2026-04-16T17:56:57Z",
+    "tag": "v1.8.7.0",
+    "peak_downloads": 0
   }
 }
