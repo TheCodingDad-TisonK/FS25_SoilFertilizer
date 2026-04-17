@@ -190,33 +190,58 @@ The interactive **Soil Map overlay** lives in the native PDA Map (ESC → Map). 
 
 ## ⚙️ Settings
 
-Open via **ESC → Settings → Game Settings → Soil & Fertilizer**.
+Settings are split across two places.
+
+### ESC → Settings → Game Settings → Soil & Fertilizer
+
+Three core settings live here so you can reach them quickly:
 
 | Setting | Options | What it does |
 |---|---|---|
 | **Enable mod** | On / Off | Stops all simulation when off |
+| **Notifications** | On / Off | Pop-up alerts when fields get critically low |
+| **Debug mode** | On / Off | Verbose logging to the game log |
+
+### SHIFT+O — Full Settings Panel
+
+Press **`Shift+O`** anywhere in-game (on foot or in a vehicle) to open the full settings panel. Settings are organised into three categories:
+
+**🌱 Simulation** — controls the core simulation behaviour
+
+| Setting | Options | What it does |
+|---|---|---|
 | **Fertility system** | On / Off | Toggles the entire nutrient and pH simulation |
 | **Nutrient cycles** | On / Off | Enables crop depletion and natural recovery |
 | **Fertilizer costs** | On / Off | Adds running costs to fertilizer application |
-| **Notifications** | On / Off | Pop-up alerts when fields get critically low |
-| **Seasonal effects** | On / Off | Spring boost and fall nitrogen loss |
+| **Seasonal effects** | On / Off | Spring nitrogen boost and fall nitrogen loss |
 | **Rain effects** | On / Off | Leaching and pH acidification from rain |
 | **Plowing bonus** | On / Off | Whether plowing improves OM and pH |
-| **Weed pressure** | On / Off | Track weed competition per field — apply herbicide to reduce |
-| **Pest pressure** | On / Off | Track insect pest populations per field — apply insecticide to reduce |
-| **Disease pressure** | On / Off | Track crop disease per field — apply fungicide to reduce |
-| **Crop rotation** | On / Off | Enable legume rotation bonus and mono-crop fatigue multiplier |
+| **Weed pressure** | On / Off | Track weed competition per field |
+| **Pest pressure** | On / Off | Track insect pest populations per field |
+| **Disease pressure** | On / Off | Track crop disease per field |
+| **Crop rotation** | On / Off | Enable legume bonus and mono-crop fatigue multiplier |
+| **Imperial units** | On / Off | Sprayer rates in gal/ac and lb/ac instead of L/ha and kg/ha |
 | **Difficulty** | Simple / Realistic / Hardcore | Scales depletion rate — 0.7× / 1× / 1.5× |
+
+**🖥️ Display / HUD** — controls what you see on screen
+
+| Setting | Options | What it does |
+|---|---|---|
 | **HUD enabled** | On / Off | Show or hide the soil overlay |
-| **HUD position** | 6 options | Top-right, top-left, bottom-right, bottom-left, centre-right, or custom (drag to any position) |
+| **HUD position** | 6 options | Top-right, top-left, bottom-right, bottom-left, centre-right, or custom |
 | **HUD colour theme** | 4 themes | Green / Blue / Amber / Mono |
-| **HUD transparency** | Clear → Solid | 5 levels from 25% to 100% opacity |
+| **HUD transparency** | Clear → Solid | 5 opacity levels |
 | **HUD font size** | Small / Medium / Large | Scales all HUD text |
-| **Use imperial units** | On / Off | Sprayer rate shown in gal/ac and lb/ac instead of L/ha and kg/ha |
-| **Auto rate control** | On / Off | Sprayer rate automatically adjusts toward the target application rate for the current product |
+| **Auto rate control** | On / Off | Sprayer rate auto-adjusts toward the target rate for the current product |
+
+**🗺️ Map** — controls the PDA map overlay
+
+| Setting | Options | What it does |
+|---|---|---|
+| **Active map layer** | N / P / K / pH / OM / Weed / Pest / Disease | Nutrient layer shown on the PDA map |
 
 > [!NOTE]
-> In multiplayer, settings are **server-authoritative** — the host's settings are pushed to all clients on join. Clients cannot override locked settings.
+> In multiplayer, settings are **server-authoritative** — the host's settings are pushed to all clients on join. Non-admin clients can see but not change server settings. HUD display preferences are always local and can be changed by any player.
 
 ---
 
@@ -284,8 +309,9 @@ All integrations are detected automatically at runtime and fail gracefully if th
 4. Apply lime first — it unlocks the full value of everything else
 5. Apply fertilizer → watch N/P/K climb in real time
 6. Press K → open the full farm soil report sorted by urgency
-7. Let a field go fallow for a season → it slowly recovers on its own
-8. At harvest → healthy soil means the full yield you worked for
+7. Press Shift+O → open the full settings panel to tune the simulation
+8. Let a field go fallow for a season → it slowly recovers on its own
+9. At harvest → healthy soil means the full yield you worked for
 ```
 
 > [!TIP]
@@ -317,7 +343,7 @@ This mod is licensed under **[CC BY-NC-ND 4.0](https://creativecommons.org/licen
 
 You may share it in its original form with attribution. You may not sell it, modify and redistribute it, or reupload it under a different name or authorship. Contributions via pull request are explicitly permitted and encouraged.
 
-**Author:** TisonK &nbsp;·&nbsp; **Version:** 1.8.8.0
+**Author:** TisonK &nbsp;·&nbsp; **Version:** 1.9.0.0
 
 © 2026 TisonK — See [LICENSE](LICENSE) for full terms.
 

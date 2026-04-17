@@ -71,6 +71,9 @@
     <e k="sf_hud_trans_5" v="Solid" eh="e41480b6" />
     <e k="sf_use_imperial_short" v="Imperial Units" eh="ff2701ad" />
     <e k="sf_use_imperial_long" v="Show application rates in gal/ac and lb/ac (off = L/ha and kg/ha)" eh="17efa489" />
+    <e k="sf_active_map_layer_short" v="Active Map Layer" />
+    <e k="sf_active_map_layer_long" v="Nutrient layer shown as overlay in the PDA map" />
+    <e k="input_SF_OPEN_SETTINGS" v="Open Soil Settings" />
     <e k="sf_reset" v="Reset Soil Settings" eh="467bc2f5" />
     <e k="input_SF_TOGGLE_HUD" v="Toggle Soil HUD" eh="f0224a10" />
     <e k="input_SF_SOIL_REPORT" v="Soil Report" eh="c33180ef" />
