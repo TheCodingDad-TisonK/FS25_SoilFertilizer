@@ -123,6 +123,14 @@ function HookManager:installAll(soilSystem)
     local purchaseRefillOk = self:installPurchaseRefillHook()
     if purchaseRefillOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
+    -- Fix AI external fill: prevent empty-tank fallback to vanilla FERTILIZER for our types
+    local extFillOk = self:installExternalFillHook()
+    if extFillOk then successCount = successCount + 1 else failCount = failCount + 1 end
+
+    -- Fix fill plane and fill volume texture for custom fill types
+    local fillMatOk = self:installFillTypeMaterialHook()
+    if fillMatOk then successCount = successCount + 1 else failCount = failCount + 1 end
+
     SoilLogger.info("Hook installation complete: %d/%d successful, %d failed",
         successCount, successCount + failCount, failCount)
 
@@ -325,6 +333,7 @@ function HookManager:installEffectTypeHook()
     end
     if liqIdx then
         for _, name in ipairs({ "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME",
+                                 "INSECTICIDE", "FUNGICIDE",
                                  "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH" }) do
             local idx = fm:getFillTypeIndexByName(name)
             if idx then remap[idx] = liqIdx end
@@ -479,6 +488,7 @@ function HookManager:installSprayTypeEffectsHook()
                           "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM" }
     -- Liquid custom types visually match LIQUIDFERTILIZER spraying
     local liquidNames = { "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME",
+                          "INSECTICIDE", "FUNGICIDE",
                           "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH" }
 
     -- Shared helper: walk a vehicle's sprayType entries and inject our names
@@ -788,6 +798,13 @@ function HookManager:installSprayerAreaHook()
                     local spx, _, spz = getWorldTranslation(self.rootNode)
                     g_SoilFertilityManager.soilSystem._lastSprayX = spx
                     g_SoilFertilityManager.soilSystem._lastSprayZ = spz
+                end
+
+                -- Track last custom fill type so getExternalFill hook can identify the
+                -- intended product when the tank hits empty (fillType becomes UNKNOWN).
+                local _hm = g_SoilFertilityManager.hookManager
+                if _hm and _hm.customFillTypePrices and _hm.customFillTypePrices[fillTypeIndex] then
+                    self._soilLastCustomFillType = fillTypeIndex
                 end
 
                 if isFertilizer then
@@ -1454,5 +1471,172 @@ function HookManager:installPurchaseRefillHook()
     self.customFillTypePrices = customPrices
 
     SoilLogger.info("[OK] Purchase refill hook installed - BUY mode enabled for %d custom fill types", count)
+    return true
+end
+
+-- =========================================================
+-- HOOK 9: Fix AI "external fill" for custom fertilizer types
+-- =========================================================
+-- When getIsSprayerExternallyFilled() returns true (AI + helperBuyFertilizer) and the
+-- vehicle's tank is empty (fillType == FillType.UNKNOWN), FS25's getExternalFill
+-- matches the condition:
+--   (fillType == UNKNOWN and (allowLiquidFertilizer or allowFertilizer or allowHerbicide))
+-- Because we patched the fill unit to also accept vanilla FERTILIZER/LIQUIDFERTILIZER
+-- (via installFillUnitHook), allowFertilizer == true even on a spreader loaded with UREA.
+-- getExternalFill then returns vanilla FERTILIZER with buy-mode charging — silently
+-- applying the wrong product to the terrain density map.
+--
+-- Fix: wrap getExternalFill. When fillType is one of our custom types (direct match),
+-- OR fillType == UNKNOWN but the vehicle was last spraying a custom type
+-- (_soilLastCustomFillType), intercept:
+--   • Buy mode active → charge our price (1.5× AI premium), return our custom type.
+--   • Buy mode inactive → return (UNKNOWN, 0) so the AI stops rather than falling
+--     through to vanilla FERTILIZER.
+---@return boolean success
+function HookManager:installExternalFillHook()
+    if not Sprayer or type(Sprayer.getExternalFill) ~= "function" then
+        SoilLogger.warning("External fill hook: Sprayer.getExternalFill not available - skipping")
+        return false
+    end
+
+    local original = Sprayer.getExternalFill
+
+    Sprayer.getExternalFill = function(sprayerSelf, fillType, dt)
+        local hookMgr = g_SoilFertilityManager and g_SoilFertilityManager.hookManager
+        local prices  = hookMgr and hookMgr.customFillTypePrices
+
+        if not prices then
+            return original(sprayerSelf, fillType, dt)
+        end
+
+        -- Identify the intended custom product
+        local customIdx = nil
+        if fillType and fillType ~= FillType.UNKNOWN and prices[fillType] then
+            customIdx = fillType
+        elseif (not fillType or fillType == FillType.UNKNOWN) and sprayerSelf._soilLastCustomFillType then
+            customIdx = sprayerSelf._soilLastCustomFillType
+        end
+
+        if not customIdx then
+            return original(sprayerSelf, fillType, dt)
+        end
+
+        local mi = g_currentMission and g_currentMission.missionInfo
+        if not mi then
+            return FillType.UNKNOWN, 0
+        end
+
+        local fm = g_fillTypeManager
+        local ft = fm and fm:getFillTypeByIndex(customIdx)
+        local ftName = ft and ft.name or ""
+
+        local buyActive = false
+        if ftName == "LIQUIDMANURE" or ftName == "DIGESTATE" then
+            buyActive = (mi.helperSlurrySource == 2)
+        elseif ftName == "MANURE" then
+            buyActive = (mi.helperManureSource == 2)
+        else
+            buyActive = (mi.helperBuyFertilizer == true)
+        end
+
+        if not buyActive then
+            -- No buy mode: don't fall through to vanilla FERTILIZER; AI stops when empty.
+            return FillType.UNKNOWN, 0
+        end
+
+        -- Buy mode active: charge our price and return the custom type so the
+        -- correct product is written to the terrain density map.
+        local usage = sprayerSelf:getSprayerUsage(customIdx, dt)
+        if sprayerSelf.isServer and usage > 0 then
+            local pricePerLiter = prices[customIdx] or 1.0
+            local price = usage * pricePerLiter * 1.5  -- 1.5× AI premium (matches vanilla)
+            local farmId = sprayerSelf:getActiveFarm()
+            local statsFarmId = farmId
+            pcall(function() statsFarmId = sprayerSelf:getLastTouchedFarmlandFarmId() end)
+            pcall(function()
+                g_farmManager:updateFarmStats(statsFarmId, "expenses", price)
+                g_currentMission:addMoney(-price, farmId, MoneyType.PURCHASE_FERTILIZER)
+            end)
+            SoilLogger.debug("ExternalFill BUY: veh=%d type=%s liters=%.2f price=%.2f",
+                sprayerSelf.id or 0, ftName, usage, price)
+        end
+
+        return customIdx, usage
+    end
+
+    self:register(Sprayer, "getExternalFill", original, "Sprayer.getExternalFill")
+    SoilLogger.info("[OK] External fill hook installed (Sprayer.getExternalFill)")
+    return true
+end
+
+-- =========================================================
+-- HOOK 10: Fix fill plane and fill volume texture for custom types
+-- =========================================================
+-- updateFillUnitFillPlane (FillUnit) and FillVolume:onUpdate both call:
+--   g_fillTypeManager:getTextureArrayIndexByFillTypeIndex(fillType)
+-- to set the "fillTypeId" shader parameter that selects which texture in the
+-- terrain fill-type array is shown on the fill plane / fill volume mesh.
+-- Custom fill types are not registered with texture array entries, so the
+-- call returns nil and the visual never updates — the fill plane and hopper
+-- mesh stay on whatever they showed before (or show nothing/wrong colour).
+--
+-- Fix: wrap getTextureArrayIndexByFillTypeIndex. When the index belongs to one
+-- of our custom types and the original returns nil, remap to the vanilla
+-- equivalent (FERTILIZER for solid types, LIQUIDFERTILIZER for liquid types)
+-- and return its texture array index. Purely cosmetic — nutrient tracking is
+-- unaffected.
+---@return boolean success
+function HookManager:installFillTypeMaterialHook()
+    if not g_fillTypeManager or type(g_fillTypeManager.getTextureArrayIndexByFillTypeIndex) ~= "function" then
+        SoilLogger.warning("Fill type material hook: getTextureArrayIndexByFillTypeIndex not available - skipping")
+        return false
+    end
+
+    local fm = g_fillTypeManager
+    local fertIdx    = fm:getFillTypeIndexByName("FERTILIZER")
+    local liqFertIdx = fm:getFillTypeIndexByName("LIQUIDFERTILIZER")
+
+    local remap = {}
+    if fertIdx then
+        for _, name in ipairs({ "UREA", "AMS", "MAP", "DAP", "POTASH",
+                                 "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM" }) do
+            local idx = fm:getFillTypeIndexByName(name)
+            if idx then remap[idx] = fertIdx end
+        end
+    end
+    if liqFertIdx then
+        for _, name in ipairs({ "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME",
+                                 "INSECTICIDE", "FUNGICIDE",
+                                 "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH" }) do
+            local idx = fm:getFillTypeIndexByName(name)
+            if idx then remap[idx] = liqFertIdx end
+        end
+    end
+
+    if not next(remap) then
+        SoilLogger.warning("Fill type material hook: no custom fill types found — skipping")
+        return false
+    end
+
+    local count = 0
+    for _ in pairs(remap) do count = count + 1 end
+
+    local origGetTexIdx = fm.getTextureArrayIndexByFillTypeIndex
+    fm.getTextureArrayIndexByFillTypeIndex = function(mgr, fillTypeIndex, ...)
+        local result = origGetTexIdx(mgr, fillTypeIndex, ...)
+        if result == nil and fillTypeIndex then
+            local mapped = remap[fillTypeIndex]
+            if mapped then
+                result = origGetTexIdx(mgr, mapped, ...)
+            end
+        end
+        return result
+    end
+
+    self:registerCleanup("g_fillTypeManager.getTextureArrayIndexByFillTypeIndex", function()
+        fm.getTextureArrayIndexByFillTypeIndex = origGetTexIdx
+    end)
+
+    SoilLogger.info("[OK] Fill type material hook installed - %d custom types mapped to vanilla textures", count)
     return true
 end
