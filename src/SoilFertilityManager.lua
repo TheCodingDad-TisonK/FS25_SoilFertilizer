@@ -112,6 +112,12 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
             SoilLogger.info("Soil Map Overlay created")
         end
 
+        -- Settings panel (SHIFT+O)
+        if SoilSettingsPanel then
+            self.settingsPanel = SoilSettingsPanel.new(self.settings)
+            SoilLogger.info("Settings panel created")
+        end
+
         -- Hook PlayerInputComponent.registerActionEvents to register J/K in the PLAYER context.
         -- PLAYER context is reused (not recreated) when the player returns on foot, so these
         -- events persist across vehicle entry/exit cycles.
@@ -169,6 +175,20 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
                         g_SoilFertilityManager.cycleMapLayerEventId = mapId
                         g_inputBinding:setActionEventTextVisibility(mapId, false)
                         SoilLogger.info("Map layer cycle (Shift+M) registered in PLAYER context")
+                    end
+                end
+
+                -- Settings panel (Shift+O) — registered in PLAYER context
+                if g_SoilFertilityManager.settingsPanel then
+                    local spOk, spId = g_inputBinding:registerActionEvent(
+                        InputAction.SF_OPEN_SETTINGS, g_SoilFertilityManager,
+                        g_SoilFertilityManager.onOpenSettingsInput,
+                        false, true, false, true
+                    )
+                    if spOk and spId then
+                        g_SoilFertilityManager.settingsPanelEventId = spId
+                        g_inputBinding:setActionEventTextVisibility(spId, false)
+                        SoilLogger.info("Settings panel (Shift+O) registered in PLAYER context")
                     end
                 end
 
@@ -269,6 +289,20 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
                     SoilLogger.info("Auto toggle (Shift+L) registered in VEHICLE context")
                 end
 
+                -- Settings panel (Shift+O) in VEHICLE context
+                if g_SoilFertilityManager.settingsPanel then
+                    local vSpOk, vSpId = binding:registerActionEvent(
+                        InputAction.SF_OPEN_SETTINGS, g_SoilFertilityManager,
+                        g_SoilFertilityManager.onOpenSettingsInput,
+                        false, true, false, true
+                    )
+                    if vSpOk and vSpId then
+                        g_SoilFertilityManager.vehicleSettingsPanelEventId = vSpId
+                        binding:setActionEventTextVisibility(vSpId, false)
+                        SoilLogger.info("Settings panel (Shift+O) registered in VEHICLE context")
+                    end
+                end
+
                 binding:endActionEventsModification()
                 _soilVehicleHookActive = false
             end
@@ -314,6 +348,10 @@ function SoilFertilityManager:onMissionLoaded()
         if self.soilHUD then
             self.soilHUD:initialize()
             self.soilHUD:loadLayout()
+        end
+
+        if self.settingsPanel then
+            self.settingsPanel:initialize()
         end
 
         -- Defer soil system initialization (hook installation) until game is ready
@@ -434,6 +472,13 @@ end
 function SoilFertilityManager:onToggleHUDInput()
     if self.soilHUD then
         self.soilHUD:toggleVisibility()
+    end
+end
+
+-- Input callback for Settings Panel (Shift+O)
+function SoilFertilityManager:onOpenSettingsInput()
+    if self.settingsPanel then
+        self.settingsPanel:toggle()
     end
 end
 
@@ -715,6 +760,11 @@ function SoilFertilityManager:update(dt)
         end
     end
 
+    -- Settings panel camera-lock and cursor keepalive
+    if self.settingsPanel then
+        self.settingsPanel:update()
+    end
+
     -- Auto-rate control: adjust sprayer rate based on current field soil data
     self:updateAutoRates(dt)
 end
@@ -967,6 +1017,11 @@ function SoilFertilityManager:delete()
         self.soilHUD:saveLayout()
         self.soilHUD:delete()
         self.soilHUD = nil
+    end
+
+    if self.settingsPanel then
+        self.settingsPanel:delete()
+        self.settingsPanel = nil
     end
 
     if self.soilSystem then

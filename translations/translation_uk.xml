@@ -71,6 +71,9 @@
     <e k="sf_hud_trans_5" v="Суцільний" eh="e41480b6" />
     <e k="sf_use_imperial_short" v="Імперські одиниці" eh="ff2701ad" />
     <e k="sf_use_imperial_long" v="Показувати норми у gal/ac і lb/ac (вимк. = L/ha і kg/ha)" eh="17efa489" />
+    <e k="sf_active_map_layer_short" v="Active Map Layer" />
+    <e k="sf_active_map_layer_long" v="Nutrient layer shown as overlay in the PDA map" />
+    <e k="input_SF_OPEN_SETTINGS" v="Open Soil Settings" />
     <e k="sf_reset" v="Скинути налаштування ґрунту" eh="467bc2f5" />
     <e k="input_SF_TOGGLE_HUD" v="Перемкнути HUD ґрунту" eh="f0224a10" />
     <e k="input_SF_SOIL_REPORT" v="Звіт про ґрунт" eh="c33180ef" />

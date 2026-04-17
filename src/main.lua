@@ -57,6 +57,7 @@ source(modDirectory .. "src/hooks/SoilMapHooks.lua")
 source(modDirectory .. "src/ui/SoilPDAScreen.lua")
 source(modDirectory .. "src/ui/SoilFieldDetailDialog.lua")
 source(modDirectory .. "src/ui/SoilTreatmentDialog.lua")
+source(modDirectory .. "src/ui/SoilSettingsPanel.lua")
 
 -- 5. Network
 source(modDirectory .. "src/network/NetworkEvents.lua")
@@ -246,10 +247,14 @@ FSBaseMission.update = Utils.appendedFunction(FSBaseMission.update, function(mis
     end
 end)
 
--- Hook draw for HUD — guard isRunning so we stop drawing once teardown begins
+-- Hook draw for HUD and settings panel
 FSBaseMission.draw = Utils.appendedFunction(FSBaseMission.draw, function(mission)
-    if sfm and sfm.soilHUD and mission.isRunning then
+    if not mission.isRunning then return end
+    if sfm and sfm.soilHUD then
         sfm.soilHUD:draw()
+    end
+    if sfm and sfm.settingsPanel then
+        sfm.settingsPanel:draw()
     end
 end)
 
@@ -289,6 +294,12 @@ end
 -- (e.g. player controller on foot), breaking cursor activation on foot.
 local soilMouseHandler = {}
 function soilMouseHandler:mouseEvent(posX, posY, isDown, isUp, button, eventUsed)
+    -- Settings panel eats input first when open
+    if sfm and sfm.settingsPanel and sfm.settingsPanel:isOpen() then
+        local consumed = sfm.settingsPanel:onMouseEvent(posX, posY, isDown, isUp, button, eventUsed)
+        eventUsed = consumed or eventUsed
+        return eventUsed
+    end
     if sfm and sfm.soilHUD then
         local consumed = sfm.soilHUD:onMouseEvent(posX, posY, isDown, isUp, button, eventUsed)
         eventUsed = consumed or eventUsed

@@ -84,6 +84,9 @@
     <e k="sf_hud_hint_normal" v="RMT: bewegen/Größe ändern" eh="afc8f13b" />
     <e k="sf_use_imperial_short" v="Imperiale Einheiten" eh="ff2701ad" />
     <e k="sf_use_imperial_long" v="Ausbringmengen in gal/ac und lb/ac (aus = L/ha und kg/ha)" eh="17efa489" />
+    <e k="sf_active_map_layer_short" v="Active Map Layer" />
+    <e k="sf_active_map_layer_long" v="Nutrient layer shown as overlay in the PDA map" />
+    <e k="input_SF_OPEN_SETTINGS" v="Open Soil Settings" />
     <e k="sf_reset" v="Bodeneinstellungen zurücksetzen" eh="467bc2f5" />
     <e k="input_SF_TOGGLE_HUD" v="Boden-HUD umschalten" eh="f0224a10" />
     <e k="input_SF_SOIL_REPORT" v="Bodenbericht" eh="c33180ef" />

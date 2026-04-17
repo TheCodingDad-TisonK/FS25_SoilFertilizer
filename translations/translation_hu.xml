@@ -84,6 +84,9 @@
     <e k="sf_hud_hint_normal" v="RMB: move/resize" eh="afc8f13b" />
     <e k="sf_use_imperial_short" v="Angolszász mértékegységek" eh="ff2701ad" />
     <e k="sf_use_imperial_long" v="Kijuttatási normák gal/ac és lb/ac egységben (ki = L/ha és kg/ha)" eh="17efa489" />
+    <e k="sf_active_map_layer_short" v="Active Map Layer" />
+    <e k="sf_active_map_layer_long" v="Nutrient layer shown as overlay in the PDA map" />
+    <e k="input_SF_OPEN_SETTINGS" v="Open Soil Settings" />
     <e k="sf_reset" v="Talajbeállítások alaphelyzetbe állítása" eh="467bc2f5" />
     <e k="input_SF_TOGGLE_HUD" v="Talaj HUD váltása" eh="f0224a10" />
     <e k="input_SF_SOIL_REPORT" v="Talajjelentés" eh="c33180ef" />

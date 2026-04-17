@@ -84,6 +84,9 @@
     <e k="sf_hud_hint_normal" v="右鍵：移動/縮放" eh="afc8f13b" />
     <e k="sf_use_imperial_short" v="英制單位" eh="ff2701ad" />
     <e k="sf_use_imperial_long" v="以 gal/ac 和 lb/ac 顯示施用量（關閉則為 L/ha 和 kg/ha）" eh="17efa489" />
+    <e k="sf_active_map_layer_short" v="Active Map Layer" />
+    <e k="sf_active_map_layer_long" v="Nutrient layer shown as overlay in the PDA map" />
+    <e k="input_SF_OPEN_SETTINGS" v="Open Soil Settings" />
     <e k="sf_reset" v="重置土壤設置" eh="467bc2f5" />
     <e k="input_SF_TOGGLE_HUD" v="切換土壤 HUD" eh="f0224a10" />
     <e k="input_SF_SOIL_REPORT" v="土壤報告" eh="c33180ef" />
