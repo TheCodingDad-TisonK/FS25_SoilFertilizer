@@ -55,26 +55,7 @@
           </GuiElement>
         </GuiElement>
 
-        <!-- SIDEBAR B: Simple jump list shown on Map tab -->
-        <GuiElement id="sidebarMap" position="0px 0px" width="420px" height="640px" visible="false">
-          <Text profile="sf_sectionHeader" text="$l10n_sf_pda_tab_fields" position="10px -10px"/>
-          <Text profile="sf_subHeader" text="$l10n_sf_pda_map_jump_hint" position="10px -38px" size="400px 22px"/>
-          <GuiElement position="0px -65px" width="420px" height="555px">
-            <SmoothList id="sidebarMapList" profile="sf_smoothList"
-                        startClipperElementName="sideMapStart"
-                        endClipperElementName="sideMapEnd">
-              <ListItem profile="sf_listRow" onClick="onClickMapJumpRow">
-                <Bitmap profile="sf_rowBg" name="alternating"/>
-                <Text profile="sf_cellLeft"  name="jumpRowId"     size="90px  28px"/>
-                <Text profile="sf_cellRight" name="jumpRowStatus" position="100px 0" size="310px 28px"/>
-              </ListItem>
-            </SmoothList>
-            <Bitmap profile="fs25_secondaryMenuStartClipper" name="sideMapStart"/>
-            <Bitmap profile="fs25_secondaryMenuStopClipper"  name="sideMapEnd"/>
-          </GuiElement>
-        </GuiElement>
-
-        <!-- SIDEBAR C: Treatment summary shown on Treatment tab -->
+        <!-- SIDEBAR B: Treatment summary shown on Treatment tab -->
         <GuiElement id="sidebarTreatment" position="0px 0px" width="420px" height="640px" visible="false">
           <Text profile="sf_sectionHeader" text="$l10n_sf_pda_section_attention" position="10px -10px"/>
           <ThreePartBitmap width="400px" height="220px" position="10px -42px">
@@ -140,19 +121,12 @@
               position="0px 350px" size="1000px 40px" visible="false"/>
       </GuiElement>
 
-      <!-- TAB 2: SOIL MAP -->
-      <GuiElement id="mapContent" position="0px 0px" width="1000px" height="668px" visible="false">
-        <Text profile="sf_sectionHeader" text="$l10n_sf_pda_map_section_title" position="0px 658px"/>
-        <InGameMapPreview profile="sf_soilMiniMapFull" id="soilMiniMap"/>
-      </GuiElement>
-
-      <!-- TAB 3: TREATMENT PLAN -->
+      <!-- TAB 2: TREATMENT PLAN -->
       <GuiElement id="treatmentContent" position="0px 0px" width="1000px" height="668px" visible="false">
         <Text profile="sf_sectionHeader" text="$l10n_sf_pda_treatment_section_title" position="0px 648px"/>
         <Text profile="sf_colHeader"      text="$l10n_sf_pda_col_field"    position="8px   618px" size="80px  24px"/>
         <Text profile="sf_colHeader"      text="$l10n_sf_pda_col_priority" position="90px  618px" size="120px 24px"/>
-        <Text profile="sf_colHeader"      text="$l10n_sf_pda_col_needs"    position="220px 618px" size="560px 24px"/>
-        <Text profile="sf_colHeader"      text="$l10n_sf_pda_col_status"   position="790px 618px" size="170px 24px"/>
+        <Text profile="sf_colHeader"      text="$l10n_sf_pda_col_needs"    position="220px 618px" size="740px 24px"/>
         <GuiElement id="treatmentListContainer" position="0px 100px" width="1000px" height="508px">
           <SmoothList id="treatmentList" profile="sf_smoothList"
                       startClipperElementName="tlStart"
@@ -175,14 +149,12 @@
               position="0px 350px" size="1000px 40px" visible="false"/>
       </GuiElement>
 
-      <!-- Tab bar — 3 tabs, evenly spaced -->
+      <!-- Tab bar — 2 tabs, evenly spaced -->
       <GuiElement id="tabBar" profile="emptyPanel" position="0px 668px" width="1000px" height="58px">
-        <Text   profile="sf_tabLabel"     id="tabLabelOverview"      text="$l10n_sf_pda_section_farm_overview" onClick="onClickTabOverview"   position="0px   30px" size="333px 28px"/>
-        <Bitmap profile="sf_tabUnderline" id="tabUnderlineOverview"                                                                            position="0px   28px" size="333px 2px"/>
-        <Text   profile="sf_tabLabel"     id="tabLabelMap"           text="$l10n_sf_pda_tab_map"               onClick="onClickTabMap"         position="333px 30px" size="334px 28px"/>
-        <Bitmap profile="sf_tabUnderline" id="tabUnderlineMap"                                                                                  position="333px 28px" size="334px 2px" visible="false"/>
-        <Text   profile="sf_tabLabel"     id="tabLabelTreatment"     text="$l10n_sf_pda_tab_treatment"         onClick="onClickTabTreatment"   position="667px 30px" size="333px 28px"/>
-        <Bitmap profile="sf_tabUnderline" id="tabUnderlineTreatment"                                                                            position="667px 28px" size="333px 2px" visible="false"/>
+        <Text   profile="sf_tabLabel"     id="tabLabelOverview"      text="$l10n_sf_pda_section_farm_overview" onClick="onClickTabOverview"   position="0px   30px" size="500px 28px"/>
+        <Bitmap profile="sf_tabUnderline" id="tabUnderlineOverview"                                                                            position="0px   28px" size="500px 2px"/>
+        <Text   profile="sf_tabLabel"     id="tabLabelTreatment"     text="$l10n_sf_pda_tab_treatment"         onClick="onClickTabTreatment"   position="500px 30px" size="500px 28px"/>
+        <Bitmap profile="sf_tabUnderline" id="tabUnderlineTreatment"                                                                            position="500px 28px" size="500px 2px" visible="false"/>
       </GuiElement>
 
       <Bitmap profile="sf_tabDivider" position="0px 666px" size="1000px 2px"/>
@@ -191,10 +163,6 @@
   </GuiElement><!-- closes menuContainer -->
 
   <GUIProfiles>
-    <Profile name="sf_soilMiniMapFull" extends="baseReference">
-      <size value="960px 380px"/>
-      <position value="0px 70px"/>
-    </Profile>
     <Profile name="SF_IconMenu" extends="baseReference" with="anchorMiddleCenter">
       <size value="50px 50px"/>
       <imageSliceId value="noSlice"/>
@@ -253,51 +221,6 @@
       <textSize value="16px"/>
       <textBold value="true"/>
       <textColor value="0.35 0.85 0.40 1.0"/>
-    </Profile>
-    <Profile name="sf_legendBlock" extends="fs25_textDefault" with="anchorTopLeft">
-      <textSize value="14px"/>
-    </Profile>
-    <Profile name="sf_legendLabel" extends="fs25_textDefault" with="anchorTopLeft">
-      <textSize value="14px"/>
-      <textColor value="$preset_colorWhite"/>
-    </Profile>
-    <Profile name="sf_colHeader" extends="fs25_textDefault" with="anchorTopLeft">
-      <textSize value="13px"/>
-      <textBold value="true"/>
-      <textUpperCase value="true"/>
-      <textColor value="$preset_colorWhite_50"/>
-      <textAlignment value="left"/>
-    </Profile>
-    <Profile name="sf_colHeaderRight" extends="sf_colHeader">
-      <textAlignment value="right"/>
-    </Profile>
-    <Profile name="sf_smoothList" extends="emptyPanel" with="anchorStretchingYLeft pivotTopLeft"/>
-    <Profile name="sf_listRow" extends="emptyPanel" with="anchorTopStretchingX pivotTopLeft">
-      <height value="28px"/>
-    </Profile>
-    <Profile name="sf_rowBg" extends="baseReference" with="anchorStretchingYStretchingX">
-      <imageColor value="$preset_fs25_colorGrey"/>
-      <imageSelectedColor value="0.25 0.65 0.30 0.9"/>
-      <alternateBackgroundColor value="$preset_fs25_colorGreyDark_50"/>
-    </Profile>
-    <Profile name="sf_cellLeft" extends="fs25_textDefault" with="anchorStretchingYLeft">
-      <position value="8px 0"/>
-      <textSize value="13px"/>
-      <textAlignment value="left"/>
-      <textColor value="$preset_fs25_colorMainLight"/>
-      <textSelectedColor value="$preset_fs25_colorMainDark"/>
-    </Profile>
-    <Profile name="sf_cellRight" extends="sf_cellLeft">
-      <textAlignment value="right"/>
-    </Profile>
-    <Profile name="sf_emptyHint" extends="fs25_textDefault" with="anchorTopLeft">
-      <textSize value="14px"/>
-      <textAlignment value="center"/>
-      <textColor value="$preset_colorWhite_50"/>
-    </Profile>
-  </GUIProfiles>
-</GUI>
-or value="0.35 0.85 0.40 1.0"/>
     </Profile>
     <Profile name="sf_legendBlock" extends="fs25_textDefault" with="anchorTopLeft">
       <textSize value="14px"/>

@@ -147,22 +147,31 @@ function SoilMapFrame:_injectMenuButton(frame)
         self._pdaButton = {
             inputAction = InputAction.MENU_EXTRA_1,
             text = tr("sf_pda_open_btn", "Open Soil PDA"),
+            -- Defer toggle to next update tick — calling showGui inside a menuButton
+            -- callback fires mid-mouseEvent chain and causes a one-time frame error on return.
             callback = function()
-                if SoilPDAScreen then
-                    SoilPDAScreen.toggle()
+                if SoilPDAScreen and g_currentMission then
+                    local deferred = {}
+                    deferred.update = function(_, _dt)
+                        SoilPDAScreen.toggle()
+                        g_currentMission:removeUpdateable(deferred)
+                    end
+                    g_currentMission:addUpdateable(deferred)
                 end
             end,
             showWhenPaused = true
         }
     end
 
-    if not self._devNoteButton then
-        self._devNoteButton = {
+    if not self._cycleLayerButton then
+        self._cycleLayerButton = {
             inputAction = InputAction.MENU_EXTRA_2,
-            text = tr("sf_pda_btn_help", "Dev Note"),
+            text = tr("sf_map_btn_cycle_layer", "Cycle Layer"),
             callback = function()
-                if SoilHelpDialog then
-                    SoilHelpDialog.show()
+                local smf = g_SoilFertilityManager and g_SoilFertilityManager.soilMapFrame
+                if smf and smf.soilMapOverlay then
+                    smf.soilMapOverlay:cycleLayer()
+                    smf:_syncSelector()
                 end
             end,
             showWhenPaused = true
@@ -170,10 +179,10 @@ function SoilMapFrame:_injectMenuButton(frame)
     end
 
     local pdaExists = false
-    local devNoteExists = false
+    local cycleExists = false
     for _, btn in ipairs(frame.menuButtonInfo) do
         if btn == self._pdaButton then pdaExists = true end
-        if btn == self._devNoteButton then devNoteExists = true end
+        if btn == self._cycleLayerButton then cycleExists = true end
     end
 
     local dirty = false
@@ -181,8 +190,8 @@ function SoilMapFrame:_injectMenuButton(frame)
         table.insert(frame.menuButtonInfo, self._pdaButton)
         dirty = true
     end
-    if not devNoteExists then
-        table.insert(frame.menuButtonInfo, self._devNoteButton)
+    if not cycleExists then
+        table.insert(frame.menuButtonInfo, self._cycleLayerButton)
         dirty = true
     end
 
@@ -392,8 +401,10 @@ function SoilMapFrame:delete()
     -- appendedFunction hooks on InGameMenuMapFrame are class-level and
     -- not individually removable — guard via g_SoilFertilityManager check
     -- inside the closure means they no-op safely after delete().
-    self.layerSelector  = nil
-    self.soilMapOverlay = nil
-    self.settings       = nil
+    self.layerSelector      = nil
+    self._pdaButton         = nil
+    self._cycleLayerButton  = nil
+    self.soilMapOverlay     = nil
+    self.settings           = nil
     SoilLogger.info("[SoilMapFrame] deleted")
 end

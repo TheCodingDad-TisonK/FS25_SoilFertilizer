@@ -398,7 +398,7 @@
     <e k="sf_pda_map_jump_hint" v="Click a field to jump to it on the map" eh="006d5371" />
     <e k="sf_pda_map_native_hint" v="The soil layer visualization has moved! You can now access and toggle all soil layers directly from the native PDA Map sidebar (ESC &gt; Map). Look for the 'Soil Layers' category in the sidebar dots." eh="87f73b10" />
     <e k="sf_pda_map_open_btn" v="DEV NOTE" eh="ef40b93f" />
-    <e k="sf_pda_btn_help" v="Dev Note" eh="5320d63f" />
+    <e k="sf_pda_btn_help" v="Help" />
     <e k="sf_pda_help_text" v="Hi there, it's me the developer! I've moved the soil map layers to the native PDA Map (ESC &gt; Map) for a more seamless experience. You can now select layers directly from the sidebar. The PDA page is still being polished, so stay tuned for more updates!" eh="58e05bdf" />
     <e k="sf_pda_help_github" v="YOUR FEEDBACK MATTERS! If you encounter any bugs, have suggestions for new features, or want to contribute to the code, please visit the project on GitHub. You can open an Issue or a Pull Request at any time to help make this mod better for everyone. Thank you for testing!" eh="3a10b023" />
     <e k="sf_pda_help_note" v="Note: The soil layers tab on the map page is NOT WORKING. Im aware of the issue and working on a fix. (which might take some time)" eh="2d8f5dc7" />
@@ -406,6 +406,26 @@
     <e k="sf_map_health_overall" v="Average Soil Health" eh="5533cbe3" />
     <e k="sf_map_btn_report" v="Open Farm Overview" eh="6f0800e8" />
     <e k="sf_map_btn_help" v="Dev Note (NOT WORKING YET)" eh="800e465a" />
+    <e k="sf_map_btn_cycle_layer" v="Cycle Layer" />
+    <e k="sf_map_btn_treatment" v="Treatment Plan" />
+    <e k="sf_map_btn_disable" v="Disable Overlay" />
+    <e k="sf_treat_action_ok" v="OK" />
+    <e k="sf_help_title" v="Soil Quick Reference" />
+    <e k="sf_help_nutrients_header" v="NUTRIENTS" />
+    <e k="sf_help_n" v="N  (Nitrogen)     - Depletes fast. Apply UAN, Urea, or Manure." />
+    <e k="sf_help_p" v="P  (Phosphorus)   - Long-lasting. Apply MAP or DAP." />
+    <e k="sf_help_k" v="K  (Potassium)    - Apply Potash. Important for roots." />
+    <e k="sf_help_om" v="OM (Organic Mat.) - Builds slowly. Plow in manure/compost." />
+    <e k="sf_help_soil_header" v="SOIL CHEMISTRY" />
+    <e k="sf_help_ph" v="pH  6.5-7.0 = Ideal.  < 6.5 apply Lime.  > 7.5 apply Gypsum." />
+    <e k="sf_help_pressure_header" v="CROP PRESSURE" />
+    <e k="sf_help_weed" v="Weed    > 20% - Apply Herbicide." />
+    <e k="sf_help_pest" v="Pest    > 20% - Apply Insecticide." />
+    <e k="sf_help_disease" v="Disease > 20% - Apply Fungicide." />
+    <e k="sf_help_status_header" v="STATUS LEVELS" />
+    <e k="sf_help_good" v="Good - No action needed." />
+    <e k="sf_help_fair" v="Fair - Monitor / preventive top-up." />
+    <e k="sf_help_poor" v="Poor - Immediate treatment required." />
     <!-- Fields Tab -->
     <e k="sf_pda_fields_section_title" v="All Fields" eh="48729e0b" />
     <e k="sf_pda_col_field" v="Field" eh="6f16a5f8" />

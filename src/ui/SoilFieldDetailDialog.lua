@@ -305,14 +305,16 @@ end
 function SoilFieldDetailDialog:_setNutrient(valueEl, statusEl, value, statusStr, suffix)
     suffix = suffix or ""
     if valueEl then
-        valueEl:setText(tostring(value) .. suffix)
+        valueEl:setText(math.floor(value + 0.5) .. suffix)
     end
     if statusEl then
         local label, color
-        if statusStr == "good" then
+        -- Status strings from getFieldInfo are capitalized: "Good"/"Fair"/"Poor"
+        local s = statusStr and statusStr:lower() or "poor"
+        if s == "good" then
             label = tr("sf_pda_status_good", "Good")
             color = COLOR_GOOD
-        elseif statusStr == "fair" then
+        elseif s == "fair" then
             label = tr("sf_pda_status_fair", "Fair")
             color = COLOR_FAIR
         else

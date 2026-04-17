@@ -434,6 +434,26 @@
     <e k="sf_detail_no_field" v="Данные отсутствуют." eh="c6d95d5e" />
     <e k="sf_detail_no_crop" v="Не зафиксировано" eh="a4b5a996" />
     <e k="sf_pda_btn_help" v="Заметка разработчика" />
+    <e k="sf_map_btn_cycle_layer" v="Сменить слой" />
+    <e k="sf_map_btn_treatment" v="План обработки" />
+    <e k="sf_map_btn_disable" v="Отключить слой" />
+    <e k="sf_treat_action_ok" v="OK" />
+    <e k="sf_help_title" v="Soil Quick Reference" />
+    <e k="sf_help_nutrients_header" v="NUTRIENTS" />
+    <e k="sf_help_n" v="N  (Nitrogen)     - Depletes fast. Apply UAN, Urea, or Manure." />
+    <e k="sf_help_p" v="P  (Phosphorus)   - Long-lasting. Apply MAP or DAP." />
+    <e k="sf_help_k" v="K  (Potassium)    - Apply Potash. Important for roots." />
+    <e k="sf_help_om" v="OM (Organic Mat.) - Builds slowly. Plow in manure/compost." />
+    <e k="sf_help_soil_header" v="SOIL CHEMISTRY" />
+    <e k="sf_help_ph" v="pH  6.5-7.0 = Ideal.  < 6.5 apply Lime.  > 7.5 apply Gypsum." />
+    <e k="sf_help_pressure_header" v="CROP PRESSURE" />
+    <e k="sf_help_weed" v="Weed    > 20% - Apply Herbicide." />
+    <e k="sf_help_pest" v="Pest    > 20% - Apply Insecticide." />
+    <e k="sf_help_disease" v="Disease > 20% - Apply Fungicide." />
+    <e k="sf_help_status_header" v="STATUS LEVELS" />
+    <e k="sf_help_good" v="Good - No action needed." />
+    <e k="sf_help_fair" v="Fair - Monitor / preventive top-up." />
+    <e k="sf_help_poor" v="Poor - Immediate treatment required." />
     <e k="sf_pda_help_github" v="ВАШИ ОТЗЫВЫ ВАЖНЫ! Если вы обнаружите ошибки, у вас есть предложения по новым функциям или вы хотите внести вклад в код — посетите проект на GitHub. Вы можете открыть Issue или Pull Request в любое время, чтобы помочь улучшить этот мод для всех. Спасибо за тестирование!" />
     <e k="sf_pda_help_text" v="Привет, это я — разработчик! Как видите, эта страница ещё очень активно дорабатывается. Слои карты сейчас являются только визуальными превью (не функциональными для выбора), а многие элементы интерфейса ещё требуют финальной доработки." />
     <e k="sf_pda_map_jump_hint" v="Нажмите на поле, чтобы перейти к нему на карте" />

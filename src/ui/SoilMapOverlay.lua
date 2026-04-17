@@ -23,8 +23,8 @@ SoilMapOverlay.ALPHA          = 0.72
 
 -- Sampling constants
 SoilMapOverlay.SAMPLE_UPDATE_INTERVAL_MS = 4500
-SoilMapOverlay.MAX_POINTS       = 15000   -- increased to support full polygon fill
-SoilMapOverlay.POLYGON_STEP     = 15     -- world-unit grid spacing for polygon sampling (meters)
+SoilMapOverlay.MAX_POINTS       = 40000   -- increased to support full polygon fill
+SoilMapOverlay.POLYGON_STEP     = 10     -- world-unit grid spacing for polygon sampling (meters)
 
 -- Status colors (match SoilHUD palette)
 SoilMapOverlay.C_POOR = {0.88, 0.25, 0.25}
@@ -165,8 +165,11 @@ function SoilMapOverlay:onSideBarClick(posX, posY)
             if rect.action == "report" then
                 if SoilPDAScreen then SoilPDAScreen.toggle() end
                 return true
-            elseif rect.action == "help" then
-                if SoilHelpDialog then SoilHelpDialog.show() end
+            elseif rect.action == "treatment" then
+                if SoilPDAScreen then SoilPDAScreen.showTreatment() end
+                return true
+            elseif rect.action == "disable" then
+                self:setLayer(0)
                 return true
             elseif rect.index then
                 -- Toggle: re-clicking the active layer turns the overlay off
@@ -352,8 +355,23 @@ function SoilMapOverlay:onDraw(frame, mapElement, ingameMap, pageIndex)
     local mapMaxX = mapX + mapWidth
     local mapMaxY = mapY + mapHeight
 
-    -- Pre-compute normalised dot size once (same for all points)
-    local sizeX, sizeY = getNormalizedScreenValues(10, 10)
+    -- Compute tile size from world-to-screen scale so tiles fill edge-to-edge at any zoom level.
+    -- Sample two adjacent world points and measure their screen distance.
+    -- Fall back to a fixed size if the projection returns nil (map not fully ready).
+    local sizeX, sizeY
+    local probeX, probeZ = 0, 0
+    local ax, ay = self:worldToScreenPosition(ingameMap, probeX, probeZ)
+    local bx, by = self:worldToScreenPosition(ingameMap, probeX + SoilMapOverlay.POLYGON_STEP, probeZ)
+    local cx, cy = self:worldToScreenPosition(ingameMap, probeX, probeZ + SoilMapOverlay.POLYGON_STEP)
+    if ax and bx and cx then
+        local dxX = math.abs(bx - ax)
+        local dyZ = math.abs(cy - ay)
+        -- Add 15% overlap so adjacent tiles don't leave hairline gaps
+        sizeX = math.max(dxX * 1.15, 0.0005)
+        sizeY = math.max(dyZ * 1.15, 0.0005)
+    else
+        sizeX, sizeY = getNormalizedScreenValues(10, 10)
+    end
     local halfX, halfY = sizeX * 0.5, sizeY * 0.5
 
     for _, point in ipairs(self.samplePoints) do
@@ -471,8 +489,9 @@ function SoilMapOverlay:onDrawHud(frame)
     local _, actionMargin = getNormalizedScreenValues(0, 3)
 
     local actionButtons = {
-        { key = "sf_map_btn_report", label = "Field Report", action = "report" },
-        { key = "sf_map_btn_help",   label = "Help",         action = "help"   },
+        { key = "sf_map_btn_report",    label = "Farm Overview",  action = "report"    },
+        { key = "sf_map_btn_treatment", label = "Treatment Plan", action = "treatment" },
+        { key = "sf_map_btn_disable",   label = "Disable Overlay",action = "disable"   },
     }
 
     for _, btn in ipairs(actionButtons) do

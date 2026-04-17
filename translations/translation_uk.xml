@@ -435,6 +435,26 @@
     <e k="sf_detail_no_field" v="Дані відсутні." eh="c6d95d5e" />
     <e k="sf_detail_no_crop" v="Не зафіксовано" eh="a4b5a996" />
     <e k="sf_pda_btn_help" v="Нотатка розробника" />
+    <e k="sf_map_btn_cycle_layer" v="Змінити шар" />
+    <e k="sf_map_btn_treatment" v="План обробки" />
+    <e k="sf_map_btn_disable" v="Вимкнути шар" />
+    <e k="sf_treat_action_ok" v="OK" />
+    <e k="sf_help_title" v="Soil Quick Reference" />
+    <e k="sf_help_nutrients_header" v="NUTRIENTS" />
+    <e k="sf_help_n" v="N  (Nitrogen)     - Depletes fast. Apply UAN, Urea, or Manure." />
+    <e k="sf_help_p" v="P  (Phosphorus)   - Long-lasting. Apply MAP or DAP." />
+    <e k="sf_help_k" v="K  (Potassium)    - Apply Potash. Important for roots." />
+    <e k="sf_help_om" v="OM (Organic Mat.) - Builds slowly. Plow in manure/compost." />
+    <e k="sf_help_soil_header" v="SOIL CHEMISTRY" />
+    <e k="sf_help_ph" v="pH  6.5-7.0 = Ideal.  < 6.5 apply Lime.  > 7.5 apply Gypsum." />
+    <e k="sf_help_pressure_header" v="CROP PRESSURE" />
+    <e k="sf_help_weed" v="Weed    > 20% - Apply Herbicide." />
+    <e k="sf_help_pest" v="Pest    > 20% - Apply Insecticide." />
+    <e k="sf_help_disease" v="Disease > 20% - Apply Fungicide." />
+    <e k="sf_help_status_header" v="STATUS LEVELS" />
+    <e k="sf_help_good" v="Good - No action needed." />
+    <e k="sf_help_fair" v="Fair - Monitor / preventive top-up." />
+    <e k="sf_help_poor" v="Poor - Immediate treatment required." />
     <e k="sf_pda_help_github" v="ВАШІ ВІДГУКИ ВАЖЛИВІ! Якщо ви знайдете помилки, маєте пропозиції щодо нових функцій або хочете зробити внесок у код — відвідайте проєкт на GitHub. Ви можете відкрити Issue або Pull Request у будь-який час, щоб допомогти покращити цей мод для всіх. Дякуємо за тестування!" />
     <e k="sf_pda_help_text" v="Привіт, це я — розробник! Як бачите, ця сторінка ще активно розробляється. Шари карти наразі є лише візуальними прев'ю (не функціональними для вибору), а багато елементів інтерфейсу ще потребують фінального доопрацювання." />
     <e k="sf_pda_map_jump_hint" v="Натисніть на поле, щоб перейти до нього на карті" />
