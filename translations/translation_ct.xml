@@ -90,8 +90,8 @@
     <e k="input_SF_RATE_UP" v="增加肥料施用量" eh="6e601ef5" />
     <e k="input_SF_RATE_DOWN" v="減少肥料施用量" eh="30712026" />
     <e k="input_SF_TOGGLE_AUTO" v="切換自動施用量" eh="a8642cf0" />
-        <e k="input_SF_CYCLE_MAP_LAYER" v="Cycle Soil Map Layer" />
-        <e k="input_SF_SOIL_PDA" v="Open Soil PDA" />
+        <e k="input_SF_CYCLE_MAP_LAYER" v="Cycle Soil Map Layer" eh="8e4a716c" />
+        <e k="input_SF_SOIL_PDA" v="Open Soil PDA" eh="7d70f7b4" />
     <e k="sf_report_title" v="土壤與肥料報告" eh="a76f8218" />
     <e k="sf_report_fields_tracked" v="追蹤的田地：" eh="7b1e59b8" />
     <e k="sf_report_need_fert" v="需要肥料：" eh="110b60f2" />
@@ -396,6 +396,9 @@
     <e k="sf_pda_map_instructions" v="在遊戲中按 Shift+M 切換土壤地圖圖層。" eh="b13603aa" />
     <e k="sf_pda_map_open_btn" v="打開土壤地圖" eh="0901ae30" />
     <e k="sf_pda_map_unavailable" v="Map preview unavailable" eh="00000000" />
+		<e k="sf_map_health_overall" v="[EN] Average Soil Health" eh="5533cbe3" />
+		<e k="sf_map_btn_report" v="[EN] Open Farm Overview" eh="6f0800e8" />
+		<e k="sf_map_btn_help" v="[EN] Dev Note (NOT WORKING YET)" eh="800e465a" />
     <!-- Fields Tab -->
     <e k="sf_pda_fields_section_title" v="所有田地" eh="48729e0b" />
     <e k="sf_pda_col_field" v="田地" eh="6f16a5f8" />
@@ -467,11 +470,13 @@
     <e k="sf_detail_rotation_fatigue" v="連作疲勞 (x1.15 耗損)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="無可用數據。" eh="c6d95d5e" />
     <e k="sf_detail_no_crop" v="無記錄" eh="a4b5a996" />
-    <e k="sf_pda_btn_help" v="Nota del Dev" />
-    <e k="sf_pda_help_github" v="EL TEU COMENTARI IMPORTA! Si trobes errors, tens suggeriments de noves funcions o vols contribuir al codi, visita el projecte a GitHub. Pots obrir un Issue o una Pull Request en qualsevol moment per ajudar a millorar aquest mod per a tothom. Gràcies per provar-lo!" />
-    <e k="sf_pda_help_text" v="Hola, sóc jo, el desenvolupador! Com pots veure, aquesta pàgina encara està en construcció. Les capes del mapa ara mateix són només previsualitzacions visuals (no funcionals per a la selecció), i molts elements de la interfície encara necessiten el seu acabat final." />
-    <e k="sf_pda_map_jump_hint" v="Feu clic en un camp per saltar-hi al mapa" />
-    <e k="sf_pda_total_urgent_label" v="Total que necessita atenció" />
-    <e k="sf_pda_treatment_hint" v="Els camps llistats a la dreta necessiten tractament. Feu clic en una fila per veure els inputs recomanats i les quantitats estimades." />
+    <e k="sf_pda_btn_help" v="Nota del Dev" eh="5320d63f" />
+    <e k="sf_pda_help_github" v="EL TEU COMENTARI IMPORTA! Si trobes errors, tens suggeriments de noves funcions o vols contribuir al codi, visita el projecte a GitHub. Pots obrir un Issue o una Pull Request en qualsevol moment per ajudar a millorar aquest mod per a tothom. Gràcies per provar-lo!" eh="3a10b023" />
+		<e k="sf_pda_help_note" v="[EN] Note: The soil layers tab on the map page is NOT WORKING. Im aware of the issue and working on a fix. (which might take some time)" eh="2d8f5dc7" />
+    <e k="sf_pda_help_text" v="Hola, sóc jo, el desenvolupador! Com pots veure, aquesta pàgina encara està en construcció. Les capes del mapa ara mateix són només previsualitzacions visuals (no funcionals per a la selecció), i molts elements de la interfície encara necessiten el seu acabat final." eh="58e05bdf" />
+    <e k="sf_pda_map_jump_hint" v="Feu clic en un camp per saltar-hi al mapa" eh="006d5371" />
+		<e k="sf_pda_map_native_hint" v="[EN] The soil layer visualization has moved! You can now access and toggle all soil layers directly from the native PDA Map sidebar (ESC &amp;gt; Map). Look for the 'Soil Layers' category in the sidebar dots." eh="87f73b10" />
+    <e k="sf_pda_total_urgent_label" v="Total que necessita atenció" eh="b3ce2db9" />
+    <e k="sf_pda_treatment_hint" v="Els camps llistats a la dreta necessiten tractament. Feu clic en una fila per veure els inputs recomanats i les quantitats estimades." eh="5748d316" />
     </elements>
 </l10n>

@@ -90,8 +90,8 @@
     <e k="input_SF_RATE_UP" v="Zvýšit dávku hnojiva" eh="6e601ef5" />
     <e k="input_SF_RATE_DOWN" v="Snížit dávku hnojiva" eh="30712026" />
     <e k="input_SF_TOGGLE_AUTO" v="Přepnout automatickou dávku" eh="a8642cf0" />
-        <e k="input_SF_CYCLE_MAP_LAYER" v="Cycle Soil Map Layer" />
-        <e k="input_SF_SOIL_PDA" v="Open Soil PDA" />
+        <e k="input_SF_CYCLE_MAP_LAYER" v="Cycle Soil Map Layer" eh="8e4a716c" />
+        <e k="input_SF_SOIL_PDA" v="Open Soil PDA" eh="7d70f7b4" />
     <e k="sf_report_title" v="Zpráva o Půdě &amp;amp; Hnojivu" eh="a76f8218" />
     <e k="sf_report_fields_tracked" v="Sledovaná Pole:" eh="7b1e59b8" />
     <e k="sf_report_need_fert" v="Potřebují Hnojivo:" eh="110b60f2" />
@@ -362,6 +362,9 @@
     <e k="sf_pda_map_instructions" v="Press Shift+M in-game to cycle soil map layers." eh="b13603aa" />
     <e k="sf_pda_map_open_btn" v="Open Soil Map" eh="0901ae30" />
     <e k="sf_pda_map_unavailable" v="Map preview unavailable" eh="00000000" />
+		<e k="sf_map_health_overall" v="[EN] Average Soil Health" eh="5533cbe3" />
+		<e k="sf_map_btn_report" v="[EN] Open Farm Overview" eh="6f0800e8" />
+		<e k="sf_map_btn_help" v="[EN] Dev Note (NOT WORKING YET)" eh="800e465a" />
     <!-- Fields Tab -->
     <e k="sf_pda_fields_section_title" v="All Fields" eh="48729e0b" />
     <e k="sf_pda_col_field" v="Field" eh="6f16a5f8" />
@@ -433,11 +436,13 @@
     <e k="sf_detail_rotation_fatigue" v="Fatigue (x1.15 depletion)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="No data available." eh="c6d95d5e" />
     <e k="sf_detail_no_crop" v="None recorded" eh="a4b5a996" />
-    <e k="sf_pda_btn_help" v="Poznámka vývojáře" />
-    <e k="sf_pda_help_github" v="VAŠE ZPĚTNÁ VAZBA JE DŮLEŽITÁ! Pokud narazíte na chyby, máte návrhy na nové funkce nebo chcete přispět ke kódu, navštivte projekt na GitHubu. Kdykoli můžete otevřít Issue nebo Pull Request a pomoci zlepšit tento mod pro všechny. Děkujeme za testování!" />
-    <e k="sf_pda_help_text" v="Ahoj, jsem to já, vývojář! Jak vidíte, tato stránka je stále ve vývoji. Vrstvy mapy jsou momentálně jen vizuální náhledy (nefunkční pro výběr) a mnoho prvků uživatelského rozhraní stále potřebuje finální úpravy." />
-    <e k="sf_pda_map_jump_hint" v="Kliknutím na pole přejdete na něj v mapě" />
-    <e k="sf_pda_total_urgent_label" v="Celkem vyžaduje pozornost" />
-    <e k="sf_pda_treatment_hint" v="Pole uvedená vpravo potřebují ošetření. Kliknutím na řádek zobrazíte doporučené vstupy a odhadované množství." />
+    <e k="sf_pda_btn_help" v="Poznámka vývojáře" eh="5320d63f" />
+    <e k="sf_pda_help_github" v="VAŠE ZPĚTNÁ VAZBA JE DŮLEŽITÁ! Pokud narazíte na chyby, máte návrhy na nové funkce nebo chcete přispět ke kódu, navštivte projekt na GitHubu. Kdykoli můžete otevřít Issue nebo Pull Request a pomoci zlepšit tento mod pro všechny. Děkujeme za testování!" eh="3a10b023" />
+		<e k="sf_pda_help_note" v="[EN] Note: The soil layers tab on the map page is NOT WORKING. Im aware of the issue and working on a fix. (which might take some time)" eh="2d8f5dc7" />
+    <e k="sf_pda_help_text" v="Ahoj, jsem to já, vývojář! Jak vidíte, tato stránka je stále ve vývoji. Vrstvy mapy jsou momentálně jen vizuální náhledy (nefunkční pro výběr) a mnoho prvků uživatelského rozhraní stále potřebuje finální úpravy." eh="58e05bdf" />
+    <e k="sf_pda_map_jump_hint" v="Kliknutím na pole přejdete na něj v mapě" eh="006d5371" />
+		<e k="sf_pda_map_native_hint" v="[EN] The soil layer visualization has moved! You can now access and toggle all soil layers directly from the native PDA Map sidebar (ESC &amp;gt; Map). Look for the 'Soil Layers' category in the sidebar dots." eh="87f73b10" />
+    <e k="sf_pda_total_urgent_label" v="Celkem vyžaduje pozornost" eh="b3ce2db9" />
+    <e k="sf_pda_treatment_hint" v="Pole uvedená vpravo potřebují ošetření. Kliknutím na řádek zobrazíte doporučené vstupy a odhadované množství." eh="5748d316" />
     </elements>
 </l10n>

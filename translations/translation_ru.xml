@@ -77,8 +77,8 @@
     <e k="input_SF_RATE_UP" v="Увеличить норму внесения удобрений" eh="6e601ef5" />
     <e k="input_SF_RATE_DOWN" v="Уменьшить норму внесения удобрений" eh="30712026" />
     <e k="input_SF_TOGGLE_AUTO" v="Переключить автоматический режим" eh="a8642cf0" />
-        <e k="input_SF_CYCLE_MAP_LAYER" v="Cycle Soil Map Layer" />
-        <e k="input_SF_SOIL_PDA" v="Open Soil PDA" />
+        <e k="input_SF_CYCLE_MAP_LAYER" v="Cycle Soil Map Layer" eh="8e4a716c" />
+        <e k="input_SF_SOIL_PDA" v="Open Soil PDA" eh="7d70f7b4" />
     <e k="sf_report_title" v="Отчет о почве и удобрениях" eh="a76f8218" />
     <e k="sf_report_fields_tracked" v="Отслеживаемые поля:" eh="7b1e59b8" />
     <e k="sf_report_need_fert" v="Удобрения требуют:" eh="110b60f2" />
@@ -362,6 +362,9 @@
     <e k="sf_pda_map_instructions" v="Press Shift+M in-game to cycle soil map layers." eh="b13603aa" />
     <e k="sf_pda_map_open_btn" v="Open Soil Map" eh="0901ae30" />
     <e k="sf_pda_map_unavailable" v="Map preview unavailable" eh="00000000" />
+		<e k="sf_map_health_overall" v="[EN] Average Soil Health" eh="5533cbe3" />
+		<e k="sf_map_btn_report" v="[EN] Open Farm Overview" eh="6f0800e8" />
+		<e k="sf_map_btn_help" v="[EN] Dev Note (NOT WORKING YET)" eh="800e465a" />
     <!-- Fields Tab -->
     <e k="sf_pda_fields_section_title" v="All Fields" eh="48729e0b" />
     <e k="sf_pda_col_field" v="Field" eh="6f16a5f8" />
@@ -433,11 +436,13 @@
     <e k="sf_detail_rotation_fatigue" v="Fatigue (x1.15 depletion)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="No data available." eh="c6d95d5e" />
     <e k="sf_detail_no_crop" v="None recorded" eh="a4b5a996" />
-    <e k="sf_pda_btn_help" v="Заметка разработчика" />
-    <e k="sf_pda_help_github" v="ВАШИ ОТЗЫВЫ ВАЖНЫ! Если вы обнаружите ошибки, у вас есть предложения по новым функциям или вы хотите внести вклад в код — посетите проект на GitHub. Вы можете открыть Issue или Pull Request в любое время, чтобы помочь улучшить этот мод для всех. Спасибо за тестирование!" />
-    <e k="sf_pda_help_text" v="Привет, это я — разработчик! Как видите, эта страница ещё очень активно дорабатывается. Слои карты сейчас являются только визуальными превью (не функциональными для выбора), а многие элементы интерфейса ещё требуют финальной доработки." />
-    <e k="sf_pda_map_jump_hint" v="Нажмите на поле, чтобы перейти к нему на карте" />
-    <e k="sf_pda_total_urgent_label" v="Всего требует внимания" />
-    <e k="sf_pda_treatment_hint" v="Поля, перечисленные справа, требуют обработки. Нажмите на строку, чтобы увидеть рекомендуемые средства и примерные количества." />
+    <e k="sf_pda_btn_help" v="Заметка разработчика" eh="5320d63f" />
+    <e k="sf_pda_help_github" v="ВАШИ ОТЗЫВЫ ВАЖНЫ! Если вы обнаружите ошибки, у вас есть предложения по новым функциям или вы хотите внести вклад в код — посетите проект на GitHub. Вы можете открыть Issue или Pull Request в любое время, чтобы помочь улучшить этот мод для всех. Спасибо за тестирование!" eh="3a10b023" />
+		<e k="sf_pda_help_note" v="[EN] Note: The soil layers tab on the map page is NOT WORKING. Im aware of the issue and working on a fix. (which might take some time)" eh="2d8f5dc7" />
+    <e k="sf_pda_help_text" v="Привет, это я — разработчик! Как видите, эта страница ещё очень активно дорабатывается. Слои карты сейчас являются только визуальными превью (не функциональными для выбора), а многие элементы интерфейса ещё требуют финальной доработки." eh="58e05bdf" />
+    <e k="sf_pda_map_jump_hint" v="Нажмите на поле, чтобы перейти к нему на карте" eh="006d5371" />
+		<e k="sf_pda_map_native_hint" v="[EN] The soil layer visualization has moved! You can now access and toggle all soil layers directly from the native PDA Map sidebar (ESC &amp;gt; Map). Look for the 'Soil Layers' category in the sidebar dots." eh="87f73b10" />
+    <e k="sf_pda_total_urgent_label" v="Всего требует внимания" eh="b3ce2db9" />
+    <e k="sf_pda_treatment_hint" v="Поля, перечисленные справа, требуют обработки. Нажмите на строку, чтобы увидеть рекомендуемые средства и примерные количества." eh="5748d316" />
     </elements>
 </l10n>
