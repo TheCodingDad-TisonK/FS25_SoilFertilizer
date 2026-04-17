@@ -362,36 +362,36 @@
     <e k="sf_pda_map_instructions" v="Drücken Sie Umschalt+M im Spiel, um Bodenebenen zu wechseln." eh="b13603aa" />
     <e k="sf_pda_map_open_btn" v="Bodenkarte öffnen" eh="0901ae30" />
     <e k="sf_pda_map_unavailable" v="Map preview unavailable" eh="00000000" />
-		<e k="sf_map_health_overall" v="[EN] Average Soil Health" eh="5533cbe3" />
-		<e k="sf_map_btn_report" v="[EN] Open Farm Overview" eh="6f0800e8" />
-		<e k="sf_map_btn_help" v="[EN] Dev Note (NOT WORKING YET)" eh="800e465a" />
+		<e k="sf_map_health_overall" v="Durchschn. Bodengesundheit" eh="5533cbe3" />
+		<e k="sf_map_btn_report" v="Hofübersicht öffnen" eh="6f0800e8" />
+		<e k="sf_map_btn_help" v="Hilfe" eh="800e465a" />
     <e k="sf_map_btn_cycle_layer" v="Ebene wechseln" />
     <e k="sf_map_btn_treatment" v="Behandlungsplan" />
     <e k="sf_map_btn_disable" v="Overlay deaktivieren" />
     <e k="sf_treat_action_ok" v="OK" />
-    <e k="sf_help_title" v="Soil Quick Reference" />
-    <e k="sf_help_nutrients_header" v="NUTRIENTS" />
-    <e k="sf_help_n" v="N  (Nitrogen)     - Depletes fast. Apply UAN, Urea, or Manure." />
-    <e k="sf_help_p" v="P  (Phosphorus)   - Long-lasting. Apply MAP or DAP." />
-    <e k="sf_help_k" v="K  (Potassium)    - Apply Potash. Important for roots." />
-    <e k="sf_help_om" v="OM (Organic Mat.) - Builds slowly. Plow in manure/compost." />
-    <e k="sf_help_soil_header" v="SOIL CHEMISTRY" />
-    <e k="sf_help_ph" v="pH  6.5-7.0 = Ideal.  < 6.5 apply Lime.  > 7.5 apply Gypsum." />
-    <e k="sf_help_pressure_header" v="CROP PRESSURE" />
-    <e k="sf_help_weed" v="Weed    > 20% - Apply Herbicide." />
-    <e k="sf_help_pest" v="Pest    > 20% - Apply Insecticide." />
-    <e k="sf_help_disease" v="Disease > 20% - Apply Fungicide." />
-    <e k="sf_help_status_header" v="STATUS LEVELS" />
-    <e k="sf_help_good" v="Good - No action needed." />
-    <e k="sf_help_fair" v="Fair - Monitor / preventive top-up." />
-    <e k="sf_help_poor" v="Poor - Immediate treatment required." />
+    <e k="sf_help_title" v="Boden-Schnellreferenz" />
+    <e k="sf_help_nutrients_header" v="NÄHRSTOFFE" />
+    <e k="sf_help_n" v="N  (Stickstoff)   - Schnell erschöpft. UAN, Harnstoff oder Mist ausbringen." />
+    <e k="sf_help_p" v="P  (Phosphor)     - Langanhaltend. MAP oder DAP ausbringen." />
+    <e k="sf_help_k" v="K  (Kalium)       - Kali ausbringen. Wichtig für Wurzeln." />
+    <e k="sf_help_om" v="OS (Organisch)    - Baut sich langsam auf. Mist/Kompost einpflügen." />
+    <e k="sf_help_soil_header" v="BODENCHEMIE" />
+    <e k="sf_help_ph" v="pH  6,5-7,0 = Ideal.  &lt; 6,5 Kalk ausbringen.  &gt; 7,5 Gips ausbringen." />
+    <e k="sf_help_pressure_header" v="PFLANZENDRUCK" />
+    <e k="sf_help_weed" v="Unkraut  &gt; 20% - Herbizid ausbringen." />
+    <e k="sf_help_pest" v="Schädling &gt; 20% - Insektizid ausbringen." />
+    <e k="sf_help_disease" v="Krankheit &gt; 20% - Fungizid ausbringen." />
+    <e k="sf_help_status_header" v="STATUSNIVEAUS" />
+    <e k="sf_help_good" v="Gut - Keine Aktion erforderlich." />
+    <e k="sf_help_fair" v="Mittel - Beobachten / vorbeugend nachdüngen." />
+    <e k="sf_help_poor" v="Schlecht - Sofortige Behandlung erforderlich." />
     <!-- Fields Tab -->
     <e k="sf_pda_fields_section_title" v="Alle Felder" eh="48729e0b" />
     <e k="sf_pda_col_field" v="Feld" eh="6f16a5f8" />
     <e k="sf_pda_col_n" v="N%" eh="30740562" />
     <e k="sf_pda_col_p" v="P%" eh="0a5e03bc" />
-		<e k="sf_pda_filter_all" v="[EN] Filter: All Fields" eh="a46a8cb2" />
-		<e k="sf_pda_filter_owned" v="[EN] Filter: Owned Only" eh="258cb971" />
+		<e k="sf_pda_filter_all" v="Filter: Alle Felder" eh="a46a8cb2" />
+		<e k="sf_pda_filter_owned" v="Filter: Nur eigene Felder" eh="258cb971" />
     <e k="sf_pda_col_k" v="K%" eh="43e4d0bf" />
     <e k="sf_pda_col_ph" v="pH" eh="397dff20" />
     <e k="sf_pda_col_om" v="OM" eh="bfbebc07" />
@@ -456,12 +456,12 @@
     <e k="sf_detail_rotation_fatigue" v="Ermüdung (x1,15 Verarmung)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="Keine Daten verfügbar." eh="c6d95d5e" />
     <e k="sf_detail_no_crop" v="Nichts aufgezeichnet" eh="a4b5a996" />
-    <e k="sf_pda_btn_help" v="Entwicklernotiz" eh="5320d63f" />
+    <e k="sf_pda_btn_help" v="Hilfe" eh="5320d63f" />
     <e k="sf_pda_help_github" v="DEIN FEEDBACK ZÄHLT! Wenn du Fehler findest, Vorschläge für neue Funktionen hast oder zum Code beitragen möchtest, besuche das Projekt auf GitHub. Du kannst jederzeit ein Issue oder einen Pull Request öffnen, um diesen Mod für alle zu verbessern. Danke fürs Testen!" eh="3a10b023" />
-		<e k="sf_pda_help_note" v="[EN] Note: The soil layers tab on the map page is NOT WORKING. Im aware of the issue and working on a fix. (which might take some time)" eh="2d8f5dc7" />
+		<e k="sf_pda_help_note" v="Hinweis: Die Bodenkartenebenen sind jetzt direkt über ESC → Karte erreichbar." eh="2d8f5dc7" />
     <e k="sf_pda_help_text" v="Hallo, ich bin der Entwickler! Wie du sehen kannst, ist diese Seite noch stark in Arbeit. Die Kartenebenen sind derzeit nur visuelle Vorschauen (für die Auswahl nicht funktionsfähig), und viele UI-Elemente brauchen noch den letzten Schliff." eh="58e05bdf" />
     <e k="sf_pda_map_jump_hint" v="Klicke auf ein Feld, um es auf der Karte anzuzeigen" eh="006d5371" />
-		<e k="sf_pda_map_native_hint" v="[EN] The soil layer visualization has moved! You can now access and toggle all soil layers directly from the native PDA Map sidebar (ESC &amp;gt; Map). Look for the 'Soil Layers' category in the sidebar dots." eh="87f73b10" />
+		<e k="sf_pda_map_native_hint" v="Die Bodenkartenebenen wurden verschoben! Alle Bodenebenen sind jetzt direkt über die native PDA-Karte erreichbar (ESC → Karte). Suche nach der Kategorie 'Bodenebenen' in der Seitenleiste." eh="87f73b10" />
     <e k="sf_pda_total_urgent_label" v="Gesamt benötigt Aufmerksamkeit" eh="b3ce2db9" />
     <e k="sf_pda_treatment_hint" v="Die rechts aufgelisteten Felder benötigen Behandlung. Klicke auf eine Zeile, um empfohlene Mittel und geschätzte Mengen zu sehen." eh="5748d316" />
     </elements>
