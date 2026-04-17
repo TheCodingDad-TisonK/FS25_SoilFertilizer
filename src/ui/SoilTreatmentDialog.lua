@@ -157,7 +157,7 @@ function SoilTreatmentDialog:_populateData()
     elseif ph > 7.5 then
         self:_setAction(self.treatPHAction, tr("sf_treat_action_gypsum", "Apply GYPSUM to lower pH / improve structure."), COLOR_FAIR)
     else
-        self:_setAction(self.treatPHAction, tr("sf_treat_action_optimal", "Optimal - No action needed."), COLOR_GOOD)
+        self:_setAction(self.treatPHAction, tr("sf_treat_action_ok", "OK"), COLOR_GOOD)
     end
 
     -- 2. OM Action
@@ -167,7 +167,7 @@ function SoilTreatmentDialog:_populateData()
     elseif om < 4.0 then
         self:_setAction(self.treatOMAction, tr("sf_treat_action_om_fair", "Monitor. Maintain organic inputs."), COLOR_FAIR)
     else
-        self:_setAction(self.treatOMAction, tr("sf_treat_action_optimal", "Optimal - No action needed."), COLOR_GOOD)
+        self:_setAction(self.treatOMAction, tr("sf_treat_action_ok", "OK"), COLOR_GOOD)
     end
 
     -- 3. Nutrient Actions (N, P, K)
@@ -179,7 +179,7 @@ function SoilTreatmentDialog:_populateData()
     elseif info.nitrogen.value < (thresh.nitrogen.fair or 50) then
         self:_setAction(self.treatNAction, tr("sf_treat_action_n_fair", "Apply AMS or STARTER fertilizer."), COLOR_FAIR)
     else
-        self:_setAction(self.treatNAction, tr("sf_treat_action_optimal", "Optimal - No action needed."), COLOR_GOOD)
+        self:_setAction(self.treatNAction, tr("sf_treat_action_ok", "OK"), COLOR_GOOD)
     end
 
     -- P
@@ -188,7 +188,7 @@ function SoilTreatmentDialog:_populateData()
     elseif info.phosphorus.value < (thresh.phosphorus.fair or 45) then
         self:_setAction(self.treatPAction, tr("sf_treat_action_p_fair", "Apply blended FERTILIZER."), COLOR_FAIR)
     else
-        self:_setAction(self.treatPAction, tr("sf_treat_action_optimal", "Optimal - No action needed."), COLOR_GOOD)
+        self:_setAction(self.treatPAction, tr("sf_treat_action_ok", "OK"), COLOR_GOOD)
     end
 
     -- K
@@ -197,7 +197,7 @@ function SoilTreatmentDialog:_populateData()
     elseif info.potassium.value < (thresh.potassium.fair or 40) then
         self:_setAction(self.treatKAction, tr("sf_treat_action_k_fair", "Apply blended FERTILIZER."), COLOR_FAIR)
     else
-        self:_setAction(self.treatKAction, tr("sf_treat_action_optimal", "Optimal - No action needed."), COLOR_GOOD)
+        self:_setAction(self.treatKAction, tr("sf_treat_action_ok", "OK"), COLOR_GOOD)
     end
 
     -- 4. Protection Actions
@@ -207,21 +207,21 @@ function SoilTreatmentDialog:_populateData()
     if (info.weedPressure or 0) >= pThresh then
         self:_setAction(self.treatWeedAction, tr("sf_treat_action_weed", "Apply HERBICIDE immediately."), COLOR_POOR)
     else
-        self:_setAction(self.treatWeedAction, tr("sf_treat_action_optimal", "Optimal - No action needed."), COLOR_GOOD)
+        self:_setAction(self.treatWeedAction, tr("sf_treat_action_ok", "OK"), COLOR_GOOD)
     end
 
     -- Pest
     if (info.pestPressure or 0) >= pThresh then
         self:_setAction(self.treatPestAction, tr("sf_treat_action_pest", "Apply INSECTICIDE immediately."), COLOR_POOR)
     else
-        self:_setAction(self.treatPestAction, tr("sf_treat_action_optimal", "Optimal - No action needed."), COLOR_GOOD)
+        self:_setAction(self.treatPestAction, tr("sf_treat_action_ok", "OK"), COLOR_GOOD)
     end
 
     -- Disease
     if (info.diseasePressure or 0) >= pThresh then
         self:_setAction(self.treatDiseaseAction, tr("sf_treat_action_disease", "Apply FUNGICIDE immediately."), COLOR_POOR)
     else
-        self:_setAction(self.treatDiseaseAction, tr("sf_treat_action_optimal", "Optimal - No action needed."), COLOR_GOOD)
+        self:_setAction(self.treatDiseaseAction, tr("sf_treat_action_ok", "OK"), COLOR_GOOD)
     end
 end
 

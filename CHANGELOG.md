@@ -7,6 +7,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.8.8.0] - 2026-04-17
+
+### Changed
+
+- **PDA screen reduced to two tabs**: The Soil Map tab has been removed. The interactive soil
+  map is fully available from the native PDA Map (ESC → Map) via the sidebar overlay controls.
+  The PDA page now has two focused tabs — **Farm Overview** and **Treatment Plan** — each taking
+  half the tab bar width for a cleaner layout.
+
+- **Treatment Plan button now navigates correctly**: Clicking "Treatment Plan" from the in-game
+  map sidebar overlay now lands directly on the Treatment Plan tab. Previously the tab would not
+  switch automatically — the user had to click the tab manually. Root cause: `onOpen()` was
+  resetting the active tab from `self.activeTab` *after* the tab was set from the static call.
+  Fixed by pre-setting `page.activeTab` before `goToPage()` fires the lifecycle.
+
+- **Map sidebar buttons replaced**: The sidebar "Dev Note (NOT WORKING YET)" button has been
+  replaced with three actionable buttons — **Cycle Layer** (cycles through overlay layers),
+  **Treatment Plan** (opens the PDA Treatment tab directly), and **Disable Overlay** (hides the
+  overlay). The sidebar no longer shows any placeholder or broken controls.
+
+- **Help button label**: The bottom-bar "Dev Note" button on the PDA screen is now labelled
+  **Help**, opening the soil quick-reference card (nutrients, thresholds, treatment guide).
+
+### Fixed
+
+- **Overlay tiles fill edge-to-edge at any zoom**: Tile size is now computed per-frame using
+  two world-to-screen probe points so tiles expand with zoom and leave no grid gaps. Previously
+  tiles showed visible seams when zooming in.
+
+- **Field detail dialog showing all values red**: Status comparisons were case-sensitive. The
+  `getFieldInfo()` API returns capitalized strings (`"Good"`, `"Fair"`, `"Poor"`); comparisons
+  used lowercase literals and always fell to the `else` (red) branch. Fixed with `.lower()`.
+
+- **mouseEvent crash on first PDA Map open after using Farm Overview**: `IngameMapPreviewElement`
+  crashed at `setCustomLayout` when `ingameMap` was nil. The paging element routes mouseEvents
+  to all registered pages including hidden ones; the minimap's `ingameMap` is only set when the
+  map tab is opened. Fixed by guarding `mouseEvent` to short-circuit when `ingameMap == nil` or
+  the element is not visible. (Moot after the map tab removal, but the guard remains for safety.)
+
+### Improved
+
+- **UX color consistency**: All four dialogs (Field Detail, Treatment, Report, Field Detail) now
+  use the same `{0.25,0.85,0.25}` / `{0.90,0.82,0.18}` / `{0.88,0.25,0.25}` palette.
+  Previously each dialog had slightly different green/amber/red values.
+
+- **Treatment dialog "OK" text**: Optimal status rows now show **OK** instead of
+  "Optimal — No action needed." for a cleaner, faster scan.
+
+---
+
 ## [1.8.7.0] - 2026-04-16
 
 ### Fixed

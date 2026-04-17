@@ -33,11 +33,11 @@ SoilReportDialog.instance = nil
 SoilReportDialog.xmlPath = nil
 
 -- Status colors
-SoilReportDialog.COLOR_GOOD  = {0.3, 1.0, 0.3, 1}
-SoilReportDialog.COLOR_FAIR  = {1.0, 0.9, 0.3, 1}
-SoilReportDialog.COLOR_POOR  = {1.0, 0.4, 0.4, 1}
-SoilReportDialog.COLOR_WHITE = {1.0, 1.0, 1.0, 1}
-SoilReportDialog.COLOR_DIM   = {0.6, 0.6, 0.6, 1}
+SoilReportDialog.COLOR_GOOD  = {0.25, 0.85, 0.25, 1.0}
+SoilReportDialog.COLOR_FAIR  = {0.90, 0.82, 0.18, 1.0}
+SoilReportDialog.COLOR_POOR  = {0.88, 0.25, 0.25, 1.0}
+SoilReportDialog.COLOR_WHITE = {1.00, 1.00, 1.00, 1.0}
+SoilReportDialog.COLOR_DIM   = {0.60, 0.60, 0.60, 1.0}
 
 function SoilReportDialog.getInstance(modDirectory)
     if SoilReportDialog.instance == nil then
@@ -689,7 +689,7 @@ function SoilReportDialog:updateDetailView(fieldId)
 
     -- Header
     if self.detailFieldLabel then
-        self.detailFieldLabel:setText(string.format("Field %d", fieldId))
+        self.detailFieldLabel:setText(string.format("%s %d", tr("sf_detail_field_label", "Field #"), fieldId))
     end
     if self.detailCropLabel then
         local cropName = info.lastCrop or tr("sf_report_none", "None")

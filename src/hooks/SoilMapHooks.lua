@@ -186,8 +186,17 @@ function SoilMapHooks:onDrawOverlayHud()
 end
 
 function SoilMapHooks:onMouseEvent(superFunc, posX, posY, isDown, isUp, button, eventUsed)
-    if not isSoilPageActive(self) then 
-        return superFunc(self, posX, posY, isDown, isUp, button, eventUsed) 
+    -- Guard: isSoilPageActive may error if selector is in transition (first-open race condition)
+    local pageActive = false
+    local ok, result = pcall(isSoilPageActive, self)
+    if ok then pageActive = result end
+
+    if not pageActive then
+        local ok2, ret = pcall(superFunc, self, posX, posY, isDown, isUp, button, eventUsed)
+        if not ok2 then
+            SoilLogger.debug("[SoilMapHooks] mouseEvent superFunc error (frame in transition): %s", tostring(ret))
+        end
+        return ret
     end
 
     -- Manual click detection for our sidebar buttons
@@ -199,7 +208,11 @@ function SoilMapHooks:onMouseEvent(superFunc, posX, posY, isDown, isUp, button, 
     end
 
     -- Let the native handler handle movement, zooming, and map dragging
-    return superFunc(self, posX, posY, isDown, isUp, button, eventUsed)
+    local ok3, ret3 = pcall(superFunc, self, posX, posY, isDown, isUp, button, eventUsed)
+    if not ok3 then
+        SoilLogger.debug("[SoilMapHooks] mouseEvent superFunc error: %s", tostring(ret3))
+    end
+    return ret3
 end
 
 function SoilMapHooks:getHasChangeableFilterList(superFunc, ...)

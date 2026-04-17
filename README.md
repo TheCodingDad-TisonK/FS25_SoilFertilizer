@@ -172,15 +172,16 @@ Press **`Shift+P`** to open the dedicated Soil & Fertilizer page inside the FS25
 - Weed, Pest, and Disease pressure field counts
 - Fields currently below fertilizer threshold
 
-**Three tabs:**
+**Two tabs:**
 
 | Tab | What you see |
 |---|---|
-| **Soil Map** | Active overlay layer name and description, colour legend (Good / Fair / Poor), and a one-click button to jump to the interactive soil map |
-| **Fields** | Full list of every tracked field — N%, P%, K%, pH, OM, and an overall status badge. Click any row to open a per-field detail popup |
+| **Farm Overview** | Full list of every tracked field — N%, P%, K%, pH, OM, and an overall status badge. Click any row to open a per-field detail popup |
 | **Treatment Plan** | Fields sorted by urgency (worst first) with the primary deficiency or pressure identified. Minor-urgency fields grouped at the bottom |
 
-**Field Detail popup** (click any row in Fields or Treatment Plan):
+The interactive **Soil Map overlay** lives in the native PDA Map (ESC → Map). Use the sidebar to select and cycle overlay layers (Nitrogen, Phosphorus, Potassium, pH, OM, Weed, Pest, Disease) without leaving the game map.
+
+**Field Detail popup** (click any row in Farm Overview or Treatment Plan):
 - All five nutrient values with colour-coded Good / Fair / Poor status
 - Weed, Pest, and Disease pressure — asterisk (`*`) shown when a protection product is active
 - Last harvested crop and crop rotation status (Legume Bonus / Fatigue / OK)
@@ -316,7 +317,7 @@ This mod is licensed under **[CC BY-NC-ND 4.0](https://creativecommons.org/licen
 
 You may share it in its original form with attribution. You may not sell it, modify and redistribute it, or reupload it under a different name or authorship. Contributions via pull request are explicitly permitted and encouraged.
 
-**Author:** TisonK &nbsp;·&nbsp; **Version:** 1.8.7.0
+**Author:** TisonK &nbsp;·&nbsp; **Version:** 1.8.8.0
 
 © 2026 TisonK — See [LICENSE](LICENSE) for full terms.
 

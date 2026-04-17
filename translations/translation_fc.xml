@@ -46,8 +46,8 @@
 		<e k="input_SF_RATE_UP" v="[EN] Increase Fertilizer Rate" eh="6e601ef5" />
 		<e k="input_SF_RATE_DOWN" v="[EN] Decrease Fertilizer Rate" eh="30712026" />
     <e k="input_SF_TOGGLE_AUTO" v="åˆ‡æ¢è‡ªåŠ¨æ–½ç”¨é‡" eh="a8642cf0" />
-        <e k="input_SF_CYCLE_MAP_LAYER" v="Cycle Soil Map Layer" />
-        <e k="input_SF_SOIL_PDA" v="Open Soil PDA" />
+        <e k="input_SF_CYCLE_MAP_LAYER" v="Cycle Soil Map Layer" eh="8e4a716c" />
+        <e k="input_SF_SOIL_PDA" v="Open Soil PDA" eh="7d70f7b4" />
 		<e k="sf_report_title" v="[EN] Soil &amp;amp;amp; Fertilizer Report" eh="a76f8218" />
 		<e k="sf_report_fields_tracked" v="[EN] Fields Tracked:" eh="7b1e59b8" />
 		<e k="sf_report_need_fert" v="[EN] Need Fertilizer:" eh="110b60f2" />
@@ -362,6 +362,29 @@
     <e k="sf_pda_map_instructions" v="Press Shift+M in-game to cycle soil map layers." eh="b13603aa" />
     <e k="sf_pda_map_open_btn" v="Open Soil Map" eh="0901ae30" />
     <e k="sf_pda_map_unavailable" v="Map preview unavailable" eh="00000000" />
+		<e k="sf_map_health_overall" v="[EN] Average Soil Health" eh="5533cbe3" />
+		<e k="sf_map_btn_report" v="[EN] Open Farm Overview" eh="6f0800e8" />
+		<e k="sf_map_btn_help" v="[EN] Dev Note (NOT WORKING YET)" eh="800e465a" />
+    <e k="sf_map_btn_cycle_layer" v="Changer la couche" />
+    <e k="sf_map_btn_treatment" v="Plan de traitement" />
+    <e k="sf_map_btn_disable" v="Désactiver la couche" />
+    <e k="sf_treat_action_ok" v="OK" />
+    <e k="sf_help_title" v="Soil Quick Reference" />
+    <e k="sf_help_nutrients_header" v="NUTRIENTS" />
+    <e k="sf_help_n" v="N  (Nitrogen)     - Depletes fast. Apply UAN, Urea, or Manure." />
+    <e k="sf_help_p" v="P  (Phosphorus)   - Long-lasting. Apply MAP or DAP." />
+    <e k="sf_help_k" v="K  (Potassium)    - Apply Potash. Important for roots." />
+    <e k="sf_help_om" v="OM (Organic Mat.) - Builds slowly. Plow in manure/compost." />
+    <e k="sf_help_soil_header" v="SOIL CHEMISTRY" />
+    <e k="sf_help_ph" v="pH  6.5-7.0 = Ideal.  < 6.5 apply Lime.  > 7.5 apply Gypsum." />
+    <e k="sf_help_pressure_header" v="CROP PRESSURE" />
+    <e k="sf_help_weed" v="Weed    > 20% - Apply Herbicide." />
+    <e k="sf_help_pest" v="Pest    > 20% - Apply Insecticide." />
+    <e k="sf_help_disease" v="Disease > 20% - Apply Fungicide." />
+    <e k="sf_help_status_header" v="STATUS LEVELS" />
+    <e k="sf_help_good" v="Good - No action needed." />
+    <e k="sf_help_fair" v="Fair - Monitor / preventive top-up." />
+    <e k="sf_help_poor" v="Poor - Immediate treatment required." />
     <!-- Fields Tab -->
     <e k="sf_pda_fields_section_title" v="All Fields" eh="48729e0b" />
     <e k="sf_pda_col_field" v="Field" eh="6f16a5f8" />
@@ -433,11 +456,13 @@
     <e k="sf_detail_rotation_fatigue" v="Fatigue (x1.15 depletion)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="No data available." eh="c6d95d5e" />
     <e k="sf_detail_no_crop" v="None recorded" eh="a4b5a996" />
-    <e k="sf_pda_btn_help" v="Note du dev" />
-    <e k="sf_pda_help_github" v="VOS COMMENTAIRES COMPTENT! Si vous rencontrez des bogues, avez des suggestions pour de nouvelles fonctionnalités ou souhaitez contribuer au code, visitez le projet sur GitHub. Vous pouvez ouvrir un Issue ou une Pull Request en tout temps pour aider à améliorer ce mod pour tous. Merci de tester!" />
-    <e k="sf_pda_help_text" v="Bonjour, c'est moi le développeur! Comme vous pouvez le voir, cette page est encore en plein développement. Les couches de carte sont actuellement de simples aperçus visuels (non fonctionnels pour la sélection) et plusieurs éléments d'interface ont encore besoin d'ajustements." />
-    <e k="sf_pda_map_jump_hint" v="Cliquez sur un champ pour y accéder sur la carte" />
-    <e k="sf_pda_total_urgent_label" v="Total nécessitant attention" />
-    <e k="sf_pda_treatment_hint" v="Les champs listés à droite nécessitent un traitement. Cliquez sur une ligne pour voir les intrants recommandés et les quantités estimées." />
+    <e k="sf_pda_btn_help" v="Note du dev" eh="5320d63f" />
+    <e k="sf_pda_help_github" v="VOS COMMENTAIRES COMPTENT! Si vous rencontrez des bogues, avez des suggestions pour de nouvelles fonctionnalités ou souhaitez contribuer au code, visitez le projet sur GitHub. Vous pouvez ouvrir un Issue ou une Pull Request en tout temps pour aider à améliorer ce mod pour tous. Merci de tester!" eh="3a10b023" />
+		<e k="sf_pda_help_note" v="[EN] Note: The soil layers tab on the map page is NOT WORKING. Im aware of the issue and working on a fix. (which might take some time)" eh="2d8f5dc7" />
+    <e k="sf_pda_help_text" v="Bonjour, c'est moi le développeur! Comme vous pouvez le voir, cette page est encore en plein développement. Les couches de carte sont actuellement de simples aperçus visuels (non fonctionnels pour la sélection) et plusieurs éléments d'interface ont encore besoin d'ajustements." eh="58e05bdf" />
+    <e k="sf_pda_map_jump_hint" v="Cliquez sur un champ pour y accéder sur la carte" eh="006d5371" />
+		<e k="sf_pda_map_native_hint" v="[EN] The soil layer visualization has moved! You can now access and toggle all soil layers directly from the native PDA Map sidebar (ESC &amp;gt; Map). Look for the 'Soil Layers' category in the sidebar dots." eh="87f73b10" />
+    <e k="sf_pda_total_urgent_label" v="Total nécessitant attention" eh="b3ce2db9" />
+    <e k="sf_pda_treatment_hint" v="Les champs listés à droite nécessitent un traitement. Cliquez sur une ligne pour voir les intrants recommandés et les quantités estimées." eh="5748d316" />
     </elements>
 </l10n>
