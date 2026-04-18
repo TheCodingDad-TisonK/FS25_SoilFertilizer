@@ -346,11 +346,27 @@ function SoilFertilitySystem:onPlowing(fieldId)
         changed = true
     end
 
-    -- Plowing benefit 3: Reset weed pressure to 0 (tillage buries weed seeds/roots)
+    -- Plowing benefit 3: Reset weed pressure to 0 (deep tillage buries weed seeds/roots)
     if self.settings.weedPressure and (field.weedPressure or 0) > 0 then
         self:log("[Plowing] Field %d: weed pressure %.0f -> 0 (tillage reset)", fieldId, field.weedPressure)
         field.weedPressure = 0
         field.herbicideDaysLeft = 0
+        changed = true
+    end
+
+    -- Plowing benefit 4: Reduce pest pressure (disrupts overwintering habitat)
+    if self.settings.pestPressure and SoilConstants.PLOWING.PEST_PRESSURE_REDUCTION and (field.pestPressure or 0) > 0 then
+        local before = field.pestPressure
+        field.pestPressure = math.max(0, before - SoilConstants.PLOWING.PEST_PRESSURE_REDUCTION)
+        self:log("[Plowing] Field %d: pest pressure %.0f -> %.0f", fieldId, before, field.pestPressure)
+        changed = true
+    end
+
+    -- Plowing benefit 5: Reduce disease pressure (buries inoculum, exposes to UV/drying)
+    if self.settings.diseasePressure and SoilConstants.PLOWING.DISEASE_PRESSURE_REDUCTION and (field.diseasePressure or 0) > 0 then
+        local before = field.diseasePressure
+        field.diseasePressure = math.max(0, before - SoilConstants.PLOWING.DISEASE_PRESSURE_REDUCTION)
+        self:log("[Plowing] Field %d: disease pressure %.0f -> %.0f", fieldId, before, field.diseasePressure)
         changed = true
     end
 
@@ -363,6 +379,55 @@ function SoilFertilitySystem:onPlowing(fieldId)
     -- Broadcast to clients if server in multiplayer
     if changed and g_server and g_currentMission and g_currentMission.missionDynamicInfo and g_currentMission.missionDynamicInfo.isMultiplayer then
         if field and SoilFieldUpdateEvent then
+            g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
+        end
+    end
+end
+
+--- Called when a shallow cultivator passes over a field.
+--- Partially reduces weed, pest, and disease pressure.
+---@param fieldId number
+function SoilFertilitySystem:onCultivation(fieldId)
+    if not fieldId or fieldId <= 0 then return end
+    if not self.settings.plowingBonus then return end
+    if not SoilConstants.CULTIVATION then return end
+
+    local field = self:getOrCreateField(fieldId, false)
+    if not field then return end
+
+    -- Throttle: once per field per in-game day to prevent frame-rate overdrive
+    local today = (g_currentMission and g_currentMission.environment and
+                   g_currentMission.environment.currentDay) or 0
+    self.cultivationAppliedDay = self.cultivationAppliedDay or {}
+    if self.cultivationAppliedDay[fieldId] == today then return end
+    self.cultivationAppliedDay[fieldId] = today
+
+    local changed = false
+    local c = SoilConstants.CULTIVATION
+
+    if self.settings.weedPressure and c.WEED_PRESSURE_REDUCTION and (field.weedPressure or 0) > 0 then
+        local before = field.weedPressure
+        field.weedPressure = math.max(0, before - c.WEED_PRESSURE_REDUCTION)
+        self:log("[Cultivation] Field %d: weed %.0f -> %.0f", fieldId, before, field.weedPressure)
+        changed = true
+    end
+
+    if self.settings.pestPressure and c.PEST_PRESSURE_REDUCTION and (field.pestPressure or 0) > 0 then
+        local before = field.pestPressure
+        field.pestPressure = math.max(0, before - c.PEST_PRESSURE_REDUCTION)
+        self:log("[Cultivation] Field %d: pest %.0f -> %.0f", fieldId, before, field.pestPressure)
+        changed = true
+    end
+
+    if self.settings.diseasePressure and c.DISEASE_PRESSURE_REDUCTION and (field.diseasePressure or 0) > 0 then
+        local before = field.diseasePressure
+        field.diseasePressure = math.max(0, before - c.DISEASE_PRESSURE_REDUCTION)
+        self:log("[Cultivation] Field %d: disease %.0f -> %.0f", fieldId, before, field.diseasePressure)
+        changed = true
+    end
+
+    if changed and g_server and g_currentMission and g_currentMission.missionDynamicInfo and g_currentMission.missionDynamicInfo.isMultiplayer then
+        if SoilFieldUpdateEvent then
             g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
         end
     end

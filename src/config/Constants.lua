@@ -56,7 +56,17 @@ SoilConstants.FIELD_DEFAULTS = {
 -- Thresholds for plowing operations
 SoilConstants.PLOWING = {
     MIN_DEPTH_FOR_PLOWING = 0.15,  -- Minimum working depth (meters) to qualify as deep plowing
-                                     -- Values > 0.15m improve organic matter mixing
+    PEST_PRESSURE_REDUCTION    = 30,  -- Points removed from pest pressure on plowing
+    DISEASE_PRESSURE_REDUCTION = 40,  -- Points removed from disease pressure on plowing
+}
+
+-- ========================================
+-- CULTIVATION (shallow tillage — non-plowing passes)
+-- ========================================
+SoilConstants.CULTIVATION = {
+    WEED_PRESSURE_REDUCTION    = 20,  -- Points removed from weed pressure per cultivation pass
+    PEST_PRESSURE_REDUCTION    = 10,
+    DISEASE_PRESSURE_REDUCTION = 15,
 }
 
 -- ========================================
