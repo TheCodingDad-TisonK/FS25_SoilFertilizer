@@ -325,6 +325,7 @@ function SoilMapOverlay:updateSamplePoints(force)
                     local layerSystem = self.soilSystem and self.soilSystem.layerSystem
                     local grleLayerName = layerSystem and layerSystem.available and LAYER_GRLE_NAME[layerIdx]
                     if grleLayerName then
+                        -- GRLE per-pixel path: maps that ship custom density-map info layers
                         for _, pt in ipairs(polyPts) do
                             if totalPoints < SoilMapOverlay.MAX_POINTS then
                                 local val = layerSystem:readValueAtWorld(grleLayerName, pt.x, pt.z)
@@ -338,7 +339,32 @@ function SoilMapOverlay:updateSamplePoints(force)
                                 totalPoints = totalPoints + 1
                             end
                         end
+                    elseif layerIdx >= 1 and layerIdx <= 5 then
+                        -- zoneData per-cell path: standard maps, layers 1-5 (N/P/K/pH/OM).
+                        -- Cells that have been sprayed show their local value; unvisited cells
+                        -- fall back to the field average so the map is always fully coloured.
+                        local fieldEntry = self.soilSystem.fieldData and self.soilSystem.fieldData[farmlandId]
+                        local zoneData = fieldEntry and fieldEntry.zoneData
+                        local zone = SoilConstants.ZONE
+                        for _, pt in ipairs(polyPts) do
+                            if totalPoints < SoilMapOverlay.MAX_POINTS then
+                                local r, g, b
+                                if zoneData then
+                                    local cx = math.floor(pt.x / zone.CELL_SIZE)
+                                    local cz = math.floor(pt.z / zone.CELL_SIZE)
+                                    local cell = zoneData[cx .. "_" .. cz]
+                                    if cell then
+                                        local val = getCellLayerValue(cell, layerIdx)
+                                        if val then r, g, b = self:valueToLayerColor(layerIdx, val) end
+                                    end
+                                end
+                                if not r then r, g, b = self:getLayerColor(layerIdx, info, farmlandId) end
+                                table.insert(self.samplePoints, {x = pt.x, z = pt.z, r = r, g = g, b = b})
+                                totalPoints = totalPoints + 1
+                            end
+                        end
                     else
+                        -- Field-average path: layers 6-9 (urgency, weed, pest, disease)
                         local r, g, b = self:getLayerColor(layerIdx, info, farmlandId)
                         for _, pt in ipairs(polyPts) do
                             if totalPoints < SoilMapOverlay.MAX_POINTS then
@@ -698,6 +724,17 @@ local LAYER_GRLE_NAME = {
     [4] = "infoLayer_soilPH",
     [5] = "infoLayer_soilOM",
 }
+
+-- Extract the per-cell value for a given overlay layer index (1-5 only).
+local function getCellLayerValue(cell, layerIdx)
+    if layerIdx == 1 then return cell.N
+    elseif layerIdx == 2 then return cell.P
+    elseif layerIdx == 3 then return cell.K
+    elseif layerIdx == 4 then return cell.pH
+    elseif layerIdx == 5 then return cell.OM
+    end
+    return nil
+end
 
 -- Convert a raw decoded value (from the density map layer) to a colour.
 -- Mirrors the same thresholds used in getLayerColor so the per-pixel path

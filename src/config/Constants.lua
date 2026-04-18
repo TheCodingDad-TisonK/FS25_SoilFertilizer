@@ -445,6 +445,17 @@ SoilConstants.HUD = {
 }
 
 -- ========================================
+-- ZONE CELL GRID (per-area overlay coloring)
+-- ========================================
+-- Each zone cell covers CELL_SIZE × CELL_SIZE world meters.
+-- CELL_AREA_HA must equal (CELL_SIZE^2 / 10000).
+-- These values must match SoilMapOverlay.POLYGON_STEP (10 m).
+SoilConstants.ZONE = {
+    CELL_SIZE    = 10,    -- meters per cell side
+    CELL_AREA_HA = 0.01,  -- hectares per cell (10×10 m = 0.01 ha)
+}
+
+-- ========================================
 -- NETWORK SYNC
 -- ========================================
 SoilConstants.NETWORK = {

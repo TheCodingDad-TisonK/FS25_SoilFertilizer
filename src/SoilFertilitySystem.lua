@@ -783,6 +783,7 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing, area)
         fungicideDaysLeft = 0,
         dryDayCount = 0,
         nutrientBuffer = {},  -- Tracks [fillTypeIndex] = litersApplied (reset daily)
+        zoneData = {},        -- Sparse {cellKey → {N,P,K,pH,OM}} for per-area overlay
         lastAlertYear = 0,    -- In-game year when the last critical alert fired (persisted)
     }
 
@@ -1137,6 +1138,16 @@ function SoilFertilitySystem:updateFieldNutrients(fieldId, fruitTypeIndex, harve
     field.phosphorus = math.max(limits.MIN, field.phosphorus - rates.P * factor)
     field.potassium  = math.max(limits.MIN, field.potassium  - rates.K * factor)
 
+    -- Deplete zone cells by the same absolute amount (harvest extracts uniformly across field)
+    if field.zoneData then
+        local dN, dP, dK = rates.N * factor, rates.P * factor, rates.K * factor
+        for _, cell in pairs(field.zoneData) do
+            cell.N = math.max(limits.MIN, cell.N - dN)
+            cell.P = math.max(limits.MIN, cell.P - dP)
+            cell.K = math.max(limits.MIN, cell.K - dK)
+        end
+    end
+
     -- Step 4: Chopped straw/chaff adds organic matter
     -- When strawRatio > 0 the combine is chopping material back into the field.
     -- The chopped biomass decomposes and increases soil organic matter.
@@ -1232,6 +1243,33 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
                 if entry.pH then self.layerSystem:updatePixelForField("pH",           x, z, field.pH,            2.0) end
                 if entry.OM then self.layerSystem:updatePixelForField("organicMatter",x, z, field.organicMatter, 2.0) end
             end
+        end
+
+        -- zoneData per-cell update for per-area PDA overlay coloring (standard maps)
+        local sprayX = self._lastSprayX
+        local sprayZ = self._lastSprayZ
+        if sprayX and sprayZ then
+            local zone = SoilConstants.ZONE
+            local cx = math.floor(sprayX / zone.CELL_SIZE)
+            local cz = math.floor(sprayZ / zone.CELL_SIZE)
+            local cellKey = cx .. "_" .. cz
+            if not field.zoneData then field.zoneData = {} end
+            if not field.zoneData[cellKey] then
+                field.zoneData[cellKey] = {
+                    N  = field.nitrogen,
+                    P  = field.phosphorus,
+                    K  = field.potassium,
+                    pH = field.pH,
+                    OM = field.organicMatter,
+                }
+            end
+            local cell = field.zoneData[cellKey]
+            local cellFactor = (liters / 1000.0) / zone.CELL_AREA_HA
+            if entry.N  then cell.N  = math.min(limits.MAX,                     cell.N  + entry.N  * cellFactor) end
+            if entry.P  then cell.P  = math.min(limits.MAX,                     cell.P  + entry.P  * cellFactor) end
+            if entry.K  then cell.K  = math.min(limits.MAX,                     cell.K  + entry.K  * cellFactor) end
+            if entry.pH then cell.pH = math.max(limits.PH_MIN, math.min(limits.PH_MAX, cell.pH + entry.pH * cellFactor)) end
+            if entry.OM then cell.OM = math.min(limits.ORGANIC_MATTER_MAX,      cell.OM + entry.OM * cellFactor) end
         end
     end
 
@@ -1575,6 +1613,21 @@ function SoilFertilitySystem:saveToXMLFile(xmlFile, key)
             setXMLInt(xmlFile, fieldKey .. "#burnDaysLeft", field.burnDaysLeft or 0)
             setXMLInt(xmlFile, fieldKey .. "#lastAlertYear", field.lastAlertYear or 0)
 
+            -- Save per-area zone cells for overlay coloring
+            local zoneIdx = 0
+            if field.zoneData then
+                for cellKey, cell in pairs(field.zoneData) do
+                    local zk = string.format("%s.zone(%d)", fieldKey, zoneIdx)
+                    setXMLString(xmlFile, zk .. "#key", cellKey)
+                    setXMLFloat(xmlFile, zk .. "#N",  cell.N  or 0)
+                    setXMLFloat(xmlFile, zk .. "#P",  cell.P  or 0)
+                    setXMLFloat(xmlFile, zk .. "#K",  cell.K  or 0)
+                    setXMLFloat(xmlFile, zk .. "#pH", cell.pH or 6.0)
+                    setXMLFloat(xmlFile, zk .. "#OM", cell.OM or 0)
+                    zoneIdx = zoneIdx + 1
+                end
+            end
+
             index = index + 1
         else
             print(string.format(
@@ -1624,7 +1677,9 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
             dryDayCount = getXMLInt(xmlFile, fieldKey .. "#dryDayCount") or 0,
             burnDaysLeft = getXMLInt(xmlFile, fieldKey .. "#burnDaysLeft") or 0,
             lastAlertYear = getXMLInt(xmlFile, fieldKey .. "#lastAlertYear") or 0,
-            initialized = true
+            initialized = true,
+            nutrientBuffer = {},
+            zoneData = {},
         }
 
         -- Clear empty strings
@@ -1636,6 +1691,22 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
         end
         if self.fieldData[fieldId].lastCrop3 == "" then
             self.fieldData[fieldId].lastCrop3 = nil
+        end
+
+        -- Load per-area zone cells
+        local zi = 0
+        while true do
+            local zk = string.format("%s.zone(%d)", fieldKey, zi)
+            local cellKey = getXMLString(xmlFile, zk .. "#key")
+            if not cellKey then break end
+            self.fieldData[fieldId].zoneData[cellKey] = {
+                N  = getXMLFloat(xmlFile, zk .. "#N")  or 0,
+                P  = getXMLFloat(xmlFile, zk .. "#P")  or 0,
+                K  = getXMLFloat(xmlFile, zk .. "#K")  or 0,
+                pH = getXMLFloat(xmlFile, zk .. "#pH") or 6.0,
+                OM = getXMLFloat(xmlFile, zk .. "#OM") or 0,
+            }
+            zi = zi + 1
         end
 
         index = index + 1
