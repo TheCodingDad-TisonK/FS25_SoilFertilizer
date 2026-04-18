@@ -60,6 +60,9 @@ function Settings:load()
     end
 
     self.manager:loadSettings(self)
+    -- Local-only settings (HUD position, transparency, etc.) are stored per-player
+    -- in the user profile dir and loaded on top of server settings so they always win.
+    self.manager:loadLocalSettings(self)
 
     self:validateSettings()
 
@@ -82,6 +85,8 @@ function Settings:save()
     end
 
     self.manager:saveSettings(self)
+    -- Always save local-only settings (HUD appearance) regardless of server/client role.
+    self.manager:saveLocalSettings(self)
 end
 
 ---@param saveImmediately boolean

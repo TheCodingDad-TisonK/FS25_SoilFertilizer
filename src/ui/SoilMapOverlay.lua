@@ -204,12 +204,14 @@ local function isPointInPoly(px, pz, verts)
 end
 
 --- Return an array of world {x, z} sample points that fill the field polygon.
---- Results are cached in self.fieldPolyCache keyed by fsField.fieldId (or a fallback key).
---- The grid step is SoilMapOverlay.POLYGON_STEP meters; points outside the polygon are rejected.
+--- Results are cached in self.fieldPolyCache keyed by fsField.fieldId + step.
+--- Points outside the polygon are rejected.
 ---@param fsField table FS25 Field object with polygonPoints and fieldId
+---@param step    number  World-unit grid spacing in meters (caller-computed)
 ---@return table Array of {x, z}
-function SoilMapOverlay:getFieldFillPoints(fsField)
-    local cacheKey = fsField.fieldId or tostring(fsField)
+function SoilMapOverlay:getFieldFillPoints(fsField, step)
+    step = step or SoilMapOverlay.POLYGON_STEP
+    local cacheKey = (fsField.fieldId or tostring(fsField)) .. "@" .. step
     if self.fieldPolyCache[cacheKey] then
         return self.fieldPolyCache[cacheKey]
     end
@@ -251,7 +253,7 @@ function SoilMapOverlay:getFieldFillPoints(fsField)
     end
 
     -- Grid-sample the bounding box, keep points inside the polygon
-    local step = SoilMapOverlay.POLYGON_STEP
+    -- (step is the caller-supplied world-unit spacing, already terrain-scaled)
     -- Offset start by half-step so points land near field centre, not edges
     local startX = minX + step * 0.5
     local startZ = minZ + step * 0.5
@@ -278,6 +280,18 @@ function SoilMapOverlay:getFieldFillPoints(fsField)
 end
 
 -- ── Point Sampling (DMF Pattern) ─────────────────────────
+
+-- Extract the per-cell value for a given overlay layer index (1-5 only).
+-- Must be defined before updateSamplePoints to be in scope as an upvalue.
+local function getCellLayerValue(cell, layerIdx)
+    if layerIdx == 1 then return cell.N
+    elseif layerIdx == 2 then return cell.P
+    elseif layerIdx == 3 then return cell.K
+    elseif layerIdx == 4 then return cell.pH
+    elseif layerIdx == 5 then return cell.OM
+    end
+    return nil
+end
 
 function SoilMapOverlay:updateSamplePoints(force)
     local now = (g_currentMission and g_currentMission.time) or g_time or 0
@@ -310,6 +324,13 @@ function SoilMapOverlay:updateSamplePoints(force)
         return
     end
 
+    -- Scale sampling step proportional to terrain size so large maps
+    -- (4x, 16x) get the same screen-pixel density as a standard 2048m map.
+    -- A 8192m map at step=10 would produce 16× more points and hit MAX_POINTS
+    -- after only a handful of fields, leaving the rest of the map empty.
+    local terrainSize = (g_currentMission and g_currentMission.terrainSize) or 2048
+    local scaledStep = SoilMapOverlay.POLYGON_STEP * math.max(1.0, terrainSize / 2048.0)
+
     local totalPoints = 0
     for _, fsField in ipairs(fields) do
         if fsField and fsField.farmland then
@@ -317,12 +338,60 @@ function SoilMapOverlay:updateSamplePoints(force)
             if farmlandId and farmlandId > 0 then
                 local info = self.soilSystem:getFieldInfo(farmlandId)
                 if info then
-                    local r, g, b = self:getLayerColor(layerIdx, info, farmlandId)
-                    local polyPts = self:getFieldFillPoints(fsField)
-                    for _, pt in ipairs(polyPts) do
-                        if totalPoints < SoilMapOverlay.MAX_POINTS then
-                            table.insert(self.samplePoints, {x = pt.x, z = pt.z, r = r, g = g, b = b})
-                            totalPoints = totalPoints + 1
+                    local polyPts = self:getFieldFillPoints(fsField, scaledStep)
+                    -- Per-pixel path: when GRLE density map layers are available (layers 1-5),
+                    -- read the soil value at each sample point directly from the layer so that
+                    -- sprayed sub-areas show different colours from unsprayed areas.
+                    -- Falls back to per-field average for layers 6-9 or when layers are absent.
+                    local layerSystem = self.soilSystem and self.soilSystem.layerSystem
+                    local grleLayerName = layerSystem and layerSystem.available and LAYER_GRLE_NAME[layerIdx]
+                    if grleLayerName then
+                        -- GRLE per-pixel path: maps that ship custom density-map info layers
+                        for _, pt in ipairs(polyPts) do
+                            if totalPoints < SoilMapOverlay.MAX_POINTS then
+                                local val = layerSystem:readValueAtWorld(grleLayerName, pt.x, pt.z)
+                                local r, g, b
+                                if val ~= nil then
+                                    r, g, b = self:valueToLayerColor(layerIdx, val)
+                                else
+                                    r, g, b = self:getLayerColor(layerIdx, info, farmlandId)
+                                end
+                                table.insert(self.samplePoints, {x = pt.x, z = pt.z, r = r, g = g, b = b})
+                                totalPoints = totalPoints + 1
+                            end
+                        end
+                    elseif layerIdx >= 1 and layerIdx <= 5 then
+                        -- zoneData per-cell path: standard maps, layers 1-5 (N/P/K/pH/OM).
+                        -- Cells that have been sprayed show their local value; unvisited cells
+                        -- fall back to the field average so the map is always fully coloured.
+                        local fieldEntry = self.soilSystem.fieldData and self.soilSystem.fieldData[farmlandId]
+                        local zoneData = fieldEntry and fieldEntry.zoneData
+                        local zone = SoilConstants.ZONE
+                        for _, pt in ipairs(polyPts) do
+                            if totalPoints < SoilMapOverlay.MAX_POINTS then
+                                local r, g, b
+                                if zoneData then
+                                    local cx = math.floor(pt.x / zone.CELL_SIZE)
+                                    local cz = math.floor(pt.z / zone.CELL_SIZE)
+                                    local cell = zoneData[cx .. "_" .. cz]
+                                    if cell then
+                                        local val = getCellLayerValue(cell, layerIdx)
+                                        if val then r, g, b = self:valueToLayerColor(layerIdx, val) end
+                                    end
+                                end
+                                if not r then r, g, b = self:getLayerColor(layerIdx, info, farmlandId) end
+                                table.insert(self.samplePoints, {x = pt.x, z = pt.z, r = r, g = g, b = b})
+                                totalPoints = totalPoints + 1
+                            end
+                        end
+                    else
+                        -- Field-average path: layers 6-9 (urgency, weed, pest, disease)
+                        local r, g, b = self:getLayerColor(layerIdx, info, farmlandId)
+                        for _, pt in ipairs(polyPts) do
+                            if totalPoints < SoilMapOverlay.MAX_POINTS then
+                                table.insert(self.samplePoints, {x = pt.x, z = pt.z, r = r, g = g, b = b})
+                                totalPoints = totalPoints + 1
+                            end
                         end
                     end
                 end
@@ -356,13 +425,14 @@ function SoilMapOverlay:onDraw(frame, mapElement, ingameMap, pageIndex)
     local mapMaxY = mapY + mapHeight
 
     -- Compute tile size from world-to-screen scale so tiles fill edge-to-edge at any zoom level.
-    -- Sample two adjacent world points and measure their screen distance.
-    -- Fall back to a fixed size if the projection returns nil (map not fully ready).
+    -- Use the same terrain-scaled step as the sampler so tiles match sample density exactly.
+    local terrainSz = (g_currentMission and g_currentMission.terrainSize) or 2048
+    local drawStep  = SoilMapOverlay.POLYGON_STEP * math.max(1.0, terrainSz / 2048.0)
     local sizeX, sizeY
     local probeX, probeZ = 0, 0
     local ax, ay = self:worldToScreenPosition(ingameMap, probeX, probeZ)
-    local bx, by = self:worldToScreenPosition(ingameMap, probeX + SoilMapOverlay.POLYGON_STEP, probeZ)
-    local cx, cy = self:worldToScreenPosition(ingameMap, probeX, probeZ + SoilMapOverlay.POLYGON_STEP)
+    local bx, by = self:worldToScreenPosition(ingameMap, probeX + drawStep, probeZ)
+    local cx, cy = self:worldToScreenPosition(ingameMap, probeX, probeZ + drawStep)
     if ax and bx and cx then
         local dxX = math.abs(bx - ax)
         local dyZ = math.abs(cy - ay)
@@ -664,6 +734,53 @@ function SoilMapOverlay:getMapRenderBounds(frame, ingameMap)
     local mapX, mapY = layout:getMapPosition()
     local mapW, mapH = layout:getMapSize()
     return mapX, mapY, mapW, mapH
+end
+
+-- ── Layer density-map layer names (indices 1-5 have GRLE layers) ─────────────
+-- Maps overlay layer index → SoilLayerSystem layer name.
+-- Layers 6-9 are computed values (urgency, weed, pest, disease) with no GRLE.
+local LAYER_GRLE_NAME = {
+    [1] = "infoLayer_soilN",
+    [2] = "infoLayer_soilP",
+    [3] = "infoLayer_soilK",
+    [4] = "infoLayer_soilPH",
+    [5] = "infoLayer_soilOM",
+}
+
+-- Convert a raw decoded value (from the density map layer) to a colour.
+-- Mirrors the same thresholds used in getLayerColor so the per-pixel path
+-- matches the per-field fallback path exactly.
+---@param layerIdx integer  1-5 (soil nutrient layers)
+---@param val      number   Decoded semantic float from readValueAtWorld
+function SoilMapOverlay:valueToLayerColor(layerIdx, val)
+    local POOR = SoilMapOverlay.C_POOR
+    local FAIR = SoilMapOverlay.C_FAIR
+    local GOOD = SoilMapOverlay.C_GOOD
+    local T    = SoilConstants.STATUS_THRESHOLDS
+
+    if layerIdx == 1 then
+        if val < T.nitrogen.poor     then return POOR[1], POOR[2], POOR[3]
+        elseif val < T.nitrogen.fair then return FAIR[1], FAIR[2], FAIR[3]
+        else                              return GOOD[1], GOOD[2], GOOD[3] end
+    elseif layerIdx == 2 then
+        if val < T.phosphorus.poor     then return POOR[1], POOR[2], POOR[3]
+        elseif val < T.phosphorus.fair then return FAIR[1], FAIR[2], FAIR[3]
+        else                                return GOOD[1], GOOD[2], GOOD[3] end
+    elseif layerIdx == 3 then
+        if val < T.potassium.poor     then return POOR[1], POOR[2], POOR[3]
+        elseif val < T.potassium.fair then return FAIR[1], FAIR[2], FAIR[3]
+        else                               return GOOD[1], GOOD[2], GOOD[3] end
+    elseif layerIdx == 4 then
+        if val >= 6.5 and val <= 7.0   then return GOOD[1], GOOD[2], GOOD[3]
+        elseif val >= 5.5 and val <= 7.5 then return FAIR[1], FAIR[2], FAIR[3]
+        else                                  return POOR[1], POOR[2], POOR[3] end
+    elseif layerIdx == 5 then
+        if val >= 4.0     then return GOOD[1], GOOD[2], GOOD[3]
+        elseif val >= 2.5 then return FAIR[1], FAIR[2], FAIR[3]
+        else                   return POOR[1], POOR[2], POOR[3] end
+    end
+
+    return GOOD[1], GOOD[2], GOOD[3]
 end
 
 -- ── Layer color logic ─────────────────────────────────────
