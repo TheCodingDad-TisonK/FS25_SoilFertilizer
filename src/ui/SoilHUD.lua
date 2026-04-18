@@ -620,11 +620,19 @@ function SoilHUD:drawPanel()
     local alpha = SoilConstants.HUD.TRANSPARENCY_LEVELS[self.settings.hudTransparency or 3]
     local fontMult = SoilConstants.HUD.FONT_SIZE_MULTIPLIERS[self.settings.hudFontSize or 2]
 
+    -- Blend the chosen color theme into the background so transparency changes are visible.
+    -- Pure black at any alpha looks identical; a slight tint from the theme accent makes
+    -- the difference between Clear (0.42) and Solid (1.00) actually perceptible.
+    local theme = SoilConstants.HUD.COLOR_THEMES[self.settings.hudColorTheme or 1]
+    local bgR = 0.05 + theme.r * 0.04
+    local bgG = 0.05 + theme.g * 0.04
+    local bgB = 0.05 + theme.b * 0.04
+
     -- Shadow
     self:drawRect(px + 0.003*s, py - 0.003*s, pw, ph, SoilHUD.C_SHADOW)
 
-    -- Background
-    self:drawRect(px, py, pw, ph, SoilHUD.C_BG, alpha)
+    -- Background (tinted by color theme, alpha set by transparency level)
+    self:drawRect(px, py, pw, ph, {bgR, bgG, bgB, 1}, alpha)
 
     -- Title bar
     local titleH = SoilHUD.TITLE_H * s
@@ -653,7 +661,6 @@ function SoilHUD:drawPanel()
 
     -- ── Content ───────────────────────────────────────────
     local transparency = self.settings.hudTransparency or 3
-    if transparency <= 2 then setTextShadow(true) end
     setTextAlignment(RenderText.ALIGN_LEFT)
 
     local pad  = SoilHUD.PAD * s
@@ -831,7 +838,6 @@ function SoilHUD:drawPanel()
     end
 
     -- Reset text state
-    if transparency <= 2 then setTextShadow(false) end
     setTextBold(false)
     setTextAlignment(RenderText.ALIGN_LEFT)
     setTextColor(1, 1, 1, 1)
