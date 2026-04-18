@@ -279,6 +279,18 @@ end
 
 -- ── Point Sampling (DMF Pattern) ─────────────────────────
 
+-- Extract the per-cell value for a given overlay layer index (1-5 only).
+-- Must be defined before updateSamplePoints to be in scope as an upvalue.
+local function getCellLayerValue(cell, layerIdx)
+    if layerIdx == 1 then return cell.N
+    elseif layerIdx == 2 then return cell.P
+    elseif layerIdx == 3 then return cell.K
+    elseif layerIdx == 4 then return cell.pH
+    elseif layerIdx == 5 then return cell.OM
+    end
+    return nil
+end
+
 function SoilMapOverlay:updateSamplePoints(force)
     local now = (g_currentMission and g_currentMission.time) or g_time or 0
     if not force and now < self.nextSampleUpdateTime then
@@ -724,17 +736,6 @@ local LAYER_GRLE_NAME = {
     [4] = "infoLayer_soilPH",
     [5] = "infoLayer_soilOM",
 }
-
--- Extract the per-cell value for a given overlay layer index (1-5 only).
-local function getCellLayerValue(cell, layerIdx)
-    if layerIdx == 1 then return cell.N
-    elseif layerIdx == 2 then return cell.P
-    elseif layerIdx == 3 then return cell.K
-    elseif layerIdx == 4 then return cell.pH
-    elseif layerIdx == 5 then return cell.OM
-    end
-    return nil
-end
 
 -- Convert a raw decoded value (from the density map layer) to a colour.
 -- Mirrors the same thresholds used in getLayerColor so the per-pixel path
