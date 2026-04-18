@@ -161,6 +161,12 @@ function HookManager:installAll(soilSystem)
     -- before updateSprayerEffects re-evaluates getActiveSprayType.
     self:refreshAllSprayerEffects()
 
+    -- Remap wap.sprayType to vanilla index inside processSprayerArea so that the
+    -- native C++ FSDensityMapUtil.updateSprayArea receives a known spray type index
+    -- and actually writes the ground density map (fertilizer/herbicide visual overlay).
+    -- Must run AFTER registerCustomSprayTypes so our custom spray type indices exist.
+    self:installDensityMapSprayHook()
+
     self.installed = true
 end
 
@@ -614,6 +620,106 @@ function HookManager:refreshAllSprayerEffects()
     if refreshed > 0 then
         SoilLogger.info("[OK] Refreshed sprayer effects on %d loaded vehicle(s)", refreshed)
     end
+end
+
+-- =========================================================
+-- DENSITY MAP SPRAY HOOK: remap custom spray type indices
+-- =========================================================
+-- FSDensityMapUtil.updateSprayArea is a native C++ function. It has its own
+-- internal spray type table loaded at map init from maps_sprayTypes.xml and
+-- only recognises the vanilla indices (FERTILIZER=1, HERBICIDE=2, LIME=3,
+-- etc.). When wap.sprayType is one of our custom Lua-registered indices
+-- (8, 9, 10 ...) the C++ call silently writes nothing to the density map —
+-- no ground colour change after application (fertilizer/herbicide visual).
+--
+-- Root cause: Sprayer.processSprayerArea is registered via
+-- SpecializationUtil.registerFunction, which COPIES the function reference
+-- into each vehicle type at registration time. Class-level replacement of
+-- Sprayer.processSprayerArea after vehicles are loaded never reaches existing
+-- vehicle instances — they already have the old reference baked in.
+--
+-- Fix: hook Sprayer.onStartWorkAreaProcessing instead. This is registered via
+-- SpecializationUtil.registerEventListener, which looks up the function on the
+-- Sprayer class dynamically at each event fire. Our Utils.appendedFunction
+-- replacement therefore reaches ALL vehicles (existing and newly spawned).
+-- After the original sets wap.sprayType to our custom index, we remap it to
+-- the vanilla equivalent. processSprayerArea then calls updateSprayArea with a
+-- known C++ spray type index → ground density map writes correctly.
+-- wap.sprayFillType (real fill type used by our nutrient hooks) is never touched.
+---@return boolean success
+function HookManager:installDensityMapSprayHook()
+    if not Sprayer or type(Sprayer.onStartWorkAreaProcessing) ~= "function" then
+        SoilLogger.warning("DensityMap spray hook: Sprayer.onStartWorkAreaProcessing not available - skipping")
+        return false
+    end
+    if not g_sprayTypeManager or not g_fillTypeManager then
+        SoilLogger.warning("DensityMap spray hook: managers not available - skipping")
+        return false
+    end
+
+    local liqST = g_sprayTypeManager:getSprayTypeByName("LIQUIDFERTILIZER")
+    local dryST = g_sprayTypeManager:getSprayTypeByName("FERTILIZER")
+
+    if not liqST and not dryST then
+        SoilLogger.warning("DensityMap spray hook: vanilla spray types not found - skipping")
+        return false
+    end
+
+    local liqIdx = liqST and liqST.index
+    local dryIdx = dryST and dryST.index
+
+    -- Build remap: customSprayTypeIndex → vanillaSprayTypeIndex
+    local liquidNames = { "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME",
+                          "INSECTICIDE", "FUNGICIDE",
+                          "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH" }
+    local solidNames  = { "UREA", "AMS", "MAP", "DAP", "POTASH",
+                          "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM" }
+
+    local remap = {}
+    if liqIdx then
+        for _, name in ipairs(liquidNames) do
+            local st = g_sprayTypeManager:getSprayTypeByName(name)
+            if st then remap[st.index] = liqIdx end
+        end
+    end
+    if dryIdx then
+        for _, name in ipairs(solidNames) do
+            local st = g_sprayTypeManager:getSprayTypeByName(name)
+            if st then remap[st.index] = dryIdx end
+        end
+    end
+
+    if not next(remap) then
+        SoilLogger.warning("DensityMap spray hook: no custom spray types found after registration - skipping")
+        return false
+    end
+
+    local count = 0
+    for _ in pairs(remap) do count = count + 1 end
+
+    -- Append to onStartWorkAreaProcessing (event listener — dynamic lookup, reaches all vehicles).
+    -- After the original resolves wap.sprayType = getSprayTypeIndexByFillTypeIndex(fillType),
+    -- remap any custom index to the vanilla equivalent so processSprayerArea passes a valid
+    -- C++ index to FSDensityMapUtil.updateSprayArea.
+    local original = Sprayer.onStartWorkAreaProcessing
+    Sprayer.onStartWorkAreaProcessing = Utils.appendedFunction(
+        original,
+        function(sprayerSelf, dt)
+            local spec = sprayerSelf.spec_sprayer
+            local wap  = spec and spec.workAreaParameters
+            if wap and wap.sprayType then
+                local vanillaIdx = remap[wap.sprayType]
+                if vanillaIdx then
+                    wap.sprayType = vanillaIdx
+                end
+            end
+        end
+    )
+    self:register(Sprayer, "onStartWorkAreaProcessing", original,
+        "Sprayer.onStartWorkAreaProcessing (density map sprayType remap)")
+
+    SoilLogger.info("[OK] DensityMap spray hook installed on onStartWorkAreaProcessing — %d custom spray types remapped to vanilla for C++ density map call", count)
+    return true
 end
 
 --- Register a cleanup-only hook (e.g. message center subscriptions).

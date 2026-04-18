@@ -139,9 +139,13 @@ function SoilLayerSystem:initialize()
         if handle ~= nil and handle ~= 0 then
             -- Build a DensityMapModifier spanning all bits of this layer
             local modifier = DensityMapModifier.new(handle, 0, def.numBits, g_terrainNode)
+            -- Cache a reusable DensityMapFilter so per-pixel reads don't allocate
+            -- a new filter object per call (avoids GC pressure on 40k-point samples).
+            local filter = DensityMapFilter.new(modifier)
             self.layerHandles[def.name] = {
                 handle   = handle,
                 modifier = modifier,
+                filter   = filter,
                 def      = def,
             }
             registered = registered + 1
@@ -200,6 +204,35 @@ function SoilLayerSystem:writeValueAtWorld(layerName, worldX, worldZ, value, rad
     -- No filter — write unconditionally to all pixels in radius
     modifier:setParallelogramWorldCoords(worldX - r, worldZ - r, worldX + r, worldZ - r, worldX - r, worldZ + r, DensityCoordType.POINT)
     modifier:executeSet(encoded, filter, nil)
+end
+
+-- ─────────────────────────────────────────────────────────
+-- Read the decoded semantic value at a single world position.
+-- Uses a cached DensityMapFilter (set during initialize) to avoid
+-- per-call allocation when sampling 40k+ overlay points.
+-- Returns nil if the layer is unavailable or the read fails.
+-- ─────────────────────────────────────────────────────────
+
+---@param layerName string  e.g. "infoLayer_soilN"
+---@param worldX    number
+---@param worldZ    number
+---@return number|nil  Semantic float value, or nil on failure
+function SoilLayerSystem:readValueAtWorld(layerName, worldX, worldZ)
+    if not self.available then return nil end
+    local entry = self.layerHandles[layerName]
+    if not entry then return nil end
+
+    local modifier = entry.modifier
+    local filter   = entry.filter  -- reuse cached filter
+    modifier:setParallelogramWorldCoords(
+        worldX, worldZ,
+        worldX + 0.1, worldZ,
+        worldX, worldZ + 0.1,
+        DensityCoordType.POINT
+    )
+    local val, _, _ = modifier:executeGet(filter, nil)
+    if val == nil then return nil end
+    return decode(val, entry.def)
 end
 
 -- ─────────────────────────────────────────────────────────

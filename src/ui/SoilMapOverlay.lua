@@ -317,12 +317,34 @@ function SoilMapOverlay:updateSamplePoints(force)
             if farmlandId and farmlandId > 0 then
                 local info = self.soilSystem:getFieldInfo(farmlandId)
                 if info then
-                    local r, g, b = self:getLayerColor(layerIdx, info, farmlandId)
                     local polyPts = self:getFieldFillPoints(fsField)
-                    for _, pt in ipairs(polyPts) do
-                        if totalPoints < SoilMapOverlay.MAX_POINTS then
-                            table.insert(self.samplePoints, {x = pt.x, z = pt.z, r = r, g = g, b = b})
-                            totalPoints = totalPoints + 1
+                    -- Per-pixel path: when GRLE density map layers are available (layers 1-5),
+                    -- read the soil value at each sample point directly from the layer so that
+                    -- sprayed sub-areas show different colours from unsprayed areas.
+                    -- Falls back to per-field average for layers 6-9 or when layers are absent.
+                    local layerSystem = self.soilSystem and self.soilSystem.layerSystem
+                    local grleLayerName = layerSystem and layerSystem.available and LAYER_GRLE_NAME[layerIdx]
+                    if grleLayerName then
+                        for _, pt in ipairs(polyPts) do
+                            if totalPoints < SoilMapOverlay.MAX_POINTS then
+                                local val = layerSystem:readValueAtWorld(grleLayerName, pt.x, pt.z)
+                                local r, g, b
+                                if val ~= nil then
+                                    r, g, b = self:valueToLayerColor(layerIdx, val)
+                                else
+                                    r, g, b = self:getLayerColor(layerIdx, info, farmlandId)
+                                end
+                                table.insert(self.samplePoints, {x = pt.x, z = pt.z, r = r, g = g, b = b})
+                                totalPoints = totalPoints + 1
+                            end
+                        end
+                    else
+                        local r, g, b = self:getLayerColor(layerIdx, info, farmlandId)
+                        for _, pt in ipairs(polyPts) do
+                            if totalPoints < SoilMapOverlay.MAX_POINTS then
+                                table.insert(self.samplePoints, {x = pt.x, z = pt.z, r = r, g = g, b = b})
+                                totalPoints = totalPoints + 1
+                            end
                         end
                     end
                 end
@@ -664,6 +686,53 @@ function SoilMapOverlay:getMapRenderBounds(frame, ingameMap)
     local mapX, mapY = layout:getMapPosition()
     local mapW, mapH = layout:getMapSize()
     return mapX, mapY, mapW, mapH
+end
+
+-- ── Layer density-map layer names (indices 1-5 have GRLE layers) ─────────────
+-- Maps overlay layer index → SoilLayerSystem layer name.
+-- Layers 6-9 are computed values (urgency, weed, pest, disease) with no GRLE.
+local LAYER_GRLE_NAME = {
+    [1] = "infoLayer_soilN",
+    [2] = "infoLayer_soilP",
+    [3] = "infoLayer_soilK",
+    [4] = "infoLayer_soilPH",
+    [5] = "infoLayer_soilOM",
+}
+
+-- Convert a raw decoded value (from the density map layer) to a colour.
+-- Mirrors the same thresholds used in getLayerColor so the per-pixel path
+-- matches the per-field fallback path exactly.
+---@param layerIdx integer  1-5 (soil nutrient layers)
+---@param val      number   Decoded semantic float from readValueAtWorld
+function SoilMapOverlay:valueToLayerColor(layerIdx, val)
+    local POOR = SoilMapOverlay.C_POOR
+    local FAIR = SoilMapOverlay.C_FAIR
+    local GOOD = SoilMapOverlay.C_GOOD
+    local T    = SoilConstants.STATUS_THRESHOLDS
+
+    if layerIdx == 1 then
+        if val < T.nitrogen.poor     then return POOR[1], POOR[2], POOR[3]
+        elseif val < T.nitrogen.fair then return FAIR[1], FAIR[2], FAIR[3]
+        else                              return GOOD[1], GOOD[2], GOOD[3] end
+    elseif layerIdx == 2 then
+        if val < T.phosphorus.poor     then return POOR[1], POOR[2], POOR[3]
+        elseif val < T.phosphorus.fair then return FAIR[1], FAIR[2], FAIR[3]
+        else                                return GOOD[1], GOOD[2], GOOD[3] end
+    elseif layerIdx == 3 then
+        if val < T.potassium.poor     then return POOR[1], POOR[2], POOR[3]
+        elseif val < T.potassium.fair then return FAIR[1], FAIR[2], FAIR[3]
+        else                               return GOOD[1], GOOD[2], GOOD[3] end
+    elseif layerIdx == 4 then
+        if val >= 6.5 and val <= 7.0   then return GOOD[1], GOOD[2], GOOD[3]
+        elseif val >= 5.5 and val <= 7.5 then return FAIR[1], FAIR[2], FAIR[3]
+        else                                  return POOR[1], POOR[2], POOR[3] end
+    elseif layerIdx == 5 then
+        if val >= 4.0     then return GOOD[1], GOOD[2], GOOD[3]
+        elseif val >= 2.5 then return FAIR[1], FAIR[2], FAIR[3]
+        else                   return POOR[1], POOR[2], POOR[3] end
+    end
+
+    return GOOD[1], GOOD[2], GOOD[3]
 end
 
 -- ── Layer color logic ─────────────────────────────────────
