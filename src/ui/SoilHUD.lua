@@ -1096,9 +1096,14 @@ function SoilHUD:drawSprayerRatePanel()
     local panelY  = self.panelY - gap - panelH
     local cx      = panelX + pw * 0.5
 
-    -- Shadow + background + border
+    -- Shadow + background + border (match main panel theme + transparency)
+    local rTheme = SoilConstants.HUD.COLOR_THEMES[self.settings.hudColorTheme or 1]
+    local rBgR = 0.05 + rTheme.r * 0.04
+    local rBgG = 0.05 + rTheme.g * 0.04
+    local rBgB = 0.05 + rTheme.b * 0.04
+    local rAlpha = SoilConstants.HUD.TRANSPARENCY_LEVELS[self.settings.hudTransparency or 3]
     self:drawRect(panelX + 0.002*s, panelY - 0.002*s, pw, panelH, SoilHUD.C_SHADOW)
-    self:drawRect(panelX, panelY, pw, panelH, SoilHUD.C_BG, 0.82)
+    self:drawRect(panelX, panelY, pw, panelH, {rBgR, rBgG, rBgB, 1}, rAlpha)
     local bw = 0.001
     self:drawRect(panelX,           panelY,               pw, bw, SoilHUD.C_BORDER)
     self:drawRect(panelX,           panelY + panelH - bw,  pw, bw, SoilHUD.C_BORDER)

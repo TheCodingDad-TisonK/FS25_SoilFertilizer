@@ -100,28 +100,29 @@ All three are visible in the HUD and the full Soil Report. Each can be toggled o
 | **Digestate** | ●●●○○ | ●●○○○ | ●●●●○ | ✓ | Biogas byproduct, well-rounded |
 | **Lime** | — | — | — | — | Only raises pH — but nothing else works properly without it |
 
-**Custom dry/liquid (purchasable big bags in shop):**
+**Custom liquid fertilizers (purchasable IBC liquid tanks in shop):**
 
 | Product | Type | Primary benefit |
 |---|---|---|
 | UAN-32 / UAN-28 | Liquid nitrogen | Highest N/L of liquid sources |
 | Anhydrous Ammonia | Liquid nitrogen | Maximum N concentration |
-| Urea / AMS | Dry nitrogen | Standard granular N sources |
-| MAP / DAP | Dry P+N | Phosphorus-focused blends |
-| Potash | Dry K | Pure potassium supplement |
 | Starter 10-34-0 | Liquid P | In-furrow high-P starter |
-
-**Liquid equivalents for sprayer compatibility (purchasable big bags in shop):**
-
-All five dry granular products above have a liquid equivalent that works in standard sprayers instead of spreaders.
-
-| Product | Type | Primary benefit |
-|---|---|---|
 | Liquid Urea | Liquid N | Dissolved urea for sprayer application |
 | Liquid AMS | Liquid N | Liquid ammonium sulphate |
 | Liquid MAP | Liquid P+N | High-P liquid blend |
 | Liquid DAP | Liquid P+N | Liquid DAP equivalent |
 | Liquid Potash | Liquid K | Dissolved potassium for sprayers |
+| Insecticide | Liquid | Pest pressure treatment (sprayer) |
+| Fungicide | Liquid | Disease pressure treatment (sprayer) |
+
+**Custom dry/solid fertilizers (purchasable big bags in shop):**
+
+| Product | Type | Primary benefit |
+|---|---|---|
+| Urea / AMS | Dry nitrogen | Standard granular N sources |
+| MAP / DAP | Dry P+N | Phosphorus-focused blends |
+| Potash | Dry K | Pure potassium supplement |
+| Gypsum | Dry amendment | pH correction and soil structure improvement |
 
 **Organic / soil amendments (registered, obtained from compatible mods or production lines):**
 
@@ -343,7 +344,7 @@ This mod is licensed under **[CC BY-NC-ND 4.0](https://creativecommons.org/licen
 
 You may share it in its original form with attribution. You may not sell it, modify and redistribute it, or reupload it under a different name or authorship. Contributions via pull request are explicitly permitted and encouraged.
 
-**Author:** TisonK &nbsp;·&nbsp; **Version:** 1.9.0.0
+**Author:** TisonK &nbsp;·&nbsp; **Version:** 1.9.3.0
 
 © 2026 TisonK — See [LICENSE](LICENSE) for full terms.
 
