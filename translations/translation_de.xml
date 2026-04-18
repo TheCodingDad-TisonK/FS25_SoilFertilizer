@@ -84,9 +84,9 @@
     <e k="sf_hud_hint_normal" v="RMT: bewegen/Größe ändern" eh="afc8f13b" />
     <e k="sf_use_imperial_short" v="Imperiale Einheiten" eh="ff2701ad" />
     <e k="sf_use_imperial_long" v="Ausbringmengen in gal/ac und lb/ac (aus = L/ha und kg/ha)" eh="17efa489" />
-    <e k="sf_active_map_layer_short" v="Active Map Layer" />
-    <e k="sf_active_map_layer_long" v="Nutrient layer shown as overlay in the PDA map" />
-    <e k="input_SF_OPEN_SETTINGS" v="Open Soil Settings" />
+    <e k="sf_active_map_layer_short" v="Active Map Layer" eh="1861765f" />
+    <e k="sf_active_map_layer_long" v="Nutrient layer shown as overlay in the PDA map" eh="d7755cc8" />
+    <e k="input_SF_OPEN_SETTINGS" v="Open Soil Settings" eh="2e31c0dd" />
     <e k="sf_reset" v="Bodeneinstellungen zurücksetzen" eh="467bc2f5" />
     <e k="input_SF_TOGGLE_HUD" v="Boden-HUD umschalten" eh="f0224a10" />
     <e k="input_SF_SOIL_REPORT" v="Bodenbericht" eh="c33180ef" />
@@ -176,6 +176,8 @@
     <e k="sf_bigBag_fungicide_name" v="Big Bag Fungizid" eh="a3d4e59c" />
     <e k="sf_bigBag_fungicide_function" v="Fungizid (flüssig)" eh="745c34cb" />
     <e k="sf_bigBag_starter_function" v="Starterdünger (flüssig)" eh="2c36ea57" />
+		<e k="sf_bigBag_gypsum_name" v="[EN] Big Bag Gypsum" eh="40fc8169" />
+		<e k="sf_bigBag_gypsum_function" v="[EN] Soil Amendment (dry)" eh="51503c54" />
     <e k="sf_report_detail_n_ok" v="Stickstoff: Optimal" eh="13782bd9" />
     <e k="sf_report_detail_p_ok" v="Phosphor: Optimal" eh="dbc90f11" />
     <e k="sf_report_detail_k_ok" v="Kalium: Optimal" eh="0197b4ba" />
@@ -368,26 +370,26 @@
 		<e k="sf_map_health_overall" v="Durchschn. Bodengesundheit" eh="5533cbe3" />
 		<e k="sf_map_btn_report" v="Hofübersicht öffnen" eh="6f0800e8" />
 		<e k="sf_map_btn_help" v="Hilfe" eh="800e465a" />
-    <e k="sf_map_btn_cycle_layer" v="Ebene wechseln" />
-    <e k="sf_map_btn_treatment" v="Behandlungsplan" />
-    <e k="sf_map_btn_disable" v="Overlay deaktivieren" />
-    <e k="sf_treat_action_ok" v="OK" />
-    <e k="sf_help_title" v="Boden-Schnellreferenz" />
-    <e k="sf_help_nutrients_header" v="NÄHRSTOFFE" />
-    <e k="sf_help_n" v="N  (Stickstoff)   - Schnell erschöpft. UAN, Harnstoff oder Mist ausbringen." />
-    <e k="sf_help_p" v="P  (Phosphor)     - Langanhaltend. MAP oder DAP ausbringen." />
-    <e k="sf_help_k" v="K  (Kalium)       - Kali ausbringen. Wichtig für Wurzeln." />
-    <e k="sf_help_om" v="OS (Organisch)    - Baut sich langsam auf. Mist/Kompost einpflügen." />
-    <e k="sf_help_soil_header" v="BODENCHEMIE" />
-    <e k="sf_help_ph" v="pH  6,5-7,0 = Ideal.  &lt; 6,5 Kalk ausbringen.  &gt; 7,5 Gips ausbringen." />
-    <e k="sf_help_pressure_header" v="PFLANZENDRUCK" />
-    <e k="sf_help_weed" v="Unkraut  &gt; 20% - Herbizid ausbringen." />
-    <e k="sf_help_pest" v="Schädling &gt; 20% - Insektizid ausbringen." />
-    <e k="sf_help_disease" v="Krankheit &gt; 20% - Fungizid ausbringen." />
-    <e k="sf_help_status_header" v="STATUSNIVEAUS" />
-    <e k="sf_help_good" v="Gut - Keine Aktion erforderlich." />
-    <e k="sf_help_fair" v="Mittel - Beobachten / vorbeugend nachdüngen." />
-    <e k="sf_help_poor" v="Schlecht - Sofortige Behandlung erforderlich." />
+    <e k="sf_map_btn_cycle_layer" v="Ebene wechseln" eh="875dbf22" />
+    <e k="sf_map_btn_treatment" v="Behandlungsplan" eh="4ba012e2" />
+    <e k="sf_map_btn_disable" v="Overlay deaktivieren" eh="8e75dec5" />
+    <e k="sf_treat_action_ok" v="OK" eh="e0aa021e" />
+    <e k="sf_help_title" v="Boden-Schnellreferenz" eh="8986bb6d" />
+    <e k="sf_help_nutrients_header" v="NÄHRSTOFFE" eh="9aeb39bf" />
+    <e k="sf_help_n" v="N  (Stickstoff)   - Schnell erschöpft. UAN, Harnstoff oder Mist ausbringen." eh="f2d0c792" />
+    <e k="sf_help_p" v="P  (Phosphor)     - Langanhaltend. MAP oder DAP ausbringen." eh="fdfbd91e" />
+    <e k="sf_help_k" v="K  (Kalium)       - Kali ausbringen. Wichtig für Wurzeln." eh="e0217634" />
+    <e k="sf_help_om" v="OS (Organisch)    - Baut sich langsam auf. Mist/Kompost einpflügen." eh="a4e29617" />
+    <e k="sf_help_soil_header" v="BODENCHEMIE" eh="19c67ff5" />
+    <e k="sf_help_ph" v="pH  6,5-7,0 = Ideal.  &lt; 6,5 Kalk ausbringen.  &gt; 7,5 Gips ausbringen." eh="8929304d" />
+    <e k="sf_help_pressure_header" v="PFLANZENDRUCK" eh="132b0f66" />
+    <e k="sf_help_weed" v="Unkraut  &gt; 20% - Herbizid ausbringen." eh="c8d890df" />
+    <e k="sf_help_pest" v="Schädling &gt; 20% - Insektizid ausbringen." eh="f4932a05" />
+    <e k="sf_help_disease" v="Krankheit &gt; 20% - Fungizid ausbringen." eh="1bfd0913" />
+    <e k="sf_help_status_header" v="STATUSNIVEAUS" eh="b081c2c6" />
+    <e k="sf_help_good" v="Gut - Keine Aktion erforderlich." eh="03910bec" />
+    <e k="sf_help_fair" v="Mittel - Beobachten / vorbeugend nachdüngen." eh="2922eb1c" />
+    <e k="sf_help_poor" v="Schlecht - Sofortige Behandlung erforderlich." eh="b287d206" />
     <!-- Fields Tab -->
     <e k="sf_pda_fields_section_title" v="Alle Felder" eh="48729e0b" />
     <e k="sf_pda_col_field" v="Feld" eh="6f16a5f8" />

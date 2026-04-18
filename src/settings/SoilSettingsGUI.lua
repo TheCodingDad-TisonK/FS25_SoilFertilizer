@@ -42,6 +42,7 @@ function SoilSettingsGUI:registerConsoleCommands()
     addConsoleCommand("SoilResetSettings", "Reset all settings to defaults", "consoleCommandResetSettings", self)
     addConsoleCommand("SoilSaveData", "Force save soil data", "consoleCommandSaveData", self)
     addConsoleCommand("SoilDebug", "Toggle debug mode", "consoleCommandDebug", self)
+    addConsoleCommand("SoilDrainVehicle", "Drain custom fertilizer from current vehicle/implements (50% refund)", "consoleCommandDrainVehicle", self)
     addConsoleCommand("soilfertility", "Show all soil commands", "consoleCommandHelp", self)
 
     SoilLogger.info("Console commands registered")
@@ -66,6 +67,7 @@ function SoilSettingsGUI:consoleCommandHelp()
     print("SoilResetSettings - Reset to defaults")
     print("SoilSaveData - Force save soil data")
     print("SoilDebug - Toggle debug mode")
+    print("SoilDrainVehicle - Drain custom fertilizer from vehicle/implements (50% refund)")
     print("==============================================")
     return "Type 'soilfertility' for more info"
 end
@@ -334,4 +336,133 @@ function SoilSettingsGUI:consoleCommandResetSettings()
         return "Soil Mod settings reset to default!"
     end
     return "Error: Soil Mod not initialized"
+end
+
+-- =========================================================
+-- SoilDrainVehicle: empty custom fill types from the current
+-- vehicle and all attached implements, with a 50% refund.
+-- =========================================================
+-- Liquid sprayers have no Dischargeable spec — vanilla FS25
+-- offers no way to drain them. This command is the escape
+-- hatch so players can switch products without wasting them.
+function SoilSettingsGUI:consoleCommandDrainVehicle()
+    if not g_currentMission then
+        return "Error: No active mission"
+    end
+
+    local fm = g_fillTypeManager
+    if not fm then return "Error: FillTypeManager not available" end
+
+    -- Build a set of custom fill type indices this mod manages
+    local customNames = {
+        "UREA","AMS","MAP","DAP","POTASH","COMPOST","BIOSOLIDS",
+        "CHICKEN_MANURE","PELLETIZED_MANURE","GYPSUM",
+        "UAN32","UAN28","ANHYDROUS","STARTER","LIQUIDLIME",
+        "INSECTICIDE","FUNGICIDE",
+        "LIQUID_UREA","LIQUID_AMS","LIQUID_MAP","LIQUID_DAP","LIQUID_POTASH",
+    }
+    local customSet = {}
+    local priceTable = {}
+    -- Prices match FALLBACK_PRICES in installPurchaseRefillHook
+    local fallbackPrices = {
+        UREA=1.65, AMS=1.40, MAP=1.95, DAP=1.75, POTASH=1.80,
+        COMPOST=0.60, BIOSOLIDS=0.55, CHICKEN_MANURE=0.50,
+        PELLETIZED_MANURE=0.70, GYPSUM=0.80,
+        UAN32=1.60, UAN28=1.50, ANHYDROUS=1.85, STARTER=1.70,
+        LIQUIDLIME=1.20, INSECTICIDE=1.20, FUNGICIDE=1.30,
+        LIQUID_UREA=1.70, LIQUID_AMS=1.45, LIQUID_MAP=2.00,
+        LIQUID_DAP=1.80, LIQUID_POTASH=1.85,
+    }
+    for _, name in ipairs(customNames) do
+        local idx = fm:getFillTypeIndexByName(name)
+        if idx then
+            customSet[idx] = name
+            priceTable[idx] = fallbackPrices[name] or 1.0
+        end
+    end
+
+    -- Find the controlled vehicle
+    local vehicle = nil
+    if g_localPlayer then
+        local ok, inVeh = pcall(function() return g_localPlayer:getIsInVehicle() end)
+        if ok and inVeh then
+            local ok2, v = pcall(function() return g_localPlayer:getCurrentVehicle() end)
+            if ok2 and v then vehicle = v end
+        end
+    end
+    if not vehicle and g_currentMission.controlledVehicle then
+        vehicle = g_currentMission.controlledVehicle
+    end
+    if not vehicle then
+        return "Error: No vehicle currently controlled. Enter a vehicle first."
+    end
+
+    -- Collect root vehicle + all attached implements recursively
+    local function collectVehicles(v, list)
+        table.insert(list, v)
+        local ok, impls = pcall(function() return v:getAttachedImplements() end)
+        if ok and impls then
+            for _, impl in ipairs(impls) do
+                if impl.object then
+                    collectVehicles(impl.object, list)
+                end
+            end
+        end
+    end
+    local targets = {}
+    collectVehicles(vehicle, targets)
+
+    local totalRefund  = 0
+    local totalDrained = 0
+    local report       = {}
+
+    local isServer = g_currentMission:getIsServer()
+    local farmId   = vehicle:getOwnerFarmId() or 1
+
+    for _, veh in ipairs(targets) do
+        local spec = veh.spec_fillUnit
+        if spec and spec.fillUnits then
+            for fuIdx, fillUnit in ipairs(spec.fillUnits) do
+                local currentType = fillUnit.fillType
+                if currentType and customSet[currentType] then
+                    local level = fillUnit.fillLevel or 0
+                    if level > 0 then
+                        local typeName = customSet[currentType]
+                        local refund   = level * priceTable[currentType] * 0.5
+
+                        if isServer then
+                            pcall(function()
+                                veh:addFillUnitFillLevel(farmId, fuIdx, -level, currentType, ToolType.UNDEFINED, nil)
+                            end)
+                            pcall(function()
+                                g_currentMission:addMoney(refund, farmId, MoneyType.PURCHASE_FERTILIZER, true, true)
+                            end)
+                        end
+
+                        totalDrained = totalDrained + level
+                        totalRefund  = totalRefund  + refund
+                        table.insert(report, string.format(
+                            "  %s: %.0f L/kg drained → refund $%.0f", typeName, level, refund))
+                        SoilLogger.info("SoilDrainVehicle: drained %.0f of %s, refund $%.0f",
+                            level, typeName, refund)
+                    end
+                end
+            end
+        end
+    end
+
+    if #report == 0 then
+        return "No custom fertilizer found in vehicle or attached implements."
+    end
+
+    if not isServer then
+        table.insert(report, "(Note: not host — drain logged only; run on the host for full effect)")
+    end
+
+    local summary = string.format(
+        "=== SoilDrainVehicle ===\n%s\nTotal: %.0f L/kg drained | Refund: $%.0f (50%%)\n========================",
+        table.concat(report, "\n"), totalDrained, totalRefund
+    )
+    print(summary)
+    return summary
 end

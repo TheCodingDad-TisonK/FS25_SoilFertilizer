@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.9.3.0] - 2026-04-18
+
+### Added
+
+- **IBC Liquid Tanks replace big bag containers for liquid fertilizers**: UAN-32, UAN-28,
+  Anhydrous Ammonia, Starter 10-34-0, Liquid Urea, Liquid AMS, Liquid MAP, Liquid DAP,
+  Liquid Potash, Insecticide, and Fungicide are now available as IBC-style liquid tank objects
+  in the shop instead of big bag pallets. The new objects are purpose-built for liquid products
+  and provide a cleaner visual fit. Single-unit and multi-purchase options included for all types.
+
+- **Purchasable Gypsum big bag**: Gypsum is now available as a purchasable big bag in the shop,
+  consistent with other solid amendment products. Apply with a spreader to correct pH and
+  improve soil structure.
+
+- **`SoilDrainVehicle` console command**: Drains all custom fertilizer fill types from the
+  current vehicle and all attached implements, refunding 50% of the product value. Liquid
+  sprayers have no built-in way to be emptied in FS25 — this command is the escape hatch
+  so players can switch products without discarding an entire tank load.
+
+- **Soil report treatment action strings** (all 26 languages): The soil report now shows
+  specific product recommendations per nutrient deficit — e.g. "Apply UAN32, UREA, or
+  ANHYDROUS" for low nitrogen — and rotation status labels (Legume Bonus, Fatigue, OK).
+
+---
+
 ## [1.9.2.0] - 2026-04-18
 
 ### Fixed
