@@ -413,13 +413,15 @@ SoilConstants.HUD = {
         [4] = { r = 0.9, g = 0.9, b = 0.9 },  -- Mono (minimalist grayscale)
     },
 
-    -- Transparency levels (matched to hudTransparency setting values 1-5)
+    -- Transparency levels (matched to hudTransparency setting values 1-5).
+    -- Clear was previously 0.25 but {0.05,0.05,0.05} @ 0.25 alpha is nearly
+    -- invisible on most in-game backgrounds, making the HUD appear to vanish.
     TRANSPARENCY_LEVELS = {
-        [1] = 0.25,  -- Clear (25%)
-        [2] = 0.50,  -- Light (50%)
-        [3] = 0.70,  -- Medium (70%) - default
-        [4] = 0.85,  -- Dark (85%)
-        [5] = 1.00,  -- Solid (100%)
+        [1] = 0.42,  -- Clear  (was 0.25 — raised so panel stays visible)
+        [2] = 0.58,  -- Light  (was 0.50)
+        [3] = 0.70,  -- Medium (default, unchanged)
+        [4] = 0.85,  -- Dark   (unchanged)
+        [5] = 1.00,  -- Solid  (unchanged)
     },
 
     -- Font size multipliers (matched to hudFontSize setting values 1-3)

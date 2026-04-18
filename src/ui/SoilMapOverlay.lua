@@ -204,12 +204,14 @@ local function isPointInPoly(px, pz, verts)
 end
 
 --- Return an array of world {x, z} sample points that fill the field polygon.
---- Results are cached in self.fieldPolyCache keyed by fsField.fieldId (or a fallback key).
---- The grid step is SoilMapOverlay.POLYGON_STEP meters; points outside the polygon are rejected.
+--- Results are cached in self.fieldPolyCache keyed by fsField.fieldId + step.
+--- Points outside the polygon are rejected.
 ---@param fsField table FS25 Field object with polygonPoints and fieldId
+---@param step    number  World-unit grid spacing in meters (caller-computed)
 ---@return table Array of {x, z}
-function SoilMapOverlay:getFieldFillPoints(fsField)
-    local cacheKey = fsField.fieldId or tostring(fsField)
+function SoilMapOverlay:getFieldFillPoints(fsField, step)
+    step = step or SoilMapOverlay.POLYGON_STEP
+    local cacheKey = (fsField.fieldId or tostring(fsField)) .. "@" .. step
     if self.fieldPolyCache[cacheKey] then
         return self.fieldPolyCache[cacheKey]
     end
@@ -251,7 +253,7 @@ function SoilMapOverlay:getFieldFillPoints(fsField)
     end
 
     -- Grid-sample the bounding box, keep points inside the polygon
-    local step = SoilMapOverlay.POLYGON_STEP
+    -- (step is the caller-supplied world-unit spacing, already terrain-scaled)
     -- Offset start by half-step so points land near field centre, not edges
     local startX = minX + step * 0.5
     local startZ = minZ + step * 0.5
@@ -322,6 +324,13 @@ function SoilMapOverlay:updateSamplePoints(force)
         return
     end
 
+    -- Scale sampling step proportional to terrain size so large maps
+    -- (4x, 16x) get the same screen-pixel density as a standard 2048m map.
+    -- A 8192m map at step=10 would produce 16× more points and hit MAX_POINTS
+    -- after only a handful of fields, leaving the rest of the map empty.
+    local terrainSize = (g_currentMission and g_currentMission.terrainSize) or 2048
+    local scaledStep = SoilMapOverlay.POLYGON_STEP * math.max(1.0, terrainSize / 2048.0)
+
     local totalPoints = 0
     for _, fsField in ipairs(fields) do
         if fsField and fsField.farmland then
@@ -329,7 +338,7 @@ function SoilMapOverlay:updateSamplePoints(force)
             if farmlandId and farmlandId > 0 then
                 local info = self.soilSystem:getFieldInfo(farmlandId)
                 if info then
-                    local polyPts = self:getFieldFillPoints(fsField)
+                    local polyPts = self:getFieldFillPoints(fsField, scaledStep)
                     -- Per-pixel path: when GRLE density map layers are available (layers 1-5),
                     -- read the soil value at each sample point directly from the layer so that
                     -- sprayed sub-areas show different colours from unsprayed areas.
@@ -416,13 +425,14 @@ function SoilMapOverlay:onDraw(frame, mapElement, ingameMap, pageIndex)
     local mapMaxY = mapY + mapHeight
 
     -- Compute tile size from world-to-screen scale so tiles fill edge-to-edge at any zoom level.
-    -- Sample two adjacent world points and measure their screen distance.
-    -- Fall back to a fixed size if the projection returns nil (map not fully ready).
+    -- Use the same terrain-scaled step as the sampler so tiles match sample density exactly.
+    local terrainSz = (g_currentMission and g_currentMission.terrainSize) or 2048
+    local drawStep  = SoilMapOverlay.POLYGON_STEP * math.max(1.0, terrainSz / 2048.0)
     local sizeX, sizeY
     local probeX, probeZ = 0, 0
     local ax, ay = self:worldToScreenPosition(ingameMap, probeX, probeZ)
-    local bx, by = self:worldToScreenPosition(ingameMap, probeX + SoilMapOverlay.POLYGON_STEP, probeZ)
-    local cx, cy = self:worldToScreenPosition(ingameMap, probeX, probeZ + SoilMapOverlay.POLYGON_STEP)
+    local bx, by = self:worldToScreenPosition(ingameMap, probeX + drawStep, probeZ)
+    local cx, cy = self:worldToScreenPosition(ingameMap, probeX, probeZ + drawStep)
     if ax and bx and cx then
         local dxX = math.abs(bx - ax)
         local dyZ = math.abs(cy - ay)

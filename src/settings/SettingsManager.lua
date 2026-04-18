@@ -71,6 +71,67 @@ function SettingsManager:applyDefaults(settingsObject)
     end
 end
 
+-- ── Local-only settings (per-player, not server-shared) ──────
+-- Saved to the user profile directory so they survive reconnects on dedi servers.
+
+function SettingsManager:getLocalSettingsPath()
+    local ok, profilePath = pcall(getUserProfileAppPath)
+    if ok and profilePath and profilePath ~= "" then
+        local dir = profilePath .. "modsSettings"
+        createFolder(dir)
+        return dir .. "/" .. SettingsManager.MOD_NAME .. "_local.xml"
+    end
+    -- Fallback: savegame dir with _local suffix (singleplayer / self-hosted)
+    local xmlPath = self:getSavegameXmlFilePath()
+    return xmlPath and xmlPath:gsub("%.xml$", "_local.xml") or nil
+end
+
+function SettingsManager:saveLocalSettings(settingsObject)
+    local path = self:getLocalSettingsPath()
+    if not path then return false end
+
+    local xml = XMLFile.create("sf_LocalConfig", path, self.XMLTAG)
+    if not xml then return false end
+
+    for _, def in ipairs(SettingsSchema.definitions) do
+        if def.localOnly then
+            local xmlKey = self.XMLTAG .. "." .. def.id
+            if def.type == "boolean" then
+                xml:setBool(xmlKey, settingsObject[def.id])
+            elseif def.type == "number" then
+                xml:setInt(xmlKey, settingsObject[def.id])
+            end
+        end
+    end
+
+    xml:save()
+    xml:delete()
+    SoilLogger.debug("Local settings saved: %s", path)
+    return true
+end
+
+function SettingsManager:loadLocalSettings(settingsObject)
+    local path = self:getLocalSettingsPath()
+    if not path or not fileExists(path) then return end
+
+    local xml = XMLFile.load("sf_LocalConfig", path)
+    if not xml then return end
+
+    for _, def in ipairs(SettingsSchema.definitions) do
+        if def.localOnly then
+            local xmlKey = self.XMLTAG .. "." .. def.id
+            if def.type == "boolean" then
+                settingsObject[def.id] = xml:getBool(xmlKey, settingsObject[def.id])
+            elseif def.type == "number" then
+                settingsObject[def.id] = xml:getInt(xmlKey, settingsObject[def.id])
+            end
+        end
+    end
+
+    xml:delete()
+    SoilLogger.info("Local settings loaded from: %s", path)
+end
+
 function SettingsManager:saveSettings(settingsObject)
     local xmlPath = self:getSavegameXmlFilePath()
 
