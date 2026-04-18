@@ -1,7 +1,7 @@
 # FS25_SoilFertilizer - Developer Guide
 
-**Version**: 1.8.8.0
-**Last Updated**: 2026-04-17
+**Version**: 1.9.2.0
+**Last Updated**: 2026-04-18
 
 ---
 
@@ -55,7 +55,7 @@ FS25_SoilFertilizer/
 ├── CLAUDE.md                # Project architecture guide
 ├── DEVELOPMENT.md           # This file
 ├── src/
-│   ├── main.lua             # Entry point & lifecycle hooks
+│   ├── main.lua                    # Entry point & lifecycle hooks
 │   ├── SoilFertilityManager.lua    # Central coordinator
 │   ├── SoilFertilitySystem.lua     # Core soil simulation logic
 │   ├── SprayerRateManager.lua      # Auto-rate control logic
@@ -64,16 +64,23 @@ FS25_SoilFertilizer/
 │   │   └── SettingsSchema.lua      # Settings definitions
 │   ├── settings/
 │   │   ├── Settings.lua            # Settings domain object
-│   │   ├── SettingsManager.lua     # XML save/load
+│   │   ├── SettingsManager.lua     # XML save/load (server + local per-player)
 │   │   ├── SoilSettingsUI.lua      # In-game UI generation
 │   │   └── SoilSettingsGUI.lua     # Console commands
 │   ├── hooks/
-│   │   └── HookManager.lua         # Game engine hooks
+│   │   ├── HookManager.lua         # Game engine hook lifecycle
+│   │   └── SoilMapHooks.lua        # In-game map overlay hooks
 │   ├── network/
 │   │   └── NetworkEvents.lua       # Multiplayer sync
 │   ├── ui/
-│   │   ├── SoilHUD.lua             # Always-on legend/reference HUD overlay
-│   │   └── SoilReportDialog.lua    # Full-farm soil report dialog (K key)
+│   │   ├── SoilHUD.lua             # Always-on HUD panel overlay
+│   │   ├── SoilSettingsPanel.lua   # HUD settings sub-panel (position, theme, transparency)
+│   │   ├── SoilPDAScreen.lua       # PDA screen (K key) — Farm Overview + Treatment Plan tabs
+│   │   ├── SoilMapOverlay.lua      # In-game map polygon fill overlay
+│   │   ├── SoilLayerSystem.lua     # Overlay layer definitions (N/P/K/OM/pH)
+│   │   ├── SoilFieldDetailDialog.lua  # Field detail popup dialog
+│   │   ├── SoilTreatmentDialog.lua    # Treatment recommendation dialog
+│   │   └── SoilReportDialog.lua    # Full-farm soil report dialog
 │   └── utils/
 │       ├── Logger.lua              # Centralized logging
 │       ├── AsyncRetryHandler.lua   # Retry pattern utility
@@ -89,9 +96,9 @@ FS25_SoilFertilizer/
 `main.lua` loads modules in strict dependency order:
 
 1. **Utilities & Config**: Logger, AsyncRetryHandler, Constants, SettingsSchema
-2. **Core Systems**: HookManager, SprayerRateManager, SoilFertilitySystem, SoilFertilityManager
+2. **Core Systems**: HookManager, SoilMapHooks, SprayerRateManager, SoilFertilitySystem, SoilFertilityManager
 3. **Settings**: SettingsManager, Settings, SoilSettingsGUI
-4. **UI**: UIHelper, SoilSettingsUI, SoilHUD, SoilReportDialog
+4. **UI**: UIHelper, SoilSettingsUI, SoilLayerSystem, SoilMapOverlay, SoilFieldDetailDialog, SoilTreatmentDialog, SoilReportDialog, SoilPDAScreen, SoilSettingsPanel, SoilHUD
 5. **Network**: NetworkEvents
 
 **Important**: Respect this order when adding new modules.
@@ -106,6 +113,8 @@ g_SoilFertilityManager
   ├── settingsManager   : SettingsManager instance
   ├── soilSystem        : SoilFertilitySystem instance
   ├── soilHUD           : SoilHUD instance
+  ├── soilPDAScreen     : SoilPDAScreen instance
+  ├── soilMapOverlay    : SoilMapOverlay instance
   └── Network events registered globally
 ```
 

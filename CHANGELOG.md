@@ -7,6 +7,84 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.9.2.0] - 2026-04-18
+
+### Fixed
+
+- **HUD crashes every frame when transparency set to Clear or Light**: `setTextShadow()` does
+  not exist in FS25's Lua sandbox. Calling it aborted the draw function every frame, making the
+  entire HUD panel invisible at low transparency levels. Both calls removed.
+
+- **Background color not visually changing with transparency**: The HUD panel background was
+  pure near-black (`{0.05, 0.05, 0.05}`) regardless of the selected color theme. Changing
+  transparency on a near-black background produces no perceptible difference. The background is
+  now lightly tinted by the active color theme accent so transparency changes are clearly visible.
+
+---
+
+## [1.9.1.0] - 2026-04-18
+
+### Added
+
+- **Large map support (16x and custom sizes)**: The soil map overlay now scales its polygon fill
+  step proportionally to the terrain size. A 2048m map uses a 10m step (unchanged); an 8192m
+  map uses a 40m step, keeping the total sample count bounded and preventing budget exhaustion
+  on oversized maps. Cache keys include the step value so large-map and standard-map results
+  never collide.
+
+- **Dedicated server HUD settings persistence**: HUD appearance settings (position, transparency,
+  color theme) are now saved to and loaded from a per-player local file using
+  `getUserProfileAppPath()`. Previously these settings were stored only in the server savegame
+  XML, which clients on a dedicated server cannot write — meaning they reset to defaults on
+  every reconnect. The local file is always saved and loaded regardless of server/client role,
+  and local values take precedence over server-received values.
+
+---
+
+## [1.9.0.0] - 2026-04-18
+
+### Added
+
+- **Per-area PDA overlay coloring via sparse cell grid**: The in-game map overlay now colors
+  each field area using a sparse `zoneData` cell grid rather than a single centroid dot. Each
+  grid cell is sampled individually so fields with mixed soil status display correctly.
+
+### Fixed
+
+- **Spray ground overlay rendering**: Spray ground overlays now render correctly end-to-end,
+  including per-pixel soil map overlay support.
+
+- **Lua local scope crash in overlay sampling**: `getCellLayerValue` was called before it was
+  defined in local scope inside `updateSamplePoints`, causing a nil crash on certain map loads.
+  Reordered so the local function is declared before use.
+
+---
+
+## [1.8.9.0] - 2026-04-17
+
+### Fixed
+
+- **AI empty-tank vanilla fallback**: AI workers no longer get stuck when custom fill tanks run
+  empty. The system falls back to vanilla behavior correctly instead of throwing errors.
+
+- **Fill plane and volume textures**: Fill plane and volume textures now display correctly for
+  custom fill types (UREA, UAN32, DAP, etc.).
+
+- **Spray visuals**: Spray visual effects now play correctly for all custom fertilizer types
+  under all application conditions.
+
+- **Missing German translation strings**: All German strings that previously showed `[EN]`
+  placeholders are now fully translated and the EN placeholders removed.
+
+### Improved
+
+- **Translation sync**: UK, RU, and several other language files updated with corrected strings.
+
+- **Polygon sample budget raised**: `MAX_POINTS` raised from the previous value to 15,000,
+  allowing larger fields to display full polygon fill coverage without truncation.
+
+---
+
 ## [1.8.8.0] - 2026-04-17
 
 ### Changed
