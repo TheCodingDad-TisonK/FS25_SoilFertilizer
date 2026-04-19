@@ -23,7 +23,7 @@ SoilMapOverlay.ALPHA          = 0.72
 
 -- Sampling constants
 SoilMapOverlay.SAMPLE_UPDATE_INTERVAL_MS = 4500
-SoilMapOverlay.MAX_POINTS       = 40000   -- increased to support full polygon fill
+SoilMapOverlay.MAX_POINTS       = 6000   -- cap keeps draw loop fast; ~200 pts/field on a 30-field map
 SoilMapOverlay.POLYGON_STEP     = 10     -- world-unit grid spacing for polygon sampling (meters)
 
 -- Status colors (match SoilHUD palette)
@@ -444,12 +444,20 @@ function SoilMapOverlay:onDraw(frame, mapElement, ingameMap, pageIndex)
     end
     local halfX, halfY = sizeX * 0.5, sizeY * 0.5
 
+    -- Derive affine transform coefficients from the 3 probe points.
+    -- The map is a linear projection so this is exact at any zoom/pan level.
+    -- Replaces a per-point worldToScreenPosition() engine call with arithmetic,
+    -- cutting ~40k Lua→C++ calls per frame down to the 3 probes above.
+    local scaleXX = (bx - ax) / drawStep
+    local scaleYX = (by - ay) / drawStep
+    local scaleXZ = (cx - ax) / drawStep
+    local scaleYZ = (cy - ay) / drawStep
+
     for _, point in ipairs(self.samplePoints) do
-        local screenX, screenY = self:worldToScreenPosition(ingameMap, point.x, point.z)
-        if screenX ~= nil and screenY ~= nil
-           and screenX >= mapX and screenX <= mapMaxX
+        local screenX = ax + point.x * scaleXX + point.z * scaleXZ
+        local screenY = ay + point.x * scaleYX + point.z * scaleYZ
+        if screenX >= mapX and screenX <= mapMaxX
            and screenY >= mapY and screenY <= mapMaxY then
-            -- Draw polygon fill tile (no per-tile border — too expensive at 3000+ pts)
             drawFilledRect(screenX - halfX, screenY - halfY, sizeX, sizeY,
                            point.r, point.g, point.b, SoilMapOverlay.ALPHA)
         end
