@@ -292,7 +292,7 @@
     <e k="sf_report_rotation_bonus" v="Bonus de rotation" eh="2831a7ac" />
     <e k="sf_report_rotation_fatigue" v="Fatigue : Même culture" eh="46135880" />
     <e k="sf_report_rotation_ok" v="Rotation : OK" eh="df66b3be" />
-    <e k="sf_gypsum_title" v="Gypse (pH+)" eh="56e6dc36" />
+    <e k="sf_gypsum_title" v="Gypse (pH-)" eh="56e6dc36" />
     <e k="sf_compost_title" v="Compost (Organique)" eh="c3e2071a" />
     <e k="sf_biosolids_title" v="Biosolides (N+P)" eh="f0c901dc" />
     <e k="sf_chicken_manure_title" v="Fumier de poulet (N+P)" eh="338128e2" />

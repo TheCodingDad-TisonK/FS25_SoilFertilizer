@@ -292,7 +292,7 @@
     <e k="sf_report_rotation_bonus" v="Bono de rotación" eh="2831a7ac" />
     <e k="sf_report_rotation_fatigue" v="Fatiga: Mismo cultivo" eh="46135880" />
     <e k="sf_report_rotation_ok" v="Rotación: OK" eh="df66b3be" />
-    <e k="sf_gypsum_title" v="Yeso (pH+)" eh="56e6dc36" />
+    <e k="sf_gypsum_title" v="Yeso (pH-)" eh="56e6dc36" />
     <e k="sf_compost_title" v="Compost (Orgánico)" eh="c3e2071a" />
     <e k="sf_biosolids_title" v="Biosólidos (N+P)" eh="f0c901dc" />
     <e k="sf_chicken_manure_title" v="Gallinaza (N+P)" eh="338128e2" />

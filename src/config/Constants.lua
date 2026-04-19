@@ -199,8 +199,8 @@ SoilConstants.FERTILIZER_PROFILES = {
     -- Starter fertilizer (High-P pop-up)
     STARTER           = { N=63.5, P=595.0, K=44.6 }, -- 46.8 L/ha: ~8N, ~15P ppm
 
-    -- Gypsum (Fix: No pH effect)
-    GYPSUM            = { pH=0.0, OM=0.22 }, -- 1500 kg/ha: pure OM/sulfur boost
+    -- Gypsum: mild pH lowering + OM/structure boost
+    GYPSUM            = { pH=-0.10, OM=0.22 }, -- 1500 kg/ha: -0.25 pH shift, OM boost
 
     -- Phosphorus & potassium sources (Dry bulk)
     MAP               = { N=11.1, P=411.5, K=0.00 }, -- 225 kg/ha: ~45P ppm

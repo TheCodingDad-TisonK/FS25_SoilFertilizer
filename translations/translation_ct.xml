@@ -324,7 +324,7 @@
     <e k="sf_report_rotation_bonus" v="輪作獎勵" eh="2831a7ac" />
     <e k="sf_report_rotation_fatigue" v="連作疲勞：相同作物" eh="46135880" />
     <e k="sf_report_rotation_ok" v="輪作：正常" eh="df66b3be" />
-    <e k="sf_gypsum_title" v="石膏 (pH+)" eh="56e6dc36" />
+    <e k="sf_gypsum_title" v="石膏 (pH-)" eh="56e6dc36" />
     <e k="sf_compost_title" v="堆肥 (有機)" eh="c3e2071a" />
     <e k="sf_biosolids_title" v="生物固形物 (N+P)" eh="f0c901dc" />
     <e k="sf_chicken_manure_title" v="雞糞 (N+P)" eh="338128e2" />

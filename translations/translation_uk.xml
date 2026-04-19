@@ -293,7 +293,7 @@
     <e k="sf_report_rotation_bonus" v="Бонус за ротацію" eh="2831a7ac" />
     <e k="sf_report_rotation_fatigue" v="Втома: та сама культура" eh="46135880" />
     <e k="sf_report_rotation_ok" v="Ротація: у нормі" eh="df66b3be" />
-    <e k="sf_gypsum_title" v="Гіпс (pH+)" eh="56e6dc36" />
+    <e k="sf_gypsum_title" v="Гіпс (pH-)" eh="56e6dc36" />
     <e k="sf_compost_title" v="Компост (органічний)" eh="c3e2071a" />
     <e k="sf_biosolids_title" v="Біосуміші (N+P)" eh="f0c901dc" />
     <e k="sf_chicken_manure_title" v="Курячий послід (N+P)" eh="338128e2" />
