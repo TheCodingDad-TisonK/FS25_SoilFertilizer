@@ -199,6 +199,46 @@ local SETTING_DESCS = {
 -- Page states
 local PAGE_LANDING  = "landing"
 local PAGE_CATEGORY = "category"
+local PAGE_ADMIN    = "admin"
+
+-- ── Admin page layout ─────────────────────────────────────
+local ADMIN_ROW_H = 0.033   -- setting rows (toggle/multi)
+local ADMIN_ACT_H = 0.028   -- action button rows
+local ADMIN_ACCENT = {0.88, 0.25, 0.25}   -- red accent for admin
+
+local ADMIN_SECTIONS = {
+    {
+        header = "Mod Control & Difficulty",
+        items  = {
+            { label = "Mod Enabled",      desc = "Activate / deactivate the entire mod",       stype = "setting", id = "enabled" },
+            { label = "Debug Mode",       desc = "Extra logging for troubleshooting",           stype = "setting", id = "debugMode" },
+            { label = "Difficulty",       desc = "Nutrient drain intensity level",              stype = "setting", id = "difficulty" },
+        },
+    },
+    {
+        header = "Systems",
+        items  = {
+            { label = "Fertility System", desc = "Full soil fertility modeling",                stype = "setting", id = "fertilitySystem" },
+            { label = "Nutrient Cycles",  desc = "N/P/K depletion and recovery",               stype = "setting", id = "nutrientCycles" },
+            { label = "Fertilizer Costs", desc = "Real in-game cost for fertilizers",          stype = "setting", id = "fertilizerCosts" },
+            { label = "Notifications",    desc = "In-game soil status notifications",          stype = "setting", id = "showNotifications" },
+            { label = "Seasonal Effects", desc = "Season-driven soil changes",                 stype = "setting", id = "seasonalEffects" },
+            { label = "Rain Effects",     desc = "Rain causes nutrient leaching",              stype = "setting", id = "rainEffects" },
+            { label = "Plowing Bonus",    desc = "Plow bonus for soil recovery",               stype = "setting", id = "plowingBonus" },
+        },
+    },
+    {
+        header = "Actions & Field Tools",
+        items  = {
+            { label = "Save Soil Data",      desc = "Force-save all soil data now",            stype = "action", id = "admin_save" },
+            { label = "Reset All Settings",  desc = "Restore every setting to its default",    stype = "danger", id = "admin_reset" },
+            { label = "Drain Vehicle Tanks", desc = "Empty sprayer + implements (50% refund)", stype = "action", id = "admin_drain" },
+            { label = "Current Field Info",  desc = "Soil data for the field at your position",stype = "action", id = "admin_field_info" },
+            { label = "Field Forecast",      desc = "Yield forecast for field at position",    stype = "action", id = "admin_field_forecast" },
+            { label = "List All Fields",     desc = "Dump all field soil data to game log",    stype = "action", id = "admin_list_fields" },
+        },
+    },
+}
 
 -- ── Constructor ───────────────────────────────────────────
 function SoilSettingsPanel.new(settings)
@@ -208,6 +248,7 @@ function SoilSettingsPanel.new(settings)
     self.isVisible    = false
     self.page         = PAGE_LANDING
     self.activeCatIdx = nil
+    self.adminMsg     = nil   -- last action result shown in admin page
     self.mouseX       = 0
     self.mouseY       = 0
     self.initialized  = false
@@ -234,9 +275,10 @@ end
 -- ── Visibility ────────────────────────────────────────────
 function SoilSettingsPanel:open()
     if not self.initialized then self:initialize() end
-    self.isVisible = true
-    self.page      = PAGE_LANDING
+    self.isVisible    = true
+    self.page         = PAGE_LANDING
     self.activeCatIdx = nil
+    self.adminMsg     = nil
     -- Save camera rotation so update() can freeze it every frame (SoilHUD edit-mode pattern)
     self.savedCamRotX, self.savedCamRotY, self.savedCamRotZ = nil, nil, nil
     if getCamera and getRotation then
@@ -394,6 +436,8 @@ function SoilSettingsPanel:draw()
         self:drawLandingPage()
     elseif self.page == PAGE_CATEGORY then
         self:drawCategoryPage()
+    elseif self.page == PAGE_ADMIN then
+        self:drawAdminPage()
     end
 end
 
@@ -403,12 +447,16 @@ function SoilSettingsPanel:drawTitleBar()
     self:drawRect(PX, ty, PW, TB_H, C.title_bg)
 
     -- Left accent line
-    local accColor = (self.activeCatIdx and CATEGORIES[self.activeCatIdx].accent) or C.green
+    local accColor = (self.page == PAGE_ADMIN) and ADMIN_ACCENT
+                  or (self.activeCatIdx and CATEGORIES[self.activeCatIdx].accent)
+                  or C.green
     self:drawRect(PX, ty, 0.004, TB_H, accColor)
 
     -- Title text
     local title = "SOIL & FERTILIZER SETTINGS"
-    if self.activeCatIdx then
+    if self.page == PAGE_ADMIN then
+        title = title .. "  /  ADMIN PANEL"
+    elseif self.activeCatIdx then
         title = title .. "  /  " .. string.upper(CATEGORIES[self.activeCatIdx].label)
     end
     self:drawText(PX + 0.018, ty + TB_H * 0.32, TS_TITLE, title, C.white, RenderText.ALIGN_LEFT, true)
@@ -447,7 +495,7 @@ function SoilSettingsPanel:drawInfoBar()
     self:drawText(PX + PAD, textY, TS_SMALL, adminText, adminColor, RenderText.ALIGN_LEFT, true)
     self:drawText(PX + PAD + 0.10, textY, TS_SMALL, "·  " .. modeText, C.info_mode, RenderText.ALIGN_LEFT, false)
 
-    if self.page == PAGE_CATEGORY then
+    if self.page == PAGE_CATEGORY or self.page == PAGE_ADMIN then
         -- Back button
         local bbW = 0.085
         local bbH = IB_H * 0.62
@@ -459,14 +507,16 @@ function SoilSettingsPanel:drawInfoBar()
         self:drawText(bbX + bbW * 0.5, bbY + bbH * 0.18, TS_SMALL, "< Back", C.white, RenderText.ALIGN_CENTER, false)
         self:registerClick("back", bbX, bbY, bbW, bbH)
 
-        -- Reset button
-        local rbW = 0.095
-        local rbX = bbX + bbW + 0.010
-        local rbY = bbY
-        local resetHover = self:hitTest(rbX, rbY, rbW, bbH, self.mouseX, self.mouseY)
-        self:drawRect(rbX, rbY, rbW, bbH, resetHover and {0.50, 0.20, 0.10, 0.70} or C.off_bg)
-        self:drawText(rbX + rbW * 0.5, rbY + bbH * 0.18, TS_SMALL, "Reset Cat.", C.dim, RenderText.ALIGN_CENTER, false)
-        self:registerClick("reset_cat", rbX, rbY, rbW, bbH)
+        if self.page == PAGE_CATEGORY then
+            -- Reset button (category only)
+            local rbW = 0.095
+            local rbX = bbX + bbW + 0.010
+            local rbY = bbY
+            local resetHover = self:hitTest(rbX, rbY, rbW, bbH, self.mouseX, self.mouseY)
+            self:drawRect(rbX, rbY, rbW, bbH, resetHover and {0.50, 0.20, 0.10, 0.70} or C.off_bg)
+            self:drawText(rbX + rbW * 0.5, rbY + bbH * 0.18, TS_SMALL, "Reset Cat.", C.dim, RenderText.ALIGN_CENTER, false)
+            self:registerClick("reset_cat", rbX, rbY, rbW, bbH)
+        end
     else
         -- Close hint on landing
         self:drawText(PX + PW - PAD, textY, TS_SMALL, "SHIFT+O to close", C.hint, RenderText.ALIGN_RIGHT, false)
@@ -485,20 +535,21 @@ function SoilSettingsPanel:drawLandingPage()
         self:drawCategoryCard(cardX, CARD_Y, CARD_W, CARD_H, cat, i)
     end
 
-    -- Drain Vehicle button — bottom-right corner of content area
-    local btnW = 0.148
-    local btnH = 0.030
+    -- ADMIN button — bottom-right corner
+    local btnW = 0.090
+    local btnH = 0.032
     local btnX = CX + CW - btnW
-    local btnY = CY_BOT + 0.006
-    local btnHover = self:hitTest(btnX, btnY, btnW, btnH, self.mouseX, self.mouseY)
+    local btnY = CY_BOT + 0.005
+    local btnHov = self:hitTest(btnX, btnY, btnW, btnH, self.mouseX, self.mouseY)
     self:drawRect(btnX, btnY, btnW, btnH,
-        btnHover and {0.70, 0.45, 0.08, 0.85} or {0.18, 0.14, 0.06, 0.80})
-    self:drawRect(btnX, btnY, 0.003, btnH, {0.90, 0.62, 0.18, 1.0})
+        btnHov and {0.55, 0.08, 0.08, 0.95} or {0.22, 0.05, 0.05, 0.88})
+    self:drawRect(btnX, btnY, 0.003, btnH, ADMIN_ACCENT)
+    self:drawRect(btnX, btnY + btnH - 0.001, btnW, 0.001, ADMIN_ACCENT, 0.40)
     self:drawText(btnX + btnW * 0.5 + 0.002, btnY + btnH * 0.22, TS_SMALL,
-        "Drain Vehicle Tanks (50% refund)",
-        btnHover and {1.0, 0.82, 0.30, 1.0} or {0.75, 0.60, 0.25, 1.0},
-        RenderText.ALIGN_CENTER, false)
-    self:registerClick("drain_vehicle", btnX, btnY, btnW, btnH)
+        "⚙ ADMIN",
+        btnHov and {1.0, 0.55, 0.55, 1.0} or {0.85, 0.35, 0.35, 1.0},
+        RenderText.ALIGN_CENTER, true)
+    self:registerClick("open_admin", btnX, btnY, btnW, btnH)
 end
 
 function SoilSettingsPanel:drawCategoryCard(x, y, w, h, cat, idx)
@@ -597,6 +648,119 @@ function SoilSettingsPanel:drawCategoryPage()
     end
 
     -- Thin top divider under title bar
+    self:drawRect(CX, CY_TOP, CW, 0.001, C.divider)
+end
+
+-- ── Admin page ────────────────────────────────────────────
+local function getPlayerFieldId()
+    local x, z = 0, 0
+    if g_localPlayer and g_localPlayer.rootNode then
+        local ok, wx, _, wz = pcall(getWorldTranslation, g_localPlayer.rootNode)
+        if ok and wx then x, z = wx, wz end
+    elseif g_currentMission and g_currentMission.controlledVehicle then
+        local v = g_currentMission.controlledVehicle
+        if v.rootNode then
+            local ok, wx, _, wz = pcall(getWorldTranslation, v.rootNode)
+            if ok and wx then x, z = wx, wz end
+        end
+    end
+    if g_fieldManager then
+        local field = g_fieldManager:getFieldAtWorldPosition(x, z)
+        if field and field.farmland then return field.farmland.id end
+    end
+    return nil
+end
+
+local function adminShowMsg(self, msg)
+    self.adminMsg = msg
+    if g_currentMission and g_currentMission.hud and
+       g_currentMission.hud.showBlinkingWarning then
+        g_currentMission.hud:showBlinkingWarning(msg, 5000)
+    end
+end
+
+function SoilSettingsPanel:drawAdminPage()
+    local gui = g_SoilFertilityManager and g_SoilFertilityManager.settingsGUI
+    local isAdmin = self:isAdmin()
+    local curY = CY_TOP
+    local rowIdx = 0
+
+    for _, sec in ipairs(ADMIN_SECTIONS) do
+        -- Section header (red accent)
+        curY = curY - SEC_H
+        if curY < CY_BOT then break end
+        self:drawRect(CX, curY, CW, SEC_H, C.title_bg, 0.60)
+        self:drawRect(CX, curY, 0.003, SEC_H, ADMIN_ACCENT)
+        self:drawText(CX + 0.012, curY + SEC_H * 0.25, TS_SMALL,
+            string.upper(sec.header), {ADMIN_ACCENT[1], ADMIN_ACCENT[2], ADMIN_ACCENT[3], 1.0},
+            RenderText.ALIGN_LEFT, true)
+
+        for _, item in ipairs(sec.items) do
+            local isAction = (item.stype == "action" or item.stype == "danger")
+            local rh = isAction and ADMIN_ACT_H or ADMIN_ROW_H
+            curY = curY - rh
+            if curY < CY_BOT then break end
+
+            rowIdx = rowIdx + 1
+            if rowIdx % 2 == 0 then self:drawRect(CX, curY, CW, rh, C.row_alt) end
+
+            if item.stype == "setting" then
+                -- Reuse existing setting row drawing
+                local def = SettingsSchema.byId[item.id]
+                local locked = not def.localOnly and not isAdmin
+                local lc = locked and C.lock_text or C.white
+                local dc = locked and {C.lock_text[1]*0.7, C.lock_text[2]*0.7, C.lock_text[3]*0.7, 1} or C.dim
+                if locked then self:drawRect(CX, curY, 0.003, rh, {0.88, 0.60, 0.18, 0.45}) end
+                self:drawText(CX + (locked and 0.010 or 0.008), curY + rh * 0.55, TS_BODY, item.label, lc, RenderText.ALIGN_LEFT, not locked)
+                self:drawText(CX + (locked and 0.010 or 0.008), curY + rh * 0.15, TS_TINY, item.desc, dc, RenderText.ALIGN_LEFT, false)
+                local ctrlX = CX + CW - 0.012
+                local ctrlY = curY + (rh - TOGGLE_H) * 0.5
+                if def.type == "boolean" then
+                    self:drawToggleControl(ctrlX, ctrlY, item.id, locked)
+                elseif def.type == "number" then
+                    self:drawMultiControl(ctrlX, ctrlY, item.id, locked)
+                end
+            else
+                -- Action / danger button row
+                local isDanger = (item.stype == "danger")
+                local btnW = 0.130
+                local btnH = rh * 0.72
+                local btnX = CX + CW - btnW - 0.012
+                local btnY = curY + (rh - btnH) * 0.5
+                local hov  = self:hitTest(btnX, btnY, btnW, btnH, self.mouseX, self.mouseY)
+
+                self:drawText(CX + 0.008, curY + rh * 0.55, TS_BODY, item.label, C.white, RenderText.ALIGN_LEFT, true)
+                self:drawText(CX + 0.008, curY + rh * 0.15, TS_TINY, item.desc, C.dim,   RenderText.ALIGN_LEFT, false)
+
+                local bgCol = isDanger
+                    and (hov and {0.65, 0.10, 0.10, 0.95} or {0.30, 0.06, 0.06, 0.85})
+                    or  (hov and {0.10, 0.35, 0.15, 0.95} or {0.08, 0.18, 0.10, 0.85})
+                local acCol = isDanger and ADMIN_ACCENT or C.green
+                self:drawRect(btnX, btnY, btnW, btnH, bgCol)
+                self:drawRect(btnX, btnY, 0.002, btnH, acCol)
+                self:drawText(btnX + btnW * 0.5, btnY + btnH * 0.20, TS_TINY,
+                    isDanger and "⚠ " .. item.label or "▶  " .. item.label,
+                    hov and {1,1,1,1} or {0.75,0.75,0.75,1},
+                    RenderText.ALIGN_CENTER, isDanger)
+                self:registerClick("admin_action_" .. item.id, btnX, btnY, btnW, btnH,
+                    { actionId = item.id, gui = gui })
+            end
+
+            self:drawRect(CX, curY, CW, 0.0005, C.divider, 0.35)
+        end
+
+        curY = curY - 0.005
+    end
+
+    -- Last result message at bottom
+    if self.adminMsg then
+        local msgY = CY_BOT + 0.004
+        self:drawText(CX + 0.006, msgY, TS_TINY,
+            "Last: " .. self.adminMsg:sub(1, 90),
+            {0.55, 0.80, 0.55, 0.85}, RenderText.ALIGN_LEFT, false)
+    end
+
+    -- Thin top divider
     self:drawRect(CX, CY_TOP, CW, 0.001, C.divider)
 end
 
@@ -785,16 +949,40 @@ function SoilSettingsPanel:handleClick(id, data)
             self:requestChange(data.id, nxt)
         end
 
-    elseif id == "drain_vehicle" then
-        local msg = "No vehicle controlled — enter a vehicle first."
-        if g_SoilFertilityManager and g_SoilFertilityManager.settingsGUI then
-            local result = g_SoilFertilityManager.settingsGUI:consoleCommandDrainVehicle()
-            if result then msg = result end
+    elseif id == "open_admin" then
+        self.page = PAGE_ADMIN
+        self.adminMsg = nil
+
+    elseif id:sub(1, 13) == "admin_action_" then
+        local gui = g_SoilFertilityManager and g_SoilFertilityManager.settingsGUI
+        local actionId = data and data.actionId
+        local msg = "Action failed."
+        if gui and actionId then
+            if actionId == "admin_save" then
+                msg = gui:consoleCommandSaveData()
+            elseif actionId == "admin_reset" then
+                msg = gui:consoleCommandResetSettings()
+            elseif actionId == "admin_drain" then
+                msg = gui:consoleCommandDrainVehicle()
+            elseif actionId == "admin_field_info" then
+                local fid = getPlayerFieldId()
+                if fid then
+                    msg = gui:consoleCommandFieldInfo(tostring(fid))
+                else
+                    msg = "No field at your current position."
+                end
+            elseif actionId == "admin_field_forecast" then
+                local fid = getPlayerFieldId()
+                if fid then
+                    msg = gui:consoleCommandFieldForecast(tostring(fid))
+                else
+                    msg = "No field at your current position."
+                end
+            elseif actionId == "admin_list_fields" then
+                msg = gui:consoleCommandListFields()
+            end
         end
-        if g_currentMission and g_currentMission.hud and
-           g_currentMission.hud.showBlinkingWarning then
-            g_currentMission.hud:showBlinkingWarning(msg, 6000)
-        end
+        adminShowMsg(self, msg or "Done.")
     end
 end
 
