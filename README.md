@@ -208,9 +208,9 @@ Three core settings live here so you can reach them quickly:
 | **Notifications** | On / Off | Pop-up alerts when fields get critically low |
 | **Debug mode** | On / Off | Verbose logging to the game log |
 
-### SHIFT+O — Full Settings Panel
+### SHIFT+O — Admin & Settings Panel
 
-Press **`Shift+O`** anywhere in-game (on foot or in a vehicle) to open the full settings panel. Settings are organised into three categories:
+Press **`Shift+O`** anywhere in-game (on foot or in a vehicle) to open the admin panel. The landing page lists every available console command with a brief description — useful for quick reference without opening the developer console. Navigate to the **Settings** tab for the full simulation controls organised into three categories:
 
 **🌱 Simulation** — controls the core simulation behaviour
 
@@ -253,7 +253,7 @@ Press **`Shift+O`** anywhere in-game (on foot or in a vehicle) to open the full 
 
 ## 🖥️ Console Commands
 
-Open the developer console with **`~`** and type `soilfertility` for the full list.
+Open the developer console with **`~`** and type `soilfertility` for the full list, or press **`Shift+O`** in-game to open the admin panel — the landing page lists every command with a brief description.
 
 | Command | Arguments | Description |
 |---|---|---|
@@ -266,6 +266,7 @@ Open the developer console with **`~`** and type `soilfertility` for the full li
 | `SoilSetSeasonalEffects` | `true` / `false` | Toggle seasonal N changes |
 | `SoilSetRainEffects` | `true` / `false` | Toggle rain leaching and acidification |
 | `SoilSetPlowingBonus` | `true` / `false` | Toggle plowing OM/pH bonus |
+| `SoilDrainVehicle` | — | Drain custom fill types from vehicle + implements (50% refund) |
 | `SoilFieldInfo` | `<fieldId>` | Detailed soil readout for one field |
 | `SoilFieldForecast` | `<fieldId>` | Yield forecast and treatment recommendations for one field |
 | `SoilListFields` | — | List all tracked fields with current soil values |

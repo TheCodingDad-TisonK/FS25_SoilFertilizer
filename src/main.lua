@@ -374,9 +374,54 @@ function soilStatus()
     end
 end
 
+-- Debug: dump current vehicle's sprayer spec to diagnose visual effect issues
+function SoilSprayerDebug()
+    local vehicle = g_currentMission and g_currentMission.controlledVehicle
+    if not vehicle then
+        print("[SoilSprayerDebug] No controlled vehicle")
+        return
+    end
+    local spec = vehicle.spec_sprayer
+    if not spec then
+        print("[SoilSprayerDebug] Vehicle has no spec_sprayer")
+        return
+    end
+
+    local fm = g_fillTypeManager
+    local fillUnitIdx = vehicle:getSprayerFillUnitIndex()
+    local fillType    = vehicle:getFillUnitFillType(fillUnitIdx)
+    local fillFT      = fm and fm:getFillTypeByIndex(fillType)
+    local effectsVis  = vehicle:getAreEffectsVisible()
+    local wap         = spec.workAreaParameters
+
+    print(string.format("[SoilSprayerDebug] Vehicle: %s", tostring(vehicle.configFileName or "?")))
+    print(string.format("  fillUnit=%d  fillType=%s(%s)  effectsVisible=%s",
+        fillUnitIdx, tostring(fillType), tostring(fillFT and fillFT.name), tostring(effectsVis)))
+    print(string.format("  wap.sprayType=%s  wap.sprayFillType=%s  wap.isActive=%s  wap.lastSprayTime=%s",
+        tostring(wap and wap.sprayType), tostring(wap and wap.sprayFillType),
+        tostring(wap and wap.isActive), tostring(wap and wap.lastSprayTime)))
+
+    print(string.format("  spec.effects count=%d", spec.effects and #spec.effects or 0))
+    print(string.format("  spec.sprayTypes count=%d", spec.sprayTypes and #spec.sprayTypes or 0))
+
+    for i, st in ipairs(spec.sprayTypes or {}) do
+        local ftNames = st.fillTypes and table.concat(st.fillTypes, ",") or "nil"
+        print(string.format("  sprayType[%d]: fillTypes=[%s]  effects=%d  animNodes=%d",
+            i, ftNames,
+            st.effects and #st.effects or 0,
+            st.animationNodes and #st.animationNodes or 0))
+    end
+
+    local activeSprayType = vehicle:getActiveSprayType()
+    print(string.format("  getActiveSprayType() = %s", activeSprayType and "FOUND" or "nil"))
+    print(string.format("  _soilEffectsActive=%s  _soilManagedFillType=%s",
+        tostring(spec._soilEffectsActive), tostring(spec._soilManagedFillType)))
+end
+
 -- Expose global console functions
 getfenv(0)["soilfertility"] = soilfertility
 getfenv(0)["soilStatus"] = soilStatus
+getfenv(0)["SoilSprayerDebug"] = SoilSprayerDebug
 getfenv(0)["soilEnable"] = function()
     if g_SoilFertilityManager and g_SoilFertilityManager.settingsGUI then
         return g_SoilFertilityManager.settingsGUI:consoleCommandSoilEnable()

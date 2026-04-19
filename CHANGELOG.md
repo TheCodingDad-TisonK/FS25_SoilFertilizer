@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.9.7.0] - 2026-04-19
+
+### Added
+
+- **Admin panel at SHIFT+O**: The SHIFT+O settings panel now opens to an admin landing page
+  listing every available console command with a brief description. The previous **Drain Vehicle**
+  button has been replaced by the **Admin** button that opens this panel — all drain and admin
+  operations are now accessible from one organised hub. Admin-only access in multiplayer is
+  enforced as before.
+
+### Fixed
+
+- **Liquid sprayer visual effects**: Custom liquid fertilizers (UAN-32, UAN-28, Anhydrous
+  Ammonia, Starter 10-34-0, Liquid Urea, Liquid AMS, Liquid MAP, Liquid DAP, Liquid Potash,
+  Insecticide, Fungicide, Liquid Lime) now correctly show spray visual effects and sounds on
+  any sprayer while active. The previous approach remapped fill types correctly at the Lua
+  level but the underlying `FertilizerMotionPathEffect` pipeline requires C++-registered motion
+  path data per fill type — silently producing no effect. The fix hooks `Sprayer.onUpdateTick`
+  to call `setEffectTypeInfo` + `startEffects` directly using the nearest vanilla fill type
+  as a proxy, bypassing the broken pipeline entirely.
+
+- **SoilSettingsPanel field position crash**: The field detection helper used `x, z = 0, 0`
+  as its default, causing `getFieldAtWorldPosition(0, 0)` to silently return wrong results
+  (or crash) when player position was unavailable. Default changed to `nil` with an explicit
+  guard (`if x == nil then return nil end`) and a `pcall` wrapper around the field lookup.
+
+---
+
 ## [1.9.4.0] - 2026-04-19
 
 ### Added
