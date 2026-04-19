@@ -7,6 +7,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+[1.9.8.0] - 2026-04-19
+Fixed
+
+LIQUIDLIME (and trailed sprayers) not applying on edge fields: The
+sprayer hook used getWorldTranslation(self.rootNode) — the tractor body —
+to resolve which field was being sprayed. When the tractor sat near a field
+boundary or headland, rootNode could fall outside the polygon and return
+nil, silently discarding the entire application. The hook now falls back to
+the attached implement chain: if the tractor position returns no field, it
+walks spec_attacherJoints.attachedImplements and tries each implement's
+own rootNode and work-area start points until a valid field is found. Fixes
+IBC tank sprayers, trailing boom sprayers, and self-propelled rigs parked
+at the headland. Reported in Discord (LIQUIDLIME thread) and related to
+issue #199.
+"Field X fully treated with INSECTICIDE / FUNGICIDE" notification:
+INSECTICIDE and FUNGICIDE are listed in FERTILIZER_PROFILES so that
+applyFertilizer can route their pest/disease side-effects internally.
+This caused them to reach the "fully treated" notification block, producing
+misleading messages like "Field 12 fully treated with INSECTICIDE". The
+notification is now suppressed for any fill type present in
+INSECTICIDE_TYPES, FUNGICIDE_TYPES, or HERBICIDE_TYPES. Nutrient
+fertilizers are unaffected.
+Auto-lime over-shooting Precision Farming's optimal pH: AUTO_RATE_TARGETS.pH
+was set to 7.0, so following the mod's lime recommendations would push fields
+past Precision Farming's ~6.5 optimal band — leaving players in a permanent
+state where one system always flagged their soil as under-supplied. The target
+is now 6.5, matching the agronomic midpoint and PF's value. A new named
+constant NUTRIENT_LIMITS.PH_OPTIMAL = 6.5 is introduced as the single
+source of truth used by the auto-rate calculator, the field urgency score,
+and any future calculations. Thanks to the community member who reported
+this in issue #199.
+PDA "Lime (pH)" recommendation not triggering between pH 5.5 and 6.0:
+The "needs lime" check in buildNeedsString used a hardcoded < 6.0
+threshold instead of FERTILIZATION_THRESHOLDS.pH (which is 5.5). Fields
+in the 5.5–6.0 range were silently omitted from the needs list and treatment
+plan, despite the soil report correctly flagging them as Fair. Fixed to read
+from FERTILIZATION_THRESHOLDS.pH consistently with all other nutrient checks.
+Unscanned fields showing green pH in PDA overview: Three or 7.0
+nil-fallbacks in SoilPDAScreen substituted the "perfect" pH value whenever
+info.pH was nil (unscanned or newly created field). This made unscanned
+fields appear green in the field list, inflated the farm-average pH shown in
+the sidebar, and suppressed lime recommendations for those fields. All three
+now fall back to FIELD_DEFAULTS.pH (6.0).
+MP clients receiving wrong field defaults on join: All stream-write
+nil-fallbacks in NetworkEvents — nitrogen or 50, phosphorus or 40,
+potassium or 45, organicMatter or 3.5, pH or 6.5 — were hardcoded
+literals that did not match FIELD_DEFAULTS and had drifted out of sync with
+constant changes. Both the full-sync write block and the per-field update event
+now read from FIELD_DEFAULTS. The corrupt-data recovery fallback for pH in
+the full-sync deserialiser is also corrected from 6.5 to FIELD_DEFAULTS.pH.
+Affects what joining MP clients receive as initial state for any field that
+has nil values in the server's table.
+
+---
+
 ## [1.9.7.0] - 2026-04-19
 
 ### Added
