@@ -653,20 +653,28 @@ end
 
 -- ── Admin page ────────────────────────────────────────────
 local function getPlayerFieldId()
-    local x, z = 0, 0
+    local x, z = nil, nil
+
     if g_localPlayer and g_localPlayer.rootNode then
         local ok, wx, _, wz = pcall(getWorldTranslation, g_localPlayer.rootNode)
         if ok and wx then x, z = wx, wz end
-    elseif g_currentMission and g_currentMission.controlledVehicle then
+    end
+    if x == nil and g_currentMission and g_currentMission.controlledVehicle then
         local v = g_currentMission.controlledVehicle
-        if v.rootNode then
+        if v and v.rootNode then
             local ok, wx, _, wz = pcall(getWorldTranslation, v.rootNode)
             if ok and wx then x, z = wx, wz end
         end
     end
+
+    -- No valid position found — don't pass 0,0 to the field lookup
+    if x == nil then return nil end
+
     if g_fieldManager then
-        local field = g_fieldManager:getFieldAtWorldPosition(x, z)
-        if field and field.farmland then return field.farmland.id end
+        local ok, field = pcall(function()
+            return g_fieldManager:getFieldAtWorldPosition(x, z)
+        end)
+        if ok and field and field.farmland then return field.farmland.id end
     end
     return nil
 end
