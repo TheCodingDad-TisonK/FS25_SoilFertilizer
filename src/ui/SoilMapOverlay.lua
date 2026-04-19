@@ -23,8 +23,9 @@ SoilMapOverlay.ALPHA          = 0.72
 
 -- Sampling constants
 SoilMapOverlay.SAMPLE_UPDATE_INTERVAL_MS = 4500
-SoilMapOverlay.MAX_POINTS       = 20000  -- covers standard (24k needed) and 16x maps (25k needed); safe with affine transform fix
 SoilMapOverlay.POLYGON_STEP     = 10     -- world-unit grid spacing for polygon sampling (meters)
+-- Point budgets per density level (1=Low, 2=Medium, 3=High)
+SoilMapOverlay.DENSITY_POINTS   = {8000, 20000, 40000}
 
 -- Status colors (match SoilHUD palette)
 SoilMapOverlay.C_POOR = {0.88, 0.25, 0.25}
@@ -326,10 +327,12 @@ function SoilMapOverlay:updateSamplePoints(force)
 
     -- Scale sampling step proportional to terrain size so large maps
     -- (4x, 16x) get the same screen-pixel density as a standard 2048m map.
-    -- A 8192m map at step=10 would produce 16× more points and hit MAX_POINTS
-    -- after only a handful of fields, leaving the rest of the map empty.
     local terrainSize = (g_currentMission and g_currentMission.terrainSize) or 2048
     local scaledStep = SoilMapOverlay.POLYGON_STEP * math.max(1.0, terrainSize / 2048.0)
+
+    -- Resolve point budget from the player's density setting (localOnly, default Medium)
+    local densityLevel = (self.settings and self.settings.overlayDensity) or 2
+    local maxPoints = SoilMapOverlay.DENSITY_POINTS[densityLevel] or SoilMapOverlay.DENSITY_POINTS[2]
 
     local totalPoints = 0
     for _, fsField in ipairs(fields) do
@@ -348,7 +351,7 @@ function SoilMapOverlay:updateSamplePoints(force)
                     if grleLayerName then
                         -- GRLE per-pixel path: maps that ship custom density-map info layers
                         for _, pt in ipairs(polyPts) do
-                            if totalPoints < SoilMapOverlay.MAX_POINTS then
+                            if totalPoints < maxPoints then
                                 local val = layerSystem:readValueAtWorld(grleLayerName, pt.x, pt.z)
                                 local r, g, b
                                 if val ~= nil then
@@ -368,7 +371,7 @@ function SoilMapOverlay:updateSamplePoints(force)
                         local zoneData = fieldEntry and fieldEntry.zoneData
                         local zone = SoilConstants.ZONE
                         for _, pt in ipairs(polyPts) do
-                            if totalPoints < SoilMapOverlay.MAX_POINTS then
+                            if totalPoints < maxPoints then
                                 local r, g, b
                                 if zoneData then
                                     local cx = math.floor(pt.x / zone.CELL_SIZE)
@@ -388,7 +391,7 @@ function SoilMapOverlay:updateSamplePoints(force)
                         -- Field-average path: layers 6-9 (urgency, weed, pest, disease)
                         local r, g, b = self:getLayerColor(layerIdx, info, farmlandId)
                         for _, pt in ipairs(polyPts) do
-                            if totalPoints < SoilMapOverlay.MAX_POINTS then
+                            if totalPoints < maxPoints then
                                 table.insert(self.samplePoints, {x = pt.x, z = pt.z, r = r, g = g, b = b})
                                 totalPoints = totalPoints + 1
                             end

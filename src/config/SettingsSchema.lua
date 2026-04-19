@@ -164,6 +164,15 @@ SettingsSchema.definitions = {
         uiId = "sf_active_map_layer",
         localOnly = true,  -- per-player map view, not synced to server
     },
+    {
+        id = "overlayDensity",
+        type = "number",
+        default = 2,  -- 1=Low (8k pts), 2=Medium (20k pts), 3=High (40k pts)
+        min = 1,
+        max = 3,
+        uiId = "sf_overlay_density",
+        localOnly = true,  -- per-player render preference, not synced to server
+    },
 }
 
 -- Build lookup table by id for fast access

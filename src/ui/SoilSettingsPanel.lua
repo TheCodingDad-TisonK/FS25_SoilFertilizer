@@ -152,6 +152,10 @@ local CATEGORIES = {
                 header = "Layer",
                 items  = { "activeMapLayer" }
             },
+            {
+                header = "Performance",
+                items  = { "overlayDensity" }
+            },
         }
     },
 }
@@ -165,6 +169,7 @@ local MULTI_OPTS = {
     hudTransparency   = {"Clear", "Light", "Medium", "Dark", "Solid"},
     activeMapLayer    = {"Off", "Nitrogen", "Phosphorus", "Potassium", "pH",
                          "Org Matter", "Urgency", "Weed", "Pest", "Disease"},
+    overlayDensity    = {"Low", "Medium", "High"},
 }
 
 -- Short descriptions for each setting
@@ -188,6 +193,7 @@ local SETTING_DESCS = {
     hudTransparency  = "HUD background transparency",
     hudPosition      = "HUD preset anchor position",
     activeMapLayer   = "Nutrient layer shown in PDA map",
+    overlayDensity   = "Sample point budget (Low=8k, Med=20k, High=40k)",
 }
 
 -- Page states
@@ -478,6 +484,21 @@ function SoilSettingsPanel:drawLandingPage()
         local cardX = CX + (i - 1) * (CARD_W + CARD_GAP)
         self:drawCategoryCard(cardX, CARD_Y, CARD_W, CARD_H, cat, i)
     end
+
+    -- Drain Vehicle button — bottom-right corner of content area
+    local btnW = 0.148
+    local btnH = 0.030
+    local btnX = CX + CW - btnW
+    local btnY = CY_BOT + 0.006
+    local btnHover = self:hitTest(btnX, btnY, btnW, btnH, self.mouseX, self.mouseY)
+    self:drawRect(btnX, btnY, btnW, btnH,
+        btnHover and {0.70, 0.45, 0.08, 0.85} or {0.18, 0.14, 0.06, 0.80})
+    self:drawRect(btnX, btnY, 0.003, btnH, {0.90, 0.62, 0.18, 1.0})
+    self:drawText(btnX + btnW * 0.5 + 0.002, btnY + btnH * 0.22, TS_SMALL,
+        "Drain Vehicle Tanks (50% refund)",
+        btnHover and {1.0, 0.82, 0.30, 1.0} or {0.75, 0.60, 0.25, 1.0},
+        RenderText.ALIGN_CENTER, false)
+    self:registerClick("drain_vehicle", btnX, btnY, btnW, btnH)
 end
 
 function SoilSettingsPanel:drawCategoryCard(x, y, w, h, cat, idx)
@@ -762,6 +783,17 @@ function SoilSettingsPanel:handleClick(id, data)
             local nxt = cur + 1
             if nxt > #data.opts then nxt = 1 end
             self:requestChange(data.id, nxt)
+        end
+
+    elseif id == "drain_vehicle" then
+        local msg = "No vehicle controlled — enter a vehicle first."
+        if g_SoilFertilityManager and g_SoilFertilityManager.settingsGUI then
+            local result = g_SoilFertilityManager.settingsGUI:consoleCommandDrainVehicle()
+            if result then msg = result end
+        end
+        if g_currentMission and g_currentMission.hud and
+           g_currentMission.hud.showBlinkingWarning then
+            g_currentMission.hud:showBlinkingWarning(msg, 6000)
         end
     end
 end
