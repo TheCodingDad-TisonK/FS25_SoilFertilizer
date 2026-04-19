@@ -23,7 +23,7 @@ SoilMapOverlay.ALPHA          = 0.72
 
 -- Sampling constants
 SoilMapOverlay.SAMPLE_UPDATE_INTERVAL_MS = 4500
-SoilMapOverlay.MAX_POINTS       = 6000   -- cap keeps draw loop fast; ~200 pts/field on a 30-field map
+SoilMapOverlay.MAX_POINTS       = 20000  -- covers standard (24k needed) and 16x maps (25k needed); safe with affine transform fix
 SoilMapOverlay.POLYGON_STEP     = 10     -- world-unit grid spacing for polygon sampling (meters)
 
 -- Status colors (match SoilHUD palette)
