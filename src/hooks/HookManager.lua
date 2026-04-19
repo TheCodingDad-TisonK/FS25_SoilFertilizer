@@ -167,6 +167,12 @@ function HookManager:installAll(soilSystem)
     -- Must run AFTER registerCustomSprayTypes so our custom spray type indices exist.
     self:installDensityMapSprayHook()
 
+    -- Direct client-side visual effect management for custom fill types.
+    -- Bypasses the getActiveSprayType/setEffectTypeInfo chain that silently fails for
+    -- FertilizerMotionPathEffect when the fill type has no registered motion path data.
+    -- Hooks onUpdateTick (event listener, dynamic dispatch) so it reaches all vehicles.
+    self:installSprayerVisualEffectHook()
+
     self.installed = true
 end
 
@@ -1746,5 +1752,136 @@ function HookManager:installFillTypeMaterialHook()
     end)
 
     SoilLogger.info("[OK] Fill type material hook installed - %d custom types mapped to vanilla textures", count)
+    return true
+end
+
+-- =========================================================
+-- HOOK 11: Direct client-side visual effects for custom liquid fill types
+-- =========================================================
+-- FertilizerMotionPathEffect (used by liquid sprayer boom visuals) looks up motion
+-- path data by fill type index. Vanilla types have data registered; our custom types
+-- do not, so the lookup returns nil and the effect never starts — even when our
+-- setEffectTypeInfo hook correctly remaps the index to LIQUIDFERTILIZER before storage.
+-- The failure is inside FS25's internal C++ effect pipeline, which may execute before
+-- the Lua hook fires.
+--
+-- Fix: hook Sprayer.onUpdateTick (registered via SpecializationUtil.registerEventListener,
+-- dynamic dispatch — reaches all vehicles immediately). On the client (visual only):
+--   • detect fill type change and when getAreEffectsVisible() changes state
+--   • call setEffectTypeInfo + startEffects directly with the vanilla-equivalent fill type
+--   • call stopEffects when the sprayer stops or fill type changes
+-- This runs once per state-change (not per-frame), is purely cosmetic, and does NOT
+-- interfere with nutrient tracking which uses the real fill type from wap.sprayFillType.
+---@return boolean success
+function HookManager:installSprayerVisualEffectHook()
+    if not Sprayer or type(Sprayer.onUpdateTick) ~= "function" then
+        SoilLogger.warning("Sprayer visual effect hook: Sprayer.onUpdateTick not available - skipping")
+        return false
+    end
+    if not g_fillTypeManager then
+        SoilLogger.warning("Sprayer visual effect hook: g_fillTypeManager not available - skipping")
+        return false
+    end
+
+    local fm = g_fillTypeManager
+    local fertIdx    = fm:getFillTypeIndexByName("FERTILIZER")
+    local liqFertIdx = fm:getFillTypeIndexByName("LIQUIDFERTILIZER")
+
+    -- Build remap: custom fill type index → vanilla fill type index (cosmetic only)
+    local remap = {}
+    if fertIdx then
+        for _, name in ipairs({ "UREA", "AMS", "MAP", "DAP", "POTASH",
+                                 "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM" }) do
+            local idx = fm:getFillTypeIndexByName(name)
+            if idx then remap[idx] = fertIdx end
+        end
+    end
+    if liqFertIdx then
+        for _, name in ipairs({ "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME",
+                                 "INSECTICIDE", "FUNGICIDE",
+                                 "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH" }) do
+            local idx = fm:getFillTypeIndexByName(name)
+            if idx then remap[idx] = liqFertIdx end
+        end
+    end
+
+    if not next(remap) then
+        SoilLogger.warning("Sprayer visual effect hook: no custom fill types found - skipping")
+        return false
+    end
+
+    local function startSprayerEffects(vehicle, vanillaFillType)
+        local spec = vehicle.spec_sprayer
+        if not spec then return end
+        if spec.effects and #spec.effects > 0 then
+            g_effectManager:setEffectTypeInfo(spec.effects, vanillaFillType)
+            g_effectManager:startEffects(spec.effects)
+        end
+        for _, st in ipairs(spec.sprayTypes or {}) do
+            if st.effects and #st.effects > 0 then
+                g_effectManager:setEffectTypeInfo(st.effects, vanillaFillType)
+                g_effectManager:startEffects(st.effects)
+                g_animationManager:startAnimations(st.animationNodes)
+                g_soundManager:playSamples(st.samples and st.samples.spray or {})
+            end
+        end
+    end
+
+    local function stopSprayerEffects(vehicle)
+        local spec = vehicle.spec_sprayer
+        if not spec then return end
+        g_effectManager:stopEffects(spec.effects)
+        for _, st in ipairs(spec.sprayTypes or {}) do
+            g_effectManager:stopEffects(st.effects)
+            g_animationManager:stopAnimations(st.animationNodes)
+            g_soundManager:stopSamples(st.samples and st.samples.spray or {})
+        end
+    end
+
+    local original = Sprayer.onUpdateTick
+    Sprayer.onUpdateTick = Utils.appendedFunction(
+        original,
+        function(sprayerSelf, dt, isActiveForInput, isActiveForInputIgnoreSelection, isSelected)
+            if not sprayerSelf.isClient then return end
+
+            local spec = sprayerSelf.spec_sprayer
+            if not spec then return end
+
+            local fillUnitIndex = sprayerSelf:getSprayerFillUnitIndex()
+            local fillType = sprayerSelf:getFillUnitFillType(fillUnitIndex)
+            local vanillaFillType = fillType and remap[fillType]
+
+            -- If fill type changed away from custom, stop our managed effects and reset
+            local lastFT = spec._soilManagedFillType
+            if lastFT and lastFT ~= fillType then
+                stopSprayerEffects(sprayerSelf)
+                spec._soilManagedFillType = nil
+                spec._soilEffectsActive   = nil
+            end
+
+            if not vanillaFillType then return end  -- not our custom type, nothing to manage
+
+            local effectsVisible = sprayerSelf:getAreEffectsVisible()
+
+            -- Only act on state change to avoid per-tick overhead
+            if effectsVisible == spec._soilEffectsActive then return end
+
+            spec._soilEffectsActive   = effectsVisible
+            spec._soilManagedFillType = fillType
+
+            if effectsVisible then
+                startSprayerEffects(sprayerSelf, vanillaFillType)
+                SoilLogger.debug("SprayerVisual: started effects (fillType=%d → vanilla=%d)", fillType, vanillaFillType)
+            else
+                stopSprayerEffects(sprayerSelf)
+                SoilLogger.debug("SprayerVisual: stopped effects (fillType=%d)", fillType)
+            end
+        end
+    )
+    self:register(Sprayer, "onUpdateTick", original, "Sprayer.onUpdateTick (sprayer visual effects)")
+
+    local count = 0
+    for _ in pairs(remap) do count = count + 1 end
+    SoilLogger.info("[OK] Sprayer visual effect hook installed on onUpdateTick — %d custom fill types", count)
     return true
 end
