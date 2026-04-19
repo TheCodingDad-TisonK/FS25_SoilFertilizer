@@ -114,6 +114,7 @@ All three are visible in the HUD and the full Soil Report. Each can be toggled o
 | Liquid Potash | Liquid K | Dissolved potassium for sprayers |
 | Insecticide | Liquid | Pest pressure treatment (sprayer) |
 | Fungicide | Liquid | Disease pressure treatment (sprayer) |
+| Liquid Lime | Liquid pH agent | Raises pH via sprayer — alternative to dry lime |
 
 **Custom dry/solid fertilizers (purchasable big bags in shop):**
 
@@ -122,9 +123,13 @@ All three are visible in the HUD and the full Soil Report. Each can be toggled o
 | Urea / AMS | Dry nitrogen | Standard granular N sources |
 | MAP / DAP | Dry P+N | Phosphorus-focused blends |
 | Potash | Dry K | Pure potassium supplement |
-| Gypsum | Dry amendment | pH correction and soil structure improvement |
+| Gypsum | Dry amendment | Lowers pH and improves soil structure |
+| Compost | Organic amendment | Best OM builder per application |
+| Biosolids | Organic fertilizer | Municipal organic N+P amendment |
+| Chicken Manure | Organic fertilizer | Concentrated N+P poultry litter |
+| Pelletized Manure | Organic fertilizer | Dense balanced NPK+OM — highest analysis |
 
-**Organic / soil amendments (registered, obtained from compatible mods or production lines):**
+**Organic / soil amendments (nutrient profiles):**
 
 | Product | Application | N | P | K | OM | Notes |
 |---|---|---|---|---|---|---|
@@ -132,7 +137,7 @@ All three are visible in the HUD and the full Soil Report. Each can be toggled o
 | **Biosolids** | Spreader | ●●○○○ | ●●○○○ | Low | ✓ | Municipal organic amendment |
 | **Chicken Manure** | Spreader | ●●●○○ | ●●●○○ | ●●○○○ | ✓ | Concentrated poultry litter |
 | **Pelletized Manure** | Spreader | ●●●●○ | ●●●●○ | ●●●●○ | ✓ | Dense balanced organic NPK |
-| **Gypsum** | Spreader | — | — | — | Low | pH correction, minor OM gain |
+| **Gypsum** | Spreader | — | — | — | Low | Lowers pH, minor OM gain |
 | **Liquid Lime** | Sprayer | — | — | — | — | Raises pH via sprayer equipment |
 
 > [!NOTE]
@@ -344,7 +349,7 @@ This mod is licensed under **[CC BY-NC-ND 4.0](https://creativecommons.org/licen
 
 You may share it in its original form with attribution. You may not sell it, modify and redistribute it, or reupload it under a different name or authorship. Contributions via pull request are explicitly permitted and encouraged.
 
-**Author:** TisonK &nbsp;·&nbsp; **Version:** 1.9.3.0
+**Author:** TisonK &nbsp;·&nbsp; **Version:** 1.9.4.0
 
 © 2026 TisonK — See [LICENSE](LICENSE) for full terms.
 
