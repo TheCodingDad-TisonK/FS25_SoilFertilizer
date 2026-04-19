@@ -23,9 +23,9 @@ SoilMapOverlay.ALPHA          = 0.72
 
 -- Sampling constants
 SoilMapOverlay.SAMPLE_UPDATE_INTERVAL_MS = 4500
-SoilMapOverlay.MAX_POINTS       = 20000  -- fair per-field budget ensures all fields covered on any map size
 SoilMapOverlay.POLYGON_STEP     = 10     -- world-unit grid spacing for polygon sampling (meters)
-SoilMapOverlay.DRAW_THROTTLE_MS = 50     -- ~20fps cap for overlay draw (soil changes every 4.5s; 60fps redraws are pure waste)
+-- Point budgets per density level (1=Low, 2=Medium, 3=High)
+SoilMapOverlay.DENSITY_POINTS   = {8000, 20000, 40000}
 
 -- Status colors (match SoilHUD palette)
 SoilMapOverlay.C_POOR = {0.88, 0.25, 0.25}
@@ -76,7 +76,6 @@ function SoilMapOverlay.new(soilSystem, settings)
     self.samplePoints = {}
     self.displayValues = nil
     self.nextSampleUpdateTime = 0
-    self.lastDrawTime = 0
     self.isMapOpen = false
     self.isReady = false
 
@@ -317,8 +316,9 @@ function SoilMapOverlay:updateSamplePoints(force)
     end
 
     -- Fill each field polygon with a grid of coloured sample points.
-    -- Two-pass approach: collect valid fields first, then apply a fair per-field
-    -- point budget so no field is starved when MAX_POINTS is reached.
+    -- We match fields to our soil data via farmland.id (the key fieldData uses).
+    -- getFieldFillPoints() handles the grid sampling and caching; it falls back to
+    -- a single centroid point for very small fields or when polygon data is absent.
     local fields = g_fieldManager.fields
     if fields == nil then
         SoilLogger.info("SoilMapOverlay: g_fieldManager.fields is nil")
@@ -330,84 +330,74 @@ function SoilMapOverlay:updateSamplePoints(force)
     local terrainSize = (g_currentMission and g_currentMission.terrainSize) or 2048
     local scaledStep = SoilMapOverlay.POLYGON_STEP * math.max(1.0, terrainSize / 2048.0)
 
-    -- Pass 1: collect all fields that have soil data (cheap — no polygon math yet)
-    local validFields = {}
+    -- Resolve point budget from the player's density setting (localOnly, default Medium)
+    local densityLevel = (self.settings and self.settings.overlayDensity) or 2
+    local maxPoints = SoilMapOverlay.DENSITY_POINTS[densityLevel] or SoilMapOverlay.DENSITY_POINTS[2]
+
+    local totalPoints = 0
     for _, fsField in ipairs(fields) do
         if fsField and fsField.farmland then
             local farmlandId = fsField.farmland.id
             if farmlandId and farmlandId > 0 then
                 local info = self.soilSystem:getFieldInfo(farmlandId)
                 if info then
-                    table.insert(validFields, {fsField = fsField, farmlandId = farmlandId, info = info})
-                end
-            end
-        end
-    end
-
-    -- Fair per-field budget: every field gets an equal slice of MAX_POINTS.
-    -- This prevents early large fields from consuming all points and leaving
-    -- later fields (bottom of the map) completely uncoloured.
-    local fieldCount   = math.max(#validFields, 1)
-    local maxPerField  = math.ceil(SoilMapOverlay.MAX_POINTS / fieldCount)
-
-    -- Pass 2: fill polygons with the per-field cap applied
-    local totalPoints = 0
-    local layerSystem = self.soilSystem and self.soilSystem.layerSystem
-
-    for _, entry in ipairs(validFields) do
-        local fsField    = entry.fsField
-        local farmlandId = entry.farmlandId
-        local info       = entry.info
-
-        local polyPts = self:getFieldFillPoints(fsField, scaledStep)
-        local grleLayerName = layerSystem and layerSystem.available and LAYER_GRLE_NAME[layerIdx]
-        local fieldPts = 0
-
-        if grleLayerName then
-            -- GRLE per-pixel path
-            for _, pt in ipairs(polyPts) do
-                if fieldPts >= maxPerField then break end
-                local val = layerSystem:readValueAtWorld(grleLayerName, pt.x, pt.z)
-                local r, g, b
-                if val ~= nil then
-                    r, g, b = self:valueToLayerColor(layerIdx, val)
-                else
-                    r, g, b = self:getLayerColor(layerIdx, info, farmlandId)
-                end
-                table.insert(self.samplePoints, {x = pt.x, z = pt.z, r = r, g = g, b = b})
-                fieldPts  = fieldPts  + 1
-                totalPoints = totalPoints + 1
-            end
-        elseif layerIdx >= 1 and layerIdx <= 5 then
-            -- zoneData per-cell path: local sprayed values with field-average fallback
-            local fieldEntry = self.soilSystem.fieldData and self.soilSystem.fieldData[farmlandId]
-            local zoneData = fieldEntry and fieldEntry.zoneData
-            local zone = SoilConstants.ZONE
-            for _, pt in ipairs(polyPts) do
-                if fieldPts >= maxPerField then break end
-                local r, g, b
-                if zoneData then
-                    local cx = math.floor(pt.x / zone.CELL_SIZE)
-                    local cz = math.floor(pt.z / zone.CELL_SIZE)
-                    local cell = zoneData[cx .. "_" .. cz]
-                    if cell then
-                        local val = getCellLayerValue(cell, layerIdx)
-                        if val then r, g, b = self:valueToLayerColor(layerIdx, val) end
+                    local polyPts = self:getFieldFillPoints(fsField, scaledStep)
+                    -- Per-pixel path: when GRLE density map layers are available (layers 1-5),
+                    -- read the soil value at each sample point directly from the layer so that
+                    -- sprayed sub-areas show different colours from unsprayed areas.
+                    -- Falls back to per-field average for layers 6-9 or when layers are absent.
+                    local layerSystem = self.soilSystem and self.soilSystem.layerSystem
+                    local grleLayerName = layerSystem and layerSystem.available and LAYER_GRLE_NAME[layerIdx]
+                    if grleLayerName then
+                        -- GRLE per-pixel path: maps that ship custom density-map info layers
+                        for _, pt in ipairs(polyPts) do
+                            if totalPoints < maxPoints then
+                                local val = layerSystem:readValueAtWorld(grleLayerName, pt.x, pt.z)
+                                local r, g, b
+                                if val ~= nil then
+                                    r, g, b = self:valueToLayerColor(layerIdx, val)
+                                else
+                                    r, g, b = self:getLayerColor(layerIdx, info, farmlandId)
+                                end
+                                table.insert(self.samplePoints, {x = pt.x, z = pt.z, r = r, g = g, b = b})
+                                totalPoints = totalPoints + 1
+                            end
+                        end
+                    elseif layerIdx >= 1 and layerIdx <= 5 then
+                        -- zoneData per-cell path: standard maps, layers 1-5 (N/P/K/pH/OM).
+                        -- Cells that have been sprayed show their local value; unvisited cells
+                        -- fall back to the field average so the map is always fully coloured.
+                        local fieldEntry = self.soilSystem.fieldData and self.soilSystem.fieldData[farmlandId]
+                        local zoneData = fieldEntry and fieldEntry.zoneData
+                        local zone = SoilConstants.ZONE
+                        for _, pt in ipairs(polyPts) do
+                            if totalPoints < maxPoints then
+                                local r, g, b
+                                if zoneData then
+                                    local cx = math.floor(pt.x / zone.CELL_SIZE)
+                                    local cz = math.floor(pt.z / zone.CELL_SIZE)
+                                    local cell = zoneData[cx .. "_" .. cz]
+                                    if cell then
+                                        local val = getCellLayerValue(cell, layerIdx)
+                                        if val then r, g, b = self:valueToLayerColor(layerIdx, val) end
+                                    end
+                                end
+                                if not r then r, g, b = self:getLayerColor(layerIdx, info, farmlandId) end
+                                table.insert(self.samplePoints, {x = pt.x, z = pt.z, r = r, g = g, b = b})
+                                totalPoints = totalPoints + 1
+                            end
+                        end
+                    else
+                        -- Field-average path: layers 6-9 (urgency, weed, pest, disease)
+                        local r, g, b = self:getLayerColor(layerIdx, info, farmlandId)
+                        for _, pt in ipairs(polyPts) do
+                            if totalPoints < maxPoints then
+                                table.insert(self.samplePoints, {x = pt.x, z = pt.z, r = r, g = g, b = b})
+                                totalPoints = totalPoints + 1
+                            end
+                        end
                     end
                 end
-                if not r then r, g, b = self:getLayerColor(layerIdx, info, farmlandId) end
-                table.insert(self.samplePoints, {x = pt.x, z = pt.z, r = r, g = g, b = b})
-                fieldPts  = fieldPts  + 1
-                totalPoints = totalPoints + 1
-            end
-        else
-            -- Field-average path: layers 6-9 (urgency, weed, pest, disease)
-            local r, g, b = self:getLayerColor(layerIdx, info, farmlandId)
-            for _, pt in ipairs(polyPts) do
-                if fieldPts >= maxPerField then break end
-                table.insert(self.samplePoints, {x = pt.x, z = pt.z, r = r, g = g, b = b})
-                fieldPts  = fieldPts  + 1
-                totalPoints = totalPoints + 1
             end
         end
     end
@@ -423,11 +413,6 @@ end
 -- ── Draw (called by hook) ────────────────────────────────
 
 function SoilMapOverlay:onDraw(frame, mapElement, ingameMap, pageIndex)
-    -- Throttle to ~20fps: soil data changes every 4.5s; redrawing 60×/s is pure waste.
-    local now = (g_currentMission and g_currentMission.time) or g_time or 0
-    if now - self.lastDrawTime < SoilMapOverlay.DRAW_THROTTLE_MS then return end
-    self.lastDrawTime = now
-
     self:updateSamplePoints(false)
 
     if #self.samplePoints == 0 then return end

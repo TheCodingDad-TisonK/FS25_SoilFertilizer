@@ -73,6 +73,8 @@
     <e k="sf_use_imperial_long" v="Показывать нормы в галлонах на акр и фунтах на акр (по умолчанию = л/га и кг/га)" eh="17efa489" />
     <e k="sf_active_map_layer_short" v="Active Map Layer" eh="1861765f" />
     <e k="sf_active_map_layer_long" v="Nutrient layer shown as overlay in the PDA map" eh="d7755cc8" />
+    <e k="sf_overlay_density_short" v="Map Detail" />
+    <e k="sf_overlay_density_long" v="Sample point budget for the PDA soil overlay. Low = better FPS, High = fuller coverage on large maps." />
     <e k="input_SF_OPEN_SETTINGS" v="Open Soil Settings" eh="2e31c0dd" />
     <e k="sf_reset" v="Сбросить настройки грунта" eh="467bc2f5" />
     <e k="input_SF_TOGGLE_HUD" v="Переключить HUD грунта" eh="f0224a10" />

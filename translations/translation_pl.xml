@@ -86,6 +86,8 @@
     <e k="sf_use_imperial_long" v="Wyświetlaj dawki w gal/ac i lb/ac (wyłączone = L/ha i kg/ha)" eh="17efa489" />
     <e k="sf_active_map_layer_short" v="Active Map Layer" eh="1861765f" />
     <e k="sf_active_map_layer_long" v="Nutrient layer shown as overlay in the PDA map" eh="d7755cc8" />
+    <e k="sf_overlay_density_short" v="Map Detail" />
+    <e k="sf_overlay_density_long" v="Sample point budget for the PDA soil overlay. Low = better FPS, High = fuller coverage on large maps." />
     <e k="input_SF_OPEN_SETTINGS" v="Open Soil Settings" eh="2e31c0dd" />
     <e k="sf_reset" v="Resetuj ustawienia gleby" eh="467bc2f5" />
     <e k="input_SF_TOGGLE_HUD" v="Przełącz HUD gleby" eh="f0224a10" />
