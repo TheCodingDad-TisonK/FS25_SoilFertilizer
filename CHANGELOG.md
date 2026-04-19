@@ -11,11 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Admin panel at SHIFT+O**: The SHIFT+O settings panel now opens to an admin landing page
-  listing every available console command with a brief description. The previous **Drain Vehicle**
-  button has been replaced by the **Admin** button that opens this panel — all drain and admin
-  operations are now accessible from one organised hub. Admin-only access in multiplayer is
-  enforced as before.
+- **Admin page inside the SHIFT+O settings panel**: The **Drain Vehicle** button in the
+  SHIFT+O settings panel has been replaced by an **Admin** button. Pressing it opens a dedicated
+  admin page listing every available console command with buttons to execute them directly —
+  no need to open the developer console. Admin-only access in multiplayer is enforced as before.
 
 ### Fixed
 

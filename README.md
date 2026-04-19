@@ -208,9 +208,9 @@ Three core settings live here so you can reach them quickly:
 | **Notifications** | On / Off | Pop-up alerts when fields get critically low |
 | **Debug mode** | On / Off | Verbose logging to the game log |
 
-### SHIFT+O — Admin & Settings Panel
+### SHIFT+O — Full Settings Panel
 
-Press **`Shift+O`** anywhere in-game (on foot or in a vehicle) to open the admin panel. The landing page lists every available console command with a brief description — useful for quick reference without opening the developer console. Navigate to the **Settings** tab for the full simulation controls organised into three categories:
+Press **`Shift+O`** anywhere in-game (on foot or in a vehicle) to open the full settings panel. Settings are organised into three categories. The panel also includes an **Admin** button (previously labelled *Drain Vehicle*) — pressing it opens a dedicated admin page with all console commands listed and executable as buttons directly in-game:
 
 **🌱 Simulation** — controls the core simulation behaviour
 
@@ -253,7 +253,7 @@ Press **`Shift+O`** anywhere in-game (on foot or in a vehicle) to open the admin
 
 ## 🖥️ Console Commands
 
-Open the developer console with **`~`** and type `soilfertility` for the full list, or press **`Shift+O`** in-game to open the admin panel — the landing page lists every command with a brief description.
+Open the developer console with **`~`** and type `soilfertility` for the full list, or press **`Shift+O`** → **Admin** to access all commands as buttons directly in-game.
 
 | Command | Arguments | Description |
 |---|---|---|
