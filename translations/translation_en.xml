@@ -165,6 +165,16 @@
     <e k="sf_bigBag_starter_function" v="Starter Fertilizer (liquid)" eh="2c36ea57" />
     <e k="sf_bigBag_gypsum_name" v="Big Bag Gypsum" eh="40fc8169" />
     <e k="sf_bigBag_gypsum_function" v="Soil Amendment (dry)" eh="51503c54" />
+    <e k="sf_bigBag_compost_name" v="Big Bag Compost" />
+    <e k="sf_bigBag_compost_function" v="Organic Soil Amendment (dry)" />
+    <e k="sf_bigBag_biosolids_name" v="Big Bag Biosolids" />
+    <e k="sf_bigBag_biosolids_function" v="Organic Fertilizer (dry)" />
+    <e k="sf_bigBag_chicken_manure_name" v="Big Bag Chicken Manure" />
+    <e k="sf_bigBag_chicken_manure_function" v="Organic Fertilizer (dry)" />
+    <e k="sf_bigBag_pelletized_manure_name" v="Big Bag Pelletized Manure" />
+    <e k="sf_bigBag_pelletized_manure_function" v="Organic Fertilizer (dry)" />
+    <e k="sf_bigBag_liquidlime_name" v="Liquid Lime Tank" />
+    <e k="sf_bigBag_liquidlime_function" v="pH Raising Agent (liquid)" />
     <e k="sf_hud_title" v="SOIL MONITOR" eh="f8cda642" />
     <e k="sf_hud_field" v="Field %d" eh="08988997" />
     <e k="sf_hud_noField" v="Walk onto a field" eh="62c55e9e" />

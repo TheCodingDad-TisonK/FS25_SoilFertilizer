@@ -178,6 +178,16 @@
     <e k="sf_bigBag_starter_function" v="Startmeststof (vloeibaar)" eh="2c36ea57" />
 		<e k="sf_bigBag_gypsum_name" v="[EN] Big Bag Gypsum" eh="40fc8169" />
 		<e k="sf_bigBag_gypsum_function" v="[EN] Soil Amendment (dry)" eh="51503c54" />
+    <e k="sf_bigBag_compost_name" v="Big Bag Compost" />
+    <e k="sf_bigBag_compost_function" v="Organic Soil Amendment (dry)" />
+    <e k="sf_bigBag_biosolids_name" v="Big Bag Biosolids" />
+    <e k="sf_bigBag_biosolids_function" v="Organic Fertilizer (dry)" />
+    <e k="sf_bigBag_chicken_manure_name" v="Big Bag Chicken Manure" />
+    <e k="sf_bigBag_chicken_manure_function" v="Organic Fertilizer (dry)" />
+    <e k="sf_bigBag_pelletized_manure_name" v="Big Bag Pelletized Manure" />
+    <e k="sf_bigBag_pelletized_manure_function" v="Organic Fertilizer (dry)" />
+    <e k="sf_bigBag_liquidlime_name" v="Liquid Lime Tank" />
+    <e k="sf_bigBag_liquidlime_function" v="pH Raising Agent (liquid)" />
     <e k="sf_report_detail_n_ok" v="Stikstof: Optimaal" eh="13782bd9" />
     <e k="sf_report_detail_p_ok" v="Fosfor: Optimaal" eh="dbc90f11" />
     <e k="sf_report_detail_k_ok" v="Kalium: Optimaal" eh="0197b4ba" />
