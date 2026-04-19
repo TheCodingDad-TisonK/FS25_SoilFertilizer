@@ -1148,6 +1148,8 @@ function HookManager:installPlowingHook()
 
                         if isPlowingTool then
                             g_SoilFertilityManager.soilSystem:onPlowing(farmlandId)
+                        else
+                            g_SoilFertilityManager.soilSystem:onCultivation(farmlandId)
                         end
                     end
                 end

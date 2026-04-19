@@ -165,6 +165,16 @@
     <e k="sf_bigBag_starter_function" v="Стартовое удобрение (жидкое)" eh="2c36ea57" />
 		<e k="sf_bigBag_gypsum_name" v="[EN] Big Bag Gypsum" eh="40fc8169" />
 		<e k="sf_bigBag_gypsum_function" v="[EN] Soil Amendment (dry)" eh="51503c54" />
+    <e k="sf_bigBag_compost_name" v="Big Bag Compost" />
+    <e k="sf_bigBag_compost_function" v="Organic Soil Amendment (dry)" />
+    <e k="sf_bigBag_biosolids_name" v="Big Bag Biosolids" />
+    <e k="sf_bigBag_biosolids_function" v="Organic Fertilizer (dry)" />
+    <e k="sf_bigBag_chicken_manure_name" v="Big Bag Chicken Manure" />
+    <e k="sf_bigBag_chicken_manure_function" v="Organic Fertilizer (dry)" />
+    <e k="sf_bigBag_pelletized_manure_name" v="Big Bag Pelletized Manure" />
+    <e k="sf_bigBag_pelletized_manure_function" v="Organic Fertilizer (dry)" />
+    <e k="sf_bigBag_liquidlime_name" v="Liquid Lime Tank" />
+    <e k="sf_bigBag_liquidlime_function" v="pH Raising Agent (liquid)" />
     <e k="sf_hud_title" v="МОНИТОР ПОЧВЫ" eh="f8cda642" />
     <e k="sf_hud_field" v="Поле %d" eh="08988997" />
     <e k="sf_hud_noField" v="Выйдите на поле" eh="62c55e9e" />
@@ -292,7 +302,7 @@
     <e k="sf_report_rotation_bonus" v="Бонус за ротацию" eh="2831a7ac" />
     <e k="sf_report_rotation_fatigue" v="Урожайность: тот же урожай" eh="46135880" />
     <e k="sf_report_rotation_ok" v="Ротация: в порядке" eh="df66b3be" />
-    <e k="sf_gypsum_title" v="Гипс (pH+)" eh="56e6dc36" />
+    <e k="sf_gypsum_title" v="Гипс (pH-)" eh="56e6dc36" />
     <e k="sf_compost_title" v="Компост (органический)" eh="c3e2071a" />
     <e k="sf_biosolids_title" v="Биологические отходы (N+P)" eh="f0c901dc" />
     <e k="sf_chicken_manure_title" v="Куриный помет (N+P)" eh="338128e2" />

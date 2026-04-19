@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.9.4.0] - 2026-04-19
+
+### Added
+
+- **Purchasable big bags for Compost, Biosolids, Chicken Manure, and Pelletized Manure**: All
+  four organic fertilizers are now available as purchasable big bags in the shop. Previously
+  these were only obtainable through on-farm production or compatible mods. Compost ($300),
+  Biosolids ($500), Chicken Manure ($600), Pelletized Manure ($1000) — single-unit and
+  multi-purchase options included.
+
+- **Purchasable Liquid Lime IBC tank**: Liquid Lime is now available as a purchasable IBC-style
+  liquid tank ($1200 / 2000 L) in the shop, consistent with other liquid fertilizer products.
+  Apply with a sprayer to raise field pH.
+
+### Fixed
+
+- **Gypsum now correctly lowers soil pH**: The gypsum fertilizer profile had `pH=0.0` (no
+  effect) while the Treatment dialog recommended applying it for alkaline fields (pH > 7.5).
+  Gypsum now applies a −0.10 pH delta per application (~−0.25 pH shift at the 1500 kg/ha base
+  rate), giving players an actual tool to manage alkaline soil. Fill type title updated from
+  `(pH+)` to `(pH−)` across all 26 languages.
+
+- **Tillage reduces weed, pest, and disease pressure**: Any cultivator or plow pass now reduces
+  active weed, pest, and disease pressure on the field. Closes #188.
+
+---
+
 ## [1.9.3.0] - 2026-04-18
 
 ### Added
