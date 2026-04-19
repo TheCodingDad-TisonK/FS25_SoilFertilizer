@@ -244,7 +244,8 @@ Press **`Shift+O`** anywhere in-game (on foot or in a vehicle) to open the full 
 
 | Setting | Options | What it does |
 |---|---|---|
-| **Active map layer** | N / P / K / pH / OM / Weed / Pest / Disease | Nutrient layer shown on the PDA map |
+| **Active map layer** | Off / N / P / K / pH / OM / Urgency / Weed / Pest / Disease | Nutrient layer shown on the PDA map |
+| **Overlay density** | Low / Medium / High | Number of data points rendered on the map overlay — Low (8k), Medium (20k), High (40k). Reduce if the map causes frame drops |
 
 > [!NOTE]
 > In multiplayer, settings are **server-authoritative** — the host's settings are pushed to all clients on join. Non-admin clients can see but not change server settings. HUD display preferences are always local and can be changed by any player.
