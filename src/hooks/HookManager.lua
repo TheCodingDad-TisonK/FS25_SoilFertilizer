@@ -107,9 +107,17 @@ function HookManager:installAll(soilSystem)
     local weatherOk = self:installWeatherHook()
     if weatherOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
-    -- Plowing benefits
+    -- Plowing benefits (cultivators + deep-tillage via Cultivator spec)
     local plowingOk = self:installPlowingHook()
     if plowingOk then successCount = successCount + 1 else failCount = failCount + 1 end
+
+    -- Dedicated plow implements (Plow.processPlowArea)
+    local dedicatedPlowOk = self:installDedicatedPlowHook()
+    if dedicatedPlowOk then successCount = successCount + 1 else failCount = failCount + 1 end
+
+    -- Mechanical weed removal (WeedControl.processWeedControlArea — weeders, hoes, inter-row cultivators)
+    local weedControlOk = self:installWeedControlHook()
+    if weedControlOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
     -- Sowing / planting: clear stale lastCrop so HUD shows live crop (fix #123)
     local sowingOk = self:installSowingHook()
@@ -1202,6 +1210,117 @@ function HookManager:installPlowingHook()
     )
     self:register(Cultivator, "processCultivatorArea", original, "Cultivator.processCultivatorArea")
     SoilLogger.info("[OK] Plowing hook installed successfully")
+    return true
+end
+
+-- =========================================================
+-- HOOK 5b: Dedicated plow implements (Plow.processPlowArea)
+-- =========================================================
+--- Hooks dedicated plow implements (belt plows, disc plows, etc.) which call
+--- Plow.processPlowArea rather than Cultivator.processCultivatorArea.
+--- Without this hook, plowing with a real plow (spec_plow) never triggers
+--- soil benefits because those implements bypass processCultivatorArea entirely.
+---@return boolean success
+function HookManager:installDedicatedPlowHook()
+    if not Plow or type(Plow.processPlowArea) ~= "function" then
+        SoilLogger.warning("Could not install dedicated plow hook - Plow.processPlowArea not available")
+        return false
+    end
+
+    local original = Plow.processPlowArea
+    Plow.processPlowArea = Utils.appendedFunction(
+        original,
+        function(plowSelf, workArea, dt)
+            if not g_SoilFertilityManager or
+               not g_SoilFertilityManager.soilSystem or
+               not g_SoilFertilityManager.settings.enabled or
+               not g_SoilFertilityManager.settings.plowingBonus then
+                return
+            end
+
+            if not workArea or type(workArea) ~= "table" then return end
+            if not workArea.start or not workArea.width or not workArea.height then return end
+
+            local sx, _, sz = getWorldTranslation(workArea.start)
+            local wx, _, wz = getWorldTranslation(workArea.width)
+            local hx, _, hz = getWorldTranslation(workArea.height)
+            local centerX = (sx + wx + hx) / 3
+            local centerZ = (sz + wz + hz) / 3
+
+            local success, errorMsg = pcall(function()
+                if g_farmlandManager then
+                    local farmland = g_farmlandManager:getFarmlandAtWorldPosition(centerX, centerZ)
+                    local farmlandId = farmland and farmland.id
+                    if farmlandId and farmlandId > 0 then
+                        g_SoilFertilityManager.soilSystem:onPlowing(farmlandId)
+                    end
+                end
+            end)
+
+            if not success then
+                SoilLogger.error("Dedicated plow hook failed: %s", tostring(errorMsg))
+            end
+        end
+    )
+    self:register(Plow, "processPlowArea", original, "Plow.processPlowArea")
+    SoilLogger.info("[OK] Dedicated plow hook installed successfully")
+    return true
+end
+
+-- =========================================================
+-- HOOK 5c: Mechanical weed removal (WeedControl.processWeedControlArea)
+-- =========================================================
+--- Hooks the WeedControl specialization used by dedicated weeders, inter-row
+--- hoes, and mechanical weed-control implements. These never call
+--- processCultivatorArea, so without this hook mechanical weed removal has
+--- no effect on weed pressure tracked by this mod (issue #200).
+---@return boolean success
+function HookManager:installWeedControlHook()
+    if not WeedControl or type(WeedControl.processWeedControlArea) ~= "function" then
+        SoilLogger.warning("Could not install WeedControl hook - WeedControl.processWeedControlArea not available")
+        return false
+    end
+
+    local original = WeedControl.processWeedControlArea
+    WeedControl.processWeedControlArea = Utils.appendedFunction(
+        original,
+        function(weedControlSelf, workArea, dt)
+            if not g_SoilFertilityManager or
+               not g_SoilFertilityManager.soilSystem or
+               not g_SoilFertilityManager.settings.enabled or
+               not g_SoilFertilityManager.settings.weedPressure then
+                return
+            end
+
+            if not workArea or type(workArea) ~= "table" then return end
+            if not workArea.start or not workArea.width or not workArea.height then return end
+
+            local sx, _, sz = getWorldTranslation(workArea.start)
+            local wx, _, wz = getWorldTranslation(workArea.width)
+            local hx, _, hz = getWorldTranslation(workArea.height)
+            local centerX = (sx + wx + hx) / 3
+            local centerZ = (sz + wz + hz) / 3
+
+            local success, errorMsg = pcall(function()
+                if g_farmlandManager then
+                    local farmland = g_farmlandManager:getFarmlandAtWorldPosition(centerX, centerZ)
+                    local farmlandId = farmland and farmland.id
+                    if farmlandId and farmlandId > 0 then
+                        -- Mechanical weed control (inter-row hoeing, weeding passes) is
+                        -- equivalent to a shallow cultivation pass for weed/pest/disease pressure.
+                        g_SoilFertilityManager.soilSystem:onCultivation(farmlandId)
+                        SoilLogger.debug("[WeedControlHook] Field %d: mechanical weed removal applied", farmlandId)
+                    end
+                end
+            end)
+
+            if not success then
+                SoilLogger.error("WeedControl hook failed: %s", tostring(errorMsg))
+            end
+        end
+    )
+    self:register(WeedControl, "processWeedControlArea", original, "WeedControl.processWeedControlArea")
+    SoilLogger.info("[OK] WeedControl hook (mechanical weed removal) installed successfully")
     return true
 end
 

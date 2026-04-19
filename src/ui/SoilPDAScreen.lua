@@ -480,7 +480,7 @@ function SoilPDAScreen:onClickHelp()
             t("sf_help_ph", "pH  6.5 – 7.0 = Ideal.  < 6.5 apply Lime.  > 7.5 apply Gypsum."),
             "",
             t("sf_help_pressure_header", "CROP PRESSURE"),
-            t("sf_help_weed",    "Weed     > 20% — Apply Herbicide."),
+            t("sf_help_weed",    "Weed     > 20% — Apply Herbicide or use mechanical weeder/hoe."),
             t("sf_help_pest",    "Pest     > 20% — Apply Insecticide."),
             t("sf_help_disease", "Disease  > 20% — Apply Fungicide."),
             "",
