@@ -1341,18 +1341,28 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
     field.fertilizerApplied = (field.fertilizerApplied or 0) + liters
 
     -- Check for "Field fully treated" notification (once per field per day at 90% threshold)
-    local baseRateEntry = SoilConstants.SPRAYER_RATE.BASE_RATES[fillType.name] or 
-                         SoilConstants.SPRAYER_RATE.BASE_RATES.DEFAULT
-    local targetVolume = areaInHa * baseRateEntry.value
-    local coverageThreshold = targetVolume * SoilConstants.SPRAYER_RATE.FERTILIZER_COVERAGE_THRESHOLD
+    -- Skip notification for crop-protection products (INSECTICIDE, FUNGICIDE, HERBICIDE) —
+    -- they share FERTILIZER_PROFILES entries for pest/disease reduction but are not fertilizers,
+    -- so "fully treated with INSECTICIDE" would be misleading and incorrect.
+    local isCropProtection = (
+        (SoilConstants.PEST_PRESSURE    and SoilConstants.PEST_PRESSURE.INSECTICIDE_TYPES    and SoilConstants.PEST_PRESSURE.INSECTICIDE_TYPES[fillType.name])    or
+        (SoilConstants.DISEASE_PRESSURE and SoilConstants.DISEASE_PRESSURE.FUNGICIDE_TYPES   and SoilConstants.DISEASE_PRESSURE.FUNGICIDE_TYPES[fillType.name])    or
+        (SoilConstants.WEED_PRESSURE    and SoilConstants.WEED_PRESSURE.HERBICIDE_TYPES      and SoilConstants.WEED_PRESSURE.HERBICIDE_TYPES[fillType.name])
+    )
+    if not isCropProtection then
+        local baseRateEntry = SoilConstants.SPRAYER_RATE.BASE_RATES[fillType.name] or
+                             SoilConstants.SPRAYER_RATE.BASE_RATES.DEFAULT
+        local targetVolume = areaInHa * baseRateEntry.value
+        local coverageThreshold = targetVolume * SoilConstants.SPRAYER_RATE.FERTILIZER_COVERAGE_THRESHOLD
 
-    if field.nutrientBuffer[fillTypeIndex] >= coverageThreshold then
-        local today = (g_currentMission and g_currentMission.environment and
-                       g_currentMission.environment.currentDay) or 0
-        if not self.fertNotifyShown then self.fertNotifyShown = {} end
-        if self.fertNotifyShown[fieldId] ~= today then
-            self:showNotification("Soil Update", string.format("Field %d fully treated with %s", fieldId, fillType.name))
-            self.fertNotifyShown[fieldId] = today
+        if field.nutrientBuffer[fillTypeIndex] >= coverageThreshold then
+            local today = (g_currentMission and g_currentMission.environment and
+                           g_currentMission.environment.currentDay) or 0
+            if not self.fertNotifyShown then self.fertNotifyShown = {} end
+            if self.fertNotifyShown[fieldId] ~= today then
+                self:showNotification("Soil Update", string.format("Field %d fully treated with %s", fieldId, fillType.name))
+                self.fertNotifyShown[fieldId] = today
+            end
         end
     end
 end

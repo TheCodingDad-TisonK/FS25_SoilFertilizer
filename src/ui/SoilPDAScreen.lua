@@ -730,7 +730,7 @@ function SoilPDAScreen:_refreshSummaryStats()
         sumN  = sumN  + info.nitrogen.value
         sumP  = sumP  + info.phosphorus.value
         sumK  = sumK  + info.potassium.value
-        sumPH = sumPH + (info.pH or 7.0)
+        sumPH = sumPH + (info.pH or SoilConstants.FIELD_DEFAULTS.pH)
         sumOM = sumOM + (info.organicMatter or 3.5)
         if (info.weedPressure    or 0) >= PRESSURE_THRESHOLD then weedCount    = weedCount    + 1 end
         if (info.pestPressure    or 0) >= PRESSURE_THRESHOLD then pestCount    = pestCount    + 1 end
@@ -867,9 +867,9 @@ function SoilPDAScreen:_populateFieldCell(index, cell)
 
     -- pH
     if phEl then
-        local phVal = string.format("%.1f", info.pH or 7.0)
+        local phVal = string.format("%.1f", info.pH or SoilConstants.FIELD_DEFAULTS.pH)
         phEl:setText(phVal)
-        local ph = info.pH or 7.0
+        local ph = info.pH or SoilConstants.FIELD_DEFAULTS.pH
         if ph >= 6.5 and ph <= 7.0 then
             phEl:setTextColor(unpack(COLOR_GOOD))
         elseif ph >= 6.0 and ph < 7.5 then
@@ -918,6 +918,8 @@ local function buildNeedsString(info)
     local nThreshPoor  = thresh and thresh.nitrogen   and thresh.nitrogen.poor   or 30
     local pThreshPoor  = thresh and thresh.phosphorus and thresh.phosphorus.poor or 25
     local kThreshPoor  = thresh and thresh.potassium  and thresh.potassium.poor  or 20
+    local fertThresh   = SoilConstants.FERTILIZATION_THRESHOLDS
+    local phThreshLow  = fertThresh and fertThresh.pH or 5.5
 
     if info.nitrogen.value   < nThreshPoor then
         table.insert(needs, tr("sf_pda_need_n", "Nitrogen"))
@@ -928,7 +930,7 @@ local function buildNeedsString(info)
     if info.potassium.value  < kThreshPoor then
         table.insert(needs, tr("sf_pda_need_k", "Potassium"))
     end
-    if (info.pH or 7.0) < 6.0 then
+    if (info.pH or SoilConstants.FIELD_DEFAULTS.pH) < phThreshLow then
         table.insert(needs, tr("sf_pda_need_ph", "Lime (pH)"))
     end
     if (info.weedPressure    or 0) >= PRESSURE_THRESHOLD then

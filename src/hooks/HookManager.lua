@@ -880,21 +880,55 @@ function HookManager:installSprayerAreaHook()
 
                 if not isFertilizer and not herbOnlyDirect and not pestOnlyDirect and not diseaseOnlyDirect then return end
 
-                -- Resolve field from vehicle root position
+                -- Resolve field from vehicle root position.
+                -- When the tractor body straddles a field boundary (common on edge fields),
+                -- rootNode may fall outside the polygon and return nil. Fall back to the
+                -- work-area midpoint of each attached implement so LIQUIDLIME and other
+                -- products applied by a trailed sprayer are attributed correctly.
                 local x, _, z = getWorldTranslation(self.rootNode)
                 if not x then return end
 
-                local fieldId = nil
-                if g_fieldManager and type(g_fieldManager.getFieldAtWorldPosition) == "function" then
-                    local field = g_fieldManager:getFieldAtWorldPosition(x, z)
-                    if field and field.farmland then
-                        fieldId = field.farmland.id
+                local function _resolveFieldId(wx, wz)
+                    local fid = nil
+                    if g_fieldManager and type(g_fieldManager.getFieldAtWorldPosition) == "function" then
+                        local f = g_fieldManager:getFieldAtWorldPosition(wx, wz)
+                        if f and f.farmland then fid = f.farmland.id end
+                    end
+                    if not fid and g_farmlandManager then
+                        local fl = g_farmlandManager:getFarmlandAtWorldPosition(wx, wz)
+                        if fl then fid = fl.id end
+                    end
+                    return fid
+                end
+
+                local fieldId = _resolveFieldId(x, z)
+
+                -- Fallback: try the midpoints of work areas on attached implements
+                if not fieldId or fieldId <= 0 then
+                    local attachedImpls = self.spec_attacherJoints and self.spec_attacherJoints.attachedImplements
+                    if attachedImpls then
+                        for _, impl in ipairs(attachedImpls) do
+                            local obj = impl and impl.object
+                            if obj then
+                                -- Try implement rootNode first
+                                local ix, _, iz = getWorldTranslation(obj.rootNode)
+                                if ix then fieldId = _resolveFieldId(ix, iz) end
+                                -- Then try each work area start point
+                                if (not fieldId or fieldId <= 0) and obj.spec_workArea and obj.spec_workArea.workAreas then
+                                    for _, wa in ipairs(obj.spec_workArea.workAreas) do
+                                        if wa.start then
+                                            local sx, _, sz = getWorldTranslation(wa.start)
+                                            if sx then fieldId = _resolveFieldId(sx, sz) end
+                                        end
+                                        if fieldId and fieldId > 0 then break end
+                                    end
+                                end
+                            end
+                            if fieldId and fieldId > 0 then break end
+                        end
                     end
                 end
-                if not fieldId and g_farmlandManager then
-                    local farmland = g_farmlandManager:getFarmlandAtWorldPosition(x, z)
-                    if farmland then fieldId = farmland.id end
-                end
+
                 if not fieldId or fieldId <= 0 then return end
 
                 -- Apply rate multiplier
