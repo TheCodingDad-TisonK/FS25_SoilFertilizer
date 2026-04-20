@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.9.8.0] - 2026-04-20
+
+### Fixed
+- **Spreader pallet unload**: All fillTypes were wrapped in an unnecessary `<pallets>` container element — removed it so the game can correctly recognize the `<pallet>` reference. Spreaders can now unload custom fertilizers as bigBag pallets on site by pressing the I key. (Thanks @61nian — PR #202)
+- **Sprayer pallet unload**: Liquid fillTypes (UAN32, UAN28, ANHYDROUS, STARTER, INSECTICIDE, FUNGICIDE, LIQUID_UREA, LIQUID_AMS, LIQUID_MAP, LIQUID_DAP, LIQUID_POTASH) now correctly unload as liquidTank pallets when pressing I key on a sprayer. Previously these were pointing to bigBag objects which have no liquid fill point.
+- **LIQUIDLIME pallet**: Added missing pallet reference for LIQUIDLIME, which was registered as a sprayer fillType but had no pallet entry at all.
+
+---
+
 ## [1.9.7.0] - 2026-04-19
 
 ### Added
