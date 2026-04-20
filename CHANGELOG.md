@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.9.7.1] - 2026-04-20
+
+### Fixed
+
+- **Unloading for spreaders**: Spraders can now unload custom fertilizers as big bags on site. But for sprayers is still in progress.
+
 ## [1.9.7.0] - 2026-04-19
 
 ### Added
