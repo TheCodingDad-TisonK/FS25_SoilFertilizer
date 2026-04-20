@@ -7,15 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.9.8.0] - 2026-04-20
+
+### Fixed
+- **Spreader pallet unload**: All fillTypes were wrapped in an unnecessary `<pallets>` container element — removed it so the game can correctly recognize the `<pallet>` reference. Spreaders can now unload custom fertilizers as bigBag pallets on site by pressing the I key. (Thanks @61nian — PR #202)
+- **Sprayer pallet unload**: Liquid fillTypes (UAN32, UAN28, ANHYDROUS, STARTER, INSECTICIDE, FUNGICIDE, LIQUID_UREA, LIQUID_AMS, LIQUID_MAP, LIQUID_DAP, LIQUID_POTASH) now correctly unload as liquidTank pallets when pressing I key on a sprayer. Previously these were pointing to bigBag objects which have no liquid fill point.
+- **LIQUIDLIME pallet**: Added missing pallet reference for LIQUIDLIME, which was registered as a sprayer fillType but had no pallet entry at all.
+
+---
+
 ## [1.9.7.0] - 2026-04-19
 
 ### Added
 
-- **Admin panel at SHIFT+O**: The SHIFT+O settings panel now opens to an admin landing page
-  listing every available console command with a brief description. The previous **Drain Vehicle**
-  button has been replaced by the **Admin** button that opens this panel — all drain and admin
-  operations are now accessible from one organised hub. Admin-only access in multiplayer is
-  enforced as before.
+- **Admin page inside the SHIFT+O settings panel**: The **Drain Vehicle** button in the
+  SHIFT+O settings panel has been replaced by an **Admin** button. Pressing it opens a dedicated
+  admin page listing every available console command with buttons to execute them directly —
+  no need to open the developer console. Admin-only access in multiplayer is enforced as before.
 
 ### Fixed
 

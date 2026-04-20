@@ -107,9 +107,17 @@ function HookManager:installAll(soilSystem)
     local weatherOk = self:installWeatherHook()
     if weatherOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
-    -- Plowing benefits
+    -- Plowing benefits (cultivators + deep-tillage via Cultivator spec)
     local plowingOk = self:installPlowingHook()
     if plowingOk then successCount = successCount + 1 else failCount = failCount + 1 end
+
+    -- Dedicated plow implements (Plow.processPlowArea)
+    local dedicatedPlowOk = self:installDedicatedPlowHook()
+    if dedicatedPlowOk then successCount = successCount + 1 else failCount = failCount + 1 end
+
+    -- Mechanical weed removal (Weeder.processWeederArea — weeders, inter-row hoes)
+    local weedControlOk = self:installWeederHook()
+    if weedControlOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
     -- Sowing / planting: clear stale lastCrop so HUD shows live crop (fix #123)
     local sowingOk = self:installSowingHook()
@@ -880,21 +888,55 @@ function HookManager:installSprayerAreaHook()
 
                 if not isFertilizer and not herbOnlyDirect and not pestOnlyDirect and not diseaseOnlyDirect then return end
 
-                -- Resolve field from vehicle root position
+                -- Resolve field from vehicle root position.
+                -- When the tractor body straddles a field boundary (common on edge fields),
+                -- rootNode may fall outside the polygon and return nil. Fall back to the
+                -- work-area midpoint of each attached implement so LIQUIDLIME and other
+                -- products applied by a trailed sprayer are attributed correctly.
                 local x, _, z = getWorldTranslation(self.rootNode)
                 if not x then return end
 
-                local fieldId = nil
-                if g_fieldManager and type(g_fieldManager.getFieldAtWorldPosition) == "function" then
-                    local field = g_fieldManager:getFieldAtWorldPosition(x, z)
-                    if field and field.farmland then
-                        fieldId = field.farmland.id
+                local function _resolveFieldId(wx, wz)
+                    local fid = nil
+                    if g_fieldManager and type(g_fieldManager.getFieldAtWorldPosition) == "function" then
+                        local f = g_fieldManager:getFieldAtWorldPosition(wx, wz)
+                        if f and f.farmland then fid = f.farmland.id end
+                    end
+                    if not fid and g_farmlandManager then
+                        local fl = g_farmlandManager:getFarmlandAtWorldPosition(wx, wz)
+                        if fl then fid = fl.id end
+                    end
+                    return fid
+                end
+
+                local fieldId = _resolveFieldId(x, z)
+
+                -- Fallback: try the midpoints of work areas on attached implements
+                if not fieldId or fieldId <= 0 then
+                    local attachedImpls = self.spec_attacherJoints and self.spec_attacherJoints.attachedImplements
+                    if attachedImpls then
+                        for _, impl in ipairs(attachedImpls) do
+                            local obj = impl and impl.object
+                            if obj then
+                                -- Try implement rootNode first
+                                local ix, _, iz = getWorldTranslation(obj.rootNode)
+                                if ix then fieldId = _resolveFieldId(ix, iz) end
+                                -- Then try each work area start point
+                                if (not fieldId or fieldId <= 0) and obj.spec_workArea and obj.spec_workArea.workAreas then
+                                    for _, wa in ipairs(obj.spec_workArea.workAreas) do
+                                        if wa.start then
+                                            local sx, _, sz = getWorldTranslation(wa.start)
+                                            if sx then fieldId = _resolveFieldId(sx, sz) end
+                                        end
+                                        if fieldId and fieldId > 0 then break end
+                                    end
+                                end
+                            end
+                            if fieldId and fieldId > 0 then break end
+                        end
                     end
                 end
-                if not fieldId and g_farmlandManager then
-                    local farmland = g_farmlandManager:getFarmlandAtWorldPosition(x, z)
-                    if farmland then fieldId = farmland.id end
-                end
+
                 if not fieldId or fieldId <= 0 then return end
 
                 -- Apply rate multiplier
@@ -1138,6 +1180,9 @@ function HookManager:installPlowingHook()
                 if g_farmlandManager then
                     local farmland = g_farmlandManager:getFarmlandAtWorldPosition(centerX, centerZ)
                     local farmlandId = farmland and farmland.id
+                    local isPlowSpec = cultivatorSelf.spec_plow ~= nil or cultivatorSelf.spec_subsoiler ~= nil
+                    SoilLogger.info("[PlowHook] center=(%.1f,%.1f) farmlandId=%s isPlow=%s",
+                        centerX, centerZ, tostring(farmlandId), tostring(isPlowSpec))
                     if farmlandId and farmlandId > 0 then
                         -- Check if this is a plowing implement
                         local isPlowingTool = cultivatorSelf.spec_plow ~= nil or
@@ -1168,6 +1213,117 @@ function HookManager:installPlowingHook()
     )
     self:register(Cultivator, "processCultivatorArea", original, "Cultivator.processCultivatorArea")
     SoilLogger.info("[OK] Plowing hook installed successfully")
+    return true
+end
+
+-- =========================================================
+-- HOOK 5b: Dedicated plow implements (Plow.processPlowArea)
+-- =========================================================
+--- Hooks dedicated plow implements (belt plows, disc plows, etc.) which call
+--- Plow.processPlowArea rather than Cultivator.processCultivatorArea.
+--- Without this hook, plowing with a real plow (spec_plow) never triggers
+--- soil benefits because those implements bypass processCultivatorArea entirely.
+---@return boolean success
+function HookManager:installDedicatedPlowHook()
+    if not Plow or type(Plow.processPlowArea) ~= "function" then
+        SoilLogger.warning("Could not install dedicated plow hook - Plow.processPlowArea not available")
+        return false
+    end
+
+    local original = Plow.processPlowArea
+    Plow.processPlowArea = Utils.appendedFunction(
+        original,
+        function(plowSelf, workArea, dt)
+            if not g_SoilFertilityManager or
+               not g_SoilFertilityManager.soilSystem or
+               not g_SoilFertilityManager.settings.enabled or
+               not g_SoilFertilityManager.settings.plowingBonus then
+                return
+            end
+
+            if not workArea or type(workArea) ~= "table" then return end
+            if not workArea.start or not workArea.width or not workArea.height then return end
+
+            local sx, _, sz = getWorldTranslation(workArea.start)
+            local wx, _, wz = getWorldTranslation(workArea.width)
+            local hx, _, hz = getWorldTranslation(workArea.height)
+            local centerX = (sx + wx + hx) / 3
+            local centerZ = (sz + wz + hz) / 3
+
+            local success, errorMsg = pcall(function()
+                if g_farmlandManager then
+                    local farmland = g_farmlandManager:getFarmlandAtWorldPosition(centerX, centerZ)
+                    local farmlandId = farmland and farmland.id
+                    if farmlandId and farmlandId > 0 then
+                        g_SoilFertilityManager.soilSystem:onPlowing(farmlandId)
+                    end
+                end
+            end)
+
+            if not success then
+                SoilLogger.error("Dedicated plow hook failed: %s", tostring(errorMsg))
+            end
+        end
+    )
+    self:register(Plow, "processPlowArea", original, "Plow.processPlowArea")
+    SoilLogger.info("[OK] Dedicated plow hook installed successfully")
+    return true
+end
+
+-- =========================================================
+-- HOOK 5c: Mechanical weed removal (Weeder.processWeederArea)
+-- =========================================================
+--- Hooks the Weeder specialization's processWeederArea function.
+--- FS25 weeders (inter-row hoes, mechanical weeders) call this instead of
+--- processCultivatorArea — without this hook they have no effect on the
+--- mod's weed pressure tracking (issue #200).
+--- The correct function per LUADOC is Weeder.processWeederArea, NOT
+--- WeedControl.processWeedControlArea (that class does not exist in FS25).
+---@return boolean success
+function HookManager:installWeederHook()
+    if not Weeder or type(Weeder.processWeederArea) ~= "function" then
+        SoilLogger.warning("Could not install Weeder hook - Weeder.processWeederArea not available")
+        return false
+    end
+
+    local original = Weeder.processWeederArea
+    Weeder.processWeederArea = Utils.appendedFunction(
+        original,
+        function(weederSelf, workArea, dt)
+            if not g_SoilFertilityManager or
+               not g_SoilFertilityManager.soilSystem or
+               not g_SoilFertilityManager.settings.enabled or
+               not g_SoilFertilityManager.settings.weedPressure then
+                return
+            end
+
+            if not workArea or type(workArea) ~= "table" then return end
+            if not workArea.start or not workArea.width or not workArea.height then return end
+
+            local sx, _, sz = getWorldTranslation(workArea.start)
+            local wx, _, wz = getWorldTranslation(workArea.width)
+            local hx, _, hz = getWorldTranslation(workArea.height)
+            local centerX = (sx + wx + hx) / 3
+            local centerZ = (sz + wz + hz) / 3
+
+            local success, errorMsg = pcall(function()
+                if g_farmlandManager then
+                    local farmland = g_farmlandManager:getFarmlandAtWorldPosition(centerX, centerZ)
+                    local farmlandId = farmland and farmland.id
+                    if farmlandId and farmlandId > 0 then
+                        g_SoilFertilityManager.soilSystem:onCultivation(farmlandId)
+                        SoilLogger.debug("[WeederHook] Field %d: mechanical weed removal applied", farmlandId)
+                    end
+                end
+            end)
+
+            if not success then
+                SoilLogger.error("Weeder hook failed: %s", tostring(errorMsg))
+            end
+        end
+    )
+    self:register(Weeder, "processWeederArea", original, "Weeder.processWeederArea")
+    SoilLogger.info("[OK] Weeder hook (mechanical weed removal) installed successfully")
     return true
 end
 

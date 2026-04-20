@@ -80,6 +80,10 @@ SoilConstants.NUTRIENT_LIMITS = {
     PH_MAX = 7.5,
     PH_NEUTRAL_LOW = 6.5,
     PH_NEUTRAL_HIGH = 7.0,
+    -- Single authoritative optimal pH target used by yield urgency, auto-rate, and
+    -- any future calculations.  6.5 is the agronomic mid-point and matches the
+    -- value Precision Farming uses, avoiding over-liming when both mods are active.
+    PH_OPTIMAL = 6.5,
 }
 
 -- ========================================
@@ -556,7 +560,9 @@ SoilConstants.SPRAYER_RATE = {
         N  = 80,
         P  = 70,
         K  = 75,
-        pH = 7.0,
+        -- Aligned to PH_OPTIMAL (6.5) so auto-lime stops pushing past the
+        -- Precision Farming optimal band, ending the chronic under-supply tension.
+        pH = 6.5,
         OM = 5.0
     },
 

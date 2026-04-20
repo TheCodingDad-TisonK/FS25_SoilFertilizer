@@ -205,7 +205,7 @@ function SoilTreatmentDialog:_populateData()
     
     -- Weed
     if (info.weedPressure or 0) >= pThresh then
-        self:_setAction(self.treatWeedAction, tr("sf_treat_action_weed", "Apply HERBICIDE immediately."), COLOR_POOR)
+        self:_setAction(self.treatWeedAction, tr("sf_treat_action_weed", "Apply HERBICIDE or use mechanical WEEDER/HOE."), COLOR_POOR)
     else
         self:_setAction(self.treatWeedAction, tr("sf_treat_action_ok", "OK"), COLOR_GOOD)
     end

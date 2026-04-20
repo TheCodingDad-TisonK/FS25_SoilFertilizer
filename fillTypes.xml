@@ -11,9 +11,7 @@
             <economy pricePerLiter="1.60"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_liquidFertilizer.png"/>
             <sprayType sprayTypeStr="LIQUID"/>
-            <pallets>
-                <pallet filename="objects/bigBag/uan32/bigBag_uan32.xml" />
-            </pallets>
+            <pallet filename="objects/liquidTank/uan32/liquidTank_uan32.xml" />
         </fillType>
 
         <fillType name="UAN28" title="$l10n_sf_uan28_title" showOnPriceTable="true" isBulkType="false" unitShort="$l10n_unit_literShort">
@@ -21,9 +19,7 @@
             <economy pricePerLiter="1.50"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_liquidFertilizer.png"/>
             <sprayType sprayTypeStr="LIQUID"/>
-            <pallets>
-                <pallet filename="objects/bigBag/uan28/bigBag_uan28.xml" />
-            </pallets>
+            <pallet filename="objects/liquidTank/uan28/liquidTank_uan28.xml" />
         </fillType>
 
         <fillType name="ANHYDROUS" title="$l10n_sf_anhydrous_title" showOnPriceTable="true" isBulkType="false" unitShort="$l10n_unit_literShort">
@@ -31,9 +27,7 @@
             <economy pricePerLiter="1.85"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_liquidFertilizer.png"/>
             <sprayType sprayTypeStr="LIQUID"/>
-            <pallets>
-                <pallet filename="objects/bigBag/anhydrous/bigBag_anhydrous.xml" />
-            </pallets>
+            <pallet filename="objects/liquidTank/anhydrous/liquidTank_anhydrous.xml" />
         </fillType>
 
         <fillType name="STARTER" title="$l10n_sf_starter_title" showOnPriceTable="true" isBulkType="false" unitShort="$l10n_unit_literShort">
@@ -41,9 +35,7 @@
             <economy pricePerLiter="1.70"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_liquidFertilizer.png"/>
             <sprayType sprayTypeStr="LIQUID"/>
-            <pallets>
-                <pallet filename="objects/bigBag/starter/bigBag_starter.xml" />
-            </pallets>
+            <pallet filename="objects/liquidTank/starter/liquidTank_starter.xml" />
         </fillType>
 
         <!-- ── SOLID GRANULAR SOURCES ─────────────────────────── -->
@@ -53,9 +45,7 @@
             <economy pricePerLiter="1.65"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
             <sprayType sprayTypeStr="SOLID"/>
-            <pallets>
-                <pallet filename="objects/bigBag/urea/bigBag_urea.xml" />
-            </pallets>
+            <pallet filename="objects/bigBag/urea/bigBag_urea.xml" />
         </fillType>
 
         <fillType name="AMS" title="$l10n_sf_ams_title" showOnPriceTable="true" isBulkType="true" unitShort="$l10n_unit_literShort">
@@ -63,9 +53,7 @@
             <economy pricePerLiter="1.40"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
             <sprayType sprayTypeStr="SOLID"/>
-            <pallets>
-                <pallet filename="objects/bigBag/ams/bigBag_ams.xml" />
-            </pallets>
+            <pallet filename="objects/bigBag/ams/bigBag_ams.xml" />
         </fillType>
 
         <fillType name="MAP" title="$l10n_sf_map_title" showOnPriceTable="true" isBulkType="true" unitShort="$l10n_unit_literShort">
@@ -73,9 +61,7 @@
             <economy pricePerLiter="1.95"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
             <sprayType sprayTypeStr="SOLID"/>
-            <pallets>
-                <pallet filename="objects/bigBag/map/bigBag_map.xml" />
-            </pallets>
+            <pallet filename="objects/bigBag/map/bigBag_map.xml" />
         </fillType>
 
         <fillType name="DAP" title="$l10n_sf_dap_title" showOnPriceTable="true" isBulkType="true" unitShort="$l10n_unit_literShort">
@@ -83,9 +69,7 @@
             <economy pricePerLiter="1.75"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
             <sprayType sprayTypeStr="SOLID"/>
-            <pallets>
-                <pallet filename="objects/bigBag/dap/bigBag_dap.xml" />
-            </pallets>
+            <pallet filename="objects/bigBag/dap/bigBag_dap.xml" />
         </fillType>
 
         <fillType name="POTASH" title="$l10n_sf_potash_title" showOnPriceTable="true" isBulkType="true" unitShort="$l10n_unit_literShort">
@@ -93,9 +77,7 @@
             <economy pricePerLiter="1.80"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
             <sprayType sprayTypeStr="SOLID"/>
-            <pallets>
-                <pallet filename="objects/bigBag/potash/bigBag_potash.xml" />
-            </pallets>
+            <pallet filename="objects/bigBag/potash/bigBag_potash.xml" />
         </fillType>
 
         <!-- ── CROP PROTECTION ────────────────────────────────── -->
@@ -105,9 +87,7 @@
             <economy pricePerLiter="1.20"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_liquidFertilizer.png"/>
             <sprayType sprayTypeStr="LIQUID"/>
-            <pallets>
-                <pallet filename="objects/bigBag/insecticide/bigBag_insecticide.xml" />
-            </pallets>
+            <pallet filename="objects/liquidTank/insecticide/liquidTank_insecticide.xml" />
         </fillType>
 
         <fillType name="FUNGICIDE" title="$l10n_sf_fungicide_title" showOnPriceTable="true" isBulkType="false" unitShort="$l10n_unit_literShort">
@@ -115,9 +95,7 @@
             <economy pricePerLiter="1.30"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_liquidFertilizer.png"/>
             <sprayType sprayTypeStr="LIQUID"/>
-            <pallets>
-                <pallet filename="objects/bigBag/fungicide/bigBag_fungicide.xml" />
-            </pallets>
+            <pallet filename="objects/liquidTank/fungicide/liquidTank_fungicide.xml" />
         </fillType>
 
         <fillType name="LIQUID_UREA" title="$l10n_sf_liquid_urea_title" showOnPriceTable="true" isBulkType="false" unitShort="$l10n_unit_literShort">
@@ -125,9 +103,7 @@
             <economy pricePerLiter="1.70"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_liquidFertilizer.png"/>
             <sprayType sprayTypeStr="LIQUID"/>
-            <pallets>
-                <pallet filename="objects/bigBag/liquid_urea/bigBag_liquid_urea.xml" />
-            </pallets>
+            <pallet filename="objects/liquidTank/liquid_urea/liquidTank_liquid_urea.xml" />
         </fillType>
 
         <fillType name="LIQUID_AMS" title="$l10n_sf_liquid_ams_title" showOnPriceTable="true" isBulkType="false" unitShort="$l10n_unit_literShort">
@@ -135,9 +111,7 @@
             <economy pricePerLiter="1.45"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_liquidFertilizer.png"/>
             <sprayType sprayTypeStr="LIQUID"/>
-            <pallets>
-                <pallet filename="objects/bigBag/liquid_ams/bigBag_liquid_ams.xml" />
-            </pallets>
+            <pallet filename="objects/liquidTank/liquid_ams/liquidTank_liquid_ams.xml" />
         </fillType>
 
         <fillType name="LIQUID_MAP" title="$l10n_sf_liquid_map_title" showOnPriceTable="true" isBulkType="false" unitShort="$l10n_unit_literShort">
@@ -145,9 +119,7 @@
             <economy pricePerLiter="2.00"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_liquidFertilizer.png"/>
             <sprayType sprayTypeStr="LIQUID"/>
-            <pallets>
-                <pallet filename="objects/bigBag/liquid_map/bigBag_liquid_map.xml" />
-            </pallets>
+            <pallet filename="objects/liquidTank/liquid_map/liquidTank_liquid_map.xml" />
         </fillType>
 
         <fillType name="LIQUID_DAP" title="$l10n_sf_liquid_dap_title" showOnPriceTable="true" isBulkType="false" unitShort="$l10n_unit_literShort">
@@ -155,9 +127,7 @@
             <economy pricePerLiter="1.80"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_liquidFertilizer.png"/>
             <sprayType sprayTypeStr="LIQUID"/>
-            <pallets>
-                <pallet filename="objects/bigBag/liquid_dap/bigBag_liquid_dap.xml" />
-            </pallets>
+            <pallet filename="objects/liquidTank/liquid_dap/liquidTank_liquid_dap.xml" />
         </fillType>
 
         <fillType name="LIQUID_POTASH" title="$l10n_sf_liquid_potash_title" showOnPriceTable="true" isBulkType="false" unitShort="$l10n_unit_literShort">
@@ -165,9 +135,7 @@
             <economy pricePerLiter="1.85"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_liquidFertilizer.png"/>
             <sprayType sprayTypeStr="LIQUID"/>
-            <pallets>
-                <pallet filename="objects/bigBag/liquid_potash/bigBag_liquid_potash.xml" />
-            </pallets>
+            <pallet filename="objects/liquidTank/liquid_potash/liquidTank_liquid_potash.xml" />
         </fillType>
 
         <!-- ── ORGANIC / SOIL AMENDMENTS ──────────────────────── -->
@@ -217,6 +185,7 @@
             <economy pricePerLiter="0.28"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_liquidFertilizer.png"/>
             <sprayType sprayTypeStr="LIQUID"/>
+            <pallet filename="objects/liquidTank/liquidlime/liquidTank_liquidlime.xml" />
         </fillType>
 
     </fillTypes>

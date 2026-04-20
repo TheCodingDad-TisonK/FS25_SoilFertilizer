@@ -301,84 +301,69 @@ end
 ---@param fieldId number The field being plowed
 function SoilFertilitySystem:onPlowing(fieldId)
     if not fieldId or fieldId <= 0 then return end
-    if not self.settings.plowingBonus then return end
 
     local field = self:getOrCreateField(fieldId, true)
     if not field then return end
 
+    self:info("[Plowing] Field %d triggered (plowingBonus=%s, weedPressure=%s)",
+        fieldId, tostring(self.settings.plowingBonus), tostring(self.settings.weedPressure))
+
     local changed = false
 
-    -- Plowing benefit 1: Increase organic matter (mixing in crop residue)
-    -- Why: Plowing turns over the top soil layer, mixing in crop residue (stems, roots, chaff)
-    -- This incorporates organic material into the soil, increasing organic matter content
-    -- Organic matter improves soil structure, water retention, and microbial activity
-    -- Scale: 0-10 OM scale, +0.5 per plowing (~14% boost from default 3.5)
-    local omBefore = field.organicMatter or SoilConstants.FIELD_DEFAULTS.organicMatter
-    local omIncrease = 0.5  -- Balanced increase: ~3-4 plowings to reach near-maximum OM
-    local omAfter = math.min(omBefore + omIncrease, SoilConstants.NUTRIENT_LIMITS.ORGANIC_MATTER_MAX)
+    -- Plowing benefits 1 & 2: OM increase and pH normalization (only if plowingBonus enabled)
+    if self.settings.plowingBonus then
+        local omBefore = field.organicMatter or SoilConstants.FIELD_DEFAULTS.organicMatter
+        local omIncrease = 0.5
+        local omAfter = math.min(omBefore + omIncrease, SoilConstants.NUTRIENT_LIMITS.ORGANIC_MATTER_MAX)
+        if omAfter > omBefore then
+            field.organicMatter = omAfter
+            changed = true
+        end
 
-    if omAfter > omBefore then
-        field.organicMatter = omAfter
-        changed = true
+        local phBefore = field.pH or SoilConstants.FIELD_DEFAULTS.pH
+        local phTarget = 7.0
+        local phNormalization = 0.1
+        local phAfter = phBefore
+        if phBefore < phTarget then
+            phAfter = math.min(phBefore + phNormalization, phTarget)
+        elseif phBefore > phTarget then
+            phAfter = math.max(phBefore - phNormalization, phTarget)
+        end
+        if phAfter ~= phBefore then
+            field.pH = phAfter
+            changed = true
+        end
+
+        self:info("[Plowing] Field %d: OM %.1f->%.1f, pH %.2f->%.2f",
+            fieldId, omBefore, omAfter, phBefore, phAfter)
     end
 
-    -- Plowing benefit 2: pH normalization (0.1 units toward 7.0)
-    -- Why: Plowing aerates soil and exposes deeper layers to weathering
-    -- Acidic soils (pH < 7): Aeration promotes oxidation and mineral weathering, raising pH slightly
-    -- Alkaline soils (pH > 7): Aeration and organic matter decomposition produce mild acids, lowering pH
-    -- Result: pH gradually moves toward neutral (7.0) over time with regular plowing
-    -- This mimics real-world soil chemistry where plowing improves pH buffering capacity
-    local phBefore = field.pH or SoilConstants.FIELD_DEFAULTS.pH
-    local phTarget = 7.0  -- Neutral pH is optimal for most crops
-    local phNormalization = 0.1  -- Small adjustment per plowing event
-    local phAfter = phBefore
-
-    if phBefore < phTarget then
-        -- Acidic soil: Move toward neutral (increase pH)
-        phAfter = math.min(phBefore + phNormalization, phTarget)
-    elseif phBefore > phTarget then
-        -- Alkaline soil: Move toward neutral (decrease pH)
-        phAfter = math.max(phBefore - phNormalization, phTarget)
-    end
-
-    if phAfter ~= phBefore then
-        field.pH = phAfter
-        changed = true
-    end
-
-    -- Plowing benefit 3: Reset weed pressure to 0 (deep tillage buries weed seeds/roots)
+    -- Plowing benefit 3: Reset weed pressure (independent of plowingBonus)
     if self.settings.weedPressure and (field.weedPressure or 0) > 0 then
-        self:log("[Plowing] Field %d: weed pressure %.0f -> 0 (tillage reset)", fieldId, field.weedPressure)
+        self:info("[Plowing] Field %d: weed %.0f -> 0", fieldId, field.weedPressure)
         field.weedPressure = 0
         field.herbicideDaysLeft = 0
         changed = true
     end
 
-    -- Plowing benefit 4: Reduce pest pressure (disrupts overwintering habitat)
+    -- Plowing benefit 4: Reduce pest pressure (independent of plowingBonus)
     if self.settings.pestPressure and SoilConstants.PLOWING.PEST_PRESSURE_REDUCTION and (field.pestPressure or 0) > 0 then
         local before = field.pestPressure
         field.pestPressure = math.max(0, before - SoilConstants.PLOWING.PEST_PRESSURE_REDUCTION)
-        self:log("[Plowing] Field %d: pest pressure %.0f -> %.0f", fieldId, before, field.pestPressure)
+        self:info("[Plowing] Field %d: pest %.0f -> %.0f", fieldId, before, field.pestPressure)
         changed = true
     end
 
-    -- Plowing benefit 5: Reduce disease pressure (buries inoculum, exposes to UV/drying)
+    -- Plowing benefit 5: Reduce disease pressure (independent of plowingBonus)
     if self.settings.diseasePressure and SoilConstants.PLOWING.DISEASE_PRESSURE_REDUCTION and (field.diseasePressure or 0) > 0 then
         local before = field.diseasePressure
         field.diseasePressure = math.max(0, before - SoilConstants.PLOWING.DISEASE_PRESSURE_REDUCTION)
-        self:log("[Plowing] Field %d: disease pressure %.0f -> %.0f", fieldId, before, field.diseasePressure)
+        self:info("[Plowing] Field %d: disease %.0f -> %.0f", fieldId, before, field.diseasePressure)
         changed = true
     end
 
-    -- Debug logging
-    if self.settings.debugMode and changed then
-        self:info("[Plowing] Field %d: OM %.1f->%.1f, pH %.2f->%.2f",
-            fieldId, omBefore, omAfter, phBefore, phAfter)
-    end
-
-    -- Broadcast to clients if server in multiplayer
     if changed and g_server and g_currentMission and g_currentMission.missionDynamicInfo and g_currentMission.missionDynamicInfo.isMultiplayer then
-        if field and SoilFieldUpdateEvent then
+        if SoilFieldUpdateEvent then
             g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
         end
     end
@@ -389,18 +374,12 @@ end
 ---@param fieldId number
 function SoilFertilitySystem:onCultivation(fieldId)
     if not fieldId or fieldId <= 0 then return end
-    if not self.settings.plowingBonus then return end
     if not SoilConstants.CULTIVATION then return end
 
     local field = self:getOrCreateField(fieldId, false)
     if not field then return end
 
-    -- Throttle: once per field per in-game day to prevent frame-rate overdrive
-    local today = (g_currentMission and g_currentMission.environment and
-                   g_currentMission.environment.currentDay) or 0
-    self.cultivationAppliedDay = self.cultivationAppliedDay or {}
-    if self.cultivationAppliedDay[fieldId] == today then return end
-    self.cultivationAppliedDay[fieldId] = today
+    self:info("[Cultivation] Field %d triggered (weedPressure=%.0f)", fieldId, field.weedPressure or 0)
 
     local changed = false
     local c = SoilConstants.CULTIVATION
@@ -408,21 +387,21 @@ function SoilFertilitySystem:onCultivation(fieldId)
     if self.settings.weedPressure and c.WEED_PRESSURE_REDUCTION and (field.weedPressure or 0) > 0 then
         local before = field.weedPressure
         field.weedPressure = math.max(0, before - c.WEED_PRESSURE_REDUCTION)
-        self:log("[Cultivation] Field %d: weed %.0f -> %.0f", fieldId, before, field.weedPressure)
+        self:info("[Cultivation] Field %d: weed %.0f -> %.0f", fieldId, before, field.weedPressure)
         changed = true
     end
 
     if self.settings.pestPressure and c.PEST_PRESSURE_REDUCTION and (field.pestPressure or 0) > 0 then
         local before = field.pestPressure
         field.pestPressure = math.max(0, before - c.PEST_PRESSURE_REDUCTION)
-        self:log("[Cultivation] Field %d: pest %.0f -> %.0f", fieldId, before, field.pestPressure)
+        self:info("[Cultivation] Field %d: pest %.0f -> %.0f", fieldId, before, field.pestPressure)
         changed = true
     end
 
     if self.settings.diseasePressure and c.DISEASE_PRESSURE_REDUCTION and (field.diseasePressure or 0) > 0 then
         local before = field.diseasePressure
         field.diseasePressure = math.max(0, before - c.DISEASE_PRESSURE_REDUCTION)
-        self:log("[Cultivation] Field %d: disease %.0f -> %.0f", fieldId, before, field.diseasePressure)
+        self:info("[Cultivation] Field %d: disease %.0f -> %.0f", fieldId, before, field.diseasePressure)
         changed = true
     end
 
@@ -1341,18 +1320,28 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
     field.fertilizerApplied = (field.fertilizerApplied or 0) + liters
 
     -- Check for "Field fully treated" notification (once per field per day at 90% threshold)
-    local baseRateEntry = SoilConstants.SPRAYER_RATE.BASE_RATES[fillType.name] or 
-                         SoilConstants.SPRAYER_RATE.BASE_RATES.DEFAULT
-    local targetVolume = areaInHa * baseRateEntry.value
-    local coverageThreshold = targetVolume * SoilConstants.SPRAYER_RATE.FERTILIZER_COVERAGE_THRESHOLD
+    -- Skip notification for crop-protection products (INSECTICIDE, FUNGICIDE, HERBICIDE) —
+    -- they share FERTILIZER_PROFILES entries for pest/disease reduction but are not fertilizers,
+    -- so "fully treated with INSECTICIDE" would be misleading and incorrect.
+    local isCropProtection = (
+        (SoilConstants.PEST_PRESSURE    and SoilConstants.PEST_PRESSURE.INSECTICIDE_TYPES    and SoilConstants.PEST_PRESSURE.INSECTICIDE_TYPES[fillType.name])    or
+        (SoilConstants.DISEASE_PRESSURE and SoilConstants.DISEASE_PRESSURE.FUNGICIDE_TYPES   and SoilConstants.DISEASE_PRESSURE.FUNGICIDE_TYPES[fillType.name])    or
+        (SoilConstants.WEED_PRESSURE    and SoilConstants.WEED_PRESSURE.HERBICIDE_TYPES      and SoilConstants.WEED_PRESSURE.HERBICIDE_TYPES[fillType.name])
+    )
+    if not isCropProtection then
+        local baseRateEntry = SoilConstants.SPRAYER_RATE.BASE_RATES[fillType.name] or
+                             SoilConstants.SPRAYER_RATE.BASE_RATES.DEFAULT
+        local targetVolume = areaInHa * baseRateEntry.value
+        local coverageThreshold = targetVolume * SoilConstants.SPRAYER_RATE.FERTILIZER_COVERAGE_THRESHOLD
 
-    if field.nutrientBuffer[fillTypeIndex] >= coverageThreshold then
-        local today = (g_currentMission and g_currentMission.environment and
-                       g_currentMission.environment.currentDay) or 0
-        if not self.fertNotifyShown then self.fertNotifyShown = {} end
-        if self.fertNotifyShown[fieldId] ~= today then
-            self:showNotification("Soil Update", string.format("Field %d fully treated with %s", fieldId, fillType.name))
-            self.fertNotifyShown[fieldId] = today
+        if field.nutrientBuffer[fillTypeIndex] >= coverageThreshold then
+            local today = (g_currentMission and g_currentMission.environment and
+                           g_currentMission.environment.currentDay) or 0
+            if not self.fertNotifyShown then self.fertNotifyShown = {} end
+            if self.fertNotifyShown[fieldId] ~= today then
+                self:showNotification("Soil Update", string.format("Field %d fully treated with %s", fieldId, fillType.name))
+                self.fertNotifyShown[fieldId] = today
+            end
         end
     end
 end
