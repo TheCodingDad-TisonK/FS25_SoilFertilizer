@@ -996,10 +996,24 @@ function HookManager:installSprayerAreaHook()
                 local buyPrices = hookMgr and hookMgr.customFillTypePrices
                 local pricePerLiter = buyPrices and buyPrices[fillTypeIndex]
                 if pricePerLiter then
+                    -- Courseplay-aware AI detection (mirrors isInBuyMode above).
+                    -- getIsAIActive() returns false for CP-driven vehicles; we must also
+                    -- check CP's own spec and legacy vehicle.cp flag.
                     local isAI = false
                     local okAI, resAI = pcall(function() return self:getIsAIActive() end)
-                    if (okAI and resAI) then isAI = true end
+                    if okAI and resAI then isAI = true end
+                    if not isAI and self.spec_aiVehicle and self.spec_aiVehicle.isActive then
+                        isAI = true
+                    end
                     if not isAI and self.spec_aiJobVehicle and self.spec_aiJobVehicle.job ~= nil then
+                        isAI = true
+                    end
+                    -- Courseplay (modern)
+                    if not isAI and self.spec_cpAIWorker and self.spec_cpAIWorker.isActive then
+                        isAI = true
+                    end
+                    -- Courseplay (legacy)
+                    if not isAI and self.cp and self.cp.isActive then
                         isAI = true
                     end
                     if isAI and g_currentMission and g_currentMission.missionInfo then
@@ -1642,12 +1656,32 @@ function HookManager:installPurchaseRefillHook()
         if not vehicle then return false end
 
         -- 1. Check if AI is active (Standard Helper or Courseplay)
-        -- We check both getIsAIActive and the spec_aiVehicle presence
+        --
+        -- FS25 vanilla: getIsAIActive() / spec_aiVehicle.isActive / spec_aiJobVehicle.job
+        -- Courseplay: drives via its own input-injection pipeline and does NOT set the
+        -- vanilla AI-job system active.  CP marks itself via spec_cpAIWorker.isActive
+        -- (all modern CP versions) and optionally vehicle.cp.isActive (legacy CP builds).
+        -- We must check all paths so BUY mode works regardless of which AI mod is running.
         local isAI = false
+
+        -- Vanilla Helper (primary)
         local ok, res = pcall(function() return vehicle:getIsAIActive() end)
-        if ok and res then 
-            isAI = true 
-        elseif vehicle.spec_aiVehicle and vehicle.spec_aiVehicle.isActive then
+        if ok and res then
+            isAI = true
+        end
+        -- Vanilla Helper (spec fallbacks)
+        if not isAI and vehicle.spec_aiVehicle and vehicle.spec_aiVehicle.isActive then
+            isAI = true
+        end
+        if not isAI and vehicle.spec_aiJobVehicle and vehicle.spec_aiJobVehicle.job ~= nil then
+            isAI = true
+        end
+        -- Courseplay (modern): spec_cpAIWorker is added by CP to every vehicle it controls
+        if not isAI and vehicle.spec_cpAIWorker and vehicle.spec_cpAIWorker.isActive then
+            isAI = true
+        end
+        -- Courseplay (legacy / fallback): CP sets vehicle.cp.isActive in older builds
+        if not isAI and vehicle.cp and vehicle.cp.isActive then
             isAI = true
         end
 

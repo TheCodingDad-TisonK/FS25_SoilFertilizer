@@ -1308,7 +1308,13 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
                 }
             end
             local cell = field.zoneData[cellKey]
-            local cellFactor = (liters / 1000.0) / zone.CELL_AREA_HA
+            -- cellFactor must use areaInHa (not zone.CELL_AREA_HA) so that each cell
+            -- absorbs nutrients at exactly the same per-frame rate as the whole-field
+            -- average.  Using CELL_AREA_HA (0.01 ha) as the denominator made cells
+            -- gain nutrients up to 1000× faster than the field total, causing the HUD
+            -- to show near-complete N saturation after less than 1% field coverage
+            -- (issue #205 Bug 2).
+            local cellFactor = (liters / 1000.0) / areaInHa
             if entry.N  then cell.N  = math.min(limits.MAX,                     cell.N  + entry.N  * cellFactor) end
             if entry.P  then cell.P  = math.min(limits.MAX,                     cell.P  + entry.P  * cellFactor) end
             if entry.K  then cell.K  = math.min(limits.MAX,                     cell.K  + entry.K  * cellFactor) end
