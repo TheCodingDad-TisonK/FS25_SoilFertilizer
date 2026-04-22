@@ -855,9 +855,22 @@ function HookManager:installSprayerAreaHook()
             if self.getIsTurnedOn ~= nil and not self:getIsTurnedOn() then return end
 
             if not fillTypeIndex or fillTypeIndex <= 0 then return end
+
+            -- Track the active custom fill type BEFORE the liters/sprayFillLevel guards.
+            -- When AI uses external-fill BUY mode, wap.usage is always 0 (no tank depletion),
+            -- so the guards below would exit early every frame and _soilLastCustomFillType
+            -- would never be set. getExternalFill (Hook 9) relies on this field to identify
+            -- the intended product when fillType arrives as UNKNOWN — without it, Hook 9
+            -- falls through to original and no money is ever charged (issue #205).
+            do
+                local _hm = g_SoilFertilityManager and g_SoilFertilityManager.hookManager
+                if _hm and _hm.customFillTypePrices and _hm.customFillTypePrices[fillTypeIndex] then
+                    self._soilLastCustomFillType = fillTypeIndex
+                end
+            end
+
             if not liters or liters <= 0 then return end
             if not sprayFillLevel or sprayFillLevel <= 0 then return end
-
             local success, errorMsg = pcall(function()
                 local fillType = g_fillTypeManager:getFillTypeByIndex(fillTypeIndex)
                 if not fillType then return end
@@ -954,13 +967,6 @@ function HookManager:installSprayerAreaHook()
                     g_SoilFertilityManager.soilSystem._lastSprayZ = spz
                 end
 
-                -- Track last custom fill type so getExternalFill hook can identify the
-                -- intended product when the tank hits empty (fillType becomes UNKNOWN).
-                local _hm = g_SoilFertilityManager.hookManager
-                if _hm and _hm.customFillTypePrices and _hm.customFillTypePrices[fillTypeIndex] then
-                    self._soilLastCustomFillType = fillTypeIndex
-                end
-
                 if isFertilizer then
                     g_SoilFertilityManager.soilSystem:onFertilizerApplied(fieldId, fillTypeIndex, effectiveLiters)
                 end
@@ -1035,14 +1041,47 @@ function HookManager:installSprayerAreaHook()
                                 local fillUnitIndex = 1
                                 local okFui, fuiVal = pcall(function() return self:getSprayerFillUnitIndex() end)
                                 if okFui and fuiVal then fillUnitIndex = fuiVal end
-                                local farmId = self:getOwnerFarmId()
-                                pcall(function()
-                                    self:addFillUnitFillLevel(farmId, fillUnitIndex, liters, fillTypeIndex, ToolType.UNDEFINED, nil)
-                                end)
+
+                                -- Directly restore the fill level in the spec table.
+                                -- self:addFillUnitFillLevel() goes through the game's network-sync
+                                -- and farm-permission pipeline, which silently rejects writes on
+                                -- AI-controlled vehicles (no active player session).
+                                -- Writing the spec field directly is safe here — we are server-side
+                                -- inside an appendedFunction that runs after the drain already happened.
+                                local spec = self.spec_fillUnit
+                                local fu = spec and spec.fillUnits and spec.fillUnits[fillUnitIndex]
+                                if fu then
+                                    -- Use the game API for capacity (spec field name varies by vehicle XML).
+                                    local cap = fu.fillLevel + liters  -- safe fallback: just undo the drain
+                                    local okCap, capVal = pcall(function() return self:getFillUnitCapacity(fillUnitIndex) end)
+                                    if okCap and capVal and capVal > 0 then cap = capVal end
+                                    fu.fillLevel = math.min(cap, fu.fillLevel + liters)
+                                    -- Raise dirty flag so HUD and network layer pick up the new value.
+                                    if spec.fillUnitsDirtyFlag then
+                                        pcall(function() self:raiseDirtyFlags(spec.fillUnitsDirtyFlag) end)
+                                    end
+                                end
+
+                                -- Resolve farmId — try every path in order of reliability for AI vehicles.
+                                -- getActiveFarm() is on Sprayer spec; ownerFarmId is a plain table field
+                                -- always present on every vehicle; getOwnerFarmId() returns 0 when no
+                                -- player session is active (i.e. always 0 for AI-only vehicles).
+                                local farmId = nil
+                                pcall(function() farmId = self:getActiveFarm() end)
+                                if not farmId or farmId <= 0 then
+                                    farmId = self.ownerFarmId
+                                end
+                                if not farmId or farmId <= 0 then
+                                    farmId = self.spec_enterable and self.spec_enterable.activeFarmId
+                                end
+                                if not farmId or farmId <= 0 then
+                                    pcall(function() farmId = self:getOwnerFarmId() end)
+                                end
                                 local cost = liters * pricePerLiter
                                 if farmId and farmId > 0 then
                                     pcall(function()
-                                        g_currentMission:addMoney(-cost, farmId, MoneyType.PURCHASE_FERTILIZER, true, true)
+                                        -- Match Hook 9 (getExternalFill) signature — no extra bool args.
+                                        g_currentMission:addMoney(-cost, farmId, MoneyType.PURCHASE_FERTILIZER)
                                     end)
                                 end
                                 SoilLogger.debug("BUY REFILL (sprayer hook): veh=%d, type=%s, liters=%.2f, cost=%.2f",

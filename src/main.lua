@@ -15,7 +15,7 @@ local modDirectory = g_currentModDirectory
 local modName = g_currentModName
 
 -- Menu icon global (resolved by XML imageFilename="g_SFIconMenu" via GuiOverlay hook below)
-g_SFIconMenu = Utils.getFilename("images/menuIcon.dds", g_currentModDirectory)
+g_SFIconMenu = Utils.getFilename("textures/ui/menuIcon.dds", g_currentModDirectory)
 
 -- Resolve g_SFIconMenu in XML imageFilename attributes (EmployeeManager/MDM pattern)
 local SF_ICON_GLOBALS = { g_SFIconMenu = true }
@@ -93,7 +93,7 @@ local function loadedMission(mission, node)
     -- createImageOverlay() (the same API used by SoilHUD.lua for its own overlays).
     -- The old handle is freed with delete() to avoid GPU resource leaks.
     if g_fillTypeManager then
-        local hudDir = modDirectory .. "hud/fillTypes/"
+        local hudDir = modDirectory .. "textures/hud/fillTypes/"
         local icons = {
             UAN32       = "hud_fill_UAN32.dds",
             UAN28       = "hud_fill_UAN28.dds",

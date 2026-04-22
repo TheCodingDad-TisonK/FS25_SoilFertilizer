@@ -27,7 +27,7 @@ SoilPDAScreen._mt = Class(SoilPDAScreen, TabbedMenuFrameElement)
 SoilPDAScreen.CLASS_NAME     = "SoilPDAScreen"
 SoilPDAScreen.MENU_PAGE_NAME = "menuSoilFertilizer"
 SoilPDAScreen.XML_FILENAME   = "xml/gui/SoilPDAScreen.xml"
-SoilPDAScreen.MENU_ICON_PATH = "images/menuIcon.dds"
+SoilPDAScreen.MENU_ICON_PATH = "textures/ui/menuIcon.dds"
 
 -- Capture mod directory at source-time (valid during loading only)
 local SF_PDA_MOD_DIR = g_currentModDirectory
