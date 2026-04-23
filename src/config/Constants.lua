@@ -478,6 +478,11 @@ SoilConstants.NETWORK = {
     FULL_SYNC_MAX_ATTEMPTS = 3,
     FULL_SYNC_RETRY_INTERVAL = 5000, -- ms
 
+    -- Chunked full-sync: fields are split into batches to avoid blocking the
+    -- main thread for large maps (issue #212 - 255-field timeout/crash).
+    FULL_SYNC_BATCH_SIZE = 32,       -- fields per packet
+    FULL_SYNC_BATCH_DELAY = 50,      -- ms between batches (one per ~3 frames)
+
     -- Network value type encoding
     VALUE_TYPE = {
         BOOLEAN = 0,

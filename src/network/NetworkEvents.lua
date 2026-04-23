@@ -201,37 +201,67 @@ function SoilRequestFullSyncEvent:writeStream(streamId, connection)
 end
 
 function SoilRequestFullSyncEvent:run(connection)
-    -- SERVER ONLY: Send full settings + field data to requesting client
+    -- SERVER ONLY: Send settings immediately, then stream field data in small
+    -- batches so the main thread is never blocked for large maps (issue #212).
     if g_server == nil or not connection then return end
+    if not g_SoilFertilityManager or not g_SoilFertilityManager.settings then return end
 
-    if g_SoilFertilityManager and g_SoilFertilityManager.settings then
-        -- Validate that soil system has initialized field data
-        local soilSystem = g_SoilFertilityManager.soilSystem
-        local fieldData = soilSystem and soilSystem.fieldData or {}
+    local soilSystem = g_SoilFertilityManager.soilSystem
+    local fieldData  = soilSystem and soilSystem.fieldData or {}
 
-        -- Count actual fields (not just empty table)
-        local fieldCount = 0
-        if fieldData then
-            for _ in pairs(fieldData) do
-                fieldCount = fieldCount + 1
-            end
-        end
+    -- Count fields
+    local fieldCount = 0
+    for _ in pairs(fieldData) do fieldCount = fieldCount + 1 end
 
-        -- If soil system is still initializing (no fields yet), log warning
-        -- Client will retry automatically via retry handler
-        if soilSystem and soilSystem.fieldsScanPending then
-            SoilLogger.warning("Server: Sync requested but field scan still pending (%d fields ready) - client will retry", fieldCount)
-        else
-            SoilLogger.info("Server: Sending full sync to client (%d fields)", fieldCount)
-        end
-
-        -- Send sync event (even if empty - client needs settings)
-        -- Empty field data is valid for new saves or dedicated servers
-        connection:sendEvent(SoilFullSyncEvent.new(
-            g_SoilFertilityManager.settings,
-            fieldData
-        ))
+    if soilSystem and soilSystem.fieldsScanPending then
+        SoilLogger.warning("Server: Sync requested but field scan still pending (%d fields ready) - client will retry", fieldCount)
+    else
+        SoilLogger.info("Server: Sending full sync to client (%d fields)", fieldCount)
     end
+
+    -- Step 1: send settings + empty fields immediately so the client
+    -- unblocks and stops the retry timer right away.
+    connection:sendEvent(SoilFullSyncEvent.new(g_SoilFertilityManager.settings, {}))
+
+    -- Step 2: nothing to batch - we're done.
+    if fieldCount == 0 then return end
+
+    -- Step 3: build a sorted id list for deterministic batching.
+    local fieldIds = {}
+    for id in pairs(fieldData) do fieldIds[#fieldIds + 1] = id end
+    table.sort(fieldIds)
+
+    local batchSize    = SoilConstants.NETWORK.FULL_SYNC_BATCH_SIZE
+    local batchDelay   = SoilConstants.NETWORK.FULL_SYNC_BATCH_DELAY
+    local totalBatches = math.ceil(#fieldIds / batchSize)
+    local batchIndex   = 1
+
+    -- Step 4: schedule each batch via a delayed callback so the engine loop
+    -- can process network I/O between batches (avoids the 3-minute hang).
+    local function sendNextBatch()
+        -- Guard: connection may have dropped between callbacks
+        if batchIndex > totalBatches then return end
+
+        local startIdx = (batchIndex - 1) * batchSize + 1
+        local endIdx   = math.min(batchIndex * batchSize, #fieldIds)
+        local batch    = {}
+        for i = startIdx, endIdx do
+            local id = fieldIds[i]
+            batch[id] = fieldData[id]
+        end
+
+        local isLast = (batchIndex == totalBatches)
+        connection:sendEvent(SoilFieldBatchSyncEvent.new(batch, isLast))
+
+        SoilLogger.info("Server: Field batch %d/%d sent (%d fields)", batchIndex, totalBatches, endIdx - startIdx + 1)
+        batchIndex = batchIndex + 1
+
+        if not isLast then
+            g_currentMission:addDelayedCallback(sendNextBatch, batchDelay)
+        end
+    end
+
+    g_currentMission:addDelayedCallback(sendNextBatch, batchDelay)
 end
 
 -- ========================================
@@ -444,42 +474,47 @@ function SoilFullSyncEvent:writeStream(streamId, connection)
 end
 
 function SoilFullSyncEvent:run(connection)
-    -- CLIENT ONLY: Receive full settings + field data from server
+    -- CLIENT ONLY: Receive settings from server.
+    -- Field data is no longer bundled here; it arrives via SoilFieldBatchSyncEvent
+    -- packets sent immediately after this one (issue #212 chunked-sync fix).
     if not g_client or not g_SoilFertilityManager then return end
 
-    SoilLogger.info("Client: Received full sync from server")
+    SoilLogger.info("Client: Received full sync header from server (settings + %d legacy fields)", self:getFieldCount())
 
     -- Apply all settings
     local settings = g_SoilFertilityManager.settings
-    settings.enabled = self.settings.enabled
-    settings.debugMode = self.settings.debugMode
-    settings.fertilitySystem = self.settings.fertilitySystem
-    settings.nutrientCycles = self.settings.nutrientCycles
-    settings.fertilizerCosts = self.settings.fertilizerCosts
-    settings.showNotifications = self.settings.showNotifications
-    settings.seasonalEffects = self.settings.seasonalEffects
-    settings.rainEffects = self.settings.rainEffects
-    settings.plowingBonus = self.settings.plowingBonus
-    settings.weedPressure = self.settings.weedPressure
-    settings.pestPressure = self.settings.pestPressure
-    settings.diseasePressure = self.settings.diseasePressure
-    settings.difficulty = self.settings.difficulty
-    settings.autoRateControl = self.settings.autoRateControl
-    settings.cropRotation = self.settings.cropRotation
+    settings.enabled          = self.settings.enabled
+    settings.debugMode        = self.settings.debugMode
+    settings.fertilitySystem  = self.settings.fertilitySystem
+    settings.nutrientCycles   = self.settings.nutrientCycles
+    settings.fertilizerCosts  = self.settings.fertilizerCosts
+    settings.showNotifications= self.settings.showNotifications
+    settings.seasonalEffects  = self.settings.seasonalEffects
+    settings.rainEffects      = self.settings.rainEffects
+    settings.plowingBonus     = self.settings.plowingBonus
+    settings.weedPressure     = self.settings.weedPressure
+    settings.pestPressure     = self.settings.pestPressure
+    settings.diseasePressure  = self.settings.diseasePressure
+    settings.difficulty       = self.settings.difficulty
+    settings.autoRateControl  = self.settings.autoRateControl
+    settings.cropRotation     = self.settings.cropRotation
 
-    -- Apply field data (server-authoritative)
-    if g_SoilFertilityManager.soilSystem then
+    -- Legacy path: if the server sent field data inline (old server version),
+    -- apply it directly so we stay backwards-compatible.
+    local legacyCount = self:getFieldCount()
+    if legacyCount > 0 and g_SoilFertilityManager.soilSystem then
         g_SoilFertilityManager.soilSystem.fieldData = self.fieldData
-        SoilLogger.info("Client: Synced %d fields from server", self:getFieldCount())
+        SoilLogger.info("Client: Applied %d legacy inline fields", legacyCount)
     end
+
+    -- Mark sync as received (stops retry timer).
+    -- Field batches are additive; the retry guard is satisfied by the header.
+    SoilNetworkEvents_OnFullSyncReceived()
 
     -- Refresh UI if open
     if g_SoilFertilityManager.settingsUI then
         g_SoilFertilityManager.settingsUI:refreshUI()
     end
-
-    -- Mark sync as received (stops retry timer)
-    SoilNetworkEvents_OnFullSyncReceived()
 
     local diffNames = { "Simple", "Realistic", "Hardcore" }
     local diffName  = diffNames[settings.difficulty] or "Unknown"
@@ -493,6 +528,170 @@ function SoilFullSyncEvent:getFieldCount()
         count = count + 1
     end
     return count
+end
+
+-- ========================================
+-- FIELD BATCH SYNC EVENT (Server -> Client)
+-- ========================================
+-- Part of the chunked full-sync flow introduced in issue #212.
+-- The server sends one of these per batch of fields after the initial
+-- SoilFullSyncEvent (which carries settings + signals sync start).
+-- isLast=true on the final batch so the client can finalise.
+SoilFieldBatchSyncEvent = {}
+SoilFieldBatchSyncEvent_mt = Class(SoilFieldBatchSyncEvent, Event)
+
+InitEventClass(SoilFieldBatchSyncEvent, "SoilFieldBatchSyncEvent")
+
+function SoilFieldBatchSyncEvent.emptyNew()
+    return Event.new(SoilFieldBatchSyncEvent_mt)
+end
+
+function SoilFieldBatchSyncEvent.new(batchFields, isLast)
+    local self = SoilFieldBatchSyncEvent.emptyNew()
+    self.batchFields = batchFields or {}
+    self.isLast      = isLast or false
+    return self
+end
+
+function SoilFieldBatchSyncEvent:writeStream(streamId, connection)
+    -- Count fields in this batch
+    local count = 0
+    for _ in pairs(self.batchFields) do count = count + 1 end
+
+    streamWriteInt32(streamId, count)
+    streamWriteBool(streamId, self.isLast)
+
+    for fieldId, field in pairs(self.batchFields) do
+        streamWriteInt32(streamId,   fieldId)
+        streamWriteFloat32(streamId, field.fieldArea          or 1.0)
+        streamWriteFloat32(streamId, field.nitrogen           or SoilConstants.FIELD_DEFAULTS.nitrogen)
+        streamWriteFloat32(streamId, field.phosphorus         or SoilConstants.FIELD_DEFAULTS.phosphorus)
+        streamWriteFloat32(streamId, field.potassium          or SoilConstants.FIELD_DEFAULTS.potassium)
+        streamWriteFloat32(streamId, field.organicMatter      or SoilConstants.FIELD_DEFAULTS.organicMatter)
+        streamWriteFloat32(streamId, field.pH                 or SoilConstants.FIELD_DEFAULTS.pH)
+        streamWriteString(streamId,  field.lastCrop           or "")
+        streamWriteString(streamId,  field.lastCrop2          or "")
+        streamWriteString(streamId,  field.lastCrop3          or "")
+        streamWriteInt32(streamId,   field.rotationBonusDaysLeft or 0)
+        streamWriteInt32(streamId,   field.lastHarvest        or 0)
+        streamWriteFloat32(streamId, field.fertilizerApplied  or 0)
+        streamWriteFloat32(streamId, field.weedPressure       or 0)
+        streamWriteInt32(streamId,   field.herbicideDaysLeft  or 0)
+        streamWriteFloat32(streamId, field.pestPressure       or 0)
+        streamWriteInt32(streamId,   field.insecticideDaysLeft or 0)
+        streamWriteFloat32(streamId, field.diseasePressure    or 0)
+        streamWriteInt32(streamId,   field.fungicideDaysLeft  or 0)
+        streamWriteInt32(streamId,   field.dryDayCount        or 0)
+        streamWriteInt32(streamId,   field.burnDaysLeft       or 0)
+
+        -- Nutrient buffer (V1.7)
+        local buffer = field.nutrientBuffer or {}
+        local bCount = 0
+        for _ in pairs(buffer) do bCount = bCount + 1 end
+        streamWriteInt32(streamId, bCount)
+        for ftIdx, amount in pairs(buffer) do
+            streamWriteInt32(streamId,   ftIdx)
+            streamWriteFloat32(streamId, amount)
+        end
+    end
+end
+
+function SoilFieldBatchSyncEvent:readStream(streamId, connection)
+    local count  = streamReadInt32(streamId)
+    self.isLast  = streamReadBool(streamId)
+    self.batchFields = {}
+
+    for _ = 1, count do
+        local fieldId        = streamReadInt32(streamId)
+        local fieldArea      = streamReadFloat32(streamId)
+        local nitrogen       = streamReadFloat32(streamId)
+        local phosphorus     = streamReadFloat32(streamId)
+        local potassium      = streamReadFloat32(streamId)
+        local organicMatter  = streamReadFloat32(streamId)
+        local pH             = streamReadFloat32(streamId)
+        local lastCrop       = streamReadString(streamId)
+        local lastCrop2      = streamReadString(streamId)
+        local lastCrop3      = streamReadString(streamId)
+        local rotBonus       = streamReadInt32(streamId)
+        local lastHarvest    = streamReadInt32(streamId)
+        local fertApplied    = streamReadFloat32(streamId)
+        local weedP          = streamReadFloat32(streamId)
+        local herbDays       = streamReadInt32(streamId)
+        local pestP          = streamReadFloat32(streamId)
+        local pestDays       = streamReadInt32(streamId)
+        local diseaseP       = streamReadFloat32(streamId)
+        local diseaseDays    = streamReadInt32(streamId)
+        local dryDays        = streamReadInt32(streamId)
+        local burnDays       = streamReadInt32(streamId)
+
+        local buffer = {}
+        local bCount = streamReadInt32(streamId)
+        for _ = 1, bCount do
+            local ftIdx  = streamReadInt32(streamId)
+            local amount = streamReadFloat32(streamId)
+            buffer[ftIdx] = amount
+        end
+
+        if type(fieldId) == "number" and fieldId >= 0 then
+            self.batchFields[fieldId] = {
+                fieldArea             = math.max(0.01, fieldArea or 1.0),
+                nitrogen              = math.max(SoilConstants.NUTRIENT_LIMITS.MIN, math.min(SoilConstants.NUTRIENT_LIMITS.MAX, nitrogen)),
+                phosphorus            = math.max(SoilConstants.NUTRIENT_LIMITS.MIN, math.min(SoilConstants.NUTRIENT_LIMITS.MAX, phosphorus)),
+                potassium             = math.max(SoilConstants.NUTRIENT_LIMITS.MIN, math.min(SoilConstants.NUTRIENT_LIMITS.MAX, potassium)),
+                organicMatter         = math.max(SoilConstants.NUTRIENT_LIMITS.MIN, math.min(SoilConstants.NUTRIENT_LIMITS.ORGANIC_MATTER_MAX, organicMatter)),
+                pH                    = math.max(SoilConstants.NUTRIENT_LIMITS.PH_MIN, math.min(SoilConstants.NUTRIENT_LIMITS.PH_MAX, pH)),
+                lastCrop              = lastCrop ~= "" and lastCrop or nil,
+                lastCrop2             = lastCrop2 ~= "" and lastCrop2 or nil,
+                lastCrop3             = lastCrop3 ~= "" and lastCrop3 or nil,
+                rotationBonusDaysLeft = math.max(0, rotBonus),
+                lastHarvest           = math.max(0, lastHarvest),
+                fertilizerApplied     = math.max(0, fertApplied),
+                weedPressure          = math.max(0, math.min(100, weedP)),
+                herbicideDaysLeft     = math.max(0, herbDays),
+                pestPressure          = math.max(0, math.min(100, pestP)),
+                insecticideDaysLeft   = math.max(0, pestDays),
+                diseasePressure       = math.max(0, math.min(100, diseaseP)),
+                fungicideDaysLeft     = math.max(0, diseaseDays),
+                dryDayCount           = math.max(0, dryDays),
+                burnDaysLeft          = math.max(0, burnDays),
+                nutrientBuffer        = buffer,
+                initialized           = true,
+            }
+        end
+    end
+
+    self:run(connection)
+end
+
+function SoilFieldBatchSyncEvent:run(connection)
+    -- CLIENT ONLY: merge this batch into the local field table
+    if g_client == nil then return end
+    if not g_SoilFertilityManager or not g_SoilFertilityManager.soilSystem then return end
+
+    local soilSystem = g_SoilFertilityManager.soilSystem
+    for fieldId, field in pairs(self.batchFields) do
+        soilSystem.fieldData[fieldId] = field
+    end
+
+    SoilLogger.info("Client: Received field batch (%d fields, last=%s)", self:getBatchCount(), tostring(self.isLast))
+
+    if self.isLast then
+        -- Count total now that all batches are in
+        local total = 0
+        for _ in pairs(soilSystem.fieldData) do total = total + 1 end
+        SoilLogger.info("Client: Full field sync complete (%d total fields)", total)
+
+        -- Refresh any open UI panels
+        if g_SoilFertilityManager.settingsUI then
+            g_SoilFertilityManager.settingsUI:refreshUI()
+        end
+    end
+end
+
+function SoilFieldBatchSyncEvent:getBatchCount()
+    local n = 0
+    for _ in pairs(self.batchFields) do n = n + 1 end
+    return n
 end
 
 -- ========================================
