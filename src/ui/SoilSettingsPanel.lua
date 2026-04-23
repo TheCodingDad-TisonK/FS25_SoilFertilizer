@@ -249,6 +249,10 @@ function SoilSettingsPanel.new(settings)
     self.page         = PAGE_LANDING
     self.activeCatIdx = nil
     self.adminMsg     = nil   -- last action result shown in admin page
+    self.popupVisible = false -- whether the output popup dialog is shown
+    self.popupMsg     = nil   -- full output text shown in the popup
+    self.popupLines   = nil   -- split lines of popupMsg
+    self.popupScroll  = 0     -- first visible line index (0-based)
     self.mouseX       = 0
     self.mouseY       = 0
     self.initialized  = false
@@ -279,6 +283,10 @@ function SoilSettingsPanel:open()
     self.page         = PAGE_LANDING
     self.activeCatIdx = nil
     self.adminMsg     = nil
+    self.popupVisible = false
+    self.popupMsg     = nil
+    self.popupLines   = nil
+    self.popupScroll  = 0
     -- Save camera rotation so update() can freeze it every frame (SoilHUD edit-mode pattern)
     self.savedCamRotX, self.savedCamRotY, self.savedCamRotZ = nil, nil, nil
     if getCamera and getRotation then
@@ -431,14 +439,23 @@ function SoilSettingsPanel:draw()
     -- Info bar (bottom)
     self:drawInfoBar()
 
-    -- Page content
-    if self.page == PAGE_LANDING then
-        self:drawLandingPage()
-    elseif self.page == PAGE_CATEGORY then
-        self:drawCategoryPage()
-    elseif self.page == PAGE_ADMIN then
-        self:drawAdminPage()
+    -- Page content (skipped when popup is open — popup draws its own dim overlay)
+    if not self.popupVisible then
+        if self.page == PAGE_LANDING then
+            self:drawLandingPage()
+        elseif self.page == PAGE_CATEGORY then
+            self:drawCategoryPage()
+        elseif self.page == PAGE_ADMIN then
+            self:drawAdminPage()
+        end
     end
+
+    -- Popup dialog always drawn on top.
+    -- Reset click zones first so page buttons can't be clicked through the popup.
+    if self.popupVisible then
+        self._clickRects = {}
+    end
+    self:drawPopupDialog()
 end
 
 -- ── Title bar ─────────────────────────────────────────────
@@ -608,7 +625,7 @@ function SoilSettingsPanel:drawCategoryCard(x, y, w, h, cat, idx)
         hovered and cat.accent or C.off_bg,
         hovered and 0.20 or 1.0)
     self:drawText(btnX + btnW * 0.5, btnY + btnH * 0.18, TS_SMALL,
-        hovered and "Open  →" or "Configure  →",
+        hovered and "Open >>" or "Configure >>",
         hovered and cat.accent or C.hint,
         RenderText.ALIGN_CENTER, false)
 
@@ -681,6 +698,17 @@ end
 
 local function adminShowMsg(self, msg)
     self.adminMsg = msg
+    -- Show full output in the popup dialog
+    self.popupMsg  = msg or ""
+    -- Split into lines for rendering
+    local lines = {}
+    for line in (self.popupMsg .. "\n"):gmatch("([^\n]*)\n") do
+        table.insert(lines, line)
+    end
+    self.popupLines  = lines
+    self.popupScroll = 0
+    self.popupVisible = true
+    -- Also show a short blinking warning as before
     if g_currentMission and g_currentMission.hud and
        g_currentMission.hud.showBlinkingWarning then
         g_currentMission.hud:showBlinkingWarning(msg, 5000)
@@ -747,7 +775,7 @@ function SoilSettingsPanel:drawAdminPage()
                 self:drawRect(btnX, btnY, btnW, btnH, bgCol)
                 self:drawRect(btnX, btnY, 0.002, btnH, acCol)
                 self:drawText(btnX + btnW * 0.5, btnY + btnH * 0.20, TS_TINY,
-                    isDanger and "⚠ " .. item.label or "▶  " .. item.label,
+                    isDanger and "!! " .. item.label or ">  " .. item.label,
                     hov and {1,1,1,1} or {0.75,0.75,0.75,1},
                     RenderText.ALIGN_CENTER, isDanger)
                 self:registerClick("admin_action_" .. item.id, btnX, btnY, btnW, btnH,
@@ -772,6 +800,135 @@ function SoilSettingsPanel:drawAdminPage()
     self:drawRect(CX, CY_TOP, CW, 0.001, C.divider)
 end
 
+-- ── Admin Output Popup Dialog ──────────────────────────────
+function SoilSettingsPanel:drawPopupDialog()
+    if not self.popupVisible then return end
+
+    -- Popup dimensions
+    local DW  = 0.54
+    local DH  = 0.52
+    local DX  = (1 - DW) / 2
+    local DY  = (1 - DH) / 2
+    local DPAD = 0.016
+
+    -- Line rendering config
+    local LINE_H   = TS_TINY + 0.004
+    local MAX_LINES = math.floor((DH - 0.095) / LINE_H)
+
+    local lines = self.popupLines or {}
+    local total = #lines
+    -- Clamp scroll
+    local maxScroll = math.max(0, total - MAX_LINES)
+    if self.popupScroll > maxScroll then self.popupScroll = maxScroll end
+
+    -- Dimmed overlay behind popup
+    self:drawRect(0, 0, 1, 1, {0, 0, 0, 0.55})
+
+    -- Shadow
+    self:drawRect(DX + 0.005, DY - 0.005, DW, DH, C.shadow, 0.65)
+
+    -- Background
+    self:drawRect(DX, DY, DW, DH, {0.06, 0.07, 0.11, 0.98})
+
+    -- Border
+    local bw = 0.0015
+    self:drawRect(DX,           DY,          DW, bw, ADMIN_ACCENT, 0.80)
+    self:drawRect(DX,           DY + DH - bw, DW, bw, ADMIN_ACCENT, 0.80)
+    self:drawRect(DX,           DY,          bw, DH, ADMIN_ACCENT, 0.80)
+    self:drawRect(DX + DW - bw, DY,          bw, DH, ADMIN_ACCENT, 0.80)
+
+    -- Title bar
+    local TH = 0.036
+    local TY = DY + DH - TH
+    self:drawRect(DX, TY, DW, TH, {0.08, 0.09, 0.14, 1.0})
+    self:drawRect(DX, TY, 0.004, TH, ADMIN_ACCENT)
+    self:drawText(DX + DPAD, TY + TH * 0.28, TS_SMALL,
+        "ADMIN COMMAND OUTPUT", {ADMIN_ACCENT[1], ADMIN_ACCENT[2], ADMIN_ACCENT[3], 1.0},
+        RenderText.ALIGN_LEFT, true)
+
+    -- Close [X] button in title bar
+    local cbW = 0.034
+    local cbH = TH * 0.62
+    local cbX = DX + DW - cbW - 0.010
+    local cbY = TY + (TH - cbH) * 0.5
+    local cbHov = self:hitTest(cbX, cbY, cbW, cbH, self.mouseX, self.mouseY)
+    self:drawRect(cbX, cbY, cbW, cbH, cbHov and C.close_hover or {0.18, 0.10, 0.10, 0.80})
+    self:drawText(cbX + cbW * 0.5, cbY + cbH * 0.18, TS_SMALL, "[X]",
+        cbHov and {1,1,1,1} or {0.70,0.35,0.35,1}, RenderText.ALIGN_CENTER, true)
+    self:registerClick("popup_close", cbX, cbY, cbW, cbH)
+
+    -- Content area
+    local contentY_top = TY - 0.006
+    local contentY_bot = DY + 0.044   -- room for close button at bottom
+    local textX = DX + DPAD
+    local curY  = contentY_top
+
+    for i = self.popupScroll + 1, math.min(self.popupScroll + MAX_LINES, total) do
+        local line = lines[i]
+        curY = curY - LINE_H
+        if curY < contentY_bot then break end
+
+        -- Colour-code header/separator lines
+        local col = C.white
+        if line:match("^===") or line:match("^---") then
+            col = {ADMIN_ACCENT[1], ADMIN_ACCENT[2], ADMIN_ACCENT[3], 0.90}
+        elseif line:match("^  ") then
+            col = {0.75, 0.85, 0.75, 1.0}
+        end
+        self:drawText(textX, curY + LINE_H * 0.15, TS_TINY, line, col, RenderText.ALIGN_LEFT, false)
+    end
+
+    -- Scroll buttons (right side, only when content overflows)
+    if total > MAX_LINES then
+        local sbW = 0.032
+        local sbH = 0.034
+        local sbX = DX + DW - sbW - 0.006
+        local upY  = contentY_top - sbH - 0.004
+        local dnY  = upY - sbH - 0.004
+
+        local upHov = self:hitTest(sbX, upY, sbW, sbH, self.mouseX, self.mouseY)
+        local dnHov = self:hitTest(sbX, dnY, sbW, sbH, self.mouseX, self.mouseY)
+        local canUp = self.popupScroll > 0
+        local canDn = self.popupScroll < maxScroll
+
+        self:drawRect(sbX, upY, sbW, sbH,
+            upHov and canUp and {0.25, 0.50, 0.30, 0.95} or {0.10, 0.15, 0.12, 0.80})
+        self:drawText(sbX + sbW * 0.5, upY + sbH * 0.18, TS_SMALL,
+            "^", canUp and {1,1,1,1} or {0.35,0.35,0.35,1}, RenderText.ALIGN_CENTER, true)
+
+        self:drawRect(sbX, dnY, sbW, sbH,
+            dnHov and canDn and {0.25, 0.50, 0.30, 0.95} or {0.10, 0.15, 0.12, 0.80})
+        self:drawText(sbX + sbW * 0.5, dnY + sbH * 0.18, TS_SMALL,
+            "v", canDn and {1,1,1,1} or {0.35,0.35,0.35,1}, RenderText.ALIGN_CENTER, true)
+
+        self:registerClick("popup_scroll_up", sbX, upY, sbW, sbH)
+        self:registerClick("popup_scroll_dn", sbX, dnY, sbW, sbH)
+
+        local scrollInfo = string.format("Lines %d-%d of %d",
+            self.popupScroll + 1,
+            math.min(self.popupScroll + MAX_LINES, total),
+            total)
+        self:drawText(DX + DPAD, DY + 0.028, TS_TINY, scrollInfo,
+            {0.45, 0.55, 0.45, 0.80}, RenderText.ALIGN_LEFT, false)
+    end
+
+    -- Bottom "Close" button
+    local btnW = 0.100
+    local btnH = 0.028
+    local btnX = DX + (DW - btnW) * 0.5
+    local btnY = DY + 0.008
+    local btnHov = self:hitTest(btnX, btnY, btnW, btnH, self.mouseX, self.mouseY)
+    self:drawRect(btnX, btnY, btnW, btnH,
+        btnHov and {0.65, 0.10, 0.10, 0.95} or {0.20, 0.06, 0.06, 0.90})
+    self:drawRect(btnX, btnY, 0.002, btnH, ADMIN_ACCENT)
+    self:drawText(btnX + btnW * 0.5, btnY + btnH * 0.20, TS_SMALL,
+        "[X] Close",
+        btnHov and {1,1,1,1} or {0.80,0.75,0.75,1},
+        RenderText.ALIGN_CENTER, true)
+    self:registerClick("popup_close", btnX, btnY, btnW, btnH)
+end
+
+-- ── Setting row ────────────────────────────────────────────
 function SoilSettingsPanel:drawSettingRow(x, y, w, settingId, rowIdx, isAdmin)
     local def = SettingsSchema.byId[settingId]
     if not def then return end
@@ -908,8 +1065,8 @@ function SoilSettingsPanel:onMouseEvent(posX, posY, isDown, isUp, button, eventU
         end
     end
 
-    -- Click outside panel = close
-    if not self:hitTest(PX, PY, PW, PH, posX, posY) then
+    -- Click outside panel = close (but not when popup is active)
+    if not self.popupVisible and not self:hitTest(PX, PY, PW, PH, posX, posY) then
         self:close()
         return true
     end
@@ -955,6 +1112,27 @@ function SoilSettingsPanel:handleClick(id, data)
             local nxt = cur + 1
             if nxt > #data.opts then nxt = 1 end
             self:requestChange(data.id, nxt)
+        end
+
+    elseif id == "popup_close" then
+        self.popupVisible = false
+        self.popupMsg     = nil
+        self.popupLines   = nil
+        self.popupScroll  = 0
+
+    elseif id == "popup_scroll_up" then
+        if self.popupScroll > 0 then
+            self.popupScroll = self.popupScroll - 1
+        end
+
+    elseif id == "popup_scroll_dn" then
+        local total = self.popupLines and #self.popupLines or 0
+        local DH = 0.52
+        local LINE_H = TS_TINY + 0.004
+        local MAX_LINES = math.floor((DH - 0.095) / LINE_H)
+        local maxScroll = math.max(0, total - MAX_LINES)
+        if self.popupScroll < maxScroll then
+            self.popupScroll = self.popupScroll + 1
         end
 
     elseif id == "open_admin" then
