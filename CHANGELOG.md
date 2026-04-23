@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.9.9.0]  2026-04-23
+
+### Fixed
+- **Mod Icon** has been updated/changed
+- **Settings panel** its ADMIN page has been improved. Ouput will be shown in a popup, instead of just the console
+
+---
+
 ## [1.9.8.0] - 2026-04-21
 
 ### Fixed

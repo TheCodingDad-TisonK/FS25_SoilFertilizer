@@ -318,8 +318,32 @@ end
 
 function SoilSettingsGUI:consoleCommandListFields()
     if g_SoilFertilityManager and g_SoilFertilityManager.soilSystem then
-        g_SoilFertilityManager.soilSystem:listAllFields()
-        return "Field list displayed in console"
+        local sys    = g_SoilFertilityManager.soilSystem
+        local lines  = {"=== Tracked Field Soil Data ==="}
+
+        local sorted = {}
+        for fieldId, _ in pairs(sys.fieldData) do
+            table.insert(sorted, fieldId)
+        end
+        table.sort(sorted)
+
+        if #sorted == 0 then
+            table.insert(lines, "  No fields tracked yet.")
+        else
+            for _, fieldId in ipairs(sorted) do
+                local f = sys.fieldData[fieldId]
+                table.insert(lines, string.format(
+                    "  Field %d:  N=%.1f  P=%.1f  K=%.1f  pH=%.1f  OM=%.2f%%",
+                    fieldId, f.nitrogen, f.phosphorus, f.potassium, f.pH, f.organicMatter))
+            end
+        end
+
+        table.insert(lines, string.format("Total: %d field(s)", #sorted))
+        table.insert(lines, "================================")
+
+        local result = table.concat(lines, "\n")
+        print(result)
+        return result
     end
     return "Error: Soil Mod not initialized"
 end
