@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.9.9.1]  2026-04-23
+
+### Fixed
+- **Dedicated server join freeze/crash on large maps (255+ fields)**: full-sync no longer sends all field data in a single blocking packet. Fields are now streamed to the joining client in batches of 32 via SoilFieldBatchSyncEvent, spread across multiple frames with a 50 ms gap between batches. The settings handshake is sent immediately so the client retry timer is cancelled right away.
+
+
+
+---
+
 ## [1.9.9.0]  2026-04-23
 
 ### Fixed
