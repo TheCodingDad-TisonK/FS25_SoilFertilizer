@@ -119,10 +119,6 @@ function HookManager:installAll(soilSystem)
     local weedControlOk = self:installWeederHook()
     if weedControlOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
-    -- Sowing / planting: clear stale lastCrop so HUD shows live crop (fix #123)
-    local sowingOk = self:installSowingHook()
-    if sowingOk then successCount = successCount + 1 else failCount = failCount + 1 end
-
     -- Patch vanilla fill units to accept custom fertilizer types
     local fillUnitOk = self:installFillUnitHook()
     if fillUnitOk then successCount = successCount + 1 else failCount = failCount + 1 end

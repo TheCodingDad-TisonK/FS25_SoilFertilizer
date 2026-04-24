@@ -281,19 +281,14 @@ function SoilFertilitySystem:onFieldOwnershipChanged(fieldId, farmlandId, farmId
 end
 
 --- Hook delegate: called by HookManager when sowing/planting occurs on a field.
---- Clears the stale lastCrop so the HUD falls through to live FieldState detection
---- instead of showing the crop from the previous harvest (fix for issue #123).
+--- Called when a field is sown. Reserved for future sowing-time logic.
+--- NOTE: We previously cleared lastCrop here to force live HUD detection (#123),
+--- but that caused duplicate crop entries in history when the same crop is replanted
+--- (especially visible with FS25_CropRotation installed — issue #204).
+--- Live FieldState detection in getFieldInfo() works regardless of lastCrop, so
+--- the clearing was unnecessary and harmful to rotation history accuracy.
 ---@param fieldId number The field being sown
 function SoilFertilitySystem:onSowing(fieldId)
-    if not fieldId or fieldId <= 0 then return end
-    local field = self:getOrCreateField(fieldId, true)
-    if not field then return end
-    -- Clearing lastCrop here is safe: getFieldInfo() will immediately pick up the
-    -- live fruitTypeIndex from FieldState:update() once the crop is in the ground.
-    -- If FieldState somehow returns UNKNOWN in the first tick, we get "Fallow"
-    -- momentarily (correct — seeds just went in, nothing is growing yet).
-    field.lastCrop = nil
-    SoilLogger.debug("Sowing on field %d: cleared lastCrop for fresh HUD detection", fieldId)
 end
 
 --- Hook delegate: called by HookManager when plowing occurs
