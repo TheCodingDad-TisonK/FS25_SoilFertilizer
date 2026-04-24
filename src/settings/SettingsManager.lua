@@ -88,7 +88,10 @@ end
 
 function SettingsManager:saveLocalSettings(settingsObject)
     local path = self:getLocalSettingsPath()
-    if not path then return false end
+    if not path then
+        SoilLogger.warning("saveLocalSettings: path unavailable (dedi server first boot, no savegame written yet)")
+        return false
+    end
 
     local xml = XMLFile.create("sf_LocalConfig", path, self.XMLTAG)
     if not xml then return false end
