@@ -94,12 +94,12 @@ function SoilSettingChangeEvent:run(connection)
             end
         end
 
-        -- Broadcast to all clients
+        -- Broadcast to ALL clients including the original sender.
+        -- On dedicated servers the admin is a client — excluding them (old behaviour)
+        -- meant their own panel never reflected the confirmed value (issue #208).
         if g_server then
             g_server:broadcastEvent(
-                SoilSettingSyncEvent.new(self.settingName, self.settingValue),
-                nil,  -- send to all
-                connection  -- except sender
+                SoilSettingSyncEvent.new(self.settingName, self.settingValue)
             )
         end
     end
