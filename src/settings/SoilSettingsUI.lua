@@ -17,6 +17,10 @@ local SoilSettingsUI_mt = Class(SoilSettingsUI)
 -- Capture mod name at load time — g_currentModName is only valid during loading.
 local SF_MOD_NAME = g_currentModName
 
+-- The 3 settings injected into the vanilla settings page (Shift+Esc).
+-- Everything else lives in the custom SoilSettingsPanel (Shift+O).
+local VANILLA_SETTINGS = { "enabled", "showNotifications", "debugMode" }
+
 -- Resolve a translation key using the mod-scoped i18n instance.
 -- g_i18n is the base-game global and does not know about mod keys.
 local function tr(key, fallback)
@@ -109,7 +113,7 @@ function SoilSettingsUI:refreshUI()
     local frame = inGameMenu.pageSettings
     if not frame.soilFertilizer_initDone then return end
 
-    for _, id in ipairs({ "enabled", "showNotifications", "debugMode" }) do
+    for _, id in ipairs(VANILLA_SETTINGS) do
         local def = SettingsSchema.byId[id]
         if def then
             local element = frame["soilFertilizer_" .. def.uiId]
@@ -126,7 +130,7 @@ function SoilSettingsUI:updateAdminState(frame)
     if not frame.soilFertilizer_initDone then return end
     local isAdmin = self:isPlayerAdmin()
 
-    for _, id in ipairs({ "enabled", "showNotifications", "debugMode" }) do
+    for _, id in ipairs(VANILLA_SETTINGS) do
         local def = SettingsSchema.byId[id]
         if def then
             local element = frame["soilFertilizer_" .. def.uiId]
@@ -139,10 +143,6 @@ function SoilSettingsUI:updateAdminState(frame)
         end
     end
 end
-
--- The 3 settings we keep in the vanilla settings page.
--- Everything else lives in the custom SoilSettingsPanel (SHIFT+O).
-local VANILLA_SETTINGS = { "enabled", "showNotifications", "debugMode" }
 
 --- Called when InGameMenuSettingsFrame opens.
 --- Only injects the 3 core settings kept in the vanilla page.
@@ -203,7 +203,7 @@ end
 function SoilSettingsUI:updateGameSettings(frame)
     if not frame.soilFertilizer_initDone then return end
 
-    for _, id in ipairs({ "enabled", "showNotifications", "debugMode" }) do
+    for _, id in ipairs(VANILLA_SETTINGS) do
         local def = SettingsSchema.byId[id]
         if def then
             local element = frame["soilFertilizer_" .. def.uiId]
@@ -217,8 +217,8 @@ function SoilSettingsUI:updateGameSettings(frame)
     end
 end
 
--- Callbacks for the 3 vanilla settings only
-for _, id in ipairs({ "enabled", "showNotifications", "debugMode" }) do
+-- Callbacks for the vanilla settings only
+for _, id in ipairs(VANILLA_SETTINGS) do
     local def = SettingsSchema.byId[id]
     if def then
         SoilSettingsUI["on_" .. def.id .. "_Changed"] = function(self, state)

@@ -318,22 +318,16 @@ end
 function SoilFullSyncEvent:readStream(streamId, connection)
     self.settings = {}
 
-    -- Read all settings
-    self.settings.enabled = streamReadBool(streamId)
-    self.settings.debugMode = streamReadBool(streamId)
-    self.settings.fertilitySystem = streamReadBool(streamId)
-    self.settings.nutrientCycles = streamReadBool(streamId)
-    self.settings.fertilizerCosts = streamReadBool(streamId)
-    self.settings.showNotifications = streamReadBool(streamId)
-    self.settings.seasonalEffects = streamReadBool(streamId)
-    self.settings.rainEffects = streamReadBool(streamId)
-    self.settings.plowingBonus = streamReadBool(streamId)
-    self.settings.weedPressure = streamReadBool(streamId)
-    self.settings.pestPressure = streamReadBool(streamId)
-    self.settings.diseasePressure = streamReadBool(streamId)
-    self.settings.difficulty = streamReadInt32(streamId)
-    self.settings.autoRateControl = streamReadBool(streamId)
-    self.settings.cropRotation = streamReadBool(streamId)
+    -- Read all non-local settings in schema order (matches writeStream iteration)
+    for _, def in ipairs(SettingsSchema.definitions) do
+        if not def.localOnly then
+            if def.type == "boolean" then
+                self.settings[def.id] = streamReadBool(streamId)
+            elseif def.type == "number" then
+                self.settings[def.id] = streamReadInt32(streamId)
+            end
+        end
+    end
 
     -- Read field data
     self.fieldData = {}
@@ -446,22 +440,16 @@ function SoilFullSyncEvent:readStream(streamId, connection)
 end
 
 function SoilFullSyncEvent:writeStream(streamId, connection)
-    -- Write all settings
-    streamWriteBool(streamId, self.settings.enabled)
-    streamWriteBool(streamId, self.settings.debugMode)
-    streamWriteBool(streamId, self.settings.fertilitySystem)
-    streamWriteBool(streamId, self.settings.nutrientCycles)
-    streamWriteBool(streamId, self.settings.fertilizerCosts)
-    streamWriteBool(streamId, self.settings.showNotifications)
-    streamWriteBool(streamId, self.settings.seasonalEffects)
-    streamWriteBool(streamId, self.settings.rainEffects)
-    streamWriteBool(streamId, self.settings.plowingBonus)
-    streamWriteBool(streamId, self.settings.weedPressure == true)
-    streamWriteBool(streamId, self.settings.pestPressure == true)
-    streamWriteBool(streamId, self.settings.diseasePressure == true)
-    streamWriteInt32(streamId, self.settings.difficulty)
-    streamWriteBool(streamId, self.settings.autoRateControl == true)
-    streamWriteBool(streamId, self.settings.cropRotation == true)
+    -- Write all non-local settings in schema order (matches readStream iteration)
+    for _, def in ipairs(SettingsSchema.definitions) do
+        if not def.localOnly then
+            if def.type == "boolean" then
+                streamWriteBool(streamId, self.settings[def.id] == true)
+            elseif def.type == "number" then
+                streamWriteInt32(streamId, self.settings[def.id] or def.default)
+            end
+        end
+    end
 
     -- Write field data
     local fieldCount = 0
@@ -513,23 +501,13 @@ function SoilFullSyncEvent:run(connection)
 
     SoilLogger.info("Client: Received full sync header from server (settings + %d legacy fields)", self:getFieldCount())
 
-    -- Apply all settings
+    -- Apply all non-local settings from schema (auto-covers any new settings)
     local settings = g_SoilFertilityManager.settings
-    settings.enabled          = self.settings.enabled
-    settings.debugMode        = self.settings.debugMode
-    settings.fertilitySystem  = self.settings.fertilitySystem
-    settings.nutrientCycles   = self.settings.nutrientCycles
-    settings.fertilizerCosts  = self.settings.fertilizerCosts
-    settings.showNotifications= self.settings.showNotifications
-    settings.seasonalEffects  = self.settings.seasonalEffects
-    settings.rainEffects      = self.settings.rainEffects
-    settings.plowingBonus     = self.settings.plowingBonus
-    settings.weedPressure     = self.settings.weedPressure
-    settings.pestPressure     = self.settings.pestPressure
-    settings.diseasePressure  = self.settings.diseasePressure
-    settings.difficulty       = self.settings.difficulty
-    settings.autoRateControl  = self.settings.autoRateControl
-    settings.cropRotation     = self.settings.cropRotation
+    for _, def in ipairs(SettingsSchema.definitions) do
+        if not def.localOnly then
+            settings[def.id] = self.settings[def.id]
+        end
+    end
 
     -- Legacy path: if the server sent field data inline (old server version),
     -- apply it directly so we stay backwards-compatible.
