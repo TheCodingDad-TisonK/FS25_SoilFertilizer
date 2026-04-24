@@ -234,34 +234,66 @@ function SoilRequestFullSyncEvent:run(connection)
     local batchSize    = SoilConstants.NETWORK.FULL_SYNC_BATCH_SIZE
     local batchDelay   = SoilConstants.NETWORK.FULL_SYNC_BATCH_DELAY
     local totalBatches = math.ceil(#fieldIds / batchSize)
-    local batchIndex   = 1
 
-    -- Step 4: schedule each batch via a delayed callback so the engine loop
-    -- can process network I/O between batches (avoids the 3-minute hang).
-    local function sendNextBatch()
-        -- Guard: connection may have dropped between callbacks
-        if batchIndex > totalBatches then return end
+    -- Step 4: Use addUpdateable to drip-feed batches one per update tick,
+    -- throttled by batchDelay (ms). g_currentMission:addDelayedCallback() does
+    -- NOT exist in FS25 — addUpdateable is the correct deferred-work API.
+    local batchDispatcher = {
+        batchIndex  = 1,
+        timer       = 0,
+        batchSize   = batchSize,
+        batchDelay  = batchDelay,
+        totalBatches = totalBatches,
+        fieldIds    = fieldIds,
+        fieldData   = fieldData,
+        connection  = connection,
 
-        local startIdx = (batchIndex - 1) * batchSize + 1
-        local endIdx   = math.min(batchIndex * batchSize, #fieldIds)
-        local batch    = {}
-        for i = startIdx, endIdx do
-            local id = fieldIds[i]
-            batch[id] = fieldData[id]
+        update = function(self, dt)
+            -- Guard: connection may have dropped or all batches sent
+            if not self.connection or self.batchIndex > self.totalBatches then
+                g_currentMission:removeUpdateable(self)
+                return
+            end
+
+            -- Throttle: wait batchDelay ms between sends
+            self.timer = self.timer + dt
+            if self.timer < self.batchDelay then return end
+            self.timer = 0
+
+            local startIdx = (self.batchIndex - 1) * self.batchSize + 1
+            local endIdx   = math.min(self.batchIndex * self.batchSize, #self.fieldIds)
+            local batch    = {}
+            for i = startIdx, endIdx do
+                local id = self.fieldIds[i]
+                batch[id] = self.fieldData[id]
+            end
+
+            local isLast = (self.batchIndex == self.totalBatches)
+            self.connection:sendEvent(SoilFieldBatchSyncEvent.new(batch, isLast))
+
+            SoilLogger.info("Server: Field batch %d/%d sent (%d fields)",
+                self.batchIndex, self.totalBatches, endIdx - startIdx + 1)
+
+            self.batchIndex = self.batchIndex + 1
+
+            if isLast then
+                g_currentMission:removeUpdateable(self)
+            end
         end
+    }
 
-        local isLast = (batchIndex == totalBatches)
-        connection:sendEvent(SoilFieldBatchSyncEvent.new(batch, isLast))
-
-        SoilLogger.info("Server: Field batch %d/%d sent (%d fields)", batchIndex, totalBatches, endIdx - startIdx + 1)
-        batchIndex = batchIndex + 1
-
-        if not isLast then
-            g_currentMission:addDelayedCallback(sendNextBatch, batchDelay)
+    if g_currentMission and g_currentMission.addUpdateable then
+        g_currentMission:addUpdateable(batchDispatcher)
+        SoilLogger.info("Server: Batch dispatcher registered (%d batches of %d fields)", totalBatches, batchSize)
+    else
+        -- Fallback for edge cases: send everything at once (old blocking behaviour)
+        SoilLogger.warning("Server: addUpdateable unavailable — sending all %d fields synchronously", fieldCount)
+        local allBatch = {}
+        for _, id in ipairs(fieldIds) do
+            allBatch[id] = fieldData[id]
         end
+        connection:sendEvent(SoilFieldBatchSyncEvent.new(allBatch, true))
     end
-
-    g_currentMission:addDelayedCallback(sendNextBatch, batchDelay)
 end
 
 -- ========================================
