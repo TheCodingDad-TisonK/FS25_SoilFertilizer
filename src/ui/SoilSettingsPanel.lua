@@ -134,7 +134,7 @@ local CATEGORIES = {
             },
             {
                 header = "HUD Style",
-                items  = { "hudColorTheme", "hudFontSize", "hudTransparency" }
+                items  = { "hudColorTheme", "hudFontSize", "hudTransparency", "hudDragEnabled" }
             },
             {
                 header = "Position",
@@ -192,6 +192,7 @@ local SETTING_DESCS = {
     hudFontSize      = "HUD text size",
     hudTransparency  = "HUD background transparency",
     hudPosition      = "HUD preset anchor position",
+    hudDragEnabled   = "RMB enters HUD drag mode (disable if conflicting with other mods)",
     activeMapLayer   = "Nutrient layer shown in PDA map",
     overlayDensity   = "Sample point budget (Low=8k, Med=20k, High=40k)",
 }
