@@ -381,7 +381,8 @@ function SoilFertilityManager:deferredSoilSystemInit()
 
         update = function(self, dt)
             if self.installed then
-                return true  -- Remove updater - job done
+                g_currentMission:removeUpdateable(self)
+                return
             end
 
             self.attempts = self.attempts + 1
@@ -397,9 +398,9 @@ function SoilFertilityManager:deferredSoilSystemInit()
             if not missionReady then
                 if self.attempts >= self.maxAttempts then
                     SoilLogger.warning("Deferred init timeout: Mission not ready after %d attempts", self.attempts)
-                    return true  -- Give up and remove updater
+                    g_currentMission:removeUpdateable(self)
                 end
-                return false  -- Keep waiting
+                return
             end
 
             -- Guard 2: Field manager must be ready AND populated with at least one field.
@@ -409,9 +410,9 @@ function SoilFertilityManager:deferredSoilSystemInit()
             if not g_fieldManager or not g_fieldManager.fields or next(g_fieldManager.fields) == nil then
                 if self.attempts >= self.maxAttempts then
                     SoilLogger.warning("Deferred init timeout: FieldManager not populated after %d attempts", self.attempts)
-                    return true  -- Give up and remove updater
+                    g_currentMission:removeUpdateable(self)
                 end
-                return false  -- Keep waiting
+                return
             end
 
             -- Guard 3: FarmlandManager must be available for ownership hook installation.
@@ -420,13 +421,27 @@ function SoilFertilityManager:deferredSoilSystemInit()
             if not g_farmlandManager then
                 if self.attempts >= self.maxAttempts then
                     SoilLogger.warning("Deferred init timeout: FarmlandManager not available after %d attempts", self.attempts)
-                    return true  -- Give up and remove updater
+                    g_currentMission:removeUpdateable(self)
                 end
-                return false  -- Keep waiting
+                return
             end
 
             -- All guards passed - initialize soil system now
             SoilLogger.info("Game ready after %d update cycles - initializing soil system...", self.attempts)
+
+            -- Reload settings here: savegameDirectory is now guaranteed available.
+            -- The earlier load() in new() fires before savegameDirectory is set on
+            -- dedicated servers (Mission00.load timing), so it falls back to defaults.
+            -- This reload picks up the actual saved XML values.
+            self.sfm.settings:load()
+
+            -- Guard: if settings were saved with enabled=false, respect that.
+            if not self.sfm.settings.enabled then
+                SoilLogger.info("Mod disabled in settings — skipping soil system init")
+                self.installed = true
+                g_currentMission:removeUpdateable(self)
+                return
+            end
 
             local initSuccess, initError = pcall(function()
                 self.sfm.soilSystem:initialize()
@@ -448,7 +463,7 @@ function SoilFertilityManager:deferredSoilSystemInit()
             end
 
             self.installed = true
-            return true  -- Remove updater
+            g_currentMission:removeUpdateable(self)
         end
     }
 

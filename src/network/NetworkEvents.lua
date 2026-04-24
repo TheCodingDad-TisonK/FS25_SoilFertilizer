@@ -94,12 +94,12 @@ function SoilSettingChangeEvent:run(connection)
             end
         end
 
-        -- Broadcast to all clients
+        -- Broadcast to ALL clients including the original sender.
+        -- On dedicated servers the admin is a client — excluding them (old behaviour)
+        -- meant their own panel never reflected the confirmed value (issue #208).
         if g_server then
             g_server:broadcastEvent(
-                SoilSettingSyncEvent.new(self.settingName, self.settingValue),
-                nil,  -- send to all
-                connection  -- except sender
+                SoilSettingSyncEvent.new(self.settingName, self.settingValue)
             )
         end
     end
@@ -234,34 +234,66 @@ function SoilRequestFullSyncEvent:run(connection)
     local batchSize    = SoilConstants.NETWORK.FULL_SYNC_BATCH_SIZE
     local batchDelay   = SoilConstants.NETWORK.FULL_SYNC_BATCH_DELAY
     local totalBatches = math.ceil(#fieldIds / batchSize)
-    local batchIndex   = 1
 
-    -- Step 4: schedule each batch via a delayed callback so the engine loop
-    -- can process network I/O between batches (avoids the 3-minute hang).
-    local function sendNextBatch()
-        -- Guard: connection may have dropped between callbacks
-        if batchIndex > totalBatches then return end
+    -- Step 4: Use addUpdateable to drip-feed batches one per update tick,
+    -- throttled by batchDelay (ms). g_currentMission:addDelayedCallback() does
+    -- NOT exist in FS25 — addUpdateable is the correct deferred-work API.
+    local batchDispatcher = {
+        batchIndex  = 1,
+        timer       = 0,
+        batchSize   = batchSize,
+        batchDelay  = batchDelay,
+        totalBatches = totalBatches,
+        fieldIds    = fieldIds,
+        fieldData   = fieldData,
+        connection  = connection,
 
-        local startIdx = (batchIndex - 1) * batchSize + 1
-        local endIdx   = math.min(batchIndex * batchSize, #fieldIds)
-        local batch    = {}
-        for i = startIdx, endIdx do
-            local id = fieldIds[i]
-            batch[id] = fieldData[id]
+        update = function(self, dt)
+            -- Guard: connection may have dropped or all batches sent
+            if not self.connection or self.batchIndex > self.totalBatches then
+                g_currentMission:removeUpdateable(self)
+                return
+            end
+
+            -- Throttle: wait batchDelay ms between sends
+            self.timer = self.timer + dt
+            if self.timer < self.batchDelay then return end
+            self.timer = 0
+
+            local startIdx = (self.batchIndex - 1) * self.batchSize + 1
+            local endIdx   = math.min(self.batchIndex * self.batchSize, #self.fieldIds)
+            local batch    = {}
+            for i = startIdx, endIdx do
+                local id = self.fieldIds[i]
+                batch[id] = self.fieldData[id]
+            end
+
+            local isLast = (self.batchIndex == self.totalBatches)
+            self.connection:sendEvent(SoilFieldBatchSyncEvent.new(batch, isLast))
+
+            SoilLogger.info("Server: Field batch %d/%d sent (%d fields)",
+                self.batchIndex, self.totalBatches, endIdx - startIdx + 1)
+
+            self.batchIndex = self.batchIndex + 1
+
+            if isLast then
+                g_currentMission:removeUpdateable(self)
+            end
         end
+    }
 
-        local isLast = (batchIndex == totalBatches)
-        connection:sendEvent(SoilFieldBatchSyncEvent.new(batch, isLast))
-
-        SoilLogger.info("Server: Field batch %d/%d sent (%d fields)", batchIndex, totalBatches, endIdx - startIdx + 1)
-        batchIndex = batchIndex + 1
-
-        if not isLast then
-            g_currentMission:addDelayedCallback(sendNextBatch, batchDelay)
+    if g_currentMission and g_currentMission.addUpdateable then
+        g_currentMission:addUpdateable(batchDispatcher)
+        SoilLogger.info("Server: Batch dispatcher registered (%d batches of %d fields)", totalBatches, batchSize)
+    else
+        -- Fallback for edge cases: send everything at once (old blocking behaviour)
+        SoilLogger.warning("Server: addUpdateable unavailable — sending all %d fields synchronously", fieldCount)
+        local allBatch = {}
+        for _, id in ipairs(fieldIds) do
+            allBatch[id] = fieldData[id]
         end
+        connection:sendEvent(SoilFieldBatchSyncEvent.new(allBatch, true))
     end
-
-    g_currentMission:addDelayedCallback(sendNextBatch, batchDelay)
 end
 
 -- ========================================
@@ -286,22 +318,16 @@ end
 function SoilFullSyncEvent:readStream(streamId, connection)
     self.settings = {}
 
-    -- Read all settings
-    self.settings.enabled = streamReadBool(streamId)
-    self.settings.debugMode = streamReadBool(streamId)
-    self.settings.fertilitySystem = streamReadBool(streamId)
-    self.settings.nutrientCycles = streamReadBool(streamId)
-    self.settings.fertilizerCosts = streamReadBool(streamId)
-    self.settings.showNotifications = streamReadBool(streamId)
-    self.settings.seasonalEffects = streamReadBool(streamId)
-    self.settings.rainEffects = streamReadBool(streamId)
-    self.settings.plowingBonus = streamReadBool(streamId)
-    self.settings.weedPressure = streamReadBool(streamId)
-    self.settings.pestPressure = streamReadBool(streamId)
-    self.settings.diseasePressure = streamReadBool(streamId)
-    self.settings.difficulty = streamReadInt32(streamId)
-    self.settings.autoRateControl = streamReadBool(streamId)
-    self.settings.cropRotation = streamReadBool(streamId)
+    -- Read all non-local settings in schema order (matches writeStream iteration)
+    for _, def in ipairs(SettingsSchema.definitions) do
+        if not def.localOnly then
+            if def.type == "boolean" then
+                self.settings[def.id] = streamReadBool(streamId)
+            elseif def.type == "number" then
+                self.settings[def.id] = streamReadInt32(streamId)
+            end
+        end
+    end
 
     -- Read field data
     self.fieldData = {}
@@ -414,22 +440,16 @@ function SoilFullSyncEvent:readStream(streamId, connection)
 end
 
 function SoilFullSyncEvent:writeStream(streamId, connection)
-    -- Write all settings
-    streamWriteBool(streamId, self.settings.enabled)
-    streamWriteBool(streamId, self.settings.debugMode)
-    streamWriteBool(streamId, self.settings.fertilitySystem)
-    streamWriteBool(streamId, self.settings.nutrientCycles)
-    streamWriteBool(streamId, self.settings.fertilizerCosts)
-    streamWriteBool(streamId, self.settings.showNotifications)
-    streamWriteBool(streamId, self.settings.seasonalEffects)
-    streamWriteBool(streamId, self.settings.rainEffects)
-    streamWriteBool(streamId, self.settings.plowingBonus)
-    streamWriteBool(streamId, self.settings.weedPressure == true)
-    streamWriteBool(streamId, self.settings.pestPressure == true)
-    streamWriteBool(streamId, self.settings.diseasePressure == true)
-    streamWriteInt32(streamId, self.settings.difficulty)
-    streamWriteBool(streamId, self.settings.autoRateControl == true)
-    streamWriteBool(streamId, self.settings.cropRotation == true)
+    -- Write all non-local settings in schema order (matches readStream iteration)
+    for _, def in ipairs(SettingsSchema.definitions) do
+        if not def.localOnly then
+            if def.type == "boolean" then
+                streamWriteBool(streamId, self.settings[def.id] == true)
+            elseif def.type == "number" then
+                streamWriteInt32(streamId, self.settings[def.id] or def.default)
+            end
+        end
+    end
 
     -- Write field data
     local fieldCount = 0
@@ -481,23 +501,13 @@ function SoilFullSyncEvent:run(connection)
 
     SoilLogger.info("Client: Received full sync header from server (settings + %d legacy fields)", self:getFieldCount())
 
-    -- Apply all settings
+    -- Apply all non-local settings from schema (auto-covers any new settings)
     local settings = g_SoilFertilityManager.settings
-    settings.enabled          = self.settings.enabled
-    settings.debugMode        = self.settings.debugMode
-    settings.fertilitySystem  = self.settings.fertilitySystem
-    settings.nutrientCycles   = self.settings.nutrientCycles
-    settings.fertilizerCosts  = self.settings.fertilizerCosts
-    settings.showNotifications= self.settings.showNotifications
-    settings.seasonalEffects  = self.settings.seasonalEffects
-    settings.rainEffects      = self.settings.rainEffects
-    settings.plowingBonus     = self.settings.plowingBonus
-    settings.weedPressure     = self.settings.weedPressure
-    settings.pestPressure     = self.settings.pestPressure
-    settings.diseasePressure  = self.settings.diseasePressure
-    settings.difficulty       = self.settings.difficulty
-    settings.autoRateControl  = self.settings.autoRateControl
-    settings.cropRotation     = self.settings.cropRotation
+    for _, def in ipairs(SettingsSchema.definitions) do
+        if not def.localOnly then
+            settings[def.id] = self.settings[def.id]
+        end
+    end
 
     -- Legacy path: if the server sent field data inline (old server version),
     -- apply it directly so we stay backwards-compatible.
