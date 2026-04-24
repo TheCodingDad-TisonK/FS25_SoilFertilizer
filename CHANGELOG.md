@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.9.9.3] - 2026-04-24
+
+### Fixed
+
+- **#208 — Admin settings GUI not updating on dedicated server**: When an admin changed a setting, the broadcast excluded the sender's connection. The admin's own panel was never refreshed with the new value. The sender exclusion has been removed — all clients including the admin now receive the `SoilSettingSyncEvent` broadcast.
+
+- **#209 — Admin settings reset to defaults on dedicated server restart**: `settings:load()` was called during `SoilFertilityManager.new()`, before the savegame directory was set by the engine on dedicated servers. Settings always loaded from the wrong path and fell back to defaults. The load is now deferred to `deferredSoilSystemInit()` where `savegameDirectory` is guaranteed to be available.
+
+- **BUG-03 — `SoilFullSyncEvent` hardcoded settings list**: The MP full sync event enumerated 15 settings by name in a hardcoded block. Any new setting added to `SettingsSchema` would be silently absent from MP join syncs. Replaced with schema-driven iteration over `SettingsSchema.definitions` — new settings are now synced automatically. Wire format is unchanged for the existing 15 settings.
+
+- **BUG-05 — `VANILLA_SETTINGS` defined twice in `SoilSettingsUI`**: The list of 3 settings shown in the vanilla settings page was defined as a local variable twice — once before the callbacks (used by those functions) and once after a block of function definitions (the intended single definition, but unreachable as an upvalue). The duplicate was removed and the single declaration moved before all function definitions.
+
+- **#204 — Conflict with FS25_CropRotation**: When a crop was sown, `onSowing()` cleared `field.lastCrop = nil` to force a live `FieldState` detection in the HUD. However, `getFieldInfo()` already performs live `FieldState` detection regardless — the clearing was unnecessary. The side-effect was that `lastCrop` (previous season) and `lastCrop2` (season before) both reflected the same crop when the same crop was replanted, causing duplicate entries in the rotation history. Removed the `onSowing` clearing entirely; the sowing hook installation was also removed from `HookManager`.
+
+- **Zombie updaters in `hookInstaller` and batch dispatcher**: Both the deferred hook installer and the MP field batch dispatcher used `return true` / `return false` to signal completion. FS25's `addUpdateable` system ignores return values — updaters run forever unless `g_currentMission:removeUpdateable(self)` is called explicitly. Both updated to call `removeUpdateable` at the correct completion/cleanup points.
+
+---
+
 ## [1.9.9.1]  2026-04-23
 
 ### Fixed
