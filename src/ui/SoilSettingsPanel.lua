@@ -134,7 +134,7 @@ local CATEGORIES = {
             },
             {
                 header = "HUD Style",
-                items  = { "hudColorTheme", "hudFontSize", "hudTransparency" }
+                items  = { "hudColorTheme", "hudFontSize", "hudTransparency", "hudDragEnabled" }
             },
             {
                 header = "Position",
@@ -192,6 +192,7 @@ local SETTING_DESCS = {
     hudFontSize      = "HUD text size",
     hudTransparency  = "HUD background transparency",
     hudPosition      = "HUD preset anchor position",
+    hudDragEnabled   = "RMB enters HUD drag mode (disable if conflicting with other mods)",
     activeMapLayer   = "Nutrient layer shown in PDA map",
     overlayDensity   = "Sample point budget (Low=8k, Med=20k, High=40k)",
 }
@@ -246,6 +247,8 @@ function SoilSettingsPanel.new(settings)
     self.settings     = settings
     self.fillOverlay  = nil
     self.isVisible    = false
+    local mod = g_modManager and g_modManager:getModByName(g_currentModName)
+    self.modVersion   = "v" .. (mod and mod.version or "?")
     self.page         = PAGE_LANDING
     self.activeCatIdx = nil
     self.adminMsg     = nil   -- last action result shown in admin page
@@ -479,7 +482,7 @@ function SoilSettingsPanel:drawTitleBar()
     self:drawText(PX + 0.018, ty + TB_H * 0.32, TS_TITLE, title, C.white, RenderText.ALIGN_LEFT, true)
 
     -- Version tag
-    self:drawText(PX + PW - 0.020, ty + TB_H * 0.32, TS_TINY, "v1.9.9.1", C.hint, RenderText.ALIGN_RIGHT, false)
+    self:drawText(PX + PW - 0.020, ty + TB_H * 0.32, TS_TINY, self.modVersion, C.hint, RenderText.ALIGN_RIGHT, false)
 
     -- [X] close button — right side
     local cbW = 0.038

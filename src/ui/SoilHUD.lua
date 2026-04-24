@@ -296,8 +296,8 @@ function SoilHUD:onMouseEvent(posX, posY, isDown, isUp, button, eventUsed)
     if not self.settings.showHUD then return false end
     if not self.visible then return false end
 
-    -- RMB: toggle edit mode
-    if isDown and button == 3 then
+    -- RMB: toggle edit mode (skipped if player disabled drag to avoid mod conflicts)
+    if isDown and button == 3 and self.settings.hudDragEnabled then
         if self.editMode then
             self:exitEditMode()
         else
@@ -374,7 +374,7 @@ function SoilHUD:update(dt)
     end
 
     -- Detection for initial RMB click when cursor might be hidden
-    if not self.editMode and self.initialized and self.settings.enabled and self.settings.showHUD and self.visible then
+    if not self.editMode and self.initialized and self.settings.enabled and self.settings.showHUD and self.visible and self.settings.hudDragEnabled then
         if Input and Input.isMouseButtonPressed and Input.isMouseButtonPressed(Input.MOUSE_BUTTON_RIGHT) then
             -- Note: posX/posY might not be perfectly accurate if hidden, but we check last known
             if g_inputBinding and g_inputBinding.mousePosXLast and g_inputBinding.mousePosYLast then

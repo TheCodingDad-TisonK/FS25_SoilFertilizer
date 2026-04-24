@@ -20,6 +20,8 @@
 		<e k="sf_hud_font_3" v="[EN] Large" eh="3a69b34c" />
 		<e k="sf_hud_transparency_short" v="[EN] HUD Transparency" eh="e8a009e4" />
 		<e k="sf_hud_transparency_long" v="[EN] Set background transparency level (Clear = see-through, Solid = opaque)" eh="152e390a" />
+		<e k="sf_hud_drag_enabled_short" v="[EN] HUD Drag" eh="e5a9a723" />
+		<e k="sf_hud_drag_enabled_long" v="[EN] Allow right-click to enter HUD drag/edit mode. Disable if conflicting with other mods (e.g. Courseplay)" eh="d9e2d813" />
 		<e k="sf_hud_trans_1" v="[EN] Clear" eh="dc30bc0c" />
 		<e k="sf_hud_trans_2" v="[EN] Light" eh="9914a0ce" />
 		<e k="sf_hud_trans_3" v="[EN] Medium" eh="87f8a6ab" />
@@ -42,8 +44,8 @@
 		<e k="sf_use_imperial_long" v="[EN] Show application rates in gal/ac and lb/ac (off = L/ha and kg/ha)" eh="17efa489" />
     <e k="sf_active_map_layer_short" v="Active Map Layer" eh="1861765f" />
     <e k="sf_active_map_layer_long" v="Nutrient layer shown as overlay in the PDA map" eh="d7755cc8" />
-    <e k="sf_overlay_density_short" v="Map Detail" />
-    <e k="sf_overlay_density_long" v="Sample point budget for the PDA soil overlay. Low = better FPS, High = fuller coverage on large maps." />
+    <e k="sf_overlay_density_short" v="Map Detail" eh="a525859a" />
+    <e k="sf_overlay_density_long" v="Sample point budget for the PDA soil overlay. Low = better FPS, High = fuller coverage on large maps." eh="89215ce5" />
     <e k="input_SF_OPEN_SETTINGS" v="Open Soil Settings" eh="2e31c0dd" />
 		<e k="sf_reset" v="[EN] Reset Soil Settings" eh="467bc2f5" />
 		<e k="input_SF_TOGGLE_HUD" v="[EN] Toggle Soil HUD" eh="f0224a10" />
@@ -136,16 +138,16 @@
     <e k="sf_bigBag_starter_function" v="Başlangıç gübresi (sıvı)" eh="2c36ea57" />
 		<e k="sf_bigBag_gypsum_name" v="[EN] Big Bag Gypsum" eh="40fc8169" />
 		<e k="sf_bigBag_gypsum_function" v="[EN] Soil Amendment (dry)" eh="51503c54" />
-    <e k="sf_bigBag_compost_name" v="Big Bag Compost" />
-    <e k="sf_bigBag_compost_function" v="Organic Soil Amendment (dry)" />
-    <e k="sf_bigBag_biosolids_name" v="Big Bag Biosolids" />
-    <e k="sf_bigBag_biosolids_function" v="Organic Fertilizer (dry)" />
-    <e k="sf_bigBag_chicken_manure_name" v="Big Bag Chicken Manure" />
-    <e k="sf_bigBag_chicken_manure_function" v="Organic Fertilizer (dry)" />
-    <e k="sf_bigBag_pelletized_manure_name" v="Big Bag Pelletized Manure" />
-    <e k="sf_bigBag_pelletized_manure_function" v="Organic Fertilizer (dry)" />
-    <e k="sf_bigBag_liquidlime_name" v="Liquid Lime Tank" />
-    <e k="sf_bigBag_liquidlime_function" v="pH Raising Agent (liquid)" />
+    <e k="sf_bigBag_compost_name" v="Big Bag Compost" eh="14322c5d" />
+    <e k="sf_bigBag_compost_function" v="Organic Soil Amendment (dry)" eh="9dd2256a" />
+    <e k="sf_bigBag_biosolids_name" v="Big Bag Biosolids" eh="61a60ff3" />
+    <e k="sf_bigBag_biosolids_function" v="Organic Fertilizer (dry)" eh="374c7b1e" />
+    <e k="sf_bigBag_chicken_manure_name" v="Big Bag Chicken Manure" eh="cb60fddc" />
+    <e k="sf_bigBag_chicken_manure_function" v="Organic Fertilizer (dry)" eh="374c7b1e" />
+    <e k="sf_bigBag_pelletized_manure_name" v="Big Bag Pelletized Manure" eh="064be7fa" />
+    <e k="sf_bigBag_pelletized_manure_function" v="Organic Fertilizer (dry)" eh="374c7b1e" />
+    <e k="sf_bigBag_liquidlime_name" v="Liquid Lime Tank" eh="4f8caca1" />
+    <e k="sf_bigBag_liquidlime_function" v="pH Raising Agent (liquid)" eh="7a118b6d" />
 
 		<e k="sf_section" v="[EN] Soil &amp;amp; Fertilizer" eh="d30a22a9" />
 		<e k="sf_enabled_short" v="[EN] Enable Mod" eh="cf7fea13" />

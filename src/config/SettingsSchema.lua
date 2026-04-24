@@ -93,6 +93,13 @@ SettingsSchema.definitions = {
         localOnly = true,  -- per-player display preference, not synced to server
     },
     {
+        id = "hudDragEnabled",
+        type = "boolean",
+        default = true,
+        uiId = "sf_hud_drag_enabled",
+        localOnly = true,  -- per-player preference, not synced to server
+    },
+    {
         id = "seasonalEffects",
         type = "boolean",
         default = true,
