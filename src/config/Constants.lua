@@ -190,8 +190,8 @@ SoilConstants.FERTILIZER_PROFILES = {
     MANURE            = { N=0.53, P=1.59,  K=0.60, OM=0.04 }, -- 14000 L/ha: ~20N, ~12P, ~30K ppm
     LIQUIDMANURE      = { N=0.42, P=1.59,  K=0.80, OM=0.03 }, -- Slurry
     DIGESTATE         = { N=0.58, P=1.85,  K=1.10, OM=0.04 }, -- Digestate
-    LIME              = { pH=0.31 },                          -- 2500 kg/ha: +0.7 pH shift
-    LIQUIDLIME        = { pH=0.20 },                          -- 2800 L/ha: +0.5 pH shift
+    LIME              = { pH=0.16 },                          -- 2500 kg/ha: +0.40 pH shift per pass (~3 passes to correct pH 5.5→6.5)
+    LIQUIDLIME        = { pH=1.07 },                          -- 374  L/ha: +0.40 pH shift per pass (rate corrected from 2800→374 L/ha)
 
     -- Nitrogen sources (high-concentration)
     UAN32             = { N=243.6, P=0.00, K=0.00 }, -- 60.8 L/ha: ~40N ppm
@@ -528,7 +528,7 @@ SoilConstants.SPRAYER_RATE = {
         LIQUIDMANURE      = { value = 14000.0, unit = "liquid" },  -- FS25 fill type name for slurry
         DIGESTATE         = { value = 14000.0, unit = "liquid" },
         LIME              = { value =  2500.0, unit = "dry"    },  -- ~2230 lb/ac
-        LIQUIDLIME        = { value =  2800.0, unit = "liquid" },
+        LIQUIDLIME        = { value =   374.0, unit = "liquid" },  -- 40 gal/ac (real fluid lime; was 2800 which was 6× too high)
         -- Nitrogen sources
         UAN32             = { value =    60.8, unit = "liquid" },  -- ~6.5 gal/ac
         UAN28             = { value =    60.8, unit = "liquid" },

@@ -139,6 +139,12 @@ function HookManager:installAll(soilSystem)
         self:propagateExternalFillHookToLiveVehicles()
     end
 
+    -- Speed-based area-normalized consumption (tank-drain path).
+    -- Replaces vanilla getSprayerUsage's speedLimit with actual lastSpeed so product
+    -- consumption scales correctly with area covered at the vehicle's real speed.
+    local sprayUsageOk = self:installSprayerUsageHook()
+    if sprayUsageOk then successCount = successCount + 1 else failCount = failCount + 1 end
+
     -- Opt custom fill types into the vanilla "external fill" skip-depletion path.
     -- This is the canonical BUY-mode fix (issue #205): by telling the base engine that
     -- our tank is externally filled when BUY mode is active, Sprayer:onStartWorkAreaProcessing
@@ -1946,7 +1952,48 @@ function HookManager:installExternalFillHook()
 
         -- Buy mode active: charge our price and return the custom type so the
         -- correct product is written to the terrain density map.
-        local usage = sprayerSelf:getSprayerUsage(customIdx, dt)
+        --
+        -- Area-normalized usage (speed-based).
+        -- Vanilla getSprayerUsage uses self.speedLimit (configured max speed in km/h),
+        -- which over-charges when the vehicle moves slower than its speed limit.
+        -- We replicate the vanilla formula but substitute lastSpeed (actual m/s → km/h)
+        -- so consumption truly scales with area covered, not with the speed dial setting.
+        -- Formula: scale × litersPerSecond × actualSpeed_km/h × workWidth_m × dt_ms × 0.001
+        local usage
+        do
+            local actualSpeedKmh = math.abs(sprayerSelf.lastSpeed or 0) * 3600
+            if actualSpeedKmh < 0.5 then
+                -- Sprayer not moving (headland pivot, stopped).  No area covered, no charge.
+                usage = 0
+            else
+                local spec_s   = sprayerSelf.spec_sprayer
+                local usScale  = spec_s and spec_s.usageScale
+                -- Prefer active spray-type's usageScale if present.
+                local okAST, activeSpT = pcall(function() return sprayerSelf:getActiveSprayType() end)
+                if okAST and activeSpT and activeSpT.usageScale then
+                    usScale = activeSpT.usageScale
+                end
+                local workWidth = (usScale and usScale.workingWidth) or 12
+                if usScale and usScale.workAreaIndex then
+                    local okW, w = pcall(function()
+                        return sprayerSelf:getWorkAreaWidth(usScale.workAreaIndex)
+                    end)
+                    if okW and w and w > 0 then workWidth = w end
+                end
+                -- fillType-specific scale (usually 1 for custom types, fallback to default).
+                local fillScale = 1
+                if spec_s and spec_s.usageScale then
+                    local ft_scales = spec_s.usageScale.fillTypeScales
+                    fillScale = (ft_scales and ft_scales[customIdx])
+                        or spec_s.usageScale.default
+                        or 1
+                end
+                -- litersPerSecond registered in g_sprayTypeManager for this fill type.
+                local spT = g_sprayTypeManager and g_sprayTypeManager:getSprayTypeByFillTypeIndex(customIdx)
+                local lps = spT and spT.litersPerSecond or 1
+                usage = fillScale * lps * actualSpeedKmh * workWidth * dt * 0.001
+            end
+        end
         if sprayerSelf.isServer and usage > 0 then
             local pricePerLiter = prices[customIdx] or 1.0
             local price = usage * pricePerLiter * 1.5  -- 1.5× AI premium (matches vanilla)
@@ -1966,6 +2013,114 @@ function HookManager:installExternalFillHook()
 
     self:register(Sprayer, "getExternalFill", original, "Sprayer.getExternalFill")
     SoilLogger.info("[OK] External fill hook installed (Sprayer.getExternalFill)")
+    return true
+end
+
+-- =========================================================
+-- HOOK 9a: Speed-based area-normalized sprayer consumption
+-- =========================================================
+-- Vanilla Sprayer:getSprayerUsage multiplies by self.speedLimit (configured max speed,
+-- km/h) rather than self.lastSpeed (actual current speed, m/s). When the vehicle drives
+-- slower than its speed limit (Courseplay following a planned route, turning at headlands,
+-- slowing for obstacles), vanilla over-charges and under-applies per hectare.
+--
+-- Fix: replace speedLimit with lastSpeed × 3600 (converted to km/h for formula
+-- compatibility). The rest of the vanilla formula is identical:
+--   scale × litersPerSecond × actualSpeed_km/h × workWidth_m × dt_ms × 0.001
+-- When the vehicle stops (headland pivot), lastSpeed ≈ 0 → usage = 0 → boom shuts off.
+-- This is correct — no area is being covered.
+--
+-- Three-layer patch required: SpecializationUtil.registerFunction (line 91 of Sprayer.lua)
+-- + copyTypeFunctionsInto means class-table patches never reach live vehicle instances.
+---@return boolean success
+function HookManager:installSprayerUsageHook()
+    if not Sprayer or type(Sprayer.getSprayerUsage) ~= "function" then
+        SoilLogger.warning("SprayerUsage hook: Sprayer.getSprayerUsage not available - skipping")
+        return false
+    end
+
+    local originalClassFn = Sprayer.getSprayerUsage
+
+    local function makeUsageReplacement(originalFn)
+        return function(sprayerSelf, fillType, dt)
+            if fillType == FillType.UNKNOWN then return 0 end
+
+            -- Actual speed in km/h (lastSpeed is m/s).
+            local actualSpeedKmh = math.abs(sprayerSelf.lastSpeed or 0) * 3600
+            if actualSpeedKmh < 0.5 then
+                -- Below 0.5 km/h (stopping, pivoting at headlands): no area covered.
+                return 0
+            end
+
+            -- Mirror vanilla's full formula, substituting actualSpeed for speedLimit.
+            local spec_s = sprayerSelf.spec_sprayer
+            if not spec_s then
+                return originalFn(sprayerSelf, fillType, dt)
+            end
+
+            -- fillType-specific scale (falls back to usageScale.default, normally 1.0)
+            local fillScale = 1
+            if spec_s.usageScale then
+                local ft_scales = spec_s.usageScale.fillTypeScales
+                fillScale = (ft_scales and ft_scales[fillType])
+                    or spec_s.usageScale.default or 1
+            end
+
+            -- litersPerSecond from the spray type manager (registered for all custom types
+            -- by registerCustomSprayTypes; vanilla types are always present).
+            local spT = g_sprayTypeManager and g_sprayTypeManager:getSprayTypeByFillTypeIndex(fillType)
+            local lps = spT and spT.litersPerSecond or 1
+
+            -- Working width: prefer active spray-type's usageScale, then vehicle default.
+            local usScale = spec_s.usageScale
+            local okAST, activeSpT = pcall(function() return sprayerSelf:getActiveSprayType() end)
+            if okAST and activeSpT and activeSpT.usageScale then
+                usScale = activeSpT.usageScale
+            end
+            local workWidth = (usScale and usScale.workingWidth) or 12
+            if usScale and usScale.workAreaIndex then
+                local okW, w = pcall(function()
+                    return sprayerSelf:getWorkAreaWidth(usScale.workAreaIndex)
+                end)
+                if okW and w and w > 0 then workWidth = w end
+            end
+
+            return fillScale * lps * actualSpeedKmh * workWidth * dt * 0.001
+        end
+    end
+
+    -- Layer 1: class table
+    Sprayer.getSprayerUsage = makeUsageReplacement(originalClassFn)
+
+    -- Layer 2: vehicleType.functions for every type with Sprayer spec
+    local typesPatched = 0
+    if g_vehicleTypeManager and g_vehicleTypeManager.types then
+        for _, typeDef in pairs(g_vehicleTypeManager.types) do
+            local hasSprayer = typeDef.specializationsByName and typeDef.specializationsByName.sprayer
+            if hasSprayer and typeDef.functions and typeDef.functions.getSprayerUsage then
+                local origTypeFn = typeDef.functions.getSprayerUsage
+                typeDef.functions.getSprayerUsage = makeUsageReplacement(origTypeFn)
+                typesPatched = typesPatched + 1
+            end
+        end
+    end
+
+    -- Layer 3: every already-live vehicle instance
+    local vehPatched = 0
+    local vList = (g_currentMission and g_currentMission.vehicleSystem and
+                   g_currentMission.vehicleSystem.vehicles) or
+                  (g_currentMission and g_currentMission.vehicles) or {}
+    for _, vehicle in pairs(vList) do
+        if vehicle and rawget(vehicle, "getSprayerUsage") then
+            local origInstFn = vehicle.getSprayerUsage
+            vehicle.getSprayerUsage = makeUsageReplacement(origInstFn)
+            vehPatched = vehPatched + 1
+        end
+    end
+
+    self:register(Sprayer, "getSprayerUsage", originalClassFn, "Sprayer.getSprayerUsage (class only)")
+    SoilLogger.info("[OK] SprayerUsage hook installed — actual-speed consumption (%d types, %d vehicles patched)",
+        typesPatched, vehPatched)
     return true
 end
 
