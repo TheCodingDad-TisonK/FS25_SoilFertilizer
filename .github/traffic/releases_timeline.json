@@ -357,11 +357,11 @@
   "v2-beta": {
     "published_at": "2026-04-25T13:08:32Z",
     "tag": "v2-beta",
-    "peak_downloads": 2
+    "peak_downloads": 3
   },
   "v2.0.2.0": {
     "published_at": "2026-04-25T15:55:34Z",
     "tag": "v2.0.2.0",
-    "peak_downloads": 0
+    "peak_downloads": 7
   }
 }
