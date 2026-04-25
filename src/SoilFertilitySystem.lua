@@ -827,8 +827,11 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing, area)
         coveredCellCount = 0, -- Running count of coveredCells for O(1) fraction computation
         totalFieldCells = 0,  -- Estimated cell count from field area (set on first spray)
         coverageFraction = 0, -- Fraction of field covered today (0.0–1.0)
-        compaction = 0,       -- Soil compaction level 0–100 (0 = none, 100 = fully compacted)
-        lastCompactionDay = -1, -- tracks once-per-day throttle (transient, not persisted)
+        compaction = 0,            -- field-average compaction 0–100 (derived from cells)
+        compactionCells = {},      -- {cellKey → 0-100} per-cell compaction (10×10 m grid)
+        compactionCellDays = {},   -- {cellKey → day} per-cell once-per-day throttle (transient)
+        compactionSum = 0,         -- running sum of cell values for O(1) average
+        compactionTotalCells = 0,  -- total estimated field cells (set lazily from fieldArea)
         lastAlertYear = 0,    -- In-game year when the last critical alert fired (persisted)
     }
 
@@ -853,11 +856,24 @@ function SoilFertilitySystem:updateDailySoil()
         field.coveredCellCount  = 0
         field.coverageFraction  = 0
 
-        -- Compaction natural decay
+        -- Compaction natural decay (per-cell) + daily throttle reset
         if self.settings.compactionEnabled and SoilConstants.COMPACTION then
             local cp = SoilConstants.COMPACTION
-            if (field.compaction or 0) > 0 then
-                field.compaction = math.max(0, field.compaction - cp.NATURAL_DECAY_PER_DAY)
+            field.compactionCellDays = {}  -- reset per-cell once-per-day throttle
+            if field.compactionCells and next(field.compactionCells) then
+                local newSum = 0
+                for cellKey, val in pairs(field.compactionCells) do
+                    local newVal = val - cp.NATURAL_DECAY_PER_DAY
+                    if newVal > 0 then
+                        field.compactionCells[cellKey] = newVal
+                        newSum = newSum + newVal
+                    else
+                        field.compactionCells[cellKey] = nil
+                    end
+                end
+                field.compactionSum = newSum
+                local tc = field.compactionTotalCells or 0
+                field.compaction = tc > 0 and (newSum / tc) or 0
             end
         end
 
@@ -1855,6 +1871,17 @@ function SoilFertilitySystem:saveToXMLFile(xmlFile, key)
             setXMLInt(xmlFile, fieldKey .. "#lastAlertYear", field.lastAlertYear or 0)
             setXMLFloat(xmlFile, fieldKey .. "#compaction", field.compaction or 0)
 
+            -- Save per-cell compaction data
+            local compIdx = 0
+            if field.compactionCells then
+                for cellKey, val in pairs(field.compactionCells) do
+                    local ck = string.format("%s.compactionCell(%d)", fieldKey, compIdx)
+                    setXMLString(xmlFile, ck .. "#key", cellKey)
+                    setXMLFloat(xmlFile, ck .. "#v", val)
+                    compIdx = compIdx + 1
+                end
+            end
+
             -- Save per-area zone cells for overlay coloring
             local zoneIdx = 0
             if field.zoneData then
@@ -1919,7 +1946,11 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
             dryDayCount = getXMLInt(xmlFile, fieldKey .. "#dryDayCount") or 0,
             burnDaysLeft = getXMLInt(xmlFile, fieldKey .. "#burnDaysLeft") or 0,
             lastAlertYear = getXMLInt(xmlFile, fieldKey .. "#lastAlertYear") or 0,
-            compaction = getXMLFloat(xmlFile, fieldKey .. "#compaction") or 0,
+            compaction = 0,
+            compactionCells = {},
+            compactionCellDays = {},
+            compactionSum = 0,
+            compactionTotalCells = 0,
             initialized = true,
             nutrientBuffer = {},
             zoneData = {},
@@ -1950,6 +1981,29 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
                 OM = getXMLFloat(xmlFile, zk .. "#OM") or 0,
             }
             zi = zi + 1
+        end
+
+        -- Load per-cell compaction data and reconstruct running sum + average
+        local zone = SoilConstants.ZONE
+        local ci = 0
+        local sumLoaded = 0
+        while true do
+            local ck = string.format("%s.compactionCell(%d)", fieldKey, ci)
+            local cellKey = getXMLString(xmlFile, ck .. "#key")
+            if not cellKey then break end
+            local val = getXMLFloat(xmlFile, ck .. "#v") or 0
+            if val > 0 then
+                self.fieldData[fieldId].compactionCells[cellKey] = val
+                sumLoaded = sumLoaded + val
+            end
+            ci = ci + 1
+        end
+        if ci > 0 then
+            local areaInHa = self.fieldData[fieldId].fieldArea or 1.0
+            local totalCells = math.max(1, math.ceil(areaInHa / zone.CELL_AREA_HA))
+            self.fieldData[fieldId].compactionSum = sumLoaded
+            self.fieldData[fieldId].compactionTotalCells = totalCells
+            self.fieldData[fieldId].compaction = sumLoaded / totalCells
         end
 
         index = index + 1
@@ -2008,33 +2062,80 @@ end
 -- COMPACTION API (P2-D)
 -- =========================================================
 
---- Apply compaction from a heavy vehicle work pass. Throttled to once per in-game day per field.
----@param fieldId number The farmland ID
-function SoilFertilitySystem:onCompaction(fieldId)
+--- Apply compaction from a heavy vehicle work pass at a specific world position.
+--- Throttled to once per cell per in-game day. Field-average is maintained as a
+--- running sum over estimated total field cells so the nutrient penalty stays correct.
+---@param farmlandId number
+---@param worldX number  world X of the implement's work area centre
+---@param worldZ number  world Z of the implement's work area centre
+function SoilFertilitySystem:onCompaction(farmlandId, worldX, worldZ)
     if not self.settings.compactionEnabled then return end
     local cp = SoilConstants.COMPACTION
     if not cp then return end
-    local field = self:getOrCreateField(fieldId, false)
+    local field = self:getOrCreateField(farmlandId, false)
     if not field then return end
+
+    local zone = SoilConstants.ZONE
+    local cx = math.floor(worldX / zone.CELL_SIZE)
+    local cz = math.floor(worldZ / zone.CELL_SIZE)
+    local cellKey = cx .. "_" .. cz
+
     local currentDay = (g_currentMission and g_currentMission.environment and
                         g_currentMission.environment.currentDay) or 0
-    if field.lastCompactionDay == currentDay then return end
-    field.lastCompactionDay = currentDay
-    field.compaction = math.min(cp.MAX_COMPACTION, (field.compaction or 0) + cp.COMPACTION_PER_PASS)
-    self:log("Compaction: Field %d → %.0f%%", fieldId, field.compaction)
+
+    if not field.compactionCells    then field.compactionCells    = {} end
+    if not field.compactionCellDays then field.compactionCellDays = {} end
+
+    if field.compactionCellDays[cellKey] == currentDay then return end
+    field.compactionCellDays[cellKey] = currentDay
+
+    local prev   = field.compactionCells[cellKey] or 0
+    local newVal = math.min(cp.MAX_COMPACTION, prev + cp.COMPACTION_PER_PASS)
+    field.compactionCells[cellKey] = newVal
+
+    field.compactionSum = (field.compactionSum or 0) + (newVal - prev)
+    if (field.compactionTotalCells or 0) == 0 then
+        local areaInHa = field.fieldArea or 1.0
+        field.compactionTotalCells = math.max(1, math.ceil(areaInHa / zone.CELL_AREA_HA))
+    end
+    field.compaction = field.compactionSum / field.compactionTotalCells
+
+    SoilLogger.debug("Compaction: field=%d cell=%s  %.0f→%.0f%%  avg=%.1f%%",
+        farmlandId, cellKey, prev, newVal, field.compaction)
 end
 
---- Apply subsoiler compaction reduction.
----@param fieldId number The farmland ID
-function SoilFertilitySystem:onSubsoilerPass(fieldId)
+--- Apply subsoiler compaction reduction at a specific world position.
+---@param farmlandId number
+---@param worldX number
+---@param worldZ number
+function SoilFertilitySystem:onSubsoilerPass(farmlandId, worldX, worldZ)
     if not self.settings.compactionEnabled then return end
     local cp = SoilConstants.COMPACTION
     if not cp then return end
-    local field = self:getOrCreateField(fieldId, false)
+    local field = self:getOrCreateField(farmlandId, false)
     if not field then return end
-    local prev = field.compaction or 0
-    field.compaction = math.max(0, prev - cp.SUBSOILER_REDUCTION)
-    if prev > field.compaction then
-        self:log("Subsoiler: Field %d compaction %.0f → %.0f%%", fieldId, prev, field.compaction)
+
+    if not field.compactionCells then field.compactionCells = {} end
+
+    local zone = SoilConstants.ZONE
+    local cx   = math.floor(worldX / zone.CELL_SIZE)
+    local cz   = math.floor(worldZ / zone.CELL_SIZE)
+    local cellKey = cx .. "_" .. cz
+
+    local prev = field.compactionCells[cellKey] or 0
+    if prev <= 0 then return end
+
+    local newVal = math.max(0, prev - cp.SUBSOILER_REDUCTION)
+    if newVal > 0 then
+        field.compactionCells[cellKey] = newVal
+    else
+        field.compactionCells[cellKey] = nil
     end
+
+    field.compactionSum = math.max(0, (field.compactionSum or 0) - (prev - newVal))
+    local tc = field.compactionTotalCells or 0
+    field.compaction = tc > 0 and (field.compactionSum / tc) or 0
+
+    SoilLogger.debug("Subsoiler: field=%d cell=%s  %.0f→%.0f%%  avg=%.1f%%",
+        farmlandId, cellKey, prev, newVal, field.compaction)
 end
