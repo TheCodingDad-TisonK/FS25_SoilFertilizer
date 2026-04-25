@@ -347,7 +347,7 @@
   "v1.9.9.9": {
     "published_at": "2026-04-24T10:46:45Z",
     "tag": "v1.9.9.9",
-    "peak_downloads": 83
+    "peak_downloads": 85
   },
   "v2.0.0": {
     "published_at": "2026-04-25T10:20:46Z",
@@ -357,6 +357,6 @@
   "v2-beta": {
     "published_at": "2026-04-25T13:08:32Z",
     "tag": "v2-beta",
-    "peak_downloads": 0
+    "peak_downloads": 1
   }
 }
