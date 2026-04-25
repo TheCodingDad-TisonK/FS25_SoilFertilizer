@@ -823,6 +823,10 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing, area)
         dryDayCount = 0,
         nutrientBuffer = {},  -- Tracks [fillTypeIndex] = litersApplied (reset daily)
         zoneData = {},        -- Sparse {cellKey → {N,P,K,pH,OM}} for per-area overlay
+        coveredCells = {},    -- Set of cellKey strings touched by fertilizer today (reset daily)
+        coveredCellCount = 0, -- Running count of coveredCells for O(1) fraction computation
+        totalFieldCells = 0,  -- Estimated cell count from field area (set on first spray)
+        coverageFraction = 0, -- Fraction of field covered today (0.0–1.0)
         lastAlertYear = 0,    -- In-game year when the last critical alert fired (persisted)
     }
 
@@ -841,8 +845,11 @@ function SoilFertilitySystem:updateDailySoil()
     local phNorm = SoilConstants.PH_NORMALIZATION
 
     for fieldId, field in pairs(self.fieldData) do
-        -- Clear fertilizer buffers daily - require same-day full coverage
-        field.nutrientBuffer = {}
+        -- Clear fertilizer and coverage buffers daily
+        field.nutrientBuffer    = {}
+        field.coveredCells      = {}
+        field.coveredCellCount  = 0
+        field.coverageFraction  = 0
 
         -- Natural nutrient recovery for fallow fields
         local daysSinceFallow = currentDay - (field.lastHarvest or 0)
@@ -1341,6 +1348,19 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
             local cx = math.floor(sprayX / zone.CELL_SIZE)
             local cz = math.floor(sprayZ / zone.CELL_SIZE)
             local cellKey = cx .. "_" .. cz
+
+            -- Coverage tracking: count unique cells visited today
+            if not field.coveredCells then field.coveredCells = {} end
+            if not field.coveredCells[cellKey] then
+                field.coveredCells[cellKey] = true
+                field.coveredCellCount = (field.coveredCellCount or 0) + 1
+                -- Compute totalFieldCells once (lazily) from field area
+                if (field.totalFieldCells or 0) == 0 then
+                    field.totalFieldCells = math.max(1, math.ceil(areaInHa / zone.CELL_AREA_HA))
+                end
+                field.coverageFraction = math.min(1.0, field.coveredCellCount / field.totalFieldCells)
+            end
+
             if not field.zoneData then field.zoneData = {} end
             if not field.zoneData[cellKey] then
                 field.zoneData[cellKey] = {
@@ -1384,7 +1404,9 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
         local targetVolume = areaInHa * baseRateEntry.value
         local coverageThreshold = targetVolume * SoilConstants.SPRAYER_RATE.FERTILIZER_COVERAGE_THRESHOLD
 
-        if field.nutrientBuffer[fillTypeIndex] >= coverageThreshold then
+        local minCoverage = SoilConstants.COVERAGE and SoilConstants.COVERAGE.MIN_FULL_CREDIT or 0.70
+        if field.nutrientBuffer[fillTypeIndex] >= coverageThreshold and
+           (field.coverageFraction or 0) >= minCoverage then
             local today = (g_currentMission and g_currentMission.environment and
                            g_currentMission.environment.currentDay) or 0
             if not self.fertNotifyShown then self.fertNotifyShown = {} end
@@ -1705,7 +1727,8 @@ function SoilFertilitySystem:getFieldInfo(fieldId)
         diseasePressure = field.diseasePressure or 0,
         fungicideActive = (field.fungicideDaysLeft or 0) > 0,
         burnDaysLeft = field.burnDaysLeft or 0,
-        nutrientBuffer = field.nutrientBuffer or {},
+        nutrientBuffer   = field.nutrientBuffer or {},
+        coverageFraction = field.coverageFraction or 0,
         needsFertilization = (
             field.nitrogen < fertThresholds.nitrogen or
             field.phosphorus < fertThresholds.phosphorus or

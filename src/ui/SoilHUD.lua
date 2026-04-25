@@ -233,6 +233,7 @@ function SoilHUD:calculateHeight()
             if mgr.settings.weedPressure and (info.weedPressure or 0) > 0 then h = h + SoilHUD.LINE_H end
             if mgr.settings.pestPressure and (info.pestPressure or 0) > 0 then h = h + SoilHUD.LINE_H end
             if mgr.settings.diseasePressure and (info.diseasePressure or 0) > 0 then h = h + SoilHUD.LINE_H end
+            if (info.coverageFraction or 0) > 0 then h = h + SoilHUD.LINE_H end
         end
         
         h = h + SoilHUD.PAD * 1.3
@@ -798,6 +799,22 @@ function SoilHUD:drawPanel()
             if mgr.settings.diseasePressure then
                 cy = self:drawPressureRow("sf_hud_disease", info.diseasePressure or 0,
                     info.fungicideActive, px, cy, pw, s, fontMult)
+            end
+
+            -- Coverage fraction row (only when actively fertilizing this field today)
+            local cov = info.coverageFraction or 0
+            if cov > 0 then
+                local minCov = SoilConstants.COVERAGE and SoilConstants.COVERAGE.MIN_FULL_CREDIT or 0.70
+                local covPct = math.floor(cov * 100 + 0.5)
+                local minPct = math.floor(minCov * 100 + 0.5)
+                local covText = string.format("Coverage: %d%% / %d%%", covPct, minPct)
+                local cr, cg, cb = 0.90, 0.35, 0.15  -- amber-red: below threshold
+                if cov >= minCov then cr, cg, cb = 0.32, 0.88, 0.44 end  -- green: at/above
+                local pad = SoilHUD.PAD * s
+                setTextAlignment(RenderText.ALIGN_LEFT)
+                setTextColor(cr, cg, cb, 1.0)
+                renderText(px + pad, cy, 0.010 * fontMult * s, covText)
+                cy = cy - SoilHUD.LINE_H * s
             end
         end
 

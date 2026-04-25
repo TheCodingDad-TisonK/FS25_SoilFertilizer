@@ -623,6 +623,7 @@ function SoilFieldBatchSyncEvent:writeStream(streamId, connection)
         streamWriteInt32(streamId,   field.fungicideDaysLeft  or 0)
         streamWriteInt32(streamId,   field.dryDayCount        or 0)
         streamWriteInt32(streamId,   field.burnDaysLeft       or 0)
+        streamWriteFloat32(streamId, field.coverageFraction   or 0)
 
         -- Nutrient buffer (V1.7)
         local buffer = field.nutrientBuffer or {}
@@ -663,6 +664,7 @@ function SoilFieldBatchSyncEvent:readStream(streamId, connection)
         local diseaseDays    = streamReadInt32(streamId)
         local dryDays        = streamReadInt32(streamId)
         local burnDays       = streamReadInt32(streamId)
+        local coverageFrac   = streamReadFloat32(streamId)
 
         local buffer = {}
         local bCount = streamReadInt32(streamId)
@@ -695,6 +697,9 @@ function SoilFieldBatchSyncEvent:readStream(streamId, connection)
                 dryDayCount           = math.max(0, dryDays),
                 burnDaysLeft          = math.max(0, burnDays),
                 nutrientBuffer        = buffer,
+                coverageFraction      = math.max(0, math.min(1, coverageFrac or 0)),
+                coveredCells          = {},
+                coveredCellCount      = 0,
                 initialized           = true,
             }
         end
@@ -778,6 +783,7 @@ function SoilFieldUpdateEvent:readStream(streamId, connection)
     local diseaseDays = streamReadInt32(streamId)
     local dryDays = streamReadInt32(streamId)
     local burnDays = streamReadInt32(streamId)
+    local coverageFrac = streamReadFloat32(streamId)
 
     -- Read nutrient buffer (V1.7)
     local buffer = {}
@@ -815,8 +821,11 @@ function SoilFieldUpdateEvent:readStream(streamId, connection)
         fungicideDaysLeft = math.max(0, diseaseDays),
         dryDayCount = math.max(0, dryDays),
         burnDaysLeft = math.max(0, burnDays),
-        nutrientBuffer = buffer,
-        initialized = true
+        nutrientBuffer   = buffer,
+        coverageFraction = math.max(0, math.min(1, coverageFrac or 0)),
+        coveredCells     = {},
+        coveredCellCount = 0,
+        initialized      = true
     }
 
     -- Clear empty strings
@@ -855,6 +864,7 @@ function SoilFieldUpdateEvent:writeStream(streamId, connection)
     streamWriteInt32(streamId, self.field.fungicideDaysLeft or 0)
     streamWriteInt32(streamId, self.field.dryDayCount or 0)
     streamWriteInt32(streamId, self.field.burnDaysLeft or 0)
+    streamWriteFloat32(streamId, self.field.coverageFraction or 0)
 
     -- Write nutrient buffer (V1.7)
     local buffer = self.field.nutrientBuffer or {}

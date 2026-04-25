@@ -472,6 +472,16 @@ SoilConstants.ZONE = {
 }
 
 -- ========================================
+-- FERTILIZER COVERAGE TRACKING (v2)
+-- ========================================
+-- A fertilizer pass requires MIN_FULL_CREDIT fraction of the field to be
+-- physically covered before the "fully treated" notification fires.
+-- Coverage is tracked per-field daily via the cell grid shared with ZONE.
+SoilConstants.COVERAGE = {
+    MIN_FULL_CREDIT = 0.70,  -- 70% of field cells must be visited for full-treated notification
+}
+
+-- ========================================
 -- NETWORK SYNC
 -- ========================================
 SoilConstants.NETWORK = {
