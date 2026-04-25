@@ -235,54 +235,84 @@ function SoilRequestFullSyncEvent:run(connection)
     local batchDelay   = SoilConstants.NETWORK.FULL_SYNC_BATCH_DELAY
     local totalBatches = math.ceil(#fieldIds / batchSize)
 
-    -- Step 4: Use addUpdateable to drip-feed batches one per update tick,
-    -- throttled by batchDelay (ms). g_currentMission:addDelayedCallback() does
-    -- NOT exist in FS25 — addUpdateable is the correct deferred-work API.
-    local batchDispatcher = {
-        batchIndex  = 1,
-        timer       = 0,
-        batchSize   = batchSize,
-        batchDelay  = batchDelay,
-        totalBatches = totalBatches,
-        fieldIds    = fieldIds,
-        fieldData   = fieldData,
-        connection  = connection,
+    -- Step 4: Choose sync strategy based on server type.
+    --
+    -- Dedicated servers (g_dedicatedServer ~= nil) use a different connection
+    -- lifecycle: the connection object captured in a closure is NOT guaranteed
+    -- to remain valid across update ticks, causing the deferred batchDispatcher
+    -- to crash with "attempt to call missing method" errors (issue #228).
+    --
+    -- Fix: on dedicated servers send all batches synchronously in a tight loop
+    -- right now, while the connection is guaranteed alive. The main-thread-block
+    -- concern that motivated batching (issue #212) is less of a problem on dedi
+    -- servers which run headless without a render frame budget to protect.
+    --
+    -- On listen servers (local host / singleplayer) the original addUpdateable
+    -- approach is kept so the UI stays responsive during large syncs.
 
-        update = function(self, dt)
-            -- Guard: connection may have dropped or all batches sent
-            if not self.connection or self.batchIndex > self.totalBatches then
-                g_currentMission:removeUpdateable(self)
-                return
-            end
+    local isDedicatedServer = (g_dedicatedServer ~= nil)
 
-            -- Throttle: wait batchDelay ms between sends
-            self.timer = self.timer + dt
-            if self.timer < self.batchDelay then return end
-            self.timer = 0
-
-            local startIdx = (self.batchIndex - 1) * self.batchSize + 1
-            local endIdx   = math.min(self.batchIndex * self.batchSize, #self.fieldIds)
+    if isDedicatedServer then
+        -- Dedicated server path: send all batches immediately in a loop.
+        SoilLogger.info("Server: Dedicated server detected — sending %d fields in synchronous batches", fieldCount)
+        for batchIndex = 1, totalBatches do
+            local startIdx = (batchIndex - 1) * batchSize + 1
+            local endIdx   = math.min(batchIndex * batchSize, #fieldIds)
             local batch    = {}
             for i = startIdx, endIdx do
-                local id = self.fieldIds[i]
-                batch[id] = self.fieldData[id]
+                local id = fieldIds[i]
+                batch[id] = fieldData[id]
             end
-
-            local isLast = (self.batchIndex == self.totalBatches)
-            self.connection:sendEvent(SoilFieldBatchSyncEvent.new(batch, isLast))
-
-            SoilLogger.info("Server: Field batch %d/%d sent (%d fields)",
-                self.batchIndex, self.totalBatches, endIdx - startIdx + 1)
-
-            self.batchIndex = self.batchIndex + 1
-
-            if isLast then
-                g_currentMission:removeUpdateable(self)
-            end
+            local isLast = (batchIndex == totalBatches)
+            connection:sendEvent(SoilFieldBatchSyncEvent.new(batch, isLast))
+            SoilLogger.info("Server: Field batch %d/%d sent (%d fields)", batchIndex, totalBatches, endIdx - startIdx + 1)
         end
-    }
+    elseif g_currentMission and g_currentMission.addUpdateable then
+        -- Listen server / local host path: drip-feed batches via addUpdateable
+        -- so the render thread is not blocked for large maps (issue #212).
+        local batchDispatcher = {
+            batchIndex   = 1,
+            timer        = 0,
+            batchSize    = batchSize,
+            batchDelay   = batchDelay,
+            totalBatches = totalBatches,
+            fieldIds     = fieldIds,
+            fieldData    = fieldData,
+            connection   = connection,
 
-    if g_currentMission and g_currentMission.addUpdateable then
+            update = function(self, dt)
+                -- Guard: connection may have dropped or all batches sent
+                if not self.connection or self.batchIndex > self.totalBatches then
+                    g_currentMission:removeUpdateable(self)
+                    return
+                end
+
+                -- Throttle: wait batchDelay ms between sends
+                self.timer = self.timer + dt
+                if self.timer < self.batchDelay then return end
+                self.timer = 0
+
+                local startIdx = (self.batchIndex - 1) * self.batchSize + 1
+                local endIdx   = math.min(self.batchIndex * self.batchSize, #self.fieldIds)
+                local batch    = {}
+                for i = startIdx, endIdx do
+                    local id = self.fieldIds[i]
+                    batch[id] = self.fieldData[id]
+                end
+
+                local isLast = (self.batchIndex == self.totalBatches)
+                self.connection:sendEvent(SoilFieldBatchSyncEvent.new(batch, isLast))
+
+                SoilLogger.info("Server: Field batch %d/%d sent (%d fields)",
+                    self.batchIndex, self.totalBatches, endIdx - startIdx + 1)
+
+                self.batchIndex = self.batchIndex + 1
+
+                if isLast then
+                    g_currentMission:removeUpdateable(self)
+                end
+            end
+        }
         g_currentMission:addUpdateable(batchDispatcher)
         SoilLogger.info("Server: Batch dispatcher registered (%d batches of %d fields)", totalBatches, batchSize)
     else
