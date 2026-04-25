@@ -378,7 +378,8 @@ function SoilMapOverlay:updateSamplePoints(force)
                                 if zoneData then
                                     local cx = math.floor(pt.x / zone.CELL_SIZE)
                                     local cz = math.floor(pt.z / zone.CELL_SIZE)
-                                    local cell = zoneData[cx .. "_" .. cz]
+                                    -- PHASE 2: integer key matches applyFertilizer() change
+                                    local cell = zoneData[cx * 10000 + cz]
                                     if cell then
                                         local val = getCellLayerValue(cell, layerIdx)
                                         if val then r, g, b = self:valueToLayerColor(layerIdx, val) end

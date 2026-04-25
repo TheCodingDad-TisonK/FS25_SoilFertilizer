@@ -27,8 +27,17 @@ function HookManager:getFieldIdAtWorldPosition(x, z)
     -- Initialize the native MapDataGrid cache on first use (requires map to be loaded)
     if not self.fieldIdCache then
         local mapSize = g_currentMission and g_currentMission.terrainSize or 2048
-        -- 2m block size provides high resolution for field boundaries
-        self.fieldIdCache = MapDataGrid.createFromBlockSize(mapSize, 2)
+        -- PHASE 5: Scale block size with map size.
+        -- A fixed 2m block on a 16x map (16384m) creates a 8192×8192 grid — 64M cells.
+        -- Doubling block size per doubling of map keeps the cell count constant (~4M).
+        --   4x  (4096m):  blockSize=2m  → 2048×2048 grid
+        --   8x  (8192m):  blockSize=4m  → 2048×2048 grid
+        --   16x (16384m): blockSize=8m  → 2048×2048 grid
+        local BASE_MAP   = 4096
+        local BASE_BLOCK = 2
+        local blockSize  = math.max(BASE_BLOCK, math.floor(BASE_BLOCK * (mapSize / BASE_MAP)))
+        SoilLogger.info("[PERF-P5] MapDataGrid: map=%.0fm  blockSize=%dm", mapSize, blockSize)
+        self.fieldIdCache = MapDataGrid.createFromBlockSize(mapSize, blockSize)
     end
 
     -- Fast path: Check the native C++ backed spatial grid cache
