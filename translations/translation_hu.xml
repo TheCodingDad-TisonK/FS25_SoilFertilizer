@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <l10n>
     <elements>
     <e k="sf_section" v="Talaj &amp; Műtrágya" eh="f31197fb" />
@@ -64,8 +64,6 @@
     <e k="sf_hud_font_3" v="Nagy" eh="3a69b34c" />
     <e k="sf_hud_transparency_short" v="HUD átlátszóság" eh="e8a009e4" />
     <e k="sf_hud_transparency_long" v="Háttér átlátszósági szint beállítása (Átlátszó = áttetszÅ‘, Tömör = átlátszatlan)" eh="152e390a" />
-		<e k="sf_hud_drag_enabled_short" v="[EN] HUD Drag" eh="e5a9a723" />
-		<e k="sf_hud_drag_enabled_long" v="[EN] Allow right-click to enter HUD drag/edit mode. Disable if conflicting with other mods (e.g. Courseplay)" eh="d9e2d813" />
     <e k="sf_hud_trans_1" v="Átlátszó" eh="dc30bc0c" />
     <e k="sf_hud_trans_2" v="Könnyű" eh="9914a0ce" />
     <e k="sf_hud_trans_3" v="Közepes" eh="87f8a6ab" />
@@ -93,6 +91,7 @@
     <e k="input_SF_OPEN_SETTINGS" v="Open Soil Settings" eh="2e31c0dd" />
     <e k="sf_reset" v="Talajbeállítások alaphelyzetbe állítása" eh="467bc2f5" />
     <e k="input_SF_TOGGLE_HUD" v="Talaj HUD váltása" eh="f0224a10" />
+    <e k="input_SF_HUD_DRAG" v="[EN] HUD Drag Mode" eh="00000000" />
     <e k="input_SF_SOIL_REPORT" v="Talajjelentés" eh="c33180ef" />
     <e k="input_SF_RATE_UP" v="Műtrágya arány növelése" eh="6e601ef5" />
     <e k="input_SF_RATE_DOWN" v="Műtrágya arány csökkentése" eh="30712026" />

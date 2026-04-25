@@ -195,6 +195,20 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
                     end
                 end
 
+                -- HUD drag toggle (SF_HUD_DRAG, default RMB) — PLAYER context
+                if g_SoilFertilityManager.soilHUD then
+                    local dragOk, dragId = g_inputBinding:registerActionEvent(
+                        InputAction.SF_HUD_DRAG, g_SoilFertilityManager,
+                        g_SoilFertilityManager.onHUDDragInput,
+                        false, true, false, true
+                    )
+                    if dragOk and dragId then
+                        g_SoilFertilityManager.hudDragEventId = dragId
+                        g_inputBinding:setActionEventTextVisibility(dragId, false)
+                        SoilLogger.info("HUD drag (RMB) registered in PLAYER context")
+                    end
+                end
+
                 g_inputBinding:endActionEventsModification()
                 SoilLogger.info("PLAYER context input registration complete")
             end
@@ -303,6 +317,20 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
                         g_SoilFertilityManager.vehicleSettingsPanelEventId = vSpId
                         binding:setActionEventTextVisibility(vSpId, false)
                         SoilLogger.info("Settings panel (Shift+O) registered in VEHICLE context")
+                    end
+                end
+
+                -- HUD drag toggle (SF_HUD_DRAG, default RMB) — VEHICLE context
+                if g_SoilFertilityManager.soilHUD then
+                    local vDragOk, vDragId = binding:registerActionEvent(
+                        InputAction.SF_HUD_DRAG, g_SoilFertilityManager,
+                        g_SoilFertilityManager.onHUDDragInput,
+                        false, true, false, true
+                    )
+                    if vDragOk and vDragId then
+                        g_SoilFertilityManager.vehicleHudDragEventId = vDragId
+                        binding:setActionEventTextVisibility(vDragId, false)
+                        SoilLogger.info("HUD drag (RMB) registered in VEHICLE context")
                     end
                 end
 
@@ -497,6 +525,16 @@ end
 function SoilFertilityManager:onOpenSettingsInput()
     if self.settingsPanel then
         self.settingsPanel:toggle()
+    end
+end
+
+-- Input callback for HUD drag toggle (SF_HUD_DRAG, default RMB)
+function SoilFertilityManager:onHUDDragInput()
+    if not self.soilHUD then return end
+    if self.soilHUD.editMode then
+        self.soilHUD:exitEditMode()
+    else
+        self.soilHUD:enterEditMode()
     end
 end
 
@@ -1018,6 +1056,16 @@ function SoilFertilityManager:delete()
     if self.cycleMapLayerEventId and g_inputBinding then
         g_inputBinding:removeActionEvent(self.cycleMapLayerEventId)
         self.cycleMapLayerEventId = nil
+    end
+
+    if self.hudDragEventId and g_inputBinding then
+        g_inputBinding:removeActionEvent(self.hudDragEventId)
+        self.hudDragEventId = nil
+    end
+
+    if self.vehicleHudDragEventId and g_inputBinding then
+        g_inputBinding:removeActionEvent(self.vehicleHudDragEventId)
+        self.vehicleHudDragEventId = nil
     end
 
     if self.soilReportDialog then

@@ -296,15 +296,7 @@ function SoilHUD:onMouseEvent(posX, posY, isDown, isUp, button, eventUsed)
     if not self.settings.showHUD then return false end
     if not self.visible then return false end
 
-    -- RMB: toggle edit mode (skipped if player disabled drag to avoid mod conflicts)
-    if isDown and button == 3 and self.settings.hudDragEnabled then
-        if self.editMode then
-            self:exitEditMode()
-        else
-            self:enterEditMode()
-        end
-        return
-    end
+    -- RMB toggle is now handled by the SF_HUD_DRAG input action (registered in SoilFertilityManager)
 
     if not self.editMode then return false end
 
@@ -373,17 +365,6 @@ function SoilHUD:update(dt)
         self.lastHudPosition = currentPosition
     end
 
-    -- Detection for initial RMB click when cursor might be hidden
-    if not self.editMode and self.initialized and self.settings.enabled and self.settings.showHUD and self.visible and self.settings.hudDragEnabled then
-        if Input and Input.isMouseButtonPressed and Input.isMouseButtonPressed(Input.MOUSE_BUTTON_RIGHT) then
-            -- Note: posX/posY might not be perfectly accurate if hidden, but we check last known
-            if g_inputBinding and g_inputBinding.mousePosXLast and g_inputBinding.mousePosYLast then
-                if self:isPointerOverHUD(g_inputBinding.mousePosXLast, g_inputBinding.mousePosYLast) then
-                    self:enterEditMode()
-                end
-            end
-        end
-    end
 
     if self.editMode then
         if g_inputBinding and g_inputBinding.setShowMouseCursor then

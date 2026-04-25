@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <l10n>
     <elements>
     <e k="sf_section" v="Boden &amp; Dünger" eh="f31197fb" />
@@ -64,8 +64,6 @@
     <e k="sf_hud_font_3" v="Groß" eh="3a69b34c" />
     <e k="sf_hud_transparency_short" v="HUD-Transparenz" eh="e8a009e4" />
     <e k="sf_hud_transparency_long" v="Hintergrundtransparenz festlegen (Klar = durchsichtig, Fest = undurchsichtig)" eh="152e390a" />
-		<e k="sf_hud_drag_enabled_short" v="[EN] HUD Drag" eh="e5a9a723" />
-		<e k="sf_hud_drag_enabled_long" v="[EN] Allow right-click to enter HUD drag/edit mode. Disable if conflicting with other mods (e.g. Courseplay)" eh="d9e2d813" />
     <e k="sf_hud_trans_1" v="Klar" eh="dc30bc0c" />
     <e k="sf_hud_trans_2" v="Leicht" eh="9914a0ce" />
     <e k="sf_hud_trans_3" v="Mittel" eh="87f8a6ab" />
@@ -93,6 +91,7 @@
     <e k="input_SF_OPEN_SETTINGS" v="Open Soil Settings" eh="2e31c0dd" />
     <e k="sf_reset" v="Bodeneinstellungen zurücksetzen" eh="467bc2f5" />
     <e k="input_SF_TOGGLE_HUD" v="Boden-HUD umschalten" eh="f0224a10" />
+    <e k="input_SF_HUD_DRAG" v="[EN] HUD Drag Mode" eh="00000000" />
     <e k="input_SF_SOIL_REPORT" v="Bodenbericht" eh="c33180ef" />
     <e k="input_SF_RATE_UP" v="Düngerrate erhöhen" eh="6e601ef5" />
     <e k="input_SF_RATE_DOWN" v="Düngerrate verringern" eh="30712026" />
