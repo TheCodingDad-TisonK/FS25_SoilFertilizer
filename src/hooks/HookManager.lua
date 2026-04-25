@@ -131,6 +131,28 @@ function HookManager:installAll(soilSystem)
     local extFillOk = self:installExternalFillHook()
     if extFillOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
+    -- CRITICAL: propagate the getExternalFill wrapper down to vehicleType.functions and
+    -- live vehicle instances. SpecializationUtil.copyTypeFunctionsInto copies function
+    -- refs directly onto vehicle instances at load time, so patching Sprayer.getExternalFill
+    -- on the class table alone NEVER reaches already-loaded vehicles (issue #205).
+    if extFillOk then
+        self:propagateExternalFillHookToLiveVehicles()
+    end
+
+    -- Speed-based area-normalized consumption (tank-drain path).
+    -- Replaces vanilla getSprayerUsage's speedLimit with actual lastSpeed so product
+    -- consumption scales correctly with area covered at the vehicle's real speed.
+    local sprayUsageOk = self:installSprayerUsageHook()
+    if sprayUsageOk then successCount = successCount + 1 else failCount = failCount + 1 end
+
+    -- Opt custom fill types into the vanilla "external fill" skip-depletion path.
+    -- This is the canonical BUY-mode fix (issue #205): by telling the base engine that
+    -- our tank is externally filled when BUY mode is active, Sprayer:onStartWorkAreaProcessing
+    -- clears sprayVehicle/sprayFillUnit to nil and onEndWorkAreaProcessing NEVER calls
+    -- addFillUnitFillLevel — no tank drain, no race, no refill, no FillUnit hook needed.
+    local buyOptInOk = self:installExternalFillOptInHook()
+    if buyOptInOk then successCount = successCount + 1 else failCount = failCount + 1 end
+
     -- Fix fill plane and fill volume texture for custom fill types
     local fillMatOk = self:installFillTypeMaterialHook()
     if fillMatOk then successCount = successCount + 1 else failCount = failCount + 1 end
@@ -276,6 +298,10 @@ function HookManager:registerCustomSprayTypes()
         if g_fillTypeManager:getFillTypeByName(name) then
             local customRate = baseRates[name] and baseRates[name].value or liqBase
             local customLPS  = liquidLPS * (customRate / liqBase)
+            -- effectiveRate = LPS * 36000 gives L/ha at 1 m/s (1 km/h) over 1 m width;
+            -- at real field speed & width the per-ha result matches BASE_RATES value.
+            local effectiveRate = customLPS * 36000  -- L/ha equivalent at reference conditions
+            SoilLogger.debug("SprayType [LIQ] %-20s  LPS=%.6f  rate=%.1f L/ha", name, customLPS, effectiveRate)
 
             -- addSprayType is idempotent: if already registered it updates the entry
             g_sprayTypeManager:addSprayType(name, customLPS, "FERTILIZER", liquidGroundType, false)
@@ -289,6 +315,8 @@ function HookManager:registerCustomSprayTypes()
         if g_fillTypeManager:getFillTypeByName(name) then
             local customRate = baseRates[name] and baseRates[name].value or dryBase
             local customLPS  = solidLPS * (customRate / dryBase)
+            local effectiveRate = customLPS * 36000  -- kg/ha equivalent at reference conditions
+            SoilLogger.debug("SprayType [DRY] %-20s  LPS=%.6f  rate=%.1f kg/ha", name, customLPS, effectiveRate)
 
             g_sprayTypeManager:addSprayType(name, customLPS, "FERTILIZER", solidGroundType, false)
             registered = registered + 1
@@ -301,6 +329,7 @@ function HookManager:registerCustomSprayTypes()
         "[OK] Custom spray types registered: %d types (calibrated LPS: liquid base=%.5f, solid base=%.5f, %d skipped/unavailable)",
         registered, liquidLPS, solidLPS, skipped
     )
+    SoilLogger.info("     To see per-type rates, enable debug mode: SoilDebug (in developer console)")
 end
 
 -- =========================================================
@@ -818,6 +847,12 @@ function HookManager:installSprayerAreaHook()
         return false
     end
 
+    -- Capture the HookManager instance as an upvalue. g_SoilFertilityManager is the
+    -- SoilFertilityManager (not HookManager) and the HookManager lives at
+    -- g_SoilFertilityManager.soilSystem.hookManager — easy to get wrong, so we just
+    -- capture `self` here and reference it directly in the closure.
+    local hookMgrRef = self
+
     local original = Sprayer.onEndWorkAreaProcessing
     Sprayer.onEndWorkAreaProcessing = Utils.appendedFunction(
         original,
@@ -859,7 +894,7 @@ function HookManager:installSprayerAreaHook()
             -- the intended product when fillType arrives as UNKNOWN — without it, Hook 9
             -- falls through to original and no money is ever charged (issue #205).
             do
-                local _hm = g_SoilFertilityManager and g_SoilFertilityManager.hookManager
+                local _hm = hookMgrRef
                 if _hm and _hm.customFillTypePrices and _hm.customFillTypePrices[fillTypeIndex] then
                     self._soilLastCustomFillType = fillTypeIndex
                 end
@@ -994,7 +1029,24 @@ function HookManager:installSprayerAreaHook()
                 -- our FillUnit.addFillUnitFillLevel hook installs, so the class-level hook
                 -- may be bypassed. Here we handle BUY mode reliably: the tank already depleted
                 -- (original ran first), so we add the consumed liters back and charge the farm.
-                local hookMgr = g_SoilFertilityManager.hookManager
+                --
+                -- IMPORTANT (issue #205 opt-in path): when getIsSprayerExternallyFilled()
+                -- returns true AND getExternalFill returns a valid type, vanilla's
+                -- onStartWorkAreaProcessing sets sprayVehicle=nil AND
+                -- onEndWorkAreaProcessing skips addFillUnitFillLevel entirely.
+                -- The tank was NEVER drained, so adding liters here would inflate the level.
+                -- Detect this by checking wap.sprayVehicle == nil after vanilla ran.
+                do
+                    local wap = spec.workAreaParameters
+                    if wap and wap.sprayVehicle == nil then
+                        -- External fill path active — tank untouched, getExternalFill already
+                        -- charged the farm. Skip backup refill entirely.
+                        SoilLogger.debug("BUY SKIP backup refill: external fill path active (sprayVehicle=nil) veh=%d", self.id or 0)
+                        return  -- exit pcall closure, backup refill block below is skipped
+                    end
+                end
+
+                local hookMgr = hookMgrRef
                 local buyPrices = hookMgr and hookMgr.customFillTypePrices
                 local pricePerLiter = buyPrices and buyPrices[fillTypeIndex]
                 if pricePerLiter then
@@ -1653,7 +1705,7 @@ function HookManager:installPurchaseRefillHook()
         LIQUID_UREA = 1.70, LIQUID_AMS = 1.45, LIQUID_MAP = 2.00, LIQUID_DAP = 1.80, LIQUID_POTASH = 1.85,
         UREA = 1.65, AMS = 1.40, MAP = 1.95, DAP = 1.75, POTASH = 1.80,
         COMPOST = 0.60, BIOSOLIDS = 0.55, CHICKEN_MANURE = 0.50,
-        PELLETIZED_MANURE = 0.70, GYPSUM = 0.80,
+        PELLETIZED_MANURE = 0.70, GYPSUM = 0.35,  -- reduced: amendment, not plant food ($525/ha vs $1200)
     }
 
     -- customPrices[fillTypeIndex] = pricePerLiter
@@ -1838,22 +1890,44 @@ function HookManager:installExternalFillHook()
         return false
     end
 
+    -- Capture HookManager instance (see note in installSprayerAreaHook).
+    local hookMgrRef = self
+
     local original = Sprayer.getExternalFill
 
     Sprayer.getExternalFill = function(sprayerSelf, fillType, dt)
-        local hookMgr = g_SoilFertilityManager and g_SoilFertilityManager.hookManager
+        local hookMgr = hookMgrRef
         local prices  = hookMgr and hookMgr.customFillTypePrices
 
         if not prices then
             return original(sprayerSelf, fillType, dt)
         end
 
-        -- Identify the intended custom product
+        -- Identify the intended custom product.
+        -- Priority order (issue #205 STARTER → LIQUIDFERTILIZER fix):
+        --   1. fillType arg is already one of our custom types (direct match).
+        --   2. Ask the tank what it actually holds (authoritative on a full/partial tank).
+        --   3. Fall back to _soilLastCustomFillType (stamp set by the Sprayer-area hook;
+        --      covers the empty-tank AI case where tank fill type is UNKNOWN).
+        -- Step 2 is what prevents the "STARTER loaded but vanilla picks LIQUIDFERTILIZER"
+        -- bug: when the caller passes fillType=UNKNOWN, the tank's real contents win over
+        -- vanilla's allowLiquidFertilizer/allowFertilizer/allowHerbicide cascade.
         local customIdx = nil
         if fillType and fillType ~= FillType.UNKNOWN and prices[fillType] then
             customIdx = fillType
-        elseif (not fillType or fillType == FillType.UNKNOWN) and sprayerSelf._soilLastCustomFillType then
-            customIdx = sprayerSelf._soilLastCustomFillType
+        else
+            -- Step 2: read actual tank contents
+            local okFui, sprayFui = pcall(function() return sprayerSelf:getSprayerFillUnitIndex() end)
+            if okFui and sprayFui then
+                local okTankFt, tankFt = pcall(function() return sprayerSelf:getFillUnitFillType(sprayFui) end)
+                if okTankFt and tankFt and tankFt ~= FillType.UNKNOWN and prices[tankFt] then
+                    customIdx = tankFt
+                end
+            end
+            -- Step 3: empty-tank stamp fallback
+            if not customIdx and sprayerSelf._soilLastCustomFillType and prices[sprayerSelf._soilLastCustomFillType] then
+                customIdx = sprayerSelf._soilLastCustomFillType
+            end
         end
 
         if not customIdx then
@@ -1885,7 +1959,48 @@ function HookManager:installExternalFillHook()
 
         -- Buy mode active: charge our price and return the custom type so the
         -- correct product is written to the terrain density map.
-        local usage = sprayerSelf:getSprayerUsage(customIdx, dt)
+        --
+        -- Area-normalized usage (speed-based).
+        -- Vanilla getSprayerUsage uses self.speedLimit (configured max speed in km/h),
+        -- which over-charges when the vehicle moves slower than its speed limit.
+        -- We replicate the vanilla formula but substitute lastSpeed (actual m/s → km/h)
+        -- so consumption truly scales with area covered, not with the speed dial setting.
+        -- Formula: scale × litersPerSecond × actualSpeed_km/h × workWidth_m × dt_ms × 0.001
+        local usage
+        do
+            local actualSpeedKmh = math.abs(sprayerSelf.lastSpeed or 0) * 3600
+            if actualSpeedKmh < 0.5 then
+                -- Sprayer not moving (headland pivot, stopped).  No area covered, no charge.
+                usage = 0
+            else
+                local spec_s   = sprayerSelf.spec_sprayer
+                local usScale  = spec_s and spec_s.usageScale
+                -- Prefer active spray-type's usageScale if present.
+                local okAST, activeSpT = pcall(function() return sprayerSelf:getActiveSprayType() end)
+                if okAST and activeSpT and activeSpT.usageScale then
+                    usScale = activeSpT.usageScale
+                end
+                local workWidth = (usScale and usScale.workingWidth) or 12
+                if usScale and usScale.workAreaIndex then
+                    local okW, w = pcall(function()
+                        return sprayerSelf:getWorkAreaWidth(usScale.workAreaIndex)
+                    end)
+                    if okW and w and w > 0 then workWidth = w end
+                end
+                -- fillType-specific scale (usually 1 for custom types, fallback to default).
+                local fillScale = 1
+                if spec_s and spec_s.usageScale then
+                    local ft_scales = spec_s.usageScale.fillTypeScales
+                    fillScale = (ft_scales and ft_scales[customIdx])
+                        or spec_s.usageScale.default
+                        or 1
+                end
+                -- litersPerSecond registered in g_sprayTypeManager for this fill type.
+                local spT = g_sprayTypeManager and g_sprayTypeManager:getSprayTypeByFillTypeIndex(customIdx)
+                local lps = spT and spT.litersPerSecond or 1
+                usage = fillScale * lps * actualSpeedKmh * workWidth * dt * 0.001
+            end
+        end
         if sprayerSelf.isServer and usage > 0 then
             local pricePerLiter = prices[customIdx] or 1.0
             local price = usage * pricePerLiter * 1.5  -- 1.5× AI premium (matches vanilla)
@@ -1896,8 +2011,21 @@ function HookManager:installExternalFillHook()
                 g_farmManager:updateFarmStats(statsFarmId, "expenses", price)
                 g_currentMission:addMoney(-price, farmId, MoneyType.PURCHASE_FERTILIZER)
             end)
-            SoilLogger.debug("ExternalFill BUY: veh=%d type=%s liters=%.2f price=%.2f",
-                sprayerSelf.id or 0, ftName, usage, price)
+            -- Diagnostic: log BUY billing details every frame (debug mode only).
+            -- usage = L charged this dt; price = cost this dt; eff = effective L/ha.
+            -- Compare eff to BASE_RATES to validate the speed-based formula is correct.
+            local spd   = math.abs(sprayerSelf.lastSpeed or 0) * 3600  -- km/h
+            local spT2  = g_sprayTypeManager and g_sprayTypeManager:getSprayTypeByFillTypeIndex(customIdx)
+            local lps2  = spT2 and spT2.litersPerSecond or 0
+            local usagePerSec = (dt > 0) and (usage * 1000 / dt) or 0
+            local spec_s2 = sprayerSelf.spec_sprayer
+            local usScale2 = spec_s2 and spec_s2.usageScale
+            local ww2 = (usScale2 and usScale2.workingWidth) or 12
+            local areaPerSec = spd * ww2 / 36000  -- ha/s
+            local effLpha = (areaPerSec > 0) and (usagePerSec / areaPerSec) or 0
+            SoilLogger.debug(
+                "ExternalFill BUY veh=%d type=%-12s  spd=%.1f km/h  lps=%.6f  usage=%.4fL  cost=$%.4f  eff=%.1f L/ha",
+                sprayerSelf.id or 0, ftName, spd, lps2, usage, price, effLpha)
         end
 
         return customIdx, usage
@@ -1906,6 +2034,365 @@ function HookManager:installExternalFillHook()
     self:register(Sprayer, "getExternalFill", original, "Sprayer.getExternalFill")
     SoilLogger.info("[OK] External fill hook installed (Sprayer.getExternalFill)")
     return true
+end
+
+-- =========================================================
+-- HOOK 9a: Speed-based area-normalized sprayer consumption
+-- =========================================================
+-- Vanilla Sprayer:getSprayerUsage multiplies by self.speedLimit (configured max speed,
+-- km/h) rather than self.lastSpeed (actual current speed, m/s). When the vehicle drives
+-- slower than its speed limit (Courseplay following a planned route, turning at headlands,
+-- slowing for obstacles), vanilla over-charges and under-applies per hectare.
+--
+-- Fix: replace speedLimit with lastSpeed × 3600 (converted to km/h for formula
+-- compatibility). The rest of the vanilla formula is identical:
+--   scale × litersPerSecond × actualSpeed_km/h × workWidth_m × dt_ms × 0.001
+-- When the vehicle stops (headland pivot), lastSpeed ≈ 0 → usage = 0 → boom shuts off.
+-- This is correct — no area is being covered.
+--
+-- Three-layer patch required: SpecializationUtil.registerFunction (line 91 of Sprayer.lua)
+-- + copyTypeFunctionsInto means class-table patches never reach live vehicle instances.
+---@return boolean success
+function HookManager:installSprayerUsageHook()
+    if not Sprayer or type(Sprayer.getSprayerUsage) ~= "function" then
+        SoilLogger.warning("SprayerUsage hook: Sprayer.getSprayerUsage not available - skipping")
+        return false
+    end
+
+    local originalClassFn = Sprayer.getSprayerUsage
+
+    -- Throttle table: vehId → last log time (ms).  Shared across all replacement closures
+    -- so that Layer-1/2/3 duplicates don't each log independently for the same vehicle.
+    local _usageLogLastTime = {}
+
+    local function makeUsageReplacement(originalFn)
+        return function(sprayerSelf, fillType, dt)
+            if fillType == FillType.UNKNOWN then return 0 end
+
+            -- Actual speed in km/h (lastSpeed stored in m/ms by physics; * 3600 = km/h).
+            local actualSpeedKmh = math.abs(sprayerSelf.lastSpeed or 0) * 3600
+            if actualSpeedKmh < 0.5 then
+                -- Below 0.5 km/h (stopping, pivoting at headlands): no area covered.
+                return 0
+            end
+
+            -- Mirror vanilla's full formula, substituting actualSpeed for speedLimit.
+            local spec_s = sprayerSelf.spec_sprayer
+            if not spec_s then
+                return originalFn(sprayerSelf, fillType, dt)
+            end
+
+            -- fillType-specific scale (falls back to usageScale.default, normally 1.0)
+            local fillScale = 1
+            if spec_s.usageScale then
+                local ft_scales = spec_s.usageScale.fillTypeScales
+                fillScale = (ft_scales and ft_scales[fillType])
+                    or spec_s.usageScale.default or 1
+            end
+
+            -- litersPerSecond from the spray type manager (registered for all custom types
+            -- by registerCustomSprayTypes; vanilla types are always present).
+            local spT = g_sprayTypeManager and g_sprayTypeManager:getSprayTypeByFillTypeIndex(fillType)
+            local lps = spT and spT.litersPerSecond or 1
+
+            -- Working width: prefer active spray-type's usageScale, then vehicle default.
+            local usScale = spec_s.usageScale
+            local okAST, activeSpT = pcall(function() return sprayerSelf:getActiveSprayType() end)
+            if okAST and activeSpT and activeSpT.usageScale then
+                usScale = activeSpT.usageScale
+            end
+            local workWidth = (usScale and usScale.workingWidth) or 12
+            if usScale and usScale.workAreaIndex then
+                local okW, w = pcall(function()
+                    return sprayerSelf:getWorkAreaWidth(usScale.workAreaIndex)
+                end)
+                if okW and w and w > 0 then workWidth = w end
+            end
+
+            local usage = fillScale * lps * actualSpeedKmh * workWidth * dt * 0.001
+
+            -- Throttled diagnostic: log once per 4 s per vehicle (debug mode only).
+            -- Shows speed / width / lps / usage-per-second / effective L/ha so you can
+            -- confirm the speed-based formula is working at the actual travel speed.
+            local vehId = sprayerSelf.id or 0
+            local now   = (g_currentMission and g_currentMission.time) or 0
+            if (now - (_usageLogLastTime[vehId] or 0)) >= 4000 then
+                _usageLogLastTime[vehId] = now
+                local usagePerSec = (dt > 0) and (usage * 1000 / dt) or 0
+                -- Effective L/ha = usage-rate / area-rate
+                -- area/s = speed_kmh * 1000/3600 m/s * width_m / 10000 ha/m² = speed*width/36000
+                local areaPerSec    = actualSpeedKmh * workWidth / 36000
+                local effectiveLpha = (areaPerSec > 0) and (usagePerSec / areaPerSec) or 0
+                local ftName = "?"
+                local ft = g_fillTypeManager and g_fillTypeManager:getFillTypeByIndex(fillType)
+                if ft then ftName = ft.name end
+                SoilLogger.debug(
+                    "SprayUsage veh=%d type=%-12s  spd=%.1f km/h  w=%.1fm  lps=%.6f  scale=%.2f  usage/s=%.4f L/s  eff=%.1f L/ha",
+                    vehId, ftName, actualSpeedKmh, workWidth, lps, fillScale, usagePerSec, effectiveLpha)
+            end
+
+            return usage
+        end
+    end
+
+    -- Layer 1: class table
+    Sprayer.getSprayerUsage = makeUsageReplacement(originalClassFn)
+
+    -- Layer 2: vehicleType.functions for every type with Sprayer spec
+    local typesPatched = 0
+    if g_vehicleTypeManager and g_vehicleTypeManager.types then
+        for _, typeDef in pairs(g_vehicleTypeManager.types) do
+            local hasSprayer = typeDef.specializationsByName and typeDef.specializationsByName.sprayer
+            if hasSprayer and typeDef.functions and typeDef.functions.getSprayerUsage then
+                local origTypeFn = typeDef.functions.getSprayerUsage
+                typeDef.functions.getSprayerUsage = makeUsageReplacement(origTypeFn)
+                typesPatched = typesPatched + 1
+            end
+        end
+    end
+
+    -- Layer 3: every already-live vehicle instance
+    local vehPatched = 0
+    local vList = (g_currentMission and g_currentMission.vehicleSystem and
+                   g_currentMission.vehicleSystem.vehicles) or
+                  (g_currentMission and g_currentMission.vehicles) or {}
+    for _, vehicle in pairs(vList) do
+        if vehicle and rawget(vehicle, "getSprayerUsage") then
+            local origInstFn = vehicle.getSprayerUsage
+            vehicle.getSprayerUsage = makeUsageReplacement(origInstFn)
+            vehPatched = vehPatched + 1
+        end
+    end
+
+    self:register(Sprayer, "getSprayerUsage", originalClassFn, "Sprayer.getSprayerUsage (class only)")
+    SoilLogger.info("[OK] SprayerUsage hook installed — actual-speed consumption (%d types, %d vehicles patched)",
+        typesPatched, vehPatched)
+    return true
+end
+
+-- =========================================================
+-- HOOK 9b: Opt custom fill types into the vanilla "external fill" skip-depletion path
+-- =========================================================
+-- Root cause of issue #205 (BUY mode doesn't work with custom types / Courseplay):
+-- vanilla Sprayer:getIsSprayerExternallyFilled() returns true only when
+-- missionInfo.helperBuyFertilizer is true AND the sprayer is flagged as a
+-- fertilizer sprayer. For SlurryTankers (helperSlurrySource==2) and
+-- ManureSpreaders (helperManureSource==2) it always returns false, so vanilla
+-- drains the tank normally. With custom slurry/manure fill types loaded, that
+-- drain writes directly to the tank and then our getExternalFill hook refills
+-- it — a race that flickers and double-charges.
+--
+-- Canonical fix: override getIsSprayerExternallyFilled so it ALSO returns true
+-- when the tank holds one of our custom fill types AND the corresponding BUY
+-- mode is active. This tells vanilla's onStartWorkAreaProcessing to clear
+-- sprayVehicle/sprayVehicleFillUnitIndex to nil — which means
+-- onEndWorkAreaProcessing's `if sprayVehicle ~= nil` check is false and
+-- addFillUnitFillLevel is NEVER called. No tank drain. No race. No refill hook
+-- needed. Money is still charged inside getExternalFill.
+--
+-- Covers all Sprayer-using implements:
+--   - Pure Sprayer (field sprayer)
+--   - SlurryTanker (uses Sprayer spec; helperSlurrySource==2 → BUY)
+--   - ManureSpreader (uses Sprayer spec; helperManureSource==2 → BUY)
+--   - FertilizingSowingMachine (planter+fertilizer; uses Sprayer spec)
+--   - FertilizingCultivator (cultivator+fertilizer; uses Sprayer spec)
+---@return boolean success
+-- IMPORTANT: `SpecializationUtil.registerFunction` stores the function reference
+-- in `vehicleType.functions[name]`, and at vehicle instantiation
+-- `SpecializationUtil.copyTypeFunctionsInto` COPIES each reference directly onto
+-- the vehicle instance (vehicle[name] = func).  Replacing only
+-- `Sprayer.getIsSprayerExternallyFilled` on the class table has ZERO effect on
+-- vehicles that were loaded before our hook ran — hence the fix must patch:
+--   (1) the Sprayer class table (future loads)
+--   (2) every vehicleType.functions["getIsSprayerExternallyFilled"] that has
+--       Sprayer in its specialization list (new instances of known types)
+--   (3) every already-live vehicle instance with the method copied on it
+function HookManager:installExternalFillOptInHook()
+    if not Sprayer or type(Sprayer.getIsSprayerExternallyFilled) ~= "function" then
+        SoilLogger.warning("External fill opt-in hook: Sprayer.getIsSprayerExternallyFilled not available - skipping")
+        return false
+    end
+
+    local originalClassFn = Sprayer.getIsSprayerExternallyFilled
+    local hookMgr = self
+    local hookMgrRef = self  -- upvalue used inside the closure below
+    hookMgr._soilPatchedVehicles = hookMgr._soilPatchedVehicles or {}
+
+    -- Build the replacement factory.  Each patched target gets its own wrapper
+    -- that captures the ORIGINAL function it replaces (so we can still delegate
+    -- to vanilla inside the wrapper).
+    local function makeReplacement(originalFn)
+        return function(sprayerSelf)
+            -- Delegate to vanilla first — if vanilla already handles this vehicle
+            -- (e.g. it's a recognised slurry tanker with helperSlurrySource==2),
+            -- there's nothing extra to do.
+            local okVanilla, vanillaRes = pcall(originalFn, sprayerSelf)
+            local vanillaResult = okVanilla and vanillaRes or false
+            if vanillaResult then
+                return true
+            end
+
+            -- Only extend behaviour for our custom fill types.
+            -- hookMgrRef is the captured HookManager upvalue (self at install time).
+            local hm     = hookMgrRef
+            local prices = hm and hm.customFillTypePrices
+            if not prices then return vanillaResult end
+
+            -- Require active AI field work (BUY mode is AI-only).
+            local okAI, aiActive = pcall(function() return sprayerSelf:getIsAIActive() end)
+            if not (okAI and aiActive) then return vanillaResult end
+
+            local root = sprayerSelf.rootVehicle
+            if not root then return vanillaResult end
+            local okFW, fw = pcall(function() return root:getIsFieldWorkActive() end)
+            if not (okFW and fw) then return vanillaResult end
+
+            -- Identify tank contents (priority: arg fill type → tank fill type → last known custom type).
+            local fillType = nil
+            local okFui, sprayFui = pcall(function() return sprayerSelf:getSprayerFillUnitIndex() end)
+            if okFui and sprayFui then
+                local okFt, ft = pcall(function() return sprayerSelf:getFillUnitFillType(sprayFui) end)
+                if okFt and ft and ft ~= FillType.UNKNOWN then fillType = ft end
+            end
+            if (not fillType or not prices[fillType]) and sprayerSelf._soilLastCustomFillType then
+                fillType = sprayerSelf._soilLastCustomFillType
+            end
+            if not fillType or not prices[fillType] then return vanillaResult end
+
+            local mi = g_currentMission and g_currentMission.missionInfo
+            if not mi then return vanillaResult end
+
+            local fm     = g_fillTypeManager
+            local ftDef  = fm and fillType and fm:getFillTypeByIndex(fillType)
+            local ftName = ftDef and ftDef.name or ""
+
+            local buyActive = false
+            if ftName == "LIQUIDMANURE" or ftName == "DIGESTATE" then
+                buyActive = (mi.helperSlurrySource == 2)
+            elseif ftName == "MANURE" then
+                buyActive = (mi.helperManureSource == 2)
+            else
+                buyActive = (mi.helperBuyFertilizer == true)
+            end
+            if not buyActive then return vanillaResult end
+
+            SoilLogger.debug("BUY opt-in engaged: veh=%s type=%s", tostring(sprayerSelf.id or "?"), ftName)
+            return true
+        end
+    end
+
+    -- -----------------------------------------------------------------
+    -- Layer 1: patch the Sprayer class table (future vehicleType loads).
+    -- -----------------------------------------------------------------
+    Sprayer.getIsSprayerExternallyFilled = makeReplacement(originalClassFn)
+
+    -- -----------------------------------------------------------------
+    -- Layer 2: patch g_vehicleTypeManager.types[*].functions for every
+    -- type that has Sprayer in its specialization list.
+    -- -----------------------------------------------------------------
+    local typesPatched, typesSeen, typesSkipped = 0, 0, 0
+    local typeManager = g_vehicleTypeManager
+    if typeManager and typeManager.types then
+        for _, typeDef in pairs(typeManager.types) do
+            typesSeen = typesSeen + 1
+            local hasSprayer = false
+            if typeDef.specializationsByName and typeDef.specializationsByName.sprayer then
+                hasSprayer = true
+            elseif typeDef.specializations then
+                for _, spec in ipairs(typeDef.specializations) do
+                    if spec == Sprayer or (spec and spec.specName == "sprayer") then
+                        hasSprayer = true
+                        break
+                    end
+                end
+            end
+            if hasSprayer and typeDef.functions and typeDef.functions.getIsSprayerExternallyFilled then
+                local origTypeFn = typeDef.functions.getIsSprayerExternallyFilled
+                typeDef.functions.getIsSprayerExternallyFilled = makeReplacement(origTypeFn)
+                typesPatched = typesPatched + 1
+            elseif hasSprayer then
+                typesSkipped = typesSkipped + 1
+            end
+        end
+    end
+    SoilLogger.debug("BUY opt-in hook: vehicleType scan — seen=%d, sprayer-types patched=%d",
+        typesSeen, typesPatched)
+
+    -- -----------------------------------------------------------------
+    -- Layer 3: patch every already-live vehicle instance.
+    -- -----------------------------------------------------------------
+    local vehPatched, vehSeen = 0, 0
+    if g_currentMission and g_currentMission.vehicleSystem and g_currentMission.vehicleSystem.vehicles then
+        for _, vehicle in pairs(g_currentMission.vehicleSystem.vehicles) do
+            vehSeen = vehSeen + 1
+            if vehicle and rawget(vehicle, "getIsSprayerExternallyFilled") then
+                local origInstFn = vehicle.getIsSprayerExternallyFilled
+                vehicle.getIsSprayerExternallyFilled = makeReplacement(origInstFn)
+                vehPatched = vehPatched + 1
+            end
+        end
+    elseif g_currentMission and g_currentMission.vehicles then
+        -- Older API path fallback
+        for _, vehicle in pairs(g_currentMission.vehicles) do
+            vehSeen = vehSeen + 1
+            if vehicle and rawget(vehicle, "getIsSprayerExternallyFilled") then
+                local origInstFn = vehicle.getIsSprayerExternallyFilled
+                vehicle.getIsSprayerExternallyFilled = makeReplacement(origInstFn)
+                vehPatched = vehPatched + 1
+            end
+        end
+    end
+    SoilLogger.debug("BUY opt-in hook: live vehicle scan — seen=%d, patched=%d", vehSeen, vehPatched)
+
+    -- -----------------------------------------------------------------
+    -- Cleanup: restore only the Sprayer class reference on uninstall.
+    -- (Types/instances aren't restored — they'd already be stale.)
+    -- -----------------------------------------------------------------
+    self:register(Sprayer, "getIsSprayerExternallyFilled", originalClassFn,
+        "Sprayer.getIsSprayerExternallyFilled (class only)")
+    SoilLogger.info("[OK] External fill opt-in hook installed — BUY mode should now engage for custom types")
+    return true
+end
+
+-- =========================================================
+-- Re-apply the opt-in patch to the `getExternalFill` function too
+-- (same dispatch issue — the existing installExternalFillHook patches only the
+-- class table, so it never reaches live instances).  We piggy-back here to
+-- patch typeDef.functions["getExternalFill"] and live instances with the
+-- SAME wrapper that installExternalFillHook already built.
+-- =========================================================
+function HookManager:propagateExternalFillHookToLiveVehicles()
+    if not Sprayer then return end
+    local classFn = Sprayer.getExternalFill  -- the wrapper installed by installExternalFillHook
+    if not classFn then return end
+
+    local typesPatched = 0
+    if g_vehicleTypeManager and g_vehicleTypeManager.types then
+        for typeName, typeDef in pairs(g_vehicleTypeManager.types) do
+            local hasSprayer = false
+            if typeDef.specializationsByName and typeDef.specializationsByName.sprayer then
+                hasSprayer = true
+            end
+            if hasSprayer and typeDef.functions and typeDef.functions.getExternalFill then
+                -- Only overwrite if still pointing at the original vanilla fn.
+                typeDef.functions.getExternalFill = classFn
+                typesPatched = typesPatched + 1
+            end
+        end
+    end
+
+    local vehPatched = 0
+    local vList = (g_currentMission and g_currentMission.vehicleSystem and
+                   g_currentMission.vehicleSystem.vehicles) or
+                  (g_currentMission and g_currentMission.vehicles) or {}
+    for _, vehicle in pairs(vList) do
+        if vehicle and rawget(vehicle, "getExternalFill") then
+            vehicle.getExternalFill = classFn
+            vehPatched = vehPatched + 1
+        end
+    end
+    SoilLogger.debug("getExternalFill wrapper propagated — typeDefs=%d, liveVehicles=%d",
+        typesPatched, vehPatched)
 end
 
 -- =========================================================
