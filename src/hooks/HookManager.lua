@@ -1315,9 +1315,9 @@ function HookManager:installPlowingHook()
                             local isSubsoiler = cultivatorSelf.spec_cultivator and
                                                cultivatorSelf.spec_cultivator.isSubsoiler
                             if isSubsoiler then
-                                SoilLogger.debug("Compaction: subsoiler pass on farmland=%d veh=%d",
-                                    farmlandId, cultivatorSelf.id or 0)
-                                g_SoilFertilityManager.soilSystem:onSubsoilerPass(farmlandId)
+                                SoilLogger.debug("Compaction: subsoiler pass on farmland=%d veh=%d pos=(%.1f,%.1f)",
+                                    farmlandId, cultivatorSelf.id or 0, centerX, centerZ)
+                                g_SoilFertilityManager.soilSystem:onSubsoilerPass(farmlandId, centerX, centerZ)
                             else
                                 local rootVehicle = cultivatorSelf.rootVehicle or cultivatorSelf
                                 local okM, totalMass = pcall(function()
@@ -1325,12 +1325,12 @@ function HookManager:installPlowingHook()
                                 end)
                                 if okM and totalMass then
                                     SoilLogger.debug(
-                                        "Compaction check: farmland=%d veh=%d  mass=%.1ft  threshold=%.1ft  heavy=%s",
-                                        farmlandId, cultivatorSelf.id or 0,
+                                        "Compaction check: farmland=%d veh=%d  pos=(%.1f,%.1f)  mass=%.1ft  threshold=%.1ft  heavy=%s",
+                                        farmlandId, cultivatorSelf.id or 0, centerX, centerZ,
                                         totalMass, cp.HEAVY_VEHICLE_THRESHOLD_T,
                                         tostring(totalMass >= cp.HEAVY_VEHICLE_THRESHOLD_T))
                                     if totalMass >= cp.HEAVY_VEHICLE_THRESHOLD_T then
-                                        g_SoilFertilityManager.soilSystem:onCompaction(farmlandId)
+                                        g_SoilFertilityManager.soilSystem:onCompaction(farmlandId, centerX, centerZ)
                                     end
                                 end
                             end
@@ -1399,12 +1399,12 @@ function HookManager:installDedicatedPlowHook()
                             local cp = SoilConstants.COMPACTION
                             if cp and okM and totalMass then
                                 SoilLogger.debug(
-                                    "Compaction check (plow): farmland=%d veh=%d  mass=%.1ft  threshold=%.1ft  heavy=%s",
-                                    farmlandId, plowSelf.id or 0,
+                                    "Compaction check (plow): farmland=%d veh=%d  pos=(%.1f,%.1f)  mass=%.1ft  threshold=%.1ft  heavy=%s",
+                                    farmlandId, plowSelf.id or 0, centerX, centerZ,
                                     totalMass, cp.HEAVY_VEHICLE_THRESHOLD_T,
                                     tostring(totalMass >= cp.HEAVY_VEHICLE_THRESHOLD_T))
                                 if totalMass >= cp.HEAVY_VEHICLE_THRESHOLD_T then
-                                    g_SoilFertilityManager.soilSystem:onCompaction(farmlandId)
+                                    g_SoilFertilityManager.soilSystem:onCompaction(farmlandId, centerX, centerZ)
                                 end
                             end
                         end
