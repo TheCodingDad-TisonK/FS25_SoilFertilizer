@@ -7,6 +7,70 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased]
+
+### Fixed
+
+- **Shop duplicate items removed** (#236 related): Single-item pallet/bigBag storeItems were
+  showing alongside their `multipleItemPurchase` counterparts, creating duplicate shop entries
+  for every purchasable product. Single items are now registered with `showInStore=false` so
+  `multipleItemPurchase` can still spawn them at purchase time, but they no longer appear as
+  separate shop entries.
+
+- **Organic fertilizer P coefficients recalibrated** (#236): Phosphorus coefficients for all
+  manure-based products were approximately 5× too high relative to real-world N:P:K ratios
+  from UNL Extension publication G1335. A single slurry pass at 14,000 L/ha was delivering
+  +22 internal P points (blowing past the "fair" threshold in one application); corrected
+  values now deliver +3–6 P points per pass, requiring 2–3 passes to bring a depleted field
+  to "fair" levels. Affected products: Manure, Slurry, Digestate, Biosolids, Chicken Manure,
+  Pelletized Manure. Base application rates (14,000 L/ha for slurry) are unchanged.
+
+---
+
+## [2.0.2.0] - 2026-04-25
+
+### Added
+
+- **Per-cell soil compaction tracking** (#231): Compaction is now tracked individually per
+  soil cell rather than per field, enabling finer-grained overlay visualization and more
+  accurate subsoiler targeting.
+
+### Fixed
+
+- **BigBag diffuse map textures included in build**: PNG texture files for bigBag products
+  were excluded from the mod ZIP by the build script; corrected so all diffuse maps are
+  packaged correctly.
+
+---
+
+## [2.0.1.0] - 2026-04-25
+
+### Added
+
+- **Per-product label textures for big bags**: Each big bag product now has its own unique
+  label texture (`_diffuse.png`) so products are visually distinguishable in-game.
+
+- **Community translations** (RU/UK): Russian and Ukrainian localizations contributed by
+  community members.
+
+### Fixed
+
+- **LPS calibration for custom spray types** (PR #233 by @antler22): `registerCustomSprayTypes`
+  was scaling custom LPS off the vanilla display rate (93.5 L/ha) instead of the actual drain
+  rate (291.6 L/ha), causing a 3.12× over-drain on every custom fertilizer type. Fixed by
+  deriving `customLPS = customRate / 36000` directly. All 22 custom spray types now drain at
+  exactly their `BASE_RATES` values.
+
+- **Stale VEHICLE context action event IDs** (PR #233 by @antler22): SF was accumulating
+  duplicate input event registrations on every vehicle mount and Courseplay seat-change,
+  causing keys to fire 2–3× per press and HUD drag to toggle on then immediately back off.
+  Fixed by purging all existing SF vehicle event IDs before each re-registration pass.
+
+- **Big bag store icon textures**: Missing `.dds` store icon files added for affected big bag
+  products.
+
+---
+
 ## [2.0.0.0] - 2026-04-25
 
 ### Added

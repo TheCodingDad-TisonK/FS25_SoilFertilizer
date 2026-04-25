@@ -95,9 +95,9 @@ All three are visible in the HUD and the full Soil Report. Each can be toggled o
 |---|---|---|---|---|---|
 | **Liquid Fertilizer** | ●●●○○ | ●●○○○ | ●●●○○ | — | Fast-acting, balanced NPK |
 | **Solid Fertilizer** | ●●●●○ | ●●●○○ | ●●●○○ | — | Higher N/P, granular |
-| **Manure** | ●●○○○ | ●●○○○ | ●●●○○ | ✓ | Slow-release, builds OM over time |
-| **Slurry** | ●●●○○ | ●●○○○ | ●●●●○ | ✓ | Liquid organic, strong K |
-| **Digestate** | ●●●○○ | ●●○○○ | ●●●●○ | ✓ | Biogas byproduct, well-rounded |
+| **Manure** | ●●○○○ | ●○○○○ | ●●○○○ | ✓ | Slow-release, builds OM over time |
+| **Slurry** | ●●●○○ | ●●○○○ | ●●●●○ | ✓ | Liquid organic, K-dominant (real N:P:K ratio) |
+| **Digestate** | ●●●○○ | ●●○○○ | ●●●●○ | ✓ | Biogas byproduct, higher N availability than raw manure |
 | **Lime** | — | — | — | — | Only raises pH — but nothing else works properly without it |
 
 **Custom liquid fertilizers (purchasable IBC liquid tanks in shop):**
@@ -136,7 +136,7 @@ All three are visible in the HUD and the full Soil Report. Each can be toggled o
 | **Compost** | Spreader | Low | Low | Low | ●●●●● | Best OM builder per litre |
 | **Biosolids** | Spreader | ●●○○○ | ●●○○○ | Low | ✓ | Municipal organic amendment |
 | **Chicken Manure** | Spreader | ●●●○○ | ●●●○○ | ●●○○○ | ✓ | Concentrated poultry litter |
-| **Pelletized Manure** | Spreader | ●●●●○ | ●●●●○ | ●●●●○ | ✓ | Dense balanced organic NPK |
+| **Pelletized Manure** | Spreader | ●●●●○ | ●●●○○ | ●●●●○ | ✓ | Dense balanced organic NPK |
 | **Gypsum** | Spreader | — | — | — | Low | Lowers pH, minor OM gain |
 | **Liquid Lime** | Sprayer | — | — | — | — | Raises pH via sprayer equipment |
 
