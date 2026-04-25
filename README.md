@@ -143,6 +143,40 @@ All three are visible in the HUD and the full Soil Report. Each can be toggled o
 > [!NOTE]
 > Organic matter builds slowly — it takes many seasons to accumulate meaningfully. Soil with high OM buffers pH swings and slows nutrient loss from rain.
 
+### 🚜 Soil Compaction
+
+Heavy vehicles compact the soil they drive over. Compaction is tracked per field (0–100%) and
+gradually reduces how effectively the field can absorb nutrients.
+
+| Threshold | Vehicle weight | Effect |
+|---|---|---|
+| **Compaction hit** | ≥ 8 t total (tractor + implement) | +2% compaction per day (once per game day) |
+| **Subsoiler pass** | Any cultivator with `isSubsoiler = true` | −15% compaction per pass |
+| **Natural decay** | Automatically | −0.5% per game day |
+
+At maximum compaction (100%), the field's nutrient extraction penalty reaches **20%** — compacted
+soil binds nutrients and reduces their availability to crops.
+
+The HUD shows compaction as a colour-coded row (green < 20%, amber 20–60%, red > 60%). It also
+appears as **overlay layer 10** on the in-game map. Compaction is saved to `soilData.xml` and
+synced to all clients in multiplayer. Toggle it in settings if you prefer to skip this mechanic.
+
+### 📡 See-and-Spray Integration
+
+When the **Precision Farming DLC** See-and-Spray nozzles would deactivate (no native weed
+detected in a particular spot), the mod checks our own `weedPressure` field value. If weed
+pressure is 20% or higher, the nozzle stays open — bridging our field-level weed tracking into
+the precision spot-spray system.
+
+This is a fully guarded integration: if Precision Farming is not installed it is a silent no-op.
+
+### 📊 Coverage Tracking
+
+The sprayer now tracks which individual soil cells have been covered in an application pass.
+Coverage fraction is shown live in the HUD as `Coverage: X% / 70% min`. The fully-treated
+field notification is gated on achieving **70% minimum coverage** — a single-pass clip across
+a field corner no longer triggers a false "field treated" popup.
+
 ### 🌦️ Environmental Effects
 
 The mod isn't just about what you put in — it's about what the world takes out.
@@ -162,7 +196,9 @@ A compact overlay shows the current field's soil status while you're working. Co
 
 🟢 **Green** — healthy, no action needed &nbsp;|&nbsp; 🟡 **Amber** — getting low, plan ahead &nbsp;|&nbsp; 🔴 **Red** — depleted, yield is being affected
 
-Fully customisable: 5 positions, 4 colour themes, 5 transparency levels, 3 font sizes, and a compact mode that shrinks to one line per nutrient.
+Additional rows appear contextually: **Coverage** (`Coverage: X% / 70% min`) while a sprayer is active on a field, and **Compaction** (when soil compaction is above 0% and the setting is enabled). Both are colour-coded with the same green/amber/red tiers as nutrients.
+
+Fully customisable: 5 positions, 4 colour themes, 5 transparency levels, 3 font sizes, and a compact mode that shrinks to one line per nutrient. The drag-to-reposition action (`SF_HUD_DRAG`, default: RMB) is now rebindable through the standard FS25 key bindings menu.
 
 ### 📋 Full Farm Soil Report
 
@@ -226,6 +262,7 @@ Press **`Shift+O`** anywhere in-game (on foot or in a vehicle) to open the full 
 | **Pest pressure** | On / Off | Track insect pest populations per field |
 | **Disease pressure** | On / Off | Track crop disease per field |
 | **Crop rotation** | On / Off | Enable legume bonus and mono-crop fatigue multiplier |
+| **Soil compaction** | On / Off | Heavy vehicles (≥ 8 t) compact soil, reducing nutrient availability |
 | **Imperial units** | On / Off | Sprayer rates in gal/ac and lb/ac instead of L/ha and kg/ha |
 | **Difficulty** | Simple / Realistic / Hardcore | Scales depletion rate — 0.7× / 1× / 1.5× |
 
@@ -244,7 +281,7 @@ Press **`Shift+O`** anywhere in-game (on foot or in a vehicle) to open the full 
 
 | Setting | Options | What it does |
 |---|---|---|
-| **Active map layer** | Off / N / P / K / pH / OM / Urgency / Weed / Pest / Disease | Nutrient layer shown on the PDA map |
+| **Active map layer** | Off / N / P / K / pH / OM / Urgency / Weed / Pest / Disease / Compaction | Nutrient layer shown on the PDA map |
 | **Overlay density** | Low / Medium / High | Number of data points rendered on the map overlay — Low (8k), Medium (20k), High (40k). Reduce if the map causes frame drops |
 
 > [!NOTE]
@@ -284,7 +321,7 @@ All integrations are detected automatically at runtime and fail gracefully if th
 
 | Mod | Behaviour |
 |---|---|
-| **Precision Farming DLC** | Compatible — both mods run independently. No conflicts. |
+| **Precision Farming DLC** | Compatible — both mods run independently. No conflicts. See-and-Spray integration bridges our weed pressure tracking into PF's nozzle activation logic when both are installed. |
 | **FS25_SeasonalCropStress** | Soil pH and organic matter influence evapotranspiration rates per field. |
 | **FS25_NPCFavor** | NPC neighbour favour quests can reference your fields' soil state. |
 | **FS25_MoistureSystem** | Compatible — both mods use independent hooks. No conflicts. |
@@ -351,7 +388,7 @@ This mod is licensed under **[CC BY-NC-ND 4.0](https://creativecommons.org/licen
 
 You may share it in its original form with attribution. You may not sell it, modify and redistribute it, or reupload it under a different name or authorship. Contributions via pull request are explicitly permitted and encouraged.
 
-**Author:** TisonK &nbsp;·&nbsp; **Version:** 1.9.9.3
+**Author:** TisonK &nbsp;·&nbsp; **Version:** 2.0.0.0
 
 © 2026 TisonK — See [LICENSE](LICENSE) for full terms.
 

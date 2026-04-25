@@ -233,6 +233,8 @@ function SoilHUD:calculateHeight()
             if mgr.settings.weedPressure and (info.weedPressure or 0) > 0 then h = h + SoilHUD.LINE_H end
             if mgr.settings.pestPressure and (info.pestPressure or 0) > 0 then h = h + SoilHUD.LINE_H end
             if mgr.settings.diseasePressure and (info.diseasePressure or 0) > 0 then h = h + SoilHUD.LINE_H end
+            if (info.coverageFraction or 0) > 0 then h = h + SoilHUD.LINE_H end
+            if mgr.settings.compactionEnabled and (info.compaction or 0) > 0 then h = h + SoilHUD.LINE_H end
         end
         
         h = h + SoilHUD.PAD * 1.3
@@ -296,15 +298,7 @@ function SoilHUD:onMouseEvent(posX, posY, isDown, isUp, button, eventUsed)
     if not self.settings.showHUD then return false end
     if not self.visible then return false end
 
-    -- RMB: toggle edit mode (skipped if player disabled drag to avoid mod conflicts)
-    if isDown and button == 3 and self.settings.hudDragEnabled then
-        if self.editMode then
-            self:exitEditMode()
-        else
-            self:enterEditMode()
-        end
-        return
-    end
+    -- RMB toggle is now handled by the SF_HUD_DRAG input action (registered in SoilFertilityManager)
 
     if not self.editMode then return false end
 
@@ -373,17 +367,6 @@ function SoilHUD:update(dt)
         self.lastHudPosition = currentPosition
     end
 
-    -- Detection for initial RMB click when cursor might be hidden
-    if not self.editMode and self.initialized and self.settings.enabled and self.settings.showHUD and self.visible and self.settings.hudDragEnabled then
-        if Input and Input.isMouseButtonPressed and Input.isMouseButtonPressed(Input.MOUSE_BUTTON_RIGHT) then
-            -- Note: posX/posY might not be perfectly accurate if hidden, but we check last known
-            if g_inputBinding and g_inputBinding.mousePosXLast and g_inputBinding.mousePosYLast then
-                if self:isPointerOverHUD(g_inputBinding.mousePosXLast, g_inputBinding.mousePosYLast) then
-                    self:enterEditMode()
-                end
-            end
-        end
-    end
 
     if self.editMode then
         if g_inputBinding and g_inputBinding.setShowMouseCursor then
@@ -817,6 +800,41 @@ function SoilHUD:drawPanel()
             if mgr.settings.diseasePressure then
                 cy = self:drawPressureRow("sf_hud_disease", info.diseasePressure or 0,
                     info.fungicideActive, px, cy, pw, s, fontMult)
+            end
+
+            -- Coverage fraction row (only when actively fertilizing this field today)
+            local cov = info.coverageFraction or 0
+            if cov > 0 then
+                local minCov = SoilConstants.COVERAGE and SoilConstants.COVERAGE.MIN_FULL_CREDIT or 0.70
+                local covPct = math.floor(cov * 100 + 0.5)
+                local minPct = math.floor(minCov * 100 + 0.5)
+                local covText = string.format("Coverage: %d%% / %d%%", covPct, minPct)
+                local cr, cg, cb = 0.90, 0.35, 0.15  -- amber-red: below threshold
+                if cov >= minCov then cr, cg, cb = 0.32, 0.88, 0.44 end  -- green: at/above
+                local pad = SoilHUD.PAD * s
+                setTextAlignment(RenderText.ALIGN_LEFT)
+                setTextColor(cr, cg, cb, 1.0)
+                renderText(px + pad, cy, 0.010 * fontMult * s, covText)
+                cy = cy - SoilHUD.LINE_H * s
+            end
+
+            -- Compaction row
+            local comp = info.compaction or 0
+            if mgr.settings.compactionEnabled and comp > 0 then
+                local compPct = math.floor(comp + 0.5)
+                local cr, cg, cb
+                if comp > 60 then
+                    cr, cg, cb = 0.88, 0.25, 0.25   -- red: severe
+                elseif comp > 20 then
+                    cr, cg, cb = 0.90, 0.55, 0.10   -- amber: moderate
+                else
+                    cr, cg, cb = 0.32, 0.88, 0.44   -- green: low
+                end
+                local pad = SoilHUD.PAD * s
+                setTextAlignment(RenderText.ALIGN_LEFT)
+                setTextColor(cr, cg, cb, 1.0)
+                renderText(px + pad, cy, 0.010 * fontMult * s, string.format("Compaction: %d%%", compPct))
+                cy = cy - SoilHUD.LINE_H * s
             end
         end
 

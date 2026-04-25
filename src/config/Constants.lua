@@ -190,8 +190,8 @@ SoilConstants.FERTILIZER_PROFILES = {
     MANURE            = { N=0.53, P=1.59,  K=0.60, OM=0.04 }, -- 14000 L/ha: ~20N, ~12P, ~30K ppm
     LIQUIDMANURE      = { N=0.42, P=1.59,  K=0.80, OM=0.03 }, -- Slurry
     DIGESTATE         = { N=0.58, P=1.85,  K=1.10, OM=0.04 }, -- Digestate
-    LIME              = { pH=0.31 },                          -- 2500 kg/ha: +0.7 pH shift
-    LIQUIDLIME        = { pH=0.20 },                          -- 2800 L/ha: +0.5 pH shift
+    LIME              = { pH=0.16 },                          -- 2500 kg/ha: +0.40 pH shift per pass (~3 passes to correct pH 5.5→6.5)
+    LIQUIDLIME        = { pH=1.07 },                          -- 374  L/ha: +0.40 pH shift per pass (rate corrected from 2800→374 L/ha)
 
     -- Nitrogen sources (high-concentration)
     UAN32             = { N=243.6, P=0.00, K=0.00 }, -- 60.8 L/ha: ~40N ppm
@@ -472,6 +472,16 @@ SoilConstants.ZONE = {
 }
 
 -- ========================================
+-- FERTILIZER COVERAGE TRACKING (v2)
+-- ========================================
+-- A fertilizer pass requires MIN_FULL_CREDIT fraction of the field to be
+-- physically covered before the "fully treated" notification fires.
+-- Coverage is tracked per-field daily via the cell grid shared with ZONE.
+SoilConstants.COVERAGE = {
+    MIN_FULL_CREDIT = 0.70,  -- 70% of field cells must be visited for full-treated notification
+}
+
+-- ========================================
 -- NETWORK SYNC
 -- ========================================
 SoilConstants.NETWORK = {
@@ -528,7 +538,7 @@ SoilConstants.SPRAYER_RATE = {
         LIQUIDMANURE      = { value = 14000.0, unit = "liquid" },  -- FS25 fill type name for slurry
         DIGESTATE         = { value = 14000.0, unit = "liquid" },
         LIME              = { value =  2500.0, unit = "dry"    },  -- ~2230 lb/ac
-        LIQUIDLIME        = { value =  2800.0, unit = "liquid" },
+        LIQUIDLIME        = { value =   374.0, unit = "liquid" },  -- 40 gal/ac (real fluid lime; was 2800 which was 6× too high)
         -- Nitrogen sources
         UAN32             = { value =    60.8, unit = "liquid" },  -- ~6.5 gal/ac
         UAN28             = { value =    60.8, unit = "liquid" },
@@ -762,6 +772,18 @@ SoilConstants.MAP_OVERLAY = {
     LEGEND_MARGIN  = 0.02,  -- gap from map corner (fraction of map width)
     LEGEND_W_FRAC  = 0.13,  -- legend panel width   (fraction of map width)
     LEGEND_H_FRAC  = 0.17,  -- legend panel height  (fraction of map height)
+}
+
+-- ========================================
+-- COMPACTION (P2-D)
+-- ========================================
+SoilConstants.COMPACTION = {
+    HEAVY_VEHICLE_THRESHOLD_T = 8.0,   -- tonnes (Vehicle:getTotalMass returns tonnes)
+    COMPACTION_PER_PASS       = 2.0,   -- points added per heavy-vehicle work pass (once/day/field)
+    NATURAL_DECAY_PER_DAY     = 0.5,   -- points removed per game day (natural recovery)
+    SUBSOILER_REDUCTION       = 15.0,  -- points removed per subsoiler pass
+    MAX_COMPACTION            = 100.0,
+    NUTRIENT_PENALTY_MAX      = 0.20,  -- max 20% extra nutrient extraction at max compaction
 }
 
 SoilLogger.info("Constants loaded")

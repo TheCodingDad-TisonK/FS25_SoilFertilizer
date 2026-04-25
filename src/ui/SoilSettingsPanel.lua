@@ -118,7 +118,7 @@ local CATEGORIES = {
             },
             {
                 header = "Crop Stress",
-                items  = { "weedPressure", "pestPressure", "diseasePressure" }
+                items  = { "weedPressure", "pestPressure", "diseasePressure", "compactionEnabled" }
             },
         }
     },
@@ -134,7 +134,7 @@ local CATEGORIES = {
             },
             {
                 header = "HUD Style",
-                items  = { "hudColorTheme", "hudFontSize", "hudTransparency", "hudDragEnabled" }
+                items  = { "hudColorTheme", "hudFontSize", "hudTransparency" }
             },
             {
                 header = "Position",
@@ -168,7 +168,7 @@ local MULTI_OPTS = {
     hudFontSize       = {"Small", "Medium", "Large"},
     hudTransparency   = {"Clear", "Light", "Medium", "Dark", "Solid"},
     activeMapLayer    = {"Off", "Nitrogen", "Phosphorus", "Potassium", "pH",
-                         "Org Matter", "Urgency", "Weed", "Pest", "Disease"},
+                         "Org Matter", "Urgency", "Weed", "Pest", "Disease", "Compaction"},
     overlayDensity    = {"Low", "Medium", "High"},
 }
 
@@ -186,13 +186,13 @@ local SETTING_DESCS = {
     weedPressure     = "Track and penalize weed spread",
     pestPressure     = "Track insect pest infestation",
     diseasePressure  = "Track fungal crop diseases",
+    compactionEnabled = "Heavy vehicle soil compaction",
     showHUD          = "Show the soil HUD overlay",
     useImperialUnits = "Use imperial units (US tons/acre)",
     hudColorTheme    = "Color palette for HUD elements",
     hudFontSize      = "HUD text size",
     hudTransparency  = "HUD background transparency",
     hudPosition      = "HUD preset anchor position",
-    hudDragEnabled   = "RMB enters HUD drag mode (disable if conflicting with other mods)",
     activeMapLayer   = "Nutrient layer shown in PDA map",
     overlayDensity   = "Sample point budget (Low=8k, Med=20k, High=40k)",
 }
@@ -226,6 +226,7 @@ local ADMIN_SECTIONS = {
             { label = "Seasonal Effects", desc = "Season-driven soil changes",                 stype = "setting", id = "seasonalEffects" },
             { label = "Rain Effects",     desc = "Rain causes nutrient leaching",              stype = "setting", id = "rainEffects" },
             { label = "Plowing Bonus",    desc = "Plow bonus for soil recovery",               stype = "setting", id = "plowingBonus" },
+            { label = "Soil Compaction",  desc = "Heavy vehicle compaction effects",            stype = "setting", id = "compactionEnabled" },
         },
     },
     {
@@ -346,15 +347,7 @@ end
 
 -- ── Admin / settings helpers ──────────────────────────────
 function SoilSettingsPanel:isAdmin()
-    if not g_currentMission then return false end
-    if not (g_currentMission.missionDynamicInfo and
-            g_currentMission.missionDynamicInfo.isMultiplayer) then
-        return true
-    end
-    if g_dedicatedServer then return true end
-    local user = g_currentMission.userManager and
-                 g_currentMission.userManager:getUserByUserId(g_currentMission.playerUserId)
-    return user and user:getIsMasterUser() or false
+    return SoilUtils.isPlayerAdmin()
 end
 
 function SoilSettingsPanel:requestChange(id, value)
@@ -363,8 +356,7 @@ function SoilSettingsPanel:requestChange(id, value)
     if def.localOnly then
         self.settings[id] = value
         self.settings:save()
-        -- sync HUD if needed
-        if g_SoilFertilityManager and g_SoilFertilityManager.soilHUD then
+        if id == "hudPosition" and g_SoilFertilityManager and g_SoilFertilityManager.soilHUD then
             g_SoilFertilityManager.soilHUD:updatePosition()
         end
         return

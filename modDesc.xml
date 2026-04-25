@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <modDesc descVersion="106">
     <author>TisonK</author>
-    <version>1.9.9.9</version>
+    <version>2.0.0.0</version>
     <modName>FS25_SoilFertilizer</modName>
     <title>
         <en>Realistic Soil &amp; Fertilizer</en>
@@ -75,6 +75,7 @@
         <action name="SF_TOGGLE_AUTO" category="VEHICLE" />
         <action name="SF_CYCLE_MAP_LAYER" category="ONFOOT" />
         <action name="SF_OPEN_SETTINGS"   category="ONFOOT" />
+        <action name="SF_HUD_DRAG"        category="ONFOOT" />
     </actions>
 
     <l10n filenamePrefix="translations/translation" />
@@ -100,6 +101,9 @@
         </actionBinding>
         <actionBinding action="SF_OPEN_SETTINGS">
             <binding device="KB_MOUSE_DEFAULT" input="KEY_lshift KEY_o" />
+        </actionBinding>
+        <actionBinding action="SF_HUD_DRAG">
+            <binding device="KB_MOUSE_DEFAULT" input="MOUSE_BUTTON_RIGHT" />
         </actionBinding>
     </inputBinding>
 

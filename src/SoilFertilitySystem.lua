@@ -823,6 +823,12 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing, area)
         dryDayCount = 0,
         nutrientBuffer = {},  -- Tracks [fillTypeIndex] = litersApplied (reset daily)
         zoneData = {},        -- Sparse {cellKey → {N,P,K,pH,OM}} for per-area overlay
+        coveredCells = {},    -- Set of cellKey strings touched by fertilizer today (reset daily)
+        coveredCellCount = 0, -- Running count of coveredCells for O(1) fraction computation
+        totalFieldCells = 0,  -- Estimated cell count from field area (set on first spray)
+        coverageFraction = 0, -- Fraction of field covered today (0.0–1.0)
+        compaction = 0,       -- Soil compaction level 0–100 (0 = none, 100 = fully compacted)
+        lastCompactionDay = -1, -- tracks once-per-day throttle (transient, not persisted)
         lastAlertYear = 0,    -- In-game year when the last critical alert fired (persisted)
     }
 
@@ -841,8 +847,19 @@ function SoilFertilitySystem:updateDailySoil()
     local phNorm = SoilConstants.PH_NORMALIZATION
 
     for fieldId, field in pairs(self.fieldData) do
-        -- Clear fertilizer buffers daily - require same-day full coverage
-        field.nutrientBuffer = {}
+        -- Clear fertilizer and coverage buffers daily
+        field.nutrientBuffer    = {}
+        field.coveredCells      = {}
+        field.coveredCellCount  = 0
+        field.coverageFraction  = 0
+
+        -- Compaction natural decay
+        if self.settings.compactionEnabled and SoilConstants.COMPACTION then
+            local cp = SoilConstants.COMPACTION
+            if (field.compaction or 0) > 0 then
+                field.compaction = math.max(0, field.compaction - cp.NATURAL_DECAY_PER_DAY)
+            end
+        end
 
         -- Natural nutrient recovery for fallow fields
         local daysSinceFallow = currentDay - (field.lastHarvest or 0)
@@ -1159,6 +1176,17 @@ function SoilFertilitySystem:updateFieldNutrients(fieldId, fruitTypeIndex, harve
         factor = factor * diffMultiplier
     end
 
+    -- Step 2b: Compaction penalty — compacted soil reduces nutrient uptake efficiency,
+    -- causing crops to deplete more of what's available to achieve the same yield.
+    if self.settings.compactionEnabled and SoilConstants.COMPACTION then
+        local cp = SoilConstants.COMPACTION
+        local compaction = field.compaction or 0
+        if compaction > 0 then
+            local penalty = (compaction / 100) * cp.NUTRIENT_PENALTY_MAX
+            factor = factor * (1 + penalty)
+        end
+    end
+
     -- Step 3a: Crop rotation fatigue — same crop two seasons running depletes more
     if self.settings.cropRotation and field.lastCrop2 and field.lastCrop2 == fruitDesc.name then
         factor = factor * SoilConstants.CROP_ROTATION.FATIGUE_MULTIPLIER
@@ -1246,28 +1274,77 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
     if not field.nutrientBuffer then field.nutrientBuffer = {} end
     field.nutrientBuffer[fillTypeIndex] = (field.nutrientBuffer[fillTypeIndex] or 0) + liters
 
-    -- 1. Route crop protection products (incremental reduction)
+    -- 1. Route crop protection products (incremental reduction with daily cap)
+    -- Daily cap prevents over-application from driving pressure to zero in a few
+    -- frames when BASE_RATES targetRate is mismatched to real sprayer LPS.
     if entry.pestReduction then
         local targetRate = SoilConstants.SPRAYER_RATE.BASE_RATES[fillType.name] or SoilConstants.SPRAYER_RATE.BASE_RATES.INSECTICIDE
         local targetVol  = areaInHa * targetRate.value
-        local effectiveness = (liters / targetVol) * (SoilConstants.PEST_PRESSURE.INSECTICIDE_PRESSURE_REDUCTION or 25)
-        self:onInsecticideAppliedIncremental(fieldId, effectiveness)
-        
+        if targetVol > 0 then
+            local baseRed = SoilConstants.PEST_PRESSURE.INSECTICIDE_PRESSURE_REDUCTION or 25
+            local proposed = (liters / targetVol) * baseRed
+            if not self.insecticideDailyApplied then self.insecticideDailyApplied = {} end
+            local today = (g_currentMission and g_currentMission.environment and g_currentMission.environment.currentDay) or 0
+            local e = self.insecticideDailyApplied[fieldId]
+            if not e or e.day ~= today then e = { day = today, applied = 0 }; self.insecticideDailyApplied[fieldId] = e end
+            local remaining = math.max(0, baseRed - e.applied)
+            local clamped = math.min(proposed, remaining)
+            e.applied = e.applied + clamped
+            if clamped > 0 then self:onInsecticideAppliedIncremental(fieldId, clamped) end
+        end
+
     elseif entry.diseaseReduction then
         local targetRate = SoilConstants.SPRAYER_RATE.BASE_RATES[fillType.name] or SoilConstants.SPRAYER_RATE.BASE_RATES.FUNGICIDE
         local targetVol  = areaInHa * targetRate.value
-        local effectiveness = (liters / targetVol) * (SoilConstants.DISEASE_PRESSURE.FUNGICIDE_PRESSURE_REDUCTION or 20)
-        self:onFungicideAppliedIncremental(fieldId, effectiveness)
-        
+        if targetVol > 0 then
+            local baseRed = SoilConstants.DISEASE_PRESSURE.FUNGICIDE_PRESSURE_REDUCTION or 20
+            local proposed = (liters / targetVol) * baseRed
+            if not self.fungicideDailyApplied then self.fungicideDailyApplied = {} end
+            local today = (g_currentMission and g_currentMission.environment and g_currentMission.environment.currentDay) or 0
+            local e = self.fungicideDailyApplied[fieldId]
+            if not e or e.day ~= today then e = { day = today, applied = 0 }; self.fungicideDailyApplied[fieldId] = e end
+            local remaining = math.max(0, baseRed - e.applied)
+            local clamped = math.min(proposed, remaining)
+            e.applied = e.applied + clamped
+            if clamped > 0 then self:onFungicideAppliedIncremental(fieldId, clamped) end
+        end
+
     else
         -- 2. Apply standard nutrients (scaled by the liters applied this frame)
         local factor = (liters / 1000) / areaInHa
+
+        -- Capture before-values for diagnostic logging (debug mode only).
+        local dbgN0, dbgP0, dbgK0, dbgPH0 = field.nitrogen, field.phosphorus, field.potassium, field.pH
 
         if entry.N then field.nitrogen   = math.min(limits.MAX, field.nitrogen   + entry.N * factor) end
         if entry.P then field.phosphorus = math.min(limits.MAX, field.phosphorus + entry.P * factor) end
         if entry.K then field.potassium  = math.min(limits.MAX, field.potassium  + entry.K * factor) end
         if entry.pH then field.pH        = math.max(limits.PH_MIN, math.min(limits.PH_MAX, field.pH + entry.pH * factor)) end
         if entry.OM then field.organicMatter = math.min(limits.ORGANIC_MATTER_MAX, field.organicMatter + entry.OM * factor) end
+
+        -- Throttled per-field diagnostic (debug mode, lime types always logged; nutrients every 4 s).
+        -- Validates that pH shift and nutrient deltas are agronomically sensible.
+        -- For LIME/LIQUIDLIME: target ~0.40 pH over a full 1-ha pass at BASE_RATES volume.
+        -- For nutrients: visible delta per frame should be tiny; cumulative over full pass = profile value.
+        if entry.pH then
+            -- pH types (LIME, LIQUIDLIME, GYPSUM): log every application event so you can
+            -- see the per-frame delta and verify it adds up to ~0.40 over a full field pass.
+            SoilLogger.debug(
+                "FertApply pH field=%d type=%-12s liters=%.4f factor=%.6f  pH %.3f -> %.3f (delta=%.4f)",
+                fieldId, fillType.name, liters, factor, dbgPH0, field.pH, field.pH - dbgPH0)
+        else
+            -- Nutrient types: only log once every ~4 s to avoid log spam.
+            -- Uses the field buffer length as a crude frame counter (avoids a time lookup).
+            local buf = field.nutrientBuffer and field.nutrientBuffer[fillTypeIndex] or 0
+            -- Log when buffer crosses a 1000-L boundary (roughly once per ~large-step).
+            local prevBuf = buf - liters
+            if math.floor(buf / 1000) ~= math.floor(prevBuf / 1000) then
+                SoilLogger.debug(
+                    "FertApply NPK field=%d type=%-12s buf=%.0fL  N %.1f->%.1f  P %.1f->%.1f  K %.1f->%.1f",
+                    fieldId, fillType.name, buf,
+                    dbgN0, field.nitrogen, dbgP0, field.phosphorus, dbgK0, field.potassium)
+            end
+        end
 
         -- Write updated values to density map layers (per-pixel, at sprayer position)
         if self.layerSystem and self.layerSystem.available then
@@ -1292,6 +1369,19 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
             local cx = math.floor(sprayX / zone.CELL_SIZE)
             local cz = math.floor(sprayZ / zone.CELL_SIZE)
             local cellKey = cx .. "_" .. cz
+
+            -- Coverage tracking: count unique cells visited today
+            if not field.coveredCells then field.coveredCells = {} end
+            if not field.coveredCells[cellKey] then
+                field.coveredCells[cellKey] = true
+                field.coveredCellCount = (field.coveredCellCount or 0) + 1
+                -- Compute totalFieldCells once (lazily) from field area
+                if (field.totalFieldCells or 0) == 0 then
+                    field.totalFieldCells = math.max(1, math.ceil(areaInHa / zone.CELL_AREA_HA))
+                end
+                field.coverageFraction = math.min(1.0, field.coveredCellCount / field.totalFieldCells)
+            end
+
             if not field.zoneData then field.zoneData = {} end
             if not field.zoneData[cellKey] then
                 field.zoneData[cellKey] = {
@@ -1335,7 +1425,9 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
         local targetVolume = areaInHa * baseRateEntry.value
         local coverageThreshold = targetVolume * SoilConstants.SPRAYER_RATE.FERTILIZER_COVERAGE_THRESHOLD
 
-        if field.nutrientBuffer[fillTypeIndex] >= coverageThreshold then
+        local minCoverage = SoilConstants.COVERAGE and SoilConstants.COVERAGE.MIN_FULL_CREDIT or 0.70
+        if field.nutrientBuffer[fillTypeIndex] >= coverageThreshold and
+           (field.coverageFraction or 0) >= minCoverage then
             local today = (g_currentMission and g_currentMission.environment and
                            g_currentMission.environment.currentDay) or 0
             if not self.fertNotifyShown then self.fertNotifyShown = {} end
@@ -1373,50 +1465,128 @@ function SoilFertilitySystem:onFungicideAppliedIncremental(fieldId, reduction)
     field.fungicideDaysLeft = dp.FUNGICIDE_DURATION_DAYS
 end
 
+-- =====================================================================
+-- DAILY REDUCTION CAP HELPERS
+-- =====================================================================
+-- The Direct-path functions below are invoked every frame by the sprayer hook
+-- (~60x/sec). Each call computes a per-frame reduction from `liters`, but the
+-- base sprayer LPS (~93.5 L/ha for liquid) is ~60× the "target rate" entries
+-- in Constants (1.5 L/ha for HERBICIDE, similar for INSECTICIDE/FUNGICIDE).
+-- Without a cap, a 40% weed pressure field drops to 0% in < 1 second (issue
+-- #205 over-effectiveness bug).
+--
+-- Fix: cap total daily reduction at REDUCTION × effectiveness.  Progress is
+-- still smooth per-frame (good HUD feel) but over-application is useless —
+-- matching realism and the once-per-day model used by onHerbicideApplied.
+---@return number currentDay
+local function _soilGetCurrentDay()
+    return (g_currentMission and g_currentMission.environment and
+            g_currentMission.environment.currentDay) or 0
+end
+
+--- Apply capped daily reduction to a pressure field.
+-- @param dailyTable    self.herbicideDailyApplied[fieldId] = { day = N, applied = X }
+-- @param fieldId       field id
+-- @param proposedRed   unclamped per-frame reduction
+-- @param maxDailyRed   cap for today (REDUCTION × effectiveness)
+-- @return clamped reduction to actually apply this frame
+local function _soilApplyCappedReduction(dailyTable, fieldId, proposedRed, maxDailyRed)
+    local today = _soilGetCurrentDay()
+    local entry = dailyTable[fieldId]
+    if not entry or entry.day ~= today then
+        entry = { day = today, applied = 0 }
+        dailyTable[fieldId] = entry
+    end
+    local remaining = math.max(0, maxDailyRed - entry.applied)
+    local clamped = math.min(proposedRed, remaining)
+    entry.applied = entry.applied + clamped
+    return clamped
+end
+
 --- Direct-path buffering for non-profile products (Herbicide/Insecticide/Fungicide)
+-- NOTE: the formula (liters/targetVol)×REDUCTION depends on targetRate (from
+-- Constants, a real-world L/ha figure ~1.5) matching the actual vanilla sprayer
+-- LPS (~93.5 L/ha for liquid).  It does NOT — hence the daily cap below.
 function SoilFertilitySystem:onHerbicideAppliedDirect(fieldId, effectiveness, liters)
     if not self.settings.weedPressure then return end
     local field = self:getOrCreateField(fieldId, true)
     if not field then return end
 
     local areaInHa = field.fieldArea or 1.0
+    if areaInHa <= 0 then areaInHa = 1.0 end
     local targetRate = SoilConstants.SPRAYER_RATE.BASE_RATES.HERBICIDE.value
     local targetVol = areaInHa * targetRate
-    
-    local reduction = (liters / targetVol) * (SoilConstants.WEED_PRESSURE.HERBICIDE_PRESSURE_REDUCTION or 30) * (effectiveness or 1.0)
-    
-    local before = field.weedPressure or 0
-    field.weedPressure = math.max(0, before - reduction)
-    field.herbicideDaysLeft = SoilConstants.WEED_PRESSURE.HERBICIDE_DURATION_DAYS
-    
+    if targetVol <= 0 then return end
+
+    local effective = effectiveness or 1.0
+    local maxReduction = (SoilConstants.WEED_PRESSURE.HERBICIDE_PRESSURE_REDUCTION or 30) * effective
+    local proposed = (liters / targetVol) * (SoilConstants.WEED_PRESSURE.HERBICIDE_PRESSURE_REDUCTION or 30) * effective
+
+    if not self.herbicideDailyApplied then self.herbicideDailyApplied = {} end
+    local reduction = _soilApplyCappedReduction(self.herbicideDailyApplied, fieldId, proposed, maxReduction)
+
+    if reduction > 0 then
+        local before = field.weedPressure or 0
+        field.weedPressure = math.max(0, before - reduction)
+        field.herbicideDaysLeft = SoilConstants.WEED_PRESSURE.HERBICIDE_DURATION_DAYS
+    end
+
     if not field.nutrientBuffer then field.nutrientBuffer = {} end
     field.nutrientBuffer[99991] = (field.nutrientBuffer[99991] or 0) + liters
 end
 
 function SoilFertilitySystem:onInsecticideAppliedDirect(fieldId, effectiveness, liters)
-    local targetRate = SoilConstants.SPRAYER_RATE.BASE_RATES.INSECTICIDE.value
-    local areaInHa = (self.fieldData[fieldId] and self.fieldData[fieldId].fieldArea) or 1.0
-    local reduction = (liters / (areaInHa * targetRate)) * (SoilConstants.PEST_PRESSURE.INSECTICIDE_PRESSURE_REDUCTION or 25) * (effectiveness or 1.0)
-    self:onInsecticideAppliedIncremental(fieldId, reduction)
-    
+    if not self.settings.pestPressure then return end
     local field = self.fieldData[fieldId]
-    if field then
-        if not field.nutrientBuffer then field.nutrientBuffer = {} end
-        field.nutrientBuffer[99992] = (field.nutrientBuffer[99992] or 0) + liters
+    if not field then return end
+
+    local areaInHa = field.fieldArea or 1.0
+    if areaInHa <= 0 then areaInHa = 1.0 end
+    local targetRate = SoilConstants.SPRAYER_RATE.BASE_RATES.INSECTICIDE.value
+    local targetVol = areaInHa * targetRate
+    if targetVol <= 0 then return end
+
+    local effective = effectiveness or 1.0
+    local baseRed = SoilConstants.PEST_PRESSURE.INSECTICIDE_PRESSURE_REDUCTION or 25
+    local maxReduction = baseRed * effective
+    local proposed = (liters / targetVol) * baseRed * effective
+
+    if not self.insecticideDailyApplied then self.insecticideDailyApplied = {} end
+    local reduction = _soilApplyCappedReduction(self.insecticideDailyApplied, fieldId, proposed, maxReduction)
+
+    if reduction > 0 then
+        self:onInsecticideAppliedIncremental(fieldId, reduction)
     end
+
+    if not field.nutrientBuffer then field.nutrientBuffer = {} end
+    field.nutrientBuffer[99992] = (field.nutrientBuffer[99992] or 0) + liters
 end
 
 function SoilFertilitySystem:onFungicideAppliedDirect(fieldId, effectiveness, liters)
-    local targetRate = SoilConstants.SPRAYER_RATE.BASE_RATES.FUNGICIDE.value
-    local areaInHa = (self.fieldData[fieldId] and self.fieldData[fieldId].fieldArea) or 1.0
-    local reduction = (liters / (areaInHa * targetRate)) * (SoilConstants.DISEASE_PRESSURE.FUNGICIDE_PRESSURE_REDUCTION or 20) * (effectiveness or 1.0)
-    self:onFungicideAppliedIncremental(fieldId, reduction)
-    
+    if not self.settings.diseasePressure then return end
     local field = self.fieldData[fieldId]
-    if field then
-        if not field.nutrientBuffer then field.nutrientBuffer = {} end
-        field.nutrientBuffer[99993] = (field.nutrientBuffer[99993] or 0) + liters
+    if not field then return end
+
+    local areaInHa = field.fieldArea or 1.0
+    if areaInHa <= 0 then areaInHa = 1.0 end
+    local targetRate = SoilConstants.SPRAYER_RATE.BASE_RATES.FUNGICIDE.value
+    local targetVol = areaInHa * targetRate
+    if targetVol <= 0 then return end
+
+    local effective = effectiveness or 1.0
+    local baseRed = SoilConstants.DISEASE_PRESSURE.FUNGICIDE_PRESSURE_REDUCTION or 20
+    local maxReduction = baseRed * effective
+    local proposed = (liters / targetVol) * baseRed * effective
+
+    if not self.fungicideDailyApplied then self.fungicideDailyApplied = {} end
+    local reduction = _soilApplyCappedReduction(self.fungicideDailyApplied, fieldId, proposed, maxReduction)
+
+    if reduction > 0 then
+        self:onFungicideAppliedIncremental(fieldId, reduction)
     end
+
+    if not field.nutrientBuffer then field.nutrientBuffer = {} end
+    field.nutrientBuffer[99993] = (field.nutrientBuffer[99993] or 0) + liters
 end
 
 --- Apply over-application burn penalty to a field.
@@ -1578,7 +1748,9 @@ function SoilFertilitySystem:getFieldInfo(fieldId)
         diseasePressure = field.diseasePressure or 0,
         fungicideActive = (field.fungicideDaysLeft or 0) > 0,
         burnDaysLeft = field.burnDaysLeft or 0,
-        nutrientBuffer = field.nutrientBuffer or {},
+        nutrientBuffer   = field.nutrientBuffer or {},
+        coverageFraction = field.coverageFraction or 0,
+        compaction = field.compaction or 0,
         needsFertilization = (
             field.nitrogen < fertThresholds.nitrogen or
             field.phosphorus < fertThresholds.phosphorus or
@@ -1667,6 +1839,7 @@ function SoilFertilitySystem:saveToXMLFile(xmlFile, key)
             setXMLInt(xmlFile, fieldKey .. "#dryDayCount", field.dryDayCount or 0)
             setXMLInt(xmlFile, fieldKey .. "#burnDaysLeft", field.burnDaysLeft or 0)
             setXMLInt(xmlFile, fieldKey .. "#lastAlertYear", field.lastAlertYear or 0)
+            setXMLFloat(xmlFile, fieldKey .. "#compaction", field.compaction or 0)
 
             -- Save per-area zone cells for overlay coloring
             local zoneIdx = 0
@@ -1732,6 +1905,7 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
             dryDayCount = getXMLInt(xmlFile, fieldKey .. "#dryDayCount") or 0,
             burnDaysLeft = getXMLInt(xmlFile, fieldKey .. "#burnDaysLeft") or 0,
             lastAlertYear = getXMLInt(xmlFile, fieldKey .. "#lastAlertYear") or 0,
+            compaction = getXMLFloat(xmlFile, fieldKey .. "#compaction") or 0,
             initialized = true,
             nutrientBuffer = {},
             zoneData = {},
@@ -1814,4 +1988,39 @@ function SoilFertilitySystem:listAllFields()
     end
 
     SoilLogger.info("=== End field list ===")
+end
+
+-- =========================================================
+-- COMPACTION API (P2-D)
+-- =========================================================
+
+--- Apply compaction from a heavy vehicle work pass. Throttled to once per in-game day per field.
+---@param fieldId number The farmland ID
+function SoilFertilitySystem:onCompaction(fieldId)
+    if not self.settings.compactionEnabled then return end
+    local cp = SoilConstants.COMPACTION
+    if not cp then return end
+    local field = self:getOrCreateField(fieldId, false)
+    if not field then return end
+    local currentDay = (g_currentMission and g_currentMission.environment and
+                        g_currentMission.environment.currentDay) or 0
+    if field.lastCompactionDay == currentDay then return end
+    field.lastCompactionDay = currentDay
+    field.compaction = math.min(cp.MAX_COMPACTION, (field.compaction or 0) + cp.COMPACTION_PER_PASS)
+    self:log("Compaction: Field %d → %.0f%%", fieldId, field.compaction)
+end
+
+--- Apply subsoiler compaction reduction.
+---@param fieldId number The farmland ID
+function SoilFertilitySystem:onSubsoilerPass(fieldId)
+    if not self.settings.compactionEnabled then return end
+    local cp = SoilConstants.COMPACTION
+    if not cp then return end
+    local field = self:getOrCreateField(fieldId, false)
+    if not field then return end
+    local prev = field.compaction or 0
+    field.compaction = math.max(0, prev - cp.SUBSOILER_REDUCTION)
+    if prev > field.compaction then
+        self:log("Subsoiler: Field %d compaction %.0f → %.0f%%", fieldId, prev, field.compaction)
+    end
 end

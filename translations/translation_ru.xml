@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <l10n>
     <elements>
     <e k="sf_section" v="Почва и удобрения" eh="f31197fb" />
@@ -18,6 +18,8 @@
     <e k="sf_pest_pressure_long" v="Включить/выключить систему заражения насекомыми и вредителями" eh="18015099" />
     <e k="sf_disease_pressure_short" v="Давление болезней" eh="953fd6c0" />
     <e k="sf_disease_pressure_long" v="Включить/выключить систему грибковых и растительных болезней" eh="2c36ea57" />
+    <e k="sf_compaction_short" v="[EN] Soil Compaction" eh="00000000" />
+    <e k="sf_compaction_long" v="[EN] Enable/disable heavy vehicle soil compaction system" eh="00000000" />
     <e k="sf_fertility_short" v="Система плодородия" eh="f7e27d58" />
     <e k="sf_fertility_long" v="Включить/выключить динамическую систему плодородия почвы" eh="ea074366" />
     <e k="sf_nutrients_short" v="Циклы питательных веществ" eh="ffab595d" />
@@ -64,8 +66,6 @@
     <e k="sf_hud_font_3" v="Большой" eh="3a69b34c" />
     <e k="sf_hud_transparency_short" v="Прозрачность HUD" eh="e8a009e4" />
     <e k="sf_hud_transparency_long" v="Установить уровень прозрачности фона (Прозрачный = прозрачный, Сплошной = непрозрачный)" eh="152e390a" />
-		<e k="sf_hud_drag_enabled_short" v="[EN] HUD Drag" eh="e5a9a723" />
-		<e k="sf_hud_drag_enabled_long" v="[EN] Allow right-click to enter HUD drag/edit mode. Disable if conflicting with other mods (e.g. Courseplay)" eh="d9e2d813" />
     <e k="sf_hud_trans_1" v="Прозрачный" eh="dc30bc0c" />
     <e k="sf_hud_trans_2" v="Легкий" eh="9914a0ce" />
     <e k="sf_hud_trans_3" v="Средний" eh="87f8a6ab" />
@@ -80,6 +80,7 @@
     <e k="input_SF_OPEN_SETTINGS" v="Open Soil Settings" eh="2e31c0dd" />
     <e k="sf_reset" v="Сбросить настройки грунта" eh="467bc2f5" />
     <e k="input_SF_TOGGLE_HUD" v="Переключить HUD грунта" eh="f0224a10" />
+    <e k="input_SF_HUD_DRAG" v="[EN] HUD Drag Mode" eh="00000000" />
     <e k="input_SF_SOIL_REPORT" v="Отчет о почве" eh="c33180ef" />
     <e k="input_SF_RATE_UP" v="Увеличить норму внесения удобрений" eh="6e601ef5" />
     <e k="input_SF_RATE_DOWN" v="Уменьшить норму внесения удобрений" eh="30712026" />
@@ -327,6 +328,7 @@
 		<e k="sf_map_layer_weed" v="Давление сорняков" eh="53f8b936" />
 		<e k="sf_map_layer_pest" v="Давление вредителей" eh="18a7c2be" />
 		<e k="sf_map_layer_disease" v="Давление болезней" eh="2b805cc9" />
+    <e k="sf_map_layer_compaction" v="[EN] Compaction" eh="00000000" />
 		<e k="sf_map_overlay_cycle" v="Shift+M: переключение слоев загрязнения" eh="032fdac7" />
 		<e k="sf_map_page_title" v="Слои почвы" eh="04a675fb" />
 		<e k="sf_map_sidebar_header" v="Слой «Карта почв»" eh="81332549" />
