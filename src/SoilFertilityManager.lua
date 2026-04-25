@@ -247,6 +247,27 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
                 if not g_SoilFertilityManager or not g_SoilFertilityManager.soilHUD then return end
 
                 _soilVehicleHookActive = true
+
+                -- Purge any stale event IDs from a previous registration pass.
+                -- endActionEventsModification fires on every vehicle mount/seat change
+                -- (including Courseplay seat cycling). Without cleanup, duplicate
+                -- registrations accumulate — callbacks fire 2-3× per keypress and
+                -- SF_HUD_DRAG (RMB) toggles drag mode on then immediately back off.
+                local mgr = g_SoilFertilityManager
+                local staleIds = {
+                    "vehicleHUDEventId", "vehicleReportEventId",
+                    "rateUpEventId",     "rateDownEventId",
+                    "toggleAutoEventId", "vehicleSettingsPanelEventId",
+                    "vehicleHudDragEventId",
+                }
+                for _, field in ipairs(staleIds) do
+                    local oldId = mgr[field]
+                    if oldId then
+                        pcall(function() binding:removeActionEvent(oldId) end)
+                        mgr[field] = nil
+                    end
+                end
+
                 binding:beginActionEventsModification(Vehicle.INPUT_CONTEXT_NAME)
 
                 -- HUD toggle (J) in vehicle
