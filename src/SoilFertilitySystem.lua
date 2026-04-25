@@ -1379,7 +1379,21 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
                 if (field.totalFieldCells or 0) == 0 then
                     field.totalFieldCells = math.max(1, math.ceil(areaInHa / zone.CELL_AREA_HA))
                 end
+                local prevCoverage = field.coverageFraction or 0
                 field.coverageFraction = math.min(1.0, field.coveredCellCount / field.totalFieldCells)
+                -- Log milestone crossings (10/25/50/75/100%) so testers can verify
+                -- coverage is ticking up correctly during a spray pass.
+                local milestones = { 0.10, 0.25, 0.50, 0.75, 1.0 }
+                for _, m in ipairs(milestones) do
+                    if prevCoverage < m and field.coverageFraction >= m then
+                        SoilLogger.debug(
+                            "Coverage field=%d  %.0f%% covered (%d/%d cells)  type=%s",
+                            fieldId, m * 100,
+                            field.coveredCellCount, field.totalFieldCells,
+                            fillType.name)
+                        break
+                    end
+                end
             end
 
             if not field.zoneData then field.zoneData = {} end
