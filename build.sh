@@ -57,8 +57,8 @@ MOD_DIR = os.getcwd()
 ZIP_PATH = os.path.join(os.path.dirname(MOD_DIR), os.path.basename(MOD_DIR) + ".zip")
 
 EXCLUDE_DIRS  = {".git", ".claude", "__MACOSX"}
-EXCLUDE_EXTS  = {".sh", ".py", ".md", ".DS_Store", ".zip", ".png", ".txt"}
-EXCLUDE_FILES = {".gitignore"}
+EXCLUDE_EXTS  = {".sh", ".py", ".md", ".DS_Store", ".zip", ".txt"}
+EXCLUDE_FILES = {".gitignore", "icon_source.png"}
 
 with zipfile.ZipFile(ZIP_PATH, "w", zipfile.ZIP_DEFLATED) as zf:
     for root, dirs, files in os.walk(MOD_DIR):
