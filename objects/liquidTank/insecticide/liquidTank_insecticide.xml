@@ -6,7 +6,7 @@
             <set path="vehicle.storeData.name"                        value="$l10n_sf_bigBag_insecticide_name"/>
             <set path="vehicle.storeData.image"                       value="$data/objects/pallets/liquidTank/store_herbicideTankHelm.png"/>
             <set path="vehicle.storeData.price"                       value="2400"/>
-            <set path="vehicle.storeData.showInStore"                 value="true"/>
+            <set path="vehicle.storeData.showInStore"                 value="false"/>
             <set path="vehicle.storeData.functions.function"          value="$l10n_sf_bigBag_insecticide_function"/>
             <set path="vehicle.storeData.specs.fillTypes"             value="INSECTICIDE"/>
 
