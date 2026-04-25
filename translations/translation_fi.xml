@@ -165,6 +165,8 @@
     <e k="sf_pest_pressure_long" v="Enable/disable insect and pest infestation system" eh="18015099" />
     <e k="sf_disease_pressure_short" v="Disease Pressure" eh="953fd6c0" />
     <e k="sf_disease_pressure_long" v="Enable/disable fungal and crop disease system" eh="2c36ea57" />
+    <e k="sf_compaction_short" v="[EN] Soil Compaction" eh="00000000" />
+    <e k="sf_compaction_long" v="[EN] Enable/disable heavy vehicle soil compaction system" eh="00000000" />
 		<e k="sf_fertility_short" v="[EN] Fertility System" eh="f7e27d58" />
 		<e k="sf_fertility_long" v="[EN] Enable/disable dynamic soil fertility system" eh="ea074366" />
 		<e k="sf_nutrients_short" v="[EN] Nutrient Cycles" eh="ffab595d" />
@@ -326,6 +328,7 @@
 		<e k="sf_map_layer_weed" v="[EN] Weed Pressure" eh="53f8b936" />
 		<e k="sf_map_layer_pest" v="[EN] Pest Pressure" eh="18a7c2be" />
 		<e k="sf_map_layer_disease" v="[EN] Disease Pressure" eh="2b805cc9" />
+    <e k="sf_map_layer_compaction" v="[EN] Compaction" eh="00000000" />
 		<e k="sf_map_overlay_cycle" v="[EN] Shift+M: Cycle Soil Layer" eh="032fdac7" />
 		<e k="sf_map_page_title" v="[EN] Soil Layers" eh="04a675fb" />
 		<e k="sf_map_sidebar_header" v="[EN] Soil Map Layer" eh="81332549" />

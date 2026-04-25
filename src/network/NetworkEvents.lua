@@ -386,6 +386,7 @@ function SoilFullSyncEvent:readStream(streamId, connection)
         local diseaseDays = streamReadInt32(streamId)
         local dryDays = streamReadInt32(streamId)
         local burnDays = streamReadInt32(streamId)
+        local compaction = streamReadFloat32(streamId)
 
         -- Read nutrient buffer (V1.7)
         local buffer = {}
@@ -446,6 +447,7 @@ function SoilFullSyncEvent:readStream(streamId, connection)
                 fungicideDaysLeft = diseaseDays,
                 dryDayCount = dryDays,
                 burnDaysLeft = burnDays,
+                compaction = math.max(0, math.min(100, compaction or 0)),
                 initialized = true
             }
             -- Clear empty strings
@@ -510,6 +512,7 @@ function SoilFullSyncEvent:writeStream(streamId, connection)
         streamWriteInt32(streamId, field.fungicideDaysLeft or 0)
         streamWriteInt32(streamId, field.dryDayCount or 0)
         streamWriteInt32(streamId, field.burnDaysLeft or 0)
+        streamWriteFloat32(streamId, field.compaction or 0)
 
         -- Write nutrient buffer (V1.7)
         local buffer = field.nutrientBuffer or {}
@@ -624,6 +627,7 @@ function SoilFieldBatchSyncEvent:writeStream(streamId, connection)
         streamWriteInt32(streamId,   field.dryDayCount        or 0)
         streamWriteInt32(streamId,   field.burnDaysLeft       or 0)
         streamWriteFloat32(streamId, field.coverageFraction   or 0)
+        streamWriteFloat32(streamId, field.compaction         or 0)
 
         -- Nutrient buffer (V1.7)
         local buffer = field.nutrientBuffer or {}
@@ -665,6 +669,7 @@ function SoilFieldBatchSyncEvent:readStream(streamId, connection)
         local dryDays        = streamReadInt32(streamId)
         local burnDays       = streamReadInt32(streamId)
         local coverageFrac   = streamReadFloat32(streamId)
+        local compaction     = streamReadFloat32(streamId)
 
         local buffer = {}
         local bCount = streamReadInt32(streamId)
@@ -700,6 +705,7 @@ function SoilFieldBatchSyncEvent:readStream(streamId, connection)
                 coverageFraction      = math.max(0, math.min(1, coverageFrac or 0)),
                 coveredCells          = {},
                 coveredCellCount      = 0,
+                compaction            = math.max(0, math.min(100, compaction or 0)),
                 initialized           = true,
             }
         end
@@ -784,6 +790,7 @@ function SoilFieldUpdateEvent:readStream(streamId, connection)
     local dryDays = streamReadInt32(streamId)
     local burnDays = streamReadInt32(streamId)
     local coverageFrac = streamReadFloat32(streamId)
+    local compaction = streamReadFloat32(streamId)
 
     -- Read nutrient buffer (V1.7)
     local buffer = {}
@@ -825,6 +832,7 @@ function SoilFieldUpdateEvent:readStream(streamId, connection)
         coverageFraction = math.max(0, math.min(1, coverageFrac or 0)),
         coveredCells     = {},
         coveredCellCount = 0,
+        compaction       = math.max(0, math.min(100, compaction or 0)),
         initialized      = true
     }
 
@@ -865,6 +873,7 @@ function SoilFieldUpdateEvent:writeStream(streamId, connection)
     streamWriteInt32(streamId, self.field.dryDayCount or 0)
     streamWriteInt32(streamId, self.field.burnDaysLeft or 0)
     streamWriteFloat32(streamId, self.field.coverageFraction or 0)
+    streamWriteFloat32(streamId, self.field.compaction or 0)
 
     -- Write nutrient buffer (V1.7)
     local buffer = self.field.nutrientBuffer or {}

@@ -234,6 +234,7 @@ function SoilHUD:calculateHeight()
             if mgr.settings.pestPressure and (info.pestPressure or 0) > 0 then h = h + SoilHUD.LINE_H end
             if mgr.settings.diseasePressure and (info.diseasePressure or 0) > 0 then h = h + SoilHUD.LINE_H end
             if (info.coverageFraction or 0) > 0 then h = h + SoilHUD.LINE_H end
+            if mgr.settings.compactionEnabled and (info.compaction or 0) > 0 then h = h + SoilHUD.LINE_H end
         end
         
         h = h + SoilHUD.PAD * 1.3
@@ -814,6 +815,25 @@ function SoilHUD:drawPanel()
                 setTextAlignment(RenderText.ALIGN_LEFT)
                 setTextColor(cr, cg, cb, 1.0)
                 renderText(px + pad, cy, 0.010 * fontMult * s, covText)
+                cy = cy - SoilHUD.LINE_H * s
+            end
+
+            -- Compaction row
+            local comp = info.compaction or 0
+            if mgr.settings.compactionEnabled and comp > 0 then
+                local compPct = math.floor(comp + 0.5)
+                local cr, cg, cb
+                if comp > 60 then
+                    cr, cg, cb = 0.88, 0.25, 0.25   -- red: severe
+                elseif comp > 20 then
+                    cr, cg, cb = 0.90, 0.55, 0.10   -- amber: moderate
+                else
+                    cr, cg, cb = 0.32, 0.88, 0.44   -- green: low
+                end
+                local pad = SoilHUD.PAD * s
+                setTextAlignment(RenderText.ALIGN_LEFT)
+                setTextColor(cr, cg, cb, 1.0)
+                renderText(px + pad, cy, 0.010 * fontMult * s, string.format("Compaction: %d%%", compPct))
                 cy = cy - SoilHUD.LINE_H * s
             end
         end

@@ -18,6 +18,8 @@
     <e k="sf_pest_pressure_long" v="Ativar/desativar sistema de infestação de insetos e pragas" eh="18015099" />
     <e k="sf_disease_pressure_short" v="Pressão de Doenças" eh="953fd6c0" />
     <e k="sf_disease_pressure_long" v="Ativar/desativar sistema de doenças fúngicas e de culturas" eh="2c36ea57" />
+    <e k="sf_compaction_short" v="[EN] Soil Compaction" eh="00000000" />
+    <e k="sf_compaction_long" v="[EN] Enable/disable heavy vehicle soil compaction system" eh="00000000" />
     <e k="sf_fertility_short" v="Sistema Fertilidade" eh="f7e27d58" />
     <e k="sf_fertility_long" v="Ativar/desativar sistema dinâmico de fertilidade do solo" eh="ea074366" />
     <e k="sf_nutrients_short" v="Ciclos Nutrientes" eh="ffab595d" />
@@ -326,6 +328,7 @@
 		<e k="sf_map_layer_weed" v="Pressão de Ervas Daninhas" eh="53f8b936" />
 		<e k="sf_map_layer_pest" v="Pressão de Pragas" eh="18a7c2be" />
 		<e k="sf_map_layer_disease" v="Pressão de Doenças" eh="2b805cc9" />
+    <e k="sf_map_layer_compaction" v="[EN] Compaction" eh="00000000" />
 		<e k="sf_map_overlay_cycle" v="Shift+M: Ciclar Camada de Solo" eh="032fdac7" />
 		<e k="sf_map_page_title" v="Camadas de Solo" eh="04a675fb" />
 		<e k="sf_map_sidebar_header" v="Camada do Mapa de Solo" eh="81332549" />

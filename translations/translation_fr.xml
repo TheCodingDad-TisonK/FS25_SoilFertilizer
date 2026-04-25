@@ -18,6 +18,8 @@
     <e k="sf_pest_pressure_long" v="Activer/désactiver le système d'infestation d'insectes et de ravageurs" eh="18015099" />
     <e k="sf_disease_pressure_short" v="Pression des maladies" eh="953fd6c0" />
     <e k="sf_disease_pressure_long" v="Activer/désactiver le système de maladies fongiques et des cultures" eh="2c36ea57" />
+    <e k="sf_compaction_short" v="[EN] Soil Compaction" eh="00000000" />
+    <e k="sf_compaction_long" v="[EN] Enable/disable heavy vehicle soil compaction system" eh="00000000" />
     <e k="sf_fertility_short" v="Système de Fertilité" eh="f7e27d58" />
     <e k="sf_fertility_long" v="Activer/désactiver le système de fertilité du sol dynamique" eh="ea074366" />
     <e k="sf_nutrients_short" v="Cycles Nutriments" eh="ffab595d" />
@@ -326,6 +328,7 @@
 		<e k="sf_map_layer_weed" v="Pression des adventices" eh="53f8b936" />
 		<e k="sf_map_layer_pest" v="Pression des ravageurs" eh="18a7c2be" />
 		<e k="sf_map_layer_disease" v="Pression des maladies" eh="2b805cc9" />
+    <e k="sf_map_layer_compaction" v="[EN] Compaction" eh="00000000" />
 		<e k="sf_map_overlay_cycle" v="Maj+M : Faire défiler les couches" eh="032fdac7" />
 		<e k="sf_map_page_title" v="Couches de sol" eh="04a675fb" />
 		<e k="sf_map_sidebar_header" v="Couche de carte de sol" eh="81332549" />

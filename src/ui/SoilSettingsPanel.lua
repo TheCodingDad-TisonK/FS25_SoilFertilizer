@@ -118,7 +118,7 @@ local CATEGORIES = {
             },
             {
                 header = "Crop Stress",
-                items  = { "weedPressure", "pestPressure", "diseasePressure" }
+                items  = { "weedPressure", "pestPressure", "diseasePressure", "compactionEnabled" }
             },
         }
     },
@@ -168,7 +168,7 @@ local MULTI_OPTS = {
     hudFontSize       = {"Small", "Medium", "Large"},
     hudTransparency   = {"Clear", "Light", "Medium", "Dark", "Solid"},
     activeMapLayer    = {"Off", "Nitrogen", "Phosphorus", "Potassium", "pH",
-                         "Org Matter", "Urgency", "Weed", "Pest", "Disease"},
+                         "Org Matter", "Urgency", "Weed", "Pest", "Disease", "Compaction"},
     overlayDensity    = {"Low", "Medium", "High"},
 }
 
@@ -186,6 +186,7 @@ local SETTING_DESCS = {
     weedPressure     = "Track and penalize weed spread",
     pestPressure     = "Track insect pest infestation",
     diseasePressure  = "Track fungal crop diseases",
+    compactionEnabled = "Heavy vehicle soil compaction",
     showHUD          = "Show the soil HUD overlay",
     useImperialUnits = "Use imperial units (US tons/acre)",
     hudColorTheme    = "Color palette for HUD elements",
@@ -225,6 +226,7 @@ local ADMIN_SECTIONS = {
             { label = "Seasonal Effects", desc = "Season-driven soil changes",                 stype = "setting", id = "seasonalEffects" },
             { label = "Rain Effects",     desc = "Rain causes nutrient leaching",              stype = "setting", id = "rainEffects" },
             { label = "Plowing Bonus",    desc = "Plow bonus for soil recovery",               stype = "setting", id = "plowingBonus" },
+            { label = "Soil Compaction",  desc = "Heavy vehicle compaction effects",            stype = "setting", id = "compactionEnabled" },
         },
     },
     {

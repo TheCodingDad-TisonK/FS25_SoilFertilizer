@@ -774,4 +774,16 @@ SoilConstants.MAP_OVERLAY = {
     LEGEND_H_FRAC  = 0.17,  -- legend panel height  (fraction of map height)
 }
 
+-- ========================================
+-- COMPACTION (P2-D)
+-- ========================================
+SoilConstants.COMPACTION = {
+    HEAVY_VEHICLE_THRESHOLD_T = 8.0,   -- tonnes (Vehicle:getTotalMass returns tonnes)
+    COMPACTION_PER_PASS       = 2.0,   -- points added per heavy-vehicle work pass (once/day/field)
+    NATURAL_DECAY_PER_DAY     = 0.5,   -- points removed per game day (natural recovery)
+    SUBSOILER_REDUCTION       = 15.0,  -- points removed per subsoiler pass
+    MAX_COMPACTION            = 100.0,
+    NUTRIENT_PENALTY_MAX      = 0.20,  -- max 20% extra nutrient extraction at max compaction
+}
+
 SoilLogger.info("Constants loaded")

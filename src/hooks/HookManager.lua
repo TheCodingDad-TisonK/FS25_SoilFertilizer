@@ -1070,7 +1070,8 @@ function HookManager:installSprayerAreaHook()
                     if not isAI and self.cp and self.cp.isActive then
                         isAI = true
                     end
-                    if isAI and g_currentMission and g_currentMission.missionInfo then
+                    local isEntered = self.spec_enterable and self.spec_enterable.isControlled
+                    if isAI and not isEntered and g_currentMission and g_currentMission.missionInfo then
                         local mi = g_currentMission.missionInfo
                         local ftName = fillType.name
                         local buyActive = false
@@ -1303,6 +1304,24 @@ function HookManager:installPlowingHook()
                         else
                             g_SoilFertilityManager.soilSystem:onCultivation(farmlandId)
                         end
+
+                        -- Compaction: check if subsoiler or heavy vehicle
+                        if g_SoilFertilityManager.settings.compactionEnabled and SoilConstants.COMPACTION then
+                            local cp = SoilConstants.COMPACTION
+                            local isSubsoiler = cultivatorSelf.spec_cultivator and
+                                               cultivatorSelf.spec_cultivator.isSubsoiler
+                            if isSubsoiler then
+                                g_SoilFertilityManager.soilSystem:onSubsoilerPass(farmlandId)
+                            else
+                                local rootVehicle = cultivatorSelf.rootVehicle or cultivatorSelf
+                                local okM, totalMass = pcall(function()
+                                    return rootVehicle:getTotalMass(false)
+                                end)
+                                if okM and totalMass and totalMass >= cp.HEAVY_VEHICLE_THRESHOLD_T then
+                                    g_SoilFertilityManager.soilSystem:onCompaction(farmlandId)
+                                end
+                            end
+                        end
                     end
                 end
             end)
@@ -1357,6 +1376,18 @@ function HookManager:installDedicatedPlowHook()
                     local farmlandId = farmland and farmland.id
                     if farmlandId and farmlandId > 0 then
                         g_SoilFertilityManager.soilSystem:onPlowing(farmlandId)
+
+                        -- Dedicated plows are always heavy equipment
+                        if g_SoilFertilityManager.settings.compactionEnabled then
+                            local rootVehicle = plowSelf.rootVehicle or plowSelf
+                            local okM, totalMass = pcall(function()
+                                return rootVehicle:getTotalMass(false)
+                            end)
+                            local cp = SoilConstants.COMPACTION
+                            if cp and okM and totalMass and totalMass >= cp.HEAVY_VEHICLE_THRESHOLD_T then
+                                g_SoilFertilityManager.soilSystem:onCompaction(farmlandId)
+                            end
+                        end
                     end
                 end
             end)

@@ -18,6 +18,8 @@
     <e k="sf_pest_pressure_long" v="啟用/禁用昆蟲和病蟲害侵襲系統" eh="2ba11abc" />
     <e k="sf_disease_pressure_short" v="疾病壓力" eh="2b805cc9" />
     <e k="sf_disease_pressure_long" v="啟用/禁用真菌和作物疾病系統" eh="9080edbc" />
+    <e k="sf_compaction_short" v="[EN] Soil Compaction" eh="00000000" />
+    <e k="sf_compaction_long" v="[EN] Enable/disable heavy vehicle soil compaction system" eh="00000000" />
     <e k="sf_fertility_short" v="肥力系統" eh="f7e27d58" />
     <e k="sf_fertility_long" v="啟用/禁用動態土壤肥力系統" eh="ea074366" />
     <e k="sf_nutrients_short" v="養分循環" eh="ffab595d" />
@@ -360,6 +362,7 @@
     <e k="sf_map_layer_weed" v="雜草壓力" eh="53f8b936" />
     <e k="sf_map_layer_pest" v="害蟲壓力" eh="18a7c2be" />
     <e k="sf_map_layer_disease" v="疾病壓力" eh="2b805cc9" />
+    <e k="sf_map_layer_compaction" v="[EN] Compaction" eh="00000000" />
     <e k="sf_map_overlay_cycle" v="Shift+M: 切換土壤圖層" eh="032fdac7" />
     <e k="sf_map_page_title" v="土壤圖層" eh="04a675fb" />
     <e k="sf_map_sidebar_header" v="土壤地圖圖層" eh="81332549" />

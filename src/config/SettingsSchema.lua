@@ -129,6 +129,12 @@ SettingsSchema.definitions = {
         uiId = "sf_disease_pressure",
     },
     {
+        id = "compactionEnabled",
+        type = "boolean",
+        default = true,
+        uiId = "sf_compaction",
+    },
+    {
         id = "difficulty",
         type = "number",
         default = 2,
@@ -158,9 +164,9 @@ SettingsSchema.definitions = {
     {
         id = "activeMapLayer",
         type = "number",
-        default = 0,  -- 0=Off, 1=N, 2=P, 3=K, 4=pH, 5=OM, 6=Urgency, 7=Weed, 8=Pest, 9=Disease
+        default = 0,  -- 0=Off, 1=N, 2=P, 3=K, 4=pH, 5=OM, 6=Urgency, 7=Weed, 8=Pest, 9=Disease, 10=Compaction
         min = 0,
-        max = 9,
+        max = 10,
         uiId = "sf_active_map_layer",
         localOnly = true,  -- per-player map view, not synced to server
     },

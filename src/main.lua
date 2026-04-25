@@ -63,6 +63,9 @@ source(modDirectory .. "src/SoilFertilityManager.lua")
 -- 5. Network
 source(modDirectory .. "src/network/NetworkEvents.lua")
 
+-- 6. Integrations (optional DLC bridges — all guarded, safe no-ops when DLC absent)
+source(modDirectory .. "src/integrations/SeeAndSprayIntegration.lua")
+
 -- Globals
 local sfm = nil
 
