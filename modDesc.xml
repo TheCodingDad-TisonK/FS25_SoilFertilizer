@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <modDesc descVersion="106">
     <author>TisonK</author>
-    <version>2.0.2.0</version>
+    <version>2.0.3.0</version>
     <modName>FS25_SoilFertilizer</modName>
     <title>
         <en>Realistic Soil &amp; Fertilizer</en>
@@ -135,6 +135,7 @@
         <storeItem xmlFilename="objects/liquidTank/liquid_potash/multiPurchaseLiquidTank_liquid_potash.xml"/>
         <storeItem xmlFilename="objects/liquidTank/insecticide/multiPurchaseLiquidTank_insecticide.xml"/>
         <storeItem xmlFilename="objects/liquidTank/fungicide/multiPurchaseLiquidTank_fungicide.xml"/>
+        <storeItem xmlFilename="objects/liquidTank/liquidlime/multiPurchaseLiquidTank_liquidlime.xml"/>
         <!-- Big Bags / Solid (multi-purchase) -->
         <storeItem xmlFilename="objects/bigBag/urea/multiPurchaseBigBag_urea.xml"/>
         <storeItem xmlFilename="objects/bigBag/ams/multiPurchaseBigBag_ams.xml"/>
@@ -146,7 +147,7 @@
         <storeItem xmlFilename="objects/bigBag/biosolids/multiPurchaseBigBag_biosolids.xml"/>
         <storeItem xmlFilename="objects/bigBag/chicken_manure/multiPurchaseBigBag_chicken_manure.xml"/>
         <storeItem xmlFilename="objects/bigBag/pelletized_manure/multiPurchaseBigBag_pelletized_manure.xml"/>
-        <!-- IBC Liquid Tanks (single) -->
+        <!-- Single items — registered for multiPurchase spawning, hidden from shop UI -->
         <storeItem xmlFilename="objects/liquidTank/uan32/liquidTank_uan32.xml"/>
         <storeItem xmlFilename="objects/liquidTank/uan28/liquidTank_uan28.xml"/>
         <storeItem xmlFilename="objects/liquidTank/anhydrous/liquidTank_anhydrous.xml"/>
@@ -159,7 +160,6 @@
         <storeItem xmlFilename="objects/liquidTank/insecticide/liquidTank_insecticide.xml"/>
         <storeItem xmlFilename="objects/liquidTank/fungicide/liquidTank_fungicide.xml"/>
         <storeItem xmlFilename="objects/liquidTank/liquidlime/liquidTank_liquidlime.xml"/>
-        <!-- Big Bags / Solid (single) -->
         <storeItem xmlFilename="objects/bigBag/urea/bigBag_urea.xml"/>
         <storeItem xmlFilename="objects/bigBag/ams/bigBag_ams.xml"/>
         <storeItem xmlFilename="objects/bigBag/map/bigBag_map.xml"/>

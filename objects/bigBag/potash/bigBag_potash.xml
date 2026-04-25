@@ -16,7 +16,7 @@
         <functions><function>$l10n_sf_bigBag_potash_function</function></functions>
         <financeCategory>PURCHASE_FERTILIZER</financeCategory>
         <shopHeight>2</shopHeight>
-        <showInStore>true</showInStore>
+        <showInStore>false</showInStore>
         <vertexBufferMemoryUsage>113152</vertexBufferMemoryUsage>
         <indexBufferMemoryUsage>40960</indexBufferMemoryUsage>
         <textureMemoryUsage>851968</textureMemoryUsage>
