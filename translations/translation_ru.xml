@@ -18,8 +18,8 @@
     <e k="sf_pest_pressure_long" v="Включить/выключить систему заражения насекомыми и вредителями" eh="18015099" />
     <e k="sf_disease_pressure_short" v="Давление болезней" eh="953fd6c0" />
     <e k="sf_disease_pressure_long" v="Включить/выключить систему грибковых и растительных болезней" eh="2c36ea57" />
-    <e k="sf_compaction_short" v="[EN] Soil Compaction" eh="00000000" />
-    <e k="sf_compaction_long" v="[EN] Enable/disable heavy vehicle soil compaction system" eh="00000000" />
+    <e k="sf_compaction_short" v="Уплотнение почвы" eh="00000000" />
+    <e k="sf_compaction_long" v="Включить/выключить систему уплотнения грунта для тяжелых транспортных средств" eh="00000000" />
     <e k="sf_fertility_short" v="Система плодородия" eh="f7e27d58" />
     <e k="sf_fertility_long" v="Включить/выключить динамическую систему плодородия почвы" eh="ea074366" />
     <e k="sf_nutrients_short" v="Циклы питательных веществ" eh="ffab595d" />
@@ -73,14 +73,14 @@
     <e k="sf_hud_trans_5" v="Сплошной" eh="e41480b6" />
     <e k="sf_use_imperial_short" v="Имперские единицы" eh="ff2701ad" />
     <e k="sf_use_imperial_long" v="Показывать нормы в галлонах на акр и фунтах на акр (по умолчанию = л/га и кг/га)" eh="17efa489" />
-    <e k="sf_active_map_layer_short" v="Active Map Layer" eh="1861765f" />
-    <e k="sf_active_map_layer_long" v="Nutrient layer shown as overlay in the PDA map" eh="d7755cc8" />
-    <e k="sf_overlay_density_short" v="Map Detail" eh="a525859a" />
-    <e k="sf_overlay_density_long" v="Sample point budget for the PDA soil overlay. Low = better FPS, High = fuller coverage on large maps." eh="89215ce5" />
-    <e k="input_SF_OPEN_SETTINGS" v="Open Soil Settings" eh="2e31c0dd" />
+    <e k="sf_active_map_layer_short" v="Активный слой карты" eh="1861765f" />
+    <e k="sf_active_map_layer_long" v="Слой питательных веществ, отображенный в виде наложения на карте PDA" eh="d7755cc8" />
+    <e k="sf_overlay_density_short" v="Детали карты" eh="a525859a" />
+    <e k="sf_overlay_density_long" v="Пример бюджета точек для наложения текстуры почвы в PDA. Низкий = лучшая частота смены кадров, Высокий = более полное покрытие на больших картах." eh="89215ce5" />
+    <e k="input_SF_OPEN_SETTINGS" v="Настройки открытого грунта" eh="2e31c0dd" />
     <e k="sf_reset" v="Сбросить настройки грунта" eh="467bc2f5" />
     <e k="input_SF_TOGGLE_HUD" v="Переключить HUD грунта" eh="f0224a10" />
-    <e k="input_SF_HUD_DRAG" v="[EN] HUD Drag Mode" eh="00000000" />
+    <e k="input_SF_HUD_DRAG" v="Режим HUD Drag" eh="00000000" />
     <e k="input_SF_SOIL_REPORT" v="Отчет о почве" eh="c33180ef" />
     <e k="input_SF_RATE_UP" v="Увеличить норму внесения удобрений" eh="6e601ef5" />
     <e k="input_SF_RATE_DOWN" v="Уменьшить норму внесения удобрений" eh="30712026" />
@@ -168,18 +168,18 @@
     <e k="sf_bigBag_fungicide_name" v="МКР Фунгицид" eh="a3d4e59c" />
     <e k="sf_bigBag_fungicide_function" v="Фунгицид (жидкий)" eh="745c34cb" />
     <e k="sf_bigBag_starter_function" v="Стартовое удобрение (жидкое)" eh="2c36ea57" />
-		<e k="sf_bigBag_gypsum_name" v="[EN] Big Bag Gypsum" eh="40fc8169" />
-		<e k="sf_bigBag_gypsum_function" v="[EN] Soil Amendment (dry)" eh="51503c54" />
-    <e k="sf_bigBag_compost_name" v="Big Bag Compost" eh="14322c5d" />
+		<e k="sf_bigBag_gypsum_name" v="МКР Гипс" eh="40fc8169" />
+		<e k="sf_bigBag_gypsum_function" v="Почвоулучшитель (сухой)" eh="51503c54" />
+    <e k="sf_bigBag_compost_name" v="МКР Компост" eh="14322c5d" />
     <e k="sf_bigBag_compost_function" v="Organic Soil Amendment (dry)" eh="9dd2256a" />
-    <e k="sf_bigBag_biosolids_name" v="Big Bag Biosolids" eh="61a60ff3" />
-    <e k="sf_bigBag_biosolids_function" v="Organic Fertilizer (dry)" eh="374c7b1e" />
-    <e k="sf_bigBag_chicken_manure_name" v="Big Bag Chicken Manure" eh="cb60fddc" />
-    <e k="sf_bigBag_chicken_manure_function" v="Organic Fertilizer (dry)" eh="374c7b1e" />
-    <e k="sf_bigBag_pelletized_manure_name" v="Big Bag Pelletized Manure" eh="064be7fa" />
-    <e k="sf_bigBag_pelletized_manure_function" v="Organic Fertilizer (dry)" eh="374c7b1e" />
-    <e k="sf_bigBag_liquidlime_name" v="Liquid Lime Tank" eh="4f8caca1" />
-    <e k="sf_bigBag_liquidlime_function" v="pH Raising Agent (liquid)" eh="7a118b6d" />
+    <e k="sf_bigBag_biosolids_name" v="МКР Биоотходы" eh="61a60ff3" />
+    <e k="sf_bigBag_biosolids_function" v="Органическая почвенная добавка (сухая)" eh="374c7b1e" />
+    <e k="sf_bigBag_chicken_manure_name" v="МКР Куриный помет" eh="cb60fddc" />
+    <e k="sf_bigBag_chicken_manure_function" v="Органическая почвенная добавка (сухая)" eh="374c7b1e" />
+    <e k="sf_bigBag_pelletized_manure_name" v="МКР Гранулированный навоз" eh="064be7fa" />
+    <e k="sf_bigBag_pelletized_manure_function" v="Органическая почвенная добавка (сухая)" eh="374c7b1e" />
+    <e k="sf_bigBag_liquidlime_name" v="Резервуар жидкой извести" eh="4f8caca1" />
+    <e k="sf_bigBag_liquidlime_function" v="Жидкий агент, повышающий pH." eh="7a118b6d" />
     <e k="sf_hud_title" v="МОНИТОР ПОЧВЫ" eh="f8cda642" />
     <e k="sf_hud_field" v="Поле %d" eh="08988997" />
     <e k="sf_hud_noField" v="Выйдите на поле" eh="62c55e9e" />
@@ -328,7 +328,7 @@
 		<e k="sf_map_layer_weed" v="Давление сорняков" eh="53f8b936" />
 		<e k="sf_map_layer_pest" v="Давление вредителей" eh="18a7c2be" />
 		<e k="sf_map_layer_disease" v="Давление болезней" eh="2b805cc9" />
-    <e k="sf_map_layer_compaction" v="[EN] Compaction" eh="00000000" />
+    <e k="sf_map_layer_compaction" v="Уплотнение" eh="00000000" />
 		<e k="sf_map_overlay_cycle" v="Shift+M: переключение слоев загрязнения" eh="032fdac7" />
 		<e k="sf_map_page_title" v="Слои почвы" eh="04a675fb" />
 		<e k="sf_map_sidebar_header" v="Слой «Карта почв»" eh="81332549" />
@@ -383,9 +383,9 @@
     <e k="sf_pda_map_instructions" v="Нажмите Shift+M в игре, чтобы переключаться между слоями карты почв." eh="b13603aa" />
     <e k="sf_pda_map_open_btn" v="Открыть карту почв" eh="0901ae30" />
     <e k="sf_pda_map_unavailable" v="Предварительный просмотр карты недоступен" eh="00000000" />
-		<e k="sf_map_health_overall" v="[EN] Average Soil Health" eh="5533cbe3" />
-		<e k="sf_map_btn_report" v="[EN] Open Farm Overview" eh="6f0800e8" />
-		<e k="sf_map_btn_help" v="[EN] Dev Note (NOT WORKING YET)" eh="800e465a" />
+		<e k="sf_map_health_overall" v="Средний уровень здоровья почвы" eh="5533cbe3" />
+		<e k="sf_map_btn_report" v="Обзор «Открытой фермы»" eh="6f0800e8" />
+		<e k="sf_map_btn_help" v="Замет. разработ. (ПОКА НЕ РАБОТАЕТ)" eh="800e465a" />
     <!-- Fields Tab -->
     <e k="sf_pda_fields_section_title" v="Все поля" eh="48729e0b" />
     <e k="sf_pda_col_field" v="Поле" eh="6f16a5f8" />
@@ -462,27 +462,27 @@
     <e k="sf_map_btn_treatment" v="План обработки" eh="4ba012e2" />
     <e k="sf_map_btn_disable" v="Отключить слой" eh="8e75dec5" />
     <e k="sf_treat_action_ok" v="OK" eh="e0aa021e" />
-    <e k="sf_help_title" v="Soil Quick Reference" eh="8986bb6d" />
-    <e k="sf_help_nutrients_header" v="NUTRIENTS" eh="9aeb39bf" />
-    <e k="sf_help_n" v="N  (Nitrogen)     - Depletes fast. Apply UAN, Urea, or Manure." eh="f2d0c792" />
-    <e k="sf_help_p" v="P  (Phosphorus)   - Long-lasting. Apply MAP or DAP." eh="fdfbd91e" />
-    <e k="sf_help_k" v="K  (Potassium)    - Apply Potash. Important for roots." eh="e0217634" />
-    <e k="sf_help_om" v="OM (Organic Mat.) - Builds slowly. Plow in manure/compost." eh="a4e29617" />
-    <e k="sf_help_soil_header" v="SOIL CHEMISTRY" eh="19c67ff5" />
-    <e k="sf_help_ph" v="pH  6.5-7.0 = Ideal.  < 6.5 apply Lime.  > 7.5 apply Gypsum." eh="8929304d" />
-    <e k="sf_help_pressure_header" v="CROP PRESSURE" eh="132b0f66" />
-    <e k="sf_help_weed" v="Weed    > 20% - Apply Herbicide." eh="c8d890df" />
-    <e k="sf_help_pest" v="Pest    > 20% - Apply Insecticide." eh="f4932a05" />
-    <e k="sf_help_disease" v="Disease > 20% - Apply Fungicide." eh="1bfd0913" />
-    <e k="sf_help_status_header" v="STATUS LEVELS" eh="b081c2c6" />
-    <e k="sf_help_good" v="Good - No action needed." eh="03910bec" />
-    <e k="sf_help_fair" v="Fair - Monitor / preventive top-up." eh="2922eb1c" />
-    <e k="sf_help_poor" v="Poor - Immediate treatment required." eh="b287d206" />
+    <e k="sf_help_title" v="Краткий справочник по почвам" eh="8986bb6d" />
+    <e k="sf_help_nutrients_header" v="ПИТАТЕЛЬНЫЕ ВЕЩЕСТВА" eh="9aeb39bf" />
+    <e k="sf_help_n" v="Азот (N) быстро истощается. Используйте мочевину, мочевину или навоз." eh="f2d0c792" />
+    <e k="sf_help_p" v="Фосфор (P) - длительного действия. Применяйте MAP или DAP." eh="fdfbd91e" />
+    <e k="sf_help_k" v="K (калий) - Вносите калий. Важно для корней." eh="e0217634" />
+    <e k="sf_help_om" v="Органические вещества (ОМ) – образуется медленно. Внесите навоз/компост в почву при заделке." eh="a4e29617" />
+    <e k="sf_help_soil_header" v="ХИМИЯ ПОЧВЫ" eh="19c67ff5" />
+    <e k="sf_help_ph" v="Идеальный уровень pH: 6,5-7,0. При pH < 6,5 внести известь. При pH > 7,5 внести гипс." eh="8929304d" />
+    <e k="sf_help_pressure_header" v="ДАВЛЕНИЕ НА ПОСЕВЫ" eh="132b0f66" />
+    <e k="sf_help_weed" v="Сорняками > 20% - Примените гербицид." eh="c8d890df" />
+    <e k="sf_help_pest" v="Вредители > 20% - Примените инсектицид." eh="f4932a05" />
+    <e k="sf_help_disease" v="Болезни > 20% - Примените фунгицид." eh="1bfd0913" />
+    <e k="sf_help_status_header" v="УРОВНИ СТАТУСА" eh="b081c2c6" />
+    <e k="sf_help_good" v="Хорошо - Никаких действий не требуется." eh="03910bec" />
+    <e k="sf_help_fair" v="Справедливо - Мониторинг / профилактическое пополнение запасов." eh="2922eb1c" />
+    <e k="sf_help_poor" v="Плохо - Требуется немедленное лечение." eh="b287d206" />
     <e k="sf_pda_help_github" v="ВАШИ ОТЗЫВЫ ВАЖНЫ! Если вы обнаружите ошибки, у вас есть предложения по новым функциям или вы хотите внести вклад в код — посетите проект на GitHub. Вы можете открыть Issue или Pull Request в любое время, чтобы помочь улучшить этот мод для всех. Спасибо за тестирование!" eh="3a10b023" />
-		<e k="sf_pda_help_note" v="[EN] Note: The soil layers tab on the map page is NOT WORKING. Im aware of the issue and working on a fix. (which might take some time)" eh="2d8f5dc7" />
+		<e k="sf_pda_help_note" v="римечание: Вкладка «Слои почвы» на странице карты НЕ РАБОТАЕТ. Я знаю об этой проблеме и работаю над её решением (это может занять некоторое время)." eh="2d8f5dc7" />
     <e k="sf_pda_help_text" v="Привет, это я — разработчик! Как видите, эта страница ещё очень активно дорабатывается. Слои карты сейчас являются только визуальными превью (не функциональными для выбора), а многие элементы интерфейса ещё требуют финальной доработки." eh="58e05bdf" />
     <e k="sf_pda_map_jump_hint" v="Нажмите на поле, чтобы перейти к нему на карте" eh="006d5371" />
-		<e k="sf_pda_map_native_hint" v="[EN] The soil layer visualization has moved! You can now access and toggle all soil layers directly from the native PDA Map sidebar (ESC &amp;gt; Map). Look for the 'Soil Layers' category in the sidebar dots." eh="87f73b10" />
+		<e k="sf_pda_map_native_hint" v="Визуализация почвенных слоев переместилась! Теперь вы можете получить доступ ко всем почвенным слоям и переключать их непосредственно из боковой панели карты КПК (ESC > Карта). Найдите категорию «Почвенные слои» в точках боковой панели." eh="87f73b10" />
     <e k="sf_pda_total_urgent_label" v="Всего требует внимания" eh="b3ce2db9" />
     <e k="sf_pda_treatment_hint" v="Поля, перечисленные справа, требуют обработки. Нажмите на строку, чтобы увидеть рекомендуемые средства и примерные количества." eh="5748d316" />
     </elements>

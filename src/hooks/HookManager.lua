@@ -261,7 +261,8 @@ function HookManager:registerCustomSprayTypes()
         return
     end
 
-    -- Borrow litersPerSecond and sprayGroundType from the vanilla base types.
+    -- Borrow sprayGroundType from the vanilla base types (purely for visual ground marking).
+    -- litersPerSecond is NOT borrowed from vanilla — we compute it directly from BASE_RATES.
     local liqType = g_sprayTypeManager:getSprayTypeByName("LIQUIDFERTILIZER")
     local dryType = g_sprayTypeManager:getSprayTypeByName("FERTILIZER")
 
@@ -270,24 +271,31 @@ function HookManager:registerCustomSprayTypes()
         return
     end
 
-    local liquidLPS         = liqType and liqType.litersPerSecond or 0.0081
+    local liquidLPS         = liqType and liqType.litersPerSecond or 0.0081  -- stored for info log only
     local liquidGroundType  = liqType and liqType.sprayGroundType or 1
-    local solidLPS          = dryType and dryType.litersPerSecond or 0.0060
+    local solidLPS          = dryType and dryType.litersPerSecond or 0.0060  -- stored for info log only
     local solidGroundType   = dryType and dryType.sprayGroundType or 1
 
-    -- Use BASE_RATES from Constants to calibrate LPS for each custom product.
-    -- FS25 base LPS (liquid=0.0081, solid=0.0060) yields the base game application
-    -- rates (93.5 L/ha and 225 kg/ha). By scaling the LPS by the ratio of our
-    -- desired rate to the base rate, we ensure the tank drains at the correct
-    -- speed for each individual product.
+    -- Direct rate-to-LPS conversion:  customLPS = customRate_L_ha / 36000
+    --
+    -- Derivation: effective L/ha = LPS × dt_s / (spd_m_s × w_m × dt_s / 10000)
+    --                             = LPS × 10000 / (spd_m_s × w_m)
+    -- Converting speed to km/h gives: eff_L_ha = LPS × 36000.
+    -- Invert: LPS = eff_L_ha / 36000.
+    --
+    -- WHY NOT the old proportional formula?
+    -- Old:   customLPS = liquidLPS × (customRate / liqBase)   where liqBase = 93.5 L/ha
+    -- Bug:   vanilla liquidLPS=0.0081 actually drains at 0.0081×36000 = 291.6 L/ha,
+    --        NOT 93.5 L/ha (that was a UI display number, not the real drain rate).
+    -- Error: 291.6 / 93.5 = 3.12× — all custom types were consuming 3.12× too fast.
+    -- Fix:   bypass vanilla's ratio entirely; compute LPS straight from the target rate.
     local baseRates = SoilConstants.SPRAYER_RATE.BASE_RATES
-    local liqBase = baseRates.LIQUIDFERTILIZER.value
-    local dryBase = baseRates.FERTILIZER.value
+    local liqBase   = baseRates.LIQUIDFERTILIZER.value  -- used as fallback default only
 
-    -- Liquid nitrogen / starter types → inherit from LIQUIDFERTILIZER
+    -- Liquid nitrogen / starter types → inherit visual from LIQUIDFERTILIZER
     local liquidNames = { "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME", "INSECTICIDE", "FUNGICIDE",
                           "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH" }
-    -- Granular/solid types → inherit from FERTILIZER
+    -- Granular/solid types → inherit visual from FERTILIZER
     local solidNames  = { "UREA", "AMS", "MAP", "DAP", "POTASH",
                           "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM" }
 
@@ -297,11 +305,8 @@ function HookManager:registerCustomSprayTypes()
     for _, name in ipairs(liquidNames) do
         if g_fillTypeManager:getFillTypeByName(name) then
             local customRate = baseRates[name] and baseRates[name].value or liqBase
-            local customLPS  = liquidLPS * (customRate / liqBase)
-            -- effectiveRate = LPS * 36000 gives L/ha at 1 m/s (1 km/h) over 1 m width;
-            -- at real field speed & width the per-ha result matches BASE_RATES value.
-            local effectiveRate = customLPS * 36000  -- L/ha equivalent at reference conditions
-            SoilLogger.debug("SprayType [LIQ] %-20s  LPS=%.6f  rate=%.1f L/ha", name, customLPS, effectiveRate)
+            local customLPS  = customRate / 36000   -- exact: LPS = target_L_ha / 36000
+            SoilLogger.debug("SprayType [LIQ] %-20s  LPS=%.6f  rate=%.1f L/ha", name, customLPS, customRate)
 
             -- addSprayType is idempotent: if already registered it updates the entry
             g_sprayTypeManager:addSprayType(name, customLPS, "FERTILIZER", liquidGroundType, false)
@@ -313,10 +318,9 @@ function HookManager:registerCustomSprayTypes()
 
     for _, name in ipairs(solidNames) do
         if g_fillTypeManager:getFillTypeByName(name) then
-            local customRate = baseRates[name] and baseRates[name].value or dryBase
-            local customLPS  = solidLPS * (customRate / dryBase)
-            local effectiveRate = customLPS * 36000  -- kg/ha equivalent at reference conditions
-            SoilLogger.debug("SprayType [DRY] %-20s  LPS=%.6f  rate=%.1f kg/ha", name, customLPS, effectiveRate)
+            local customRate = baseRates[name] and baseRates[name].value or (solidLPS * 36000)
+            local customLPS  = customRate / 36000   -- exact: LPS = target_kg_ha / 36000
+            SoilLogger.debug("SprayType [DRY] %-20s  LPS=%.6f  rate=%.1f kg/ha", name, customLPS, customRate)
 
             g_sprayTypeManager:addSprayType(name, customLPS, "FERTILIZER", solidGroundType, false)
             registered = registered + 1
@@ -326,10 +330,10 @@ function HookManager:registerCustomSprayTypes()
     end
 
     SoilLogger.info(
-        "[OK] Custom spray types registered: %d types (calibrated LPS: liquid base=%.5f, solid base=%.5f, %d skipped/unavailable)",
+        "[OK] Custom spray types registered: %d types (direct LPS: vanilla ref liq=%.5f dry=%.5f, %d skipped)",
         registered, liquidLPS, solidLPS, skipped
     )
-    SoilLogger.info("     To see per-type rates, enable debug mode: SoilDebug (in developer console)")
+    SoilLogger.info("     Enable SoilDebug to see per-type LPS and rate values")
 end
 
 -- =========================================================
@@ -1311,14 +1315,23 @@ function HookManager:installPlowingHook()
                             local isSubsoiler = cultivatorSelf.spec_cultivator and
                                                cultivatorSelf.spec_cultivator.isSubsoiler
                             if isSubsoiler then
+                                SoilLogger.debug("Compaction: subsoiler pass on farmland=%d veh=%d",
+                                    farmlandId, cultivatorSelf.id or 0)
                                 g_SoilFertilityManager.soilSystem:onSubsoilerPass(farmlandId)
                             else
                                 local rootVehicle = cultivatorSelf.rootVehicle or cultivatorSelf
                                 local okM, totalMass = pcall(function()
                                     return rootVehicle:getTotalMass(false)
                                 end)
-                                if okM and totalMass and totalMass >= cp.HEAVY_VEHICLE_THRESHOLD_T then
-                                    g_SoilFertilityManager.soilSystem:onCompaction(farmlandId)
+                                if okM and totalMass then
+                                    SoilLogger.debug(
+                                        "Compaction check: farmland=%d veh=%d  mass=%.1ft  threshold=%.1ft  heavy=%s",
+                                        farmlandId, cultivatorSelf.id or 0,
+                                        totalMass, cp.HEAVY_VEHICLE_THRESHOLD_T,
+                                        tostring(totalMass >= cp.HEAVY_VEHICLE_THRESHOLD_T))
+                                    if totalMass >= cp.HEAVY_VEHICLE_THRESHOLD_T then
+                                        g_SoilFertilityManager.soilSystem:onCompaction(farmlandId)
+                                    end
                                 end
                             end
                         end
@@ -1384,8 +1397,15 @@ function HookManager:installDedicatedPlowHook()
                                 return rootVehicle:getTotalMass(false)
                             end)
                             local cp = SoilConstants.COMPACTION
-                            if cp and okM and totalMass and totalMass >= cp.HEAVY_VEHICLE_THRESHOLD_T then
-                                g_SoilFertilityManager.soilSystem:onCompaction(farmlandId)
+                            if cp and okM and totalMass then
+                                SoilLogger.debug(
+                                    "Compaction check (plow): farmland=%d veh=%d  mass=%.1ft  threshold=%.1ft  heavy=%s",
+                                    farmlandId, plowSelf.id or 0,
+                                    totalMass, cp.HEAVY_VEHICLE_THRESHOLD_T,
+                                    tostring(totalMass >= cp.HEAVY_VEHICLE_THRESHOLD_T))
+                                if totalMass >= cp.HEAVY_VEHICLE_THRESHOLD_T then
+                                    g_SoilFertilityManager.soilSystem:onCompaction(farmlandId)
+                                end
                             end
                         end
                     end
@@ -2049,14 +2069,26 @@ function HookManager:installExternalFillHook()
             local spT2  = g_sprayTypeManager and g_sprayTypeManager:getSprayTypeByFillTypeIndex(customIdx)
             local lps2  = spT2 and spT2.litersPerSecond or 0
             local usagePerSec = (dt > 0) and (usage * 1000 / dt) or 0
-            local spec_s2 = sprayerSelf.spec_sprayer
-            local usScale2 = spec_s2 and spec_s2.usageScale
+            -- Resolve width via workAreaIndex (same path as SprayUsage hook) so eff
+            -- in the log matches the actual billing width used in the usage calc above.
+            local spec_s2   = sprayerSelf.spec_sprayer
+            local usScale2  = spec_s2 and spec_s2.usageScale
+            local okAST2, activeSpT2 = pcall(function() return sprayerSelf:getActiveSprayType() end)
+            if okAST2 and activeSpT2 and activeSpT2.usageScale then
+                usScale2 = activeSpT2.usageScale
+            end
             local ww2 = (usScale2 and usScale2.workingWidth) or 12
+            if usScale2 and usScale2.workAreaIndex then
+                local okW2, w2 = pcall(function()
+                    return sprayerSelf:getWorkAreaWidth(usScale2.workAreaIndex)
+                end)
+                if okW2 and w2 and w2 > 0 then ww2 = w2 end
+            end
             local areaPerSec = spd * ww2 / 36000  -- ha/s
             local effLpha = (areaPerSec > 0) and (usagePerSec / areaPerSec) or 0
             SoilLogger.debug(
-                "ExternalFill BUY veh=%d type=%-12s  spd=%.1f km/h  lps=%.6f  usage=%.4fL  cost=$%.4f  eff=%.1f L/ha",
-                sprayerSelf.id or 0, ftName, spd, lps2, usage, price, effLpha)
+                "ExternalFill BUY veh=%d type=%-12s  spd=%.1f km/h  w=%.1fm  lps=%.6f  usage=%.4fL  cost=$%.4f  eff=%.1f L/ha",
+                sprayerSelf.id or 0, ftName, spd, ww2, lps2, usage, price, effLpha)
         end
 
         return customIdx, usage
