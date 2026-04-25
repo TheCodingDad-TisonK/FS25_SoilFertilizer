@@ -346,15 +346,7 @@ end
 
 -- ── Admin / settings helpers ──────────────────────────────
 function SoilSettingsPanel:isAdmin()
-    if not g_currentMission then return false end
-    if not (g_currentMission.missionDynamicInfo and
-            g_currentMission.missionDynamicInfo.isMultiplayer) then
-        return true
-    end
-    if g_dedicatedServer then return true end
-    local user = g_currentMission.userManager and
-                 g_currentMission.userManager:getUserByUserId(g_currentMission.playerUserId)
-    return user and user:getIsMasterUser() or false
+    return SoilUtils.isPlayerAdmin()
 end
 
 function SoilSettingsPanel:requestChange(id, value)
@@ -363,8 +355,7 @@ function SoilSettingsPanel:requestChange(id, value)
     if def.localOnly then
         self.settings[id] = value
         self.settings:save()
-        -- sync HUD if needed
-        if g_SoilFertilityManager and g_SoilFertilityManager.soilHUD then
+        if id == "hudPosition" and g_SoilFertilityManager and g_SoilFertilityManager.soilHUD then
             g_SoilFertilityManager.soilHUD:updatePosition()
         end
         return

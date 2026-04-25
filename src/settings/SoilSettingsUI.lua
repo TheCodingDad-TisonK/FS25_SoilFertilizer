@@ -44,22 +44,7 @@ end
 
 -- Check if current player is admin
 function SoilSettingsUI:isPlayerAdmin()
-    if not g_currentMission then return false end
-
-    if not (g_currentMission and g_currentMission.missionDynamicInfo and g_currentMission.missionDynamicInfo.isMultiplayer) then
-        return true
-    end
-
-    if g_dedicatedServer then
-        return true
-    end
-
-    local currentUser = g_currentMission.userManager:getUserByUserId(g_currentMission.playerUserId)
-    if currentUser then
-        return currentUser:getIsMasterUser()
-    end
-
-    return false
+    return SoilUtils.isPlayerAdmin()
 end
 
 -- Show admin-only warning

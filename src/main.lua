@@ -32,6 +32,7 @@ GuiOverlay.resolveFilename = Utils.overwrittenFunction(GuiOverlay.resolveFilenam
 -- 1. Utilities and config (no dependencies)
 source(modDirectory .. "src/utils/Logger.lua")
 source(modDirectory .. "src/utils/AsyncRetryHandler.lua")
+source(modDirectory .. "src/utils/SoilUtils.lua")
 source(modDirectory .. "src/config/Constants.lua")
 source(modDirectory .. "src/config/SettingsSchema.lua")
 
@@ -40,14 +41,13 @@ source(modDirectory .. "src/hooks/HookManager.lua")
 source(modDirectory .. "src/ui/SoilLayerSystem.lua")
 source(modDirectory .. "src/SprayerRateManager.lua")
 source(modDirectory .. "src/SoilFertilitySystem.lua")
-source(modDirectory .. "src/SoilFertilityManager.lua")
 
 -- 3. Settings
 source(modDirectory .. "src/settings/SettingsManager.lua")
 source(modDirectory .. "src/settings/Settings.lua")
 source(modDirectory .. "src/settings/SoilSettingsGUI.lua")
 
--- 4. UI
+-- 4. UI + Manager (Manager must come after Settings so its new() dependencies are defined)
 source(modDirectory .. "src/utils/UIHelper.lua")
 source(modDirectory .. "src/settings/SoilSettingsUI.lua")
 source(modDirectory .. "src/ui/SoilHUD.lua")
@@ -58,6 +58,7 @@ source(modDirectory .. "src/ui/SoilPDAScreen.lua")
 source(modDirectory .. "src/ui/SoilFieldDetailDialog.lua")
 source(modDirectory .. "src/ui/SoilTreatmentDialog.lua")
 source(modDirectory .. "src/ui/SoilSettingsPanel.lua")
+source(modDirectory .. "src/SoilFertilityManager.lua")
 
 -- 5. Network
 source(modDirectory .. "src/network/NetworkEvents.lua")

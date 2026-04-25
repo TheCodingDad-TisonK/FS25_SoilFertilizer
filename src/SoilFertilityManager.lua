@@ -25,6 +25,9 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
     self.disableGUI = disableGUI or false
 
     -- Settings
+    assert(Settings,        "[SoilFertilizer] Settings not loaded — check source order in main.lua")
+    assert(SettingsManager, "[SoilFertilizer] SettingsManager not loaded — check source order in main.lua")
+
     if not SettingsManager then
         SoilLogger.error("CRITICAL: SettingsManager not loaded - mod cannot initialize")
         if g_gui then
