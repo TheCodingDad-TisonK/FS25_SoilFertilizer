@@ -187,9 +187,9 @@ SoilConstants.FERTILIZER_PROFILES = {
     -- Base game (NPK balanced)
     LIQUIDFERTILIZER  = { N=79.2, P=198.0, K=44.5 },          -- 93.5 L/ha: ~20N, ~10P, ~15K ppm
     FERTILIZER        = { N=41.1, P=164.6, K=24.7 },          -- 225 kg/ha: ~25N, ~20P, ~20K ppm
-    MANURE            = { N=0.53, P=1.59,  K=0.60, OM=0.04 }, -- 14000 L/ha: ~20N, ~12P, ~30K ppm
-    LIQUIDMANURE      = { N=0.42, P=1.59,  K=0.80, OM=0.03 }, -- Slurry
-    DIGESTATE         = { N=0.58, P=1.85,  K=1.10, OM=0.04 }, -- Digestate
+    MANURE            = { N=0.53, P=0.25,  K=0.45, OM=0.04 }, -- 14000 L/ha: ~7N, ~3.5P, ~6K pts/pass (UNL beef N:P:K ratio)
+    LIQUIDMANURE      = { N=0.50, P=0.35,  K=0.65, OM=0.03 }, -- Slurry — dairy N:P:K 1:0.70:1.33 (UNL g1335)
+    DIGESTATE         = { N=0.65, P=0.40,  K=0.85, OM=0.04 }, -- Digestate — higher N availability vs raw manure
     LIME              = { pH=0.16 },                          -- 2500 kg/ha: +0.40 pH shift per pass (~3 passes to correct pH 5.5→6.5)
     LIQUIDLIME        = { pH=1.07 },                          -- 374  L/ha: +0.40 pH shift per pass (rate corrected from 2800→374 L/ha)
 
@@ -220,9 +220,9 @@ SoilConstants.FERTILIZER_PROFILES = {
 
     -- Organic / slow-release
     COMPOST           = { N=0.74, P=0.55, K=0.55, OM=0.60 }, -- 5000 kg/ha
-    BIOSOLIDS         = { N=2.05, P=6.17, K=1.23, OM=0.45 }, -- 4500 kg/ha
-    CHICKEN_MANURE    = { N=3.70, P=13.9, K=2.78, OM=0.55 }, -- 2000 kg/ha
-    PELLETIZED_MANURE = { N=16.4, P=41.1, K=18.5, OM=0.40 }, -- 450 kg/ha
+    BIOSOLIDS         = { N=2.05, P=1.20, K=1.23, OM=0.45 }, -- 4500 kg/ha: ~+9N, +5P, +5K pts/pass
+    CHICKEN_MANURE    = { N=3.70, P=2.80, K=2.78, OM=0.55 }, -- 2000 kg/ha: ~+7N, +5P, +5K pts/pass
+    PELLETIZED_MANURE = { N=16.4, P=8.20, K=18.5, OM=0.40 }, -- 450 kg/ha:  ~+7N, +3P, +8K pts/pass
 
     -- Crop protection products (Handled via effectiveness calculation)
     INSECTICIDE = { pestReduction = 1.0 },
