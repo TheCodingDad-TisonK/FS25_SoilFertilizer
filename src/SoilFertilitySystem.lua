@@ -1285,11 +1285,38 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
         -- 2. Apply standard nutrients (scaled by the liters applied this frame)
         local factor = (liters / 1000) / areaInHa
 
+        -- Capture before-values for diagnostic logging (debug mode only).
+        local dbgN0, dbgP0, dbgK0, dbgPH0 = field.nitrogen, field.phosphorus, field.potassium, field.pH
+
         if entry.N then field.nitrogen   = math.min(limits.MAX, field.nitrogen   + entry.N * factor) end
         if entry.P then field.phosphorus = math.min(limits.MAX, field.phosphorus + entry.P * factor) end
         if entry.K then field.potassium  = math.min(limits.MAX, field.potassium  + entry.K * factor) end
         if entry.pH then field.pH        = math.max(limits.PH_MIN, math.min(limits.PH_MAX, field.pH + entry.pH * factor)) end
         if entry.OM then field.organicMatter = math.min(limits.ORGANIC_MATTER_MAX, field.organicMatter + entry.OM * factor) end
+
+        -- Throttled per-field diagnostic (debug mode, lime types always logged; nutrients every 4 s).
+        -- Validates that pH shift and nutrient deltas are agronomically sensible.
+        -- For LIME/LIQUIDLIME: target ~0.40 pH over a full 1-ha pass at BASE_RATES volume.
+        -- For nutrients: visible delta per frame should be tiny; cumulative over full pass = profile value.
+        if entry.pH then
+            -- pH types (LIME, LIQUIDLIME, GYPSUM): log every application event so you can
+            -- see the per-frame delta and verify it adds up to ~0.40 over a full field pass.
+            SoilLogger.debug(
+                "FertApply pH field=%d type=%-12s liters=%.4f factor=%.6f  pH %.3f -> %.3f (delta=%.4f)",
+                fieldId, fillType.name, liters, factor, dbgPH0, field.pH, field.pH - dbgPH0)
+        else
+            -- Nutrient types: only log once every ~4 s to avoid log spam.
+            -- Uses the field buffer length as a crude frame counter (avoids a time lookup).
+            local buf = field.nutrientBuffer and field.nutrientBuffer[fillTypeIndex] or 0
+            -- Log when buffer crosses a 1000-L boundary (roughly once per ~large-step).
+            local prevBuf = buf - liters
+            if math.floor(buf / 1000) ~= math.floor(prevBuf / 1000) then
+                SoilLogger.debug(
+                    "FertApply NPK field=%d type=%-12s buf=%.0fL  N %.1f->%.1f  P %.1f->%.1f  K %.1f->%.1f",
+                    fieldId, fillType.name, buf,
+                    dbgN0, field.nitrogen, dbgP0, field.phosphorus, dbgK0, field.potassium)
+            end
+        end
 
         -- Write updated values to density map layers (per-pixel, at sprayer position)
         if self.layerSystem and self.layerSystem.available then

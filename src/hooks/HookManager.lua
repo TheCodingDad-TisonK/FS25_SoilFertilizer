@@ -298,6 +298,10 @@ function HookManager:registerCustomSprayTypes()
         if g_fillTypeManager:getFillTypeByName(name) then
             local customRate = baseRates[name] and baseRates[name].value or liqBase
             local customLPS  = liquidLPS * (customRate / liqBase)
+            -- effectiveRate = LPS * 36000 gives L/ha at 1 m/s (1 km/h) over 1 m width;
+            -- at real field speed & width the per-ha result matches BASE_RATES value.
+            local effectiveRate = customLPS * 36000  -- L/ha equivalent at reference conditions
+            SoilLogger.debug("SprayType [LIQ] %-20s  LPS=%.6f  rate=%.1f L/ha", name, customLPS, effectiveRate)
 
             -- addSprayType is idempotent: if already registered it updates the entry
             g_sprayTypeManager:addSprayType(name, customLPS, "FERTILIZER", liquidGroundType, false)
@@ -311,6 +315,8 @@ function HookManager:registerCustomSprayTypes()
         if g_fillTypeManager:getFillTypeByName(name) then
             local customRate = baseRates[name] and baseRates[name].value or dryBase
             local customLPS  = solidLPS * (customRate / dryBase)
+            local effectiveRate = customLPS * 36000  -- kg/ha equivalent at reference conditions
+            SoilLogger.debug("SprayType [DRY] %-20s  LPS=%.6f  rate=%.1f kg/ha", name, customLPS, effectiveRate)
 
             g_sprayTypeManager:addSprayType(name, customLPS, "FERTILIZER", solidGroundType, false)
             registered = registered + 1
@@ -323,6 +329,7 @@ function HookManager:registerCustomSprayTypes()
         "[OK] Custom spray types registered: %d types (calibrated LPS: liquid base=%.5f, solid base=%.5f, %d skipped/unavailable)",
         registered, liquidLPS, solidLPS, skipped
     )
+    SoilLogger.info("     To see per-type rates, enable debug mode: SoilDebug (in developer console)")
 end
 
 -- =========================================================
@@ -1698,7 +1705,7 @@ function HookManager:installPurchaseRefillHook()
         LIQUID_UREA = 1.70, LIQUID_AMS = 1.45, LIQUID_MAP = 2.00, LIQUID_DAP = 1.80, LIQUID_POTASH = 1.85,
         UREA = 1.65, AMS = 1.40, MAP = 1.95, DAP = 1.75, POTASH = 1.80,
         COMPOST = 0.60, BIOSOLIDS = 0.55, CHICKEN_MANURE = 0.50,
-        PELLETIZED_MANURE = 0.70, GYPSUM = 0.80,
+        PELLETIZED_MANURE = 0.70, GYPSUM = 0.35,  -- reduced: amendment, not plant food ($525/ha vs $1200)
     }
 
     -- customPrices[fillTypeIndex] = pricePerLiter
@@ -2004,8 +2011,21 @@ function HookManager:installExternalFillHook()
                 g_farmManager:updateFarmStats(statsFarmId, "expenses", price)
                 g_currentMission:addMoney(-price, farmId, MoneyType.PURCHASE_FERTILIZER)
             end)
-            SoilLogger.debug("ExternalFill BUY: veh=%d type=%s liters=%.2f price=%.2f",
-                sprayerSelf.id or 0, ftName, usage, price)
+            -- Diagnostic: log BUY billing details every frame (debug mode only).
+            -- usage = L charged this dt; price = cost this dt; eff = effective L/ha.
+            -- Compare eff to BASE_RATES to validate the speed-based formula is correct.
+            local spd   = math.abs(sprayerSelf.lastSpeed or 0) * 3600  -- km/h
+            local spT2  = g_sprayTypeManager and g_sprayTypeManager:getSprayTypeByFillTypeIndex(customIdx)
+            local lps2  = spT2 and spT2.litersPerSecond or 0
+            local usagePerSec = (dt > 0) and (usage * 1000 / dt) or 0
+            local spec_s2 = sprayerSelf.spec_sprayer
+            local usScale2 = spec_s2 and spec_s2.usageScale
+            local ww2 = (usScale2 and usScale2.workingWidth) or 12
+            local areaPerSec = spd * ww2 / 36000  -- ha/s
+            local effLpha = (areaPerSec > 0) and (usagePerSec / areaPerSec) or 0
+            SoilLogger.debug(
+                "ExternalFill BUY veh=%d type=%-12s  spd=%.1f km/h  lps=%.6f  usage=%.4fL  cost=$%.4f  eff=%.1f L/ha",
+                sprayerSelf.id or 0, ftName, spd, lps2, usage, price, effLpha)
         end
 
         return customIdx, usage
@@ -2041,11 +2061,15 @@ function HookManager:installSprayerUsageHook()
 
     local originalClassFn = Sprayer.getSprayerUsage
 
+    -- Throttle table: vehId → last log time (ms).  Shared across all replacement closures
+    -- so that Layer-1/2/3 duplicates don't each log independently for the same vehicle.
+    local _usageLogLastTime = {}
+
     local function makeUsageReplacement(originalFn)
         return function(sprayerSelf, fillType, dt)
             if fillType == FillType.UNKNOWN then return 0 end
 
-            -- Actual speed in km/h (lastSpeed is m/s).
+            -- Actual speed in km/h (lastSpeed stored in m/ms by physics; * 3600 = km/h).
             local actualSpeedKmh = math.abs(sprayerSelf.lastSpeed or 0) * 3600
             if actualSpeedKmh < 0.5 then
                 -- Below 0.5 km/h (stopping, pivoting at headlands): no area covered.
@@ -2085,7 +2109,29 @@ function HookManager:installSprayerUsageHook()
                 if okW and w and w > 0 then workWidth = w end
             end
 
-            return fillScale * lps * actualSpeedKmh * workWidth * dt * 0.001
+            local usage = fillScale * lps * actualSpeedKmh * workWidth * dt * 0.001
+
+            -- Throttled diagnostic: log once per 4 s per vehicle (debug mode only).
+            -- Shows speed / width / lps / usage-per-second / effective L/ha so you can
+            -- confirm the speed-based formula is working at the actual travel speed.
+            local vehId = sprayerSelf.id or 0
+            local now   = (g_currentMission and g_currentMission.time) or 0
+            if (now - (_usageLogLastTime[vehId] or 0)) >= 4000 then
+                _usageLogLastTime[vehId] = now
+                local usagePerSec = (dt > 0) and (usage * 1000 / dt) or 0
+                -- Effective L/ha = usage-rate / area-rate
+                -- area/s = speed_kmh * 1000/3600 m/s * width_m / 10000 ha/m² = speed*width/36000
+                local areaPerSec    = actualSpeedKmh * workWidth / 36000
+                local effectiveLpha = (areaPerSec > 0) and (usagePerSec / areaPerSec) or 0
+                local ftName = "?"
+                local ft = g_fillTypeManager and g_fillTypeManager:getFillTypeByIndex(fillType)
+                if ft then ftName = ft.name end
+                SoilLogger.debug(
+                    "SprayUsage veh=%d type=%-12s  spd=%.1f km/h  w=%.1fm  lps=%.6f  scale=%.2f  usage/s=%.4f L/s  eff=%.1f L/ha",
+                    vehId, ftName, actualSpeedKmh, workWidth, lps, fillScale, usagePerSec, effectiveLpha)
+            end
+
+            return usage
         end
     end
 
