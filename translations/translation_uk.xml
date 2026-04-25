@@ -472,7 +472,7 @@
     <e k="sf_help_soil_header" v="ХІМІЯ ҐРУНТУ" eh="19c67ff5" />
     <e k="sf_help_ph" v="pH 6,5-7,0 = Ідеально. < 6,5 – нанесіть вапно. > 7,5 – нанесіть гіпс." eh="8929304d" />
     <e k="sf_help_pressure_header" v="ТИСК НА КУЛЬТУРУ" eh="132b0f66" />
-    <e k="sf_help_weed" v="Бур'яни > 20% - Застосуйте гербіцид."" eh="c8d890df" />
+    <e k="sf_help_weed" v="Бур'яни > 20% - Застосуйте гербіцид." eh="c8d890df" />
     <e k="sf_help_pest" v="Шкідник > 20% - Застосуйте інсектицид." eh="f4932a05" />
     <e k="sf_help_disease" v="Хвороба > 20% - Застосуйте фунгіцид." eh="1bfd0913" />
     <e k="sf_help_status_header" v="РІВНІ СТАТУСУ" eh="b081c2c6" />
