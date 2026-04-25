@@ -7,6 +7,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.0.0] - 2026-04-25
+
+### Added
+
+- **Soil Compaction System** (#221): Heavy vehicles (8 t or more) now compact the soil they
+  drive over. Compaction accumulates per field (0–100%) and applies a nutrient extraction
+  penalty of up to 20% at maximum compaction — compacted soil can't deliver its nutrients as
+  effectively. Pass with a subsoiler to reduce compaction by 15 points per pass. Compaction
+  decays naturally at 0.5 points per day. Tracked in the HUD (green/amber/red), visible as
+  overlay layer 10, saved to `soilData.xml`, and fully synced in multiplayer. Togglable in
+  settings (`compactionEnabled`).
+
+- **Per-Cell Coverage Tracking** (#223): The sprayer now tracks which individual soil cells
+  have been covered during an application pass. Coverage fraction is calculated and displayed
+  in the HUD (`Coverage: X% / 70% min`). The fully-treated notification is now gated on
+  reaching at least 70% field coverage — no more phantom "field treated" messages from a
+  single-pass clip across a corner. Coverage data is synced in multiplayer.
+
+- **Rebindable HUD Drag** (#224): HUD drag mode (right-click to reposition the overlay) is
+  now a proper FS25 input action (`SF_HUD_DRAG`, default: RMB) instead of a hardcoded mouse
+  check. Players can rebind it in the standard FS25 key bindings menu. The old
+  `hudDragEnabled` toggle in settings has been removed — the action now covers it directly.
+
+- **See-and-Spray Integration** (#220): When Precision Farming's See-and-Spray nozzles would
+  deactivate (no native weed detected in a spot), the mod now checks our own `weedPressure`
+  field value. If weed pressure is ≥ 20, the nozzle is re-activated so herbicide continues to
+  flow. Bridges our field-level weed tracking into the per-nozzle See-and-Spray system.
+  Fully guarded — a no-op if Precision Farming is not installed.
+
+### Architecture
+
+- **`src/utils/SoilUtils.lua`** (new): Shared `SoilUtils.isPlayerAdmin()` utility replaces
+  three duplicated admin-check implementations across `SoilSettingsPanel`, `SoilSettingsUI`,
+  and `NetworkEvents` (#217).
+
+- **`src/integrations/SeeAndSprayIntegration.lua`** (new): Optional DLC bridge sourced after
+  `NetworkEvents`. Guarded at source time (`WeedSpotSpray ~= nil`) and runtime
+  (`g_precisionFarming ~= nil`) — safe no-op when PF is not loaded (#220).
+
+- **Load-order guard**: `SoilFertilityManager.new()` now asserts that `SoilFertilitySystem`,
+  `HookManager`, and `Settings` are all loaded before construction, catching accidental
+  source-order regressions immediately at startup (#219).
+
+- **`updatePosition()` call narrowed**: `SoilSettingsPanel:requestChange()` now only calls
+  `soilHUD:updatePosition()` for the `hudPosition` setting, not for every local-only setting
+  change (#218).
+
+---
+
 ## [1.9.9.3] - 2026-04-24
 
 ### Fixed
