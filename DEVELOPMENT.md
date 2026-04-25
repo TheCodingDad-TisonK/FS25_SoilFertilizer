@@ -1,7 +1,7 @@
 # FS25_SoilFertilizer - Developer Guide
 
-**Version**: 1.9.9.3
-**Last Updated**: 2026-04-24
+**Version**: 2.0.0.0
+**Last Updated**: 2026-04-25
 
 ---
 
@@ -81,9 +81,12 @@ FS25_SoilFertilizer/
 │   │   ├── SoilFieldDetailDialog.lua  # Field detail popup dialog
 │   │   ├── SoilTreatmentDialog.lua    # Treatment recommendation dialog
 │   │   └── SoilReportDialog.lua    # Full-farm soil report dialog
+│   ├── integrations/
+│   │   └── SeeAndSprayIntegration.lua  # Precision Farming See-and-Spray bridge (v2.0)
 │   └── utils/
 │       ├── Logger.lua              # Centralized logging
 │       ├── AsyncRetryHandler.lua   # Retry pattern utility
+│       ├── SoilUtils.lua           # Shared admin-check and common helpers (v2.0)
 │       └── UIHelper.lua            # UI element creation
 ```
 
@@ -95,11 +98,12 @@ FS25_SoilFertilizer/
 
 `main.lua` loads modules in strict dependency order:
 
-1. **Utilities & Config**: Logger, AsyncRetryHandler, Constants, SettingsSchema
+1. **Utilities & Config**: Logger, AsyncRetryHandler, Constants, SettingsSchema, SoilUtils
 2. **Core Systems**: HookManager, SoilMapHooks, SprayerRateManager, SoilFertilitySystem, SoilFertilityManager
 3. **Settings**: SettingsManager, Settings, SoilSettingsGUI
 4. **UI**: UIHelper, SoilSettingsUI, SoilLayerSystem, SoilMapOverlay, SoilFieldDetailDialog, SoilTreatmentDialog, SoilReportDialog, SoilPDAScreen, SoilSettingsPanel, SoilHUD
 5. **Network**: NetworkEvents
+6. **Integrations** (optional DLC bridges): SeeAndSprayIntegration
 
 **Important**: Respect this order when adding new modules.
 

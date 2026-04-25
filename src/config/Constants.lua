@@ -472,6 +472,16 @@ SoilConstants.ZONE = {
 }
 
 -- ========================================
+-- FERTILIZER COVERAGE TRACKING (v2)
+-- ========================================
+-- A fertilizer pass requires MIN_FULL_CREDIT fraction of the field to be
+-- physically covered before the "fully treated" notification fires.
+-- Coverage is tracked per-field daily via the cell grid shared with ZONE.
+SoilConstants.COVERAGE = {
+    MIN_FULL_CREDIT = 0.70,  -- 70% of field cells must be visited for full-treated notification
+}
+
+-- ========================================
 -- NETWORK SYNC
 -- ========================================
 SoilConstants.NETWORK = {
@@ -762,6 +772,18 @@ SoilConstants.MAP_OVERLAY = {
     LEGEND_MARGIN  = 0.02,  -- gap from map corner (fraction of map width)
     LEGEND_W_FRAC  = 0.13,  -- legend panel width   (fraction of map width)
     LEGEND_H_FRAC  = 0.17,  -- legend panel height  (fraction of map height)
+}
+
+-- ========================================
+-- COMPACTION (P2-D)
+-- ========================================
+SoilConstants.COMPACTION = {
+    HEAVY_VEHICLE_THRESHOLD_T = 8.0,   -- tonnes (Vehicle:getTotalMass returns tonnes)
+    COMPACTION_PER_PASS       = 2.0,   -- points added per heavy-vehicle work pass (once/day/field)
+    NATURAL_DECAY_PER_DAY     = 0.5,   -- points removed per game day (natural recovery)
+    SUBSOILER_REDUCTION       = 15.0,  -- points removed per subsoiler pass
+    MAX_COMPACTION            = 100.0,
+    NUTRIENT_PENALTY_MAX      = 0.20,  -- max 20% extra nutrient extraction at max compaction
 }
 
 SoilLogger.info("Constants loaded")

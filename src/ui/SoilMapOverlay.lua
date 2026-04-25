@@ -18,7 +18,7 @@ local function tr(key, fallback)
 end
 
 -- ── Constants ─────────────────────────────────────────────
-SoilMapOverlay.LAYER_COUNT    = 9
+SoilMapOverlay.LAYER_COUNT    = 10
 SoilMapOverlay.ALPHA          = 0.72
 
 -- Sampling constants
@@ -44,6 +44,7 @@ SoilMapOverlay.LAYER_ACCENT = {
     [7] = {0.20, 0.70, 0.20},  -- Weed:    dark green
     [8] = {0.85, 0.75, 0.10},  -- Pest:    amber
     [9] = {0.80, 0.10, 0.80},  -- Disease: magenta
+    [10] = {0.55, 0.30, 0.10}, -- Compaction: dark brown/orange
 }
 
 -- i18n key per layer index (0 = Off)
@@ -58,10 +59,11 @@ SoilMapOverlay.LAYER_KEYS = {
     [7] = "sf_map_layer_weed",
     [8] = "sf_map_layer_pest",
     [9] = "sf_map_layer_disease",
+    [10] = "sf_map_layer_compaction",
 }
 
 -- Inverted layers: high value = bad (urgency / pressures)
-SoilMapOverlay.INVERTED_LAYERS = {[6]=true,[7]=true,[8]=true,[9]=true}
+SoilMapOverlay.INVERTED_LAYERS = {[6]=true,[7]=true,[8]=true,[9]=true,[10]=true}
 
 -- ── Constructor ───────────────────────────────────────────
 
@@ -845,6 +847,11 @@ function SoilMapOverlay:getLayerColor(layerIdx, info, farmlandId)
     elseif layerIdx == 9 then
         local v = info.diseasePressure or 0
         if v > 50     then return POOR[1], POOR[2], POOR[3]
+        elseif v > 20 then return FAIR[1], FAIR[2], FAIR[3]
+        else               return GOOD[1], GOOD[2], GOOD[3] end
+    elseif layerIdx == 10 then
+        local v = info.compaction or 0
+        if v > 60     then return POOR[1], POOR[2], POOR[3]
         elseif v > 20 then return FAIR[1], FAIR[2], FAIR[3]
         else               return GOOD[1], GOOD[2], GOOD[3] end
     end

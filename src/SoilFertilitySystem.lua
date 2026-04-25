@@ -823,6 +823,12 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing, area)
         dryDayCount = 0,
         nutrientBuffer = {},  -- Tracks [fillTypeIndex] = litersApplied (reset daily)
         zoneData = {},        -- Sparse {cellKey → {N,P,K,pH,OM}} for per-area overlay
+        coveredCells = {},    -- Set of cellKey strings touched by fertilizer today (reset daily)
+        coveredCellCount = 0, -- Running count of coveredCells for O(1) fraction computation
+        totalFieldCells = 0,  -- Estimated cell count from field area (set on first spray)
+        coverageFraction = 0, -- Fraction of field covered today (0.0–1.0)
+        compaction = 0,       -- Soil compaction level 0–100 (0 = none, 100 = fully compacted)
+        lastCompactionDay = -1, -- tracks once-per-day throttle (transient, not persisted)
         lastAlertYear = 0,    -- In-game year when the last critical alert fired (persisted)
     }
 
@@ -841,8 +847,19 @@ function SoilFertilitySystem:updateDailySoil()
     local phNorm = SoilConstants.PH_NORMALIZATION
 
     for fieldId, field in pairs(self.fieldData) do
-        -- Clear fertilizer buffers daily - require same-day full coverage
-        field.nutrientBuffer = {}
+        -- Clear fertilizer and coverage buffers daily
+        field.nutrientBuffer    = {}
+        field.coveredCells      = {}
+        field.coveredCellCount  = 0
+        field.coverageFraction  = 0
+
+        -- Compaction natural decay
+        if self.settings.compactionEnabled and SoilConstants.COMPACTION then
+            local cp = SoilConstants.COMPACTION
+            if (field.compaction or 0) > 0 then
+                field.compaction = math.max(0, field.compaction - cp.NATURAL_DECAY_PER_DAY)
+            end
+        end
 
         -- Natural nutrient recovery for fallow fields
         local daysSinceFallow = currentDay - (field.lastHarvest or 0)
@@ -1159,6 +1176,17 @@ function SoilFertilitySystem:updateFieldNutrients(fieldId, fruitTypeIndex, harve
         factor = factor * diffMultiplier
     end
 
+    -- Step 2b: Compaction penalty — compacted soil reduces nutrient uptake efficiency,
+    -- causing crops to deplete more of what's available to achieve the same yield.
+    if self.settings.compactionEnabled and SoilConstants.COMPACTION then
+        local cp = SoilConstants.COMPACTION
+        local compaction = field.compaction or 0
+        if compaction > 0 then
+            local penalty = (compaction / 100) * cp.NUTRIENT_PENALTY_MAX
+            factor = factor * (1 + penalty)
+        end
+    end
+
     -- Step 3a: Crop rotation fatigue — same crop two seasons running depletes more
     if self.settings.cropRotation and field.lastCrop2 and field.lastCrop2 == fruitDesc.name then
         factor = factor * SoilConstants.CROP_ROTATION.FATIGUE_MULTIPLIER
@@ -1341,6 +1369,19 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
             local cx = math.floor(sprayX / zone.CELL_SIZE)
             local cz = math.floor(sprayZ / zone.CELL_SIZE)
             local cellKey = cx .. "_" .. cz
+
+            -- Coverage tracking: count unique cells visited today
+            if not field.coveredCells then field.coveredCells = {} end
+            if not field.coveredCells[cellKey] then
+                field.coveredCells[cellKey] = true
+                field.coveredCellCount = (field.coveredCellCount or 0) + 1
+                -- Compute totalFieldCells once (lazily) from field area
+                if (field.totalFieldCells or 0) == 0 then
+                    field.totalFieldCells = math.max(1, math.ceil(areaInHa / zone.CELL_AREA_HA))
+                end
+                field.coverageFraction = math.min(1.0, field.coveredCellCount / field.totalFieldCells)
+            end
+
             if not field.zoneData then field.zoneData = {} end
             if not field.zoneData[cellKey] then
                 field.zoneData[cellKey] = {
@@ -1384,7 +1425,9 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
         local targetVolume = areaInHa * baseRateEntry.value
         local coverageThreshold = targetVolume * SoilConstants.SPRAYER_RATE.FERTILIZER_COVERAGE_THRESHOLD
 
-        if field.nutrientBuffer[fillTypeIndex] >= coverageThreshold then
+        local minCoverage = SoilConstants.COVERAGE and SoilConstants.COVERAGE.MIN_FULL_CREDIT or 0.70
+        if field.nutrientBuffer[fillTypeIndex] >= coverageThreshold and
+           (field.coverageFraction or 0) >= minCoverage then
             local today = (g_currentMission and g_currentMission.environment and
                            g_currentMission.environment.currentDay) or 0
             if not self.fertNotifyShown then self.fertNotifyShown = {} end
@@ -1705,7 +1748,9 @@ function SoilFertilitySystem:getFieldInfo(fieldId)
         diseasePressure = field.diseasePressure or 0,
         fungicideActive = (field.fungicideDaysLeft or 0) > 0,
         burnDaysLeft = field.burnDaysLeft or 0,
-        nutrientBuffer = field.nutrientBuffer or {},
+        nutrientBuffer   = field.nutrientBuffer or {},
+        coverageFraction = field.coverageFraction or 0,
+        compaction = field.compaction or 0,
         needsFertilization = (
             field.nitrogen < fertThresholds.nitrogen or
             field.phosphorus < fertThresholds.phosphorus or
@@ -1794,6 +1839,7 @@ function SoilFertilitySystem:saveToXMLFile(xmlFile, key)
             setXMLInt(xmlFile, fieldKey .. "#dryDayCount", field.dryDayCount or 0)
             setXMLInt(xmlFile, fieldKey .. "#burnDaysLeft", field.burnDaysLeft or 0)
             setXMLInt(xmlFile, fieldKey .. "#lastAlertYear", field.lastAlertYear or 0)
+            setXMLFloat(xmlFile, fieldKey .. "#compaction", field.compaction or 0)
 
             -- Save per-area zone cells for overlay coloring
             local zoneIdx = 0
@@ -1859,6 +1905,7 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
             dryDayCount = getXMLInt(xmlFile, fieldKey .. "#dryDayCount") or 0,
             burnDaysLeft = getXMLInt(xmlFile, fieldKey .. "#burnDaysLeft") or 0,
             lastAlertYear = getXMLInt(xmlFile, fieldKey .. "#lastAlertYear") or 0,
+            compaction = getXMLFloat(xmlFile, fieldKey .. "#compaction") or 0,
             initialized = true,
             nutrientBuffer = {},
             zoneData = {},
@@ -1941,4 +1988,39 @@ function SoilFertilitySystem:listAllFields()
     end
 
     SoilLogger.info("=== End field list ===")
+end
+
+-- =========================================================
+-- COMPACTION API (P2-D)
+-- =========================================================
+
+--- Apply compaction from a heavy vehicle work pass. Throttled to once per in-game day per field.
+---@param fieldId number The farmland ID
+function SoilFertilitySystem:onCompaction(fieldId)
+    if not self.settings.compactionEnabled then return end
+    local cp = SoilConstants.COMPACTION
+    if not cp then return end
+    local field = self:getOrCreateField(fieldId, false)
+    if not field then return end
+    local currentDay = (g_currentMission and g_currentMission.environment and
+                        g_currentMission.environment.currentDay) or 0
+    if field.lastCompactionDay == currentDay then return end
+    field.lastCompactionDay = currentDay
+    field.compaction = math.min(cp.MAX_COMPACTION, (field.compaction or 0) + cp.COMPACTION_PER_PASS)
+    self:log("Compaction: Field %d → %.0f%%", fieldId, field.compaction)
+end
+
+--- Apply subsoiler compaction reduction.
+---@param fieldId number The farmland ID
+function SoilFertilitySystem:onSubsoilerPass(fieldId)
+    if not self.settings.compactionEnabled then return end
+    local cp = SoilConstants.COMPACTION
+    if not cp then return end
+    local field = self:getOrCreateField(fieldId, false)
+    if not field then return end
+    local prev = field.compaction or 0
+    field.compaction = math.max(0, prev - cp.SUBSOILER_REDUCTION)
+    if prev > field.compaction then
+        self:log("Subsoiler: Field %d compaction %.0f → %.0f%%", fieldId, prev, field.compaction)
+    end
 end
