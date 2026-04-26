@@ -1263,6 +1263,8 @@ function HookManager:installPlowingHook()
     Cultivator.processCultivatorArea = Utils.appendedFunction(
         original,
         function(cultivatorSelf, workArea, dt)
+            SoilLogger.debug("[PlowHook] processCultivatorArea fired — isPlow=%s",
+                tostring(cultivatorSelf.spec_plow ~= nil or cultivatorSelf.spec_subsoiler ~= nil))
             if not g_SoilFertilityManager or
                not g_SoilFertilityManager.soilSystem or
                not g_SoilFertilityManager.settings.enabled or
@@ -1365,6 +1367,7 @@ function HookManager:installDedicatedPlowHook()
     Plow.processPlowArea = Utils.appendedFunction(
         original,
         function(plowSelf, workArea, dt)
+            SoilLogger.debug("[DedicatedPlowHook] processPlowArea fired")
             if not g_SoilFertilityManager or
                not g_SoilFertilityManager.soilSystem or
                not g_SoilFertilityManager.settings.enabled or

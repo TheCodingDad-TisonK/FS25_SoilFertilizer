@@ -550,16 +550,26 @@ function SoilFertilityManager:onOpenSettingsInput()
 end
 
 -- Input callback for HUD drag toggle (SF_HUD_DRAG, default RMB)
+-- Debounced: Courseplay triggers endActionEventsModification twice per vehicle
+-- mount, producing two active SF_HUD_DRAG callbacks (one PLAYER-context, one
+-- VEHICLE-context).  Without debounce the pair fires on a single RMB press:
+-- enter-edit-mode then immediately exit-edit-mode — drag never sticks.
+-- 300ms window is imperceptible to the user but safely wider than one frame.
+local DRAG_DEBOUNCE_S = 0.3
 function SoilFertilityManager:onHUDDragInput()
-    -- Count rapid successive calls — two calls in <100ms = double-registration bug
     local now = (g_currentMission and g_currentMission.time) or 0
     local gap = now - (self._lastDragInputTime or 0)
-    self._lastDragInputTime = now
     self._dragInputCount = (self._dragInputCount or 0) + 1
     SoilLogger.debug("[SoilHUD] onHUDDragInput #%d  gap=%.0fms  soilHUD=%s  editMode=%s",
         self._dragInputCount, gap * 1000,
         tostring(self.soilHUD ~= nil),
         tostring(self.soilHUD and self.soilHUD.editMode))
+    -- Swallow second call that arrives within the debounce window
+    if gap < DRAG_DEBOUNCE_S and gap >= 0 then
+        SoilLogger.debug("[SoilHUD] drag debounced (gap=%.0fms < %.0fms)", gap * 1000, DRAG_DEBOUNCE_S * 1000)
+        return
+    end
+    self._lastDragInputTime = now
     if not self.soilHUD then return end
     if self.soilHUD.editMode then
         self.soilHUD:exitEditMode()
