@@ -344,7 +344,7 @@ function SoilMapOverlay:updateSamplePoints(force)
     local maxPoints    = math.floor(basePoints * mapScale * mapScale)
 
     local totalPoints = 0
-    for _, fsField in pairs(fields) do
+    for _, fsField in ipairs(fields) do
         if fsField and fsField.farmland then
             local farmlandId = fsField.farmland.id
             if farmlandId and farmlandId > 0 then

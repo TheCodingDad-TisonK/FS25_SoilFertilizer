@@ -667,7 +667,9 @@ function SoilFertilitySystem:scanFields()
         return false
     end
     local fields = g_fieldManager.fields
-    for _, field in pairs(fields) do
+    -- ipairs is safe on FS25's C++ backed fields table; pairs can trigger __pairs metamethods
+    -- and freeze on large maps. Use ipairs for the primary scan.
+    for _, field in ipairs(fields) do
         if field and type(field) == "table" then
             local actualFieldId = field.farmland and field.farmland.id
 
@@ -675,7 +677,7 @@ function SoilFertilitySystem:scanFields()
                 -- FS25: field.fieldArea is the cultivated area in hectares.
                 -- Fallback to farmland area if fieldArea is missing (though it shouldn't be).
                 local area = field.fieldArea or (field.farmland and field.farmland.area) or 1.0
-                
+
                 SoilLogger.debug("Found field %d (%.2f ha)", actualFieldId, area)
 
                 local isNew = self.fieldData[actualFieldId] == nil
@@ -688,6 +690,19 @@ function SoilFertilitySystem:scanFields()
                 end
 
                 fieldCount = fieldCount + 1
+            end
+        end
+    end
+
+    -- SECONDARY SCAN: g_farmlandManager.farmlands is a plain Lua hash table keyed by farmland ID,
+    -- safe to iterate with pairs. This catches any farmlands whose matching field entry was
+    -- unreachable via ipairs (e.g. non-sequential field indices on large/custom 64x maps).
+    if g_farmlandManager and g_farmlandManager.farmlands then
+        for farmlandId, _ in pairs(g_farmlandManager.farmlands) do
+            if type(farmlandId) == "number" and farmlandId > 0 and not self.fieldData[farmlandId] then
+                self:getOrCreateField(farmlandId, true, 1.0)
+                fieldCount = fieldCount + 1
+                SoilLogger.debug("Secondary scan caught missed farmland %d", farmlandId)
             end
         end
     end
@@ -1764,7 +1779,7 @@ function SoilFertilitySystem:getFieldInfo(fieldId)
     local cropName = nil
     if g_fieldManager and g_fieldManager.fields then
         local fsField = nil
-        for _, f in pairs(g_fieldManager.fields) do
+        for _, f in ipairs(g_fieldManager.fields) do
             if f and f.farmland and f.farmland.id == fieldId then
                 fsField = f
                 break
@@ -2102,7 +2117,7 @@ function SoilFertilitySystem:listAllFields()
 
     if g_fieldManager and g_fieldManager.fields then
         SoilLogger.info("Fields in FieldManager:")
-        for _, field in pairs(g_fieldManager.fields) do
+        for _, field in ipairs(g_fieldManager.fields) do
             -- NOTE: field.fieldId / field.id / field.index are all nil in FS25.
             -- The correct identifier is field.farmland.id (farmland-based ID system).
             local fieldIdStr = tostring(field.farmland and field.farmland.id or "?")
