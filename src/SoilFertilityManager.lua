@@ -551,6 +551,15 @@ end
 
 -- Input callback for HUD drag toggle (SF_HUD_DRAG, default RMB)
 function SoilFertilityManager:onHUDDragInput()
+    -- Count rapid successive calls — two calls in <100ms = double-registration bug
+    local now = (g_currentMission and g_currentMission.time) or 0
+    local gap = now - (self._lastDragInputTime or 0)
+    self._lastDragInputTime = now
+    self._dragInputCount = (self._dragInputCount or 0) + 1
+    SoilLogger.debug("[SoilHUD] onHUDDragInput #%d  gap=%.0fms  soilHUD=%s  editMode=%s",
+        self._dragInputCount, gap * 1000,
+        tostring(self.soilHUD ~= nil),
+        tostring(self.soilHUD and self.soilHUD.editMode))
     if not self.soilHUD then return end
     if self.soilHUD.editMode then
         self.soilHUD:exitEditMode()

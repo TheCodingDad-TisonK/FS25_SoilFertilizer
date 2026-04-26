@@ -70,6 +70,15 @@ function HookManager:getFieldIdAtWorldPosition(x, z)
         end
     end
 
+    if not fieldId then
+        SoilLogger.debug("[FieldResolve] Miss at (%.1f,%.1f) — fieldMgr=%s/%s farmMgr=%s/%s",
+            x, z,
+            tostring(g_fieldManager ~= nil),
+            tostring(g_fieldManager and type(g_fieldManager.getFieldAtWorldPosition) == "function"),
+            tostring(g_farmlandManager ~= nil),
+            tostring(g_farmlandManager and type(g_farmlandManager.getFarmlandAtWorldPosition) == "function"))
+    end
+
     -- Cache the result (-1 marks known-empty to prevent repeated slow-path lookups)
     if self.fieldIdCache then
         self.fieldIdCache:setValueAtWorldPos(x, z, fieldId or -1)
@@ -1375,6 +1384,8 @@ function HookManager:installDedicatedPlowHook()
             local success, errorMsg = pcall(function()
                 -- PHASE 5: route through shared MapDataGrid-backed cache
                 local farmlandId = self:getFieldIdAtWorldPosition(centerX, centerZ)
+                SoilLogger.debug("[DedicatedPlowHook] center=(%.1f,%.1f) farmlandId=%s",
+                    centerX, centerZ, tostring(farmlandId))
                 if farmlandId and farmlandId > 0 then
                     g_SoilFertilityManager.soilSystem:onPlowing(farmlandId)
 
@@ -1441,6 +1452,8 @@ function HookManager:installWeederHook()
             local success, errorMsg = pcall(function()
                 -- PHASE 5: route through shared MapDataGrid-backed cache
                 local farmlandId = self:getFieldIdAtWorldPosition(centerX, centerZ)
+                SoilLogger.debug("[WeederHook] center=(%.1f,%.1f) farmlandId=%s",
+                    centerX, centerZ, tostring(farmlandId))
                 if farmlandId and farmlandId > 0 then
                     g_SoilFertilityManager.soilSystem:onCultivation(farmlandId)
                     SoilLogger.debug("[WeederHook] Field %d: mechanical weed removal applied", farmlandId)
@@ -1547,6 +1560,7 @@ function HookManager:installSowingHook()
 
                 -- PHASE 5: route through shared MapDataGrid-backed cache
                 local fieldId = self:getFieldIdAtWorldPosition(x, z)
+                SoilLogger.debug("[SowingHook] pos=(%.1f,%.1f) fieldId=%s", x, z, tostring(fieldId))
                 if not fieldId or fieldId <= 0 then return end
 
                 g_SoilFertilityManager.soilSystem:onSowing(fieldId)
