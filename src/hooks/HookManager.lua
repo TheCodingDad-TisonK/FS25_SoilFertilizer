@@ -263,8 +263,9 @@ function HookManager:registerCustomSprayTypes()
 
     -- Borrow sprayGroundType from the vanilla base types (purely for visual ground marking).
     -- litersPerSecond is NOT borrowed from vanilla — we compute it directly from BASE_RATES.
-    local liqType = g_sprayTypeManager:getSprayTypeByName("LIQUIDFERTILIZER")
-    local dryType = g_sprayTypeManager:getSprayTypeByName("FERTILIZER")
+    local liqType  = g_sprayTypeManager:getSprayTypeByName("LIQUIDFERTILIZER")
+    local dryType  = g_sprayTypeManager:getSprayTypeByName("FERTILIZER")
+    local limeType = g_sprayTypeManager:getSprayTypeByName("LIME")
 
     if not liqType and not dryType then
         SoilLogger.warning("registerCustomSprayTypes: vanilla spray types not found - skipping")
@@ -275,6 +276,10 @@ function HookManager:registerCustomSprayTypes()
     local liquidGroundType  = liqType and liqType.sprayGroundType or 1
     local solidLPS          = dryType and dryType.litersPerSecond or 0.0060  -- stored for info log only
     local solidGroundType   = dryType and dryType.sprayGroundType or 1
+    -- LIQUIDLIME must use LIME's ground type so FSDensityMapUtil.updateSprayArea writes the
+    -- "limed" state to the density map. Using LIQUIDFERTILIZER's ground type marks the field
+    -- as "fertilized" only, leaving it unlimed from vanilla's perspective and reducing yield.
+    local limeGroundType    = limeType and limeType.sprayGroundType or solidGroundType
 
     -- Direct rate-to-LPS conversion:  customLPS = customRate_L_ha / 36000
     --
@@ -304,12 +309,14 @@ function HookManager:registerCustomSprayTypes()
 
     for _, name in ipairs(liquidNames) do
         if g_fillTypeManager:getFillTypeByName(name) then
-            local customRate = baseRates[name] and baseRates[name].value or liqBase
-            local customLPS  = customRate / 36000   -- exact: LPS = target_L_ha / 36000
+            local customRate   = baseRates[name] and baseRates[name].value or liqBase
+            local customLPS    = customRate / 36000   -- exact: LPS = target_L_ha / 36000
+            local groundType   = (name == "LIQUIDLIME") and limeGroundType or liquidGroundType
+            local displayType  = (name == "LIQUIDLIME") and "LIME"        or "FERTILIZER"
             SoilLogger.debug("SprayType [LIQ] %-20s  LPS=%.6f  rate=%.1f L/ha", name, customLPS, customRate)
 
             -- addSprayType is idempotent: if already registered it updates the entry
-            g_sprayTypeManager:addSprayType(name, customLPS, "FERTILIZER", liquidGroundType, false)
+            g_sprayTypeManager:addSprayType(name, customLPS, displayType, groundType, false)
             registered = registered + 1
         else
             skipped = skipped + 1
@@ -2132,8 +2139,17 @@ function HookManager:installSprayerUsageHook()
         return function(sprayerSelf, fillType, dt)
             if fillType == FillType.UNKNOWN then return 0 end
 
+            -- For towed implements (spreaders, trailing sprayers) lastSpeed may be nil
+            -- because the implement has no independent physics body. Falling back to the
+            -- vanilla formula (which uses speedLimit, always > 0) prevents zero-drain on
+            -- those vehicles while preserving speed-accurate consumption for self-propelled
+            -- machines that do report lastSpeed.
+            if sprayerSelf.lastSpeed == nil then
+                return originalFn(sprayerSelf, fillType, dt)
+            end
+
             -- Actual speed in km/h (lastSpeed stored in m/ms by physics; * 3600 = km/h).
-            local actualSpeedKmh = math.abs(sprayerSelf.lastSpeed or 0) * 3600
+            local actualSpeedKmh = math.abs(sprayerSelf.lastSpeed) * 3600
             if actualSpeedKmh < 0.5 then
                 -- Below 0.5 km/h (stopping, pivoting at headlands): no area covered.
                 return 0
