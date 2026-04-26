@@ -694,6 +694,17 @@ function SoilFertilitySystem:scanFields()
         end
     end
 
+    -- SECONDARY SCAN: catch farmlands whose field entry was unreachable via ipairs on
+    -- large/custom maps where g_fieldManager.fields has non-sequential indices (64x maps).
+    if g_farmlandManager and g_farmlandManager.farmlands then
+        for farmlandId, _ in pairs(g_farmlandManager.farmlands) do
+            if type(farmlandId) == "number" and farmlandId > 0 and not self.fieldData[farmlandId] then
+                self:getOrCreateField(farmlandId, true, 1.0)
+                fieldCount = fieldCount + 1
+                SoilLogger.debug("Secondary scan caught missed farmland %d", farmlandId)
+            end
+        end
+    end
 
     self:info("Scanned %d farmlands and initialized %d fields", farmlandCount, fieldCount)
 
