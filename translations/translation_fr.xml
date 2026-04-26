@@ -18,8 +18,8 @@
     <e k="sf_pest_pressure_long" v="Activer/désactiver le système d'infestation d'insectes et de ravageurs" eh="18015099" />
     <e k="sf_disease_pressure_short" v="Pression des maladies" eh="953fd6c0" />
     <e k="sf_disease_pressure_long" v="Activer/désactiver le système de maladies fongiques et des cultures" eh="2c36ea57" />
-    <e k="sf_compaction_short" v="[EN] Soil Compaction" eh="00000000" />
-    <e k="sf_compaction_long" v="[EN] Enable/disable heavy vehicle soil compaction system" eh="00000000" />
+    <e k="sf_compaction_short" v="Compactage du sol" eh="00000000" />
+    <e k="sf_compaction_long" v="Activer ou désactiver le système de compactage du sol par les véhicules lourds" eh="00000000" />
     <e k="sf_fertility_short" v="Système de Fertilité" eh="f7e27d58" />
     <e k="sf_fertility_long" v="Activer/désactiver le système de fertilité du sol dynamique" eh="ea074366" />
     <e k="sf_nutrients_short" v="Cycles Nutriments" eh="ffab595d" />
@@ -86,20 +86,20 @@
     <e k="sf_hud_hint_normal" v="RMB: déplacer/redimensionner" eh="afc8f13b" />
     <e k="sf_use_imperial_short" v="Unités impériales" eh="ff2701ad" />
     <e k="sf_use_imperial_long" v="Afficher les doses en gal/ac et lb/ac (désactivé = L/ha et kg/ha)" eh="17efa489" />
-    <e k="sf_active_map_layer_short" v="Active Map Layer" eh="1861765f" />
-    <e k="sf_active_map_layer_long" v="Nutrient layer shown as overlay in the PDA map" eh="d7755cc8" />
-    <e k="sf_overlay_density_short" v="Map Detail" eh="a525859a" />
-    <e k="sf_overlay_density_long" v="Sample point budget for the PDA soil overlay. Low = better FPS, High = fuller coverage on large maps." eh="89215ce5" />
-    <e k="input_SF_OPEN_SETTINGS" v="Open Soil Settings" eh="2e31c0dd" />
+    <e k="sf_active_map_layer_short" v="Couche de carte active" eh="1861765f" />
+    <e k="sf_active_map_layer_long" v="Couche de nutriments affichée en superposition sur la carte du PDA" eh="d7755cc8" />
+    <e k="sf_overlay_density_short" v="Détail de la carte" eh="a525859a" />
+    <e k="sf_overlay_density_long" v="Nombre de points d’échantillonnage pour l’affichage du sol sur le PDA. Faible = meilleures performances (FPS), Élevé = couverture plus complète sur les grandes cartes." eh="89215ce5" />
+    <e k="input_SF_OPEN_SETTINGS" v="Ouvrir les paramètres du sol" eh="2e31c0dd" />
     <e k="sf_reset" v="Réinitialiser paramètres sol" eh="467bc2f5" />
     <e k="input_SF_TOGGLE_HUD" v="Activer/désactiver HUD sol" eh="f0224a10" />
-    <e k="input_SF_HUD_DRAG" v="[EN] HUD Drag Mode" eh="00000000" />
+    <e k="input_SF_HUD_DRAG" v="Mode de déplacement du HUD" eh="00000000" />
     <e k="input_SF_SOIL_REPORT" v="Rapport Sol" eh="c33180ef" />
     <e k="input_SF_RATE_UP" v="Augmenter le taux d'engrais" eh="6e601ef5" />
     <e k="input_SF_RATE_DOWN" v="Réduire le taux d'engrais" eh="30712026" />
     <e k="input_SF_TOGGLE_AUTO" v="Basculer taux auto" eh="a8642cf0" />
-        <e k="input_SF_CYCLE_MAP_LAYER" v="Cycle Soil Map Layer" eh="8e4a716c" />
-        <e k="input_SF_SOIL_PDA" v="Open Soil PDA" eh="7d70f7b4" />
+        <e k="input_SF_CYCLE_MAP_LAYER" v="Changer la couche de la carte du sol" eh="8e4a716c" />
+        <e k="input_SF_SOIL_PDA" v="Ouvrir le PDA du sol" eh="7d70f7b4" />
     <e k="sf_report_title" v="Rapport Sol &amp;amp; Engrais" eh="a76f8218" />
     <e k="sf_report_fields_tracked" v="Champs Suivis:" eh="7b1e59b8" />
     <e k="sf_report_need_fert" v="Besoin d'Engrais:" eh="110b60f2" />
@@ -181,18 +181,18 @@
     <e k="sf_bigBag_fungicide_name" v="Big Bag Fongicide" eh="a3d4e59c" />
     <e k="sf_bigBag_fungicide_function" v="Fongicide (liquide)" eh="745c34cb" />
     <e k="sf_bigBag_starter_function" v="Engrais starter (liquide)" eh="2c36ea57" />
-		<e k="sf_bigBag_gypsum_name" v="[EN] Big Bag Gypsum" eh="40fc8169" />
-		<e k="sf_bigBag_gypsum_function" v="[EN] Soil Amendment (dry)" eh="51503c54" />
+		<e k="sf_bigBag_gypsum_name" v="Big Bag de gypse" eh="40fc8169" />
+		<e k="sf_bigBag_gypsum_function" v="Amendement du sol (sec)" eh="51503c54" />
     <e k="sf_bigBag_compost_name" v="Big Bag Compost" eh="14322c5d" />
-    <e k="sf_bigBag_compost_function" v="Organic Soil Amendment (dry)" eh="9dd2256a" />
+    <e k="sf_bigBag_compost_function" v="Amendement organique du sol (sec)" eh="9dd2256a" />
     <e k="sf_bigBag_biosolids_name" v="Big Bag Biosolids" eh="61a60ff3" />
-    <e k="sf_bigBag_biosolids_function" v="Organic Fertilizer (dry)" eh="374c7b1e" />
-    <e k="sf_bigBag_chicken_manure_name" v="Big Bag Chicken Manure" eh="cb60fddc" />
-    <e k="sf_bigBag_chicken_manure_function" v="Organic Fertilizer (dry)" eh="374c7b1e" />
-    <e k="sf_bigBag_pelletized_manure_name" v="Big Bag Pelletized Manure" eh="064be7fa" />
-    <e k="sf_bigBag_pelletized_manure_function" v="Organic Fertilizer (dry)" eh="374c7b1e" />
-    <e k="sf_bigBag_liquidlime_name" v="Liquid Lime Tank" eh="4f8caca1" />
-    <e k="sf_bigBag_liquidlime_function" v="pH Raising Agent (liquid)" eh="7a118b6d" />
+    <e k="sf_bigBag_biosolids_function" v="Engrais organique (solide)" eh="374c7b1e" />
+    <e k="sf_bigBag_chicken_manure_name" v="Big Bag fumier de poule" eh="cb60fddc" />
+    <e k="sf_bigBag_chicken_manure_function" v="Engrais organique (solide)" eh="374c7b1e" />
+    <e k="sf_bigBag_pelletized_manure_name" v="Big Bag fumier granulé" eh="064be7fa" />
+    <e k="sf_bigBag_pelletized_manure_function" v="Engrais organique (solide)" eh="374c7b1e" />
+    <e k="sf_bigBag_liquidlime_name" v="Cuve de chaux liquide" eh="4f8caca1" />
+    <e k="sf_bigBag_liquidlime_function" v="Agent rehausseur de pH (liquide)" eh="7a118b6d" />
     <e k="sf_report_detail_n_ok" v="Azote: Optimal" eh="13782bd9" />
     <e k="sf_report_detail_p_ok" v="Phosphore: Optimal" eh="dbc90f11" />
     <e k="sf_report_detail_k_ok" v="Potassium: Optimal" eh="0197b4ba" />
@@ -382,37 +382,37 @@
     <e k="sf_pda_map_legend_excess" v="Excès" eh="d1d25b9f" />
     <e k="sf_pda_map_instructions" v="Appuyez sur Maj+M en jeu pour faire défiler les couches de sol." eh="b13603aa" />
     <e k="sf_pda_map_open_btn" v="Ouvrir la carte du sol" eh="0901ae30" />
-    <e k="sf_pda_map_unavailable" v="Map preview unavailable" eh="00000000" />
-		<e k="sf_map_health_overall" v="[EN] Average Soil Health" eh="5533cbe3" />
-		<e k="sf_map_btn_report" v="[EN] Open Farm Overview" eh="6f0800e8" />
-		<e k="sf_map_btn_help" v="[EN] Dev Note (NOT WORKING YET)" eh="800e465a" />
+    <e k="sf_pda_map_unavailable" v="Aperçu de la carte indisponible" eh="00000000" />
+		<e k="sf_map_health_overall" v="Santé moyenne du sol" eh="5533cbe3" />
+		<e k="sf_map_btn_report" v="Ouvrir le résumé de la ferme" eh="6f0800e8" />
+		<e k="sf_map_btn_help" v="Note développeur (PAS ENCORE FONCTIONNEL)" eh="800e465a" />
     <e k="sf_map_btn_cycle_layer" v="Changer la couche" eh="875dbf22" />
     <e k="sf_map_btn_treatment" v="Plan de traitement" eh="4ba012e2" />
     <e k="sf_map_btn_disable" v="Désactiver la couche" eh="8e75dec5" />
     <e k="sf_treat_action_ok" v="OK" eh="e0aa021e" />
-    <e k="sf_help_title" v="Soil Quick Reference" eh="8986bb6d" />
-    <e k="sf_help_nutrients_header" v="NUTRIENTS" eh="9aeb39bf" />
-    <e k="sf_help_n" v="N  (Nitrogen)     - Depletes fast. Apply UAN, Urea, or Manure." eh="f2d0c792" />
-    <e k="sf_help_p" v="P  (Phosphorus)   - Long-lasting. Apply MAP or DAP." eh="fdfbd91e" />
-    <e k="sf_help_k" v="K  (Potassium)    - Apply Potash. Important for roots." eh="e0217634" />
-    <e k="sf_help_om" v="OM (Organic Mat.) - Builds slowly. Plow in manure/compost." eh="a4e29617" />
-    <e k="sf_help_soil_header" v="SOIL CHEMISTRY" eh="19c67ff5" />
-    <e k="sf_help_ph" v="pH  6.5-7.0 = Ideal.  < 6.5 apply Lime.  > 7.5 apply Gypsum." eh="8929304d" />
-    <e k="sf_help_pressure_header" v="CROP PRESSURE" eh="132b0f66" />
-    <e k="sf_help_weed" v="Weed    > 20% - Apply Herbicide." eh="c8d890df" />
-    <e k="sf_help_pest" v="Pest    > 20% - Apply Insecticide." eh="f4932a05" />
-    <e k="sf_help_disease" v="Disease > 20% - Apply Fungicide." eh="1bfd0913" />
-    <e k="sf_help_status_header" v="STATUS LEVELS" eh="b081c2c6" />
-    <e k="sf_help_good" v="Good - No action needed." eh="03910bec" />
-    <e k="sf_help_fair" v="Fair - Monitor / preventive top-up." eh="2922eb1c" />
-    <e k="sf_help_poor" v="Poor - Immediate treatment required." eh="b287d206" />
+    <e k="sf_help_title" v="Référence rapide du sol" eh="8986bb6d" />
+    <e k="sf_help_nutrients_header" v="NUTRIMENTS" eh="9aeb39bf" />
+    <e k="sf_help_n" v="N (Azote) – S’épuise rapidement. Appliquer UAN, Urée ou fumier." eh="f2d0c792" />
+    <e k="sf_help_p" v="P (Phosphore) – Durable. Appliquer MAP ou DAP." eh="fdfbd91e" />
+    <e k="sf_help_k" v="K (Potassium) – Appliquer de la potasse. Important pour les racines." eh="e0217634" />
+    <e k="sf_help_om" v="MO (Matière organique) – Augmente lentement. Incorporer du fumier/compost." eh="a4e29617" />
+    <e k="sf_help_soil_header" v="CHIMIE DU SOL" eh="19c67ff5" />
+    <e k="sf_help_ph" v="pH 6,5–7,0 = idéal. < 6,5 appliquer de la chaux. > 7,5 appliquer du gypse." eh="8929304d" />
+    <e k="sf_help_pressure_header" v="PRESSION SUR LES CULTURES" eh="132b0f66" />
+    <e k="sf_help_weed" v="Adventices > 20 % – Appliquer un herbicide." eh="c8d890df" />
+    <e k="sf_help_pest" v="Ravageurs > 20 % – Appliquer un insecticide." eh="f4932a05" />
+    <e k="sf_help_disease" v="Maladies > 20 % – Appliquer un fongicide." eh="1bfd0913" />
+    <e k="sf_help_status_header" v="NIVEAUX D’ÉTAT" eh="b081c2c6" />
+    <e k="sf_help_good" v="Bon – Aucune action nécessaire." eh="03910bec" />
+    <e k="sf_help_fair" v="Moyen – Surveiller / apport préventif." eh="2922eb1c" />
+    <e k="sf_help_poor" v="Mauvais – Traitement immédiat requis." eh="b287d206" />
     <!-- Fields Tab -->
     <e k="sf_pda_fields_section_title" v="Tous les champs" eh="48729e0b" />
     <e k="sf_pda_col_field" v="Champ" eh="6f16a5f8" />
     <e k="sf_pda_col_n" v="N%" eh="30740562" />
     <e k="sf_pda_col_p" v="P%" eh="0a5e03bc" />
-		<e k="sf_pda_filter_all" v="[EN] Filter: All Fields" eh="a46a8cb2" />
-		<e k="sf_pda_filter_owned" v="[EN] Filter: Owned Only" eh="258cb971" />
+		<e k="sf_pda_filter_all" v="Filtre : Tous les champs" eh="a46a8cb2" />
+		<e k="sf_pda_filter_owned" v="Filtre : Champs possédés uniquement" eh="258cb971" />
     <e k="sf_pda_col_k" v="K%" eh="43e4d0bf" />
     <e k="sf_pda_col_ph" v="pH" eh="397dff20" />
     <e k="sf_pda_col_om" v="MO" eh="bfbebc07" />
@@ -479,10 +479,10 @@
     <e k="sf_detail_no_crop" v="Aucun enregistré" eh="a4b5a996" />
     <e k="sf_pda_btn_help" v="Note du dev" eh="5320d63f" />
     <e k="sf_pda_help_github" v="VOS RETOURS COMPTENT ! Si vous rencontrez des bugs, avez des suggestions de nouvelles fonctionnalités ou souhaitez contribuer au code, rendez-vous sur le projet GitHub. Vous pouvez ouvrir une Issue ou une Pull Request à tout moment pour aider à améliorer ce mod pour tout le monde. Merci pour vos tests !" eh="3a10b023" />
-		<e k="sf_pda_help_note" v="[EN] Note: The soil layers tab on the map page is NOT WORKING. Im aware of the issue and working on a fix. (which might take some time)" eh="2d8f5dc7" />
+		<e k="sf_pda_help_note" v="Note : l’onglet des couches de sol sur la page de la carte NE FONCTIONNE PAS. Je suis au courant du problème et je travaille sur un correctif (cela peut prendre un certain temps)." eh="2d8f5dc7" />
     <e k="sf_pda_help_text" v="Bonjour, c'est moi le développeur ! Comme vous pouvez le voir, cette page est encore très en cours de développement. Les couches de carte sont actuellement de simples aperçus visuels (non fonctionnels pour la sélection) et de nombreux éléments d'interface nécessitent encore leur finition." eh="58e05bdf" />
     <e k="sf_pda_map_jump_hint" v="Cliquez sur un champ pour y accéder sur la carte" eh="006d5371" />
-		<e k="sf_pda_map_native_hint" v="[EN] The soil layer visualization has moved! You can now access and toggle all soil layers directly from the native PDA Map sidebar (ESC &amp;gt; Map). Look for the 'Soil Layers' category in the sidebar dots." eh="87f73b10" />
+		<e k="sf_pda_map_native_hint" v="La visualisation des couches de sol a été déplacée ! Vous pouvez désormais accéder et activer/désactiver toutes les couches de sol directement depuis la barre latérale de la carte PDA (ESC > Carte). Cherchez la catégorie « Couches de sol » dans les points de la barre latérale." eh="87f73b10" />
     <e k="sf_pda_total_urgent_label" v="Total nécessitant attention" eh="b3ce2db9" />
     <e k="sf_pda_treatment_hint" v="Les champs listés à droite nécessitent un traitement. Cliquez sur une ligne pour voir les intrants recommandés et les quantités estimées." eh="5748d316" />
     </elements>
