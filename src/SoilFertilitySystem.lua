@@ -919,7 +919,15 @@ function SoilFertilitySystem:updateDailySoil()
     local seasonal = SoilConstants.SEASONAL_EFFECTS
     local phNorm = SoilConstants.PH_NORMALIZATION
 
+    local isMP = g_server and g_currentMission and g_currentMission.missionDynamicInfo and
+                 g_currentMission.missionDynamicInfo.isMultiplayer and SoilFieldUpdateEvent
+    local changedFields = isMP and {} or nil
+
     for fieldId, field in pairs(self.fieldData) do
+        local prevWeed    = field.weedPressure    or 0
+        local prevPest    = field.pestPressure    or 0
+        local prevDisease = field.diseasePressure or 0
+
         -- Clear fertilizer and coverage buffers daily
         field.nutrientBuffer    = {}
         field.coveredCells      = {}
@@ -1184,6 +1192,25 @@ function SoilFertilitySystem:updateDailySoil()
                 end
             end
         end
+
+        -- Track changed fields for MP broadcast (only if pressure values changed)
+        if changedFields then
+            if math.abs((field.weedPressure    or 0) - prevWeed)    > 0.01 or
+               math.abs((field.pestPressure    or 0) - prevPest)    > 0.01 or
+               math.abs((field.diseasePressure or 0) - prevDisease) > 0.01 then
+                changedFields[fieldId] = field
+            end
+        end
+    end
+
+    -- Broadcast pressure changes to clients (dedicated server / MP only)
+    if changedFields and next(changedFields) then
+        local count = 0
+        for fieldId, field in pairs(changedFields) do
+            g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
+            count = count + 1
+        end
+        self:log("Daily broadcast: %d field(s) with pressure changes synced to clients", count)
     end
 
     -- Track season for spring-transition detection (crop rotation bonus)
@@ -1397,7 +1424,9 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
 
     else
         -- 2. Apply standard nutrients (scaled by the liters applied this frame)
-        local factor = (liters / 1000) / areaInHa
+        local rrIdx  = self.settings.replenishmentRate or 3
+        local rrMult = SoilConstants.DIFFICULTY.REPLENISHMENT_MULTIPLIERS[rrIdx] or 1.0
+        local factor = (liters / 1000) / areaInHa * rrMult
 
         -- Capture before-values for diagnostic logging (debug mode only).
         local dbgN0, dbgP0, dbgK0, dbgPH0 = field.nitrogen, field.phosphorus, field.potassium, field.pH

@@ -18,8 +18,8 @@
     <e k="sf_pest_pressure_long" v="啟用/禁用昆蟲和病蟲害侵襲系統" eh="2ba11abc" />
     <e k="sf_disease_pressure_short" v="疾病壓力" eh="2b805cc9" />
     <e k="sf_disease_pressure_long" v="啟用/禁用真菌和作物疾病系統" eh="9080edbc" />
-    <e k="sf_compaction_short" v="[EN] Soil Compaction" eh="00000000" />
-    <e k="sf_compaction_long" v="[EN] Enable/disable heavy vehicle soil compaction system" eh="00000000" />
+    <e k="sf_compaction_short" v="[EN] Soil Compaction" eh="68734a56" />
+    <e k="sf_compaction_long" v="[EN] Enable/disable heavy vehicle soil compaction system" eh="a0995ec5" />
     <e k="sf_fertility_short" v="肥力系統" eh="f7e27d58" />
     <e k="sf_fertility_long" v="啟用/禁用動態土壤肥力系統" eh="ea074366" />
     <e k="sf_nutrients_short" v="養分循環" eh="ffab595d" />
@@ -53,6 +53,8 @@
     <e k="sf_hud_color_4" v="單色" eh="5d9b47bd" />
     <e k="sf_diff_short" v="難度" eh="7b29ca96" />
     <e k="sf_diff_long" v="土壤管理難度等級" eh="d6f4560c" />
+		<e k="sf_rr_short" v="[EN] Replenishment Rate" eh="b363b336" />
+		<e k="sf_rr_long" v="[EN] How quickly fertilizer restores field nutrients (0.25x Very Slow to 2.0x Very Fast)" eh="afe78a6d" />
     <e k="sf_auto_rate_short" v="自動施用量控制" eh="6f99137d" />
     <e k="sf_auto_rate_long" v="根據田地需求自動調整肥料施用量" eh="a9ca9f6b" />
     <e k="sf_hud_theme_1" v="綠色" eh="d382816a" />
@@ -93,7 +95,7 @@
     <e k="input_SF_OPEN_SETTINGS" v="Open Soil Settings" eh="2e31c0dd" />
     <e k="sf_reset" v="重置土壤設置" eh="467bc2f5" />
     <e k="input_SF_TOGGLE_HUD" v="切換土壤 HUD" eh="f0224a10" />
-    <e k="input_SF_HUD_DRAG" v="[EN] HUD Drag Mode" eh="00000000" />
+    <e k="input_SF_HUD_DRAG" v="[EN] HUD Drag Mode" eh="cb2eb762" />
     <e k="input_SF_SOIL_REPORT" v="土壤報告" eh="c33180ef" />
     <e k="input_SF_RATE_UP" v="增加肥料施用量" eh="6e601ef5" />
     <e k="input_SF_RATE_DOWN" v="減少肥料施用量" eh="30712026" />
@@ -362,7 +364,7 @@
     <e k="sf_map_layer_weed" v="雜草壓力" eh="53f8b936" />
     <e k="sf_map_layer_pest" v="害蟲壓力" eh="18a7c2be" />
     <e k="sf_map_layer_disease" v="疾病壓力" eh="2b805cc9" />
-    <e k="sf_map_layer_compaction" v="[EN] Compaction" eh="00000000" />
+    <e k="sf_map_layer_compaction" v="[EN] Compaction" eh="19cf3ee7" />
     <e k="sf_map_overlay_cycle" v="Shift+M: 切換土壤圖層" eh="032fdac7" />
     <e k="sf_map_page_title" v="土壤圖層" eh="04a675fb" />
     <e k="sf_map_sidebar_header" v="土壤地圖圖層" eh="81332549" />

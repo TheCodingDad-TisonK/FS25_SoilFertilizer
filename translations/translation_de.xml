@@ -18,8 +18,8 @@
     <e k="sf_pest_pressure_long" v="Insekten- und Schädlingbefallssystem ein-/ausschalten" eh="18015099" />
     <e k="sf_disease_pressure_short" v="Krankheitsdruck" eh="953fd6c0" />
     <e k="sf_disease_pressure_long" v="Pilz- und Pflanzenkrankheitssystem ein-/ausschalten" eh="2c36ea57" />
-    <e k="sf_compaction_short" v="[EN] Soil Compaction" eh="00000000" />
-    <e k="sf_compaction_long" v="[EN] Enable/disable heavy vehicle soil compaction system" eh="00000000" />
+    <e k="sf_compaction_short" v="[EN] Soil Compaction" eh="68734a56" />
+    <e k="sf_compaction_long" v="[EN] Enable/disable heavy vehicle soil compaction system" eh="a0995ec5" />
     <e k="sf_fertility_short" v="Fruchtbarkeitssystem" eh="f7e27d58" />
     <e k="sf_fertility_long" v="Dynamisches Bodenfruchtbarkeitssystem ein-/ausschalten" eh="ea074366" />
     <e k="sf_nutrients_short" v="Nährstoffkreisläufe" eh="ffab595d" />
@@ -53,6 +53,8 @@
     <e k="sf_hud_color_4" v="Mono" eh="5d9b47bd" />
     <e k="sf_diff_short" v="Schwierigkeit" eh="7b29ca96" />
     <e k="sf_diff_long" v="Schwierigkeitsgrad der Bodenverwaltung" eh="d6f4560c" />
+		<e k="sf_rr_short" v="[EN] Replenishment Rate" eh="b363b336" />
+		<e k="sf_rr_long" v="[EN] How quickly fertilizer restores field nutrients (0.25x Very Slow to 2.0x Very Fast)" eh="afe78a6d" />
     <e k="sf_auto_rate_short" v="Automatische Ratensteuerung" eh="6f99137d" />
     <e k="sf_auto_rate_long" v="Passt die Düngerrate automatisch an den Bedarf des Feldes an" eh="a9ca9f6b" />
     <e k="sf_hud_theme_1" v="Grün" eh="d382816a" />
@@ -93,7 +95,7 @@
     <e k="input_SF_OPEN_SETTINGS" v="Open Soil Settings" eh="2e31c0dd" />
     <e k="sf_reset" v="Bodeneinstellungen zurücksetzen" eh="467bc2f5" />
     <e k="input_SF_TOGGLE_HUD" v="Boden-HUD umschalten" eh="f0224a10" />
-    <e k="input_SF_HUD_DRAG" v="[EN] HUD Drag Mode" eh="00000000" />
+    <e k="input_SF_HUD_DRAG" v="[EN] HUD Drag Mode" eh="cb2eb762" />
     <e k="input_SF_SOIL_REPORT" v="Bodenbericht" eh="c33180ef" />
     <e k="input_SF_RATE_UP" v="Düngerrate erhöhen" eh="6e601ef5" />
     <e k="input_SF_RATE_DOWN" v="Düngerrate verringern" eh="30712026" />
@@ -328,7 +330,7 @@
 		<e k="sf_map_layer_weed" v="Unkrautdruck" eh="53f8b936" />
 		<e k="sf_map_layer_pest" v="Schädlingdruck" eh="18a7c2be" />
 		<e k="sf_map_layer_disease" v="Krankheitsdruck" eh="2b805cc9" />
-    <e k="sf_map_layer_compaction" v="[EN] Compaction" eh="00000000" />
+    <e k="sf_map_layer_compaction" v="[EN] Compaction" eh="19cf3ee7" />
 		<e k="sf_map_overlay_cycle" v="Umschalt+M: Bodenebene wechseln" eh="032fdac7" />
 		<e k="sf_map_page_title" v="Bodenebenen" eh="04a675fb" />
 		<e k="sf_map_sidebar_header" v="Bodenkartenebene" eh="81332549" />
