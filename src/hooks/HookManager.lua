@@ -857,7 +857,22 @@ function HookManager:installHarvestHook()
         end
     )
     self:register(Combine, "addCutterArea", original, "Combine.addCutterArea")
-    SoilLogger.info("[OK] Harvest hook installed (Combine.addCutterArea)")
+
+    -- FS25 specialization functions are copied to vehicle instances at spawn time,
+    -- so vehicles already in memory have a stale reference to the pre-hook original.
+    -- Patch them directly so the hook fires on combines loaded from the savegame.
+    local patched = 0
+    local vehicleSystem = g_currentMission and g_currentMission.vehicleSystem
+    if vehicleSystem and vehicleSystem.vehicles then
+        for _, vehicle in pairs(vehicleSystem.vehicles) do
+            if vehicle.spec_combine and type(vehicle.addCutterArea) == "function" then
+                vehicle.addCutterArea = Combine.addCutterArea
+                patched = patched + 1
+            end
+        end
+    end
+
+    SoilLogger.info("[OK] Harvest hook installed (Combine.addCutterArea) — %d existing combines patched", patched)
     return true
 end
 
