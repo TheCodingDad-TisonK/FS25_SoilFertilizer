@@ -694,18 +694,6 @@ function SoilFertilitySystem:scanFields()
         end
     end
 
-    -- SECONDARY SCAN: g_farmlandManager.farmlands is a plain Lua hash table keyed by farmland ID,
-    -- safe to iterate with pairs. This catches any farmlands whose matching field entry was
-    -- unreachable via ipairs (e.g. non-sequential field indices on large/custom 64x maps).
-    if g_farmlandManager and g_farmlandManager.farmlands then
-        for farmlandId, _ in pairs(g_farmlandManager.farmlands) do
-            if type(farmlandId) == "number" and farmlandId > 0 and not self.fieldData[farmlandId] then
-                self:getOrCreateField(farmlandId, true, 1.0)
-                fieldCount = fieldCount + 1
-                SoilLogger.debug("Secondary scan caught missed farmland %d", farmlandId)
-            end
-        end
-    end
 
     self:info("Scanned %d farmlands and initialized %d fields", farmlandCount, fieldCount)
 
