@@ -947,20 +947,8 @@ function HookManager:installSprayerAreaHook()
                 local x, _, z = getWorldTranslation(self.rootNode)
                 if not x then return end
 
-                local function _resolveFieldId(wx, wz)
-                    local fid = nil
-                    if g_fieldManager and type(g_fieldManager.getFieldAtWorldPosition) == "function" then
-                        local f = g_fieldManager:getFieldAtWorldPosition(wx, wz)
-                        if f and f.farmland then fid = f.farmland.id end
-                    end
-                    if not fid and g_farmlandManager then
-                        local fl = g_farmlandManager:getFarmlandAtWorldPosition(wx, wz)
-                        if fl then fid = fl.id end
-                    end
-                    return fid
-                end
-
-                local fieldId = _resolveFieldId(x, z)
+                -- PHASE 5: route through shared MapDataGrid-backed cache
+                local fieldId = hookMgrRef:getFieldIdAtWorldPosition(x, z)
 
                 -- Fallback: try the midpoints of work areas on attached implements
                 if not fieldId or fieldId <= 0 then
@@ -971,13 +959,13 @@ function HookManager:installSprayerAreaHook()
                             if obj then
                                 -- Try implement rootNode first
                                 local ix, _, iz = getWorldTranslation(obj.rootNode)
-                                if ix then fieldId = _resolveFieldId(ix, iz) end
+                                if ix then fieldId = hookMgrRef:getFieldIdAtWorldPosition(ix, iz) end
                                 -- Then try each work area start point
                                 if (not fieldId or fieldId <= 0) and obj.spec_workArea and obj.spec_workArea.workAreas then
                                     for _, wa in ipairs(obj.spec_workArea.workAreas) do
                                         if wa.start then
                                             local sx, _, sz = getWorldTranslation(wa.start)
-                                            if sx then fieldId = _resolveFieldId(sx, sz) end
+                                            if sx then fieldId = hookMgrRef:getFieldIdAtWorldPosition(sx, sz) end
                                         end
                                         if fieldId and fieldId > 0 then break end
                                     end
@@ -1286,47 +1274,45 @@ function HookManager:installPlowingHook()
             local centerZ = (sz + wz + hz) / 3
 
             local success, errorMsg = pcall(function()
-                if g_farmlandManager then
-                    local farmland = g_farmlandManager:getFarmlandAtWorldPosition(centerX, centerZ)
-                    local farmlandId = farmland and farmland.id
-                    local isPlowSpec = cultivatorSelf.spec_plow ~= nil or cultivatorSelf.spec_subsoiler ~= nil
-                    SoilLogger.info("[PlowHook] center=(%.1f,%.1f) farmlandId=%s isPlow=%s",
-                        centerX, centerZ, tostring(farmlandId), tostring(isPlowSpec))
-                    if farmlandId and farmlandId > 0 then
-                        -- Check if this is a plowing implement
-                        local isPlowingTool = cultivatorSelf.spec_plow ~= nil or
-                                              cultivatorSelf.spec_subsoiler ~= nil
+                -- PHASE 5: route through shared MapDataGrid-backed cache
+                local farmlandId = self:getFieldIdAtWorldPosition(centerX, centerZ)
+                local isPlowSpec = cultivatorSelf.spec_plow ~= nil or cultivatorSelf.spec_subsoiler ~= nil
+                SoilLogger.info("[PlowHook] center=(%.1f,%.1f) farmlandId=%s isPlow=%s",
+                    centerX, centerZ, tostring(farmlandId), tostring(isPlowSpec))
+                if farmlandId and farmlandId > 0 then
+                    -- Check if this is a plowing implement
+                    local isPlowingTool = cultivatorSelf.spec_plow ~= nil or
+                                          cultivatorSelf.spec_subsoiler ~= nil
 
-                        -- Some cultivators work deep enough to act as plows
-                        if not isPlowingTool and cultivatorSelf.spec_cultivator then
-                            local cultivatorSpec = cultivatorSelf.spec_cultivator
-                            if cultivatorSpec.workingDepth and 
-                               cultivatorSpec.workingDepth > SoilConstants.PLOWING.MIN_DEPTH_FOR_PLOWING then
-                                isPlowingTool = true
-                            end
+                    -- Some cultivators work deep enough to act as plows
+                    if not isPlowingTool and cultivatorSelf.spec_cultivator then
+                        local cultivatorSpec = cultivatorSelf.spec_cultivator
+                        if cultivatorSpec.workingDepth and
+                           cultivatorSpec.workingDepth > SoilConstants.PLOWING.MIN_DEPTH_FOR_PLOWING then
+                            isPlowingTool = true
                         end
+                    end
 
-                        if isPlowingTool then
-                            g_SoilFertilityManager.soilSystem:onPlowing(farmlandId)
+                    if isPlowingTool then
+                        g_SoilFertilityManager.soilSystem:onPlowing(farmlandId)
+                    else
+                        g_SoilFertilityManager.soilSystem:onCultivation(farmlandId)
+                    end
+
+                    -- Compaction: check if subsoiler or heavy vehicle
+                    if g_SoilFertilityManager.settings.compactionEnabled and SoilConstants.COMPACTION then
+                        local cp = SoilConstants.COMPACTION
+                        local isSubsoiler = cultivatorSelf.spec_cultivator and
+                                           cultivatorSelf.spec_cultivator.isSubsoiler
+                        if isSubsoiler then
+                            g_SoilFertilityManager.soilSystem:onSubsoilerPass(farmlandId)
                         else
-                            g_SoilFertilityManager.soilSystem:onCultivation(farmlandId)
-                        end
-
-                        -- Compaction: check if subsoiler or heavy vehicle
-                        if g_SoilFertilityManager.settings.compactionEnabled and SoilConstants.COMPACTION then
-                            local cp = SoilConstants.COMPACTION
-                            local isSubsoiler = cultivatorSelf.spec_cultivator and
-                                               cultivatorSelf.spec_cultivator.isSubsoiler
-                            if isSubsoiler then
-                                g_SoilFertilityManager.soilSystem:onSubsoilerPass(farmlandId)
-                            else
-                                local rootVehicle = cultivatorSelf.rootVehicle or cultivatorSelf
-                                local okM, totalMass = pcall(function()
-                                    return rootVehicle:getTotalMass(false)
-                                end)
-                                if okM and totalMass and totalMass >= cp.HEAVY_VEHICLE_THRESHOLD_T then
-                                    g_SoilFertilityManager.soilSystem:onCompaction(farmlandId)
-                                end
+                            local rootVehicle = cultivatorSelf.rootVehicle or cultivatorSelf
+                            local okM, totalMass = pcall(function()
+                                return rootVehicle:getTotalMass(false)
+                            end)
+                            if okM and totalMass and totalMass >= cp.HEAVY_VEHICLE_THRESHOLD_T then
+                                g_SoilFertilityManager.soilSystem:onCompaction(farmlandId)
                             end
                         end
                     end
@@ -1378,22 +1364,20 @@ function HookManager:installDedicatedPlowHook()
             local centerZ = (sz + wz + hz) / 3
 
             local success, errorMsg = pcall(function()
-                if g_farmlandManager then
-                    local farmland = g_farmlandManager:getFarmlandAtWorldPosition(centerX, centerZ)
-                    local farmlandId = farmland and farmland.id
-                    if farmlandId and farmlandId > 0 then
-                        g_SoilFertilityManager.soilSystem:onPlowing(farmlandId)
+                -- PHASE 5: route through shared MapDataGrid-backed cache
+                local farmlandId = self:getFieldIdAtWorldPosition(centerX, centerZ)
+                if farmlandId and farmlandId > 0 then
+                    g_SoilFertilityManager.soilSystem:onPlowing(farmlandId)
 
-                        -- Dedicated plows are always heavy equipment
-                        if g_SoilFertilityManager.settings.compactionEnabled then
-                            local rootVehicle = plowSelf.rootVehicle or plowSelf
-                            local okM, totalMass = pcall(function()
-                                return rootVehicle:getTotalMass(false)
-                            end)
-                            local cp = SoilConstants.COMPACTION
-                            if cp and okM and totalMass and totalMass >= cp.HEAVY_VEHICLE_THRESHOLD_T then
-                                g_SoilFertilityManager.soilSystem:onCompaction(farmlandId)
-                            end
+                    -- Dedicated plows are always heavy equipment
+                    if g_SoilFertilityManager.settings.compactionEnabled then
+                        local rootVehicle = plowSelf.rootVehicle or plowSelf
+                        local okM, totalMass = pcall(function()
+                            return rootVehicle:getTotalMass(false)
+                        end)
+                        local cp = SoilConstants.COMPACTION
+                        if cp and okM and totalMass and totalMass >= cp.HEAVY_VEHICLE_THRESHOLD_T then
+                            g_SoilFertilityManager.soilSystem:onCompaction(farmlandId)
                         end
                     end
                 end
@@ -1446,13 +1430,11 @@ function HookManager:installWeederHook()
             local centerZ = (sz + wz + hz) / 3
 
             local success, errorMsg = pcall(function()
-                if g_farmlandManager then
-                    local farmland = g_farmlandManager:getFarmlandAtWorldPosition(centerX, centerZ)
-                    local farmlandId = farmland and farmland.id
-                    if farmlandId and farmlandId > 0 then
-                        g_SoilFertilityManager.soilSystem:onCultivation(farmlandId)
-                        SoilLogger.debug("[WeederHook] Field %d: mechanical weed removal applied", farmlandId)
-                    end
+                -- PHASE 5: route through shared MapDataGrid-backed cache
+                local farmlandId = self:getFieldIdAtWorldPosition(centerX, centerZ)
+                if farmlandId and farmlandId > 0 then
+                    g_SoilFertilityManager.soilSystem:onCultivation(farmlandId)
+                    SoilLogger.debug("[WeederHook] Field %d: mechanical weed removal applied", farmlandId)
                 end
             end)
 
@@ -1554,17 +1536,8 @@ function HookManager:installSowingHook()
                 local x, _, z = getWorldTranslation(sowingSelf.rootNode)
                 if not x then return end
 
-                local fieldId = nil
-                if g_fieldManager then
-                    local field = g_fieldManager:getFieldAtWorldPosition(x, z)
-                    if field and field.farmland then
-                        fieldId = field.farmland.id
-                    end
-                end
-                if not fieldId and g_farmlandManager then
-                    local farmland = g_farmlandManager:getFarmlandAtWorldPosition(x, z)
-                    if farmland then fieldId = farmland.id end
-                end
+                -- PHASE 5: route through shared MapDataGrid-backed cache
+                local fieldId = self:getFieldIdAtWorldPosition(x, z)
                 if not fieldId or fieldId <= 0 then return end
 
                 g_SoilFertilityManager.soilSystem:onSowing(fieldId)
