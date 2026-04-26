@@ -667,7 +667,7 @@ function SoilFertilitySystem:scanFields()
         return false
     end
     local fields = g_fieldManager.fields
-    for _, field in ipairs(fields) do
+    for _, field in pairs(fields) do
         if field and type(field) == "table" then
             local actualFieldId = field.farmland and field.farmland.id
 
@@ -715,16 +715,72 @@ function SoilFertilitySystem:broadcastAllFieldData()
     if not g_server then return end
     if not g_currentMission then return end
     if not (g_currentMission and g_currentMission.missionDynamicInfo and g_currentMission.missionDynamicInfo.isMultiplayer) then return end
-    if not SoilFieldUpdateEvent then return end
+    if not SoilFieldBatchSyncEvent then return end
 
-    local count = 0
-    for fieldId, field in pairs(self.fieldData) do
-        g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
-        count = count + 1
+    local fieldIds = {}
+    for fieldId in pairs(self.fieldData) do
+        table.insert(fieldIds, fieldId)
     end
+    local fieldCount = #fieldIds
+    if fieldCount == 0 then return end
 
-    if count > 0 then
-        self:info("Broadcast initial field data for %d fields to all clients", count)
+    local batchSize  = SoilConstants.NETWORK.FULL_SYNC_BATCH_SIZE
+    local batchDelay = SoilConstants.NETWORK.FULL_SYNC_BATCH_DELAY
+    local totalBatches = math.ceil(fieldCount / batchSize)
+    local fieldData = self.fieldData
+
+    if g_dedicatedServer then
+        -- Dedicated server: send all batches synchronously (no live rendering pressure)
+        self:info("Broadcasting %d fields to all clients in %d synchronous batches", fieldCount, totalBatches)
+        for batchIndex = 1, totalBatches do
+            local startIdx = (batchIndex - 1) * batchSize + 1
+            local endIdx   = math.min(batchIndex * batchSize, fieldCount)
+            local batch = {}
+            for i = startIdx, endIdx do
+                local id = fieldIds[i]
+                batch[id] = fieldData[id]
+            end
+            local isLast = (batchIndex == totalBatches)
+            g_server:broadcastEvent(SoilFieldBatchSyncEvent.new(batch, isLast))
+        end
+    else
+        -- Listen server: drip-feed batches across frames to avoid a single-frame spike
+        self:info("Broadcasting %d fields to all clients in %d batched frames", fieldCount, totalBatches)
+        local batchDispatcher = {
+            batchIndex   = 1,
+            totalBatches = totalBatches,
+            batchSize    = batchSize,
+            batchDelay   = batchDelay,
+            timer        = 0,
+            fieldIds     = fieldIds,
+            fieldData    = fieldData,
+            update = function(self, dt)
+                if self.batchIndex > self.totalBatches then
+                    g_currentMission:removeUpdateable(self)
+                    return
+                end
+                self.timer = self.timer + dt
+                if self.timer < self.batchDelay then return end
+                self.timer = 0
+                local startIdx = (self.batchIndex - 1) * self.batchSize + 1
+                local endIdx   = math.min(self.batchIndex * self.batchSize, #self.fieldIds)
+                local batch = {}
+                for i = startIdx, endIdx do
+                    local id = self.fieldIds[i]
+                    batch[id] = self.fieldData[id]
+                end
+                local isLast = (self.batchIndex == self.totalBatches)
+                g_server:broadcastEvent(SoilFieldBatchSyncEvent.new(batch, isLast))
+                self.batchIndex = self.batchIndex + 1
+                if self.batchIndex > self.totalBatches then
+                    g_currentMission:removeUpdateable(self)
+                end
+            end,
+            delete = function(self)
+                g_currentMission:removeUpdateable(self)
+            end
+        }
+        g_currentMission:addUpdateable(batchDispatcher)
     end
 end
 
@@ -1708,7 +1764,7 @@ function SoilFertilitySystem:getFieldInfo(fieldId)
     local cropName = nil
     if g_fieldManager and g_fieldManager.fields then
         local fsField = nil
-        for _, f in ipairs(g_fieldManager.fields) do
+        for _, f in pairs(g_fieldManager.fields) do
             if f and f.farmland and f.farmland.id == fieldId then
                 fsField = f
                 break
@@ -2046,7 +2102,7 @@ function SoilFertilitySystem:listAllFields()
 
     if g_fieldManager and g_fieldManager.fields then
         SoilLogger.info("Fields in FieldManager:")
-        for _, field in ipairs(g_fieldManager.fields) do
+        for _, field in pairs(g_fieldManager.fields) do
             -- NOTE: field.fieldId / field.id / field.index are all nil in FS25.
             -- The correct identifier is field.farmland.id (farmland-based ID system).
             local fieldIdStr = tostring(field.farmland and field.farmland.id or "?")
