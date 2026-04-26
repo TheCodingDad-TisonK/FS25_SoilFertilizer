@@ -138,11 +138,11 @@ function HookManager:installAll(soilSystem)
     local plowingOk = self:installPlowingHook()
     if plowingOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
-    -- Dedicated plow implements (Plow.processPlowArea)
+    -- Dedicated plow implements (Plow.onEndWorkAreaProcessing)
     local dedicatedPlowOk = self:installDedicatedPlowHook()
     if dedicatedPlowOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
-    -- Mechanical weed removal (Weeder.processWeederArea — weeders, inter-row hoes)
+    -- Mechanical weed removal (Weeder.onEndWorkAreaProcessing — weeders, inter-row hoes)
     local weedControlOk = self:installWeederHook()
     if weedControlOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
@@ -1250,67 +1250,60 @@ function HookManager:installWeatherHook()
 end
 
 -- =========================================================
--- HOOK 5: Plowing operations (Cultivator)
+-- HOOK 5: Plowing operations (Cultivator.onEndWorkAreaProcessing)
 -- =========================================================
+-- WHY onEndWorkAreaProcessing instead of processCultivatorArea:
+-- SpecializationUtil.registerFunction stores the function reference at
+-- vehicleType registration time (game startup), then WorkArea.lua copies it
+-- directly to workArea.processingFunction = self[funcName] at vehicle load.
+-- A class-level Utils.appendedFunction hook applied at mod load (Mission00)
+-- is completely bypassed — the workArea closure already holds the original.
+-- onEndWorkAreaProcessing is an event: SpecializationUtil.raiseEvent does a
+-- DYNAMIC table lookup (v10_[eventName](vehicle,...)) each tick, so our
+-- class-level hook is visible and fires correctly.
 ---@return boolean success True if hook installed successfully
 function HookManager:installPlowingHook()
-    if not Cultivator or type(Cultivator.processCultivatorArea) ~= "function" then
-        SoilLogger.warning("Could not install plowing hook - Cultivator.processCultivatorArea not available or replaced")
+    if not Cultivator or type(Cultivator.onEndWorkAreaProcessing) ~= "function" then
+        SoilLogger.warning("Could not install plowing hook - Cultivator.onEndWorkAreaProcessing not available")
         return false
     end
 
-    local original = Cultivator.processCultivatorArea
-    Cultivator.processCultivatorArea = Utils.appendedFunction(
+    local hookMgrRef = self
+    local original = Cultivator.onEndWorkAreaProcessing
+    Cultivator.onEndWorkAreaProcessing = Utils.appendedFunction(
         original,
-        function(cultivatorSelf, workArea, dt)
-            SoilLogger.debug("[PlowHook] processCultivatorArea fired — isPlow=%s",
-                tostring(cultivatorSelf.spec_plow ~= nil or cultivatorSelf.spec_subsoiler ~= nil))
+        function(cultivatorSelf, dt, hasProcessed)
+            -- Fast exit: no work areas were active this tick
+            if not hasProcessed then return end
             if not g_SoilFertilityManager or
                not g_SoilFertilityManager.soilSystem or
                not g_SoilFertilityManager.settings.enabled or
                not g_SoilFertilityManager.settings.plowingBonus then
                 return
             end
+            if not cultivatorSelf.isServer then return end
 
-            -- Validate workArea parameter.
-            -- workArea is a named-key table ({start=node, width=node, height=node}),
-            -- not a sequence — #workArea always returns 0 and cannot be used as a guard.
-            if not workArea or type(workArea) ~= "table" then
-                SoilLogger.debug("[PlowHook] workArea guard fired: nil or non-table (type=%s)", type(workArea))
-                return
-            end
-            if not workArea.start or not workArea.width or not workArea.height then
-                SoilLogger.debug("[PlowHook] workArea guard fired: missing key(s) start=%s width=%s height=%s",
-                    tostring(workArea.start), tostring(workArea.width), tostring(workArea.height))
-                return
-            end
+            -- Confirm cultivator work area actually changed terrain this tick
+            local spec = cultivatorSelf.spec_cultivator
+            if not spec or not spec.workAreaParameters then return end
+            local statsArea = spec.workAreaParameters.lastStatsArea
+            if not statsArea or statsArea <= 0 then return end
 
-            -- Get field ID from work area
-            local sx, _, sz = getWorldTranslation(workArea.start)
-            local wx, _, wz = getWorldTranslation(workArea.width)
-            local hx, _, hz = getWorldTranslation(workArea.height)
-            
-            local centerX = (sx + wx + hx) / 3
-            local centerZ = (sz + wz + hz) / 3
+            local isPlowSpec = cultivatorSelf.spec_plow ~= nil or cultivatorSelf.spec_subsoiler ~= nil
+            SoilLogger.debug("[PlowHook] onEndWorkAreaProcessing fired — isPlow=%s area=%.1f",
+                tostring(isPlowSpec), statsArea)
 
+            local x, _, z = getWorldTranslation(cultivatorSelf.rootNode)
             local success, errorMsg = pcall(function()
-                -- PHASE 5: route through shared MapDataGrid-backed cache
-                local farmlandId = self:getFieldIdAtWorldPosition(centerX, centerZ)
-                local isPlowSpec = cultivatorSelf.spec_plow ~= nil or cultivatorSelf.spec_subsoiler ~= nil
-                SoilLogger.info("[PlowHook] center=(%.1f,%.1f) farmlandId=%s isPlow=%s",
-                    centerX, centerZ, tostring(farmlandId), tostring(isPlowSpec))
+                local farmlandId = hookMgrRef:getFieldIdAtWorldPosition(x, z)
+                SoilLogger.info("[PlowHook] pos=(%.1f,%.1f) farmlandId=%s isPlow=%s",
+                    x, z, tostring(farmlandId), tostring(isPlowSpec))
                 if farmlandId and farmlandId > 0 then
-                    -- Check if this is a plowing implement
-                    local isPlowingTool = cultivatorSelf.spec_plow ~= nil or
-                                          cultivatorSelf.spec_subsoiler ~= nil
-
+                    local isPlowingTool = isPlowSpec
                     -- Some cultivators work deep enough to act as plows
-                    if not isPlowingTool and cultivatorSelf.spec_cultivator then
-                        local cultivatorSpec = cultivatorSelf.spec_cultivator
-                        if cultivatorSpec.workingDepth and
-                           cultivatorSpec.workingDepth > SoilConstants.PLOWING.MIN_DEPTH_FOR_PLOWING then
-                            isPlowingTool = true
-                        end
+                    if not isPlowingTool and spec.workingDepth and
+                       spec.workingDepth > SoilConstants.PLOWING.MIN_DEPTH_FOR_PLOWING then
+                        isPlowingTool = true
                     end
 
                     if isPlowingTool then
@@ -1322,9 +1315,7 @@ function HookManager:installPlowingHook()
                     -- Compaction: check if subsoiler or heavy vehicle
                     if g_SoilFertilityManager.settings.compactionEnabled and SoilConstants.COMPACTION then
                         local cp = SoilConstants.COMPACTION
-                        local isSubsoiler = cultivatorSelf.spec_cultivator and
-                                           cultivatorSelf.spec_cultivator.isSubsoiler
-                        if isSubsoiler then
+                        if spec.isSubsoiler then
                             g_SoilFertilityManager.soilSystem:onSubsoilerPass(farmlandId)
                         else
                             local rootVehicle = cultivatorSelf.rootVehicle or cultivatorSelf
@@ -1344,55 +1335,55 @@ function HookManager:installPlowingHook()
             end
         end
     )
-    self:register(Cultivator, "processCultivatorArea", original, "Cultivator.processCultivatorArea")
-    SoilLogger.info("[OK] Plowing hook installed successfully")
+    self:register(Cultivator, "onEndWorkAreaProcessing", original, "Cultivator.onEndWorkAreaProcessing")
+    SoilLogger.info("[OK] Plowing hook installed successfully (via onEndWorkAreaProcessing)")
     return true
 end
 
 -- =========================================================
--- HOOK 5b: Dedicated plow implements (Plow.processPlowArea)
+-- HOOK 5b: Dedicated plow implements (Plow.onEndWorkAreaProcessing)
 -- =========================================================
---- Hooks dedicated plow implements (belt plows, disc plows, etc.) which call
---- Plow.processPlowArea rather than Cultivator.processCultivatorArea.
---- Without this hook, plowing with a real plow (spec_plow) never triggers
---- soil benefits because those implements bypass processCultivatorArea entirely.
+--- Hooks dedicated plow implements (belt plows, disc plows, etc.) which use
+--- the Plow specialization. processingFunction closure bypass applies here too —
+--- same fix: hook the event listener instead of the processing function.
 ---@return boolean success
 function HookManager:installDedicatedPlowHook()
-    if not Plow or type(Plow.processPlowArea) ~= "function" then
-        SoilLogger.warning("Could not install dedicated plow hook - Plow.processPlowArea not available")
+    if not Plow or type(Plow.onEndWorkAreaProcessing) ~= "function" then
+        SoilLogger.warning("Could not install dedicated plow hook - Plow.onEndWorkAreaProcessing not available")
         return false
     end
 
-    local original = Plow.processPlowArea
-    Plow.processPlowArea = Utils.appendedFunction(
+    local hookMgrRef = self
+    local original = Plow.onEndWorkAreaProcessing
+    Plow.onEndWorkAreaProcessing = Utils.appendedFunction(
         original,
-        function(plowSelf, workArea, dt)
-            SoilLogger.debug("[DedicatedPlowHook] processPlowArea fired")
+        function(plowSelf, dt, hasProcessed)
+            -- Fast exit: no work areas were active this tick
+            if not hasProcessed then return end
             if not g_SoilFertilityManager or
                not g_SoilFertilityManager.soilSystem or
                not g_SoilFertilityManager.settings.enabled or
                not g_SoilFertilityManager.settings.plowingBonus then
                 return
             end
+            if not plowSelf.isServer then return end
 
-            if not workArea or type(workArea) ~= "table" then return end
-            if not workArea.start or not workArea.width or not workArea.height then return end
+            -- Confirm plow work area actually changed terrain this tick
+            local spec = plowSelf.spec_plow
+            if not spec or not spec.workAreaParameters then return end
+            local statsArea = spec.workAreaParameters.lastStatsArea
+            if not statsArea or statsArea <= 0 then return end
 
-            local sx, _, sz = getWorldTranslation(workArea.start)
-            local wx, _, wz = getWorldTranslation(workArea.width)
-            local hx, _, hz = getWorldTranslation(workArea.height)
-            local centerX = (sx + wx + hx) / 3
-            local centerZ = (sz + wz + hz) / 3
+            SoilLogger.debug("[DedicatedPlowHook] onEndWorkAreaProcessing fired — area=%.1f", statsArea)
 
+            local x, _, z = getWorldTranslation(plowSelf.rootNode)
             local success, errorMsg = pcall(function()
-                -- PHASE 5: route through shared MapDataGrid-backed cache
-                local farmlandId = self:getFieldIdAtWorldPosition(centerX, centerZ)
-                SoilLogger.debug("[DedicatedPlowHook] center=(%.1f,%.1f) farmlandId=%s",
-                    centerX, centerZ, tostring(farmlandId))
+                local farmlandId = hookMgrRef:getFieldIdAtWorldPosition(x, z)
+                SoilLogger.debug("[DedicatedPlowHook] pos=(%.1f,%.1f) farmlandId=%s",
+                    x, z, tostring(farmlandId))
                 if farmlandId and farmlandId > 0 then
                     g_SoilFertilityManager.soilSystem:onPlowing(farmlandId)
 
-                    -- Dedicated plows are always heavy equipment
                     if g_SoilFertilityManager.settings.compactionEnabled then
                         local rootVehicle = plowSelf.rootVehicle or plowSelf
                         local okM, totalMass = pcall(function()
@@ -1411,52 +1402,52 @@ function HookManager:installDedicatedPlowHook()
             end
         end
     )
-    self:register(Plow, "processPlowArea", original, "Plow.processPlowArea")
-    SoilLogger.info("[OK] Dedicated plow hook installed successfully")
+    self:register(Plow, "onEndWorkAreaProcessing", original, "Plow.onEndWorkAreaProcessing")
+    SoilLogger.info("[OK] Dedicated plow hook installed successfully (via onEndWorkAreaProcessing)")
     return true
 end
 
 -- =========================================================
--- HOOK 5c: Mechanical weed removal (Weeder.processWeederArea)
+-- HOOK 5c: Mechanical weed removal (Weeder.onEndWorkAreaProcessing)
 -- =========================================================
---- Hooks the Weeder specialization's processWeederArea function.
---- FS25 weeders (inter-row hoes, mechanical weeders) call this instead of
---- processCultivatorArea — without this hook they have no effect on the
---- mod's weed pressure tracking (issue #200).
---- The correct function per LUADOC is Weeder.processWeederArea, NOT
---- WeedControl.processWeedControlArea (that class does not exist in FS25).
+--- Hooks the Weeder specialization via its onEndWorkAreaProcessing event.
+--- FS25 weeders (inter-row hoes, mechanical weeders) use Weeder.processWeederArea
+--- for terrain work, but processingFunction is captured as a direct closure
+--- reference at vehicle load time and cannot be hooked post-load. The event
+--- listener uses dynamic dispatch, so hooking onEndWorkAreaProcessing works.
 ---@return boolean success
 function HookManager:installWeederHook()
-    if not Weeder or type(Weeder.processWeederArea) ~= "function" then
-        SoilLogger.warning("Could not install Weeder hook - Weeder.processWeederArea not available")
+    -- Same processingFunction closure bypass as Plow/Cultivator — hook the event instead
+    if not Weeder or type(Weeder.onEndWorkAreaProcessing) ~= "function" then
+        SoilLogger.warning("Could not install Weeder hook - Weeder.onEndWorkAreaProcessing not available")
         return false
     end
 
-    local original = Weeder.processWeederArea
-    Weeder.processWeederArea = Utils.appendedFunction(
+    local hookMgrRef = self
+    local original = Weeder.onEndWorkAreaProcessing
+    Weeder.onEndWorkAreaProcessing = Utils.appendedFunction(
         original,
-        function(weederSelf, workArea, dt)
+        function(weederSelf, dt, hasProcessed)
+            -- Fast exit: no work areas were active this tick
+            if not hasProcessed then return end
             if not g_SoilFertilityManager or
                not g_SoilFertilityManager.soilSystem or
                not g_SoilFertilityManager.settings.enabled or
                not g_SoilFertilityManager.settings.weedPressure then
                 return
             end
+            if not weederSelf.isServer then return end
 
-            if not workArea or type(workArea) ~= "table" then return end
-            if not workArea.start or not workArea.width or not workArea.height then return end
+            -- Confirm weeder actually changed terrain this tick
+            local spec = weederSelf.spec_weeder
+            if not spec or not spec.workAreaParameters then return end
+            local statsArea = spec.workAreaParameters.lastStatsArea
+            if not statsArea or statsArea <= 0 then return end
 
-            local sx, _, sz = getWorldTranslation(workArea.start)
-            local wx, _, wz = getWorldTranslation(workArea.width)
-            local hx, _, hz = getWorldTranslation(workArea.height)
-            local centerX = (sx + wx + hx) / 3
-            local centerZ = (sz + wz + hz) / 3
-
+            local x, _, z = getWorldTranslation(weederSelf.rootNode)
             local success, errorMsg = pcall(function()
-                -- PHASE 5: route through shared MapDataGrid-backed cache
-                local farmlandId = self:getFieldIdAtWorldPosition(centerX, centerZ)
-                SoilLogger.debug("[WeederHook] center=(%.1f,%.1f) farmlandId=%s",
-                    centerX, centerZ, tostring(farmlandId))
+                local farmlandId = hookMgrRef:getFieldIdAtWorldPosition(x, z)
+                SoilLogger.debug("[WeederHook] pos=(%.1f,%.1f) farmlandId=%s", x, z, tostring(farmlandId))
                 if farmlandId and farmlandId > 0 then
                     g_SoilFertilityManager.soilSystem:onCultivation(farmlandId)
                     SoilLogger.debug("[WeederHook] Field %d: mechanical weed removal applied", farmlandId)
@@ -1468,8 +1459,8 @@ function HookManager:installWeederHook()
             end
         end
     )
-    self:register(Weeder, "processWeederArea", original, "Weeder.processWeederArea")
-    SoilLogger.info("[OK] Weeder hook (mechanical weed removal) installed successfully")
+    self:register(Weeder, "onEndWorkAreaProcessing", original, "Weeder.onEndWorkAreaProcessing")
+    SoilLogger.info("[OK] Weeder hook (mechanical weed removal) installed successfully (via onEndWorkAreaProcessing)")
     return true
 end
 
@@ -1541,15 +1532,19 @@ end
 -- crop name from the previous harvest (fix for issue #123).
 ---@return boolean success True if hook installed successfully
 function HookManager:installSowingHook()
-    if not SowingMachine or type(SowingMachine.processSowingMachineArea) ~= "function" then
-        SoilLogger.warning("Could not install sowing hook - SowingMachine.processSowingMachineArea not available")
+    -- processSowingMachineArea has the same processingFunction closure bypass —
+    -- hook onEndWorkAreaProcessing for dynamic dispatch instead.
+    if not SowingMachine or type(SowingMachine.onEndWorkAreaProcessing) ~= "function" then
+        SoilLogger.warning("Could not install sowing hook - SowingMachine.onEndWorkAreaProcessing not available")
         return false
     end
 
-    local original = SowingMachine.processSowingMachineArea
-    SowingMachine.processSowingMachineArea = Utils.appendedFunction(
+    local hookMgrRef = self
+    local original = SowingMachine.onEndWorkAreaProcessing
+    SowingMachine.onEndWorkAreaProcessing = Utils.appendedFunction(
         original,
-        function(sowingSelf, workArea, dt)
+        function(sowingSelf, dt, hasProcessed)
+            if not hasProcessed then return end
             if not sowingSelf.isServer then return end
             if not g_SoilFertilityManager or
                not g_SoilFertilityManager.soilSystem or
@@ -1557,12 +1552,16 @@ function HookManager:installSowingHook()
                 return
             end
 
+            -- Confirm sowing actually changed terrain this tick (matches game's own guard)
+            local spec = sowingSelf.spec_sowingMachine
+            if not spec or not spec.workAreaParameters then return end
+            if spec.workAreaParameters.lastChangedArea <= 0 then return end
+
             local ok, err = pcall(function()
                 local x, _, z = getWorldTranslation(sowingSelf.rootNode)
                 if not x then return end
 
-                -- PHASE 5: route through shared MapDataGrid-backed cache
-                local fieldId = self:getFieldIdAtWorldPosition(x, z)
+                local fieldId = hookMgrRef:getFieldIdAtWorldPosition(x, z)
                 SoilLogger.debug("[SowingHook] pos=(%.1f,%.1f) fieldId=%s", x, z, tostring(fieldId))
                 if not fieldId or fieldId <= 0 then return end
 
@@ -1574,8 +1573,8 @@ function HookManager:installSowingHook()
             end
         end
     )
-    self:register(SowingMachine, "processSowingMachineArea", original, "SowingMachine.processSowingMachineArea")
-    SoilLogger.info("[OK] Sowing hook installed (SowingMachine.processSowingMachineArea)")
+    self:register(SowingMachine, "onEndWorkAreaProcessing", original, "SowingMachine.onEndWorkAreaProcessing")
+    SoilLogger.info("[OK] Sowing hook installed (via SowingMachine.onEndWorkAreaProcessing)")
     return true
 end
 
