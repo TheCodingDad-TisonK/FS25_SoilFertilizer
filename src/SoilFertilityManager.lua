@@ -121,114 +121,20 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
             SoilLogger.info("Settings panel created")
         end
 
-        -- Hook PlayerInputComponent.registerActionEvents to register J/K in the PLAYER context.
-        -- PLAYER context is reused (not recreated) when the player returns on foot, so these
-        -- events persist across vehicle entry/exit cycles.
-        if self.soilHUD and PlayerInputComponent and PlayerInputComponent.registerActionEvents then
-            local originalRegisterActionEvents = PlayerInputComponent.registerActionEvents
-            self._inputHookOriginal = originalRegisterActionEvents  -- saved for cleanup in delete()
-            PlayerInputComponent.registerActionEvents = function(inputComponent, ...)
-                originalRegisterActionEvents(inputComponent, ...)
-
-                -- Only register for the local (owning) player, not for every networked player
-                if not (inputComponent.player and inputComponent.player.isOwner) then return end
-                -- Guard against double-registration across level reloads
-                if g_SoilFertilityManager and g_SoilFertilityManager.toggleHUDEventId then return end
-                if not g_SoilFertilityManager or not g_SoilFertilityManager.soilHUD then return end
-
-                -- Register J and K in PLAYER context (on-foot use).
-                -- PlayerStateDriving calls setContext("PLAYER") WITHOUT createNew=true,
-                -- so the PLAYER context is reused and our events survive vehicle transitions.
-                g_inputBinding:beginActionEventsModification(PlayerInputComponent.INPUT_CONTEXT_NAME)
-
-                local hudOk, hudId = g_inputBinding:registerActionEvent(
-                    InputAction.SF_TOGGLE_HUD, g_SoilFertilityManager,
-                    g_SoilFertilityManager.onToggleHUDInput,
-                    false, true, false, true
-                )
-                if hudOk and hudId then
-                    g_SoilFertilityManager.toggleHUDEventId = hudId
-                    SoilLogger.info("HUD toggle (J) registered in PLAYER context")
-                else
-                    SoilLogger.warning("HUD toggle (J) PLAYER registration failed")
-                end
-
-                if g_SoilFertilityManager.soilReportDialog then
-                    local repOk, repId = g_inputBinding:registerActionEvent(
-                        InputAction.SF_SOIL_REPORT, g_SoilFertilityManager,
-                        g_SoilFertilityManager.onSoilReportInput,
-                        false, true, false, true
-                    )
-                    if repOk and repId then
-                        g_SoilFertilityManager.soilReportEventId = repId
-                        SoilLogger.info("Soil Report (K) registered in PLAYER context")
-                    end
-                end
-
-                -- Map layer cycle (Shift+M) — registered in PLAYER context only
-                -- (pause-menu map is accessible regardless of context, but the key
-                --  is intended for on-foot use; Shift+M avoids VEHICLE conflicts)
-                if g_SoilFertilityManager.soilMapOverlay then
-                    local mapOk, mapId = g_inputBinding:registerActionEvent(
-                        InputAction.SF_CYCLE_MAP_LAYER, g_SoilFertilityManager,
-                        g_SoilFertilityManager.onCycleMapLayerInput,
-                        false, true, false, true
-                    )
-                    if mapOk and mapId then
-                        g_SoilFertilityManager.cycleMapLayerEventId = mapId
-                        g_inputBinding:setActionEventTextVisibility(mapId, false)
-                        SoilLogger.info("Map layer cycle (Shift+M) registered in PLAYER context")
-                    end
-                end
-
-                -- Settings panel (Shift+O) — registered in PLAYER context
-                if g_SoilFertilityManager.settingsPanel then
-                    local spOk, spId = g_inputBinding:registerActionEvent(
-                        InputAction.SF_OPEN_SETTINGS, g_SoilFertilityManager,
-                        g_SoilFertilityManager.onOpenSettingsInput,
-                        false, true, false, true
-                    )
-                    if spOk and spId then
-                        g_SoilFertilityManager.settingsPanelEventId = spId
-                        g_inputBinding:setActionEventTextVisibility(spId, false)
-                        SoilLogger.info("Settings panel (Shift+O) registered in PLAYER context")
-                    end
-                end
-
-                -- HUD drag toggle (SF_HUD_DRAG, default RMB) — PLAYER context
-                if g_SoilFertilityManager.soilHUD then
-                    local dragOk, dragId = g_inputBinding:registerActionEvent(
-                        InputAction.SF_HUD_DRAG, g_SoilFertilityManager,
-                        g_SoilFertilityManager.onHUDDragInput,
-                        false, true, false, true
-                    )
-                    if dragOk and dragId then
-                        g_SoilFertilityManager.hudDragEventId = dragId
-                        g_inputBinding:setActionEventTextVisibility(dragId, false)
-                        SoilLogger.info("HUD drag (RMB) registered in PLAYER context")
-                    end
-                end
-
-                g_inputBinding:endActionEventsModification()
-                SoilLogger.info("PLAYER context input registration complete")
-            end
-            SoilLogger.info("PlayerInputComponent hook installed for J/K (PLAYER context)")
-        end
-
-        -- Hook InputBinding.endActionEventsModification to register our keys in VEHICLE context.
+        -- Hook InputBinding.endActionEventsModification to register our keys in both
+        -- PLAYER and VEHICLE contexts.
         --
-        -- WHY this approach instead of hooking Vehicle.registerActionEvents directly:
-        -- SpecializationUtil.copyTypeFunctionsInto() copies functions to each vehicle INSTANCE
-        -- table at spawn time. After that, vehicle:registerActionEvents() resolves from the
-        -- instance table, never looking up Vehicle.registerActionEvents on the class. Any
-        -- override of Vehicle.registerActionEvents after vehicles exist is silently ignored.
-        --
-        -- Instead, we hook InputBinding.endActionEventsModification (a class method on the
-        -- InputBinding class). Every call to endActionEventsModification routes through it,
-        -- including every VEHICLE context close. We detect VEHICLE context and inject our events.
-        -- registerActionEvent's built-in dedup handles multiple calls per session gracefully.
+        -- WHY endActionEventsModification instead of PlayerInputComponent.registerActionEvents
+        -- or Vehicle.registerActionEvents:
+        --   SpecializationUtil.copyTypeFunctionsInto() copies functions to each vehicle/player
+        --   INSTANCE table at spawn time. Any class-level override after that point is silently
+        --   ignored by existing instances. endActionEventsModification is a class method on the
+        --   InputBinding singleton — it is never copied to instances, so our override always fires.
+        --   Re-registering on every context close with stale-ID cleanup eliminates duplicate events
+        --   and ensures keys work after vehicle entry/exit without one-shot registration race conditions.
         if self.soilHUD and InputBinding and InputBinding.endActionEventsModification then
             local _soilVehicleHookActive = false
+            local _soilPlayerHookActive  = false
             local originalEndMod = InputBinding.endActionEventsModification
             self._vehicleInputHookOriginal = originalEndMod
             InputBinding.endActionEventsModification = function(binding, ignoreCheck)
@@ -241,10 +147,80 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
 
                 originalEndMod(binding, ignoreCheck)
 
-                -- Only act on VEHICLE context closures, and avoid re-entrancy
+                if not g_SoilFertilityManager or not g_SoilFertilityManager.soilHUD then return end
+
+                -- ---- PLAYER context ----
+                if PlayerInputComponent and contextName == PlayerInputComponent.INPUT_CONTEXT_NAME
+                   and not _soilPlayerHookActive then
+                    _soilPlayerHookActive = true
+                    local mgr = g_SoilFertilityManager
+
+                    -- Purge stale player context event IDs before re-registering.
+                    local stalePlayerIds = {
+                        "toggleHUDEventId", "soilReportEventId",
+                        "cycleMapLayerEventId", "settingsPanelEventId", "hudDragEventId",
+                    }
+                    for _, field in ipairs(stalePlayerIds) do
+                        local oldId = mgr[field]
+                        if oldId then
+                            pcall(function() binding:removeActionEvent(oldId) end)
+                            mgr[field] = nil
+                        end
+                    end
+
+                    binding:beginActionEventsModification(PlayerInputComponent.INPUT_CONTEXT_NAME)
+
+                    local hudOk, hudId = binding:registerActionEvent(
+                        InputAction.SF_TOGGLE_HUD, mgr, mgr.onToggleHUDInput, false, true, false, true)
+                    if hudOk and hudId then
+                        mgr.toggleHUDEventId = hudId
+                        SoilLogger.info("HUD toggle (J) registered in PLAYER context")
+                    end
+
+                    if mgr.soilReportDialog then
+                        local repOk, repId = binding:registerActionEvent(
+                            InputAction.SF_SOIL_REPORT, mgr, mgr.onSoilReportInput, false, true, false, true)
+                        if repOk and repId then
+                            mgr.soilReportEventId = repId
+                            SoilLogger.info("Soil Report (K) registered in PLAYER context")
+                        end
+                    end
+
+                    if mgr.soilMapOverlay then
+                        local mapOk, mapId = binding:registerActionEvent(
+                            InputAction.SF_CYCLE_MAP_LAYER, mgr, mgr.onCycleMapLayerInput, false, true, false, true)
+                        if mapOk and mapId then
+                            mgr.cycleMapLayerEventId = mapId
+                            binding:setActionEventTextVisibility(mapId, false)
+                            SoilLogger.info("Map layer cycle (Shift+M) registered in PLAYER context")
+                        end
+                    end
+
+                    if mgr.settingsPanel then
+                        local spOk, spId = binding:registerActionEvent(
+                            InputAction.SF_OPEN_SETTINGS, mgr, mgr.onOpenSettingsInput, false, true, false, true)
+                        if spOk and spId then
+                            mgr.settingsPanelEventId = spId
+                            binding:setActionEventTextVisibility(spId, false)
+                            SoilLogger.info("Settings panel (Shift+O) registered in PLAYER context")
+                        end
+                    end
+
+                    local dragOk, dragId = binding:registerActionEvent(
+                        InputAction.SF_HUD_DRAG, mgr, mgr.onHUDDragInput, false, true, false, true)
+                    if dragOk and dragId then
+                        mgr.hudDragEventId = dragId
+                        binding:setActionEventTextVisibility(dragId, false)
+                        SoilLogger.info("HUD drag (RMB) registered in PLAYER context")
+                    end
+
+                    binding:endActionEventsModification()
+                    _soilPlayerHookActive = false
+                end
+
+                -- ---- VEHICLE context ----
                 if contextName ~= Vehicle.INPUT_CONTEXT_NAME then return end
                 if _soilVehicleHookActive then return end
-                if not g_SoilFertilityManager or not g_SoilFertilityManager.soilHUD then return end
 
                 _soilVehicleHookActive = true
 
@@ -358,7 +334,7 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
                 binding:endActionEventsModification()
                 _soilVehicleHookActive = false
             end
-            SoilLogger.info("InputBinding.endActionEventsModification hooked for VEHICLE context keys")
+            SoilLogger.info("InputBinding.endActionEventsModification hooked for PLAYER and VEHICLE context keys")
         end
     else
         self.soilHUD = nil
@@ -529,11 +505,6 @@ function SoilFertilityManager:deferredSoilSystemInit()
         self.soilSystem:initialize()
     end
 end
-
--- NOTE: registerInputActions() removed.
--- J key is now registered inside the PlayerInputComponent.registerActionEvents hook
--- installed in SoilFertilityManager.new(). This fires at the exact moment the player's
--- input subsystem is ready, eliminating the race condition on dedicated-server clients.
 
 -- Input callback for HUD toggle (J)
 function SoilFertilityManager:onToggleHUDInput()
@@ -1020,13 +991,6 @@ end
 function SoilFertilityManager:delete()
     -- Save soil data before shutdown
     self:saveSoilData()
-
-    -- Restore PlayerInputComponent hook if we installed one
-    if self._inputHookOriginal and PlayerInputComponent then
-        PlayerInputComponent.registerActionEvents = self._inputHookOriginal
-        self._inputHookOriginal = nil
-        SoilLogger.info("PlayerInputComponent hook restored")
-    end
 
     -- Restore InputBinding.endActionEventsModification hook if we installed one
     if self._vehicleInputHookOriginal and InputBinding then
