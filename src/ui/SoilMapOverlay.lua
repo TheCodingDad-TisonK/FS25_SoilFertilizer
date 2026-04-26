@@ -24,7 +24,10 @@ SoilMapOverlay.ALPHA          = 0.72
 -- Sampling constants
 SoilMapOverlay.SAMPLE_UPDATE_INTERVAL_MS = 4500
 SoilMapOverlay.POLYGON_STEP     = 10     -- world-unit grid spacing for polygon sampling (meters)
--- Point budgets per density level (1=Low, 2=Medium, 3=High)
+-- Point budgets per density level (1=Low, 2=Medium, 3=High).
+-- These are the BASE values for a standard 2048m map. At runtime the budget is
+-- scaled up proportionally with terrain size so large maps (4x, 16x, 64x) get the
+-- same visual coverage density without hitting the cap mid-field-list.
 SoilMapOverlay.DENSITY_POINTS   = {8000, 20000, 40000}
 
 -- Status colors (match SoilHUD palette)
@@ -328,16 +331,20 @@ function SoilMapOverlay:updateSamplePoints(force)
     end
 
     -- Scale sampling step proportional to terrain size so large maps
-    -- (4x, 16x) get the same screen-pixel density as a standard 2048m map.
+    -- (4x, 16x, 64x) get the same screen-pixel density as a standard 2048m map.
     local terrainSize = (g_currentMission and g_currentMission.terrainSize) or 2048
-    local scaledStep = SoilMapOverlay.POLYGON_STEP * math.max(1.0, terrainSize / 2048.0)
+    local mapScale    = math.max(1.0, terrainSize / 2048.0)
+    local scaledStep  = SoilMapOverlay.POLYGON_STEP * mapScale
 
-    -- Resolve point budget from the player's density setting (localOnly, default Medium)
+    -- Resolve point budget from the player's density setting (localOnly, default Medium).
+    -- Scale the budget proportionally with map area (mapScale²) so large maps don't exhaust
+    -- the cap before all fields are drawn — a 4x map needs ~16x the points of a standard map.
     local densityLevel = (self.settings and self.settings.overlayDensity) or 2
-    local maxPoints = SoilMapOverlay.DENSITY_POINTS[densityLevel] or SoilMapOverlay.DENSITY_POINTS[2]
+    local basePoints   = SoilMapOverlay.DENSITY_POINTS[densityLevel] or SoilMapOverlay.DENSITY_POINTS[2]
+    local maxPoints    = math.floor(basePoints * mapScale * mapScale)
 
     local totalPoints = 0
-    for _, fsField in ipairs(fields) do
+    for _, fsField in pairs(fields) do
         if fsField and fsField.farmland then
             local farmlandId = fsField.farmland.id
             if farmlandId and farmlandId > 0 then
