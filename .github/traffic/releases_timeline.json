@@ -367,16 +367,16 @@
   "v2.0.3.0": {
     "published_at": "2026-04-25T18:02:45Z",
     "tag": "v2.0.3.0",
-    "peak_downloads": 113
+    "peak_downloads": 114
   },
   "v2.0.5.0-beta": {
-    "published_at": "2026-04-26T11:18:45Z",
+    "published_at": "2026-04-26T12:47:37Z",
     "tag": "v2.0.5.0-beta",
-    "peak_downloads": 0
+    "peak_downloads": 3
   },
   "v2.0.4.0": {
     "published_at": "2026-04-26T10:58:12Z",
     "tag": "v2.0.4.0",
-    "peak_downloads": 9
+    "peak_downloads": 29
   }
 }
