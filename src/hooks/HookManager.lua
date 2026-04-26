@@ -800,20 +800,35 @@ function HookManager:installHarvestHook()
     Combine.addCutterArea = Utils.appendedFunction(
         original,
         function(combineSelf, area, liters, inputFruitType, outputFillType, strawRatio, farmId, cutterLoad)
-            if not combineSelf.isServer then return end
+            SoilLogger.debug("Harvest hook entered: isServer=%s area=%.1f liters=%.0f fruit=%s",
+                tostring(combineSelf.isServer), area or 0, liters or 0, tostring(inputFruitType))
+            if not combineSelf.isServer then
+                SoilLogger.debug("Harvest hook: skipped (not server)")
+                return
+            end
             if not g_SoilFertilityManager or
                not g_SoilFertilityManager.soilSystem or
                not g_SoilFertilityManager.settings.enabled or
                not g_SoilFertilityManager.settings.nutrientCycles then
+                SoilLogger.debug("Harvest hook: skipped (manager/settings not ready)")
                 return
             end
 
-            if not inputFruitType or inputFruitType <= 0 then return end
-            if not liters or liters <= 0 then return end
+            if not inputFruitType or inputFruitType <= 0 then
+                SoilLogger.debug("Harvest hook: skipped (invalid fruitType=%s)", tostring(inputFruitType))
+                return
+            end
+            if not liters or liters <= 0 then
+                SoilLogger.debug("Harvest hook: skipped (liters=%.0f)", liters or 0)
+                return
+            end
 
             local success, errorMsg = pcall(function()
                 local x, _, z = getWorldTranslation(combineSelf.rootNode)
-                if not x then return end
+                if not x then
+                    SoilLogger.debug("Harvest hook: skipped (rootNode translation failed)")
+                    return
+                end
 
                 local fieldId = nil
                 if g_fieldManager and type(g_fieldManager.getFieldAtWorldPosition) == "function" then
@@ -826,9 +841,12 @@ function HookManager:installHarvestHook()
                     local farmland = g_farmlandManager:getFarmlandAtWorldPosition(x, z)
                     if farmland then fieldId = farmland.id end
                 end
-                if not fieldId or fieldId <= 0 then return end
+                if not fieldId or fieldId <= 0 then
+                    SoilLogger.debug("Harvest hook: skipped (no field at pos x=%.1f z=%.1f)", x, z)
+                    return
+                end
 
-                SoilLogger.debug("Harvest hook: Field %d, Crop %d, %.0fL, area=%.1fm2, strawRatio=%.2f", 
+                SoilLogger.debug("Harvest hook: Field %d, Crop %d, %.0fL, area=%.1fm2, strawRatio=%.2f",
                     fieldId, inputFruitType, liters, area, strawRatio or 0)
                 g_SoilFertilityManager.soilSystem:onHarvest(fieldId, inputFruitType, liters, strawRatio, area)
             end)
