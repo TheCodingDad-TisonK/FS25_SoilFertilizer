@@ -797,32 +797,26 @@ function HookManager:installHarvestHook()
     end
 
     local original = Combine.addCutterArea
-    Combine.addCutterArea = Utils.appendedFunction(
-        original,
-        function(combineSelf, area, liters, inputFruitType, outputFillType, strawRatio, farmId, cutterLoad)
-            SoilLogger.debug("Harvest hook entered: isServer=%s area=%.1f liters=%.0f fruit=%s",
-                tostring(combineSelf.isServer), area or 0, liters or 0, tostring(inputFruitType))
-            if not combineSelf.isServer then
-                SoilLogger.debug("Harvest hook: skipped (not server)")
-                return
-            end
-            if not g_SoilFertilityManager or
-               not g_SoilFertilityManager.soilSystem or
-               not g_SoilFertilityManager.settings.enabled or
-               not g_SoilFertilityManager.settings.nutrientCycles then
-                SoilLogger.debug("Harvest hook: skipped (manager/settings not ready)")
-                return
-            end
+    -- NOTE: We CANNOT use Utils.appendedFunction here because it discards the
+    -- original's return value, returning whatever the appended function returns
+    -- (nil). Cutter.lua:1085 does `if appliedDelta > 0` on that return value,
+    -- which causes "attempt to compare number < nil". We use a manual wrapper
+    -- that captures and forwards the original's return value instead.
+    Combine.addCutterArea = function(combineSelf, area, liters, inputFruitType, outputFillType, strawRatio, farmId, cutterLoad)
+        -- Call original first and capture ALL return values
+        local r1, r2, r3, r4, r5 = original(combineSelf, area, liters, inputFruitType, outputFillType, strawRatio, farmId, cutterLoad)
 
-            if not inputFruitType or inputFruitType <= 0 then
-                SoilLogger.debug("Harvest hook: skipped (invalid fruitType=%s)", tostring(inputFruitType))
-                return
-            end
-            if not liters or liters <= 0 then
-                SoilLogger.debug("Harvest hook: skipped (liters=%.0f)", liters or 0)
-                return
-            end
-
+        -- Run our soil side-effects (server-only, non-blocking)
+        SoilLogger.debug("Harvest hook entered: isServer=%s area=%.1f liters=%.0f fruit=%s",
+            tostring(combineSelf.isServer), area or 0, liters or 0, tostring(inputFruitType))
+        if combineSelf.isServer
+            and g_SoilFertilityManager
+            and g_SoilFertilityManager.soilSystem
+            and g_SoilFertilityManager.settings.enabled
+            and g_SoilFertilityManager.settings.nutrientCycles
+            and inputFruitType and inputFruitType > 0
+            and liters and liters > 0
+        then
             local success, errorMsg = pcall(function()
                 local x, _, z = getWorldTranslation(combineSelf.rootNode)
                 if not x then
@@ -854,8 +848,13 @@ function HookManager:installHarvestHook()
             if not success then
                 SoilLogger.error("Harvest hook failed: %s", tostring(errorMsg))
             end
+        else
+            SoilLogger.debug("Harvest hook: skipped (not server or manager/settings not ready or invalid args)")
         end
-    )
+
+        -- Forward original return values so Cutter.lua gets appliedDelta intact
+        return r1, r2, r3, r4, r5
+    end
     self:register(Combine, "addCutterArea", original, "Combine.addCutterArea")
 
     -- FS25 specialization functions are copied to vehicle instances at spawn time,
