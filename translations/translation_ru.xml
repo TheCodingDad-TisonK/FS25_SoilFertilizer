@@ -53,6 +53,8 @@
     <e k="sf_hud_color_4" v="Моно" eh="5d9b47bd" />
     <e k="sf_diff_short" v="Сложность" eh="7b29ca96" />
     <e k="sf_diff_long" v="Уровень сложности управления почвой" eh="d6f4560c" />
+		<e k="sf_rr_short" v="[EN] Replenishment Rate" eh="b363b336" />
+		<e k="sf_rr_long" v="[EN] How quickly fertilizer restores field nutrients (0.25x Very Slow to 2.0x Very Fast)" eh="afe78a6d" />
     <e k="sf_auto_rate_short" v="Автоматическое управление нормой" eh="6f99137d" />
     <e k="sf_auto_rate_long" v="Автоматически регулирует норму внесения удобрений в зависимости от потребностей поля" eh="a9ca9f6b" />
     <e k="sf_hud_theme_1" v="Зеленый" eh="d382816a" />

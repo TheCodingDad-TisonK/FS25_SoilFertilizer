@@ -30,6 +30,14 @@ SoilConstants.DIFFICULTY = {
         [1] = 0.7,   -- Simple
         [2] = 1.0,   -- Realistic
         [3] = 1.5,   -- Hardcore
+    },
+    -- Fertilizer replenishment speed (applied to nutrient gain per litre)
+    REPLENISHMENT_MULTIPLIERS = {
+        [1] = 0.25,  -- Very Slow
+        [2] = 0.50,  -- Slow
+        [3] = 1.00,  -- Normal (default)
+        [4] = 1.50,  -- Fast
+        [5] = 2.00,  -- Very Fast
     }
 }
 

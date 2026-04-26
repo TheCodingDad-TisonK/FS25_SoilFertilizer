@@ -552,6 +552,10 @@ end
 -- Input callback for HUD drag toggle (SF_HUD_DRAG, default RMB)
 function SoilFertilityManager:onHUDDragInput()
     if not self.soilHUD then return end
+    -- Don't steal RMB when HUD is hidden or mod is disabled — prevents mouse cursor
+    -- appearing on RMB vehicle actions (e.g. direction change) after implement cycling.
+    if not self.soilHUD.visible then return end
+    if not (self.settings and self.settings.showHUD and self.settings.enabled) then return end
     if self.soilHUD.editMode then
         self.soilHUD:exitEditMode()
     else

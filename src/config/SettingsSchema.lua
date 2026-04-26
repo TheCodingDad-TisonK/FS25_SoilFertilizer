@@ -143,6 +143,14 @@ SettingsSchema.definitions = {
         uiId = "sf_diff",
     },
     {
+        id = "replenishmentRate",
+        type = "number",
+        default = 3,
+        min = 1,
+        max = 5,
+        uiId = "sf_rr",
+    },
+    {
         id = "useImperialUnits",
         type = "boolean",
         default = true,

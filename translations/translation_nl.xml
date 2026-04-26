@@ -18,8 +18,8 @@
     <e k="sf_pest_pressure_long" v="In-/uitschakelen van insecten- en plagendruksysteem" eh="18015099" />
     <e k="sf_disease_pressure_short" v="Ziekte druk" eh="953fd6c0" />
     <e k="sf_disease_pressure_long" v="In-/uitschakelen van schimmel- en gewasziektesysteem" eh="2c36ea57" />
-    <e k="sf_compaction_short" v="[EN] Soil Compaction" eh="00000000" />
-    <e k="sf_compaction_long" v="[EN] Enable/disable heavy vehicle soil compaction system" eh="00000000" />
+    <e k="sf_compaction_short" v="[EN] Soil Compaction" eh="68734a56" />
+    <e k="sf_compaction_long" v="[EN] Enable/disable heavy vehicle soil compaction system" eh="a0995ec5" />
     <e k="sf_fertility_short" v="Vruchtbaarheidssysteem" eh="f7e27d58" />
     <e k="sf_fertility_long" v="Dynamisch bodemvruchtbaarheidssysteem in-/uitschakelen" eh="ea074366" />
     <e k="sf_nutrients_short" v="Voedingsstoffencycli" eh="ffab595d" />
@@ -53,6 +53,8 @@
     <e k="sf_hud_color_4" v="Mono" eh="5d9b47bd" />
     <e k="sf_diff_short" v="Moeilijkheid" eh="7b29ca96" />
     <e k="sf_diff_long" v="Moeilijkheidsgraad bodembeheer" eh="d6f4560c" />
+		<e k="sf_rr_short" v="[EN] Replenishment Rate" eh="b363b336" />
+		<e k="sf_rr_long" v="[EN] How quickly fertilizer restores field nutrients (0.25x Very Slow to 2.0x Very Fast)" eh="afe78a6d" />
     <e k="sf_auto_rate_short" v="Automatische snelheidscontrole" eh="6f99137d" />
     <e k="sf_auto_rate_long" v="Past automatisch de bemestingssnelheid aan op basis van veldbehoeften" eh="a9ca9f6b" />
     <e k="sf_hud_theme_1" v="Groen" eh="d382816a" />
@@ -93,7 +95,7 @@
     <e k="input_SF_OPEN_SETTINGS" v="Open Soil Settings" eh="2e31c0dd" />
     <e k="sf_reset" v="Bodeminstellingen herstellen" eh="467bc2f5" />
     <e k="input_SF_TOGGLE_HUD" v="Bodem HUD in-/uitschakelen" eh="f0224a10" />
-    <e k="input_SF_HUD_DRAG" v="[EN] HUD Drag Mode" eh="00000000" />
+    <e k="input_SF_HUD_DRAG" v="[EN] HUD Drag Mode" eh="cb2eb762" />
     <e k="input_SF_SOIL_REPORT" v="Bodemrapport" eh="c33180ef" />
     <e k="input_SF_RATE_UP" v="Meststofdosering verhogen" eh="6e601ef5" />
     <e k="input_SF_RATE_DOWN" v="Meststofdosering verlagen" eh="30712026" />
@@ -331,7 +333,7 @@
     <e k="sf_map_layer_weed" v="Onkruiddruk" eh="53f8b936" />
     <e k="sf_map_layer_pest" v="Plagendruk" eh="18a7c2be" />
     <e k="sf_map_layer_disease" v="Ziektedruk" eh="2b805cc9" />
-    <e k="sf_map_layer_compaction" v="[EN] Compaction" eh="00000000" />
+    <e k="sf_map_layer_compaction" v="[EN] Compaction" eh="19cf3ee7" />
     <e k="sf_map_overlay_cycle" v="Shift+M: Wissel bodemlaag" eh="032fdac7" />
     <e k="sf_map_page_title" v="Bodemlagen" eh="04a675fb" />
     <e k="sf_map_sidebar_header" v="Bodemkaartlaag" eh="81332549" />

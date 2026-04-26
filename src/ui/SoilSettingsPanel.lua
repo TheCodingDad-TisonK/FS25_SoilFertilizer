@@ -110,7 +110,7 @@ local CATEGORIES = {
             },
             {
                 header = "Difficulty",
-                items  = { "difficulty" }
+                items  = { "difficulty", "replenishmentRate" }
             },
             {
                 header = "Environment",
@@ -163,6 +163,7 @@ local CATEGORIES = {
 -- ── Multi-option labels ────────────────────────────────────
 local MULTI_OPTS = {
     difficulty        = {"Simple", "Realistic", "Hardcore"},
+    replenishmentRate = {"Very Slow (0.25x)", "Slow (0.5x)", "Normal (1.0x)", "Fast (1.5x)", "Very Fast (2.0x)"},
     hudPosition       = {"Top Right", "Top Left", "Bot Right", "Bot Left", "Ctr Right", "Custom"},
     hudColorTheme     = {"Green", "Blue", "Amber", "Mono"},
     hudFontSize       = {"Small", "Medium", "Large"},
@@ -179,7 +180,8 @@ local SETTING_DESCS = {
     fertilizerCosts  = "Real in-game cost for fertilizers",
     cropRotation     = "Rotation benefits and penalties",
     autoRateControl  = "Smart sprayer application rates",
-    difficulty       = "Nutrient drain intensity level",
+    difficulty         = "Nutrient drain intensity level",
+    replenishmentRate  = "Fertilizer nutrient restoration speed",
     seasonalEffects  = "Season-driven soil changes",
     rainEffects      = "Rain causes nutrient leaching",
     plowingBonus     = "Plow bonus for soil recovery",
@@ -211,9 +213,10 @@ local ADMIN_SECTIONS = {
     {
         header = "Mod Control & Difficulty",
         items  = {
-            { label = "Mod Enabled",      desc = "Activate / deactivate the entire mod",       stype = "setting", id = "enabled" },
-            { label = "Debug Mode",       desc = "Extra logging for troubleshooting",           stype = "setting", id = "debugMode" },
-            { label = "Difficulty",       desc = "Nutrient drain intensity level",              stype = "setting", id = "difficulty" },
+            { label = "Mod Enabled",         desc = "Activate / deactivate the entire mod",            stype = "setting", id = "enabled" },
+            { label = "Debug Mode",          desc = "Extra logging for troubleshooting",               stype = "setting", id = "debugMode" },
+            { label = "Difficulty",          desc = "Nutrient drain intensity level",                  stype = "setting", id = "difficulty" },
+            { label = "Replenishment Rate",  desc = "Fertilizer nutrient restoration speed",           stype = "setting", id = "replenishmentRate" },
         },
     },
     {

@@ -7,6 +7,8 @@
     <e k="sf_hud_color_4" v="Mono" eh="5d9b47bd" />
     <e k="sf_diff_short" v="Sværhedsgrad" eh="7b29ca96" />
     <e k="sf_diff_long" v="Sværhedsgrad for jordstyring" eh="d6f4560c" />
+		<e k="sf_rr_short" v="[EN] Replenishment Rate" eh="b363b336" />
+		<e k="sf_rr_long" v="[EN] How quickly fertilizer restores field nutrients (0.25x Very Slow to 2.0x Very Fast)" eh="afe78a6d" />
     <e k="sf_auto_rate_short" v="Automatisk hastighedskontrol" eh="6f99137d" />
     <e k="sf_auto_rate_long" v="Justerer automatisk gødningsraten baseret på markens behov" eh="a9ca9f6b" />
     <e k="sf_hud_theme_1" v="Grøn" eh="d382816a" />
@@ -42,11 +44,12 @@
     <e k="sf_use_imperial_long" v="Vis udbringningsrater i gal/ac og lb/ac (fra = L/ha og kg/ha)" eh="17efa489" />
     <e k="sf_active_map_layer_short" v="Aktivt kortlag" eh="1861765f" />
     <e k="sf_active_map_layer_long" v="Næringsstoflag vist som overlejring på PDA-kortet" eh="d7755cc8" />
-    <e k="sf_overlay_density_short" v="Kortdetalje" />
-    <e k="sf_overlay_density_long" v="Prøvepunktsbudget for PDA-jordoverlejringen. Lav = bedre FPS, Høj = bedre dækning på store kort." />
+    <e k="sf_overlay_density_short" v="Kortdetalje" eh="a525859a" />
+    <e k="sf_overlay_density_long" v="Prøvepunktsbudget for PDA-jordoverlejringen. Lav = bedre FPS, Høj = bedre dækning på store kort." eh="89215ce5" />
     <e k="input_SF_OPEN_SETTINGS" v="Åbn jordindstillinger" eh="2e31c0dd" />
     <e k="sf_reset" v="Nulstil jordindstillinger" eh="467bc2f5" />
     <e k="input_SF_TOGGLE_HUD" v="Slå jord-HUD til/fra" eh="f0224a10" />
+		<e k="input_SF_HUD_DRAG" v="[EN] HUD Drag Mode" eh="cb2eb762" />
     <e k="input_SF_SOIL_REPORT" v="Jordrapport" eh="c33180ef" />
     <e k="input_SF_RATE_UP" v="Øg gødningsrate" eh="6e601ef5" />
     <e k="input_SF_RATE_DOWN" v="Sænk gødningsrate" eh="30712026" />
@@ -136,16 +139,16 @@
     <e k="sf_bigBag_starter_function" v="Startgødning (flydende)" eh="2c36ea57" />
     <e k="sf_bigBag_gypsum_name" v="Big Bag Gips" eh="40fc8169" />
     <e k="sf_bigBag_gypsum_function" v="Jordforbedring (tør)" eh="51503c54" />
-    <e k="sf_bigBag_compost_name" v="Big Bag Kompost" />
-    <e k="sf_bigBag_compost_function" v="Organisk jordforbedring (tør)" />
-    <e k="sf_bigBag_biosolids_name" v="Big Bag Biosolider" />
-    <e k="sf_bigBag_biosolids_function" v="Organisk gødning (tør)" />
-    <e k="sf_bigBag_chicken_manure_name" v="Big Bag Hønsemøg" />
-    <e k="sf_bigBag_chicken_manure_function" v="Organisk gødning (tør)" />
-    <e k="sf_bigBag_pelletized_manure_name" v="Big Bag Pelleteret Gødning" />
-    <e k="sf_bigBag_pelletized_manure_function" v="Organisk gødning (tør)" />
-    <e k="sf_bigBag_liquidlime_name" v="Flydende Kalktank" />
-    <e k="sf_bigBag_liquidlime_function" v="pH-hævende middel (flydende)" />
+    <e k="sf_bigBag_compost_name" v="Big Bag Kompost" eh="14322c5d" />
+    <e k="sf_bigBag_compost_function" v="Organisk jordforbedring (tør)" eh="9dd2256a" />
+    <e k="sf_bigBag_biosolids_name" v="Big Bag Biosolider" eh="61a60ff3" />
+    <e k="sf_bigBag_biosolids_function" v="Organisk gødning (tør)" eh="374c7b1e" />
+    <e k="sf_bigBag_chicken_manure_name" v="Big Bag Hønsemøg" eh="cb60fddc" />
+    <e k="sf_bigBag_chicken_manure_function" v="Organisk gødning (tør)" eh="374c7b1e" />
+    <e k="sf_bigBag_pelletized_manure_name" v="Big Bag Pelleteret Gødning" eh="064be7fa" />
+    <e k="sf_bigBag_pelletized_manure_function" v="Organisk gødning (tør)" eh="374c7b1e" />
+    <e k="sf_bigBag_liquidlime_name" v="Flydende Kalktank" eh="4f8caca1" />
+    <e k="sf_bigBag_liquidlime_function" v="pH-hævende middel (flydende)" eh="7a118b6d" />
     <e k="sf_section" v="Jord &amp; Gødning" eh="d30a22a9" />
     <e k="sf_enabled_short" v="Aktiver mod" eh="cf7fea13" />
     <e k="sf_enabled_long" v="Aktiver eller deaktiver jord- og gødningsmoddet" eh="e377fd59" />
@@ -163,6 +166,8 @@
     <e k="sf_pest_pressure_long" v="Aktiver/deaktiver insekt- og skadedyrsangrebssystem" eh="2ba11abc" />
     <e k="sf_disease_pressure_short" v="Sygdomstryk" eh="2b805cc9" />
     <e k="sf_disease_pressure_long" v="Aktiver/deaktiver svampe- og afgrødesygdomssystem" eh="9080edbc" />
+		<e k="sf_compaction_short" v="[EN] Soil Compaction" eh="68734a56" />
+		<e k="sf_compaction_long" v="[EN] Enable/disable heavy vehicle soil compaction system" eh="a0995ec5" />
     <e k="sf_fertility_short" v="Frugtbarhedssystem" eh="f7e27d58" />
     <e k="sf_fertility_long" v="Aktiver/deaktiver dynamisk jordfrugtbarhedssystem" eh="ea074366" />
     <e k="sf_nutrients_short" v="Næringsstofcyklusser" eh="ffab595d" />
@@ -325,6 +330,7 @@
     <e k="sf_map_layer_weed" v="Ukrudtstryk" eh="53f8b936" />
     <e k="sf_map_layer_pest" v="Skadedyrstryk" eh="18a7c2be" />
     <e k="sf_map_layer_disease" v="Sygdomstryk" eh="2b805cc9" />
+		<e k="sf_map_layer_compaction" v="[EN] Compaction" eh="19cf3ee7" />
     <e k="sf_map_overlay_cycle" v="Skift+M: Skift jordlag" eh="032fdac7" />
     <e k="sf_map_page_title" v="Jordlag" eh="04a675fb" />
     <e k="sf_map_sidebar_header" v="Jordkortlag" eh="81332549" />
