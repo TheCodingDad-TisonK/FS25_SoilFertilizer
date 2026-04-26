@@ -152,10 +152,8 @@ function SoilLayerSystem:initialize()
             SoilLogger.info("[OK] Soil layer registered: %s (handle=%s)", def.name, tostring(handle))
         else
             missing = missing + 1
-            SoilLogger.warning(
-                "Soil layer NOT found on terrain: %s — " ..
-                "add it to your map's map.xml <densityMaps> block " ..
-                "and ensure the GRLE file is present in the savegame folder.",
+            SoilLogger.debug(
+                "Soil layer not found on terrain: %s (per-pixel map unavailable, using fieldData)",
                 def.name
             )
         end
@@ -170,11 +168,7 @@ function SoilLayerSystem:initialize()
             registered, #LAYER_DEFS, missing
         )
     else
-        SoilLogger.warning(
-            "SoilLayerSystem: No terrain layers found. " ..
-            "Nutrient data will be stored in fieldData only (no per-pixel maps). " ..
-            "See DEVELOPMENT.md § 'Soil Density Map Layers' for setup instructions."
-        )
+        SoilLogger.info("SoilLayerSystem: No terrain layers — using fieldData storage (normal for most maps)")
     end
 end
 
