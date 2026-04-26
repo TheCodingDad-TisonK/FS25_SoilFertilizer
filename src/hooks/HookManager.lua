@@ -22,8 +22,6 @@ end
 ---@param z number World Z coordinate
 ---@return number|nil fieldId
 function HookManager:getFieldIdAtWorldPosition(x, z)
-    if not g_fieldManager then return nil end
-    
     -- Initialize the native MapDataGrid cache on first use (requires map to be loaded)
     if not self.fieldIdCache then
         local mapSize = g_currentMission and g_currentMission.terrainSize or 2048
@@ -37,35 +35,46 @@ function HookManager:getFieldIdAtWorldPosition(x, z)
         local BASE_BLOCK = 2
         local blockSize  = math.max(BASE_BLOCK, math.floor(BASE_BLOCK * (mapSize / BASE_MAP)))
         SoilLogger.info("[PERF-P5] MapDataGrid: map=%.0fm  blockSize=%dm", mapSize, blockSize)
-        self.fieldIdCache = MapDataGrid.createFromBlockSize(mapSize, blockSize)
+        local ok, result = pcall(MapDataGrid.createFromBlockSize, mapSize, blockSize)
+        if ok and result then
+            self.fieldIdCache = result
+        else
+            SoilLogger.warning("[PERF-P5] MapDataGrid.createFromBlockSize failed (%s) — cache disabled", tostring(result))
+            self.fieldIdCache = false  -- false = permanently disabled, avoids retry spam
+        end
     end
 
     -- Fast path: Check the native C++ backed spatial grid cache
-    local cachedId = self.fieldIdCache:getValueAtWorldPos(x, z)
-    if cachedId ~= nil then
-        if cachedId == -1 then return nil end -- -1 indicates known empty space
-        return cachedId
+    if self.fieldIdCache then
+        local cachedId = self.fieldIdCache:getValueAtWorldPos(x, z)
+        if cachedId ~= nil then
+            if cachedId == -1 then return nil end  -- -1 = known empty space
+            return cachedId
+        end
     end
-    
+
     -- Slow path: Direct field polygon lookup (computationally expensive)
     local fieldId = nil
-    local field = g_fieldManager:getFieldAtWorldPosition(x, z)
-    if field and field.farmland and field.farmland.id then
-        fieldId = field.farmland.id
+    if g_fieldManager and type(g_fieldManager.getFieldAtWorldPosition) == "function" then
+        local field = g_fieldManager:getFieldAtWorldPosition(x, z)
+        if field and field.farmland and field.farmland.id then
+            fieldId = field.farmland.id
+        end
     end
-    
+
     -- Fallback to farmland detection
-    if not fieldId and g_farmlandManager then
+    if not fieldId and g_farmlandManager and type(g_farmlandManager.getFarmlandAtWorldPosition) == "function" then
         local farmland = g_farmlandManager:getFarmlandAtWorldPosition(x, z)
         if farmland and farmland.id then
-            -- Convert farmland ID to field ID (usually same in FS25)
             fieldId = farmland.id
         end
     end
-    
-    -- Cache the result (using -1 to cache nil/empty lookups to prevent repeated slow paths)
-    self.fieldIdCache:setValueAtWorldPos(x, z, fieldId or -1)
-    
+
+    -- Cache the result (-1 marks known-empty to prevent repeated slow-path lookups)
+    if self.fieldIdCache then
+        self.fieldIdCache:setValueAtWorldPos(x, z, fieldId or -1)
+    end
+
     return fieldId
 end
 
