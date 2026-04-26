@@ -128,6 +128,10 @@ function HookManager:installAll(soilSystem)
     local weedControlOk = self:installWeederHook()
     if weedControlOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
+    -- Strip-till / ridge tiller (RidgeTiller.processRidgeTillerArea — Orthman-style implements)
+    local ridgeTillerOk = self:installRidgeTillerHook()
+    if ridgeTillerOk then successCount = successCount + 1 else failCount = failCount + 1 end
+
     -- Patch vanilla fill units to accept custom fertilizer types
     local fillUnitOk = self:installFillUnitHook()
     if fillUnitOk then successCount = successCount + 1 else failCount = failCount + 1 end
@@ -816,20 +820,11 @@ function HookManager:installHarvestHook()
                 local x, _, z = getWorldTranslation(combineSelf.rootNode)
                 if not x then return end
 
-                local fieldId = nil
-                if g_fieldManager and type(g_fieldManager.getFieldAtWorldPosition) == "function" then
-                    local field = g_fieldManager:getFieldAtWorldPosition(x, z)
-                    if field and field.farmland then
-                        fieldId = field.farmland.id
-                    end
-                end
-                if not fieldId and g_farmlandManager then
-                    local farmland = g_farmlandManager:getFarmlandAtWorldPosition(x, z)
-                    if farmland then fieldId = farmland.id end
-                end
+                -- PHASE 5: use shared MapDataGrid-backed cache (self = HookManager upvalue)
+                local fieldId = self:getFieldIdAtWorldPosition(x, z)
                 if not fieldId or fieldId <= 0 then return end
 
-                SoilLogger.debug("Harvest hook: Field %d, Crop %d, %.0fL, area=%.1fm2, strawRatio=%.2f", 
+                SoilLogger.debug("Harvest hook: Field %d, Crop %d, %.0fL, area=%.1fm2, strawRatio=%.2f",
                     fieldId, inputFruitType, liters, area, strawRatio or 0)
                 g_SoilFertilityManager.soilSystem:onHarvest(fieldId, inputFruitType, liters, strawRatio, area)
             end)
@@ -1468,6 +1463,66 @@ function HookManager:installWeederHook()
     )
     self:register(Weeder, "processWeederArea", original, "Weeder.processWeederArea")
     SoilLogger.info("[OK] Weeder hook (mechanical weed removal) installed successfully")
+    return true
+end
+
+-- =========================================================
+-- HOOK 6b: Strip-till / Ridge tiller (RidgeTiller.processRidgeTillerArea)
+-- =========================================================
+-- The RidgeTiller specialization (RIDGEFORMER work area type) is completely
+-- separate from Cultivator.processCultivatorArea.  Implements such as the
+-- Orthman Strip Till use this path and were previously invisible to SF.
+--
+-- Strip-till effects are a distinct middle tier between cultivation and plowing:
+--   Weeds:   partial reduction (only ~30% surface coverage)
+--   Pests:   higher than cultivator (deep 6-8" knife disrupts soil larvae)
+--   Disease: lower than cultivator (surface residue left in untilled zones)
+--   pH:      no normalization (no soil-layer inversion)
+--   OM:      small boost (subsurface incorporation in tilled strips only)
+---@return boolean success
+function HookManager:installRidgeTillerHook()
+    -- RidgeTiller may not be present on all maps/mods — fail gracefully
+    if not RidgeTiller or type(RidgeTiller.processRidgeTillerArea) ~= "function" then
+        SoilLogger.warning("[RidgeTillerHook] RidgeTiller.processRidgeTillerArea not available — strip-till integration skipped")
+        return false
+    end
+
+    local original = RidgeTiller.processRidgeTillerArea
+    RidgeTiller.processRidgeTillerArea = Utils.appendedFunction(
+        original,
+        function(ridgeSelf, workArea, dt)
+            if not g_SoilFertilityManager or
+               not g_SoilFertilityManager.soilSystem or
+               not g_SoilFertilityManager.settings.enabled then
+                return
+            end
+
+            if not workArea or type(workArea) ~= "table" then return end
+            if not workArea.start or not workArea.width or not workArea.height then return end
+
+            local sx, _, sz = getWorldTranslation(workArea.start)
+            local wx, _, wz = getWorldTranslation(workArea.width)
+            local hx, _, hz = getWorldTranslation(workArea.height)
+            local centerX = (sx + wx + hx) / 3
+            local centerZ = (sz + wz + hz) / 3
+
+            local success, errorMsg = pcall(function()
+                -- PHASE 5: use shared MapDataGrid-backed cache (self = HookManager upvalue)
+                local fieldId = self:getFieldIdAtWorldPosition(centerX, centerZ)
+                if not fieldId or fieldId <= 0 then return end
+
+                SoilLogger.debug("[RidgeTillerHook] Field %d at (%.1f, %.1f)", fieldId, centerX, centerZ)
+                g_SoilFertilityManager.soilSystem:onStripTill(fieldId)
+            end)
+
+            if not success then
+                SoilLogger.error("[RidgeTillerHook] failed: %s", tostring(errorMsg))
+            end
+        end
+    )
+
+    self:register(RidgeTiller, "processRidgeTillerArea", original, "RidgeTiller.processRidgeTillerArea")
+    SoilLogger.info("[OK] RidgeTiller hook installed — strip-till (RIDGEFORMER) events now tracked")
     return true
 end
 

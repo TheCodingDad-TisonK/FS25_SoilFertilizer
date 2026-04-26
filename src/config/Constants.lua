@@ -70,6 +70,27 @@ SoilConstants.CULTIVATION = {
 }
 
 -- ========================================
+-- STRIP-TILL / RIDGE TILLER
+-- ========================================
+-- Strip-till (e.g. Orthman) tills narrow 6-8" deep knife-bands (~30% of
+-- field surface).  Surface residue stays in the untilled zones, so:
+--   • Weeds: LESS effective than full cultivator (partial coverage)
+--   • Pests: MORE effective than cultivator (deep knife disrupts soil larvae)
+--   • Disease: LESS than cultivator (residue left on surface → spore habitat)
+--   • No pH normalization (no soil layer inversion)
+--   • Small OM boost in tilled strips (some sub-surface matter incorporated)
+-- The RidgeTiller FS25 spec (processRidgeTillerArea / RIDGEFORMER work area)
+-- is completely separate from Cultivator.processCultivatorArea, so a dedicated
+-- hook is required.
+SoilConstants.STRIP_TILL = {
+    WEED_PRESSURE_REDUCTION    = 15,  -- pts; less than cultivator (partial surface coverage)
+    PEST_PRESSURE_REDUCTION    = 12,  -- pts; more than cultivator (deep knife action)
+    DISEASE_PRESSURE_REDUCTION = 10,  -- pts; less than cultivator (residue left in place)
+    OM_BOOST                   = 0.10, -- % OM increase per pass (tilled-strip incorporation)
+    -- No pH normalization — strip-till does not invert soil horizons
+}
+
+-- ========================================
 -- NUTRIENT LIMITS
 -- ========================================
 SoilConstants.NUTRIENT_LIMITS = {

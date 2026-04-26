@@ -449,6 +449,73 @@ function SoilFertilitySystem:onCultivation(fieldId)
     end
 end
 
+--- Called when a ridge tiller / strip-till implement passes over a field.
+--- Strip-till tills narrow deep knife-bands (~30% surface coverage), so
+--- weed control is partial but pest disruption is deeper than cultivation.
+--- No pH normalization (no soil-layer inversion). Small OM boost.
+---@param fieldId number
+function SoilFertilitySystem:onStripTill(fieldId)
+    if not fieldId or fieldId <= 0 then return end
+    if not SoilConstants.STRIP_TILL then return end
+
+    local field = self:getOrCreateField(fieldId, false)
+    if not field then return end
+
+    local st = SoilConstants.STRIP_TILL
+    local changed = false
+
+    self:info("[StripTill] Field %d triggered — weed=%.0f pest=%.0f disease=%.0f OM=%.2f",
+        fieldId,
+        field.weedPressure    or 0,
+        field.pestPressure    or 0,
+        field.diseasePressure or 0,
+        field.organicMatter   or 0)
+
+    -- Partial weed suppression (only tilled strips are disrupted)
+    if self.settings.weedPressure and (field.weedPressure or 0) > 0 then
+        local before = field.weedPressure
+        field.weedPressure = math.max(0, before - st.WEED_PRESSURE_REDUCTION)
+        self:info("[StripTill] Field %d: weed %.0f -> %.0f", fieldId, before, field.weedPressure)
+        changed = true
+    end
+
+    -- Deep knife action disrupts soil-dwelling pest larvae (better than cultivator)
+    if self.settings.pestPressure and (field.pestPressure or 0) > 0 then
+        local before = field.pestPressure
+        field.pestPressure = math.max(0, before - st.PEST_PRESSURE_REDUCTION)
+        self:info("[StripTill] Field %d: pest %.0f -> %.0f", fieldId, before, field.pestPressure)
+        changed = true
+    end
+
+    -- Minimal disease benefit — residue stays on surface between strips
+    if self.settings.diseasePressure and (field.diseasePressure or 0) > 0 then
+        local before = field.diseasePressure
+        field.diseasePressure = math.max(0, before - st.DISEASE_PRESSURE_REDUCTION)
+        self:info("[StripTill] Field %d: disease %.0f -> %.0f", fieldId, before, field.diseasePressure)
+        changed = true
+    end
+
+    -- Small OM boost from subsurface incorporation in tilled strips
+    if st.OM_BOOST and st.OM_BOOST > 0 then
+        local omBefore = field.organicMatter or SoilConstants.FIELD_DEFAULTS.organicMatter
+        local omAfter  = math.min(SoilConstants.NUTRIENT_LIMITS.ORGANIC_MATTER_MAX,
+                                  omBefore + st.OM_BOOST)
+        if omAfter > omBefore then
+            field.organicMatter = omAfter
+            self:info("[StripTill] Field %d: OM %.2f -> %.2f", fieldId, omBefore, omAfter)
+            changed = true
+        end
+    end
+
+    if changed and g_server and g_currentMission
+       and g_currentMission.missionDynamicInfo
+       and g_currentMission.missionDynamicInfo.isMultiplayer then
+        if SoilFieldUpdateEvent then
+            g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
+        end
+    end
+end
+
 --- Called when herbicide is applied to a field.
 --- Reduces weed pressure and activates suppression window.
 ---@param fieldId number
