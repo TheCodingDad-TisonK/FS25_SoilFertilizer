@@ -806,24 +806,28 @@ function HookManager:registerCleanup(name, cleanupFn)
 end
 
 -- =========================================================
--- HOOK 1: Harvest events (Combine.addCutterArea)
+-- HOOK 1: Harvest events (Cutter.onEndWorkAreaProcessing)
 -- =========================================================
--- FruitUtil.fruitPickupEvent does not exist in FS25.
--- Combine.addCutterArea fires on every combine harvest pass with:
---   area, liters, inputFruitType, outputFillType, strawRatio, farmId, cutterLoad
--- 'self' inside the appended function is the combine vehicle instance.
+-- Combine.addCutterArea is registered via SpecializationUtil.registerFunction,
+-- then WorkArea captures it as a direct closure reference at vehicle load —
+-- class-level hook is bypassed completely.
+-- Cutter.onEndWorkAreaProcessing IS an event listener (dynamic dispatch).
+-- It runs AFTER processCutterArea accumulates workAreaParameters this tick,
+-- and AFTER calling combineVehicle:addCutterArea internally, so all harvest
+-- data (area, liters, fruitType, strawRatio) is valid and accessible.
 ---@return boolean success True if hook installed successfully
 function HookManager:installHarvestHook()
-    if not Combine or type(Combine.addCutterArea) ~= "function" then
-        SoilLogger.warning("Could not install harvest hook - Combine.addCutterArea not available")
+    if not Cutter or type(Cutter.onEndWorkAreaProcessing) ~= "function" then
+        SoilLogger.warning("Could not install harvest hook - Cutter.onEndWorkAreaProcessing not available")
         return false
     end
 
-    local original = Combine.addCutterArea
-    Combine.addCutterArea = Utils.appendedFunction(
+    local hookMgrRef = self
+    local original = Cutter.onEndWorkAreaProcessing
+    Cutter.onEndWorkAreaProcessing = Utils.appendedFunction(
         original,
-        function(combineSelf, area, liters, inputFruitType, outputFillType, strawRatio, farmId, cutterLoad)
-            if not combineSelf.isServer then return end
+        function(cutterSelf, dt, hasProcessed)
+            if not cutterSelf.isServer then return end
             if not g_SoilFertilityManager or
                not g_SoilFertilityManager.soilSystem or
                not g_SoilFertilityManager.settings.enabled or
@@ -831,20 +835,33 @@ function HookManager:installHarvestHook()
                 return
             end
 
-            if not inputFruitType or inputFruitType <= 0 then return end
-            if not liters or liters <= 0 then return end
+            local spec = cutterSelf.spec_cutter
+            if not spec or not spec.workAreaParameters then return end
+
+            local area = spec.workAreaParameters.lastArea or 0
+            local lastLiters = spec.workAreaParameters.lastLiters or 0
+            if area <= 0 and lastLiters <= 0 then return end
+
+            local fruitType = spec.workAreaParameters.lastFruitType
+            if not fruitType or fruitType <= 0 then return end
 
             local success, errorMsg = pcall(function()
-                local x, _, z = getWorldTranslation(combineSelf.rootNode)
+                -- Replicate the liters/strawRatio calculation from Cutter.onEndWorkAreaProcessing
+                -- before the addCutterArea call (same formula, same tick data)
+                local conversionFactor = spec.currentConversionFactor or 1
+                local totalLiters = (g_fruitTypeManager:getFruitTypeAreaLiters(
+                    fruitType, spec.workAreaParameters.lastMultiplierArea or 0, false) + lastLiters) * conversionFactor
+                local strawRatio = (spec.strawRatio or 0) * (1 / conversionFactor)
+
+                local x, _, z = getWorldTranslation(cutterSelf.rootNode)
                 if not x then return end
 
-                -- PHASE 5: use shared MapDataGrid-backed cache (self = HookManager upvalue)
-                local fieldId = self:getFieldIdAtWorldPosition(x, z)
+                local fieldId = hookMgrRef:getFieldIdAtWorldPosition(x, z)
                 if not fieldId or fieldId <= 0 then return end
 
-                SoilLogger.debug("Harvest hook: Field %d, Crop %d, %.0fL, area=%.1fm2, strawRatio=%.2f",
-                    fieldId, inputFruitType, liters, area, strawRatio or 0)
-                g_SoilFertilityManager.soilSystem:onHarvest(fieldId, inputFruitType, liters, strawRatio, area)
+                SoilLogger.debug("[HarvestHook] Field %d, Crop %d, %.0fL, area=%.1fm2, strawRatio=%.2f",
+                    fieldId, fruitType, totalLiters, area, strawRatio)
+                g_SoilFertilityManager.soilSystem:onHarvest(fieldId, fruitType, totalLiters, strawRatio, area)
             end)
 
             if not success then
@@ -852,8 +869,8 @@ function HookManager:installHarvestHook()
             end
         end
     )
-    self:register(Combine, "addCutterArea", original, "Combine.addCutterArea")
-    SoilLogger.info("[OK] Harvest hook installed (Combine.addCutterArea)")
+    self:register(Cutter, "onEndWorkAreaProcessing", original, "Cutter.onEndWorkAreaProcessing")
+    SoilLogger.info("[OK] Harvest hook installed (Cutter.onEndWorkAreaProcessing)")
     return true
 end
 
@@ -1544,7 +1561,11 @@ function HookManager:installSowingHook()
     SowingMachine.onEndWorkAreaProcessing = Utils.appendedFunction(
         original,
         function(sowingSelf, dt, hasProcessed)
-            if not hasProcessed then return end
+            -- Note: do NOT fast-exit on hasProcessed=false here.
+            -- SowingMachine.onEndWorkAreaProcessing also ignores hasProcessed
+            -- (it uses lastChangedArea as the real guard). On some ticks the
+            -- work area activation can flicker, making hasProcessed=false while
+            -- seeds are still going in the ground.
             if not sowingSelf.isServer then return end
             if not g_SoilFertilityManager or
                not g_SoilFertilityManager.soilSystem or
@@ -1552,17 +1573,19 @@ function HookManager:installSowingHook()
                 return
             end
 
-            -- Confirm sowing actually changed terrain this tick (matches game's own guard)
+            -- Confirm seeds actually went in the ground this tick (mirrors game's own guard)
             local spec = sowingSelf.spec_sowingMachine
             if not spec or not spec.workAreaParameters then return end
-            if spec.workAreaParameters.lastChangedArea <= 0 then return end
+            if (spec.workAreaParameters.lastChangedArea or 0) <= 0 then return end
 
             local ok, err = pcall(function()
                 local x, _, z = getWorldTranslation(sowingSelf.rootNode)
                 if not x then return end
 
                 local fieldId = hookMgrRef:getFieldIdAtWorldPosition(x, z)
-                SoilLogger.debug("[SowingHook] pos=(%.1f,%.1f) fieldId=%s", x, z, tostring(fieldId))
+                SoilLogger.info("[SowingHook] pos=(%.1f,%.1f) fieldId=%s crop=%s",
+                    x, z, tostring(fieldId),
+                    tostring(spec.workAreaParameters.seedsFruitType))
                 if not fieldId or fieldId <= 0 then return end
 
                 g_SoilFertilityManager.soilSystem:onSowing(fieldId)
