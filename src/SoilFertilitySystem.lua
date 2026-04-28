@@ -663,7 +663,10 @@ function SoilFertilitySystem:update(dt)
 
     -- Delayed field scanning retry (3-tier approach: time-based → frame-based → fail gracefully)
     if self.fieldsScanPending then
-        if self.fieldsScanStage == 1 then
+        -- Clients must not run field scans — data arrives via SoilFieldBatchSyncEvent
+        if g_server == nil then
+            self.fieldsScanPending = false
+        elseif self.fieldsScanStage == 1 then
             -- Stage 1: Time-based retry (10 attempts, 2 sec intervals)
             if self.fieldsScanAttempts < self.fieldsScanMaxAttempts then
                 local currentTime = g_currentMission and g_currentMission.time or 0
@@ -746,6 +749,13 @@ function SoilFertilitySystem:update(dt)
     -- Drains the queue set by updateDailySoil() at DAILY_BATCH_SIZE
     -- fields per frame so no single frame pays the full update cost.
     if self._pendingDailyUpdate then
+        -- Guard: clients must never run the daily simulation.
+        -- Field data is authoritative on the server and pushed via SoilFieldUpdateEvent.
+        if g_server == nil then
+            self._pendingDailyUpdate = false
+            return
+        end
+
         -- Lazily rebuild ordered list if membership changed
         if self._activeListDirty then
             self:_rebuildActiveList()
@@ -795,6 +805,17 @@ end
 -- Scan all fields from FieldManager
 ---@return boolean True if successfully scanned fields, false if fields not ready yet
 function SoilFertilitySystem:scanFields()
+    -- Guard: clients must not create local fieldData.
+    -- Soil values are authoritative on the server and arrive via network sync events.
+    if g_currentMission
+       and g_currentMission.missionDynamicInfo
+       and g_currentMission.missionDynamicInfo.isMultiplayer
+       and g_server == nil then
+        self:info("Client: skipping local field scan — waiting for server sync")
+        self.fieldsScanPending = false
+        return true   -- signal 'done' to suppress further retries
+    end
+
     if not g_fieldManager or not g_fieldManager.fields then
         self:warning("FieldManager not available yet")
         return false
@@ -1838,6 +1859,16 @@ function SoilFertilitySystem:onHerbicideAppliedDirect(fieldId, effectiveness, li
         local before = field.weedPressure or 0
         field.weedPressure = math.max(0, before - reduction)
         field.herbicideDaysLeft = SoilConstants.WEED_PRESSURE.HERBICIDE_DURATION_DAYS
+
+        -- Broadcast updated weed pressure to all clients (dedicated server fix — Issue #257)
+        -- Previously missing, causing weed value to only update on clients when a subsequent
+        -- insecticide/fungicide broadcast happened to carry the stale field struct.
+        if g_server and g_currentMission and g_currentMission.missionDynamicInfo
+            and g_currentMission.missionDynamicInfo.isMultiplayer then
+            if SoilFieldUpdateEvent then
+                g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
+            end
+        end
     end
 
     if not field.nutrientBuffer then field.nutrientBuffer = {} end

@@ -90,7 +90,10 @@ function SoilSettingChangeEvent:run(connection)
         -- Re-initialize system if enabled state changed
         if self.settingName == "enabled" and g_SoilFertilityManager.soilSystem then
             if self.settingValue then
-                g_SoilFertilityManager.soilSystem:initialize()
+                -- Only re-initialize if the system is not already running
+                if not g_SoilFertilityManager.soilSystem.isInitialized then
+                    g_SoilFertilityManager.soilSystem:initialize()
+                end
             end
         end
 
@@ -1021,19 +1024,23 @@ function SoilSprayerRateEvent.new(vehicleId, rateIndex)
 end
 
 function SoilSprayerRateEvent:readStream(streamId, connection)
-    self.vehicleId = streamReadInt32(streamId)
+    local networkId = streamReadInt32(streamId)
+    local vehicle   = NetworkUtil.getObject(networkId)
+    self.vehicleId  = vehicle and vehicle.id or nil
     self.rateIndex = streamReadUInt8(streamId)
     self:run(connection)
 end
 
 function SoilSprayerRateEvent:writeStream(streamId, connection)
-    streamWriteInt32(streamId, self.vehicleId)
+    streamWriteInt32(streamId, NetworkUtil.getObjectId(self.vehicleId))
     streamWriteUInt8(streamId, self.rateIndex)
 end
 
 function SoilSprayerRateEvent:run(connection)
     local rm = g_SoilFertilityManager and g_SoilFertilityManager.sprayerRateManager
     if rm == nil then return end
+
+    if self.vehicleId == nil then return end
 
     local steps = SoilConstants.SPRAYER_RATE.STEPS
     if self.rateIndex < 1 or self.rateIndex > #steps then return end
@@ -1087,19 +1094,23 @@ function SoilSprayerAutoModeEvent.new(vehicleId, enabled)
 end
 
 function SoilSprayerAutoModeEvent:readStream(streamId, connection)
-    self.vehicleId = streamReadInt32(streamId)
+    local networkId = streamReadInt32(streamId)
+    local vehicle   = NetworkUtil.getObject(networkId)
+    self.vehicleId  = vehicle and vehicle.id or nil
     self.enabled = streamReadBool(streamId)
     self:run(connection)
 end
 
 function SoilSprayerAutoModeEvent:writeStream(streamId, connection)
-    streamWriteInt32(streamId, self.vehicleId)
+    streamWriteInt32(streamId, NetworkUtil.getObjectId(self.vehicleId))
     streamWriteBool(streamId, self.enabled)
 end
 
 function SoilSprayerAutoModeEvent:run(connection)
     local rm = g_SoilFertilityManager and g_SoilFertilityManager.sprayerRateManager
     if rm == nil then return end
+
+    if self.vehicleId == nil then return end
 
     rm:setAutoMode(self.vehicleId, self.enabled)
 
