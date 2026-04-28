@@ -7,23 +7,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased]
+## [2.0.6.3]  - 2026-04-28
 
 ### Fixed
+- 
+-
 
-- **Shop duplicate items removed** (#236 related): Single-item pallet/bigBag storeItems were
-  showing alongside their `multipleItemPurchase` counterparts, creating duplicate shop entries
-  for every purchasable product. Single items are now registered with `showInStore=false` so
-  `multipleItemPurchase` can still spawn them at purchase time, but they no longer appear as
-  separate shop entries.
+---
 
-- **Organic fertilizer P coefficients recalibrated** (#236): Phosphorus coefficients for all
-  manure-based products were approximately 5× too high relative to real-world N:P:K ratios
-  from UNL Extension publication G1335. A single slurry pass at 14,000 L/ha was delivering
-  +22 internal P points (blowing past the "fair" threshold in one application); corrected
-  values now deliver +3–6 P points per pass, requiring 2–3 passes to bring a depleted field
-  to "fair" levels. Affected products: Manure, Slurry, Digestate, Biosolids, Chicken Manure,
-  Pelletized Manure. Base application rates (14,000 L/ha for slurry) are unchanged.
+## [2.0.6.2]  - 2026-04-27
+
+### Fixed
+- Minor stability fixes and edge-case errors in soil state updates
+- Improved HUD interaction handling in specific UI states
+
+---
+
+## [2.0.6.1]  - 2026-04-27
+
+### Fixed
+- Fixed issues with HUD behavior when toggled rapidly
+- Resolved minor sync inconsistencies in multiplayer sessions
+
+---
+
+## [2.0.6.0] - 2026-04-26
+
+### Fixed
+- RMB cursor no longer appears when Soil HUD is hidden (#242)
+- Prevented unintended HUD drag activation while interacting with vehicles
+
+---
+
+## [2.0.5.0-beta] - 2026-04-26
+
+### Improved
+- General HUD responsiveness and usability improvements
+- Better handling of field state updates during gameplay
+
+### Fixed
+- Minor UI bugs and interaction inconsistencies
+
+---
+
+## [2.0.4.0] - 2026-04-26
+
+### Added
+- Additional internal validation for soil data consistency
+
+### Fixed
+- Various bugs related to soil value updates and display
+
+---
+
+## [2.0.3.0] - 2026-04-25
+
+### Improved
+- Improved handling of crop/soil transitions between growth states
+
+### Fixed
+- Fixed edge cases where soil values could desync after field changes
 
 ---
 
