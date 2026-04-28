@@ -118,9 +118,13 @@ function HookManager:installAll(soilSystem)
 
     SoilLogger.info("Installing event hooks...")
 
-    -- Harvest hook (FruitUtil)
+    -- Harvest hook: direct-cut combines and forage harvesters (Cutter spec)
     local harvestOk = self:installHarvestHook()
     if harvestOk then successCount = successCount + 1 else failCount = failCount + 1 end
+
+    -- Mower hook: forage crops cut to windrow (grass, alfalfa, clover, mowed triticale…)
+    local mowerOk = self:installMowerHook()
+    if mowerOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
     -- Fertilizer application hook (covers ALL sprayers + spreaders via Sprayer specialization)
     local sprayerAreaOk = self:installSprayerAreaHook()
@@ -906,6 +910,81 @@ function HookManager:installHarvestHook()
     end
 
     SoilLogger.info("[OK] Harvest hook installed (Combine.addCutterArea) — %d existing combines patched", patched)
+    return true
+end
+
+-- =========================================================
+-- HOOK 1b: Mower / Swather (forage crops cut to windrow)
+-- =========================================================
+-- Hooks Mower.onEndWorkAreaProcessing to capture nutrient depletion for crops
+-- that are CUT but not direct-threshed: grass, alfalfa, clover, mowed triticale, etc.
+--
+-- Why not the Cutter hook?
+--   Cutter.processCutterArea only reads the STANDING-CROP density map — it returns
+--   0 area for windrow-pickup passes, so Cutter.onEndWorkAreaProcessing never fires
+--   for mowed-crop scenarios.
+--
+-- Area source:
+--   spec_mower.workAreaParameters.lastStatsArea  — density-map pixels cut this tick
+--   MathUtil.areaToHa(pixels, getFruitPixelsToSqm()) converts to hectares.
+--
+-- Depletion is area-based (not liter-based) via SoilFertilitySystem:onMow().
+-- SoilConstants.MOWER_HA_FACTOR calibrates per-ha depletion relative to grain crops.
+---@return boolean success True if hook installed successfully
+function HookManager:installMowerHook()
+    if not Mower or type(Mower.onEndWorkAreaProcessing) ~= "function" then
+        SoilLogger.warning("[MowerHook] Mower.onEndWorkAreaProcessing not available — forage crop tracking skipped")
+        return false
+    end
+
+    local hookMgrRef = self
+    local original   = Mower.onEndWorkAreaProcessing
+    Mower.onEndWorkAreaProcessing = Utils.appendedFunction(
+        original,
+        function(mowerSelf, dt, hasProcessed)
+            if not mowerSelf.isServer then return end
+            if not g_SoilFertilityManager
+               or not g_SoilFertilityManager.soilSystem
+               or not g_SoilFertilityManager.settings.enabled
+               or not g_SoilFertilityManager.settings.nutrientCycles then
+                return
+            end
+
+            local spec = mowerSelf.spec_mower
+            if not spec or not spec.workAreaParameters then return end
+
+            -- lastStatsArea: density-map pixels processed this tick (same unit as Cutter's lastArea)
+            local area = spec.workAreaParameters.lastStatsArea or 0
+            if area <= 0 then return end
+
+            local fruitType = spec.workAreaParameters.lastInputFruitType
+            if not fruitType or fruitType <= 0 then return end
+
+            local success, errorMsg = pcall(function()
+                local x, _, z = getWorldTranslation(mowerSelf.rootNode)
+                if not x then return end
+
+                local fieldId = hookMgrRef:getFieldIdAtWorldPosition(x, z)
+                if not fieldId or fieldId <= 0 then return end
+
+                -- Convert density-map pixels → hectares using same formula as Mower.lua's
+                -- internal MathUtil.areaToHa(lastStatsArea, getFruitPixelsToSqm()) call
+                local areaHa = MathUtil.areaToHa(area, getFruitPixelsToSqm())
+                if areaHa <= 0 then return end
+
+                SoilLogger.debug("[MowerHook] Field %d, Crop %d, area=%.1f px (%.5f ha)",
+                    fieldId, fruitType, area, areaHa)
+                g_SoilFertilityManager.soilSystem:onMow(fieldId, fruitType, areaHa)
+            end)
+
+            if not success then
+                SoilLogger.error("[MowerHook] failed: %s", tostring(errorMsg))
+            end
+        end
+    )
+
+    self:register(Mower, "onEndWorkAreaProcessing", original, "Mower.onEndWorkAreaProcessing")
+    SoilLogger.info("[OK] Mower hook installed (Mower.onEndWorkAreaProcessing) — forage crop nutrient tracking active")
     return true
 end
 
