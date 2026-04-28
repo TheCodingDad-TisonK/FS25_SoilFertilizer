@@ -230,7 +230,7 @@ SoilConstants.FERTILIZER_PROFILES = {
     UREA              = { N=154.6, P=0.00, K=0.00 }, -- 168 kg/ha: ~70N ppm
 
     -- Starter fertilizer (High-P pop-up)
-    STARTER           = { N=63.5, P=595.0, K=44.6 }, -- 46.8 L/ha: ~8N, ~15P ppm
+    STARTER           = { N=63.5, P=595.0, K=0.00 }, -- 46.8 L/ha: ~8N, ~15P ppm
 
     -- Gypsum: mild pH lowering + OM/structure boost
     GYPSUM            = { pH=-0.10, OM=0.22 }, -- 1500 kg/ha: -0.25 pH shift, OM boost
