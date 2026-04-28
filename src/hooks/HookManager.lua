@@ -926,7 +926,7 @@ end
 --
 -- Area source:
 --   spec_mower.workAreaParameters.lastStatsArea  — density-map pixels cut this tick
---   MathUtil.areaToHa(pixels, getFruitPixelsToSqm()) converts to hectares.
+--   MathUtil.areaToHa(pixels, g_currentMission:getFruitPixelsToSqm()) converts to hectares.
 --
 -- Depletion is area-based (not liter-based) via SoilFertilitySystem:onMow().
 -- SoilConstants.MOWER_HA_FACTOR calibrates per-ha depletion relative to grain crops.
@@ -967,9 +967,11 @@ function HookManager:installMowerHook()
                 local fieldId = hookMgrRef:getFieldIdAtWorldPosition(x, z)
                 if not fieldId or fieldId <= 0 then return end
 
-                -- Convert density-map pixels → hectares using same formula as Mower.lua's
-                -- internal MathUtil.areaToHa(lastStatsArea, getFruitPixelsToSqm()) call
-                local areaHa = MathUtil.areaToHa(area, getFruitPixelsToSqm())
+                -- Convert density-map pixels → hectares.
+                -- getFruitPixelsToSqm() is a method on g_currentMission, NOT a global.
+                -- Mower.lua itself calls g_currentMission:getFruitPixelsToSqm() internally.
+                if not g_currentMission or type(g_currentMission.getFruitPixelsToSqm) ~= "function" then return end
+                local areaHa = MathUtil.areaToHa(area, g_currentMission:getFruitPixelsToSqm())
                 if areaHa <= 0 then return end
 
                 SoilLogger.debug("[MowerHook] Field %d, Crop %d, area=%.1f px (%.5f ha)",

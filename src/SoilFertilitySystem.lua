@@ -304,11 +304,15 @@ function SoilFertilitySystem:onMow(fieldId, fruitTypeIndex, areaHa)
         return
     end
 
-    -- Look up forage-specific rates first, then per-crop, then default
-    local name = string.lower(fruitDesc.name or "unknown")
-    local rates = SoilConstants.CROP_EXTRACTION[name]
-        or SoilConstants.CROP_EXTRACTION_FORAGE
-        or SoilConstants.CROP_EXTRACTION_DEFAULT
+    -- Mowing ALWAYS uses CROP_EXTRACTION_FORAGE, never the per-crop grain rates.
+    -- Reason: CROP_EXTRACTION rates are calibrated for harvested grain volume/density
+    -- (threshed yield, e.g. wheat at 0.39 L/sqm). The Mower spec cuts whole-plant
+    -- biomass (e.g. wheat windrow at 3.8 L/sqm) — a completely different density.
+    -- Using grain rates with windrow-equivalent area would over-extract by ~10x.
+    -- CROP_EXTRACTION_FORAGE is calibrated for cut green biomass at MOWER_HA_FACTOR.
+    -- This also prevents "mowing wheat before harvest depletes N faster than combining"
+    -- scenarios that would confuse players (TisonK's review note on PR #265).
+    local rates = SoilConstants.CROP_EXTRACTION_FORAGE or SoilConstants.CROP_EXTRACTION_DEFAULT
 
     local diffMult = SoilConstants.DIFFICULTY.MULTIPLIERS[self.settings.difficulty] or 1.0
     local haFactor = SoilConstants.MOWER_HA_FACTOR or 6.0
