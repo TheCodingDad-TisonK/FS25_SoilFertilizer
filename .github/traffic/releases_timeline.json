@@ -382,16 +382,16 @@
   "v2.0.6.0": {
     "published_at": "2026-04-26T17:30:25Z",
     "tag": "v2.0.6.0",
-    "peak_downloads": 149
+    "peak_downloads": 152
   },
   "v2.0.6.1": {
     "published_at": "2026-04-27T07:59:59Z",
     "tag": "v2.0.6.1",
-    "peak_downloads": 40
+    "peak_downloads": 41
   },
   "2.0.6.2": {
     "published_at": "2026-04-27T19:06:42Z",
     "tag": "2.0.6.2",
-    "peak_downloads": 22
+    "peak_downloads": 23
   }
 }
