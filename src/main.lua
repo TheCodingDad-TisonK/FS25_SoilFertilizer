@@ -251,7 +251,7 @@ FSBaseMission.update = Utils.appendedFunction(FSBaseMission.update, function(mis
     end
 end)
 
--- Hook draw for HUD and settings panel
+-- Hook draw for HUD, settings panel, and minimap overlay
 FSBaseMission.draw = Utils.appendedFunction(FSBaseMission.draw, function(mission)
     if not mission.isRunning then return end
     if sfm and sfm.soilHUD then
@@ -259,6 +259,15 @@ FSBaseMission.draw = Utils.appendedFunction(FSBaseMission.draw, function(mission
     end
     if sfm and sfm.settingsPanel then
         sfm.settingsPanel:draw()
+    end
+    -- Soil layer overlay on the HUD minimap (bottom-left corner).
+    -- Uses the ingameMap ref captured at map-load time (g_currentMission.ingameMap is nil in FS25).
+    if sfm and sfm.soilMapOverlay then
+        local ingameMap = sfm.soilMapOverlay.ingameMapRef
+            or (g_currentMission and g_currentMission.ingameMap)
+        if ingameMap then
+            sfm.soilMapOverlay:onDrawMinimap(ingameMap)
+        end
     end
 end)
 

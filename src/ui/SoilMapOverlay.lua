@@ -88,6 +88,10 @@ function SoilMapOverlay.new(soilSystem, settings)
     -- Populated lazily in getFieldFillPoints; cleared on requestRefresh.
     self.fieldPolyCache = {}
 
+    -- Minimap overlay: one centroid dot per field (updated on same cadence as samplePoints)
+    self.minimapCentroids = {}
+    self.nextMinimapUpdateTime = 0
+
     -- Manual Button Rects for click detection
     self.buttonRects = {}
 
@@ -140,6 +144,7 @@ end
 
 function SoilMapOverlay:requestRefresh()
     self.nextSampleUpdateTime = 0
+    self.nextMinimapUpdateTime = 0
     self.fieldPolyCache = {}
 end
 
@@ -865,6 +870,89 @@ function SoilMapOverlay:getLayerColor(layerIdx, info, farmlandId)
     end
 
     return GOOD[1], GOOD[2], GOOD[3]
+end
+
+-- ── Minimap Overlay ───────────────────────────────────────
+-- Builds one {x, z, r, g, b} centroid entry per field using field.posX/posZ.
+-- Called on a 4.5-second throttle (same cadence as the PDA sample points).
+-- requestRefresh() resets nextMinimapUpdateTime so a layer change takes effect
+-- immediately instead of waiting for the next tick.
+
+function SoilMapOverlay:updateMinimapCentroids(force)
+    local now = (g_currentMission and g_currentMission.time) or g_time or 0
+    if not force and now < self.nextMinimapUpdateTime then return end
+    self.nextMinimapUpdateTime = now + SoilMapOverlay.SAMPLE_UPDATE_INTERVAL_MS
+
+    self.minimapCentroids = {}
+
+    local layerIdx = self.settings.activeMapLayer or 0
+    if layerIdx <= 0 then return end
+
+    if not g_currentMission or not g_fieldManager then return end
+    local fields = g_fieldManager.fields
+    if not fields then return end
+
+    for _, fsField in ipairs(fields) do
+        if fsField and fsField.farmland then
+            local farmlandId = fsField.farmland.id
+            if farmlandId and farmlandId > 0 then
+                local info = self.soilSystem:getFieldInfo(farmlandId)
+                if info then
+                    local x = fsField.posX or 0
+                    local z = fsField.posZ or 0
+                    local r, g, b = self:getLayerColor(layerIdx, info, farmlandId)
+                    table.insert(self.minimapCentroids, {x = x, z = z, r = r, g = g, b = b})
+                end
+            end
+        end
+    end
+end
+
+-- Renders the active soil layer as coloured centroid dots on the HUD minimap.
+-- Guards: skips when PDA is open (fullscreen), minimap is hidden (state ≤ 1),
+-- no layer is selected, or running on a dedicated server (no HUD).
+-- Uses ingameMap.layout:getMapObjectPosition() for world→screen projection;
+-- the layout handles clipping automatically (circle clips to circle, etc.).
+
+function SoilMapOverlay:onDrawMinimap(ingameMap)
+    if ingameMap == nil then return end
+    if ingameMap.isFullscreen then return end
+    if ingameMap.state == nil or ingameMap.state <= 1 then return end
+    -- Suppress minimap dots when any full-screen GUI is open (pause menu, dialogs, etc.)
+    if g_gui ~= nil and g_gui:getIsGuiVisible() then return end
+
+    local layerIdx = self.settings.activeMapLayer or 0
+    if layerIdx <= 0 then return end
+
+    if g_client == nil then return end  -- server-only mode has no HUD
+
+    self:updateMinimapCentroids()
+    if #self.minimapCentroids == 0 then return end
+
+    local layout = ingameMap.layout
+    if layout == nil or layout.getMapObjectPosition == nil then return end
+
+    local dotSz = getNormalizedScreenValues(7, 7)
+    local halfDot = dotSz * 0.5
+    local alpha = SoilMapOverlay.ALPHA * 0.80
+
+    local wSizeX = ingameMap.worldSizeX or 2048
+    local wSizeZ = ingameMap.worldSizeZ or 2048
+    local offX   = ingameMap.worldCenterOffsetX or (wSizeX * 0.5)
+    local offZ   = ingameMap.worldCenterOffsetZ or (wSizeZ * 0.5)
+    local scale  = ingameMap.mapExtensionScaleFactor or 0.5
+    local extX   = ingameMap.mapExtensionOffsetX or 0.25
+    local extZ   = ingameMap.mapExtensionOffsetZ or 0.25
+
+    for _, centroid in ipairs(self.minimapCentroids) do
+        local objectX = (centroid.x + offX) / wSizeX * scale + extX
+        local objectZ = (centroid.z + offZ) / wSizeZ * scale + extZ
+        local ok, screenX, screenY, _, visible = pcall(layout.getMapObjectPosition, layout, objectX, objectZ, 0, 0, 0, false)
+        if ok and visible and screenX and screenY then
+            drawFilledRect(screenX - halfDot, screenY - halfDot, dotSz, dotSz,
+                           centroid.r, centroid.g, centroid.b, alpha)
+        end
+    end
 end
 
 SoilLogger.info("SoilMapOverlay loaded")
