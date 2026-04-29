@@ -1743,10 +1743,11 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
             local zone = SoilConstants.ZONE
             local cx = math.floor(sprayX / zone.CELL_SIZE)
             local cz = math.floor(sprayZ / zone.CELL_SIZE)
-            -- PHASE 2: integer key — ~3-5× faster than string concat "cx_cz".
-            -- Safe for any realistic FS25 map: cx/cz range ±820 on 16384m map,
-            -- so max key = 820*10000+820 = 8,200,820 — well within Lua integer range.
-            local cellKey = cx * 10000 + cz
+            -- String key keeps save/load/runtime consistent: setXMLString requires a string,
+            -- and the load path (getXMLString) restores keys as strings. Using a number key
+            -- here caused "setXMLString: Expected String, Actual Number" errors on autosave
+            -- and also caused post-load lookups to miss (number key vs stored string key).
+            local cellKey = tostring(cx * 10000 + cz)
 
             -- Coverage tracking: count unique cells visited today
             if not field.coveredCells then field.coveredCells = {} end

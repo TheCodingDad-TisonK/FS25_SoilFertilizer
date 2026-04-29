@@ -333,7 +333,13 @@ function HookManager:registerCustomSprayTypes()
     local liqBase   = baseRates.LIQUIDFERTILIZER.value  -- used as fallback default only
 
     -- Liquid nitrogen / starter types → inherit visual from LIQUIDFERTILIZER
-    local liquidNames = { "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME", "INSECTICIDE", "FUNGICIDE",
+    -- NOTE: HERBICIDE must be here so it gets a custom LPS of 1.5/36000 L/s, matching
+    -- INSECTICIDE and FUNGICIDE. Without it, vanilla's native HERBICIDE spray type is
+    -- used (~291 L/ha effective rate vs the intended 1.5 L/ha), causing weed pressure
+    -- to drain far too fast even with the daily cap in onHerbicideAppliedDirect (the
+    -- cap drains its full 30-point budget in the very first metre of a pass, then
+    -- repeats on subsequent game-day passes — issue #276 follow-up bug).
+    local liquidNames = { "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME", "HERBICIDE", "INSECTICIDE", "FUNGICIDE",
                           "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH" }
     -- Granular/solid types → inherit visual from FERTILIZER
     local solidNames  = { "UREA", "AMS", "MAP", "DAP", "POTASH",
