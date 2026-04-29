@@ -7,11 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.6.4] - 2026-04-29
+
+### Changed
+- Polish translation fully updated by community contributor @DanielloHQ — all previously English-only strings now translated natively
+
+---
+
 ## [2.0.6.3]  - 2026-04-28
 
 ### Fixed
-- 
--
+- Settings path fix for dedicated servers: `getUserProfileAppPath()` now always receives a properly-terminated path, preventing mangled `modsSettings` directory on some server builds (#267)
+- HUD drag no longer consumes right-mouse-button globally — RMB edit mode now only activates when the cursor is over the HUD panel, restoring normal cursor play elsewhere (#258)
 
 ---
 
