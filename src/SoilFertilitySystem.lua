@@ -280,6 +280,65 @@ function SoilFertilitySystem:onHarvest(fieldId, fruitTypeIndex, liters, strawRat
 end
 
 --- Hook delegate: called by HookManager when fertilizer applied
+--- Hook delegate: called by HookManager when a mower/swather cuts forage crops.
+--- Handles nutrient depletion for crops that are CUT but not direct-threshed:
+--- grass, alfalfa, clover, mowed triticale, etc.
+--- Uses area-based depletion (not liter-based) since no yield liters are produced
+--- at mow time — the cut material is left as a windrow for later pickup.
+---@param fieldId    number Field/farmland ID
+---@param fruitTypeIndex number FS25 fruit type index
+---@param areaHa     number Area mowed this tick in hectares
+function SoilFertilitySystem:onMow(fieldId, fruitTypeIndex, areaHa)
+    if not self.settings.enabled or not self.settings.nutrientCycles then return end
+    if not areaHa or areaHa <= 0 then return end
+
+    local field = self:getOrCreateField(fieldId, true)
+    if not field then
+        self:warning("onMow: field %d not found", fieldId)
+        return
+    end
+
+    local fruitDesc = g_fruitTypeManager and g_fruitTypeManager:getFruitTypeByIndex(fruitTypeIndex)
+    if not fruitDesc then
+        self:warning("onMow: fruit type %d not found", fruitTypeIndex)
+        return
+    end
+
+    -- Mowing ALWAYS uses CROP_EXTRACTION_FORAGE, never the per-crop grain rates.
+    -- Reason: CROP_EXTRACTION rates are calibrated for harvested grain volume/density
+    -- (threshed yield, e.g. wheat at 0.39 L/sqm). The Mower spec cuts whole-plant
+    -- biomass (e.g. wheat windrow at 3.8 L/sqm) — a completely different density.
+    -- Using grain rates with windrow-equivalent area would over-extract by ~10x.
+    -- CROP_EXTRACTION_FORAGE is calibrated for cut green biomass at MOWER_HA_FACTOR.
+    -- This also prevents "mowing wheat before harvest depletes N faster than combining"
+    -- scenarios that would confuse players (TisonK's review note on PR #265).
+    local rates = SoilConstants.CROP_EXTRACTION_FORAGE or SoilConstants.CROP_EXTRACTION_DEFAULT
+
+    local diffMult = SoilConstants.DIFFICULTY.MULTIPLIERS[self.settings.difficulty] or 1.0
+    local haFactor = SoilConstants.MOWER_HA_FACTOR or 6.0
+    local factor   = areaHa * haFactor * diffMult
+
+    local limits = SoilConstants.NUTRIENT_LIMITS
+    field.nitrogen   = math.max(limits.MIN, field.nitrogen   - rates.N * factor)
+    field.phosphorus = math.max(limits.MIN, field.phosphorus - rates.P * factor)
+    field.potassium  = math.max(limits.MIN, field.potassium  - rates.K * factor)
+
+    field.lastCrop    = fruitDesc.name
+    field.lastHarvest = (g_currentMission and g_currentMission.environment
+                         and g_currentMission.environment.currentDay) or 0
+
+    SoilLogger.debug("Mow: Field %d, %s, %.5f ha — N:%.1f P:%.1f K:%.1f",
+        fieldId, fruitDesc.name, areaHa, field.nitrogen, field.phosphorus, field.potassium)
+
+    -- Broadcast field update to clients in multiplayer
+    if g_server and g_currentMission and g_currentMission.missionDynamicInfo
+        and g_currentMission.missionDynamicInfo.isMultiplayer then
+        if SoilFieldUpdateEvent then
+            g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
+        end
+    end
+end
+
 --- Restores soil nutrients based on fertilizer type
 ---@param fieldId number The field being fertilized
 ---@param fillTypeIndex number FS25 fill type index for fertilizer
