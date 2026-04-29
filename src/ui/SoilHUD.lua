@@ -917,7 +917,7 @@ function SoilHUD:drawNutrientRow(label, nutrient, px, cy, pw, s, fontMult, info,
         end
     end
 
-    -- Threshold tick marks
+    -- Threshold tick marks (global poor/fair)
     local thresholdKey = label == "N" and "nitrogen"
                       or label == "P" and "phosphorus"
                       or label == "K" and "potassium"
@@ -935,13 +935,39 @@ function SoilHUD:drawNutrientRow(label, nutrient, px, cy, pw, s, fontMult, info,
         end
     end
 
-    -- Value displayed in ppm
+    -- Per-crop target tick at optimal level (bright cyan, taller than status ticks)
+    local cropTarget = info and info.cropTargets and info.cropTargets[label]
+    if cropTarget then
+        local tickW = 0.0008 * s
+        local tickH = barH + 0.005 * s
+        local tickY = barY - 0.0025 * s
+        local optX  = barX + barW * (cropTarget.opt / 100) - tickW * 0.5
+        self:drawRect(optX, tickY, tickW, tickH, {0.20, 0.85, 0.85, 0.90})
+    end
+
+    -- Value displayed in ppm (with crop-optimal target when a crop is planted)
     local ppmMult = SoilConstants.PPM_DISPLAY and SoilConstants.PPM_DISPLAY[label] or 1.0
     local ppmVal  = math.floor(nutrient.value * ppmMult + 0.5)
     local valX    = barX + barW + 0.006*s
-    setTextColor(col[1], col[2], col[3], 1.0)
-    
+
+    -- Derive color from crop target if available, otherwise keep status color
+    local displayCol = col
+    if cropTarget then
+        if nutrient.value >= cropTarget.opt then
+            displayCol = self:statusColor("Good")
+        elseif nutrient.value >= cropTarget.min then
+            displayCol = self:statusColor("Fair")
+        else
+            displayCol = self:statusColor("Poor")
+        end
+    end
+    setTextColor(displayCol[1], displayCol[2], displayCol[3], 1.0)
+
     local valStr = string.format("%d", ppmVal)
+    if cropTarget then
+        local optPpm = math.floor(cropTarget.opt * ppmMult + 0.5)
+        valStr = valStr .. "/" .. tostring(optPpm)
+    end
     if projectedDelta > 0 then
         local projPpm = math.floor(projectedDelta * ppmMult + 0.5)
         if projPpm > 0 then
@@ -952,7 +978,7 @@ function SoilHUD:drawNutrientRow(label, nutrient, px, cy, pw, s, fontMult, info,
 
     -- Status label
     setTextAlignment(RenderText.ALIGN_RIGHT)
-    setTextColor(col[1], col[2], col[3], 0.80)
+    setTextColor(displayCol[1], displayCol[2], displayCol[3], 0.80)
     renderText(px + pw - pad, cy + (rowH - 0.009*s) * 0.5, 0.009 * fontMult * s, nutrient.status)
     setTextAlignment(RenderText.ALIGN_LEFT)
 
