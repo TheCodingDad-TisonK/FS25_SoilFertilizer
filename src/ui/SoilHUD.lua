@@ -1110,6 +1110,63 @@ function SoilHUD:formatRateNumber(multiplier, rateConfig)
     end
 end
 
+-- Computes the STEPS index corresponding to the optimal application rate for the
+-- currently planted crop, using the same weighted-deficit formula as calculateAutoRateIndex
+-- but substituting per-crop opt targets from cropTargets instead of AUTO_RATE_TARGETS.
+-- Returns nil when: no crop planted, fill type has no N/P/K, or field already at/above
+-- all relevant crop targets (no tick needed when the field is already fine).
+function SoilHUD:_calcCropTargetRateIdx(fillType)
+    if not fillType then return nil end
+    local info = self.cachedFieldInfo
+    if not info or not info.cropTargets then return nil end
+
+    local profile = SoilConstants.FERTILIZER_PROFILES and SoilConstants.FERTILIZER_PROFILES[fillType.name]
+    if not profile then return nil end
+
+    local ct           = info.cropTargets
+    local totalWeight  = 0
+    local weightedDef  = 0
+    local anyDeficit   = false
+
+    if profile.N and profile.N > 0 and ct.N and ct.N.opt > 0 then
+        local deficit = math.max(0, ct.N.opt - info.nitrogen.value) / ct.N.opt
+        if deficit > 0 then anyDeficit = true end
+        weightedDef  = weightedDef  + deficit * profile.N
+        totalWeight  = totalWeight  + profile.N
+    end
+    if profile.P and profile.P > 0 and ct.P and ct.P.opt > 0 then
+        local deficit = math.max(0, ct.P.opt - info.phosphorus.value) / ct.P.opt
+        if deficit > 0 then anyDeficit = true end
+        weightedDef  = weightedDef  + deficit * profile.P
+        totalWeight  = totalWeight  + profile.P
+    end
+    if profile.K and profile.K > 0 and ct.K and ct.K.opt > 0 then
+        local deficit = math.max(0, ct.K.opt - info.potassium.value) / ct.K.opt
+        if deficit > 0 then anyDeficit = true end
+        weightedDef  = weightedDef  + deficit * profile.K
+        totalWeight  = totalWeight  + profile.K
+    end
+
+    -- No relevant nutrients in this fertilizer, or field already at/above all targets
+    if totalWeight <= 0 or not anyDeficit then return nil end
+
+    local defFraction = weightedDef / totalWeight
+    local targetMult  = 0.20 + defFraction * (1.20 - 0.20)
+    targetMult = math.max(0.20, math.min(1.20, targetMult))
+
+    local steps   = SoilConstants.SPRAYER_RATE.STEPS
+    local bestIdx = SoilConstants.SPRAYER_RATE.DEFAULT_INDEX
+    local bestDiff = math.huge
+    for i, step in ipairs(steps) do
+        local diff = math.abs(step - targetMult)
+        if diff < bestDiff then
+            bestDiff = diff
+            bestIdx  = i
+        end
+    end
+    return bestIdx
+end
+
 -- ── Sprayer rate panel ───────────────────────────────────
 -- Center-scroll design: ← prev prev  CURRENT RATE  next next →
 -- Thin progress bar beneath; burn warning below panel.
@@ -1255,6 +1312,19 @@ function SoilHUD:drawSprayerRatePanel()
     self:drawRect(panelX + barPad, barY, barW, barH, SoilHUD.C_BAR_BG)
     if progress > 0 then
         self:drawRect(panelX + barPad, barY, barW * progress, barH, curCol)
+    end
+
+    -- Crop-optimal rate marker (cyan tick on the progress bar)
+    -- Only shown when a crop is planted AND the field is below that crop's optimal level
+    -- for at least one nutrient covered by the current fill type.
+    local cropOptIdx = self:_calcCropTargetRateIdx(fillType)
+    if cropOptIdx then
+        local optProgress = (cropOptIdx - 1) / (#steps - 1)
+        local tickW = 0.0012 * s
+        local tickH = barH + 0.006 * s
+        local tickX = panelX + barPad + barW * optProgress - tickW * 0.5
+        local tickY = barY - 0.003 * s
+        self:drawRect(tickX, tickY, tickW, tickH, {0.20, 0.85, 0.85, 1.0})
     end
 
     -- Burn warning below panel
