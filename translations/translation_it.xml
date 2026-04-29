@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <l10n>
     <elements>
     <e k="sf_section" v="Suolo &amp; Fertilizzante" eh="f31197fb" />
@@ -28,7 +28,7 @@
     <e k="sf_difficulty_long" v="Imposta livello difficoltà: Semplice, Realistico, Hardcore" eh="cfb758a4" />
     <e k="sf_diff_1" v="Semplice" eh="1fbb1e39" />
     <e k="sf_diff_2" v="Realistico" eh="408c999f" />
-    <e k="sf_diff_3" v="Hardcore" eh="1c800aa9" />
+    <e k="sf_diff_3" v="[EN] Hardcore" eh="1c800aa9" />
 		<e k="sf_ui_soilReport_syncing" v="Sincronizzazione dati suolo..." eh="03f01c4d" />
 		<e k="sf_ui_soilReport_syncTimeout" v="Impossibile caricare la proprietà dei campi. Chiudi e riapri il rapporto." eh="9f699982" />
     <e k="sf_fertilizer_cost_short" v="Costi Fertilizzante" eh="6870d88b" />
@@ -50,7 +50,7 @@
     <e k="sf_hud_color_1" v="Verde" eh="d382816a" />
     <e k="sf_hud_color_2" v="Blu" eh="9594eec9" />
     <e k="sf_hud_color_3" v="Ambra" eh="88068e33" />
-    <e k="sf_hud_color_4" v="Mono" eh="5d9b47bd" />
+    <e k="sf_hud_color_4" v="[EN] Mono" eh="5d9b47bd" />
     <e k="sf_diff_short" v="Difficoltà" eh="7b29ca96" />
     <e k="sf_diff_long" v="Imposta livello difficoltà: Semplice, Realistica, Hardcore" eh="cfb758a4" />
 		<e k="sf_rr_short" v="Tasso di ripristino" eh="b363b336" />
@@ -60,7 +60,7 @@
     <e k="sf_hud_theme_1" v="Verde" eh="d382816a" />
     <e k="sf_hud_theme_2" v="Blu" eh="9594eec9" />
     <e k="sf_hud_theme_3" v="Ambra" eh="88068e33" />
-    <e k="sf_hud_theme_4" v="Mono" eh="5d9b47bd" />
+    <e k="sf_hud_theme_4" v="[EN] Mono" eh="5d9b47bd" />
     <e k="sf_hud_font_size_short" v="Dimensione carattere HUD" eh="fd6ca64a" />
     <e k="sf_hud_font_size_long" v="Regola dimensione testo per migliore leggibilità" eh="c338854f" />
     <e k="sf_hud_font_1" v="Piccolo" eh="2660064e" />
@@ -110,12 +110,12 @@
     <e k="sf_report_difficulty" v="Difficoltà:" eh="3abaf54f" />
     <e k="sf_report_col_field" v="Campo" eh="6f16a5f8" />
     <e k="sf_report_col_last_crop" v="Ultimo Raccolto" eh="ff41e5eb" />
-    <e k="sf_report_col_fert" v="Fert?" eh="9e6d0eb4" />
+    <e k="sf_report_col_fert" v="[EN] Fert?" eh="9e6d0eb4" />
     <e k="sf_report_no_data" v="Nessun dato disponibile. Cammina su un campo per iniziare il tracciamento." eh="1528a4cb" />
     <e k="sf_report_prev" v="Prec" eh="14230d11" />
     <e k="sf_report_next" v="Succ" eh="10ac3d04" />
     <e k="sf_report_yes" v="SÌ" eh="7469a286" />
-    <e k="sf_report_ok" v="OK" eh="e0aa021e" />
+    <e k="sf_report_ok" v="[EN] OK" eh="e0aa021e" />
     <e k="sf_report_none" v="Nessuno" eh="6adf97f8" />
     <e k="sf_report_rec_n_poor" v="Serve azoto" eh="5dca0711" />
     <e k="sf_report_rec_n_fair" v="Azoto basso" eh="35ad072d" />
@@ -138,7 +138,7 @@
     <e k="sf_uan28_title" v="UAN 28 Fertilizzante azotato (N)" eh="9d902cd7" />
     <e k="sf_anhydrous_title" v="Ammoniaca anidra (N)" eh="3fc85c02" />
     <e k="sf_starter_title" v="Fertilizzante starter 10-34-0 (P)" eh="8c1a1ddc" />
-    <e k="sf_urea_title" v="Urea 46-0-0 (N)" eh="659b3097" />
+    <e k="sf_urea_title" v="[EN] Urea 46-0-0 (N)" eh="659b3097" />
     <e k="sf_ams_title" v="Solfato di ammonio 21-0-0 (N)" eh="033d1845" />
     <e k="sf_map_title" v="Fertilizzante MAP 11-52-0 (P)" eh="31aa2534" />
     <e k="sf_dap_title" v="Fertilizzante DAP 18-46-0 (P)" eh="5030a80a" />
@@ -157,13 +157,13 @@
     <e k="sf_bigBag_uan28_function" v="Fertilizzante azotato (liquido)" eh="27de5f41" />
     <e k="sf_bigBag_anhydrous_name" v="Big Bag Ammoniaca Anidra 82-0-0" eh="44914201" />
     <e k="sf_bigBag_anhydrous_function" v="Fertilizzante azotato (liquido)" eh="27de5f41" />
-    <e k="sf_bigBag_urea_name" v="Big Bag Urea 46-0-0" eh="8e8cbaae" />
+    <e k="sf_bigBag_urea_name" v="[EN] Big Bag Urea 46-0-0" eh="8e8cbaae" />
     <e k="sf_bigBag_urea_function" v="Fertilizzante azotato (secco)" eh="63efea20" />
-    <e k="sf_bigBag_ams_name" v="Big Bag AMS 21-0-0-24S" eh="7f71ee68" />
+    <e k="sf_bigBag_ams_name" v="[EN] Big Bag AMS 21-0-0-24S" eh="7f71ee68" />
     <e k="sf_bigBag_ams_function" v="Fertilizzante azotato (secco)" eh="63efea20" />
-    <e k="sf_bigBag_map_name" v="Big Bag MAP 11-52-0" eh="8a5a059b" />
+    <e k="sf_bigBag_map_name" v="[EN] Big Bag MAP 11-52-0" eh="8a5a059b" />
     <e k="sf_bigBag_map_function" v="Fertilizzante fosfatico (secco)" eh="0cc85c60" />
-    <e k="sf_bigBag_dap_name" v="Big Bag DAP 18-46-0" eh="fb4e9987" />
+    <e k="sf_bigBag_dap_name" v="[EN] Big Bag DAP 18-46-0" eh="fb4e9987" />
     <e k="sf_bigBag_dap_function" v="Fertilizzante fosfatico (secco)" eh="0cc85c60" />
     <e k="sf_bigBag_potash_name" v="Big Bag Potassio 0-0-60" eh="eb771556" />
     <e k="sf_bigBag_potash_function" v="Fertilizzante potassico (secco)" eh="18015099" />
@@ -185,7 +185,7 @@
     <e k="sf_bigBag_starter_function" v="Fertilizzante starter (liquido)" eh="2c36ea57" />
 		<e k="sf_bigBag_gypsum_name" v="Big Bag Gesso" eh="40fc8169" />
 		<e k="sf_bigBag_gypsum_function" v="Miglioratore del suolo (secco)" eh="51503c54" />
-    <e k="sf_bigBag_compost_name" v="Big Bag Compost" eh="14322c5d" />
+    <e k="sf_bigBag_compost_name" v="[EN] Big Bag Compost" eh="14322c5d" />
     <e k="sf_bigBag_compost_function" v="Miglioratore organico (secco)" eh="9dd2256a" />
     <e k="sf_bigBag_biosolids_name" v="Big Bag Biosolidi" eh="61a60ff3" />
     <e k="sf_bigBag_biosolids_function" v="Fertilizzante organico (secco)" eh="374c7b1e" />
@@ -324,7 +324,7 @@
 		<e k="sf_map_layer_n" v="Azoto" eh="1e9ef3ba" />
 		<e k="sf_map_layer_p" v="Fosforo" eh="eb4f2688" />
 		<e k="sf_map_layer_k" v="Potassio" eh="3a4edc67" />
-		<e k="sf_map_layer_ph" v="pH" eh="397dff20" />
+		<e k="sf_map_layer_ph" v="[EN] pH" eh="397dff20" />
 		<e k="sf_map_layer_om" v="Sostanza Organica" eh="6305f4bb" />
 		<e k="sf_map_layer_urgency" v="Urgenza Campo" eh="419ea5af" />
 		<e k="sf_map_layer_weed" v="Presenza Erbe Infestanti" eh="53f8b936" />
@@ -388,7 +388,7 @@
     <e k="sf_map_btn_cycle_layer" v="Cambia livello" eh="875dbf22" />
     <e k="sf_map_btn_treatment" v="Piano di trattamento" eh="4ba012e2" />
     <e k="sf_map_btn_disable" v="Disabilita overlay" eh="8e75dec5" />
-    <e k="sf_treat_action_ok" v="OK" eh="e0aa021e" />
+    <e k="sf_treat_action_ok" v="[EN] OK" eh="e0aa021e" />
     <e k="sf_help_title" v="Riferimento Rapido Suolo" eh="8986bb6d" />
     <e k="sf_help_nutrients_header" v="NUTRIENTI" eh="9aeb39bf" />
     <e k="sf_help_n" v="N (Azoto) - Si consuma velocemente. Applica UAN, Urea o Letame." eh="f2d0c792" />
@@ -407,13 +407,13 @@
     <e k="sf_help_poor" v="Scarso - Trattamento immediato richiesto." eh="b287d206" />
     <e k="sf_pda_fields_section_title" v="Tutti i Campi" eh="48729e0b" />
     <e k="sf_pda_col_field" v="Campo" eh="6f16a5f8" />
-    <e k="sf_pda_col_n" v="N%" eh="30740562" />
-    <e k="sf_pda_col_p" v="P%" eh="0a5e03bc" />
+    <e k="sf_pda_col_n" v="[EN] N%" eh="30740562" />
+    <e k="sf_pda_col_p" v="[EN] P%" eh="0a5e03bc" />
 		<e k="sf_pda_filter_all" v="Filtro: Tutti i Campi" eh="a46a8cb2" />
 		<e k="sf_pda_filter_owned" v="Filtro: Solo di Proprietà" eh="258cb971" />
-    <e k="sf_pda_col_k" v="K%" eh="43e4d0bf" />
-    <e k="sf_pda_col_ph" v="pH" eh="397dff20" />
-    <e k="sf_pda_col_om" v="OM" eh="bfbebc07" />
+    <e k="sf_pda_col_k" v="[EN] K%" eh="43e4d0bf" />
+    <e k="sf_pda_col_ph" v="[EN] pH" eh="397dff20" />
+    <e k="sf_pda_col_om" v="[EN] OM" eh="bfbebc07" />
     <e k="sf_pda_col_status" v="Stato" eh="ec53a8c4" />
     <e k="sf_pda_no_fields" v="Nessun dato registrato sui campi." eh="72265670" />
     <e k="sf_pda_status_good" v="Buono" eh="0c6ad70b" />
@@ -468,7 +468,7 @@
 		<e k="sf_treat_action_weed" v="Applica ERBICIDA immediatamente." eh="625551c5" />
 		<e k="sf_treat_action_pest" v="Applica INSETTICIDA immediatamente." eh="f4db9a03" />
 		<e k="sf_treat_action_disease" v="Applica FUNGICIDA immediatamente." eh="9228323a" />
-    <e k="sf_detail_rotation_ok" v="OK" eh="e0aa021e" />
+    <e k="sf_detail_rotation_ok" v="[EN] OK" eh="e0aa021e" />
     <e k="sf_detail_rotation_bonus" v="Bonus Leguminose (+N)" eh="8ab86f6a" />
     <e k="sf_detail_rotation_fatigue" v="Stanchezza (deplezione x1.15)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="Nessun dato disponibile." eh="c6d95d5e" />

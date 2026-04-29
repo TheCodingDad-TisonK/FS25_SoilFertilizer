@@ -28,7 +28,7 @@
     <e k="sf_difficulty_long" v="Ustaw poziom trudności: Prosty, Realistyczny, Hardcore" eh="cfb758a4" />
     <e k="sf_diff_1" v="Prosty" eh="1fbb1e39" />
     <e k="sf_diff_2" v="Realistyczny" eh="408c999f" />
-    <e k="sf_diff_3" v="Hardcore" eh="1c800aa9" />
+    <e k="sf_diff_3" v="[EN] Hardcore" eh="1c800aa9" />
 	<e k="sf_ui_soilReport_syncing" v="Synchronizowanie danych gleby..." eh="03f01c4d" />
 	<e k="sf_ui_soilReport_syncTimeout" v=" Nie można załadować właściciela pola. Proszę zamknąć i ponownie otworzyć raport." eh="9f699982" />
     <e k="sf_fertilizer_cost_short" v="Koszty Nawozu" eh="6870d88b" />
@@ -50,7 +50,7 @@
     <e k="sf_hud_color_1" v="Zielony" eh="d382816a" />
     <e k="sf_hud_color_2" v="Niebieski" eh="9594eec9" />
     <e k="sf_hud_color_3" v="Bursztynowy" eh="88068e33" />
-    <e k="sf_hud_color_4" v="Mono" eh="5d9b47bd" />
+    <e k="sf_hud_color_4" v="[EN] Mono" eh="5d9b47bd" />
     <e k="sf_diff_short" v="Trudność" eh="7b29ca96" />
     <e k="sf_diff_long" v="Poziom trudności zarządzania glebą" eh="d6f4560c" />
     <e k="sf_auto_rate_short" v="Automatyczna kontrola dawki" eh="6f99137d" />
@@ -60,7 +60,7 @@
     <e k="sf_hud_theme_1" v="Zielony" eh="d382816a" />
     <e k="sf_hud_theme_2" v="Niebieski" eh="9594eec9" />
     <e k="sf_hud_theme_3" v="Bursztynowy" eh="88068e33" />
-    <e k="sf_hud_theme_4" v="Mono" eh="5d9b47bd" />
+    <e k="sf_hud_theme_4" v="[EN] Mono" eh="5d9b47bd" />
     <e k="sf_hud_font_size_short" v="Rozmiar czcionki HUD" eh="fd6ca64a" />
     <e k="sf_hud_font_size_long" v="Dostosuj rozmiar tekstu dla lepszej czytelności" eh="c338854f" />
     <e k="sf_hud_font_1" v="Mały" eh="2660064e" />
@@ -117,7 +117,7 @@
     <e k="sf_report_prev" v="Poprz" eh="14230d11" />
     <e k="sf_report_next" v="Nast" eh="10ac3d04" />
     <e k="sf_report_yes" v="TAK" eh="7469a286" />
-    <e k="sf_report_ok" v="OK" eh="e0aa021e" />
+    <e k="sf_report_ok" v="[EN] OK" eh="e0aa021e" />
     <e k="sf_report_none" v="Brak" eh="6adf97f8" />
     <e k="sf_report_rec_n_poor" v="Potrzebny azot" eh="5dca0711" />
     <e k="sf_report_rec_n_fair" v="Dostateczny azot" eh="35ad072d" />
@@ -172,11 +172,11 @@
     <e k="sf_bigBag_anhydrous_function" v="Nawóz azotowy (ciekły)" eh="27de5f41" />
     <e k="sf_bigBag_urea_name" v="Big Bag Mocznik 46-0-0" eh="8e8cbaae" />
     <e k="sf_bigBag_urea_function" v="Nawóz azotowy (suchy)" eh="63efea20" />
-    <e k="sf_bigBag_ams_name" v="Big Bag AMS 21-0-0-24S" eh="7f71ee68" />
+    <e k="sf_bigBag_ams_name" v="[EN] Big Bag AMS 21-0-0-24S" eh="7f71ee68" />
     <e k="sf_bigBag_ams_function" v="Nawóz azotowy (suchy)" eh="63efea20" />
-    <e k="sf_bigBag_map_name" v="Big Bag MAP 11-52-0" eh="8a5a059b" />
+    <e k="sf_bigBag_map_name" v="[EN] Big Bag MAP 11-52-0" eh="8a5a059b" />
     <e k="sf_bigBag_map_function" v="Nawóz fosforowy (suchy)" eh="0cc85c60" />
-    <e k="sf_bigBag_dap_name" v="Big Bag DAP 18-46-0" eh="fb4e9987" />
+    <e k="sf_bigBag_dap_name" v="[EN] Big Bag DAP 18-46-0" eh="fb4e9987" />
     <e k="sf_bigBag_dap_function" v="Nawóz fosforowy (suchy)" eh="0cc85c60" />
     <e k="sf_bigBag_potash_name" v="Big Bag Sól potasowa 0-0-60" eh="eb771556" />
     <e k="sf_bigBag_potash_function" v="Nawóz potasowy (suchy)" eh="18015099" />
@@ -339,7 +339,7 @@
 	<e k="sf_map_layer_n" v="Azot" eh="1e9ef3ba" />
 	<e k="sf_map_layer_p" v="Fosfor" eh="eb4f2688" />
 	<e k="sf_map_layer_k" v="Potas" eh="3a4edc67" />
-	<e k="sf_map_layer_ph" v="pH" eh="397dff20" />
+	<e k="sf_map_layer_ph" v="[EN] pH" eh="397dff20" />
 	<e k="sf_map_layer_om" v="Materia organiczna" eh="6305f4bb" />
 	<e k="sf_map_layer_urgency" v="Piorytet pola" eh="419ea5af" />
 	<e k="sf_map_layer_weed" v="Presja chwastów" eh="53f8b936" />
@@ -406,7 +406,7 @@
     <e k="sf_map_btn_cycle_layer" v="Zmień warstwę" eh="875dbf22" />
     <e k="sf_map_btn_treatment" v="Plan działania" eh="4ba012e2" />
     <e k="sf_map_btn_disable" v="Wyłącz nakładkę" eh="8e75dec5" />
-    <e k="sf_treat_action_ok" v="OK" eh="e0aa021e" />
+    <e k="sf_treat_action_ok" v="[EN] OK" eh="e0aa021e" />
     <e k="sf_help_title" v="Szybki przegląd gleby" eh="8986bb6d" />
     <e k="sf_help_nutrients_header" v="Składniki odżywcze" eh="9aeb39bf" />
     <e k="sf_help_n" v="N  (Azot)     - Wykorzystywany szybko. Zastosuj UAN, Moczenik lub Obornik." eh="f2d0c792" />
@@ -426,14 +426,14 @@
     <!-- Fields Tab -->
     <e k="sf_pda_fields_section_title" v="Wszystkie Pola" eh="48729e0b" />
     <e k="sf_pda_col_field" v="Pole" eh="6f16a5f8" />
-    <e k="sf_pda_col_n" v="N%" eh="30740562" />
-    <e k="sf_pda_col_p" v="P%" eh="0a5e03bc" />
+    <e k="sf_pda_col_n" v="[EN] N%" eh="30740562" />
+    <e k="sf_pda_col_p" v="[EN] P%" eh="0a5e03bc" />
 	<e k="sf_pda_filter_all" v="Filtr: Wszystkie Pola" eh="a46a8cb2" />
 	<e k="sf_pda_filter_owned" v="Filtr: Własne Pola" eh="258cb971" />
-    <e k="sf_pda_col_k" v="K%" eh="43e4d0bf" />
-    <e k="sf_pda_col_ph" v="pH" eh="397dff20" />
-    <e k="sf_pda_col_om" v="OM" eh="bfbebc07" />
-    <e k="sf_pda_col_status" v="Status" eh="ec53a8c4" />
+    <e k="sf_pda_col_k" v="[EN] K%" eh="43e4d0bf" />
+    <e k="sf_pda_col_ph" v="[EN] pH" eh="397dff20" />
+    <e k="sf_pda_col_om" v="[EN] OM" eh="bfbebc07" />
+    <e k="sf_pda_col_status" v="[EN] Status" eh="ec53a8c4" />
     <e k="sf_pda_no_fields" v="Brak zebranych danych z pola." eh="72265670" />
     <e k="sf_pda_status_good" v="Dobry" eh="0c6ad70b" />
     <e k="sf_pda_status_fair" v="Umiarkowany" eh="f7f20cf0" />
@@ -491,7 +491,7 @@
 	<e k="sf_treat_action_weed" v="Zastosuj Herbicyd natychmiast." eh="625551c5" />
 	<e k="sf_treat_action_pest" v="Zastosuj Insektycyd natychmiast." eh="f4db9a03" />
 	<e k="sf_treat_action_disease" v="Zastosuj Fungicyd natychmiast." eh="9228323a" />
-    <e k="sf_detail_rotation_ok" v="OK" eh="e0aa021e" />
+    <e k="sf_detail_rotation_ok" v="[EN] OK" eh="e0aa021e" />
     <e k="sf_detail_rotation_bonus" v="Bonus roślin strączkowych (+N)" eh="8ab86f6a" />
     <e k="sf_detail_rotation_fatigue" v="Degreadacja gleby przez monokulture (x1.15 wyjałowienie gleby)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="Brak dostępnych danych." eh="c6d95d5e" />

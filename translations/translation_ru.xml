@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <l10n>
     <elements>
     <e k="sf_section" v="Почва и удобрения" eh="f31197fb" />
@@ -102,7 +102,7 @@
     <e k="sf_report_prev" v="Назад" eh="14230d11" />
     <e k="sf_report_next" v="Далее" eh="10ac3d04" />
     <e k="sf_report_yes" v="ДА" eh="7469a286" />
-    <e k="sf_report_ok" v="OK" eh="e0aa021e" />
+    <e k="sf_report_ok" v="[EN] OK" eh="e0aa021e" />
     <e k="sf_report_none" v="Нет" eh="6adf97f8" />
     <e k="sf_report_rec_n_poor" v="Требуется азот" eh="5dca0711" />
     <e k="sf_report_rec_n_fair" v="Низкое содержание азота" eh="35ad072d" />
@@ -173,7 +173,7 @@
 		<e k="sf_bigBag_gypsum_name" v="МКР Гипс" eh="40fc8169" />
 		<e k="sf_bigBag_gypsum_function" v="Почвоулучшитель (сухой)" eh="51503c54" />
     <e k="sf_bigBag_compost_name" v="МКР Компост" eh="14322c5d" />
-    <e k="sf_bigBag_compost_function" v="Organic Soil Amendment (dry)" eh="9dd2256a" />
+    <e k="sf_bigBag_compost_function" v="[EN] Organic Soil Amendment (dry)" eh="9dd2256a" />
     <e k="sf_bigBag_biosolids_name" v="МКР Биоотходы" eh="61a60ff3" />
     <e k="sf_bigBag_biosolids_function" v="Органическая почвенная добавка (сухая)" eh="374c7b1e" />
     <e k="sf_bigBag_chicken_manure_name" v="МКР Куриный помет" eh="cb60fddc" />
@@ -324,7 +324,7 @@
 		<e k="sf_map_layer_n" v="Азот" eh="1e9ef3ba" />
 		<e k="sf_map_layer_p" v="Фосфор" eh="eb4f2688" />
 		<e k="sf_map_layer_k" v="Калий" eh="3a4edc67" />
-		<e k="sf_map_layer_ph" v="pH" eh="397dff20" />
+		<e k="sf_map_layer_ph" v="[EN] pH" eh="397dff20" />
 		<e k="sf_map_layer_om" v="Органические вещества" eh="6305f4bb" />
 		<e k="sf_map_layer_urgency" v="Степень срочности" eh="419ea5af" />
 		<e k="sf_map_layer_weed" v="Давление сорняков" eh="53f8b936" />
@@ -391,13 +391,13 @@
     <!-- Fields Tab -->
     <e k="sf_pda_fields_section_title" v="Все поля" eh="48729e0b" />
     <e k="sf_pda_col_field" v="Поле" eh="6f16a5f8" />
-    <e k="sf_pda_col_n" v="N%" eh="30740562" />
-    <e k="sf_pda_col_p" v="P%" eh="0a5e03bc" />
+    <e k="sf_pda_col_n" v="[EN] N%" eh="30740562" />
+    <e k="sf_pda_col_p" v="[EN] P%" eh="0a5e03bc" />
 		<e k="sf_pda_filter_all" v="Фильтр: Все поля" eh="a46a8cb2" />
 		<e k="sf_pda_filter_owned" v="Фильтр: Только мои" eh="258cb971" />
-    <e k="sf_pda_col_k" v="K%" eh="43e4d0bf" />
-    <e k="sf_pda_col_ph" v="pH" eh="397dff20" />
-    <e k="sf_pda_col_om" v="OM" eh="bfbebc07" />
+    <e k="sf_pda_col_k" v="[EN] K%" eh="43e4d0bf" />
+    <e k="sf_pda_col_ph" v="[EN] pH" eh="397dff20" />
+    <e k="sf_pda_col_om" v="[EN] OM" eh="bfbebc07" />
     <e k="sf_pda_col_status" v="Статус" eh="ec53a8c4" />
     <e k="sf_pda_no_fields" v="Пока данные с мест не зафиксированы." eh="72265670" />
     <e k="sf_pda_status_good" v="Хорошо" eh="0c6ad70b" />
@@ -454,7 +454,7 @@
 		<e k="sf_treat_action_weed" v="Немедленно внесите ГЕРБИЦИД." eh="625551c5" />
 		<e k="sf_treat_action_pest" v="Немедленно внесите ИНСКЕТИЦИД." eh="f4db9a03" />
 		<e k="sf_treat_action_disease" v="Немедленно внесите ФУНГИЦИД." eh="9228323a" />
-    <e k="sf_detail_rotation_ok" v="OK" eh="e0aa021e" />
+    <e k="sf_detail_rotation_ok" v="[EN] OK" eh="e0aa021e" />
     <e k="sf_detail_rotation_bonus" v="Бонус за бобовые (+N)" eh="8ab86f6a" />
     <e k="sf_detail_rotation_fatigue" v="Утомление (снижение на 1,15)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="Данные отсутствуют." eh="c6d95d5e" />
@@ -463,7 +463,7 @@
     <e k="sf_map_btn_cycle_layer" v="Сменить слой" eh="875dbf22" />
     <e k="sf_map_btn_treatment" v="План обработки" eh="4ba012e2" />
     <e k="sf_map_btn_disable" v="Отключить слой" eh="8e75dec5" />
-    <e k="sf_treat_action_ok" v="OK" eh="e0aa021e" />
+    <e k="sf_treat_action_ok" v="[EN] OK" eh="e0aa021e" />
     <e k="sf_help_title" v="Краткий справочник по почвам" eh="8986bb6d" />
     <e k="sf_help_nutrients_header" v="ПИТАТЕЛЬНЫЕ ВЕЩЕСТВА" eh="9aeb39bf" />
     <e k="sf_help_n" v="Азот (N) быстро истощается. Используйте мочевину, мочевину или навоз." eh="f2d0c792" />

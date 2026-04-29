@@ -1,10 +1,10 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <l10n>
     <elements>
     <e k="sf_hud_color_1" v="Grøn" eh="d382816a" />
     <e k="sf_hud_color_2" v="Blå" eh="9594eec9" />
     <e k="sf_hud_color_3" v="Rav" eh="88068e33" />
-    <e k="sf_hud_color_4" v="Mono" eh="5d9b47bd" />
+    <e k="sf_hud_color_4" v="[EN] Mono" eh="5d9b47bd" />
     <e k="sf_diff_short" v="Sværhedsgrad" eh="7b29ca96" />
     <e k="sf_diff_long" v="Sværhedsgrad for jordstyring" eh="d6f4560c" />
 		<e k="sf_rr_short" v="[EN] Replenishment Rate" eh="b363b336" />
@@ -14,7 +14,7 @@
     <e k="sf_hud_theme_1" v="Grøn" eh="d382816a" />
     <e k="sf_hud_theme_2" v="Blå" eh="9594eec9" />
     <e k="sf_hud_theme_3" v="Rav" eh="88068e33" />
-    <e k="sf_hud_theme_4" v="Mono" eh="5d9b47bd" />
+    <e k="sf_hud_theme_4" v="[EN] Mono" eh="5d9b47bd" />
     <e k="sf_hud_font_size_short" v="HUD-skriftstørrelse" eh="fd6ca64a" />
     <e k="sf_hud_font_size_long" v="Juster tekststørrelsen for bedre læsbarhed" eh="c338854f" />
     <e k="sf_hud_font_1" v="Lille" eh="2660064e" />
@@ -26,7 +26,7 @@
     <e k="sf_hud_trans_2" v="Lys" eh="9914a0ce" />
     <e k="sf_hud_trans_3" v="Mellem" eh="87f8a6ab" />
     <e k="sf_hud_trans_4" v="Mørk" eh="a18366b2" />
-    <e k="sf_hud_trans_5" v="Solid" eh="e41480b6" />
+    <e k="sf_hud_trans_5" v="[EN] Solid" eh="e41480b6" />
     <e k="sf_hud_title" v="JORDMONITOR" eh="f8cda642" />
     <e k="sf_hud_field" v="Mark %d" eh="08988997" />
     <e k="sf_hud_noField" v="Gå ud på en mark" eh="62c55e9e" />
@@ -37,7 +37,7 @@
     <e k="sf_hud_protected" v="(beskyttet)" eh="8273211e" />
     <e k="sf_hud_yield" v="Udbytte" eh="97345487" />
     <e k="sf_hud_estYield" v="Est. udbytte" eh="32a4135e" />
-    <e k="sf_hud_optimal" v="Optimal" eh="cb61fef1" />
+    <e k="sf_hud_optimal" v="[EN] Optimal" eh="cb61fef1" />
     <e k="sf_hud_hint_edit" v="Træk: flyt   Hjørne: ændr størrelse   HMK: færdig" eh="987ebf45" />
     <e k="sf_hud_hint_normal" v="HMK: flyt/ændr størrelse" eh="afc8f13b" />
     <e k="sf_use_imperial_short" v="Imperiale enheder" eh="ff2701ad" />
@@ -69,7 +69,7 @@
     <e k="sf_report_prev" v="Forrige" eh="14230d11" />
     <e k="sf_report_next" v="Næste" eh="10ac3d04" />
     <e k="sf_report_yes" v="JA" eh="7469a286" />
-    <e k="sf_report_ok" v="OK" eh="e0aa021e" />
+    <e k="sf_report_ok" v="[EN] OK" eh="e0aa021e" />
     <e k="sf_report_none" v="Ingen" eh="6adf97f8" />
     <e k="sf_report_rec_n_poor" v="Mangler kvælstof" eh="5dca0711" />
     <e k="sf_report_rec_n_fair" v="Lavt kvælstofniveau" eh="35ad072d" />
@@ -92,7 +92,7 @@
     <e k="sf_uan28_title" v="UAN 28 Gødning (N)" eh="9d902cd7" />
     <e k="sf_anhydrous_title" v="Vandfri ammoniak (N)" eh="3fc85c02" />
     <e k="sf_starter_title" v="Startgødning 10-34-0 (P)" eh="8c1a1ddc" />
-    <e k="sf_urea_title" v="Urea 46-0-0 (N)" eh="659b3097" />
+    <e k="sf_urea_title" v="[EN] Urea 46-0-0 (N)" eh="659b3097" />
     <e k="sf_ams_title" v="Ammoniumsulfat 21-0-0 (N)" eh="033d1845" />
     <e k="sf_map_title" v="MAP-gødning 11-52-0 (P)" eh="31aa2534" />
     <e k="sf_dap_title" v="DAP-gødning 18-46-0 (P)" eh="5030a80a" />
@@ -105,19 +105,19 @@
     <e k="sf_insecticide_title" v="Insekticid" eh="5650eeef" />
     <e k="sf_fungicide_title" v="Fungicid" eh="e8512698" />
     <e k="sf_report_page_info" v="Marker %d-%d af %d  |  Side %d af %d" eh="8db851d1" />
-    <e k="sf_bigBag_uan32_name" v="IBC UAN 32-0-0" eh="574747ce" />
+    <e k="sf_bigBag_uan32_name" v="[EN] IBC UAN 32-0-0" eh="574747ce" />
     <e k="sf_bigBag_uan32_function" v="Kvælstofgødning (flydende)" eh="27de5f41" />
-    <e k="sf_bigBag_uan28_name" v="IBC UAN 28-0-0" eh="7eeec815" />
+    <e k="sf_bigBag_uan28_name" v="[EN] IBC UAN 28-0-0" eh="7eeec815" />
     <e k="sf_bigBag_uan28_function" v="Kvælstofgødning (flydende)" eh="27de5f41" />
     <e k="sf_bigBag_anhydrous_name" v="IBC Vandfri Ammoniak 82-0-0" eh="fb09e6ce" />
     <e k="sf_bigBag_anhydrous_function" v="Kvælstofgødning (flydende)" eh="27de5f41" />
-    <e k="sf_bigBag_urea_name" v="Big Bag Urea 46-0-0" eh="8e8cbaae" />
+    <e k="sf_bigBag_urea_name" v="[EN] Big Bag Urea 46-0-0" eh="8e8cbaae" />
     <e k="sf_bigBag_urea_function" v="Kvælstofgødning (tør)" eh="63efea20" />
-    <e k="sf_bigBag_ams_name" v="Big Bag AMS 21-0-0-24S" eh="7f71ee68" />
+    <e k="sf_bigBag_ams_name" v="[EN] Big Bag AMS 21-0-0-24S" eh="7f71ee68" />
     <e k="sf_bigBag_ams_function" v="Kvælstofgødning (tør)" eh="63efea20" />
-    <e k="sf_bigBag_map_name" v="Big Bag MAP 11-52-0" eh="8a5a059b" />
+    <e k="sf_bigBag_map_name" v="[EN] Big Bag MAP 11-52-0" eh="8a5a059b" />
     <e k="sf_bigBag_map_function" v="Fosfatgødning (tør)" eh="0cc85c60" />
-    <e k="sf_bigBag_dap_name" v="Big Bag DAP 18-46-0" eh="fb4e9987" />
+    <e k="sf_bigBag_dap_name" v="[EN] Big Bag DAP 18-46-0" eh="fb4e9987" />
     <e k="sf_bigBag_dap_function" v="Fosfatgødning (tør)" eh="0cc85c60" />
     <e k="sf_bigBag_potash_name" v="Big Bag Kaliumklorid 0-0-60" eh="eb771556" />
     <e k="sf_bigBag_potash_function" v="Kaliumgødning (tør)" eh="18015099" />
@@ -176,7 +176,7 @@
     <e k="sf_difficulty_long" v="Angiv sværhedsgrad: Simpel, Realistisk, Hardcore" eh="cfb758a4" />
     <e k="sf_diff_1" v="Simpel" eh="1fbb1e39" />
     <e k="sf_diff_2" v="Realistisk" eh="408c999f" />
-    <e k="sf_diff_3" v="Hardcore" eh="1c800aa9" />
+    <e k="sf_diff_3" v="[EN] Hardcore" eh="1c800aa9" />
     <e k="sf_ui_soilReport_syncing" v="Synkroniserer jorddata..." eh="03f01c4d" />
     <e k="sf_ui_soilReport_syncTimeout" v="Kunne ikke indlæse markejerskab. Luk og genåbn rapporten." eh="9f699982" />
     <e k="sf_fertilizer_cost_short" v="Gødningsomkostninger" eh="6870d88b" />
@@ -213,7 +213,7 @@
     <e k="helpLine_sf_cat_fertilizers" v="Gødningstyper" eh="754d59bd" />
     <e k="helpLine_sf_cat_hud" v="HUD &amp; Jordrapport" eh="9b9888b9" />
     <e k="helpLine_sf_cat_settings" v="Indstillinger" eh="f4f70727" />
-    <e k="helpLine_sf_cat_multiplayer" v="Multiplayer" eh="901a7320" />
+    <e k="helpLine_sf_cat_multiplayer" v="[EN] Multiplayer" eh="901a7320" />
     <e k="helpLine_sf_ov_p1_title" v="Hvad gør moddet?" eh="46cbb25b" />
     <e k="helpLine_sf_ov_p1_intro_title" v="Markbaseret jordregistrering" eh="8fe3248d" />
     <e k="helpLine_sf_ov_p1_intro_text" v="Hver mark registrerer uafhængigt fem egenskaber: Kvælstof (N), Fosfor (P), Kalium (K), Organisk materiale (OM) og pH. Værdierne gemmes med din gemte spil og bevares på tværs af sessioner." eh="c30216e6" />
@@ -324,7 +324,7 @@
     <e k="sf_map_layer_n" v="Kvælstof" eh="1e9ef3ba" />
     <e k="sf_map_layer_p" v="Fosfor" eh="eb4f2688" />
     <e k="sf_map_layer_k" v="Kalium" eh="3a4edc67" />
-    <e k="sf_map_layer_ph" v="pH" eh="397dff20" />
+    <e k="sf_map_layer_ph" v="[EN] pH" eh="397dff20" />
     <e k="sf_map_layer_om" v="Organisk materiale" eh="6305f4bb" />
     <e k="sf_map_layer_urgency" v="Markhastegrad" eh="419ea5af" />
     <e k="sf_map_layer_weed" v="Ukrudtstryk" eh="53f8b936" />
@@ -389,7 +389,7 @@
     <e k="sf_map_btn_cycle_layer" v="Skift lag" eh="875dbf22" />
     <e k="sf_map_btn_treatment" v="Behandlingsplan" eh="4ba012e2" />
     <e k="sf_map_btn_disable" v="Deaktiver lag" eh="8e75dec5" />
-    <e k="sf_treat_action_ok" v="OK" eh="e0aa021e" />
+    <e k="sf_treat_action_ok" v="[EN] OK" eh="e0aa021e" />
     <e k="sf_help_title" v="Jordens hurtige reference" eh="8986bb6d" />
     <e k="sf_help_nutrients_header" v="NÆRINGSSTOFFER" eh="9aeb39bf" />
     <e k="sf_help_n" v="N  (Kvælstof)     - Udtømmes hurtigt. Anvend UAN, Urea eller Gylle." eh="f2d0c792" />
@@ -408,14 +408,14 @@
     <e k="sf_help_poor" v="Dårlig - Øjeblikkelig behandling påkrævet." eh="b287d206" />
     <e k="sf_pda_fields_section_title" v="Alle marker" eh="48729e0b" />
     <e k="sf_pda_col_field" v="Mark" eh="6f16a5f8" />
-    <e k="sf_pda_col_n" v="N%" eh="30740562" />
-    <e k="sf_pda_col_p" v="P%" eh="0a5e03bc" />
+    <e k="sf_pda_col_n" v="[EN] N%" eh="30740562" />
+    <e k="sf_pda_col_p" v="[EN] P%" eh="0a5e03bc" />
     <e k="sf_pda_filter_all" v="Filter: Alle marker" eh="a46a8cb2" />
     <e k="sf_pda_filter_owned" v="Filter: Kun ejede" eh="258cb971" />
-    <e k="sf_pda_col_k" v="K%" eh="43e4d0bf" />
-    <e k="sf_pda_col_ph" v="pH" eh="397dff20" />
-    <e k="sf_pda_col_om" v="OM" eh="bfbebc07" />
-    <e k="sf_pda_col_status" v="Status" eh="ec53a8c4" />
+    <e k="sf_pda_col_k" v="[EN] K%" eh="43e4d0bf" />
+    <e k="sf_pda_col_ph" v="[EN] pH" eh="397dff20" />
+    <e k="sf_pda_col_om" v="[EN] OM" eh="bfbebc07" />
+    <e k="sf_pda_col_status" v="[EN] Status" eh="ec53a8c4" />
     <e k="sf_pda_no_fields" v="Ingen markdata registreret endnu." eh="72265670" />
     <e k="sf_pda_status_good" v="God" eh="0c6ad70b" />
     <e k="sf_pda_status_fair" v="Rimelig" eh="f7f20cf0" />
@@ -469,7 +469,7 @@
     <e k="sf_treat_action_weed" v="Anvend HERBICID øjeblikkeligt." eh="625551c5" />
     <e k="sf_treat_action_pest" v="Anvend INSEKTICID øjeblikkeligt." eh="f4db9a03" />
     <e k="sf_treat_action_disease" v="Anvend FUNGICID øjeblikkeligt." eh="9228323a" />
-    <e k="sf_detail_rotation_ok" v="OK" eh="e0aa021e" />
+    <e k="sf_detail_rotation_ok" v="[EN] OK" eh="e0aa021e" />
     <e k="sf_detail_rotation_bonus" v="Bælgplantebonus (+N)" eh="8ab86f6a" />
     <e k="sf_detail_rotation_fatigue" v="Træthed (x1,15 udtømning)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="Ingen data tilgængelig." eh="c6d95d5e" />

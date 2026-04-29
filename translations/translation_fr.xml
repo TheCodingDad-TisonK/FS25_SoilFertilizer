@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <l10n>
     <elements>
     <e k="sf_section" v="Sol &amp; Engrais" eh="f31197fb" />
@@ -26,14 +26,14 @@
     <e k="sf_nutrients_long" v="Activer/désactiver l'épuisement et le réapprovisionnement réalistes des nutriments" eh="dbe9c8ff" />
     <e k="sf_difficulty_short" v="Difficulté" eh="7b29ca96" />
     <e k="sf_difficulty_long" v="Définir le niveau de difficulté : Simple, Réaliste, Hardcore" eh="cfb758a4" />
-    <e k="sf_diff_1" v="Simple" eh="1fbb1e39" />
+    <e k="sf_diff_1" v="[EN] Simple" eh="1fbb1e39" />
     <e k="sf_diff_2" v="Réaliste" eh="408c999f" />
-    <e k="sf_diff_3" v="Hardcore" eh="1c800aa9" />
+    <e k="sf_diff_3" v="[EN] Hardcore" eh="1c800aa9" />
 		<e k="sf_ui_soilReport_syncing" v="Synchronisation des données du sol..." eh="03f01c4d" />
 		<e k="sf_ui_soilReport_syncTimeout" v="Impossible de charger la propriété des champs. Veuillez fermer et rouvrir le rapport." eh="9f699982" />
     <e k="sf_fertilizer_cost_short" v="Coûts Engrais" eh="6870d88b" />
     <e k="sf_fertilizer_cost_long" v="Activer/désactiver les coûts d'achat d'engrais réalistes" eh="12b03fbb" />
-    <e k="sf_notifications_short" v="Notifications" eh="a274f4d4" />
+    <e k="sf_notifications_short" v="[EN] Notifications" eh="a274f4d4" />
     <e k="sf_notifications_long" v="Activer/désactiver les notifications de sol et d'engrais" eh="9a872f8f" />
     <e k="sf_show_hud_short" v="Afficher HUD" eh="c94fd4d7" />
     <e k="sf_show_hud_long" v="Afficher/masquer l'HUD d'info sol (F8 pour basculer temporairement)" eh="4e2e11b6" />
@@ -50,7 +50,7 @@
     <e k="sf_hud_color_1" v="Vert" eh="d382816a" />
     <e k="sf_hud_color_2" v="Bleu" eh="9594eec9" />
     <e k="sf_hud_color_3" v="Ambre" eh="88068e33" />
-    <e k="sf_hud_color_4" v="Mono" eh="5d9b47bd" />
+    <e k="sf_hud_color_4" v="[EN] Mono" eh="5d9b47bd" />
     <e k="sf_diff_short" v="Difficulté" eh="7b29ca96" />
     <e k="sf_diff_long" v="Niveau de difficulté de gestion du sol" eh="d6f4560c" />
 		<e k="sf_rr_short" v="[EN] Replenishment Rate" eh="b363b336" />
@@ -60,7 +60,7 @@
     <e k="sf_hud_theme_1" v="Vert" eh="d382816a" />
     <e k="sf_hud_theme_2" v="Bleu" eh="9594eec9" />
     <e k="sf_hud_theme_3" v="Ambre" eh="88068e33" />
-    <e k="sf_hud_theme_4" v="Mono" eh="5d9b47bd" />
+    <e k="sf_hud_theme_4" v="[EN] Mono" eh="5d9b47bd" />
     <e k="sf_hud_font_size_short" v="Taille police HUD" eh="fd6ca64a" />
     <e k="sf_hud_font_size_long" v="Ajuster la taille du texte pour une meilleure lisibilité" eh="c338854f" />
     <e k="sf_hud_font_1" v="Petit" eh="2660064e" />
@@ -83,7 +83,7 @@
     <e k="sf_hud_protected" v="(protégé)" eh="8273211e" />
     <e k="sf_hud_yield" v="Rendement" eh="97345487" />
     <e k="sf_hud_estYield" v="Rendement est." eh="32a4135e" />
-    <e k="sf_hud_optimal" v="Optimal" eh="cb61fef1" />
+    <e k="sf_hud_optimal" v="[EN] Optimal" eh="cb61fef1" />
     <e k="sf_hud_hint_edit" v="Glisser: déplacer   Coin: redimensionner   RMB: terminé" eh="987ebf45" />
     <e k="sf_hud_hint_normal" v="RMB: déplacer/redimensionner" eh="afc8f13b" />
     <e k="sf_use_imperial_short" v="Unités impériales" eh="ff2701ad" />
@@ -115,7 +115,7 @@
     <e k="sf_report_prev" v="Préc" eh="14230d11" />
     <e k="sf_report_next" v="Suiv" eh="10ac3d04" />
     <e k="sf_report_yes" v="OUI" eh="7469a286" />
-    <e k="sf_report_ok" v="OK" eh="e0aa021e" />
+    <e k="sf_report_ok" v="[EN] OK" eh="e0aa021e" />
     <e k="sf_report_none" v="Aucun" eh="6adf97f8" />
     <e k="sf_report_rec_n_poor" v="Azote nécessaire" eh="5dca0711" />
     <e k="sf_report_rec_n_fair" v="Azote faible" eh="35ad072d" />
@@ -148,7 +148,7 @@
 		<e k="sf_liquid_map_title" v="MAP liquide (P)" eh="3ce7c8c9" />
 		<e k="sf_liquid_dap_title" v="DAP liquide (P)" eh="86bd893e" />
 		<e k="sf_liquid_potash_title" v="Potasse liquide (K)" eh="72ac9fd3" />
-		<e k="sf_insecticide_title" v="Insecticide" eh="5650eeef" />
+		<e k="sf_insecticide_title" v="[EN] Insecticide" eh="5650eeef" />
 		<e k="sf_fungicide_title" v="Fongicide" eh="e8512698" />
     <e k="sf_report_page_info" v="Champs %d-%d sur %d  |  Page %d sur %d" eh="8db851d1" />
     <e k="sf_bigBag_uan32_name" v="Big Bag UAN 32-0-0" eh="7bdc4d9d" />
@@ -159,11 +159,11 @@
     <e k="sf_bigBag_anhydrous_function" v="Engrais azoté (liquide)" eh="27de5f41" />
     <e k="sf_bigBag_urea_name" v="Big Bag Urée 46-0-0" eh="8e8cbaae" />
     <e k="sf_bigBag_urea_function" v="Engrais azoté (sec)" eh="63efea20" />
-    <e k="sf_bigBag_ams_name" v="Big Bag AMS 21-0-0-24S" eh="7f71ee68" />
+    <e k="sf_bigBag_ams_name" v="[EN] Big Bag AMS 21-0-0-24S" eh="7f71ee68" />
     <e k="sf_bigBag_ams_function" v="Engrais azoté (sec)" eh="63efea20" />
-    <e k="sf_bigBag_map_name" v="Big Bag MAP 11-52-0" eh="8a5a059b" />
+    <e k="sf_bigBag_map_name" v="[EN] Big Bag MAP 11-52-0" eh="8a5a059b" />
     <e k="sf_bigBag_map_function" v="Engrais phosphoré (sec)" eh="0cc85c60" />
-    <e k="sf_bigBag_dap_name" v="Big Bag DAP 18-46-0" eh="fb4e9987" />
+    <e k="sf_bigBag_dap_name" v="[EN] Big Bag DAP 18-46-0" eh="fb4e9987" />
     <e k="sf_bigBag_dap_function" v="Engrais phosphoré (sec)" eh="0cc85c60" />
     <e k="sf_bigBag_potash_name" v="Big Bag Potasse 0-0-60" eh="eb771556" />
     <e k="sf_bigBag_potash_function" v="Engrais potassique (sec)" eh="18015099" />
@@ -185,9 +185,9 @@
     <e k="sf_bigBag_starter_function" v="Engrais starter (liquide)" eh="2c36ea57" />
 		<e k="sf_bigBag_gypsum_name" v="Big Bag de gypse" eh="40fc8169" />
 		<e k="sf_bigBag_gypsum_function" v="Amendement du sol (sec)" eh="51503c54" />
-    <e k="sf_bigBag_compost_name" v="Big Bag Compost" eh="14322c5d" />
+    <e k="sf_bigBag_compost_name" v="[EN] Big Bag Compost" eh="14322c5d" />
     <e k="sf_bigBag_compost_function" v="Amendement organique du sol (sec)" eh="9dd2256a" />
-    <e k="sf_bigBag_biosolids_name" v="Big Bag Biosolids" eh="61a60ff3" />
+    <e k="sf_bigBag_biosolids_name" v="[EN] Big Bag Biosolids" eh="61a60ff3" />
     <e k="sf_bigBag_biosolids_function" v="Engrais organique (solide)" eh="374c7b1e" />
     <e k="sf_bigBag_chicken_manure_name" v="Big Bag fumier de poule" eh="cb60fddc" />
     <e k="sf_bigBag_chicken_manure_function" v="Engrais organique (solide)" eh="374c7b1e" />
@@ -197,7 +197,7 @@
     <e k="sf_bigBag_liquidlime_function" v="Agent rehausseur de pH (liquide)" eh="7a118b6d" />
     <e k="sf_report_detail_n_ok" v="Azote: Optimal" eh="13782bd9" />
     <e k="sf_report_detail_p_ok" v="Phosphore: Optimal" eh="dbc90f11" />
-    <e k="sf_report_detail_k_ok" v="Potassium: Optimal" eh="0197b4ba" />
+    <e k="sf_report_detail_k_ok" v="[EN] Potassium: Optimal" eh="0197b4ba" />
     <e k="sf_report_status_monitor" v="Surveiller" eh="d2986ac8" />
     <e k="sf_report_status_adjust" v="Ajuster" eh="51d7a685" />
     <e k="sf_report_status_maintain" v="Maintenir" eh="ade01a5a" />
@@ -323,8 +323,8 @@
 		<e k="sf_map_layer_off" v="Carte du sol : Désactivée" eh="3e654ade" />
 		<e k="sf_map_layer_n" v="Azote" eh="1e9ef3ba" />
 		<e k="sf_map_layer_p" v="Phosphore" eh="eb4f2688" />
-		<e k="sf_map_layer_k" v="Potassium" eh="3a4edc67" />
-		<e k="sf_map_layer_ph" v="pH" eh="397dff20" />
+		<e k="sf_map_layer_k" v="[EN] Potassium" eh="3a4edc67" />
+		<e k="sf_map_layer_ph" v="[EN] pH" eh="397dff20" />
 		<e k="sf_map_layer_om" v="Matière Organique" eh="6305f4bb" />
 		<e k="sf_map_layer_urgency" v="Urgence au champ" eh="419ea5af" />
 		<e k="sf_map_layer_weed" v="Pression des adventices" eh="53f8b936" />
@@ -351,7 +351,7 @@
     <e k="sf_pda_section_avg_nutrients" v="Nutriments moy." eh="f06b2704" />
     <e k="sf_pda_avg_n_label" v="Azote (N)" eh="25cee53b" />
     <e k="sf_pda_avg_p_label" v="Phosphore (P)" eh="75cb5cd6" />
-    <e k="sf_pda_avg_k_label" v="Potassium (K)" eh="39797137" />
+    <e k="sf_pda_avg_k_label" v="[EN] Potassium (K)" eh="39797137" />
     <e k="sf_pda_avg_ph_label" v="Niveau de pH" eh="0c85daad" />
     <e k="sf_pda_avg_om_label" v="Matière organique" eh="6305f4bb" />
     <e k="sf_pda_section_pressure" v="Pression culture" eh="a73974d0" />
@@ -391,7 +391,7 @@
     <e k="sf_map_btn_cycle_layer" v="Changer la couche" eh="875dbf22" />
     <e k="sf_map_btn_treatment" v="Plan de traitement" eh="4ba012e2" />
     <e k="sf_map_btn_disable" v="Désactiver la couche" eh="8e75dec5" />
-    <e k="sf_treat_action_ok" v="OK" eh="e0aa021e" />
+    <e k="sf_treat_action_ok" v="[EN] OK" eh="e0aa021e" />
     <e k="sf_help_title" v="Référence rapide du sol" eh="8986bb6d" />
     <e k="sf_help_nutrients_header" v="NUTRIMENTS" eh="9aeb39bf" />
     <e k="sf_help_n" v="N (Azote) – S’épuise rapidement. Appliquer UAN, Urée ou fumier." eh="f2d0c792" />
@@ -411,12 +411,12 @@
     <!-- Fields Tab -->
     <e k="sf_pda_fields_section_title" v="Tous les champs" eh="48729e0b" />
     <e k="sf_pda_col_field" v="Champ" eh="6f16a5f8" />
-    <e k="sf_pda_col_n" v="N%" eh="30740562" />
-    <e k="sf_pda_col_p" v="P%" eh="0a5e03bc" />
+    <e k="sf_pda_col_n" v="[EN] N%" eh="30740562" />
+    <e k="sf_pda_col_p" v="[EN] P%" eh="0a5e03bc" />
 		<e k="sf_pda_filter_all" v="Filtre : Tous les champs" eh="a46a8cb2" />
 		<e k="sf_pda_filter_owned" v="Filtre : Champs possédés uniquement" eh="258cb971" />
-    <e k="sf_pda_col_k" v="K%" eh="43e4d0bf" />
-    <e k="sf_pda_col_ph" v="pH" eh="397dff20" />
+    <e k="sf_pda_col_k" v="[EN] K%" eh="43e4d0bf" />
+    <e k="sf_pda_col_ph" v="[EN] pH" eh="397dff20" />
     <e k="sf_pda_col_om" v="MO" eh="bfbebc07" />
     <e k="sf_pda_col_status" v="Statut" eh="ec53a8c4" />
     <e k="sf_pda_no_fields" v="Aucune donnée de champ enregistrée." eh="72265670" />
@@ -430,12 +430,12 @@
     <e k="sf_pda_no_treatment" v="Tous les champs sont en bon état." eh="fa985166" />
     <e k="sf_pda_need_n" v="Azote" eh="1e9ef3ba" />
     <e k="sf_pda_need_p" v="Phosphore" eh="eb4f2688" />
-    <e k="sf_pda_need_k" v="Potassium" eh="3a4edc67" />
+    <e k="sf_pda_need_k" v="[EN] Potassium" eh="3a4edc67" />
     <e k="sf_pda_need_ph" v="Ajustement pH" eh="0570e9d2" />
-    <e k="sf_pda_need_weed" v="Herbicide" eh="1029736e" />
-    <e k="sf_pda_need_pest" v="Insecticide" eh="5650eeef" />
+    <e k="sf_pda_need_weed" v="[EN] Herbicide" eh="1029736e" />
+    <e k="sf_pda_need_pest" v="[EN] Insecticide" eh="5650eeef" />
     <e k="sf_pda_need_disease" v="Fongicide" eh="e8512698" />
-    <e k="sf_pda_need_multiple" v="Multiple" eh="a0bf169f" />
+    <e k="sf_pda_need_multiple" v="[EN] Multiple" eh="a0bf169f" />
     <e k="sf_pda_treatment_minor" v="Mineur" eh="6fed0c37" />
     <!-- Field Detail Dialog (SoilFieldDetailDialog.lua) -->
     <e k="sf_detail_title" v="Détail du champ" eh="03b5acd7" />
@@ -447,7 +447,7 @@
     <e k="sf_detail_section_history" v="Historique culture" eh="54c27499" />
     <e k="sf_detail_n_label" v="Azote (N)" eh="25cee53b" />
     <e k="sf_detail_p_label" v="Phosphore (P)" eh="75cb5cd6" />
-    <e k="sf_detail_k_label" v="Potassium (K)" eh="39797137" />
+    <e k="sf_detail_k_label" v="[EN] Potassium (K)" eh="39797137" />
     <e k="sf_detail_ph_label" v="Niveau de pH" eh="0c85daad" />
     <e k="sf_detail_om_label" v="Matière organique" eh="6305f4bb" />
     <e k="sf_detail_weed_label" v="Pression adventices" eh="53f8b936" />
@@ -474,7 +474,7 @@
 		<e k="sf_treat_action_weed" v="Appliquer de l'HERBICIDE immédiatement." eh="625551c5" />
 		<e k="sf_treat_action_pest" v="Appliquer de l'INSECTICIDE immédiatement." eh="f4db9a03" />
 		<e k="sf_treat_action_disease" v="Appliquer du FONGICIDE immédiatement." eh="9228323a" />
-    <e k="sf_detail_rotation_ok" v="OK" eh="e0aa021e" />
+    <e k="sf_detail_rotation_ok" v="[EN] OK" eh="e0aa021e" />
     <e k="sf_detail_rotation_bonus" v="Bonus Légumineuse (+N)" eh="8ab86f6a" />
     <e k="sf_detail_rotation_fatigue" v="Fatigue (épuisement x1.15)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="Aucune donnée disponible." eh="c6d95d5e" />
