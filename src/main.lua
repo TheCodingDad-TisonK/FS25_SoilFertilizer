@@ -519,6 +519,20 @@ if PlayerInputComponent and PlayerInputComponent.registerActionEvents then
             end
         end
 
+        -- HUD drag toggle (RMB)
+        if g_SoilFertilityManager.soilHUD then
+            local dragOk, dragId = g_inputBinding:registerActionEvent(
+                InputAction.SF_HUD_DRAG, g_SoilFertilityManager,
+                g_SoilFertilityManager.onHUDDragInput,
+                false, true, false, true
+            )
+            if dragOk and dragId then
+                g_SoilFertilityManager.hudDragEventId = dragId
+                g_inputBinding:setActionEventTextVisibility(dragId, false)
+                SoilLogger.info("HUD drag (RMB) registered in PLAYER context")
+            end
+        end
+
         g_inputBinding:endActionEventsModification()
         SoilLogger.info("PLAYER context input registration complete")
     end
@@ -633,6 +647,20 @@ if InputBinding and InputBinding.endActionEventsModification then
                 g_SoilFertilityManager.vehicleSettingsPanelEventId = vSpId
                 binding:setActionEventTextVisibility(vSpId, false)
                 SoilLogger.info("Settings panel (Shift+O) registered in VEHICLE context")
+            end
+        end
+
+        -- HUD drag toggle (RMB)
+        if g_SoilFertilityManager.soilHUD then
+            local vDragOk, vDragId = binding:registerActionEvent(
+                InputAction.SF_HUD_DRAG, g_SoilFertilityManager,
+                g_SoilFertilityManager.onHUDDragInput,
+                false, true, false, true
+            )
+            if vDragOk and vDragId then
+                g_SoilFertilityManager.vehicleHudDragEventId = vDragId
+                binding:setActionEventTextVisibility(vDragId, false)
+                SoilLogger.info("HUD drag (RMB) registered in VEHICLE context")
             end
         end
 

@@ -298,19 +298,7 @@ function SoilHUD:onMouseEvent(posX, posY, isDown, isUp, button, eventUsed)
     if not self.settings.showHUD then return false end
     if not self.visible then return false end
 
-    -- RMB: enter/exit edit mode only when cursor is over the panel
-    -- Returning false when not over the panel lets the game handle RMB normally (cursor play etc.)
-    if isDown and button == Input.MOUSE_BUTTON_RIGHT then
-        if self:isPointerOverHUD(posX, posY) then
-            if self.editMode then
-                self:exitEditMode()
-            else
-                self:enterEditMode()
-            end
-            return true
-        end
-        return false
-    end
+    -- RMB toggle is now handled by the SF_HUD_DRAG input action (registered in SoilFertilityManager)
 
     if not self.editMode then return false end
 
