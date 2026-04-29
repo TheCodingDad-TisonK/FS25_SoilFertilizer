@@ -215,13 +215,14 @@ function SoilFieldDetailDialog:_populateData()
         end
     end
 
-    -- Nutrients
+    -- Nutrients (pass per-crop targets when a crop is planted)
+    local ct = info.cropTargets
     self:_setNutrient(self.detailN, self.detailNStatus,
-        info.nitrogen.value, info.nitrogen.status, "%")
+        info.nitrogen.value, info.nitrogen.status, "%", ct and ct.N)
     self:_setNutrient(self.detailP, self.detailPStatus,
-        info.phosphorus.value, info.phosphorus.status, "%")
+        info.phosphorus.value, info.phosphorus.status, "%", ct and ct.P)
     self:_setNutrient(self.detailK, self.detailKStatus,
-        info.potassium.value, info.potassium.status, "%")
+        info.potassium.value, info.potassium.status, "%", ct and ct.K)
 
     -- pH (0-14 scale, not %)
     if self.detailPH then
@@ -300,26 +301,43 @@ end
 ---@param valueEl    table|nil
 ---@param statusEl   table|nil
 ---@param value      number    0-100
----@param statusStr  string    "good"|"fair"|"poor"
+---@param statusStr  string    "Good"|"Fair"|"Poor"
 ---@param suffix     string    "%" or ""
-function SoilFieldDetailDialog:_setNutrient(valueEl, statusEl, value, statusStr, suffix)
+---@param cropTarget table|nil {min=number, opt=number} per-crop target (internal scale)
+function SoilFieldDetailDialog:_setNutrient(valueEl, statusEl, value, statusStr, suffix, cropTarget)
     suffix = suffix or ""
     if valueEl then
         valueEl:setText(math.floor(value + 0.5) .. suffix)
     end
     if statusEl then
         local label, color
-        -- Status strings from getFieldInfo are capitalized: "Good"/"Fair"/"Poor"
-        local s = statusStr and statusStr:lower() or "poor"
-        if s == "good" then
-            label = tr("sf_pda_status_good", "Good")
-            color = COLOR_GOOD
-        elseif s == "fair" then
-            label = tr("sf_pda_status_fair", "Fair")
-            color = COLOR_FAIR
+        if cropTarget then
+            -- Colour by crop-specific target rather than global thresholds
+            if value >= cropTarget.opt then
+                label = tr("sf_pda_status_good", "Good")
+                color = COLOR_GOOD
+            elseif value >= cropTarget.min then
+                label = tr("sf_pda_status_fair", "Fair")
+                color = COLOR_FAIR
+            else
+                label = tr("sf_pda_status_poor", "Poor")
+                color = COLOR_POOR
+            end
+            -- Append crop-optimal hint so the player knows the target
+            label = label .. " (" .. tostring(cropTarget.opt) .. ")"
         else
-            label = tr("sf_pda_status_poor", "Poor")
-            color = COLOR_POOR
+            -- No crop planted: use global status from getFieldInfo
+            local s = statusStr and statusStr:lower() or "poor"
+            if s == "good" then
+                label = tr("sf_pda_status_good", "Good")
+                color = COLOR_GOOD
+            elseif s == "fair" then
+                label = tr("sf_pda_status_fair", "Fair")
+                color = COLOR_FAIR
+            else
+                label = tr("sf_pda_status_poor", "Poor")
+                color = COLOR_POOR
+            end
         end
         statusEl:setText(label)
         statusEl:setTextColor(unpack(color))

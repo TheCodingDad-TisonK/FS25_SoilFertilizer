@@ -21,6 +21,9 @@ function SoilFertilitySystem.new(settings)
     self.isInitialized = false
     self.lastUpdateDay = 0
     self.hookManager = HookManager.new()
+    -- Install early so custom fill types are in supportedFillTypes before Mission00.load
+    -- restores vehicle fill levels from the savegame (fixes fertilizer disappearing on reload).
+    self.hookManager:installFillUnitHookEarly()
     self.layerSystem = SoilLayerSystem and SoilLayerSystem.new() or nil
 
     -- Per-day flag table for fertilizer application notifications (fieldId → game day last shown)
@@ -2127,12 +2130,22 @@ function SoilFertilitySystem:getFieldInfo(fieldId)
         end
     end
 
+    -- Resolve per-crop nutrient targets (nil when no crop planted)
+    local cropTargets = nil
+    if cropName and cropName ~= "" then
+        local targets = SoilConstants.CROP_NUTRIENT_TARGETS
+        if targets then
+            cropTargets = targets[string.lower(cropName)] or targets.default
+        end
+    end
+
     return {
         fieldId = fieldId,
         fieldArea = field.fieldArea or 1.0,
         nitrogen = { value = math.floor(field.nitrogen), status = nutrientStatus(field.nitrogen, "nitrogen") },
         phosphorus = { value = math.floor(field.phosphorus), status = nutrientStatus(field.phosphorus, "phosphorus") },
         potassium = { value = math.floor(field.potassium), status = nutrientStatus(field.potassium, "potassium") },
+        cropTargets = cropTargets,
         organicMatter = field.organicMatter,
         pH = field.pH,
         lastCrop = cropName,

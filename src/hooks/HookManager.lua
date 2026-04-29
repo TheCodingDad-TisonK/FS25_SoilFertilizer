@@ -1737,6 +1737,59 @@ function HookManager:installSowingHook()
 end
 
 -- =========================================================
+-- HOOK 7a: Early FillUnit.onPostLoad hook (installed before vehicles load)
+-- =========================================================
+-- Must run as prependedFunction so custom types are in supportedFillTypes BEFORE
+-- vanilla's onPostLoad restores the saved fill level.  Called from
+-- SoilFertilitySystem.new() so it is installed inside Mission00.load (prepend),
+-- guaranteeing it fires for every vehicle the game loads from the savegame.
+function HookManager:installFillUnitHookEarly()
+    if self._fillUnitOnPostLoadHooked then return true end
+    if not FillUnit or type(FillUnit.onPostLoad) ~= "function" then
+        SoilLogger.warning("FillUnit early hook: FillUnit.onPostLoad not available - skipping")
+        return false
+    end
+
+    local solidNames  = {"UREA", "AMS", "MAP", "DAP", "POTASH",
+                          "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM"}
+    local liquidNames = {"UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME", "INSECTICIDE", "FUNGICIDE",
+                         "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH"}
+
+    local original = FillUnit.onPostLoad
+    FillUnit.onPostLoad = Utils.prependedFunction(original, function(vehicleSelf)
+        local fm = g_fillTypeManager
+        if not fm then return end
+        local fertIdx    = fm:getFillTypeIndexByName("FERTILIZER")
+        local liqFertIdx = fm:getFillTypeIndexByName("LIQUIDFERTILIZER")
+        local spec = vehicleSelf.spec_fillUnit
+        if not spec or not spec.fillUnits then return end
+        for _, fu in pairs(spec.fillUnits) do
+            if fu.supportedFillTypes then
+                local addSolid  = fertIdx    and fu.supportedFillTypes[fertIdx]
+                local addLiquid = liqFertIdx and fu.supportedFillTypes[liqFertIdx]
+                if addSolid then
+                    for _, name in ipairs(solidNames) do
+                        local idx = fm:getFillTypeIndexByName(name)
+                        if idx then fu.supportedFillTypes[idx] = true end
+                    end
+                end
+                if addLiquid then
+                    for _, name in ipairs(liquidNames) do
+                        local idx = fm:getFillTypeIndexByName(name)
+                        if idx then fu.supportedFillTypes[idx] = true end
+                    end
+                end
+            end
+        end
+    end)
+
+    self:register(FillUnit, "onPostLoad", original, "FillUnit.onPostLoad (early)")
+    self._fillUnitOnPostLoadHooked = true
+    SoilLogger.info("[OK] FillUnit early hook installed - custom fill types injected before vanilla save restore")
+    return true
+end
+
+-- =========================================================
 -- HOOK 7: Patch vehicle fill units to accept custom types
 -- =========================================================
 -- Vanilla spreaders/sprayers have fillUnit#fillTypes="FERTILIZER" or "LIQUIDFERTILIZER".
@@ -1813,15 +1866,24 @@ function HookManager:installFillUnitHook()
         end
     end
 
-    local original = FillUnit.onPostLoad
-    FillUnit.onPostLoad = Utils.appendedFunction(
-        original,
-        function(vehicleSelf, savegame)
-            patchVehicleFillUnits(vehicleSelf)
-        end
-    )
-    self:register(FillUnit, "onPostLoad", original, "FillUnit.onPostLoad")
-    SoilLogger.info("[OK] FillUnit hook installed - custom types injected into compatible vehicles")
+    -- Only hook FillUnit.onPostLoad if the early hook wasn't already installed.
+    -- installFillUnitHookEarly() runs before vehicles load (from SoilFertilitySystem.new),
+    -- which is the only way to ensure custom types are in supportedFillTypes BEFORE
+    -- vanilla's onPostLoad tries to restore the saved fill level.
+    if not self._fillUnitOnPostLoadHooked then
+        local original = FillUnit.onPostLoad
+        FillUnit.onPostLoad = Utils.prependedFunction(
+            original,
+            function(vehicleSelf, savegame)
+                patchVehicleFillUnits(vehicleSelf)
+            end
+        )
+        self:register(FillUnit, "onPostLoad", original, "FillUnit.onPostLoad")
+        self._fillUnitOnPostLoadHooked = true
+        SoilLogger.info("[OK] FillUnit hook installed - custom types injected into compatible vehicles")
+    else
+        SoilLogger.info("[OK] FillUnit.onPostLoad already hooked by early install - skipping duplicate")
+    end
 
     -- Build customToBase: custom fill type index → vanilla base type index.
     -- Used by getFillUnitSupportsFillType hook below.

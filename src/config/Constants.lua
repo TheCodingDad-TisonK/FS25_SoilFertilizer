@@ -349,6 +349,33 @@ SoilConstants.STATUS_THRESHOLDS = {
 }
 
 -- ========================================
+-- CROP NUTRIENT TARGETS (per-crop min / optimal, internal 0-100 scale)
+-- ========================================
+-- min = minimum for acceptable growth (below = crop-specific deficiency)
+-- opt = optimal level for full yield (at/above = no yield penalty)
+-- Legumes (soybean, peas, beans) have low N targets — they fix atmospheric N.
+-- Root crops (potato, sugarbeet) have very high K targets — they partition K into tubers.
+-- Fallback "default" is used for unrecognised crops.
+SoilConstants.CROP_NUTRIENT_TARGETS = {
+    wheat      = { N = { min = 35, opt = 55 }, P = { min = 25, opt = 40 }, K = { min = 25, opt = 40 } },
+    barley     = { N = { min = 25, opt = 45 }, P = { min = 20, opt = 35 }, K = { min = 20, opt = 35 } },
+    maize      = { N = { min = 40, opt = 60 }, P = { min = 25, opt = 40 }, K = { min = 30, opt = 45 } },
+    canola     = { N = { min = 45, opt = 65 }, P = { min = 30, opt = 45 }, K = { min = 30, opt = 45 } },
+    soybean    = { N = { min = 15, opt = 30 }, P = { min = 30, opt = 50 }, K = { min = 35, opt = 55 } },
+    sunflower  = { N = { min = 35, opt = 55 }, P = { min = 25, opt = 40 }, K = { min = 35, opt = 55 } },
+    potato     = { N = { min = 45, opt = 65 }, P = { min = 35, opt = 55 }, K = { min = 60, opt = 80 } },
+    sugarbeet  = { N = { min = 45, opt = 65 }, P = { min = 35, opt = 55 }, K = { min = 65, opt = 85 } },
+    oat        = { N = { min = 25, opt = 45 }, P = { min = 20, opt = 35 }, K = { min = 20, opt = 35 } },
+    oats       = { N = { min = 25, opt = 45 }, P = { min = 20, opt = 35 }, K = { min = 20, opt = 35 } },
+    rye        = { N = { min = 25, opt = 45 }, P = { min = 20, opt = 35 }, K = { min = 20, opt = 35 } },
+    triticale  = { N = { min = 35, opt = 55 }, P = { min = 25, opt = 40 }, K = { min = 25, opt = 40 } },
+    sorghum    = { N = { min = 30, opt = 50 }, P = { min = 20, opt = 35 }, K = { min = 25, opt = 40 } },
+    peas       = { N = { min = 15, opt = 30 }, P = { min = 25, opt = 45 }, K = { min = 30, opt = 50 } },
+    beans      = { N = { min = 15, opt = 30 }, P = { min = 25, opt = 45 }, K = { min = 30, opt = 50 } },
+    default    = { N = { min = 30, opt = 50 }, P = { min = 25, opt = 40 }, K = { min = 20, opt = 40 } },
+}
+
+-- ========================================
 -- PPM DISPLAY SCALE
 -- ========================================
 -- Converts the internal 0-100 nutrient scale to soil-test PPM values for
