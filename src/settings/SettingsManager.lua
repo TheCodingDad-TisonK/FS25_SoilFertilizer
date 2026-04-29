@@ -77,6 +77,10 @@ end
 function SettingsManager:getLocalSettingsPath()
     local ok, profilePath = pcall(getUserProfileAppPath)
     if ok and profilePath and profilePath ~= "" then
+        -- Ensure trailing separator (some dedicated server builds omit it)
+        if profilePath:sub(-1) ~= "/" and profilePath:sub(-1) ~= "\\" then
+            profilePath = profilePath .. "/"
+        end
         local dir = profilePath .. "modsSettings"
         createFolder(dir)
         return dir .. "/" .. SettingsManager.MOD_NAME .. "_local.xml"

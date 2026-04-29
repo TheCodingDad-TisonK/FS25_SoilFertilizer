@@ -205,6 +205,19 @@ SoilConstants.CROP_EXTRACTION = {
 -- Default extraction for unknown crops (average cereal)
 SoilConstants.CROP_EXTRACTION_DEFAULT = { N=2.10, P=0.90, K=1.70 }
 
+-- Forage extraction rates for mowed crops (grass, alfalfa, clover, etc.)
+-- These crops are not in CROP_EXTRACTION because they are not direct-threshed;
+-- their nutrient removal is triggered by the Mower hook (area-based, not liter-based).
+-- Calibrated per MOWER_HA_FACTOR unit: mowing 1 ha of grass removes ~8 N-units
+-- (~57% of a 1-ha wheat harvest), reflecting a single cutting in a multi-cut season.
+SoilConstants.CROP_EXTRACTION_FORAGE = { N=1.40, P=0.55, K=1.80 }
+
+-- Mower area calibration factor.
+-- Formula: depletion = rates[nutrient] * areaHa * MOWER_HA_FACTOR * difficultyMult
+-- At factor=6.0, grass/alfalfa: N=8.4, P=3.3, K=10.8 units depleted per ha per cut.
+-- Compare: wheat harvest 1ha at 7000L → N=14.7, P=6.3, K=11.9. Forage ~57% of grain.
+SoilConstants.MOWER_HA_FACTOR = 6.0
+
 -- ========================================
 -- FERTILIZER PROFILES (per 1,000 liters applied)
 -- ========================================
@@ -230,7 +243,7 @@ SoilConstants.FERTILIZER_PROFILES = {
     UREA              = { N=154.6, P=0.00, K=0.00 }, -- 168 kg/ha: ~70N ppm
 
     -- Starter fertilizer (High-P pop-up)
-    STARTER           = { N=63.5, P=595.0, K=44.6 }, -- 46.8 L/ha: ~8N, ~15P ppm
+    STARTER           = { N=63.5, P=595.0, K=0.00 }, -- 46.8 L/ha: ~8N, ~15P ppm
 
     -- Gypsum: mild pH lowering + OM/structure boost
     GYPSUM            = { pH=-0.10, OM=0.22 }, -- 1500 kg/ha: -0.25 pH shift, OM boost
