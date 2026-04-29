@@ -21,6 +21,9 @@ function SoilFertilitySystem.new(settings)
     self.isInitialized = false
     self.lastUpdateDay = 0
     self.hookManager = HookManager.new()
+    -- Install early so custom fill types are in supportedFillTypes before Mission00.load
+    -- restores vehicle fill levels from the savegame (fixes fertilizer disappearing on reload).
+    self.hookManager:installFillUnitHookEarly()
     self.layerSystem = SoilLayerSystem and SoilLayerSystem.new() or nil
 
     -- Per-day flag table for fertilizer application notifications (fieldId → game day last shown)
