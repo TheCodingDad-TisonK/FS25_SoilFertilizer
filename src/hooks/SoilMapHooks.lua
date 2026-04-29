@@ -68,6 +68,24 @@ function SoilMapHooks:onLoadMapFinished()
     local soilOverlay = getSoilOverlay(self)
     if soilOverlay then
         soilOverlay:requestRefresh()
+        -- Cache the IngameMap HUD reference for the minimap overlay.
+        -- g_currentMission.ingameMap is nil in FS25; the real instance lives on the
+        -- InGameMenuMapFrame as ingameMapBase (preferred) or ingameMap.
+        -- onLoadMapFinished fires at map-load time so we capture it before first draw.
+        if not soilOverlay.ingameMapRef then
+            local ref = nil
+            if self.ingameMapBase and self.ingameMapBase.layout then
+                ref = self.ingameMapBase
+            elseif self.ingameMap and self.ingameMap.layout then
+                ref = self.ingameMap
+            end
+            if ref then
+                soilOverlay.ingameMapRef = ref
+                SoilLogger.info("SoilMapHooks: ingameMap ref cached for minimap overlay (state=%s)", tostring(ref.state))
+            else
+                SoilLogger.warning("SoilMapHooks: could not capture ingameMap ref — minimap overlay will not render")
+            end
+        end
     end
 end
 
@@ -156,6 +174,13 @@ end
 -- then check if our soil page is active before drawing.
 function SoilMapHooks.onDrawIngameMapElement(elementSelf, ...)
     if elementSelf == nil or elementSelf.ingameMap == nil then return end
+
+    -- Opportunistically cache the IngameMap ref if setupMapOverview didn't get it
+    local _soilOverlay = g_SoilFertilityManager and g_SoilFertilityManager.soilMapOverlay
+    if _soilOverlay and not _soilOverlay.ingameMapRef and elementSelf.ingameMap.layout then
+        _soilOverlay.ingameMapRef = elementSelf.ingameMap
+        SoilLogger.info("SoilMapHooks: ingameMap ref captured from PDA draw (fallback)")
+    end
 
     -- Walk up (max 6 levels) to find the frame that has soilMapPageIndex
     local frame = elementSelf.parent

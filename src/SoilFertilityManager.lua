@@ -435,8 +435,15 @@ function SoilFertilityManager:onToggleAutoInput()
 end
 
 function SoilFertilityManager:onCycleMapLayerInput()
-    if self.soilMapOverlay then
-        self.soilMapOverlay:cycleLayer()
+    if not self.soilMapOverlay then return end
+    self.soilMapOverlay:cycleLayer()
+    -- Show the new layer name briefly on the HUD so the player knows what's active
+    if g_currentMission and g_currentMission.hud then
+        local layerIdx = self.settings.activeMapLayer or 0
+        local key = SoilMapOverlay.LAYER_KEYS[layerIdx] or "sf_map_layer_off"
+        local layerName = (g_i18n and g_i18n:getText(key)) or key
+        local msg = layerIdx > 0 and ("Soil Map: " .. layerName) or "Soil Map: Off"
+        g_currentMission.hud:showBlinkingWarning(msg, 2500)
     end
 end
 
