@@ -136,7 +136,7 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
         for modName, _ in pairs(g_modIsLoaded) do
             local lowerName = string.lower(tostring(modName))
             if lowerName:find("realisticharvesting") or lowerName:find("realistic_harvesting") then
-                SoilLogger.info("RealisticHarvesting detected — harvest hooks appended safely; soil updates fire if FruitUtil still present")
+                SoilLogger.info("RealisticHarvesting detected — yield modifier applied via hopper hook (addFillUnitFillLevel) for full HUD compatibility (issue #284)")
             elseif lowerName:find("croprotation") or lowerName:find("crop_rotation") then
                 SoilLogger.info("CropRotation detected — no conflict; separate crop tracking data")
             elseif lowerName:find("bettercontracts") then
