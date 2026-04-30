@@ -376,13 +376,20 @@ function SoilFertilitySystem:onFertilizerApplied(fieldId, fillTypeIndex, liters)
 
     local fillType = g_fillTypeManager and g_fillTypeManager:getFillTypeByIndex(fillTypeIndex)
 
-    SoilLogger.debug("Fertilizer: Field %d, %s, %.0fL", fieldId, fillType and fillType.name or "unknown", liters)
+    SoilLogger.debug("Fertilizer: Field %d, %s, %.4fL", fieldId, fillType and fillType.name or "unknown", liters)
 
-    -- Broadcast to clients if server in multiplayer
+    -- Broadcast to clients in multiplayer, throttled to once every 5 seconds per field
+    -- to avoid flooding the network with 30+ events/second while a sprayer is running.
     if g_server and g_currentMission and g_currentMission.missionDynamicInfo and g_currentMission.missionDynamicInfo.isMultiplayer then
-        local field = self.fieldData[fieldId]
-        if field and SoilFieldUpdateEvent then
-            g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
+        local now = g_currentMission.time or 0
+        if not self._fertBroadcastTime then self._fertBroadcastTime = {} end
+        local last = self._fertBroadcastTime[fieldId] or 0
+        if (now - last) >= 5000 then
+            self._fertBroadcastTime[fieldId] = now
+            local field = self.fieldData[fieldId]
+            if field and SoilFieldUpdateEvent then
+                g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
+            end
         end
     end
 end
