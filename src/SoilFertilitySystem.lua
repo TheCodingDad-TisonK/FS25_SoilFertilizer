@@ -193,94 +193,110 @@ end
 ---@param fruitTypeIndex number FS25 fruit type index
 ---@param liters number Amount harvested in liters
 ---@param strawRatio number 0.0-1.0 fraction of straw that was chopped (0 = dropped/collected, 1 = fully chopped)
-function SoilFertilitySystem:onHarvest(fieldId, fruitTypeIndex, liters, strawRatio, area)
-    -- Resolve fruit type for grassland check (used by multiple penalty blocks below)
-    local harvestFruitDesc = g_fruitTypeManager and g_fruitTypeManager:getFruitTypeByIndex(fruitTypeIndex)
-    local harvestCropName  = harvestFruitDesc and string.lower(harvestFruitDesc.name or "") or ""
-    local harvestIsGrass   = SoilConstants.YIELD_SENSITIVITY and
-                             SoilConstants.YIELD_SENSITIVITY.NON_CROP_NAMES and
-                             SoilConstants.YIELD_SENSITIVITY.NON_CROP_NAMES[harvestCropName]
+--- Computes the combined yield modifier for a harvest event.
+--- All yield-reducing factors (nutrients, weeds, pests, disease) are multiplied together.
+--- Returns a value in [1-MAX_PENALTY, 1.0] — applied to liters BEFORE the combine hopper
+--- receives grain in HookManager, so the game engine actually sees fewer liters.
+---@param fieldId number
+---@param fruitTypeIndex number
+---@return number modifier  Combined yield multiplier
+function SoilFertilitySystem:computeYieldModifier(fieldId, fruitTypeIndex)
+    if not self.settings.enabled or not self.settings.nutrientCycles then return 1.0 end
 
-    -- Apply weed pressure yield penalty before nutrient update
-    -- Grassland crops (grass, drygrass, poplar) are exempt — they are grazed/mowed,
-    -- not affected by arable weed pressure mechanics.
-    if self.settings.weedPressure and SoilConstants.WEED_PRESSURE and not harvestIsGrass then
-        local field = self.fieldData[fieldId]
-        if field then
-            local wp = SoilConstants.WEED_PRESSURE
-            local pressure = field.weedPressure or 0
-            local penalty
-            if pressure < wp.LOW then
-                penalty = wp.YIELD_PENALTY_LOW
-            elseif pressure < wp.MEDIUM then
-                penalty = wp.YIELD_PENALTY_MID
-            elseif pressure < wp.HIGH then
-                penalty = wp.YIELD_PENALTY_HIGH
-            else
-                penalty = wp.YIELD_PENALTY_PEAK
-            end
-            if penalty > 0 then
-                liters = liters * (1.0 - penalty)
-                self:log("Weed penalty field %d: pressure=%.0f, penalty=%.0f%%",
-                    fieldId, pressure, penalty * 100)
-            end
+    local field = self.fieldData[fieldId]
+    if not field then return 1.0 end
+
+    local modifier = 1.0
+
+    local fruitDesc = g_fruitTypeManager and g_fruitTypeManager:getFruitTypeByIndex(fruitTypeIndex)
+    local cropName  = fruitDesc and string.lower(fruitDesc.name or "") or ""
+    local ys        = SoilConstants.YIELD_SENSITIVITY
+    local isGrass   = ys and ys.NON_CROP_NAMES and ys.NON_CROP_NAMES[cropName]
+
+    -- Nutrient-based modifier (skipped for grass/non-crop)
+    if ys and not isGrass then
+        local tier     = ys.CROP_TIERS[cropName] or ys.DEFAULT_TIER
+        local tierData = ys.TIERS[tier]
+        local thresh   = ys.OPTIMAL_THRESHOLD
+
+        local nDef = math.max(0, thresh - field.nitrogen)   / thresh
+        local pDef = math.max(0, thresh - field.phosphorus) / thresh
+        local kDef = math.max(0, thresh - field.potassium)  / thresh
+        local avgDef = (nDef + pDef + kDef) / 3
+
+        local nutrientPenalty = math.min(ys.MAX_PENALTY, avgDef * tierData.scale)
+        if nutrientPenalty > 0 then
+            modifier = modifier * (1.0 - nutrientPenalty)
+            self:log("Nutrient penalty field %d (%s/%s): N=%.0f P=%.0f K=%.0f → -%.0f%%",
+                fieldId, cropName, tier, field.nitrogen, field.phosphorus, field.potassium,
+                nutrientPenalty * 100)
         end
     end
 
-    -- Pest pressure yield penalty
+    -- Weed pressure modifier (skip for grassland)
+    if self.settings.weedPressure and SoilConstants.WEED_PRESSURE and not isGrass then
+        local wp       = SoilConstants.WEED_PRESSURE
+        local pressure = field.weedPressure or 0
+        local penalty
+        if pressure < wp.LOW then         penalty = wp.YIELD_PENALTY_LOW
+        elseif pressure < wp.MEDIUM then  penalty = wp.YIELD_PENALTY_MID
+        elseif pressure < wp.HIGH then    penalty = wp.YIELD_PENALTY_HIGH
+        else                              penalty = wp.YIELD_PENALTY_PEAK end
+        if penalty > 0 then
+            modifier = modifier * (1.0 - penalty)
+            self:log("Weed penalty field %d: pressure=%.0f → -%.0f%%", fieldId, pressure, penalty * 100)
+        end
+    end
+
+    -- Pest pressure modifier
+    if self.settings.pestPressure and SoilConstants.PEST_PRESSURE then
+        local pp       = SoilConstants.PEST_PRESSURE
+        local pressure = field.pestPressure or 0
+        local penalty
+        if pressure < pp.LOW then         penalty = pp.YIELD_PENALTY_LOW
+        elseif pressure < pp.MEDIUM then  penalty = pp.YIELD_PENALTY_MID
+        elseif pressure < pp.HIGH then    penalty = pp.YIELD_PENALTY_HIGH
+        else                              penalty = pp.YIELD_PENALTY_PEAK end
+        if penalty > 0 then
+            modifier = modifier * (1.0 - penalty)
+            self:log("Pest penalty field %d: pressure=%.0f → -%.0f%%", fieldId, pressure, penalty * 100)
+        end
+    end
+
+    -- Disease pressure modifier
+    if self.settings.diseasePressure and SoilConstants.DISEASE_PRESSURE then
+        local dp       = SoilConstants.DISEASE_PRESSURE
+        local pressure = field.diseasePressure or 0
+        local penalty
+        if pressure < dp.LOW then         penalty = dp.YIELD_PENALTY_LOW
+        elseif pressure < dp.MEDIUM then  penalty = dp.YIELD_PENALTY_MID
+        elseif pressure < dp.HIGH then    penalty = dp.YIELD_PENALTY_HIGH
+        else                              penalty = dp.YIELD_PENALTY_PEAK end
+        if penalty > 0 then
+            modifier = modifier * (1.0 - penalty)
+            self:log("Disease penalty field %d: pressure=%.0f → -%.0f%%", fieldId, pressure, penalty * 100)
+        end
+    end
+
+    return modifier
+end
+
+function SoilFertilitySystem:onHarvest(fieldId, fruitTypeIndex, liters, strawRatio, area)
+    -- Harvest-time state resets: pest population disperses when crop is cleared
     if self.settings.pestPressure and SoilConstants.PEST_PRESSURE then
         local field = self.fieldData[fieldId]
         if field then
             local pp = SoilConstants.PEST_PRESSURE
-            local pressure = field.pestPressure or 0
-            local penalty
-            if pressure < pp.LOW then
-                penalty = pp.YIELD_PENALTY_LOW
-            elseif pressure < pp.MEDIUM then
-                penalty = pp.YIELD_PENALTY_MID
-            elseif pressure < pp.HIGH then
-                penalty = pp.YIELD_PENALTY_HIGH
-            else
-                penalty = pp.YIELD_PENALTY_PEAK
-            end
-            if penalty > 0 then
-                liters = liters * (1.0 - penalty)
-                self:log("Pest penalty field %d: pressure=%.0f, penalty=%.0f%%",
-                    fieldId, pressure, penalty * 100)
-            end
-            -- Harvest disperses pest population
-            field.pestPressure = pressure * pp.HARVEST_RESET_FRACTION
+            field.pestPressure    = (field.pestPressure or 0) * pp.HARVEST_RESET_FRACTION
             field.insecticideDaysLeft = 0
         end
     end
 
-    -- Disease pressure yield penalty
-    if self.settings.diseasePressure and SoilConstants.DISEASE_PRESSURE then
-        local field = self.fieldData[fieldId]
-        if field then
-            local dp = SoilConstants.DISEASE_PRESSURE
-            local pressure = field.diseasePressure or 0
-            local penalty
-            if pressure < dp.LOW then
-                penalty = dp.YIELD_PENALTY_LOW
-            elseif pressure < dp.MEDIUM then
-                penalty = dp.YIELD_PENALTY_MID
-            elseif pressure < dp.HIGH then
-                penalty = dp.YIELD_PENALTY_HIGH
-            else
-                penalty = dp.YIELD_PENALTY_PEAK
-            end
-            if penalty > 0 then
-                liters = liters * (1.0 - penalty)
-                self:log("Disease penalty field %d: pressure=%.0f, penalty=%.0f%%",
-                    fieldId, pressure, penalty * 100)
-            end
-        end
-    end
-
+    -- Nutrient depletion uses original (biological) liters — the soil gave up these
+    -- nutrients regardless of the yield modifier applied in the combine hook.
     self:updateFieldNutrients(fieldId, fruitTypeIndex, liters, strawRatio, area)
 
-    SoilLogger.debug("Harvest: Field %d, Crop %d, %.0fL, area=%.1f", fieldId, fruitTypeIndex, liters, area or 0)
+    SoilLogger.debug("Harvest: Field %d, Crop %d, %.0fL (biological), area=%.1f", fieldId, fruitTypeIndex, liters, area or 0)
 
     -- Broadcast to clients if server in multiplayer
     if g_server and g_currentMission and g_currentMission.missionDynamicInfo and g_currentMission.missionDynamicInfo.isMultiplayer then
@@ -925,11 +941,13 @@ function SoilFertilitySystem:scanFields()
             local actualFieldId = field.farmland and field.farmland.id
 
             if actualFieldId and actualFieldId > 0 then
-                -- FS25 API: Field.areaHa = cultivated area in ha (from LUADOC: self.areaHa = sqm/10000).
-                -- Farmland.areaInHa = parcel area in ha. Both checked before defaulting to 1.0
-                -- because the old incorrect names (fieldArea / farmland.area) were always nil,
-                -- causing totalFieldCells to be computed from 1 ha instead of real field size.
-                local area = field.areaHa or (field.farmland and field.farmland.areaInHa) or 1.0
+                -- Farmland.areaInHa is loaded from XML and always populated (default 2.5 ha).
+                -- Field.areaHa is computed from polygon geometry but defaults to 1.0 in Field.new()
+                -- before the polygon loads — 1.0 is truthy in Lua, so using field.areaHa first
+                -- means the farmland fallback would NEVER fire for un-loaded polygons, causing
+                -- every field to be recorded as exactly 1 ha regardless of actual size.
+                -- Use farmland.areaInHa as the primary source; field.areaHa only as fallback.
+                local area = (field.farmland and field.farmland.areaInHa) or field.areaHa or 1.0
 
                 SoilLogger.debug("Found field %d (%.2f ha)", actualFieldId, area)
 
@@ -1776,8 +1794,18 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
             if not field.coveredCells[cellKey] then
                 field.coveredCells[cellKey] = true
                 field.coveredCellCount = (field.coveredCellCount or 0) + 1
-                -- Compute totalFieldCells once (lazily) from field area
+                -- Compute totalFieldCells once (lazily) from field area.
+                -- Re-query live farmland area as final safety net — handles fields lazily
+                -- created mid-session (not in the startup scan) and any remaining
+                -- stale-area edge cases not caught by the XML load correction.
                 if (field.totalFieldCells or 0) == 0 then
+                    if g_farmlandManager then
+                        local farmlandObj = g_farmlandManager:getFarmlandById(fieldId)
+                        if farmlandObj and farmlandObj.areaInHa and farmlandObj.areaInHa > 0 then
+                            field.fieldArea = farmlandObj.areaInHa
+                            areaInHa = farmlandObj.areaInHa
+                        end
+                    end
                     field.totalFieldCells = math.max(1, math.ceil(areaInHa / zone.CELL_AREA_HA))
                 end
                 local prevCoverage = field.coverageFraction or 0
@@ -2360,6 +2388,17 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
             nutrientBuffer = {},
             zoneData = {},
         }
+
+        -- Refresh fieldArea from the live farmland object — corrects stale values from saves
+        -- written before the scan priority bug was fixed (where field.areaHa == 1.0 default
+        -- was recorded as the real area because it's truthy and blocked the farmland fallback).
+        -- g_farmlandManager.farmlands[id].areaInHa comes from map XML and is always reliable.
+        if g_farmlandManager then
+            local farmlandObj = g_farmlandManager:getFarmlandById(fieldId)
+            if farmlandObj and farmlandObj.areaInHa and farmlandObj.areaInHa > 0 then
+                self.fieldData[fieldId].fieldArea = farmlandObj.areaInHa
+            end
+        end
 
         -- Clear empty strings
         if self.fieldData[fieldId].lastCrop == "" then

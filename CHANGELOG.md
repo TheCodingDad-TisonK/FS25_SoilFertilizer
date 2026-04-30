@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.8.0] - 2026-04-30
+
+### Added
+- Nutrient levels (N/P/K), weed pressure, pest pressure, and disease pressure now directly reduce combine harvest yield — closes #279. Previously all penalties were display-only; the combine hopper now receives fewer liters proportional to soil health. N/P/K deficit can reduce yield up to −50% (crop-dependent), weed −30%, pest −30%, disease −25%. All factors multiply together.
+- HUD yield forecast and actual combine yield now use the same formula — the `~-20%` warning shown is exactly what hits the tank.
+
+### Fixed
+- Coverage cell count still wrong in existing saves — re-closes #277. Three-layer fix: (1) scan priority order — `farmland.areaInHa` (from map XML, always set) is now primary; `field.areaHa` defaults to `1.0` in `Field.new()` and is truthy, which blocked the fallback; (2) XML load re-query — after loading each field from save, `fieldArea` is immediately refreshed from live farmland data, correcting stale `1.0` values in old saves automatically on next load with no new game required; (3) safety net at first spray — `totalFieldCells` lazy init re-queries live area for fields created mid-session.
+
+---
+
 ## [2.0.7.0] - 2026-04-30
 
 ### Added

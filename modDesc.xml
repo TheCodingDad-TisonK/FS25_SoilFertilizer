@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <modDesc descVersion="106">
     <author>TisonK</author>
-    <version>2.0.7.0</version>
+    <version>2.0.8.0</version>
     <modName>FS25_SoilFertilizer</modName>
     <title>
         <en>Realistic Soil &amp; Fertilizer</en>
@@ -173,6 +173,7 @@
     </storeItems>
 
 
+
     <!-- ═══════════════════════════════════════════════════════════
          HELP LINES  —  ESC > Help > Realistic Soil & Fertilizer
          ═══════════════════════════════════════════════════════════ -->
@@ -181,7 +182,7 @@
         <!-- ── Category 1: Overview ──────────────────────────── -->
         <category title="$l10n_helpLine_sf_cat_overview">
 
-            <page title="$l10n_helpLine_sf_ov_p1_title" iconSliceId="icon_contracts">
+            <page title="$l10n_helpLine_sf_ov_p1_title" iconSliceId="helplineSoilFertilizer.icon_sf_overview">
                 <paragraph>
                     <title text="$l10n_helpLine_sf_ov_p1_intro_title" />
                     <text  text="$l10n_helpLine_sf_ov_p1_intro_text"  />
@@ -190,9 +191,12 @@
                     <title text="$l10n_helpLine_sf_ov_p1_flow_title" />
                     <text  text="$l10n_helpLine_sf_ov_p1_flow_text"  />
                 </paragraph>
+                <paragraph>
+                    <image filename="images/helpline_sf_map_overlay.dds" uvs="0px 0px 512px 288px" displaySize="512px 288px" aspectRatio="1" size="512 288"/>
+                </paragraph>
             </page>
 
-            <page title="$l10n_helpLine_sf_ov_p2_title" iconSliceId="icon_contracts">
+            <page title="$l10n_helpLine_sf_ov_p2_title" iconSliceId="helplineSoilFertilizer.icon_sf_overview">
                 <paragraph>
                     <title text="$l10n_helpLine_sf_ov_p2_rain_title" />
                     <text  text="$l10n_helpLine_sf_ov_p2_rain_text"  />
@@ -208,7 +212,7 @@
         <!-- ── Category 2: Getting Started ───────────────────── -->
         <category title="$l10n_helpLine_sf_cat_started">
 
-            <page title="$l10n_helpLine_sf_gs_p1_title" iconSliceId="icon_contracts">
+            <page title="$l10n_helpLine_sf_gs_p1_title" iconSliceId="helplineSoilFertilizer.icon_sf_started">
                 <paragraph>
                     <title text="$l10n_helpLine_sf_gs_p1_hud_title" />
                     <text  text="$l10n_helpLine_sf_gs_p1_hud_text"  />
@@ -219,7 +223,7 @@
                 </paragraph>
             </page>
 
-            <page title="$l10n_helpLine_sf_gs_p2_title" iconSliceId="icon_shop">
+            <page title="$l10n_helpLine_sf_gs_p2_title" iconSliceId="helplineSoilFertilizer.icon_sf_started">
                 <paragraph>
                     <title text="$l10n_helpLine_sf_gs_p2_fert_title" />
                     <text  text="$l10n_helpLine_sf_gs_p2_fert_text"  />
@@ -230,7 +234,7 @@
                 </paragraph>
             </page>
 
-            <page title="$l10n_helpLine_sf_gs_p3_title" iconSliceId="icon_contracts">
+            <page title="$l10n_helpLine_sf_gs_p3_title" iconSliceId="helplineSoilFertilizer.icon_sf_started">
                 <paragraph>
                     <title text="$l10n_helpLine_sf_gs_p3_levels_title" />
                     <text  text="$l10n_helpLine_sf_gs_p3_levels_text"  />
@@ -246,7 +250,7 @@
         <!-- ── Category 3: Soil Nutrients ────────────────────── -->
         <category title="$l10n_helpLine_sf_cat_nutrients">
 
-            <page title="$l10n_helpLine_sf_nu_p1_title" iconSliceId="icon_contracts">
+            <page title="$l10n_helpLine_sf_nu_p1_title" iconSliceId="helplineSoilFertilizer.icon_sf_nutrients">
                 <paragraph>
                     <title text="$l10n_helpLine_sf_nu_p1_n_title" />
                     <text  text="$l10n_helpLine_sf_nu_p1_n_text"  />
@@ -257,7 +261,7 @@
                 </paragraph>
             </page>
 
-            <page title="$l10n_helpLine_sf_nu_p2_title" iconSliceId="icon_contracts">
+            <page title="$l10n_helpLine_sf_nu_p2_title" iconSliceId="helplineSoilFertilizer.icon_sf_nutrients">
                 <paragraph>
                     <title text="$l10n_helpLine_sf_nu_p2_k_title" />
                     <text  text="$l10n_helpLine_sf_nu_p2_k_text"  />
@@ -268,7 +272,7 @@
                 </paragraph>
             </page>
 
-            <page title="$l10n_helpLine_sf_nu_p3_title" iconSliceId="icon_contracts">
+            <page title="$l10n_helpLine_sf_nu_p3_title" iconSliceId="helplineSoilFertilizer.icon_sf_nutrients">
                 <paragraph>
                     <title text="$l10n_helpLine_sf_nu_p3_om_title" />
                     <text  text="$l10n_helpLine_sf_nu_p3_om_text"  />
@@ -279,7 +283,7 @@
                 </paragraph>
             </page>
 
-            <page title="$l10n_helpLine_sf_nu_p4_title" iconSliceId="icon_contracts">
+            <page title="$l10n_helpLine_sf_nu_p4_title" iconSliceId="helplineSoilFertilizer.icon_sf_nutrients">
                 <paragraph>
                     <title text="$l10n_helpLine_sf_nu_p4_bonus_title" />
                     <text  text="$l10n_helpLine_sf_nu_p4_bonus_text"  />
@@ -295,7 +299,7 @@
         <!-- ── Category 4: Fertilizers ───────────────────────── -->
         <category title="$l10n_helpLine_sf_cat_fertilizers">
 
-            <page title="$l10n_helpLine_sf_fe_p1_title" iconSliceId="icon_shop">
+            <page title="$l10n_helpLine_sf_fe_p1_title" iconSliceId="helplineSoilFertilizer.icon_sf_fertilizer">
                 <paragraph>
                     <title text="$l10n_helpLine_sf_fe_p1_base_title" />
                     <text  text="$l10n_helpLine_sf_fe_p1_base_text"  />
@@ -306,7 +310,7 @@
                 </paragraph>
             </page>
 
-            <page title="$l10n_helpLine_sf_fe_p2_title" iconSliceId="icon_shop">
+            <page title="$l10n_helpLine_sf_fe_p2_title" iconSliceId="helplineSoilFertilizer.icon_sf_fertilizer">
                 <paragraph>
                     <title text="$l10n_helpLine_sf_fe_p2_n_title" />
                     <text  text="$l10n_helpLine_sf_fe_p2_n_text"  />
@@ -317,7 +321,7 @@
                 </paragraph>
             </page>
 
-            <page title="$l10n_helpLine_sf_fe_p3_title" iconSliceId="icon_shop">
+            <page title="$l10n_helpLine_sf_fe_p3_title" iconSliceId="helplineSoilFertilizer.icon_sf_fertilizer">
                 <paragraph>
                     <title text="$l10n_helpLine_sf_fe_p3_organic_title" />
                     <text  text="$l10n_helpLine_sf_fe_p3_organic_text"  />
@@ -333,7 +337,7 @@
         <!-- ── Category 5: HUD & Soil Report ─────────────────── -->
         <category title="$l10n_helpLine_sf_cat_hud">
 
-            <page title="$l10n_helpLine_sf_hu_p1_title" iconSliceId="icon_hud_speedometer">
+            <page title="$l10n_helpLine_sf_hu_p1_title" iconSliceId="helplineSoilFertilizer.icon_sf_hud">
                 <paragraph>
                     <title text="$l10n_helpLine_sf_hu_p1_toggle_title" />
                     <text  text="$l10n_helpLine_sf_hu_p1_toggle_text"  />
@@ -342,9 +346,12 @@
                     <title text="$l10n_helpLine_sf_hu_p1_status_title" />
                     <text  text="$l10n_helpLine_sf_hu_p1_status_text"  />
                 </paragraph>
+                <paragraph>
+                    <image filename="images/helpline_sf_soil_monitor.dds" uvs="0px 0px 512px 380px" displaySize="512px 380px" aspectRatio="1" size="512 380"/>
+                </paragraph>
             </page>
 
-            <page title="$l10n_helpLine_sf_hu_p2_title" iconSliceId="icon_hud_speedometer">
+            <page title="$l10n_helpLine_sf_hu_p2_title" iconSliceId="helplineSoilFertilizer.icon_sf_hud">
                 <paragraph>
                     <title text="$l10n_helpLine_sf_hu_p2_press_title" />
                     <text  text="$l10n_helpLine_sf_hu_p2_press_text"  />
@@ -355,7 +362,7 @@
                 </paragraph>
             </page>
 
-            <page title="$l10n_helpLine_sf_hu_p3_title" iconSliceId="icon_hud_speedometer">
+            <page title="$l10n_helpLine_sf_hu_p3_title" iconSliceId="helplineSoilFertilizer.icon_sf_hud">
                 <paragraph>
                     <title text="$l10n_helpLine_sf_hu_p3_open_title" />
                     <text  text="$l10n_helpLine_sf_hu_p3_open_text"  />
@@ -371,7 +378,7 @@
         <!-- ── Category 6: Settings ──────────────────────────── -->
         <category title="$l10n_helpLine_sf_cat_settings">
 
-            <page title="$l10n_helpLine_sf_se_p1_title" iconSliceId="icon_contracts">
+            <page title="$l10n_helpLine_sf_se_p1_title" iconSliceId="helplineSoilFertilizer.icon_sf_settings">
                 <paragraph>
                     <title text="$l10n_helpLine_sf_se_p1_server_title" />
                     <text  text="$l10n_helpLine_sf_se_p1_server_text"  />
@@ -380,9 +387,12 @@
                     <title text="$l10n_helpLine_sf_se_p1_diff_title" />
                     <text  text="$l10n_helpLine_sf_se_p1_diff_text"  />
                 </paragraph>
+                <paragraph>
+                    <image filename="images/helpline_sf_settings.dds" uvs="0px 0px 512px 356px" displaySize="512px 356px" aspectRatio="1" size="512 356"/>
+                </paragraph>
             </page>
 
-            <page title="$l10n_helpLine_sf_se_p2_title" iconSliceId="icon_hud_speedometer">
+            <page title="$l10n_helpLine_sf_se_p2_title" iconSliceId="helplineSoilFertilizer.icon_sf_settings">
                 <paragraph>
                     <title text="$l10n_helpLine_sf_se_p2_hud_title" />
                     <text  text="$l10n_helpLine_sf_se_p2_hud_text"  />
@@ -398,7 +408,7 @@
         <!-- ── Category 7: Multiplayer & PrecisionFarming ────── -->
         <category title="$l10n_helpLine_sf_cat_multiplayer">
 
-            <page title="$l10n_helpLine_sf_mp_p1_title" iconSliceId="icon_multiplayer">
+            <page title="$l10n_helpLine_sf_mp_p1_title" iconSliceId="helplineSoilFertilizer.icon_sf_multiplayer">
                 <paragraph>
                     <title text="$l10n_helpLine_sf_mp_p1_auth_title" />
                     <text  text="$l10n_helpLine_sf_mp_p1_auth_text"  />
@@ -409,7 +419,7 @@
                 </paragraph>
             </page>
 
-            <page title="$l10n_helpLine_sf_mp_p2_title" iconSliceId="icon_multiplayer">
+            <page title="$l10n_helpLine_sf_mp_p2_title" iconSliceId="helplineSoilFertilizer.icon_sf_multiplayer">
                 <paragraph>
                     <title text="$l10n_helpLine_sf_mp_p2_compat_title" />
                     <text  text="$l10n_helpLine_sf_mp_p2_compat_text"  />

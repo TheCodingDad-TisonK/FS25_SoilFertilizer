@@ -847,12 +847,15 @@ function HookManager:installHarvestHook()
     -- which causes "attempt to compare number < nil". We use a manual wrapper
     -- that captures and forwards the original's return value instead.
     Combine.addCutterArea = function(combineSelf, area, liters, inputFruitType, outputFillType, strawRatio, farmId, cutterLoad)
-        -- Call original first and capture ALL return values
-        local r1, r2, r3, r4, r5 = original(combineSelf, area, liters, inputFruitType, outputFillType, strawRatio, farmId, cutterLoad)
-
-        -- Run our soil side-effects (server-only, non-blocking)
         SoilLogger.debug("Harvest hook entered: isServer=%s area=%.1f liters=%.0f fruit=%s",
             tostring(combineSelf.isServer), area or 0, liters or 0, tostring(inputFruitType))
+
+        -- Pre-compute yield modifier and detect field before calling original.
+        -- This allows us to pass reduced liters to the combine hopper so the game
+        -- engine actually sees fewer grain liters (not just a display-only warning).
+        local yieldModifier   = 1.0
+        local detectedFieldId = nil
+
         if combineSelf.isServer
             and g_SoilFertilityManager
             and g_SoilFertilityManager.soilSystem
@@ -861,7 +864,7 @@ function HookManager:installHarvestHook()
             and inputFruitType and inputFruitType > 0
             and liters and liters > 0
         then
-            local success, errorMsg = pcall(function()
+            local ok, errMsg = pcall(function()
                 local x, _, z = getWorldTranslation(combineSelf.rootNode)
                 if not x then
                     SoilLogger.debug("Harvest hook: skipped (rootNode translation failed)")
@@ -884,16 +887,32 @@ function HookManager:installHarvestHook()
                     return
                 end
 
-                SoilLogger.debug("Harvest hook: Field %d, Crop %d, %.0fL, area=%.1fm2, strawRatio=%.2f",
-                    fieldId, inputFruitType, liters, area, strawRatio or 0)
-                g_SoilFertilityManager.soilSystem:onHarvest(fieldId, inputFruitType, liters, strawRatio, area)
+                detectedFieldId = fieldId
+                yieldModifier = g_SoilFertilityManager.soilSystem:computeYieldModifier(fieldId, inputFruitType)
+                SoilLogger.debug("Harvest hook: Field %d, Crop %d, modifier=%.3f (%.0fL → %.0fL), area=%.1fm2",
+                    fieldId, inputFruitType, yieldModifier, liters, liters * yieldModifier, area)
             end)
 
-            if not success then
-                SoilLogger.error("Harvest hook failed: %s", tostring(errorMsg))
+            if not ok then
+                SoilLogger.error("Harvest hook (yield modifier) failed: %s", tostring(errMsg))
             end
         else
             SoilLogger.debug("Harvest hook: skipped (not server or manager/settings not ready or invalid args)")
+        end
+
+        -- Pass modified liters to original so the combine hopper receives fewer grains.
+        -- If field detection failed, yieldModifier stays 1.0 — no unintended penalty.
+        local r1, r2, r3, r4, r5 = original(combineSelf, area, liters * yieldModifier, inputFruitType, outputFillType, strawRatio, farmId, cutterLoad)
+
+        -- Nutrient depletion uses original (biological) liters — the soil depleted what
+        -- the crop grew regardless of the modifier applied to the combine's hopper.
+        if detectedFieldId then
+            local ok, errMsg = pcall(function()
+                g_SoilFertilityManager.soilSystem:onHarvest(detectedFieldId, inputFruitType, liters, strawRatio, area)
+            end)
+            if not ok then
+                SoilLogger.error("Harvest hook (nutrient update) failed: %s", tostring(errMsg))
+            end
         end
 
         -- Forward original return values so Cutter.lua gets appliedDelta intact
