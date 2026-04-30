@@ -941,11 +941,13 @@ function SoilFertilitySystem:scanFields()
             local actualFieldId = field.farmland and field.farmland.id
 
             if actualFieldId and actualFieldId > 0 then
-                -- FS25 API: Field.areaHa = cultivated area in ha (from LUADOC: self.areaHa = sqm/10000).
-                -- Farmland.areaInHa = parcel area in ha. Both checked before defaulting to 1.0
-                -- because the old incorrect names (fieldArea / farmland.area) were always nil,
-                -- causing totalFieldCells to be computed from 1 ha instead of real field size.
-                local area = field.areaHa or (field.farmland and field.farmland.areaInHa) or 1.0
+                -- Farmland.areaInHa is loaded from XML and always populated (default 2.5 ha).
+                -- Field.areaHa is computed from polygon geometry but defaults to 1.0 in Field.new()
+                -- before the polygon loads — 1.0 is truthy in Lua, so using field.areaHa first
+                -- means the farmland fallback would NEVER fire for un-loaded polygons, causing
+                -- every field to be recorded as exactly 1 ha regardless of actual size.
+                -- Use farmland.areaInHa as the primary source; field.areaHa only as fallback.
+                local area = (field.farmland and field.farmland.areaInHa) or field.areaHa or 1.0
 
                 SoilLogger.debug("Found field %d (%.2f ha)", actualFieldId, area)
 
@@ -1792,8 +1794,18 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
             if not field.coveredCells[cellKey] then
                 field.coveredCells[cellKey] = true
                 field.coveredCellCount = (field.coveredCellCount or 0) + 1
-                -- Compute totalFieldCells once (lazily) from field area
+                -- Compute totalFieldCells once (lazily) from field area.
+                -- Re-query live farmland area as final safety net — handles fields lazily
+                -- created mid-session (not in the startup scan) and any remaining
+                -- stale-area edge cases not caught by the XML load correction.
                 if (field.totalFieldCells or 0) == 0 then
+                    if g_farmlandManager then
+                        local farmlandObj = g_farmlandManager:getFarmlandById(fieldId)
+                        if farmlandObj and farmlandObj.areaInHa and farmlandObj.areaInHa > 0 then
+                            field.fieldArea = farmlandObj.areaInHa
+                            areaInHa = farmlandObj.areaInHa
+                        end
+                    end
                     field.totalFieldCells = math.max(1, math.ceil(areaInHa / zone.CELL_AREA_HA))
                 end
                 local prevCoverage = field.coverageFraction or 0
@@ -2376,6 +2388,17 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
             nutrientBuffer = {},
             zoneData = {},
         }
+
+        -- Refresh fieldArea from the live farmland object — corrects stale values from saves
+        -- written before the scan priority bug was fixed (where field.areaHa == 1.0 default
+        -- was recorded as the real area because it's truthy and blocked the farmland fallback).
+        -- g_farmlandManager.farmlands[id].areaInHa comes from map XML and is always reliable.
+        if g_farmlandManager then
+            local farmlandObj = g_farmlandManager:getFarmlandById(fieldId)
+            if farmlandObj and farmlandObj.areaInHa and farmlandObj.areaInHa > 0 then
+                self.fieldData[fieldId].fieldArea = farmlandObj.areaInHa
+            end
+        end
 
         -- Clear empty strings
         if self.fieldData[fieldId].lastCrop == "" then
