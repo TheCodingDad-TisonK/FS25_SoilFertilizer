@@ -31,7 +31,10 @@ if command -v zip &>/dev/null; then
         --exclude "./*.sh" \
         --exclude "./*.py" \
         --exclude "./.claude/*" \
+        --exclude "./.claude/**/*" \
         --exclude "./.git/*" \
+        --exclude "./.github/*" \
+        --exclude "./.github/**/*" \
         --exclude "./*.md" \
         --exclude "./CHANGELOG.md" \
         --exclude "./CONTRIBUTING.md" \
@@ -56,7 +59,7 @@ import zipfile, os, sys
 MOD_DIR = os.getcwd()
 ZIP_PATH = os.path.join(os.path.dirname(MOD_DIR), os.path.basename(MOD_DIR) + ".zip")
 
-EXCLUDE_DIRS  = {".git", ".claude", "__MACOSX"}
+EXCLUDE_DIRS  = {".git", ".claude", ".github", "__MACOSX"}
 EXCLUDE_EXTS  = {".sh", ".py", ".md", ".DS_Store", ".zip", ".txt"}
 EXCLUDE_FILES = {".gitignore", "icon_source.png"}
 
