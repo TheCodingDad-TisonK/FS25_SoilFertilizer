@@ -488,5 +488,119 @@
 		<e k="sf_pda_map_native_hint" v="[EN] The soil layer visualization has moved! You can now access and toggle all soil layers directly from the native PDA Map sidebar (ESC &gt; Map). Look for the 'Soil Layers' category in the sidebar dots." eh="87f73b10" />
     <e k="sf_pda_total_urgent_label" v="Total que necesita atención" eh="b3ce2db9" />
     <e k="sf_pda_treatment_hint" v="Los campos listados a la derecha necesitan tratamiento. Hacé clic en una fila para ver los insumos recomendados y las cantidades estimadas." eh="5748d316" />
+    <!-- HUD labels -->
+    <e k="sf_hud_label_ph" v="[EN] pH" />
+    <e k="sf_hud_label_om" v="[EN] OM" />
+    <e k="sf_hud_unit_ppm" v="[EN] (ppm)" />
+    <e k="sf_hud_coverage" v="[EN] Coverage: %d%% / %d%%" />
+    <e k="sf_hud_compaction" v="[EN] Compaction: %d%%" />
+    <!-- Sprayer rate HUD -->
+    <e k="sf_sprayer_auto_on" v="[EN] APP. RATE  ( AUTO: ON )" />
+    <e k="sf_sprayer_auto_off" v="[EN] APP. RATE  AUTO: OFF [%s]" />
+    <e k="sf_sprayer_target" v="[EN] Target: " />
+    <e k="sf_sprayer_burn_guaranteed" v="[EN] BURN RISK: GUARANTEED" />
+    <e k="sf_sprayer_burn_possible" v="[EN] BURN RISK: POSSIBLE" />
+    <!-- Notifications -->
+    <e k="sf_notify_welcome" v="[EN] Soil &amp; Fertilizer Mod Active | J = HUD | K = Soil Report | Type 'soilfertility' for commands" />
+    <e k="sf_notify_mod_active_title" v="[EN] Soil &amp; Fertilizer Mod Active" />
+    <e k="sf_notify_mod_active_body" v="[EN] Real soil system with full event hooks" />
+    <e k="sf_notify_init_delayed" v="[EN] Soil Mod: Field initialization delayed. Trying alternative method..." />
+    <e k="sf_notify_init_success" v="[EN] Soil Mod: Field initialization successful!" />
+    <e k="sf_notify_critical_title" v="[EN] Critical Care Alert" />
+    <e k="sf_notify_critical_body" v="[EN] Field %d requires immediate attention! Urgency: %d%%" />
+    <e k="sf_notify_treated_title" v="[EN] Soil Update" />
+    <e k="sf_notify_treated_body" v="[EN] Field %d fully treated with %s" />
+    <e k="sf_notify_burn_title" v="[EN] Fertilizer Burn" />
+    <e k="sf_notify_burn_body" v="[EN] Field %d: over-application damage (pH %.1f)" />
+    <e k="sf_notify_sync_error" v="[EN] Soil Mod: Data sync issue detected. Please report if this persists." />
+    <!-- Panel categories -->
+    <e k="sf_panel_cat_sim" v="[EN] Simulation" />
+    <e k="sf_panel_cat_sim_desc" v="[EN] Farm mechanics, difficulty and nutrient cycles" />
+    <e k="sf_panel_cat_display" v="[EN] Display &amp; HUD" />
+    <e k="sf_panel_cat_display_desc" v="[EN] HUD appearance, color theme, position and font size" />
+    <e k="sf_panel_cat_overlay" v="[EN] Map Overlay" />
+    <e k="sf_panel_cat_overlay_desc" v="[EN] Active overlay layer shown in the PDA map" />
+    <e k="sf_panel_hdr_core" v="[EN] Core Systems" />
+    <e k="sf_panel_hdr_difficulty" v="[EN] Difficulty" />
+    <e k="sf_panel_hdr_environment" v="[EN] Environment" />
+    <e k="sf_panel_hdr_crop_stress" v="[EN] Crop Stress" />
+    <e k="sf_panel_hdr_visibility" v="[EN] Visibility" />
+    <e k="sf_panel_hdr_hud_style" v="[EN] HUD Style" />
+    <e k="sf_panel_hdr_position" v="[EN] Position" />
+    <e k="sf_panel_hdr_layer" v="[EN] Layer" />
+    <e k="sf_panel_hdr_performance" v="[EN] Performance" />
+    <e k="sf_panel_hdr_mod_ctrl" v="[EN] Mod Control &amp; Difficulty" />
+    <e k="sf_panel_hdr_systems" v="[EN] Systems" />
+    <e k="sf_panel_hdr_actions" v="[EN] Actions &amp; Field Tools" />
+    <!-- Panel chrome -->
+    <e k="sf_panel_admin_yes" v="[EN] Admin: YES" />
+    <e k="sf_panel_admin_no" v="[EN] Admin: NO" />
+    <e k="sf_panel_multiplayer" v="[EN] Multiplayer" />
+    <e k="sf_panel_singleplayer" v="[EN] Single Player" />
+    <e k="sf_panel_btn_back" v="[EN] &lt; Back" />
+    <e k="sf_panel_btn_reset_cat" v="[EN] Reset Cat." />
+    <e k="sf_panel_btn_close_hint" v="[EN] SHIFT+O to close" />
+    <e k="sf_panel_select_category" v="[EN] Select a category to configure settings" />
+    <e k="sf_panel_btn_configure" v="[EN] Configure &gt;&gt;" />
+    <e k="sf_panel_btn_open" v="[EN] Open &gt;&gt;" />
+    <!-- Setting descriptions -->
+    <e k="sf_desc_enabled" v="[EN] Activate / deactivate the entire mod" />
+    <e k="sf_desc_debugMode" v="[EN] Extra logging for troubleshooting" />
+    <e k="sf_desc_fertilitySystem" v="[EN] Full soil fertility modeling" />
+    <e k="sf_desc_nutrientCycles" v="[EN] Track N/P/K depletion and recovery" />
+    <e k="sf_desc_fertilizerCosts" v="[EN] Real in-game cost for fertilizers" />
+    <e k="sf_desc_showNotifications" v="[EN] In-game soil status notifications" />
+    <e k="sf_desc_showHUD" v="[EN] Show the soil HUD overlay" />
+    <e k="sf_desc_hudPosition" v="[EN] HUD preset anchor position" />
+    <e k="sf_desc_hudColorTheme" v="[EN] Color palette for HUD elements" />
+    <e k="sf_desc_hudFontSize" v="[EN] HUD text size" />
+    <e k="sf_desc_hudTransparency" v="[EN] HUD background transparency" />
+    <e k="sf_desc_seasonalEffects" v="[EN] Season-driven soil changes" />
+    <e k="sf_desc_rainEffects" v="[EN] Rain causes nutrient leaching" />
+    <e k="sf_desc_plowingBonus" v="[EN] Plow bonus for soil recovery" />
+    <e k="sf_desc_weedPressure" v="[EN] Track and penalize weed spread" />
+    <e k="sf_desc_pestPressure" v="[EN] Track insect pest infestation" />
+    <e k="sf_desc_diseasePressure" v="[EN] Track fungal crop diseases" />
+    <e k="sf_desc_compactionEnabled" v="[EN] Heavy vehicle soil compaction" />
+    <e k="sf_desc_difficulty" v="[EN] Nutrient drain intensity level" />
+    <e k="sf_desc_replenishmentRate" v="[EN] Fertilizer nutrient restoration speed" />
+    <e k="sf_desc_useImperialUnits" v="[EN] Use imperial units (US tons/acre)" />
+    <e k="sf_desc_autoRateControl" v="[EN] Smart sprayer application rates" />
+    <e k="sf_desc_cropRotation" v="[EN] Rotation benefits and penalties" />
+    <e k="sf_desc_activeMapLayer" v="[EN] Nutrient layer shown in PDA map" />
+    <e k="sf_desc_overlayDensity" v="[EN] Sample point budget (Low=8k, Med=20k, High=40k)" />
+    <!-- Multi-option values -->
+    <e k="sf_rr_1" v="[EN] Very Slow (0.25x)" />
+    <e k="sf_rr_2" v="[EN] Slow (0.5x)" />
+    <e k="sf_rr_3" v="[EN] Normal (1.0x)" />
+    <e k="sf_rr_4" v="[EN] Fast (1.5x)" />
+    <e k="sf_rr_5" v="[EN] Very Fast (2.0x)" />
+    <e k="sf_layer_1" v="[EN] Off" />
+    <e k="sf_layer_2" v="[EN] Nitrogen" />
+    <e k="sf_layer_3" v="[EN] Phosphorus" />
+    <e k="sf_layer_4" v="[EN] Potassium" />
+    <e k="sf_layer_5" v="[EN] pH" />
+    <e k="sf_layer_6" v="[EN] Org Matter" />
+    <e k="sf_layer_7" v="[EN] Urgency" />
+    <e k="sf_layer_8" v="[EN] Weed" />
+    <e k="sf_layer_9" v="[EN] Pest" />
+    <e k="sf_layer_10" v="[EN] Disease" />
+    <e k="sf_layer_11" v="[EN] Compaction" />
+    <e k="sf_density_1" v="[EN] Low" />
+    <e k="sf_density_2" v="[EN] Medium" />
+    <e k="sf_density_3" v="[EN] High" />
+    <!-- Admin action items -->
+    <e k="sf_admin_save_label" v="[EN] Save Soil Data" />
+    <e k="sf_admin_save_desc" v="[EN] Force-save all soil data now" />
+    <e k="sf_admin_reset_label" v="[EN] Reset All Settings" />
+    <e k="sf_admin_reset_desc" v="[EN] Restore every setting to its default" />
+    <e k="sf_admin_drain_label" v="[EN] Drain Vehicle Tanks" />
+    <e k="sf_admin_drain_desc" v="[EN] Empty sprayer + implements (50% refund)" />
+    <e k="sf_admin_field_info_label" v="[EN] Current Field Info" />
+    <e k="sf_admin_field_info_desc" v="[EN] Soil data for the field at your position" />
+    <e k="sf_admin_field_forecast_label" v="[EN] Field Forecast" />
+    <e k="sf_admin_field_forecast_desc" v="[EN] Yield forecast for field at position" />
+    <e k="sf_admin_list_fields_label" v="[EN] List All Fields" />
+    <e k="sf_admin_list_fields_desc" v="[EN] Dump all field soil data to game log" />
     </elements>
 </l10n>

@@ -136,7 +136,7 @@ function SoilFertilitySystem:initialize()
 
     -- Show notification
     if self.settings.enabled and self.settings.showNotifications then
-        self:showNotification("Soil & Fertilizer Mod Active", "Real soil system with full event hooks")
+        self:showNotification(g_i18n:getText("sf_notify_mod_active_title"), g_i18n:getText("sf_notify_mod_active_body"))
     end
 end
 
@@ -757,7 +757,7 @@ function SoilFertilitySystem:update(dt)
                             self.fieldsScanStage = 2
                             self.fieldsScanFrameCounter = 0
                             if g_currentMission and g_currentMission.hud then
-                                g_currentMission.hud:showBlinkingWarning("Soil Mod: Field initialization delayed. Trying alternative method...", 5000)
+                                g_currentMission.hud:showBlinkingWarning(g_i18n:getText("sf_notify_init_delayed"), 5000)
                             end
                         end
                     end
@@ -775,7 +775,7 @@ function SoilFertilitySystem:update(dt)
                     self.fieldsScanPending = false
                     -- Show success notification so player knows recovery worked
                     if g_currentMission and g_currentMission.hud then
-                        g_currentMission.hud:showBlinkingWarning("Soil Mod: Field initialization successful!", 4000)
+                        g_currentMission.hud:showBlinkingWarning(g_i18n:getText("sf_notify_init_success"), 4000)
                     end
                 end
             end
@@ -1482,8 +1482,8 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
                     if owner == farmId then isOwned = true end
                 end
                 if isOwned then
-                    self:showNotification("Critical Care Alert",
-                        string.format("Field %d requires immediate attention! Urgency: %d%%",
+                    self:showNotification(g_i18n:getText("sf_notify_critical_title"),
+                        string.format(g_i18n:getText("sf_notify_critical_body"),
                             fieldId, math.floor(urgency)))
                 end
                 field.lastAlertSeason = season
@@ -1847,7 +1847,7 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
                            g_currentMission.environment.currentDay) or 0
             if not self.fertNotifyShown then self.fertNotifyShown = {} end
             if self.fertNotifyShown[fieldId] ~= today then
-                self:showNotification("Soil Update", string.format("Field %d fully treated with %s", fieldId, fillType.name))
+                self:showNotification(g_i18n:getText("sf_notify_treated_title"), string.format(g_i18n:getText("sf_notify_treated_body"), fieldId, fillType.name))
                 self.fertNotifyShown[fieldId] = today
             end
         end
@@ -2054,8 +2054,8 @@ function SoilFertilitySystem:applyBurnEffect(fieldId, rateMultiplier)
 
         if self.settings.showNotifications then
             self:showNotification(
-                "Fertilizer Burn",
-                string.format("Field %d: over-application damage (pH %.1f)", fieldId, field.pH)
+                g_i18n:getText("sf_notify_burn_title"),
+                string.format(g_i18n:getText("sf_notify_burn_body"), fieldId, field.pH)
             )
         end
 

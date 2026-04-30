@@ -468,7 +468,7 @@ function SoilFullSyncEvent:readStream(streamId, connection)
 
     -- Notify user if corruption was detected
     if corruptionDetected and g_currentMission and g_currentMission.hud then
-        g_currentMission.hud:showBlinkingWarning("Soil Mod: Data sync issue detected. Please report if this persists.", 6000)
+        g_currentMission.hud:showBlinkingWarning(g_i18n:getText("sf_notify_sync_error"), 6000)
     end
 
     self:run(connection)

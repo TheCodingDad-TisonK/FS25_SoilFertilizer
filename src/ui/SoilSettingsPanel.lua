@@ -98,105 +98,111 @@ local C = {
 -- ── Category definitions ───────────────────────────────────
 local CATEGORIES = {
     {
-        id      = "simulation",
-        label   = "Simulation",
-        desc    = "Farm mechanics, difficulty\nand nutrient cycles",
-        accent  = C.sim_accent,
+        id       = "simulation",
+        labelKey = "sf_panel_cat_sim",
+        descKey  = "sf_panel_cat_sim_desc",
+        accent   = C.sim_accent,
         sections = {
             {
-                header = "Core Systems",
-                items  = { "fertilitySystem", "nutrientCycles", "fertilizerCosts",
-                           "cropRotation", "autoRateControl" }
+                headerKey = "sf_panel_hdr_core",
+                items     = { "fertilitySystem", "nutrientCycles", "fertilizerCosts",
+                              "cropRotation", "autoRateControl" }
             },
             {
-                header = "Difficulty",
-                items  = { "difficulty", "replenishmentRate" }
+                headerKey = "sf_panel_hdr_difficulty",
+                items     = { "difficulty", "replenishmentRate" }
             },
             {
-                header = "Environment",
-                items  = { "seasonalEffects", "rainEffects", "plowingBonus" }
+                headerKey = "sf_panel_hdr_environment",
+                items     = { "seasonalEffects", "rainEffects", "plowingBonus" }
             },
             {
-                header = "Crop Stress",
-                items  = { "weedPressure", "pestPressure", "diseasePressure", "compactionEnabled" }
+                headerKey = "sf_panel_hdr_crop_stress",
+                items     = { "weedPressure", "pestPressure", "diseasePressure", "compactionEnabled" }
             },
         }
     },
     {
-        id      = "display",
-        label   = "Display & HUD",
-        desc    = "HUD appearance, color theme\nposition and font size",
-        accent  = C.disp_accent,
+        id       = "display",
+        labelKey = "sf_panel_cat_display",
+        descKey  = "sf_panel_cat_display_desc",
+        accent   = C.disp_accent,
         sections = {
             {
-                header = "Visibility",
-                items  = { "showHUD", "useImperialUnits" }
+                headerKey = "sf_panel_hdr_visibility",
+                items     = { "showHUD", "useImperialUnits" }
             },
             {
-                header = "HUD Style",
-                items  = { "hudColorTheme", "hudFontSize", "hudTransparency" }
+                headerKey = "sf_panel_hdr_hud_style",
+                items     = { "hudColorTheme", "hudFontSize", "hudTransparency" }
             },
             {
-                header = "Position",
-                items  = { "hudPosition" }
+                headerKey = "sf_panel_hdr_position",
+                items     = { "hudPosition" }
             },
         }
     },
     {
-        id      = "map",
-        label   = "Map Overlay",
-        desc    = "Active overlay layer\nshown in the PDA map",
-        accent  = C.map_accent,
+        id       = "map",
+        labelKey = "sf_panel_cat_overlay",
+        descKey  = "sf_panel_cat_overlay_desc",
+        accent   = C.map_accent,
         sections = {
             {
-                header = "Layer",
-                items  = { "activeMapLayer" }
+                headerKey = "sf_panel_hdr_layer",
+                items     = { "activeMapLayer" }
             },
             {
-                header = "Performance",
-                items  = { "overlayDensity" }
+                headerKey = "sf_panel_hdr_performance",
+                items     = { "overlayDensity" }
             },
         }
     },
 }
 
--- ── Multi-option labels ────────────────────────────────────
+-- ── Multi-option labels (i18n key names resolved at draw time via tr())
 local MULTI_OPTS = {
-    difficulty        = {"Simple", "Realistic", "Hardcore"},
-    replenishmentRate = {"Very Slow (0.25x)", "Slow (0.5x)", "Normal (1.0x)", "Fast (1.5x)", "Very Fast (2.0x)"},
-    hudPosition       = {"Top Right", "Top Left", "Bot Right", "Bot Left", "Ctr Right", "Custom"},
-    hudColorTheme     = {"Green", "Blue", "Amber", "Mono"},
-    hudFontSize       = {"Small", "Medium", "Large"},
-    hudTransparency   = {"Clear", "Light", "Medium", "Dark", "Solid"},
-    activeMapLayer    = {"Off", "Nitrogen", "Phosphorus", "Potassium", "pH",
-                         "Org Matter", "Urgency", "Weed", "Pest", "Disease", "Compaction"},
-    overlayDensity    = {"Low", "Medium", "High"},
+    difficulty        = {"sf_diff_1", "sf_diff_2", "sf_diff_3"},
+    replenishmentRate = {"sf_rr_1", "sf_rr_2", "sf_rr_3", "sf_rr_4", "sf_rr_5"},
+    hudPosition       = {"sf_hud_pos_1", "sf_hud_pos_2", "sf_hud_pos_3",
+                         "sf_hud_pos_4", "sf_hud_pos_5", "sf_hud_pos_6"},
+    hudColorTheme     = {"sf_hud_color_1", "sf_hud_color_2", "sf_hud_color_3", "sf_hud_color_4"},
+    hudFontSize       = {"sf_hud_font_1", "sf_hud_font_2", "sf_hud_font_3"},
+    hudTransparency   = {"sf_hud_trans_1", "sf_hud_trans_2", "sf_hud_trans_3",
+                         "sf_hud_trans_4", "sf_hud_trans_5"},
+    activeMapLayer    = {"sf_layer_1", "sf_layer_2", "sf_layer_3", "sf_layer_4",
+                         "sf_layer_5", "sf_layer_6", "sf_layer_7", "sf_layer_8",
+                         "sf_layer_9", "sf_layer_10", "sf_layer_11"},
+    overlayDensity    = {"sf_density_1", "sf_density_2", "sf_density_3"},
 }
 
--- Short descriptions for each setting
+-- Short descriptions for each setting (i18n key names resolved at draw time via tr())
 local SETTING_DESCS = {
-    fertilitySystem  = "Full soil fertility modeling",
-    nutrientCycles   = "Track N/P/K depletion and recovery",
-    fertilizerCosts  = "Real in-game cost for fertilizers",
-    cropRotation     = "Rotation benefits and penalties",
-    autoRateControl  = "Smart sprayer application rates",
-    difficulty         = "Nutrient drain intensity level",
-    replenishmentRate  = "Fertilizer nutrient restoration speed",
-    seasonalEffects  = "Season-driven soil changes",
-    rainEffects      = "Rain causes nutrient leaching",
-    plowingBonus     = "Plow bonus for soil recovery",
-    weedPressure     = "Track and penalize weed spread",
-    pestPressure     = "Track insect pest infestation",
-    diseasePressure  = "Track fungal crop diseases",
-    compactionEnabled = "Heavy vehicle soil compaction",
-    showHUD          = "Show the soil HUD overlay",
-    useImperialUnits = "Use imperial units (US tons/acre)",
-    hudColorTheme    = "Color palette for HUD elements",
-    hudFontSize      = "HUD text size",
-    hudTransparency  = "HUD background transparency",
-    hudPosition      = "HUD preset anchor position",
-    activeMapLayer   = "Nutrient layer shown in PDA map",
-    overlayDensity   = "Sample point budget (Low=8k, Med=20k, High=40k)",
+    fertilitySystem   = "sf_desc_fertilitySystem",
+    nutrientCycles    = "sf_desc_nutrientCycles",
+    fertilizerCosts   = "sf_desc_fertilizerCosts",
+    cropRotation      = "sf_desc_cropRotation",
+    autoRateControl   = "sf_desc_autoRateControl",
+    difficulty        = "sf_desc_difficulty",
+    replenishmentRate = "sf_desc_replenishmentRate",
+    seasonalEffects   = "sf_desc_seasonalEffects",
+    rainEffects       = "sf_desc_rainEffects",
+    plowingBonus      = "sf_desc_plowingBonus",
+    weedPressure      = "sf_desc_weedPressure",
+    pestPressure      = "sf_desc_pestPressure",
+    diseasePressure   = "sf_desc_diseasePressure",
+    compactionEnabled = "sf_desc_compactionEnabled",
+    showHUD           = "sf_desc_showHUD",
+    useImperialUnits  = "sf_desc_useImperialUnits",
+    hudColorTheme     = "sf_desc_hudColorTheme",
+    hudFontSize       = "sf_desc_hudFontSize",
+    hudTransparency   = "sf_desc_hudTransparency",
+    hudPosition       = "sf_desc_hudPosition",
+    activeMapLayer    = "sf_desc_activeMapLayer",
+    overlayDensity    = "sf_desc_overlayDensity",
+    enabled           = "sf_desc_enabled",
+    debugMode         = "sf_desc_debugMode",
+    showNotifications = "sf_desc_showNotifications",
 }
 
 -- Page states
@@ -211,36 +217,36 @@ local ADMIN_ACCENT = {0.88, 0.25, 0.25}   -- red accent for admin
 
 local ADMIN_SECTIONS = {
     {
-        header = "Mod Control & Difficulty",
-        items  = {
-            { label = "Mod Enabled",         desc = "Activate / deactivate the entire mod",            stype = "setting", id = "enabled" },
-            { label = "Debug Mode",          desc = "Extra logging for troubleshooting",               stype = "setting", id = "debugMode" },
-            { label = "Difficulty",          desc = "Nutrient drain intensity level",                  stype = "setting", id = "difficulty" },
-            { label = "Replenishment Rate",  desc = "Fertilizer nutrient restoration speed",           stype = "setting", id = "replenishmentRate" },
+        headerKey = "sf_panel_hdr_mod_ctrl",
+        items     = {
+            { stype = "setting", id = "enabled" },
+            { stype = "setting", id = "debugMode" },
+            { stype = "setting", id = "difficulty" },
+            { stype = "setting", id = "replenishmentRate" },
         },
     },
     {
-        header = "Systems",
-        items  = {
-            { label = "Fertility System", desc = "Full soil fertility modeling",                stype = "setting", id = "fertilitySystem" },
-            { label = "Nutrient Cycles",  desc = "N/P/K depletion and recovery",               stype = "setting", id = "nutrientCycles" },
-            { label = "Fertilizer Costs", desc = "Real in-game cost for fertilizers",          stype = "setting", id = "fertilizerCosts" },
-            { label = "Notifications",    desc = "In-game soil status notifications",          stype = "setting", id = "showNotifications" },
-            { label = "Seasonal Effects", desc = "Season-driven soil changes",                 stype = "setting", id = "seasonalEffects" },
-            { label = "Rain Effects",     desc = "Rain causes nutrient leaching",              stype = "setting", id = "rainEffects" },
-            { label = "Plowing Bonus",    desc = "Plow bonus for soil recovery",               stype = "setting", id = "plowingBonus" },
-            { label = "Soil Compaction",  desc = "Heavy vehicle compaction effects",            stype = "setting", id = "compactionEnabled" },
+        headerKey = "sf_panel_hdr_systems",
+        items     = {
+            { stype = "setting", id = "fertilitySystem" },
+            { stype = "setting", id = "nutrientCycles" },
+            { stype = "setting", id = "fertilizerCosts" },
+            { stype = "setting", id = "showNotifications" },
+            { stype = "setting", id = "seasonalEffects" },
+            { stype = "setting", id = "rainEffects" },
+            { stype = "setting", id = "plowingBonus" },
+            { stype = "setting", id = "compactionEnabled" },
         },
     },
     {
-        header = "Actions & Field Tools",
-        items  = {
-            { label = "Save Soil Data",      desc = "Force-save all soil data now",            stype = "action", id = "admin_save" },
-            { label = "Reset All Settings",  desc = "Restore every setting to its default",    stype = "danger", id = "admin_reset" },
-            { label = "Drain Vehicle Tanks", desc = "Empty sprayer + implements (50% refund)", stype = "action", id = "admin_drain" },
-            { label = "Current Field Info",  desc = "Soil data for the field at your position",stype = "action", id = "admin_field_info" },
-            { label = "Field Forecast",      desc = "Yield forecast for field at position",    stype = "action", id = "admin_field_forecast" },
-            { label = "List All Fields",     desc = "Dump all field soil data to game log",    stype = "action", id = "admin_list_fields" },
+        headerKey = "sf_panel_hdr_actions",
+        items     = {
+            { stype = "action", id = "admin_save" },
+            { stype = "danger", id = "admin_reset" },
+            { stype = "action", id = "admin_drain" },
+            { stype = "action", id = "admin_field_info" },
+            { stype = "action", id = "admin_field_forecast" },
+            { stype = "action", id = "admin_list_fields" },
         },
     },
 }
@@ -502,9 +508,9 @@ function SoilSettingsPanel:drawInfoBar()
     local isMP    = g_currentMission and g_currentMission.missionDynamicInfo and
                     g_currentMission.missionDynamicInfo.isMultiplayer
 
-    local adminText  = isAdmin and "Admin: YES" or "Admin: NO"
+    local adminText  = isAdmin and tr("sf_panel_admin_yes") or tr("sf_panel_admin_no")
     local adminColor = isAdmin and C.info_admin or C.info_no_adm
-    local modeText   = isMP and "Multiplayer" or "Single Player"
+    local modeText   = isMP and tr("sf_panel_multiplayer") or tr("sf_panel_singleplayer")
 
     local textY = iy + IB_H * 0.25
     self:drawText(PX + PAD, textY, TS_SMALL, adminText, adminColor, RenderText.ALIGN_LEFT, true)
@@ -519,7 +525,7 @@ function SoilSettingsPanel:drawInfoBar()
         local backHover = self:hitTest(bbX, bbY, bbW, bbH, self.mouseX, self.mouseY)
         self:drawRect(bbX, bbY, bbW, bbH, backHover and C.back_hover or C.off_bg)
         self:drawRect(bbX, bbY, 0.002, bbH, C.green_dim)
-        self:drawText(bbX + bbW * 0.5, bbY + bbH * 0.18, TS_SMALL, "< Back", C.white, RenderText.ALIGN_CENTER, false)
+        self:drawText(bbX + bbW * 0.5, bbY + bbH * 0.18, TS_SMALL, tr("sf_panel_btn_back"), C.white, RenderText.ALIGN_CENTER, false)
         self:registerClick("back", bbX, bbY, bbW, bbH)
 
         if self.page == PAGE_CATEGORY then
@@ -529,12 +535,12 @@ function SoilSettingsPanel:drawInfoBar()
             local rbY = bbY
             local resetHover = self:hitTest(rbX, rbY, rbW, bbH, self.mouseX, self.mouseY)
             self:drawRect(rbX, rbY, rbW, bbH, resetHover and {0.50, 0.20, 0.10, 0.70} or C.off_bg)
-            self:drawText(rbX + rbW * 0.5, rbY + bbH * 0.18, TS_SMALL, "Reset Cat.", C.dim, RenderText.ALIGN_CENTER, false)
+            self:drawText(rbX + rbW * 0.5, rbY + bbH * 0.18, TS_SMALL, tr("sf_panel_btn_reset_cat"), C.dim, RenderText.ALIGN_CENTER, false)
             self:registerClick("reset_cat", rbX, rbY, rbW, bbH)
         end
     else
         -- Close hint on landing
-        self:drawText(PX + PW - PAD, textY, TS_SMALL, "SHIFT+O to close", C.hint, RenderText.ALIGN_RIGHT, false)
+        self:drawText(PX + PW - PAD, textY, TS_SMALL, tr("sf_panel_btn_close_hint"), C.hint, RenderText.ALIGN_RIGHT, false)
     end
 end
 
@@ -543,7 +549,7 @@ function SoilSettingsPanel:drawLandingPage()
     -- Header above cards
     local headerY = CY_BOT + CH - 0.042
     self:drawText(PX + PW * 0.5, headerY, TS_SMALL,
-        "Select a category to configure settings", C.hint, RenderText.ALIGN_CENTER, false)
+        tr("sf_panel_select_category"), C.hint, RenderText.ALIGN_CENTER, false)
 
     for i, cat in ipairs(CATEGORIES) do
         local cardX = CX + (i - 1) * (CARD_W + CARD_GAP)
@@ -589,7 +595,7 @@ function SoilSettingsPanel:drawCategoryCard(x, y, w, h, cat, idx)
     -- Category title
     local titleY = y + h - 0.018 - 0.044
     self:drawText(x + w * 0.5, titleY, TS_BODY,
-        string.upper(cat.label), C.white, RenderText.ALIGN_CENTER, true)
+        string.upper(tr(cat.labelKey) or cat.id), C.white, RenderText.ALIGN_CENTER, true)
 
     -- Divider under title
     self:drawRect(x + 0.010, titleY - 0.006, w - 0.020, 0.001, C.divider)
@@ -598,10 +604,11 @@ function SoilSettingsPanel:drawCategoryCard(x, y, w, h, cat, idx)
     local count = 0
     for _, sec in ipairs(cat.sections) do count = count + #sec.items end
 
-    -- Description (2 lines)
+    -- Description (supports \n for manual line breaks; single line is fine too)
     local descY = titleY - 0.038
+    local descStr = tr(cat.descKey) or ""
     local lines = {}
-    for line in (cat.desc .. "\n"):gmatch("([^\n]*)\n") do
+    for line in (descStr .. "\n"):gmatch("([^\n]*)\n") do
         table.insert(lines, line)
     end
     for j, line in ipairs(lines) do
@@ -623,7 +630,7 @@ function SoilSettingsPanel:drawCategoryCard(x, y, w, h, cat, idx)
         hovered and cat.accent or C.off_bg,
         hovered and 0.20 or 1.0)
     self:drawText(btnX + btnW * 0.5, btnY + btnH * 0.18, TS_SMALL,
-        hovered and "Open >>" or "Configure >>",
+        hovered and tr("sf_panel_btn_open") or tr("sf_panel_btn_configure"),
         hovered and cat.accent or C.hint,
         RenderText.ALIGN_CENTER, false)
 
@@ -648,7 +655,7 @@ function SoilSettingsPanel:drawCategoryPage()
         self:drawRect(CX, curY, CW, SEC_H, C.title_bg, 0.60)
         self:drawRect(CX, curY, 0.003, SEC_H, cat.accent)
         self:drawText(CX + 0.012, curY + SEC_H * 0.25, TS_SMALL,
-            string.upper(sec.header), cat.accent, RenderText.ALIGN_LEFT, true)
+            string.upper(tr(sec.headerKey) or ""), cat.accent, RenderText.ALIGN_LEFT, true)
 
         for _, settingId in ipairs(sec.items) do
             curY = curY - ROW_H
@@ -726,7 +733,7 @@ function SoilSettingsPanel:drawAdminPage()
         self:drawRect(CX, curY, CW, SEC_H, C.title_bg, 0.60)
         self:drawRect(CX, curY, 0.003, SEC_H, ADMIN_ACCENT)
         self:drawText(CX + 0.012, curY + SEC_H * 0.25, TS_SMALL,
-            string.upper(sec.header), {ADMIN_ACCENT[1], ADMIN_ACCENT[2], ADMIN_ACCENT[3], 1.0},
+            string.upper(tr(sec.headerKey) or ""), {ADMIN_ACCENT[1], ADMIN_ACCENT[2], ADMIN_ACCENT[3], 1.0},
             RenderText.ALIGN_LEFT, true)
 
         for _, item in ipairs(sec.items) do
@@ -745,8 +752,11 @@ function SoilSettingsPanel:drawAdminPage()
                 local lc = locked and C.lock_text or C.white
                 local dc = locked and {C.lock_text[1]*0.7, C.lock_text[2]*0.7, C.lock_text[3]*0.7, 1} or C.dim
                 if locked then self:drawRect(CX, curY, 0.003, rh, {0.88, 0.60, 0.18, 0.45}) end
-                self:drawText(CX + (locked and 0.010 or 0.008), curY + rh * 0.55, TS_BODY, item.label, lc, RenderText.ALIGN_LEFT, not locked)
-                self:drawText(CX + (locked and 0.010 or 0.008), curY + rh * 0.15, TS_TINY, item.desc, dc, RenderText.ALIGN_LEFT, false)
+                local iLabel = tr(def.uiId .. "_short") or item.id
+                local iDescKey = SETTING_DESCS[item.id]
+                local iDesc = (iDescKey and tr(iDescKey)) or ""
+                self:drawText(CX + (locked and 0.010 or 0.008), curY + rh * 0.55, TS_BODY, iLabel, lc, RenderText.ALIGN_LEFT, not locked)
+                self:drawText(CX + (locked and 0.010 or 0.008), curY + rh * 0.15, TS_TINY, iDesc, dc, RenderText.ALIGN_LEFT, false)
                 local ctrlX = CX + CW - 0.012
                 local ctrlY = curY + (rh - TOGGLE_H) * 0.5
                 if def.type == "boolean" then
@@ -763,8 +773,10 @@ function SoilSettingsPanel:drawAdminPage()
                 local btnY = curY + (rh - btnH) * 0.5
                 local hov  = self:hitTest(btnX, btnY, btnW, btnH, self.mouseX, self.mouseY)
 
-                self:drawText(CX + 0.008, curY + rh * 0.55, TS_BODY, item.label, C.white, RenderText.ALIGN_LEFT, true)
-                self:drawText(CX + 0.008, curY + rh * 0.15, TS_TINY, item.desc, C.dim,   RenderText.ALIGN_LEFT, false)
+                local aLabel = tr("sf_" .. item.id .. "_label") or item.id
+                local aDesc  = tr("sf_" .. item.id .. "_desc") or ""
+                self:drawText(CX + 0.008, curY + rh * 0.55, TS_BODY, aLabel, C.white, RenderText.ALIGN_LEFT, true)
+                self:drawText(CX + 0.008, curY + rh * 0.15, TS_TINY, aDesc, C.dim,   RenderText.ALIGN_LEFT, false)
 
                 local bgCol = isDanger
                     and (hov and {0.65, 0.10, 0.10, 0.95} or {0.30, 0.06, 0.06, 0.85})
@@ -773,7 +785,7 @@ function SoilSettingsPanel:drawAdminPage()
                 self:drawRect(btnX, btnY, btnW, btnH, bgCol)
                 self:drawRect(btnX, btnY, 0.002, btnH, acCol)
                 self:drawText(btnX + btnW * 0.5, btnY + btnH * 0.20, TS_TINY,
-                    isDanger and "!! " .. item.label or ">  " .. item.label,
+                    isDanger and "!! " .. aLabel or ">  " .. aLabel,
                     hov and {1,1,1,1} or {0.75,0.75,0.75,1},
                     RenderText.ALIGN_CENTER, isDanger)
                 self:registerClick("admin_action_" .. item.id, btnX, btnY, btnW, btnH,
@@ -957,7 +969,8 @@ function SoilSettingsPanel:drawSettingRow(x, y, w, settingId, rowIdx, isAdmin)
     self:drawText(labelX, labelY, TS_BODY, labelText, labelColor, RenderText.ALIGN_LEFT, not locked)
 
     -- Description
-    local desc = SETTING_DESCS[settingId] or ""
+    local descKey = SETTING_DESCS[settingId]
+    local desc = (descKey and tr(descKey)) or ""
     self:drawText(labelX, y + ROW_H * 0.15, TS_TINY, desc, descColor, RenderText.ALIGN_LEFT, false)
 
     -- Control (toggle or multi-select) on the right
@@ -1009,8 +1022,9 @@ end
 function SoilSettingsPanel:drawMultiControl(rightX, y, settingId, locked)
     local opts    = MULTI_OPTS[settingId]
     if not opts then return end
-    local val     = self:getValue(settingId) or 1
-    local current = opts[val] or opts[1] or "?"
+    local val        = self:getValue(settingId) or 1
+    local currentKey = opts[val] or opts[1] or ""
+    local current    = (currentKey ~= "" and tr(currentKey)) or currentKey or "?"
 
     local arrowW = 0.022
     local labelW = MULTI_W - arrowW * 2

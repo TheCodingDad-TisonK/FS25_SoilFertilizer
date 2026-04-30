@@ -264,7 +264,7 @@ function SoilFertilityManager:deferredSoilSystemInit()
                 -- Show activation notification
                 if self.sfm.settings.showNotifications and g_currentMission and g_currentMission.hud then
                     g_currentMission.hud:showBlinkingWarning(
-                        "Soil & Fertilizer Mod Active | J = HUD | K = Soil Report | Type 'soilfertility' for commands",
+                        g_i18n:getText("sf_notify_welcome"),
                         8000
                     )
                 end
