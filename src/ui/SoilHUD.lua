@@ -700,7 +700,7 @@ function SoilHUD:drawPanel()
     self:drawRect(px + pad, cy, pw - pad*2, 0.0005, SoilHUD.C_DIVIDER)
     setTextAlignment(RenderText.ALIGN_RIGHT)
     setTextColor(SoilHUD.C_DIM[1], SoilHUD.C_DIM[2], SoilHUD.C_DIM[3], 0.60)
-    renderText(px + pw - pad, cy + 0.001*s, 0.007 * fontMult * s, "(ppm)")
+    renderText(px + pw - pad, cy + 0.001*s, 0.007 * fontMult * s, g_i18n:getText("sf_hud_unit_ppm"))
     setTextAlignment(RenderText.ALIGN_LEFT)
     cy = cy - pad * 0.8
 
@@ -709,11 +709,14 @@ function SoilHUD:drawPanel()
         local sprayer = self:getCurrentSprayer()
         local fillType = self:getSprayerFillType(sprayer)
         local profile = fillType and SoilConstants.FERTILIZER_PROFILES[fillType.name]
+        -- Rate multiplier — needed so ghost bar reflects current rate setting (issue #278)
+        local rm = g_SoilFertilityManager and g_SoilFertilityManager.sprayerRateManager
+        local rateMultiplier = (rm and sprayer) and rm:getMultiplier(sprayer.id) or 1.0
 
         -- N / P / K rows
-        cy = self:drawNutrientRow("N", info.nitrogen,   px, cy, pw, s, fontMult, info, profile, fillType)
-        cy = self:drawNutrientRow("P", info.phosphorus,  px, cy, pw, s, fontMult, info, profile, fillType)
-        cy = self:drawNutrientRow("K", info.potassium,   px, cy, pw, s, fontMult, info, profile, fillType)
+        cy = self:drawNutrientRow("N", info.nitrogen,   px, cy, pw, s, fontMult, info, profile, fillType, rateMultiplier)
+        cy = self:drawNutrientRow("P", info.phosphorus,  px, cy, pw, s, fontMult, info, profile, fillType, rateMultiplier)
+        cy = self:drawNutrientRow("K", info.potassium,   px, cy, pw, s, fontMult, info, profile, fillType, rateMultiplier)
 
         -- Divider
         cy = cy - pad * 0.5
@@ -725,13 +728,13 @@ function SoilHUD:drawPanel()
         local omCol = self:omColor(info.organicMatter)
 
         setTextColor(SoilHUD.C_LABEL[1], SoilHUD.C_LABEL[2], SoilHUD.C_LABEL[3], SoilHUD.C_LABEL[4])
-        renderText(tx, cy, 0.010 * fontMult * s, "pH")
+        renderText(tx, cy, 0.010 * fontMult * s, g_i18n:getText("sf_hud_label_ph"))
         setTextColor(pHCol[1], pHCol[2], pHCol[3], 1.0)
         renderText(tx + 0.020*s, cy, 0.010 * fontMult * s, string.format("%.1f", info.pH))
 
         local omX = tx + pw * 0.50
         setTextColor(SoilHUD.C_LABEL[1], SoilHUD.C_LABEL[2], SoilHUD.C_LABEL[3], SoilHUD.C_LABEL[4])
-        renderText(omX, cy, 0.010 * fontMult * s, "OM")
+        renderText(omX, cy, 0.010 * fontMult * s, g_i18n:getText("sf_hud_label_om"))
         setTextColor(omCol[1], omCol[2], omCol[3], 1.0)
         renderText(omX + 0.020*s, cy, 0.010 * fontMult * s, string.format("%.1f%%", info.organicMatter))
 
@@ -751,33 +754,49 @@ function SoilHUD:drawPanel()
             local tierData = ys.TIERS[tier]
             local thresh   = ys.OPTIMAL_THRESHOLD
 
-            local nDef = math.max(0, thresh - info.nitrogen.value)   / thresh
-            local pDef = math.max(0, thresh - info.phosphorus.value) / thresh
-            local kDef = math.max(0, thresh - info.potassium.value)  / thresh
-            local avgDef = (nDef + pDef + kDef) / 3
-
-            local penalty    = math.min(ys.MAX_PENALTY, avgDef * tierData.scale)
-            local penaltyPct = math.floor(penalty * 100 + 0.5)
+            -- If the field was just harvested today, show a softer post-harvest message
+            -- instead of the alarming penalty % caused by freshly depleted soil.
+            -- The forecast reflects next-season potential; nutrients drop on harvest and
+            -- the big red number before fertilizing is misleading (issue #279).
+            local currentDay = g_currentMission and g_currentMission.environment and
+                               g_currentMission.environment.currentDay
+            local justHarvested = currentDay and info.lastHarvest and
+                                  (info.lastHarvest >= currentDay)
 
             local yieldColor, yieldText
-            local yieldPrefix = (not cropLower or cropLower == "") and g_i18n:getText("sf_hud_estYield") or g_i18n:getText("sf_hud_yield")
-            if penaltyPct <= 0 then
-                yieldColor = SoilHUD.C_GOOD
-                yieldText  = string.format("%s: %s", yieldPrefix, g_i18n:getText("sf_hud_optimal"))
-            elseif penaltyPct < 15 then
-                yieldColor = SoilHUD.C_FAIR
-                yieldText  = string.format("%s ~-%d%%", yieldPrefix, penaltyPct)
+            if justHarvested then
+                yieldColor = SoilHUD.C_DIM
+                yieldText  = g_i18n:getText("sf_hud_post_harvest")
             else
-                yieldColor = SoilHUD.C_POOR
-                yieldText  = string.format("%s ~-%d%%", yieldPrefix, penaltyPct)
+                local nDef = math.max(0, thresh - info.nitrogen.value)   / thresh
+                local pDef = math.max(0, thresh - info.phosphorus.value) / thresh
+                local kDef = math.max(0, thresh - info.potassium.value)  / thresh
+                local avgDef = (nDef + pDef + kDef) / 3
+
+                local penalty    = math.min(ys.MAX_PENALTY, avgDef * tierData.scale)
+                local penaltyPct = math.floor(penalty * 100 + 0.5)
+
+                local yieldPrefix = (not cropLower or cropLower == "") and g_i18n:getText("sf_hud_estYield") or g_i18n:getText("sf_hud_yield")
+                if penaltyPct <= 0 then
+                    yieldColor = SoilHUD.C_GOOD
+                    yieldText  = string.format("%s: %s", yieldPrefix, g_i18n:getText("sf_hud_optimal"))
+                elseif penaltyPct < 15 then
+                    yieldColor = SoilHUD.C_FAIR
+                    yieldText  = string.format("%s ~-%d%%", yieldPrefix, penaltyPct)
+                else
+                    yieldColor = SoilHUD.C_POOR
+                    yieldText  = string.format("%s ~-%d%%", yieldPrefix, penaltyPct)
+                end
             end
 
             setTextColor(yieldColor[1], yieldColor[2], yieldColor[3], 1.0)
             renderText(tx, cy, 0.010 * fontMult * s, yieldText)
-            setTextAlignment(RenderText.ALIGN_RIGHT)
-            setTextColor(SoilHUD.C_DIM[1], SoilHUD.C_DIM[2], SoilHUD.C_DIM[3], SoilHUD.C_DIM[4])
-            renderText(px + pw - pad, cy, 0.009 * fontMult * s, tierData.label)
-            setTextAlignment(RenderText.ALIGN_LEFT)
+            if not justHarvested then
+                setTextAlignment(RenderText.ALIGN_RIGHT)
+                setTextColor(SoilHUD.C_DIM[1], SoilHUD.C_DIM[2], SoilHUD.C_DIM[3], SoilHUD.C_DIM[4])
+                renderText(px + pw - pad, cy, 0.009 * fontMult * s, tierData.label)
+                setTextAlignment(RenderText.ALIGN_LEFT)
+            end
 
             -- Divider before weed row
             cy = cy - SoilHUD.LINE_H * s
@@ -808,7 +827,7 @@ function SoilHUD:drawPanel()
                 local minCov = SoilConstants.COVERAGE and SoilConstants.COVERAGE.MIN_FULL_CREDIT or 0.70
                 local covPct = math.floor(cov * 100 + 0.5)
                 local minPct = math.floor(minCov * 100 + 0.5)
-                local covText = string.format("Coverage: %d%% / %d%%", covPct, minPct)
+                local covText = string.format(g_i18n:getText("sf_hud_coverage"), covPct, minPct)
                 local cr, cg, cb = 0.90, 0.35, 0.15  -- amber-red: below threshold
                 if cov >= minCov then cr, cg, cb = 0.32, 0.88, 0.44 end  -- green: at/above
                 local pad = SoilHUD.PAD * s
@@ -833,7 +852,7 @@ function SoilHUD:drawPanel()
                 local pad = SoilHUD.PAD * s
                 setTextAlignment(RenderText.ALIGN_LEFT)
                 setTextColor(cr, cg, cb, 1.0)
-                renderText(px + pad, cy, 0.010 * fontMult * s, string.format("Compaction: %d%%", compPct))
+                renderText(px + pad, cy, 0.010 * fontMult * s, string.format(g_i18n:getText("sf_hud_compaction"), compPct))
                 cy = cy - SoilHUD.LINE_H * s
             end
         end
@@ -864,7 +883,7 @@ end
 -- ── Nutrient bar row ─────────────────────────────────────
 -- Returns the new cy after drawing the row.
 -- label must be "N", "P", or "K" — used to look up ppm conversion + thresholds.
-function SoilHUD:drawNutrientRow(label, nutrient, px, cy, pw, s, fontMult, info, profile, fillType)
+function SoilHUD:drawNutrientRow(label, nutrient, px, cy, pw, s, fontMult, info, profile, fillType, rateMultiplier)
     local pad    = SoilHUD.PAD * s
     local rowH   = SoilHUD.ROW_H * s
     local barH   = SoilHUD.BAR_H * s
@@ -900,8 +919,10 @@ function SoilHUD:drawNutrientRow(label, nutrient, px, cy, pw, s, fontMult, info,
             local baseRate = (fillType and br[fillType.name]) or br.DEFAULT
             
             if baseRate then
-                local targetVolume = (info.fieldArea or 1.0) * baseRate.value
-                
+                -- Scale target volume by the current rate so the ghost bar reflects
+                -- what you'll actually apply at this rate setting (issue #278).
+                local targetVolume = (info.fieldArea or 1.0) * baseRate.value * (rateMultiplier or 1.0)
+
                 -- Ghost bar shows the gain remaining to reach the 90% threshold
                 local threshold = targetVolume * (SoilConstants.SPRAYER_RATE.FERTILIZER_COVERAGE_THRESHOLD or 0.90)
                 local remaining = math.max(0, threshold - currentBuffer)
@@ -1233,9 +1254,9 @@ function SoilHUD:drawSprayerRatePanel()
     -- Separate the mode status from the toggle hint so AUTO is never ambiguous
     local headerText
     if isAuto then
-        headerText = "APP. RATE  ( AUTO: ON )"
+        headerText = g_i18n:getText("sf_sprayer_auto_on")
     else
-        headerText = string.format("APP. RATE  AUTO: OFF [%s]", autoKey)
+        headerText = string.format(g_i18n:getText("sf_sprayer_auto_off"), autoKey)
     end
 
     setTextBold(true)
@@ -1275,7 +1296,7 @@ function SoilHUD:drawSprayerRatePanel()
     if isAuto and fillType then
         local profile = SoilConstants.FERTILIZER_PROFILES[fillType.name]
         if profile then
-            local targetText = "Target: "
+            local targetText = g_i18n:getText("sf_sprayer_target")
             local targets = SoilConstants.SPRAYER_RATE.AUTO_RATE_TARGETS
             if not targets then return end
             if profile.N and profile.N > 0 then targetText = targetText .. targets.N .. "N " end
@@ -1332,10 +1353,10 @@ function SoilHUD:drawSprayerRatePanel()
     setTextAlignment(RenderText.ALIGN_CENTER)
     if curMult >= SoilConstants.SPRAYER_RATE.BURN_GUARANTEED_THRESHOLD then
         setTextColor(1.0, 0.15, 0.15, 1.0)
-        renderText(cx, warnY, 0.010 * fontMult * s, "BURN RISK: GUARANTEED")
+        renderText(cx, warnY, 0.010 * fontMult * s, g_i18n:getText("sf_sprayer_burn_guaranteed"))
     elseif curMult > SoilConstants.SPRAYER_RATE.BURN_RISK_THRESHOLD then
         setTextColor(0.95, 0.65, 0.10, 1.0)
-        renderText(cx, warnY, 0.010 * fontMult * s, "BURN RISK: POSSIBLE")
+        renderText(cx, warnY, 0.010 * fontMult * s, g_i18n:getText("sf_sprayer_burn_possible"))
     end
 
     setTextAlignment(RenderText.ALIGN_LEFT)

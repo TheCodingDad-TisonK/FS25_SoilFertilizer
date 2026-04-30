@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.7.0] - 2026-04-30
+
+### Added
+- Full i18n pass: every previously hardcoded English string is now an i18n key — HUD labels (pH, OM, ppm, Coverage, Compaction), sprayer rate panel (APP. RATE, BURN RISK warnings, Target), all in-game notifications (welcome banner, field init, Critical Care Alert, Soil Update, Fertilizer Burn, sync error), settings panel categories/section headers/chrome (Admin: YES/NO, Multiplayer, Single Player, back/reset/close buttons), all setting descriptions, all multi-option dropdown values, and all admin action item labels
+- Added 100+ new translation keys to all 26 language files (translation_en.xml with native values; all other 25 files with `[EN]` placeholders ready for community translation)
+
+### Fixed
+- Coverage calculation (#277): field area now correctly reads `field.areaHa` / `field.farmland.areaInHa` per FS25 LUADOC, fixing coverage completing in ~1.5 minutes instead of full-season pace
+- Sprayer rate ghost bar (#278): rate multiplier now passed through to `drawNutrientRow` so the projected ghost bar reflects the current application rate setting
+- Post-harvest HUD alarm (#279): HUD now shows a neutral "Post-harvest · Fertilize" message on the day of harvest instead of an alarming penalty % from freshly depleted soil
+- Weed pressure on grassland (#273): weed growth accumulation and yield penalty are now skipped for grass/poplar/non-row-crop fields
+
+---
+
 ## [2.0.6.4] - 2026-04-29
 
 ### Changed
