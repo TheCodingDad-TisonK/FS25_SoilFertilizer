@@ -122,6 +122,11 @@ function HookManager:installAll(soilSystem)
     local harvestOk = self:installHarvestHook()
     if harvestOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
+    -- Yield modifier hook: applies soil-fertility yield reduction via the combine hopper
+    -- (separate from addCutterArea for RealisticHarvesting compatibility — see issue #284)
+    local yieldModOk = self:installYieldModifierHook()
+    if yieldModOk then successCount = successCount + 1 else failCount = failCount + 1 end
+
     -- Mower hook: forage crops cut to windrow (grass, alfalfa, clover, mowed triticale…)
     local mowerOk = self:installMowerHook()
     if mowerOk then successCount = successCount + 1 else failCount = failCount + 1 end
@@ -833,6 +838,21 @@ end
 -- It runs AFTER processCutterArea accumulates workAreaParameters this tick,
 -- and AFTER calling combineVehicle:addCutterArea internally, so all harvest
 -- data (area, liters, fruitType, strawRatio) is valid and accessible.
+--
+-- COMPATIBILITY NOTE (RealisticHarvesting / issue #284):
+-- RealisticHarvesting uses SpecializationUtil.registerOverwrittenFunction for
+-- addCutterArea, giving it a superFunc chain.  If SF wraps Combine.addCutterArea
+-- at the class level AFTER RHM registers, SF's wrapper becomes RHM's superFunc.
+-- RHM calls superFunc(self, area, realArea, inputFruitType, ...) where the 3rd
+-- argument is realArea (pixel count, e.g. ~1500), NOT liters.  The old SF code
+-- read arg 3 as "liters", multiplied by yieldModifier, and returned the result —
+-- so RHM received a garbage retLiters value and its HUD showed 0 for yield,
+-- crop loss, and engine load.
+--
+-- Fix: addCutterArea is now used ONLY for soil nutrient tracking (field detection
+-- + onHarvest).  The yield modifier is applied in a separate per-combine
+-- addFillUnitFillLevel wrapper (see installYieldModifierHook below) which always
+-- receives actual liters regardless of who sits above it in the call chain.
 ---@return boolean success True if hook installed successfully
 function HookManager:installHarvestHook()
     if not Cutter or type(Cutter.onEndWorkAreaProcessing) ~= "function" then
@@ -846,89 +866,99 @@ function HookManager:installHarvestHook()
     -- (nil). Cutter.lua:1085 does `if appliedDelta > 0` on that return value,
     -- which causes "attempt to compare number < nil". We use a manual wrapper
     -- that captures and forwards the original's return value instead.
-    Combine.addCutterArea = function(combineSelf, area, liters, inputFruitType, outputFillType, strawRatio, farmId, cutterLoad)
-        SoilLogger.debug("Harvest hook entered: isServer=%s area=%.1f liters=%.0f fruit=%s",
-            tostring(combineSelf.isServer), area or 0, liters or 0, tostring(inputFruitType))
+    --
+    -- The wrapper no longer modifies the liters argument — yield reduction is
+    -- handled by installYieldModifierHook (addFillUnitFillLevel on the hopper).
+    -- This makes the hook argument-order-agnostic and safe regardless of what
+    -- other mods pass as the 3rd positional argument.
+    --
+    -- COMPATIBILITY (issue #284): instance patching wraps the existing vehicle
+    -- function rather than replacing it, preserving any other mod's specialization
+    -- chain (e.g. RealisticHarvesting's registerOverwrittenFunction for addCutterArea).
+    local function makeHarvestWrapper(chainFn)
+        return function(combineSelf, area, liters, inputFruitType, outputFillType, strawRatio, farmId, cutterLoad)
+            SoilLogger.debug("Harvest hook entered: isServer=%s area=%.1f liters=%.0f fruit=%s",
+                tostring(combineSelf.isServer), area or 0, liters or 0, tostring(inputFruitType))
 
-        -- Pre-compute yield modifier and detect field before calling original.
-        -- This allows us to pass reduced liters to the combine hopper so the game
-        -- engine actually sees fewer grain liters (not just a display-only warning).
-        local yieldModifier   = 1.0
-        local detectedFieldId = nil
+            -- Detect field for nutrient depletion tracking (onHarvest).
+            -- Yield modifier is NO LONGER applied here — see installYieldModifierHook.
+            local detectedFieldId = nil
 
-        if combineSelf.isServer
-            and g_SoilFertilityManager
-            and g_SoilFertilityManager.soilSystem
-            and g_SoilFertilityManager.settings.enabled
-            and g_SoilFertilityManager.settings.nutrientCycles
-            and inputFruitType and inputFruitType > 0
-            and liters and liters > 0
-        then
-            local ok, errMsg = pcall(function()
-                local x, _, z = getWorldTranslation(combineSelf.rootNode)
-                if not x then
-                    SoilLogger.debug("Harvest hook: skipped (rootNode translation failed)")
-                    return
-                end
-
-                local fieldId = nil
-                if g_fieldManager and type(g_fieldManager.getFieldAtWorldPosition) == "function" then
-                    local field = g_fieldManager:getFieldAtWorldPosition(x, z)
-                    if field and field.farmland then
-                        fieldId = field.farmland.id
+            if combineSelf.isServer
+                and g_SoilFertilityManager
+                and g_SoilFertilityManager.soilSystem
+                and g_SoilFertilityManager.settings.enabled
+                and g_SoilFertilityManager.settings.nutrientCycles
+                and inputFruitType and inputFruitType > 0
+                and liters and liters > 0
+            then
+                local ok, errMsg = pcall(function()
+                    local x, _, z = getWorldTranslation(combineSelf.rootNode)
+                    if not x then
+                        SoilLogger.debug("Harvest hook: skipped (rootNode translation failed)")
+                        return
                     end
-                end
-                if not fieldId and g_farmlandManager then
-                    local farmland = g_farmlandManager:getFarmlandAtWorldPosition(x, z)
-                    if farmland then fieldId = farmland.id end
-                end
-                if not fieldId or fieldId <= 0 then
-                    SoilLogger.debug("Harvest hook: skipped (no field at pos x=%.1f z=%.1f)", x, z)
-                    return
-                end
 
-                detectedFieldId = fieldId
-                yieldModifier = g_SoilFertilityManager.soilSystem:computeYieldModifier(fieldId, inputFruitType)
-                SoilLogger.debug("Harvest hook: Field %d, Crop %d, modifier=%.3f (%.0fL → %.0fL), area=%.1fm2",
-                    fieldId, inputFruitType, yieldModifier, liters, liters * yieldModifier, area)
-            end)
+                    local fieldId = nil
+                    if g_fieldManager and type(g_fieldManager.getFieldAtWorldPosition) == "function" then
+                        local field = g_fieldManager:getFieldAtWorldPosition(x, z)
+                        if field and field.farmland then
+                            fieldId = field.farmland.id
+                        end
+                    end
+                    if not fieldId and g_farmlandManager then
+                        local farmland = g_farmlandManager:getFarmlandAtWorldPosition(x, z)
+                        if farmland then fieldId = farmland.id end
+                    end
+                    if not fieldId or fieldId <= 0 then
+                        SoilLogger.debug("Harvest hook: skipped (no field at pos x=%.1f z=%.1f)", x, z)
+                        return
+                    end
 
-            if not ok then
-                SoilLogger.error("Harvest hook (yield modifier) failed: %s", tostring(errMsg))
+                    detectedFieldId = fieldId
+                    SoilLogger.debug("Harvest hook: Field %d, Crop %d, area=%.1fm2 (yield modifier applied via hopper hook)",
+                        fieldId, inputFruitType, area)
+                end)
+
+                if not ok then
+                    SoilLogger.error("Harvest hook (field detection) failed: %s", tostring(errMsg))
+                end
+            else
+                SoilLogger.debug("Harvest hook: skipped (not server or manager/settings not ready or invalid args)")
             end
-        else
-            SoilLogger.debug("Harvest hook: skipped (not server or manager/settings not ready or invalid args)")
-        end
 
-        -- Pass modified liters to original so the combine hopper receives fewer grains.
-        -- If field detection failed, yieldModifier stays 1.0 — no unintended penalty.
-        local r1, r2, r3, r4, r5 = original(combineSelf, area, liters * yieldModifier, inputFruitType, outputFillType, strawRatio, farmId, cutterLoad)
+            -- Pass arguments completely untouched — we no longer modify liters here.
+            local r1, r2, r3, r4, r5 = chainFn(combineSelf, area, liters, inputFruitType, outputFillType, strawRatio, farmId, cutterLoad)
 
-        -- Nutrient depletion uses original (biological) liters — the soil depleted what
-        -- the crop grew regardless of the modifier applied to the combine's hopper.
-        if detectedFieldId then
-            local ok, errMsg = pcall(function()
-                g_SoilFertilityManager.soilSystem:onHarvest(detectedFieldId, inputFruitType, liters, strawRatio, area)
-            end)
-            if not ok then
-                SoilLogger.error("Harvest hook (nutrient update) failed: %s", tostring(errMsg))
+            -- Nutrient depletion uses original (biological) liters — the soil depleted what
+            -- the crop grew regardless of the yield modifier applied to the hopper.
+            if detectedFieldId then
+                local ok, errMsg = pcall(function()
+                    g_SoilFertilityManager.soilSystem:onHarvest(detectedFieldId, inputFruitType, liters, strawRatio, area)
+                end)
+                if not ok then
+                    SoilLogger.error("Harvest hook (nutrient update) failed: %s", tostring(errMsg))
+                end
             end
-        end
 
-        -- Forward original return values so Cutter.lua gets appliedDelta intact
-        return r1, r2, r3, r4, r5
+            -- Forward original return values so Cutter.lua gets appliedDelta intact
+            return r1, r2, r3, r4, r5
+        end
     end
+
+    Combine.addCutterArea = makeHarvestWrapper(original)
     self:register(Combine, "addCutterArea", original, "Combine.addCutterArea")
 
     -- FS25 specialization functions are copied to vehicle instances at spawn time,
     -- so vehicles already in memory have a stale reference to the pre-hook original.
-    -- Patch them directly so the hook fires on combines loaded from the savegame.
+    -- Wrap the existing instance function (not replace) to preserve other mods'
+    -- specialization chains (e.g. RealisticHarvesting's addCutterArea overwrite).
     local patched = 0
     local vehicleSystem = g_currentMission and g_currentMission.vehicleSystem
     if vehicleSystem and vehicleSystem.vehicles then
         for _, vehicle in pairs(vehicleSystem.vehicles) do
             if vehicle.spec_combine and type(vehicle.addCutterArea) == "function" then
-                vehicle.addCutterArea = Combine.addCutterArea
+                vehicle.addCutterArea = makeHarvestWrapper(vehicle.addCutterArea)
                 patched = patched + 1
             end
         end
@@ -939,7 +969,110 @@ function HookManager:installHarvestHook()
 end
 
 -- =========================================================
--- HOOK 1b: Mower / Swather (forage crops cut to windrow)
+-- HOOK 1b: Yield modifier applied via combine hopper
+-- =========================================================
+-- Applies the SF yield modifier by wrapping Combine.addFillUnitFillLevel.
+-- This is the companion to installHarvestHook.  Separating the modifier
+-- application from addCutterArea fixes the RealisticHarvesting conflict:
+-- RHM uses registerOverwrittenFunction for addCutterArea and calls
+--   superFunc(self, area, realArea, inputFruitType, ...)
+-- where the 3rd argument is realArea (pixel count), NOT liters.  The old
+-- code read arg 3 as "liters" and returned liters*yieldModifier — RHM got
+-- a garbage retLiters and its HUD went blank (issue #284).
+--
+-- By moving modifier logic here (where the value is always actual hopper
+-- liters), we are argument-order-agnostic and the conflict disappears.
+-- Instance patching uses makeYieldWrapper(vehicle.addFillUnitFillLevel) to
+-- preserve any other mod's chain rather than replacing it outright.
+---@return boolean success True if hook installed successfully
+function HookManager:installYieldModifierHook()
+    if not Combine or type(Combine.addFillUnitFillLevel) ~= "function" then
+        SoilLogger.warning("Yield modifier hook: Combine.addFillUnitFillLevel not available — yield reduction skipped")
+        return false
+    end
+
+    local original = Combine.addFillUnitFillLevel
+
+    -- Factory so the same modifier logic wraps any chainFn — used for both the
+    -- class-level hook and per-vehicle instance patching (issue #284: wrapping
+    -- preserves other mods' specialization chains such as RealisticHarvesting).
+    local function makeYieldWrapper(chainFn)
+        return function(combineSelf, fillUnitIndex, fillLevelDelta, fillTypeIndex, toolType, fillPositionData, extraAttributes)
+            -- Only apply modifier on the server when filling the hopper (delta > 0)
+            -- and all SF systems are ready.
+            local modifiedDelta = fillLevelDelta
+            if combineSelf.isServer
+                and fillLevelDelta and fillLevelDelta > 0
+                and fillTypeIndex
+                and g_SoilFertilityManager
+                and g_SoilFertilityManager.soilSystem
+                and g_SoilFertilityManager.settings.enabled
+                and g_SoilFertilityManager.settings.nutrientCycles
+            then
+                local ok, errMsg = pcall(function()
+                    -- Resolve the fruit type from the fill type so computeYieldModifier
+                    -- receives the fruitType index it expects (not the fillType index).
+                    local fruitType = nil
+                    if g_fruitTypeManager then
+                        local ft = g_fruitTypeManager:getFruitTypeByFillTypeIndex(fillTypeIndex)
+                        if ft then fruitType = ft.index end
+                    end
+
+                    if not fruitType or fruitType <= 0 then return end  -- not a harvestable fruit
+
+                    local x, _, z = getWorldTranslation(combineSelf.rootNode)
+                    if not x then return end
+
+                    local fieldId = nil
+                    if g_fieldManager and type(g_fieldManager.getFieldAtWorldPosition) == "function" then
+                        local field = g_fieldManager:getFieldAtWorldPosition(x, z)
+                        if field and field.farmland then fieldId = field.farmland.id end
+                    end
+                    if not fieldId and g_farmlandManager then
+                        local farmland = g_farmlandManager:getFarmlandAtWorldPosition(x, z)
+                        if farmland then fieldId = farmland.id end
+                    end
+                    if not fieldId or fieldId <= 0 then return end
+
+                    local yieldModifier = g_SoilFertilityManager.soilSystem:computeYieldModifier(fieldId, fruitType)
+                    if yieldModifier ~= 1.0 then
+                        modifiedDelta = fillLevelDelta * yieldModifier
+                        SoilLogger.debug("Yield modifier hook: Field %d Fruit %d modifier=%.3f (%.1fL → %.1fL)",
+                            fieldId, fruitType, yieldModifier, fillLevelDelta, modifiedDelta)
+                    end
+                end)
+                if not ok then
+                    SoilLogger.error("Yield modifier hook failed: %s", tostring(errMsg))
+                    modifiedDelta = fillLevelDelta  -- safe fallback: no penalty
+                end
+            end
+
+            return chainFn(combineSelf, fillUnitIndex, modifiedDelta, fillTypeIndex, toolType, fillPositionData, extraAttributes)
+        end
+    end
+
+    Combine.addFillUnitFillLevel = makeYieldWrapper(original)
+    self:register(Combine, "addFillUnitFillLevel", original, "Combine.addFillUnitFillLevel")
+
+    -- Wrap existing combine instances (not replace) to preserve other mods'
+    -- specialization chains (e.g. RealisticHarvesting's addFillUnitFillLevel overwrite).
+    local patched = 0
+    local vehicleSystem = g_currentMission and g_currentMission.vehicleSystem
+    if vehicleSystem and vehicleSystem.vehicles then
+        for _, vehicle in pairs(vehicleSystem.vehicles) do
+            if vehicle.spec_combine and type(vehicle.addFillUnitFillLevel) == "function" then
+                vehicle.addFillUnitFillLevel = makeYieldWrapper(vehicle.addFillUnitFillLevel)
+                patched = patched + 1
+            end
+        end
+    end
+
+    SoilLogger.info("[OK] Yield modifier hook installed (Combine.addFillUnitFillLevel) — %d existing combines patched", patched)
+    return true
+end
+
+-- =========================================================
+-- HOOK 1c: Mower / Swather (forage crops cut to windrow)
 -- =========================================================
 -- Hooks Mower.onEndWorkAreaProcessing to capture nutrient depletion for crops
 -- that are CUT but not direct-threshed: grass, alfalfa, clover, mowed triticale, etc.
