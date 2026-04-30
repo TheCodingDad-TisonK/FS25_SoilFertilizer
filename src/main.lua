@@ -66,6 +66,21 @@ source(modDirectory .. "src/network/NetworkEvents.lua")
 -- 6. Integrations (optional DLC bridges — all guarded, safe no-ops when DLC absent)
 source(modDirectory .. "src/integrations/SeeAndSprayIntegration.lua")
 
+-- Register helpline icon atlas as early as possible (at module load time).
+-- g_overlayManager exists from game startup, so this works before any mission loads.
+-- The loadedMission hook below retries if the manager wasn't available yet.
+local _helplineAtlasRegistered = false
+if g_overlayManager then
+    g_overlayManager:addTextureConfigFile(
+        modDirectory .. "images/helplineSoilFertilizer.xml",
+        "helplineSoilFertilizer"
+    )
+    _helplineAtlasRegistered = true
+    SoilLogger.info("Helpline icon atlas registered (early)")
+else
+    SoilLogger.warning("g_overlayManager not available at load time — will retry in loadedMission")
+end
+
 -- Globals
 local sfm = nil
 
@@ -79,14 +94,18 @@ local function loadedMission(mission, node)
     if not isEnabled() or mission.cancelLoading then return end
     sfm:onMissionLoaded()
 
-    -- Register custom helpLine icon atlas so iconSliceId="helplineSoilFertilizer.*"
-    -- resolves correctly. Must be called after mission load (g_overlayManager ready).
-    -- Pattern taken from FS25_CropRotation/src/UILoader.lua.
-    if g_overlayManager then
-        g_overlayManager:addTextureConfigFile(
-            modDirectory .. "images/helplineSoilFertilizer.xml",
-            "helplineSoilFertilizer"
-        )
+    -- Fallback: register atlas if it was skipped at load time (g_overlayManager was nil then).
+    if not _helplineAtlasRegistered then
+        if g_overlayManager then
+            g_overlayManager:addTextureConfigFile(
+                modDirectory .. "images/helplineSoilFertilizer.xml",
+                "helplineSoilFertilizer"
+            )
+            _helplineAtlasRegistered = true
+            SoilLogger.info("Helpline icon atlas registered (fallback at loadedMission)")
+        else
+            SoilLogger.warning("g_overlayManager still nil at loadedMission — helpline icons will be missing")
+        end
     end
 
     -- $modDir is not resolved in the fillTypes.xml loading context, so we patch
