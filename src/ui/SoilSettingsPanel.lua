@@ -478,7 +478,9 @@ function SoilSettingsPanel:drawTitleBar()
     if self.page == PAGE_ADMIN then
         title = title .. "  /  ADMIN PANEL"
     elseif self.activeCatIdx then
-        title = title .. "  /  " .. string.upper(CATEGORIES[self.activeCatIdx].label)
+        local cat = CATEGORIES[self.activeCatIdx]
+        local catLabel = (cat.label) or tr(cat.labelKey) or cat.id or ""
+        title = title .. "  /  " .. string.upper(catLabel)
     end
     self:drawText(PX + 0.018, ty + TB_H * 0.32, TS_TITLE, title, C.white, RenderText.ALIGN_LEFT, true)
 

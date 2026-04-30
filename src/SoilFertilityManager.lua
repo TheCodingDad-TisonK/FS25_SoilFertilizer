@@ -238,6 +238,21 @@ function SoilFertilityManager:deferredSoilSystemInit()
                 return
             end
 
+            -- Guard 4: savegameDirectory must be set before we proceed.
+            -- On dedicated servers missionDynamicInfo.isStarted becomes true after just
+            -- 1-2 update cycles, but the savegame path is populated slightly later in the
+            -- load sequence.  If we fire before it is set, settings:load() and
+            -- loadSoilData() both fall back to defaults and the player's saved data is lost.
+            if not g_currentMission.missionInfo
+            or not g_currentMission.missionInfo.savegameDirectory
+            or g_currentMission.missionInfo.savegameDirectory == "" then
+                if self.attempts >= self.maxAttempts then
+                    SoilLogger.warning("Deferred init timeout: savegameDirectory not available after %d attempts", self.attempts)
+                    g_currentMission:removeUpdateable(self)
+                end
+                return
+            end
+
             -- All guards passed - initialize soil system now
             SoilLogger.info("Game ready after %d update cycles - initializing soil system...", self.attempts)
 

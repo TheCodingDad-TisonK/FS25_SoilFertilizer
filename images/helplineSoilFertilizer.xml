@@ -1,0 +1,15 @@
+<texture>
+  <meta>
+    <filename>helplineSoilFertilizer.dds</filename>
+    <size width="2048" height="256"/>
+  </meta>
+  <slices>
+    <slice id="icon_sf_overview"    uvs="0px 0px 256px 256px"/>
+    <slice id="icon_sf_started"     uvs="256px 0px 256px 256px"/>
+    <slice id="icon_sf_nutrients"   uvs="512px 0px 256px 256px"/>
+    <slice id="icon_sf_fertilizer"  uvs="768px 0px 256px 256px"/>
+    <slice id="icon_sf_hud"         uvs="1024px 0px 256px 256px"/>
+    <slice id="icon_sf_settings"    uvs="1280px 0px 256px 256px"/>
+    <slice id="icon_sf_multiplayer" uvs="1536px 0px 256px 256px"/>
+  </slices>
+</texture>
