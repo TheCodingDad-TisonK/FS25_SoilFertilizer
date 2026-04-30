@@ -84,6 +84,7 @@
     <e k="sf_hud_yield" v="[EN] Yield" eh="97345487" />
     <e k="sf_hud_estYield" v="[EN] Est. Yield" eh="32a4135e" />
     <e k="sf_hud_optimal" v="[EN] Optimal" eh="cb61fef1" />
+    <e k="sf_hud_post_harvest" v="[EN] Post-harvest · Fertilize" />
     <e k="sf_hud_hint_edit" v="[EN] Drag: move   Corner: resize   RMB: done" eh="987ebf45" />
     <e k="sf_hud_hint_normal" v="[EN] RMB: move/resize" eh="afc8f13b" />
     <e k="sf_use_imperial_short" v="Imperiální jednotky" eh="ff2701ad" />

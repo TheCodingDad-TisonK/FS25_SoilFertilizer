@@ -84,6 +84,7 @@
     <e k="sf_hud_yield" v="Resa" eh="97345487" />
     <e k="sf_hud_estYield" v="Resa Stim." eh="32a4135e" />
     <e k="sf_hud_optimal" v="Ottimale" eh="cb61fef1" />
+    <e k="sf_hud_post_harvest" v="[EN] Post-harvest · Fertilize" />
     <e k="sf_hud_hint_edit" v="Trascina: muovi  Angolo: ridimensiona  RMB: fatto" eh="987ebf45" />
     <e k="sf_hud_hint_normal" v="RMB: muovi/ridimensiona" eh="afc8f13b" />
     <e k="sf_use_imperial_short" v="Unità imperiali" eh="ff2701ad" />

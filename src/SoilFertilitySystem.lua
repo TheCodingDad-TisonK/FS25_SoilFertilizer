@@ -194,8 +194,17 @@ end
 ---@param liters number Amount harvested in liters
 ---@param strawRatio number 0.0-1.0 fraction of straw that was chopped (0 = dropped/collected, 1 = fully chopped)
 function SoilFertilitySystem:onHarvest(fieldId, fruitTypeIndex, liters, strawRatio, area)
+    -- Resolve fruit type for grassland check (used by multiple penalty blocks below)
+    local harvestFruitDesc = g_fruitTypeManager and g_fruitTypeManager:getFruitTypeByIndex(fruitTypeIndex)
+    local harvestCropName  = harvestFruitDesc and string.lower(harvestFruitDesc.name or "") or ""
+    local harvestIsGrass   = SoilConstants.YIELD_SENSITIVITY and
+                             SoilConstants.YIELD_SENSITIVITY.NON_CROP_NAMES and
+                             SoilConstants.YIELD_SENSITIVITY.NON_CROP_NAMES[harvestCropName]
+
     -- Apply weed pressure yield penalty before nutrient update
-    if self.settings.weedPressure and SoilConstants.WEED_PRESSURE then
+    -- Grassland crops (grass, drygrass, poplar) are exempt — they are grazed/mowed,
+    -- not affected by arable weed pressure mechanics.
+    if self.settings.weedPressure and SoilConstants.WEED_PRESSURE and not harvestIsGrass then
         local field = self.fieldData[fieldId]
         if field then
             local wp = SoilConstants.WEED_PRESSURE
@@ -916,9 +925,11 @@ function SoilFertilitySystem:scanFields()
             local actualFieldId = field.farmland and field.farmland.id
 
             if actualFieldId and actualFieldId > 0 then
-                -- FS25: field.fieldArea is the cultivated area in hectares.
-                -- Fallback to farmland area if fieldArea is missing (though it shouldn't be).
-                local area = field.fieldArea or (field.farmland and field.farmland.area) or 1.0
+                -- FS25 API: Field.areaHa = cultivated area in ha (from LUADOC: self.areaHa = sqm/10000).
+                -- Farmland.areaInHa = parcel area in ha. Both checked before defaulting to 1.0
+                -- because the old incorrect names (fieldArea / farmland.area) were always nil,
+                -- causing totalFieldCells to be computed from 1 ha instead of real field size.
+                local area = field.areaHa or (field.farmland and field.farmland.areaInHa) or 1.0
 
                 SoilLogger.debug("Found field %d (%.2f ha)", actualFieldId, area)
 
@@ -948,11 +959,12 @@ function SoilFertilitySystem:scanFields()
     -- SECONDARY SCAN: catch farmlands whose field entry was unreachable via ipairs on
     -- large/custom maps where g_fieldManager.fields has non-sequential indices (64x maps).
     if g_farmlandManager and g_farmlandManager.farmlands then
-        for farmlandId, _ in pairs(g_farmlandManager.farmlands) do
+        for farmlandId, farmlandObj in pairs(g_farmlandManager.farmlands) do
             if type(farmlandId) == "number" and farmlandId > 0 and not self.fieldData[farmlandId] then
-                self:getOrCreateField(farmlandId, true, 1.0)
+                local flArea = (farmlandObj and farmlandObj.areaInHa) or 1.0
+                self:getOrCreateField(farmlandId, true, flArea)
                 fieldCount = fieldCount + 1
-                SoilLogger.debug("Secondary scan caught missed farmland %d", farmlandId)
+                SoilLogger.debug("Secondary scan caught missed farmland %d (%.2f ha)", farmlandId, flArea)
             end
         end
     end
@@ -1317,38 +1329,48 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
     end
 
     -- ── Weed pressure daily growth ───────────────────────────────────────────
+    -- Grassland (grass, drygrass, poplar, etc.) is managed by mowing/grazing,
+    -- not herbicides — skip weed pressure growth for those field types.
     if self.settings.weedPressure and SoilConstants.WEED_PRESSURE then
-        local wp = SoilConstants.WEED_PRESSURE
-        local pressure = field.weedPressure or 0
-        local herbDays = field.herbicideDaysLeft or 0
+        local cropLower = field.lastCrop and string.lower(field.lastCrop) or nil
+        local isGrassland = cropLower and
+            SoilConstants.YIELD_SENSITIVITY and
+            SoilConstants.YIELD_SENSITIVITY.NON_CROP_NAMES and
+            SoilConstants.YIELD_SENSITIVITY.NON_CROP_NAMES[cropLower]
 
-        if herbDays > 0 then field.herbicideDaysLeft = herbDays - 1 end
+        if not isGrassland then
+            local wp = SoilConstants.WEED_PRESSURE
+            local pressure = field.weedPressure or 0
+            local herbDays = field.herbicideDaysLeft or 0
 
-        if (field.herbicideDaysLeft or 0) <= 0 then
-            local baseRate
-            if     pressure < wp.LOW    then baseRate = wp.GROWTH_RATE_LOW
-            elseif pressure < wp.MEDIUM then baseRate = wp.GROWTH_RATE_MID
-            elseif pressure < wp.HIGH   then baseRate = wp.GROWTH_RATE_HIGH
-            else                             baseRate = wp.GROWTH_RATE_PEAK
-            end
+            if herbDays > 0 then field.herbicideDaysLeft = herbDays - 1 end
 
-            local seasonMult = 1.0
-            if season then
-                if     season == 1 then seasonMult = wp.SEASONAL_SPRING
-                elseif season == 2 then seasonMult = wp.SEASONAL_SUMMER
-                elseif season == 3 then seasonMult = wp.SEASONAL_FALL
-                elseif season == 4 then seasonMult = wp.SEASONAL_WINTER
+            if (field.herbicideDaysLeft or 0) <= 0 then
+                local baseRate
+                if     pressure < wp.LOW    then baseRate = wp.GROWTH_RATE_LOW
+                elseif pressure < wp.MEDIUM then baseRate = wp.GROWTH_RATE_MID
+                elseif pressure < wp.HIGH   then baseRate = wp.GROWTH_RATE_HIGH
+                else                             baseRate = wp.GROWTH_RATE_PEAK
                 end
-            end
 
-            local rainBonus = 0
-            if g_currentMission and g_currentMission.environment and
-               g_currentMission.environment.weather and
-               (g_currentMission.environment.weather.rainScale or 0) > SoilConstants.RAIN.MIN_RAIN_THRESHOLD then
-                rainBonus = wp.RAIN_BONUS
-            end
+                local seasonMult = 1.0
+                if season then
+                    if     season == 1 then seasonMult = wp.SEASONAL_SPRING
+                    elseif season == 2 then seasonMult = wp.SEASONAL_SUMMER
+                    elseif season == 3 then seasonMult = wp.SEASONAL_FALL
+                    elseif season == 4 then seasonMult = wp.SEASONAL_WINTER
+                    end
+                end
 
-            field.weedPressure = math.min(100, pressure + baseRate * seasonMult + rainBonus)
+                local rainBonus = 0
+                if g_currentMission and g_currentMission.environment and
+                   g_currentMission.environment.weather and
+                   (g_currentMission.environment.weather.rainScale or 0) > SoilConstants.RAIN.MIN_RAIN_THRESHOLD then
+                    rainBonus = wp.RAIN_BONUS
+                end
+
+                field.weedPressure = math.min(100, pressure + baseRate * seasonMult + rainBonus)
+            end
         end
     end
 

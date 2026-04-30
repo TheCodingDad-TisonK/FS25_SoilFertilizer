@@ -38,6 +38,7 @@
     <e k="sf_hud_yield" v="Udbytte" eh="97345487" />
     <e k="sf_hud_estYield" v="Est. udbytte" eh="32a4135e" />
     <e k="sf_hud_optimal" v="[EN] Optimal" eh="cb61fef1" />
+    <e k="sf_hud_post_harvest" v="[EN] Post-harvest · Fertilize" />
     <e k="sf_hud_hint_edit" v="Træk: flyt   Hjørne: ændr størrelse   HMK: færdig" eh="987ebf45" />
     <e k="sf_hud_hint_normal" v="HMK: flyt/ændr størrelse" eh="afc8f13b" />
     <e k="sf_use_imperial_short" v="Imperiale enheder" eh="ff2701ad" />

@@ -193,6 +193,7 @@
     <e k="sf_hud_yield" v="Yield" eh="97345487" />
     <e k="sf_hud_estYield" v="Est. Yield" eh="32a4135e" />
     <e k="sf_hud_optimal" v="Optimal" eh="cb61fef1" />
+    <e k="sf_hud_post_harvest" v="Post-harvest · Fertilize" />
     <e k="sf_hud_hint_edit" v="Drag: move   Corner: resize   RMB: done" eh="987ebf45" />
     <e k="sf_hud_hint_normal" v="RMB: move/resize" eh="afc8f13b" />
     <e k="sf_report_detail_n_ok" v="Nitrogen: Optimal" eh="13782bd9" />

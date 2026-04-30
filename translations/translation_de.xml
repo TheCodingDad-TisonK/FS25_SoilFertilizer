@@ -84,6 +84,7 @@
     <e k="sf_hud_yield" v="Ertrag" eh="97345487" />
     <e k="sf_hud_estYield" v="Gesch. Ertrag" eh="32a4135e" />
     <e k="sf_hud_optimal" v="[EN] Optimal" eh="cb61fef1" />
+    <e k="sf_hud_post_harvest" v="[EN] Post-harvest · Fertilize" />
     <e k="sf_hud_hint_edit" v="Ziehen: bewegen   Ecke: Größe ändern   RMT: fertig" eh="987ebf45" />
     <e k="sf_hud_hint_normal" v="RMT: bewegen/Größe ändern" eh="afc8f13b" />
     <e k="sf_use_imperial_short" v="Imperiale Einheiten" eh="ff2701ad" />

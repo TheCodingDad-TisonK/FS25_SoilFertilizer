@@ -193,6 +193,7 @@
     <e k="sf_hud_yield" v="Врожай" eh="97345487" />
     <e k="sf_hud_estYield" v="Очік. врожай" eh="32a4135e" />
     <e k="sf_hud_optimal" v="Оптимально" eh="cb61fef1" />
+    <e k="sf_hud_post_harvest" v="[EN] Post-harvest · Fertilize" />
     <e k="sf_hud_hint_edit" v="Перетягування: рух   Кут: розмір   ПКМ: готово" eh="987ebf45" />
     <e k="sf_hud_hint_normal" v="ПКМ: рух/розмір" eh="afc8f13b" />
     <e k="sf_report_detail_n_ok" v="Азот: Оптимальний" eh="13782bd9" />

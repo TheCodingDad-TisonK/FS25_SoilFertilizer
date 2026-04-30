@@ -709,11 +709,14 @@ function SoilHUD:drawPanel()
         local sprayer = self:getCurrentSprayer()
         local fillType = self:getSprayerFillType(sprayer)
         local profile = fillType and SoilConstants.FERTILIZER_PROFILES[fillType.name]
+        -- Rate multiplier — needed so ghost bar reflects current rate setting (issue #278)
+        local rm = g_SoilFertilityManager and g_SoilFertilityManager.sprayerRateManager
+        local rateMultiplier = (rm and sprayer) and rm:getMultiplier(sprayer.id) or 1.0
 
         -- N / P / K rows
-        cy = self:drawNutrientRow("N", info.nitrogen,   px, cy, pw, s, fontMult, info, profile, fillType)
-        cy = self:drawNutrientRow("P", info.phosphorus,  px, cy, pw, s, fontMult, info, profile, fillType)
-        cy = self:drawNutrientRow("K", info.potassium,   px, cy, pw, s, fontMult, info, profile, fillType)
+        cy = self:drawNutrientRow("N", info.nitrogen,   px, cy, pw, s, fontMult, info, profile, fillType, rateMultiplier)
+        cy = self:drawNutrientRow("P", info.phosphorus,  px, cy, pw, s, fontMult, info, profile, fillType, rateMultiplier)
+        cy = self:drawNutrientRow("K", info.potassium,   px, cy, pw, s, fontMult, info, profile, fillType, rateMultiplier)
 
         -- Divider
         cy = cy - pad * 0.5
@@ -751,33 +754,49 @@ function SoilHUD:drawPanel()
             local tierData = ys.TIERS[tier]
             local thresh   = ys.OPTIMAL_THRESHOLD
 
-            local nDef = math.max(0, thresh - info.nitrogen.value)   / thresh
-            local pDef = math.max(0, thresh - info.phosphorus.value) / thresh
-            local kDef = math.max(0, thresh - info.potassium.value)  / thresh
-            local avgDef = (nDef + pDef + kDef) / 3
-
-            local penalty    = math.min(ys.MAX_PENALTY, avgDef * tierData.scale)
-            local penaltyPct = math.floor(penalty * 100 + 0.5)
+            -- If the field was just harvested today, show a softer post-harvest message
+            -- instead of the alarming penalty % caused by freshly depleted soil.
+            -- The forecast reflects next-season potential; nutrients drop on harvest and
+            -- the big red number before fertilizing is misleading (issue #279).
+            local currentDay = g_currentMission and g_currentMission.environment and
+                               g_currentMission.environment.currentDay
+            local justHarvested = currentDay and info.lastHarvest and
+                                  (info.lastHarvest >= currentDay)
 
             local yieldColor, yieldText
-            local yieldPrefix = (not cropLower or cropLower == "") and g_i18n:getText("sf_hud_estYield") or g_i18n:getText("sf_hud_yield")
-            if penaltyPct <= 0 then
-                yieldColor = SoilHUD.C_GOOD
-                yieldText  = string.format("%s: %s", yieldPrefix, g_i18n:getText("sf_hud_optimal"))
-            elseif penaltyPct < 15 then
-                yieldColor = SoilHUD.C_FAIR
-                yieldText  = string.format("%s ~-%d%%", yieldPrefix, penaltyPct)
+            if justHarvested then
+                yieldColor = SoilHUD.C_DIM
+                yieldText  = g_i18n:getText("sf_hud_post_harvest")
             else
-                yieldColor = SoilHUD.C_POOR
-                yieldText  = string.format("%s ~-%d%%", yieldPrefix, penaltyPct)
+                local nDef = math.max(0, thresh - info.nitrogen.value)   / thresh
+                local pDef = math.max(0, thresh - info.phosphorus.value) / thresh
+                local kDef = math.max(0, thresh - info.potassium.value)  / thresh
+                local avgDef = (nDef + pDef + kDef) / 3
+
+                local penalty    = math.min(ys.MAX_PENALTY, avgDef * tierData.scale)
+                local penaltyPct = math.floor(penalty * 100 + 0.5)
+
+                local yieldPrefix = (not cropLower or cropLower == "") and g_i18n:getText("sf_hud_estYield") or g_i18n:getText("sf_hud_yield")
+                if penaltyPct <= 0 then
+                    yieldColor = SoilHUD.C_GOOD
+                    yieldText  = string.format("%s: %s", yieldPrefix, g_i18n:getText("sf_hud_optimal"))
+                elseif penaltyPct < 15 then
+                    yieldColor = SoilHUD.C_FAIR
+                    yieldText  = string.format("%s ~-%d%%", yieldPrefix, penaltyPct)
+                else
+                    yieldColor = SoilHUD.C_POOR
+                    yieldText  = string.format("%s ~-%d%%", yieldPrefix, penaltyPct)
+                end
             end
 
             setTextColor(yieldColor[1], yieldColor[2], yieldColor[3], 1.0)
             renderText(tx, cy, 0.010 * fontMult * s, yieldText)
-            setTextAlignment(RenderText.ALIGN_RIGHT)
-            setTextColor(SoilHUD.C_DIM[1], SoilHUD.C_DIM[2], SoilHUD.C_DIM[3], SoilHUD.C_DIM[4])
-            renderText(px + pw - pad, cy, 0.009 * fontMult * s, tierData.label)
-            setTextAlignment(RenderText.ALIGN_LEFT)
+            if not justHarvested then
+                setTextAlignment(RenderText.ALIGN_RIGHT)
+                setTextColor(SoilHUD.C_DIM[1], SoilHUD.C_DIM[2], SoilHUD.C_DIM[3], SoilHUD.C_DIM[4])
+                renderText(px + pw - pad, cy, 0.009 * fontMult * s, tierData.label)
+                setTextAlignment(RenderText.ALIGN_LEFT)
+            end
 
             -- Divider before weed row
             cy = cy - SoilHUD.LINE_H * s
@@ -864,7 +883,7 @@ end
 -- ── Nutrient bar row ─────────────────────────────────────
 -- Returns the new cy after drawing the row.
 -- label must be "N", "P", or "K" — used to look up ppm conversion + thresholds.
-function SoilHUD:drawNutrientRow(label, nutrient, px, cy, pw, s, fontMult, info, profile, fillType)
+function SoilHUD:drawNutrientRow(label, nutrient, px, cy, pw, s, fontMult, info, profile, fillType, rateMultiplier)
     local pad    = SoilHUD.PAD * s
     local rowH   = SoilHUD.ROW_H * s
     local barH   = SoilHUD.BAR_H * s
@@ -900,8 +919,10 @@ function SoilHUD:drawNutrientRow(label, nutrient, px, cy, pw, s, fontMult, info,
             local baseRate = (fillType and br[fillType.name]) or br.DEFAULT
             
             if baseRate then
-                local targetVolume = (info.fieldArea or 1.0) * baseRate.value
-                
+                -- Scale target volume by the current rate so the ghost bar reflects
+                -- what you'll actually apply at this rate setting (issue #278).
+                local targetVolume = (info.fieldArea or 1.0) * baseRate.value * (rateMultiplier or 1.0)
+
                 -- Ghost bar shows the gain remaining to reach the 90% threshold
                 local threshold = targetVolume * (SoilConstants.SPRAYER_RATE.FERTILIZER_COVERAGE_THRESHOLD or 0.90)
                 local remaining = math.max(0, threshold - currentBuffer)

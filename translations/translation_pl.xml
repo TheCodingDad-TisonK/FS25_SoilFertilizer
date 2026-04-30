@@ -84,6 +84,7 @@
     <e k="sf_hud_yield" v="Plon" eh="97345487" />
     <e k="sf_hud_estYield" v="Szac. plon" eh="32a4135e" />
     <e k="sf_hud_optimal" v="Optymalny" eh="cb61fef1" />
+    <e k="sf_hud_post_harvest" v="[EN] Post-harvest · Fertilize" />
     <e k="sf_hud_hint_edit" v="Przegciągnięcie: przesuń   ku górze: zmien rozmiar   RMB: gotowe" eh="987ebf45" />
     <e k="sf_hud_hint_normal" v="RMB: przesuń/zmień rozmiar" eh="afc8f13b" />
     <e k="sf_use_imperial_short" v="Jednostki imperialne" eh="ff2701ad" />
