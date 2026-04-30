@@ -1159,7 +1159,7 @@ function HookManager:installSprayerAreaHook()
                 local rateMultiplier = (rm ~= nil) and rm:getMultiplier(self.id) or 1.0
                 local effectiveLiters = liters * rateMultiplier
 
-                SoilLogger.debug("Sprayer/Spreader hook: Field %d, %s, %.1fL (x%.2f rate)",
+                SoilLogger.debug("Sprayer/Spreader hook: Field %d, %s, %.4fL (x%.2f rate)",
                     fieldId, fillType.name, effectiveLiters, rateMultiplier)
 
                 -- Cache sprayer world position for density-map pixel writes in applyFertilizer
