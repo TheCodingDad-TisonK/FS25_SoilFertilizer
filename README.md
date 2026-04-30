@@ -75,12 +75,12 @@ The Soil Report now shows your rotation status per field alongside the nutrient 
 
 ### 🐛 Field Health System
 
-Three pressure scores (0–100) track threats to each field independently. Left unchecked they reduce your yield at harvest. Treat them with the right product and the pressure drops within a few days.
+Three pressure scores (0–100) track threats to each field independently. Left unchecked they reduce your actual harvest yield — fewer liters in the combine hopper, less money at the sell point. Treat them with the right product and the pressure drops within a few days.
 
 | Pressure | Source | Treatment | Resets naturally | Max penalty |
 |----------|--------|-----------|-----------------|-------------|
 | 🌿 **Weed** | Grows daily — peaks without tillage | `HERBICIDE` spray | Any tillage / plowing | −30% |
-| 🐞 **Pest** | Insects — peaks in summer | `INSECTICIDE` spray | Harvest disperses population | −20% |
+| 🐞 **Pest** | Insects — peaks in summer | `INSECTICIDE` spray | Harvest disperses population | −30% |
 | 🍄 **Disease** | Fungal — driven by rain | `FUNGICIDE` spray | 3+ dry days cause natural decay | −25% |
 
 All three are visible in the HUD and the full Soil Report. Each can be toggled off in settings.
@@ -194,7 +194,9 @@ The mod isn't just about what you put in — it's about what the world takes out
 
 A compact overlay shows the current field's soil status while you're working. Colour-coded indicators make problems visible at a glance:
 
-🟢 **Green** — healthy, no action needed &nbsp;|&nbsp; 🟡 **Amber** — getting low, plan ahead &nbsp;|&nbsp; 🔴 **Red** — depleted, yield is being affected
+🟢 **Green** — healthy, no action needed &nbsp;|&nbsp; 🟡 **Amber** — getting low, plan ahead &nbsp;|&nbsp; 🔴 **Red** — depleted, yield is being reduced
+
+The **yield forecast row** (e.g. `Yield ~-18%`) is not just a warning — it reflects what the combine will actually collect. N/P/K deficits, weed, pest, and disease pressure all reduce real harvest liters. The HUD percentage is exactly the hit your tank takes.
 
 Additional rows appear contextually: **Coverage** (`Coverage: X% / 70% min`) while a sprayer is active on a field, and **Compaction** (when soil compaction is above 0% and the setting is enabled). Both are colour-coded with the same green/amber/red tiers as nutrients.
 
@@ -388,7 +390,7 @@ This mod is licensed under **[CC BY-NC-ND 4.0](https://creativecommons.org/licen
 
 You may share it in its original form with attribution. You may not sell it, modify and redistribute it, or reupload it under a different name or authorship. Contributions via pull request are explicitly permitted and encouraged.
 
-**Author:** TisonK &nbsp;·&nbsp; **Version:** 2.0.7.0
+**Author:** TisonK &nbsp;·&nbsp; **Version:** 2.0.8.0
 
 © 2026 TisonK — See [LICENSE](LICENSE) for full terms.
 
