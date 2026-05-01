@@ -25,17 +25,12 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
     self.disableGUI = disableGUI or false
 
     -- Settings
-    assert(Settings,        "[SoilFertilizer] Settings not loaded — check source order in main.lua")
-    assert(SettingsManager, "[SoilFertilizer] SettingsManager not loaded — check source order in main.lua")
-
+    if not Settings then
+        SoilLogger.error("CRITICAL: Settings not loaded — check source order in main.lua")
+        return nil
+    end
     if not SettingsManager then
-        SoilLogger.error("CRITICAL: SettingsManager not loaded - mod cannot initialize")
-        if g_gui then
-            g_gui:showInfoDialog({
-                text = "Soil & Fertilizer Mod failed to load.\n\nCritical module 'SettingsManager' is missing.\n\nPlease reinstall the mod or check for conflicts with other mods.",
-                title = "Mod Load Error"
-            })
-        end
+        SoilLogger.error("CRITICAL: SettingsManager not loaded — check source order in main.lua")
         return nil
     end
     self.settingsManager = SettingsManager.new()
@@ -253,12 +248,23 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
                 -- (including Courseplay seat cycling). Without cleanup, duplicate
                 -- registrations accumulate — callbacks fire 2-3× per keypress and
                 -- SF_HUD_DRAG (RMB) toggles drag mode on then immediately back off.
+                --
+                -- IMPORTANT: Also purge PLAYER context event IDs here. FS25's
+                -- removeActionEvent works by action slot, not strictly by context.
+                -- Removing vehicleSettingsPanelEventId / vehicleHUDEventId can
+                -- silently invalidate the PLAYER-registered slots for the same
+                -- InputActions. We nil them so the PLAYER re-registration below
+                -- can issue fresh registerActionEvent calls.
                 local mgr = g_SoilFertilityManager
                 local staleIds = {
+                    -- VEHICLE context IDs
                     "vehicleHUDEventId", "vehicleReportEventId",
                     "rateUpEventId",     "rateDownEventId",
                     "toggleAutoEventId", "vehicleSettingsPanelEventId",
                     "vehicleHudDragEventId",
+                    -- PLAYER context IDs (invalidated as a side-effect of the above removes)
+                    "toggleHUDEventId", "soilReportEventId",
+                    "cycleMapLayerEventId", "settingsPanelEventId", "hudDragEventId",
                 }
                 for _, field in ipairs(staleIds) do
                     local oldId = mgr[field]
@@ -356,6 +362,77 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
                 end
 
                 binding:endActionEventsModification()
+
+                -- Re-register PLAYER context events. These were invalidated above when we
+                -- called removeActionEvent on the vehicle IDs for the same InputActions.
+                -- PlayerInputComponent.registerActionEvents will NOT fire again on vehicle
+                -- exit (the PLAYER context is reused, not recreated), so we must do this here.
+                binding:beginActionEventsModification(PlayerInputComponent.INPUT_CONTEXT_NAME)
+
+                local pHudOk, pHudId = binding:registerActionEvent(
+                    InputAction.SF_TOGGLE_HUD, g_SoilFertilityManager,
+                    g_SoilFertilityManager.onToggleHUDInput,
+                    false, true, false, true
+                )
+                if pHudOk and pHudId then
+                    g_SoilFertilityManager.toggleHUDEventId = pHudId
+                    SoilLogger.info("HUD toggle (J) re-registered in PLAYER context after vehicle exit")
+                end
+
+                if g_SoilFertilityManager.soilReportDialog then
+                    local pRepOk, pRepId = binding:registerActionEvent(
+                        InputAction.SF_SOIL_REPORT, g_SoilFertilityManager,
+                        g_SoilFertilityManager.onSoilReportInput,
+                        false, true, false, true
+                    )
+                    if pRepOk and pRepId then
+                        g_SoilFertilityManager.soilReportEventId = pRepId
+                        SoilLogger.info("Soil Report (K) re-registered in PLAYER context after vehicle exit")
+                    end
+                end
+
+                if g_SoilFertilityManager.soilMapOverlay then
+                    local pMapOk, pMapId = binding:registerActionEvent(
+                        InputAction.SF_CYCLE_MAP_LAYER, g_SoilFertilityManager,
+                        g_SoilFertilityManager.onCycleMapLayerInput,
+                        false, true, false, true
+                    )
+                    if pMapOk and pMapId then
+                        g_SoilFertilityManager.cycleMapLayerEventId = pMapId
+                        binding:setActionEventTextVisibility(pMapId, false)
+                        SoilLogger.info("Map layer cycle (Shift+M) re-registered in PLAYER context after vehicle exit")
+                    end
+                end
+
+                if g_SoilFertilityManager.settingsPanel then
+                    local pSpOk, pSpId = binding:registerActionEvent(
+                        InputAction.SF_OPEN_SETTINGS, g_SoilFertilityManager,
+                        g_SoilFertilityManager.onOpenSettingsInput,
+                        false, true, false, true
+                    )
+                    if pSpOk and pSpId then
+                        g_SoilFertilityManager.settingsPanelEventId = pSpId
+                        binding:setActionEventTextVisibility(pSpId, false)
+                        SoilLogger.info("Settings panel (Shift+O) re-registered in PLAYER context after vehicle exit")
+                    end
+                end
+
+                if g_SoilFertilityManager.soilHUD then
+                    local pDragOk, pDragId = binding:registerActionEvent(
+                        InputAction.SF_HUD_DRAG, g_SoilFertilityManager,
+                        g_SoilFertilityManager.onHUDDragInput,
+                        false, true, false, true
+                    )
+                    if pDragOk and pDragId then
+                        g_SoilFertilityManager.hudDragEventId = pDragId
+                        binding:setActionEventTextVisibility(pDragId, false)
+                        SoilLogger.info("HUD drag (RMB) re-registered in PLAYER context after vehicle exit")
+                    end
+                end
+
+                binding:endActionEventsModification()
+                SoilLogger.info("PLAYER context inputs restored after vehicle exit")
+
                 _soilVehicleHookActive = false
             end
             SoilLogger.info("InputBinding.endActionEventsModification hooked for VEHICLE context keys")

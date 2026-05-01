@@ -91,7 +91,11 @@ end
 
 -- Called after mission loaded
 local function loadedMission(mission, node)
-    if not isEnabled() or mission.cancelLoading then return end
+    if mission.cancelLoading then return end
+    if sfm == nil then
+        SoilLogger.error("loadedMission: sfm is nil — SoilFertilityManager.new() failed during load(), mod will not function")
+        return
+    end
     sfm:onMissionLoaded()
 
     -- Fallback: register atlas if it was skipped at load time (g_overlayManager was nil then).
@@ -201,6 +205,10 @@ local function load(mission)
         end
 
         sfm = SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
+        if sfm == nil then
+            SoilLogger.error("CRITICAL: SoilFertilityManager.new() returned nil — check that all source files loaded correctly and that Settings/SettingsManager are available")
+            return
+        end
         getfenv(0)["g_SoilFertilityManager"] = sfm
         -- Cross-mod bridge: g_currentMission is a shared C++ object visible to all mods.
         -- getfenv(0) is per-mod scoped in FS25. Use mission property for reliable cross-mod detection.
@@ -269,7 +277,9 @@ local function hookSaveLoadEvents()
 end
 
 -- Hook into FS25 mission events
-Mission00.load = Utils.prependedFunction(Mission00.load, load)
+-- appendedFunction (not prepended) ensures Mission00.load has fully run and the
+-- mission object is completely set up before our load() accesses it.
+Mission00.load = Utils.appendedFunction(Mission00.load, load)
 Mission00.loadMission00Finished = Utils.appendedFunction(Mission00.loadMission00Finished, loadedMission)
 -- Prepend so our cleanup runs before FS25 tears down g_inputBinding/HUD (fixes black screen with AGS)
 FSBaseMission.delete = Utils.prependedFunction(FSBaseMission.delete, unload)
