@@ -1292,12 +1292,13 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
     local season     = self._dailyBatchSeason
 
     -- ── Buffer / coverage reset ──────────────────────────────────────────────
-    field.nutrientBuffer   = {}
-    field.coveredCells     = {}
-    field.coveredCellCount = 0
-    field.coverageFraction = 0
-    field._covLastX        = nil
-    field._covLastZ        = nil
+    field.nutrientBuffer          = {}
+    field.coveredCells            = {}
+    field.coveredCellCount        = 0
+    field.coverageFraction        = 0
+    field._covLastX               = nil
+    field._covLastZ               = nil
+    field._farmlandAreaConfirmed  = nil
 
     -- ── Compaction natural decay ─────────────────────────────────────────────
     if self.settings.compactionEnabled and SoilConstants.COMPACTION then
@@ -1684,7 +1685,18 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
 
     local limits = SoilConstants.NUTRIENT_LIMITS
 
-    -- AREA NORMALIZATION: Calculate hectares for this field
+    -- AREA NORMALIZATION: Calculate hectares for this field.
+    -- Confirm area from farmland on first spray — fixes dedicated-server first-frame spike
+    -- where fields are lazy-created with default 1.0 ha before the farmland manager is
+    -- queried.  Without this, factor = liters/1.0 instead of liters/realArea, causing
+    -- nutrients to jump by (realArea)× too much on the opening spray frame (issue #290).
+    if not field._farmlandAreaConfirmed and g_farmlandManager then
+        local farmlandObj = g_farmlandManager:getFarmlandById(fieldId)
+        if farmlandObj and farmlandObj.areaInHa and farmlandObj.areaInHa > 0 then
+            field.fieldArea = farmlandObj.areaInHa
+        end
+        field._farmlandAreaConfirmed = true
+    end
     local areaInHa = field.fieldArea or 1.0
     if areaInHa <= 0 then areaInHa = 1.0 end
 
