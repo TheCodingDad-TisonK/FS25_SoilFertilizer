@@ -1296,6 +1296,8 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
     field.coveredCells     = {}
     field.coveredCellCount = 0
     field.coverageFraction = 0
+    field._covLastX        = nil
+    field._covLastZ        = nil
 
     -- ── Compaction natural decay ─────────────────────────────────────────────
     if self.settings.compactionEnabled and SoilConstants.COMPACTION then
@@ -1796,41 +1798,9 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
             -- and also caused post-load lookups to miss (number key vs stored string key).
             local cellKey = tostring(cx * 10000 + cz)
 
-            -- Coverage tracking: count unique cells visited today
-            if not field.coveredCells then field.coveredCells = {} end
-            if not field.coveredCells[cellKey] then
-                field.coveredCells[cellKey] = true
-                field.coveredCellCount = (field.coveredCellCount or 0) + 1
-                -- Compute totalFieldCells once (lazily) from field area.
-                -- Re-query live farmland area as final safety net — handles fields lazily
-                -- created mid-session (not in the startup scan) and any remaining
-                -- stale-area edge cases not caught by the XML load correction.
-                if (field.totalFieldCells or 0) == 0 then
-                    if g_farmlandManager then
-                        local farmlandObj = g_farmlandManager:getFarmlandById(fieldId)
-                        if farmlandObj and farmlandObj.areaInHa and farmlandObj.areaInHa > 0 then
-                            field.fieldArea = farmlandObj.areaInHa
-                            areaInHa = farmlandObj.areaInHa
-                        end
-                    end
-                    field.totalFieldCells = math.max(1, math.ceil(areaInHa / zone.CELL_AREA_HA))
-                end
-                local prevCoverage = field.coverageFraction or 0
-                field.coverageFraction = math.min(1.0, field.coveredCellCount / field.totalFieldCells)
-                -- Log milestone crossings (10/25/50/75/100%) so testers can verify
-                -- coverage is ticking up correctly during a spray pass.
-                local milestones = { 0.10, 0.25, 0.50, 0.75, 1.0 }
-                for _, m in ipairs(milestones) do
-                    if prevCoverage < m and field.coverageFraction >= m then
-                        SoilLogger.debug(
-                            "Coverage field=%d  %.0f%% covered (%d/%d cells)  type=%s",
-                            fieldId, m * 100,
-                            field.coveredCellCount, field.totalFieldCells,
-                            fillType.name)
-                        break
-                    end
-                end
-            end
+            self:trackSprayerCoverage(fieldId, fillType.name)
+            -- trackSprayerCoverage may have refreshed field.fieldArea from farmland on first call
+            if field.fieldArea and field.fieldArea > 0 then areaInHa = field.fieldArea end
 
             if not field.zoneData then field.zoneData = {} end
             if not field.zoneData[cellKey] then
@@ -1953,6 +1923,73 @@ local function _soilApplyCappedReduction(dailyTable, fieldId, proposedRed, maxDa
     return clamped
 end
 
+--- Track sprayer coverage for any product type (fertilizer or crop protection).
+-- Uses the cached _lastSprayX/_lastSprayZ set by the sprayer hook before calling any
+-- application function.  Safe to call multiple times per frame — duplicate cells are
+-- ignored by the coveredCells set.
+--
+-- Minimum-travel gate: the vehicle must advance at least MIN_TRAVEL meters from the
+-- last sampled position before a new cell is recorded.  This prevents tight circles
+-- (driving on-axis) from inflating coverage on large fields — the rootNode traces an
+-- arc that visits many 10 m cells even though the sprayed area barely moves.
+---@param fieldId number
+---@param productName string|nil
+function SoilFertilitySystem:trackSprayerCoverage(fieldId, productName)
+    local field = self.fieldData[fieldId]
+    if not field then return end
+    local sprayX = self._lastSprayX
+    local sprayZ = self._lastSprayZ
+    if not sprayX or not sprayZ then return end
+
+    -- Require meaningful forward movement before crediting a new cell.
+    -- 12 m > cell diagonal (~14 m), so you must genuinely leave the current
+    -- cell neighbourhood before the next sample is accepted.
+    local MIN_TRAVEL_SQ = 144  -- 12 m²
+    local lx, lz = field._covLastX, field._covLastZ
+    if lx and lz then
+        local dx, dz = sprayX - lx, sprayZ - lz
+        if (dx * dx + dz * dz) < MIN_TRAVEL_SQ then return end
+    end
+    field._covLastX = sprayX
+    field._covLastZ = sprayZ
+
+    local zone = SoilConstants.ZONE
+    local cx = math.floor(sprayX / zone.CELL_SIZE)
+    local cz = math.floor(sprayZ / zone.CELL_SIZE)
+    local cellKey = tostring(cx * 10000 + cz)
+
+    if not field.coveredCells then field.coveredCells = {} end
+    if field.coveredCells[cellKey] then return end
+
+    field.coveredCells[cellKey] = true
+    field.coveredCellCount = (field.coveredCellCount or 0) + 1
+
+    if (field.totalFieldCells or 0) == 0 then
+        local areaInHa = field.fieldArea or 1.0
+        if g_farmlandManager then
+            local farmlandObj = g_farmlandManager:getFarmlandById(fieldId)
+            if farmlandObj and farmlandObj.areaInHa and farmlandObj.areaInHa > 0 then
+                field.fieldArea = farmlandObj.areaInHa
+                areaInHa = farmlandObj.areaInHa
+            end
+        end
+        field.totalFieldCells = math.max(1, math.ceil(areaInHa / zone.CELL_AREA_HA))
+    end
+
+    local prevCoverage = field.coverageFraction or 0
+    field.coverageFraction = math.min(1.0, field.coveredCellCount / field.totalFieldCells)
+
+    local milestones = { 0.10, 0.25, 0.50, 0.75, 1.0 }
+    for _, m in ipairs(milestones) do
+        if prevCoverage < m and field.coverageFraction >= m then
+            SoilLogger.debug("Coverage field=%d  %.0f%% covered (%d/%d cells)  type=%s",
+                fieldId, m * 100, field.coveredCellCount, field.totalFieldCells,
+                productName or "?")
+            break
+        end
+    end
+end
+
 --- Direct-path buffering for non-profile products (Herbicide/Insecticide/Fungicide)
 -- NOTE: the formula (liters/targetVol)×REDUCTION depends on targetRate (from
 -- Constants, a real-world L/ha figure ~1.5) matching the actual vanilla sprayer
@@ -1993,6 +2030,7 @@ function SoilFertilitySystem:onHerbicideAppliedDirect(fieldId, effectiveness, li
 
     if not field.nutrientBuffer then field.nutrientBuffer = {} end
     field.nutrientBuffer[99991] = (field.nutrientBuffer[99991] or 0) + liters
+    self:trackSprayerCoverage(fieldId, "HERBICIDE")
 end
 
 function SoilFertilitySystem:onInsecticideAppliedDirect(fieldId, effectiveness, liters)
@@ -2020,6 +2058,7 @@ function SoilFertilitySystem:onInsecticideAppliedDirect(fieldId, effectiveness, 
 
     if not field.nutrientBuffer then field.nutrientBuffer = {} end
     field.nutrientBuffer[99992] = (field.nutrientBuffer[99992] or 0) + liters
+    self:trackSprayerCoverage(fieldId, "INSECTICIDE")
 end
 
 function SoilFertilitySystem:onFungicideAppliedDirect(fieldId, effectiveness, liters)
@@ -2047,6 +2086,7 @@ function SoilFertilitySystem:onFungicideAppliedDirect(fieldId, effectiveness, li
 
     if not field.nutrientBuffer then field.nutrientBuffer = {} end
     field.nutrientBuffer[99993] = (field.nutrientBuffer[99993] or 0) + liters
+    self:trackSprayerCoverage(fieldId, "FUNGICIDE")
 end
 
 --- Apply over-application burn penalty to a field.
