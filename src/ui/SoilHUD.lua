@@ -96,6 +96,7 @@ function SoilHUD:initialize()
     if self.initialized then return true end
     self:updatePosition()
     self:loadLayout()   -- override preset with saved position/scale if available
+    self:installFieldInfoBoxHook()
     if createImageOverlay ~= nil then
         self.fillOverlay = createImageOverlay("dataS/menu/base/graph_pixel.dds")
     else
@@ -109,6 +110,7 @@ end
 -- ── Delete ───────────────────────────────────────────────
 function SoilHUD:delete()
     if self.editMode then self:exitEditMode() end
+    self:uninstallFieldInfoBoxHook()
     if self.fillOverlay then
         delete(self.fillOverlay)
         self.fillOverlay = nil
@@ -1440,6 +1442,171 @@ function SoilHUD:getCurrentSprayer()
         end
     end
     return result
+end
+
+-- ── Native FieldInfoBox injection ───────────────────────────────────────────
+-- Hooks Farmland.showInfo so the game's native field-info panel gains a
+-- "SOIL NUTRIENTS" section populated from live soil data.  Safe if Farmland
+-- doesn't have showInfo at load time — we define it and the game calls it
+-- whenever the field-info HUD is drawn.
+function SoilHUD:installFieldInfoBoxHook()
+    if self._fieldInfoBoxHookInstalled then return end
+    if not Farmland then
+        SoilLogger.warning("[SoilHUD] Farmland class unavailable — FieldInfoBox hook skipped")
+        return
+    end
+
+    local soilHUD = self
+    local origShowInfo = Farmland.showInfo
+
+    Farmland.showInfo = function(farmland, box)
+        if origShowInfo then origShowInfo(farmland, box) end
+
+        if not (box and type(box.addLine) == "function") then return end
+        if not g_SoilFertilityManager then return end
+        if not (g_SoilFertilityManager.settings and g_SoilFertilityManager.settings.enabled) then return end
+
+        local fieldId = soilHUD.cachedFieldId
+        if not fieldId then return end
+
+        local info = soilHUD.cachedFieldInfo
+        if not info then
+            local sys = g_SoilFertilityManager.soilSystem
+            if sys then info = sys:getFieldInfo(fieldId) end
+        end
+        if not info then return end
+
+        soilHUD:populateFieldInfoBox(box, info)
+    end
+
+    self._fieldInfoBoxHookInstalled = true
+    self._fieldInfoBoxOrigShowInfo   = origShowInfo
+    SoilLogger.info("[SoilHUD] FieldInfoBox hook installed")
+end
+
+function SoilHUD:uninstallFieldInfoBoxHook()
+    if not self._fieldInfoBoxHookInstalled then return end
+    if Farmland then
+        Farmland.showInfo = self._fieldInfoBoxOrigShowInfo
+    end
+    self._fieldInfoBoxHookInstalled = false
+    self._fieldInfoBoxOrigShowInfo   = nil
+    SoilLogger.info("[SoilHUD] FieldInfoBox hook removed")
+end
+
+-- Writes soil data into the native InfoDisplayKeyValueBox passed by the game.
+function SoilHUD:populateFieldInfoBox(box, info)
+    -- Title (InfoDisplayKeyValueBox stores this as a string property)
+    if box.title ~= nil then
+        box.title = g_i18n:getText("sf_infobox_title")
+    end
+
+    local mgr      = g_SoilFertilityManager
+    local settings = mgr and mgr.settings
+    local ct       = info.cropTargets
+
+    -- Overall soil grade
+    local gradeLabel = self:overallStatus(info)
+    box:addLine(g_i18n:getText("sf_infobox_grade"),
+        g_i18n:getText("sf_report_rec_" .. string.lower(gradeLabel)))
+
+    -- Yield estimate
+    box:addLine(g_i18n:getText("sf_hud_yield"), self:_calcInfoBoxYieldText(info))
+
+    -- N / P / K  (current / crop-target when a crop is planted)
+    local function fmtNPK(val, target)
+        if target and target.opt and target.opt > 0 then
+            return string.format("%d / %d", val, math.floor(target.opt + 0.5))
+        end
+        return tostring(val)
+    end
+    box:addLine("N (ppm)", fmtNPK(info.nitrogen.value,   ct and ct.N))
+    box:addLine("P (ppm)", fmtNPK(info.phosphorus.value, ct and ct.P))
+    box:addLine("K (ppm)", fmtNPK(info.potassium.value,  ct and ct.K))
+
+    -- pH and OM
+    box:addLine(g_i18n:getText("sf_hud_label_ph"), string.format("%.1f", info.pH))
+    box:addLine(g_i18n:getText("sf_hud_label_om"), string.format("%.1f%%", info.organicMatter))
+
+    -- Pressure rows (only when the relevant system is enabled)
+    if settings and settings.weedPressure then
+        box:addLine(g_i18n:getText("sf_hud_weeds"),
+            string.format("%d%%", math.floor(info.weedPressure or 0)))
+    end
+    if settings and settings.pestPressure then
+        box:addLine(g_i18n:getText("sf_hud_pests"),
+            string.format("%d%%", math.floor(info.pestPressure or 0)))
+    end
+    if settings and settings.diseasePressure then
+        box:addLine(g_i18n:getText("sf_hud_disease"),
+            string.format("%d%%", math.floor(info.diseasePressure or 0)))
+    end
+
+    -- "Needs" summary — what the field most urgently requires
+    box:addLine(g_i18n:getText("sf_infobox_needs"), self:_calcNeedsText(info))
+end
+
+-- Returns a short yield-estimate string for the native infobox.
+function SoilHUD:_calcInfoBoxYieldText(info)
+    local ys = SoilConstants and SoilConstants.YIELD_SENSITIVITY
+    if not ys then return g_i18n:getText("sf_hud_optimal") end
+
+    local cropLower = info.lastCrop and string.lower(info.lastCrop) or nil
+    if cropLower and ys.NON_CROP_NAMES and ys.NON_CROP_NAMES[cropLower] then
+        return g_i18n:getText("sf_hud_optimal")
+    end
+
+    -- Just-harvested: nutrients freshly depleted, penalty number would be misleading
+    if (info.daysSinceHarvest or 1) == 0 then
+        return g_i18n:getText("sf_hud_post_harvest")
+    end
+
+    local tier     = (ys.CROP_TIERS and cropLower and ys.CROP_TIERS[cropLower]) or ys.DEFAULT_TIER
+    local tierData = ys.TIERS and tier and ys.TIERS[tier]
+    local thresh   = ys.OPTIMAL_THRESHOLD or 70
+
+    local nDef = math.max(0, thresh - info.nitrogen.value)   / thresh
+    local pDef = math.max(0, thresh - info.phosphorus.value) / thresh
+    local kDef = math.max(0, thresh - info.potassium.value)  / thresh
+    local avg  = (nDef + pDef + kDef) / 3
+
+    if not tierData then return g_i18n:getText("sf_hud_optimal") end
+
+    local pct = math.floor(math.min(ys.MAX_PENALTY or 0.40, avg * (tierData.scale or 1)) * 100 + 0.5)
+    if pct <= 0 then return g_i18n:getText("sf_hud_optimal") end
+    return string.format("~-%d%%", pct)
+end
+
+-- Returns a single word (or short phrase) describing the field's most urgent need.
+function SoilHUD:_calcNeedsText(info)
+    local mgr      = g_SoilFertilityManager
+    local settings = mgr and mgr.settings
+
+    local weed    = (settings and settings.weedPressure)    and (info.weedPressure    or 0) or 0
+    local pest    = (settings and settings.pestPressure)    and (info.pestPressure    or 0) or 0
+    local disease = (settings and settings.diseasePressure) and (info.diseasePressure or 0) or 0
+    local worst   = math.max(weed, pest, disease)
+
+    -- Nutrient need takes priority only when pressure is low (< 30)
+    if info.needsFertilization and worst < 30 then
+        return g_i18n:getText("sf_infobox_fertilizer")
+    end
+
+    if worst > 0 then
+        if pest >= weed and pest >= disease then
+            return g_i18n:getText("sf_hud_pests")
+        elseif weed >= disease then
+            return g_i18n:getText("sf_hud_weeds")
+        else
+            return g_i18n:getText("sf_hud_disease")
+        end
+    end
+
+    if info.needsFertilization then
+        return g_i18n:getText("sf_infobox_fertilizer")
+    end
+
+    return g_i18n:getText("sf_hud_optimal")
 end
 
 -- ── Pixel helpers ────────────────────────────────────────

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <l10n>
     <elements>
     <e k="sf_section" v="Sol et engrais" eh="d30a22a9" />
@@ -648,5 +648,8 @@
     <e k="sf_admin_field_forecast_desc" v="Prévision de rendement pour le champ à la position" />
     <e k="sf_admin_list_fields_label" v="Lister tous les champs" />
     <e k="sf_admin_list_fields_desc" v="Exporter toutes les données de sol des champs dans le log du jeu" />
-    </elements>
+    <e k="sf_infobox_title" v="[EN] Soil Nutrients" />
+    <e k="sf_infobox_grade" v="[EN] Soil Grade" />
+    <e k="sf_infobox_needs" v="[EN] Needs" />
+    <e k="sf_infobox_fertilizer" v="[EN] Fertilizer" />    </elements>
 </l10n>

@@ -662,5 +662,9 @@
     <e k="sf_admin_field_forecast_desc" v="Yield forecast for field at position" />
     <e k="sf_admin_list_fields_label" v="List All Fields" />
     <e k="sf_admin_list_fields_desc" v="Dump all field soil data to game log" />
+    <e k="sf_infobox_title" v="Soil Nutrients" />
+    <e k="sf_infobox_grade" v="Soil Grade" />
+    <e k="sf_infobox_needs" v="Needs" />
+    <e k="sf_infobox_fertilizer" v="Fertilizer" />
     </elements>
 </l10n>
