@@ -648,18 +648,18 @@
     <e k="sf_admin_field_forecast_desc" v="Prévision de rendement pour le champ à la position" />
     <e k="sf_admin_list_fields_label" v="Lister tous les champs" />
     <e k="sf_admin_list_fields_desc" v="Exporter toutes les données de sol des champs dans le log du jeu" />
-    <e k="sf_infobox_title" v="[EN] Soil Nutrients" />
-    <e k="sf_infobox_grade" v="[EN] Soil Grade" />
-    <e k="sf_infobox_needs" v="[EN] Needs" />
-    <e k="sf_infobox_fertilizer" v="[EN] Fertilizer" />
+    <e k="sf_infobox_title" v="Nutriments du sol" />
+    <e k="sf_infobox_grade" v="Qualité du sol" />
+    <e k="sf_infobox_needs" v="Besoins" />
+    <e k="sf_infobox_fertilizer" v="Engrais" />
 
     <!-- ======================================================
          FIELD INFO BOX (native FS25 FIELD INFO panel extension)
          ====================================================== -->
-    <e k="sf_fieldinfo_box_title" v="[EN] Soil Nutrients" />
-    <e k="sf_fieldinfo_grade" v="[EN] Soil Grade" />
-    <e k="sf_fieldinfo_yield" v="[EN] Yield" />
-    <e k="sf_fieldinfo_rotation" v="[EN] Rotation" />
-    <e k="sf_fieldinfo_needs" v="[EN] Needs" />
+    <e k="sf_fieldinfo_box_title" v="Nutriments du sol" />
+    <e k="sf_fieldinfo_grade" v="Qualité du sol" />
+    <e k="sf_fieldinfo_yield" v="Rendement" />
+    <e k="sf_fieldinfo_rotation" v="Rotation" />
+    <e k="sf_fieldinfo_needs" v="Besoins" />
     </elements>
 </l10n>
