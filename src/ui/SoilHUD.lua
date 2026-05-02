@@ -105,6 +105,26 @@ function SoilHUD:initialize()
         SoilLogger.warning("SoilHUD: createImageOverlay not available")
     end
 
+    -- ── Native FS25 Field Info box ────────────────────────
+    -- Creates an InfoDisplayKeyValueBox that sits alongside the base-game FIELD INFO
+    -- panel (same visual style). The box is populated every frame by updateFieldInfoBox()
+    -- while the player is standing on a field; it auto-hides when showNextFrame() stops
+    -- being called (i.e. off-field).
+    -- API confirmed from PlaceableInfoTrigger: g_currentMission.hud.infoDisplay:createBox(InfoDisplayKeyValueBox)
+    if g_currentMission and g_currentMission.hud and g_currentMission.hud.infoDisplay then
+        local ok, box = pcall(function()
+            return g_currentMission.hud.infoDisplay:createBox(InfoDisplayKeyValueBox)
+        end)
+        if ok and box then
+            self.fieldInfoBox = box
+            SoilLogger.info("SoilHUD: FieldInfoBox registered with native HUD infoDisplay")
+        else
+            SoilLogger.warning("SoilHUD: infoDisplay:createBox() failed — SOIL NUTRIENTS box will not appear")
+        end
+    else
+        SoilLogger.info("SoilHUD: infoDisplay not available (server or early init) — skipping FieldInfoBox")
+    end
+
     self.initialized = true
     SoilLogger.info("SoilHUD initialized at (%.3f, %.3f) scale=%.2f", self.panelX, self.panelY, self.scale)
     return true
@@ -116,6 +136,15 @@ function SoilHUD:delete()
     if self.fillOverlay then
         delete(self.fillOverlay)
         self.fillOverlay = nil
+    end
+    -- Remove the native FieldInfoBox from the HUD before shutdown
+    if self.fieldInfoBox then
+        if g_currentMission and g_currentMission.hud and g_currentMission.hud.infoDisplay then
+            pcall(function()
+                g_currentMission.hud.infoDisplay:destroyBox(self.fieldInfoBox)
+            end)
+        end
+        self.fieldInfoBox = nil
     end
     self.initialized = false
 end
@@ -298,12 +327,24 @@ end
 -- Returns true when the event is consumed so the caller can propagate eventUsed correctly.
 function SoilHUD:onMouseEvent(posX, posY, isDown, isUp, button, eventUsed)
     if not self.initialized then return false end
+
+    -- RMB: toggle edit mode — BEFORE showHUD/visible guards so it works reliably
+    -- on foot as well as in a vehicle (fix from GitHub issue #130).
+    if isDown and button == Input.MOUSE_BUTTON_RIGHT then
+        if self.settings.enabled then
+            if self.editMode then
+                self:exitEditMode()
+            else
+                self:enterEditMode()
+            end
+            return true
+        end
+        return false
+    end
+
     if not self.settings.enabled then return false end
     if not self.settings.showHUD then return false end
     if not self.visible then return false end
-
-    -- RMB toggle is now handled by the SF_HUD_DRAG input action (registered in SoilFertilityManager)
-
     if not self.editMode then return false end
 
     -- LMB down: start drag or resize

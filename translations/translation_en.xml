@@ -666,5 +666,14 @@
     <e k="sf_infobox_grade" v="Soil Grade" />
     <e k="sf_infobox_needs" v="Needs" />
     <e k="sf_infobox_fertilizer" v="Fertilizer" />
+
+    <!-- ======================================================
+         FIELD INFO BOX (native FS25 FIELD INFO panel extension)
+         ====================================================== -->
+    <e k="sf_fieldinfo_box_title" v="Soil Nutrients" />
+    <e k="sf_fieldinfo_grade" v="Soil Grade" />
+    <e k="sf_fieldinfo_yield" v="Yield" />
+    <e k="sf_fieldinfo_rotation" v="Rotation" />
+    <e k="sf_fieldinfo_needs" v="Needs" />
     </elements>
 </l10n>
