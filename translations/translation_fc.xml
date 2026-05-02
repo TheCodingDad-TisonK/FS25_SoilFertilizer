@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <l10n>
     <elements>
     <e k="sf_hud_color_1" v="绿色" eh="d382816a" />
@@ -602,8 +602,5 @@
     <e k="sf_admin_field_forecast_desc" v="[EN] Yield forecast for field at position" />
     <e k="sf_admin_list_fields_label" v="[EN] List All Fields" />
     <e k="sf_admin_list_fields_desc" v="[EN] Dump all field soil data to game log" />
-    <e k="sf_infobox_title" v="[EN] Soil Nutrients" />
-    <e k="sf_infobox_grade" v="[EN] Soil Grade" />
-    <e k="sf_infobox_needs" v="[EN] Needs" />
-    <e k="sf_infobox_fertilizer" v="[EN] Fertilizer" />    </elements>
+    </elements>
 </l10n>

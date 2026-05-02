@@ -798,12 +798,23 @@ function HookManager:installDensityMapSprayHook()
     -- remap any custom index to the vanilla equivalent so processSprayerArea passes a valid
     -- C++ index to FSDensityMapUtil.updateSprayArea.
     local original = Sprayer.onStartWorkAreaProcessing
-    Sprayer.onStartWorkAreaProcessing = Utils.appendedFunction(
+    Sprayer.onStartWorkAreaProcessing = Utils.prependedFunction(
         original,
         function(sprayerSelf, dt)
             local spec = sprayerSelf.spec_sprayer
             local wap  = spec and spec.workAreaParameters
-            if wap and wap.sprayType then
+            if not wap then return end
+
+            -- If sprayType is nil (vehicle loaded before our custom types were registered),
+            -- try to resolve it now from sprayFillType so the remap below can fire.
+            -- MUST run as prependedFunction (before vanilla + processSprayerArea) so that
+            -- wap.sprayType is valid when processSprayerArea calls getSprayerUsage.
+            -- A nil sprayType causes lps=nil → usage=0 → tank never depletes for solid types.
+            if not wap.sprayType and wap.sprayFillType and wap.sprayFillType > 0 then
+                wap.sprayType = g_sprayTypeManager:getSprayTypeIndexByFillTypeIndex(wap.sprayFillType)
+            end
+
+            if wap.sprayType then
                 local vanillaIdx = remap[wap.sprayType]
                 if vanillaIdx then
                     wap.sprayType = vanillaIdx
@@ -1374,7 +1385,22 @@ function HookManager:installSprayerAreaHook()
                     if not isAI and self.cp and self.cp.isActive then
                         isAI = true
                     end
-                    local isEntered = self.spec_enterable and self.spec_enterable.isControlled
+                    -- Check if a human player is currently driving this vehicle (or its root vehicle).
+                    -- For towed implements (spreaders, trailing sprayers), self has no cab —
+                    -- getIsEntered() returns false even when the player is in the pulling tractor.
+                    -- We must check the rootVehicle too.
+                    local isEntered = false
+                    local function checkEntered(v)
+                        if not v then return false end
+                        local okE, resE = pcall(function() return v:getIsEntered() end)
+                        if okE and resE then return true end
+                        if v.spec_enterable and v.spec_enterable.controlledPlayer ~= nil then return true end
+                        return false
+                    end
+                    isEntered = checkEntered(self)
+                    if not isEntered then
+                        isEntered = checkEntered(self.rootVehicle)
+                    end
                     if isAI and not isEntered and g_currentMission and g_currentMission.missionInfo then
                         local mi = g_currentMission.missionInfo
                         local ftName = fillType.name
@@ -2556,16 +2582,29 @@ function HookManager:installSprayerUsageHook()
             if fillType == FillType.UNKNOWN then return 0 end
 
             -- For towed implements (spreaders, trailing sprayers) lastSpeed may be nil
-            -- because the implement has no independent physics body. Falling back to the
-            -- vanilla formula (which uses speedLimit, always > 0) prevents zero-drain on
-            -- those vehicles while preserving speed-accurate consumption for self-propelled
-            -- machines that do report lastSpeed.
-            if sprayerSelf.lastSpeed == nil then
+            -- because the implement has no independent physics body.
+            -- If fillType is a custom type, we MUST NOT fall back to vanilla originalFn —
+            -- vanilla getSprayerUsage only knows vanilla spray types and returns 0 for
+            -- custom fill types (lps=nil), so the tank never depletes for towed spreaders.
+            -- Instead, borrow speed from the rootVehicle (tractor pulling the implement).
+            -- For vanilla fill types with nil lastSpeed, still fall back to originalFn as before.
+            local effectiveSpeed = sprayerSelf.lastSpeed
+            if effectiveSpeed == nil then
+                local root = sprayerSelf.rootVehicle
+                if root and root ~= sprayerSelf then
+                    effectiveSpeed = root.lastSpeed
+                end
+            end
+
+            local spT = g_sprayTypeManager and g_sprayTypeManager:getSprayTypeByFillTypeIndex(fillType)
+            if effectiveSpeed == nil or not spT then
+                -- Vanilla fill type or no speed available: fall back to original vanilla formula
                 return originalFn(sprayerSelf, fillType, dt)
             end
 
-            -- Actual speed in km/h (lastSpeed stored in m/ms by physics; * 3600 = km/h).
-            local actualSpeedKmh = math.abs(sprayerSelf.lastSpeed) * 3600
+            -- Actual speed in km/h. effectiveSpeed is the implement's own lastSpeed,
+            -- or the rootVehicle (tractor) speed for towed implements where lastSpeed=nil.
+            local actualSpeedKmh = math.abs(effectiveSpeed) * 3600
             if actualSpeedKmh < 0.5 then
                 -- Below 0.5 km/h (stopping, pivoting at headlands): no area covered.
                 return 0
@@ -2587,7 +2626,7 @@ function HookManager:installSprayerUsageHook()
 
             -- litersPerSecond from the spray type manager (registered for all custom types
             -- by registerCustomSprayTypes; vanilla types are always present).
-            local spT = g_sprayTypeManager and g_sprayTypeManager:getSprayTypeByFillTypeIndex(fillType)
+            -- spT was already resolved above in the towed-implement check.
             local lps = spT and spT.litersPerSecond or 1
 
             -- Working width: prefer active spray-type's usageScale, then vehicle default.

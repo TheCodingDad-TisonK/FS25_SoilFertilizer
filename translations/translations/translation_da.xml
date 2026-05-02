@@ -1,0 +1,606 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<l10n>
+    <elements>
+    <e k="sf_hud_color_1" v="Grøn" eh="d382816a" />
+    <e k="sf_hud_color_2" v="Blå" eh="9594eec9" />
+    <e k="sf_hud_color_3" v="Rav" eh="88068e33" />
+    <e k="sf_hud_color_4" v="Mono" eh="5d9b47bd" />
+    <e k="sf_diff_short" v="Sværhedsgrad" eh="7b29ca96" />
+    <e k="sf_diff_long" v="Sværhedsgrad for jordstyring" eh="d6f4560c" />
+		<e k="sf_rr_short" v="Genopfyldningshastighed" eh="b363b336" />
+		<e k="sf_rr_long" v="Hvor hurtigt gødning genopretter næringsstoffer i marken (0,25x meget langsomt til 2,0x meget hurtigt)" eh="afe78a6d" />
+    <e k="sf_auto_rate_short" v="Automatisk hastighedskontrol" eh="6f99137d" />
+    <e k="sf_auto_rate_long" v="Justerer automatisk gødningsraten baseret på markens behov" eh="a9ca9f6b" />
+    <e k="sf_hud_theme_1" v="Grøn" eh="d382816a" />
+    <e k="sf_hud_theme_2" v="Blå" eh="9594eec9" />
+    <e k="sf_hud_theme_3" v="Rav" eh="88068e33" />
+    <e k="sf_hud_theme_4" v="[EN] Mono" eh="5d9b47bd" />
+    <e k="sf_hud_font_size_short" v="HUD-skriftstørrelse" eh="fd6ca64a" />
+    <e k="sf_hud_font_size_long" v="Juster tekststørrelsen for bedre læsbarhed" eh="c338854f" />
+    <e k="sf_hud_font_1" v="Lille" eh="2660064e" />
+    <e k="sf_hud_font_2" v="Mellem" eh="87f8a6ab" />
+    <e k="sf_hud_font_3" v="Stor" eh="3a69b34c" />
+    <e k="sf_hud_transparency_short" v="HUD-gennemsigtighed" eh="e8a009e4" />
+    <e k="sf_hud_transparency_long" v="Angiv baggrundens gennemsigtighedsniveau (Klar = gennemsigtig, Solid = uigennemsigtig)" eh="152e390a" />
+    <e k="sf_hud_trans_1" v="Klar" eh="dc30bc0c" />
+    <e k="sf_hud_trans_2" v="Lys" eh="9914a0ce" />
+    <e k="sf_hud_trans_3" v="Mellem" eh="87f8a6ab" />
+    <e k="sf_hud_trans_4" v="Mørk" eh="a18366b2" />
+    <e k="sf_hud_trans_5" v="[EN] Solid" eh="e41480b6" />
+    <e k="sf_hud_title" v="JORDMONITOR" eh="f8cda642" />
+    <e k="sf_hud_field" v="Mark %d" eh="08988997" />
+    <e k="sf_hud_noField" v="Gå ud på en mark" eh="62c55e9e" />
+    <e k="sf_hud_fallow" v="Brak" eh="eafe5913" />
+    <e k="sf_hud_weeds" v="Ukrudt" eh="324181de" />
+    <e k="sf_hud_pests" v="Skadedyr" eh="2fed5101" />
+    <e k="sf_hud_disease" v="Sygdom" eh="e7067a8c" />
+    <e k="sf_hud_protected" v="(beskyttet)" eh="8273211e" />
+    <e k="sf_hud_yield" v="Udbytte" eh="97345487" />
+    <e k="sf_hud_estYield" v="Est. udbytte" eh="32a4135e" />
+    <e k="sf_hud_optimal" v="Optimal" eh="cb61fef1" />
+    <e k="sf_hud_post_harvest" v="Efterhøst - Gød" />
+    <e k="sf_hud_hint_edit" v="Træk: flyt   Hjørne: ændr størrelse   HMK: færdig" eh="987ebf45" />
+    <e k="sf_hud_hint_normal" v="HMK: flyt/ændr størrelse" eh="afc8f13b" />
+    <e k="sf_use_imperial_short" v="Imperiale enheder" eh="ff2701ad" />
+    <e k="sf_use_imperial_long" v="Vis udbringningsrater i gal/ac og lb/ac (fra = L/ha og kg/ha)" eh="17efa489" />
+    <e k="sf_active_map_layer_short" v="Aktivt kortlag" eh="1861765f" />
+    <e k="sf_active_map_layer_long" v="Næringsstoflag vist som overlejring på PDA-kortet" eh="d7755cc8" />
+    <e k="sf_overlay_density_short" v="Kortdetalje" eh="a525859a" />
+    <e k="sf_overlay_density_long" v="Prøvepunktsbudget for PDA-jordoverlejringen. Lav = bedre FPS, Høj = bedre dækning på store kort." eh="89215ce5" />
+    <e k="input_SF_OPEN_SETTINGS" v="Åbn jordindstillinger" eh="2e31c0dd" />
+    <e k="sf_reset" v="Nulstil jordindstillinger" eh="467bc2f5" />
+    <e k="input_SF_TOGGLE_HUD" v="Slå jord-HUD til/fra" eh="f0224a10" />
+		<e k="input_SF_HUD_DRAG" v="Træk HUD-tilstand" eh="cb2eb762" />
+    <e k="input_SF_SOIL_REPORT" v="Jordrapport" eh="c33180ef" />
+    <e k="input_SF_RATE_UP" v="Øg gødningsrate" eh="6e601ef5" />
+    <e k="input_SF_RATE_DOWN" v="Sænk gødningsrate" eh="30712026" />
+    <e k="input_SF_TOGGLE_AUTO" v="Skift automatisk hastighed" eh="a8642cf0" />
+    <e k="input_SF_CYCLE_MAP_LAYER" v="Skift jordkortlag" eh="8e4a716c" />
+    <e k="input_SF_SOIL_PDA" v="Åbn jord-PDA" eh="7d70f7b4" />
+    <e k="sf_report_title" v="Jord- og gødningsrapport" eh="a76f8218" />
+    <e k="sf_report_fields_tracked" v="Sporede marker:" eh="7b1e59b8" />
+    <e k="sf_report_need_fert" v="Mangler gødning:" eh="110b60f2" />
+    <e k="sf_report_farm_health" v="Gårdens sundhed:" eh="a5330ade" />
+    <e k="sf_report_back" v="Tilbage" eh="0557fa92" />
+    <e k="sf_report_difficulty" v="Sværhedsgrad:" eh="3abaf54f" />
+    <e k="sf_report_col_field" v="Mark" eh="6f16a5f8" />
+    <e k="sf_report_col_last_crop" v="Sidste afgrøde" eh="ff41e5eb" />
+    <e k="sf_report_col_fert" v="Gødn.?" eh="9e6d0eb4" />
+    <e k="sf_report_no_data" v="Ingen jorddata tilgængelig. Gå ud på en mark for at begynde registrering." eh="1528a4cb" />
+    <e k="sf_report_prev" v="Forrige" eh="14230d11" />
+    <e k="sf_report_next" v="Næste" eh="10ac3d04" />
+    <e k="sf_report_yes" v="JA" eh="7469a286" />
+    <e k="sf_report_ok" v="[EN] OK" eh="e0aa021e" />
+    <e k="sf_report_none" v="Ingen" eh="6adf97f8" />
+    <e k="sf_report_rec_n_poor" v="Mangler kvælstof" eh="5dca0711" />
+    <e k="sf_report_rec_n_fair" v="Lavt kvælstofniveau" eh="35ad072d" />
+    <e k="sf_report_rec_p_poor" v="Mangler fosfor" eh="e8fa326f" />
+    <e k="sf_report_rec_p_fair" v="Lavt fosforniveau" eh="077e12cf" />
+    <e k="sf_report_rec_k_poor" v="Mangler kalium" eh="f23194e0" />
+    <e k="sf_report_rec_k_fair" v="Lavt kaliumniveau" eh="2006c0a2" />
+    <e k="sf_report_rec_ph_adjust" v="Juster pH" eh="84f6bbbc" />
+    <e k="sf_report_rec_ph_monitor" v="Overvåg pH" eh="6dfcded4" />
+    <e k="sf_report_rec_om_increase" v="Øg organisk materiale" eh="c2a930af" />
+    <e k="sf_report_rec_om_maintain" v="Vedligehold organisk materiale" eh="e7655847" />
+    <e k="sf_report_rec_pest" v="Skadedyrsrisiko" eh="c2a930af" />
+    <e k="sf_report_rec_disease" v="Sygdomsrisiko" eh="e7655847" />
+    <e k="sf_report_rec_needs" v="Behov:" eh="3e6d95cf" />
+    <e k="sf_report_rec_optimal" v="Jordsundhed: Optimal" eh="6ee9d19b" />
+    <e k="sf_report_rec_good" v="God" eh="0c6ad70b" />
+    <e k="sf_report_rec_fair" v="Rimelig" eh="f7f20cf0" />
+    <e k="sf_report_rec_poor" v="Dårlig" eh="0e94d017" />
+    <e k="sf_uan32_title" v="UAN 32 Gødning (N)" eh="90913bb8" />
+    <e k="sf_uan28_title" v="UAN 28 Gødning (N)" eh="9d902cd7" />
+    <e k="sf_anhydrous_title" v="Vandfri ammoniak (N)" eh="3fc85c02" />
+    <e k="sf_starter_title" v="Startgødning 10-34-0 (P)" eh="8c1a1ddc" />
+    <e k="sf_urea_title" v="Urea 46-0-0 (N)" eh="659b3097" />
+    <e k="sf_ams_title" v="Ammoniumsulfat 21-0-0 (N)" eh="033d1845" />
+    <e k="sf_map_title" v="MAP-gødning 11-52-0 (P)" eh="31aa2534" />
+    <e k="sf_dap_title" v="DAP-gødning 18-46-0 (P)" eh="5030a80a" />
+    <e k="sf_potash_title" v="Kaliumklorid 0-0-60 (K)" eh="8db6c54c" />
+    <e k="sf_liquid_urea_title" v="Flydende urea (N)" eh="7fee4f12" />
+    <e k="sf_liquid_ams_title" v="Flydende ammoniumsulfat (N)" eh="0daf3a6f" />
+    <e k="sf_liquid_map_title" v="Flydende MAP (P)" eh="3ce7c8c9" />
+    <e k="sf_liquid_dap_title" v="Flydende DAP (P)" eh="86bd893e" />
+    <e k="sf_liquid_potash_title" v="Flydende kaliumklorid (K)" eh="72ac9fd3" />
+    <e k="sf_insecticide_title" v="Insekticid" eh="5650eeef" />
+    <e k="sf_fungicide_title" v="Fungicid" eh="e8512698" />
+    <e k="sf_report_page_info" v="Marker %d-%d af %d  |  Side %d af %d" eh="8db851d1" />
+    <e k="sf_bigBag_uan32_name" v="IBC UAN 32-0-0" eh="574747ce" />
+    <e k="sf_bigBag_uan32_function" v="Kvælstofgødning (flydende)" eh="27de5f41" />
+    <e k="sf_bigBag_uan28_name" v="IBC UAN 28-0-0" eh="7eeec815" />
+    <e k="sf_bigBag_uan28_function" v="Kvælstofgødning (flydende)" eh="27de5f41" />
+    <e k="sf_bigBag_anhydrous_name" v="IBC Vandfri Ammoniak 82-0-0" eh="fb09e6ce" />
+    <e k="sf_bigBag_anhydrous_function" v="Kvælstofgødning (flydende)" eh="27de5f41" />
+    <e k="sf_bigBag_urea_name" v="Big Bag Urea 46-0-0" eh="8e8cbaae" />
+    <e k="sf_bigBag_urea_function" v="Kvælstofgødning (tør)" eh="63efea20" />
+    <e k="sf_bigBag_ams_name" v="Big Bag AMS 21-0-0-24S" eh="7f71ee68" />
+    <e k="sf_bigBag_ams_function" v="Kvælstofgødning (tør)" eh="63efea20" />
+    <e k="sf_bigBag_map_name" v="Big Bag MAP 11-52-0" eh="8a5a059b" />
+    <e k="sf_bigBag_map_function" v="Fosfatgødning (tør)" eh="0cc85c60" />
+    <e k="sf_bigBag_dap_name" v="Big Bag DAP 18-46-0" eh="fb4e9987" />
+    <e k="sf_bigBag_dap_function" v="Fosfatgødning (tør)" eh="0cc85c60" />
+    <e k="sf_bigBag_potash_name" v="Big Bag Kaliumklorid 0-0-60" eh="eb771556" />
+    <e k="sf_bigBag_potash_function" v="Kaliumgødning (tør)" eh="18015099" />
+    <e k="sf_bigBag_liquid_urea_name" v="IBC Flydende Urea" eh="c40b906f" />
+    <e k="sf_bigBag_liquid_urea_function" v="Kvælstofgødning (flydende)" eh="27de5f41" />
+    <e k="sf_bigBag_liquid_ams_name" v="IBC Flydende AMS" eh="32e6c8bb" />
+    <e k="sf_bigBag_liquid_ams_function" v="Kvælstofgødning (flydende)" eh="27de5f41" />
+    <e k="sf_bigBag_liquid_map_name" v="IBC Flydende MAP" eh="4628addb" />
+    <e k="sf_bigBag_liquid_map_function" v="Fosfatgødning (flydende)" eh="eeb5ef5d" />
+    <e k="sf_bigBag_liquid_dap_name" v="IBC Flydende DAP" eh="82fb3c06" />
+    <e k="sf_bigBag_liquid_dap_function" v="Fosfatgødning (flydende)" eh="eeb5ef5d" />
+    <e k="sf_bigBag_liquid_potash_name" v="IBC Flydende Kaliumklorid" eh="7176856d" />
+    <e k="sf_bigBag_liquid_potash_function" v="Kaliumgødning (flydende)" eh="52169d4a" />
+    <e k="sf_bigBag_starter_name" v="IBC Startgødning 10-34-0" eh="62b13bd1" />
+    <e k="sf_bigBag_insecticide_name" v="IBC Insekticid" eh="c8f0aabb" />
+    <e k="sf_bigBag_insecticide_function" v="Insekticid (flydende)" eh="09580f6b" />
+    <e k="sf_bigBag_fungicide_name" v="IBC Fungicid" eh="2a1c78d4" />
+    <e k="sf_bigBag_fungicide_function" v="Fungicid (flydende)" eh="745c34cb" />
+    <e k="sf_bigBag_starter_function" v="Startgødning (flydende)" eh="2c36ea57" />
+    <e k="sf_bigBag_gypsum_name" v="Big Bag Gips" eh="40fc8169" />
+    <e k="sf_bigBag_gypsum_function" v="Jordforbedring (tør)" eh="51503c54" />
+    <e k="sf_bigBag_compost_name" v="Big Bag Kompost" eh="14322c5d" />
+    <e k="sf_bigBag_compost_function" v="Organisk jordforbedring (tør)" eh="9dd2256a" />
+    <e k="sf_bigBag_biosolids_name" v="Big Bag Biosolider" eh="61a60ff3" />
+    <e k="sf_bigBag_biosolids_function" v="Organisk gødning (tør)" eh="374c7b1e" />
+    <e k="sf_bigBag_chicken_manure_name" v="Big Bag Hønsemøg" eh="cb60fddc" />
+    <e k="sf_bigBag_chicken_manure_function" v="Organisk gødning (tør)" eh="374c7b1e" />
+    <e k="sf_bigBag_pelletized_manure_name" v="Big Bag Pelleteret Gødning" eh="064be7fa" />
+    <e k="sf_bigBag_pelletized_manure_function" v="Organisk gødning (tør)" eh="374c7b1e" />
+    <e k="sf_bigBag_liquidlime_name" v="Flydende Kalktank" eh="4f8caca1" />
+    <e k="sf_bigBag_liquidlime_function" v="pH-hævende middel (flydende)" eh="7a118b6d" />
+    <e k="sf_section" v="Jord &amp; Gødning" eh="d30a22a9" />
+    <e k="sf_enabled_short" v="Aktiver mod" eh="cf7fea13" />
+    <e k="sf_enabled_long" v="Aktiver eller deaktiver jord- og gødningsmoddet" eh="e377fd59" />
+    <e k="sf_debug_short" v="DEBUG-tilstand" eh="2ddcdc76" />
+    <e k="sf_debug_long" v="Aktiver/deaktiver fejlfiningstilstand (ekstra logning)" eh="f6f20240" />
+    <e k="sf_seasonal_effects_short" v="Sæsoneffekter" eh="c16ea608" />
+    <e k="sf_seasonal_effects_long" v="Aktiver/deaktiver sæsonmæssig påvirkning af jordnæringsstoffer (forårsvækst, efterårsstagnation)" eh="3eea94c7" />
+    <e k="sf_rain_effects_short" v="Regneffekter" eh="a2a1758b" />
+    <e k="sf_rain_effects_long" v="Aktiver/deaktiver regnens påvirkning af jord (næringsstofudvaskning, pH-ændringer)" eh="de3b14b9" />
+    <e k="sf_plowing_bonus_short" v="Pløjebonus" eh="541ec752" />
+    <e k="sf_plowing_bonus_long" v="Aktiver/deaktiver pløjningens fordele for jordfrugtbarhed (forbedret kvælstof og organisk materiale)" eh="fe701c1c" />
+    <e k="sf_weed_pressure_short" v="Ukrudtstryk" eh="53f8b936" />
+    <e k="sf_weed_pressure_long" v="Aktiver/deaktiver dynamisk ukrudtsvækst og udbyttepåvirkning" eh="ac99a865" />
+    <e k="sf_pest_pressure_short" v="Skadedyrstryk" eh="18a7c2be" />
+    <e k="sf_pest_pressure_long" v="Aktiver/deaktiver insekt- og skadedyrsangrebssystem" eh="2ba11abc" />
+    <e k="sf_disease_pressure_short" v="Sygdomstryk" eh="2b805cc9" />
+    <e k="sf_disease_pressure_long" v="Aktiver/deaktiver svampe- og afgrødesygdomssystem" eh="9080edbc" />
+		<e k="sf_compaction_short" v="[EN] Soil Compaction" eh="68734a56" />
+		<e k="sf_compaction_long" v="[EN] Enable/disable heavy vehicle soil compaction system" eh="a0995ec5" />
+    <e k="sf_fertility_short" v="Frugtbarhedssystem" eh="f7e27d58" />
+    <e k="sf_fertility_long" v="Aktiver/deaktiver dynamisk jordfrugtbarhedssystem" eh="ea074366" />
+    <e k="sf_nutrients_short" v="Næringsstofcyklusser" eh="ffab595d" />
+    <e k="sf_nutrients_long" v="Aktiver/deaktiver realistisk næringsstofudtømning og -genopfyldning" eh="dbe9c8ff" />
+    <e k="sf_difficulty_short" v="Sværhedsgrad" eh="7b29ca96" />
+    <e k="sf_difficulty_long" v="Angiv sværhedsgrad: Simpel, Realistisk, Hardcore" eh="cfb758a4" />
+    <e k="sf_diff_1" v="Simpel" eh="1fbb1e39" />
+    <e k="sf_diff_2" v="Realistisk" eh="408c999f" />
+    <e k="sf_diff_3" v="[EN] Hardcore" eh="1c800aa9" />
+    <e k="sf_ui_soilReport_syncing" v="Synkroniserer jorddata..." eh="03f01c4d" />
+    <e k="sf_ui_soilReport_syncTimeout" v="Kunne ikke indlæse markejerskab. Luk og genåbn rapporten." eh="9f699982" />
+    <e k="sf_fertilizer_cost_short" v="Gødningsomkostninger" eh="6870d88b" />
+    <e k="sf_fertilizer_cost_long" v="Aktiver/deaktiver realistiske gødningsindkøbsomkostninger" eh="12b03fbb" />
+    <e k="sf_notifications_short" v="Notifikationer" eh="a274f4d4" />
+    <e k="sf_notifications_long" v="Aktiver/deaktiver jord- og gødningsnotifikationer" eh="9a872f8f" />
+    <e k="sf_show_hud_short" v="Vis HUD" eh="c94fd4d7" />
+    <e k="sf_show_hud_long" v="Vis/skjul jord-HUD-overlejringen (F8 for midlertidigt skift)" eh="4e2e11b6" />
+    <e k="sf_hud_position_short" v="HUD-position" eh="5ac371f2" />
+    <e k="sf_hud_position_long" v="Vælg hvor jord-HUD'et vises på skærmen" eh="d7b9c109" />
+    <e k="sf_hud_pos_1" v="Øverst til højre" eh="5f9f6784" />
+    <e k="sf_hud_pos_2" v="Øverst til venstre" eh="ac71274a" />
+    <e k="sf_hud_pos_3" v="Nederst til højre" eh="4d297f5d" />
+    <e k="sf_hud_pos_4" v="Nederst til venstre" eh="7eb55425" />
+    <e k="sf_hud_pos_5" v="Midten til højre" eh="d7afdc5a" />
+    <e k="sf_hud_pos_6" v="Brugerdefineret" eh="90589c47" />
+    <e k="sf_hud_color_theme_short" v="HUD-farvetema" eh="4a73f95b" />
+    <e k="sf_hud_color_theme_long" v="Vælg farvepalette til jorddatavisning" eh="3218bca6" />
+    <e k="sf_report_detail_n_ok" v="Kvælstof: Optimal" eh="13782bd9" />
+    <e k="sf_report_detail_p_ok" v="Fosfor: Optimal" eh="dbc90f11" />
+    <e k="sf_report_detail_k_ok" v="Kalium: Optimal" eh="0197b4ba" />
+    <e k="sf_report_status_monitor" v="Overvåg" eh="d2986ac8" />
+    <e k="sf_report_status_adjust" v="Juster" eh="51d7a685" />
+    <e k="sf_report_status_maintain" v="Vedligehold" eh="ade01a5a" />
+    <e k="sf_report_status_increase" v="Forøg" eh="aac247ca" />
+    <e k="sf_report_pressure_low" v="Lav" eh="28d0edd0" />
+    <e k="sf_report_pressure_moderate" v="Moderat" eh="1eb79d43" />
+    <e k="sf_report_pressure_high" v="Høj" eh="655d20c1" />
+    <e k="sf_report_yield_hint" v="Baseret på N/P/K vs. optimal grænse" eh="022663e0" />
+    <e k="sf_report_yield_loss" v="Udbytte ~-%d%%" eh="d64d5d59" />
+    <e k="helpLine_sf_cat_overview" v="Oversigt" eh="3b878279" />
+    <e k="helpLine_sf_cat_started" v="Kom godt i gang" eh="bf647454" />
+    <e k="helpLine_sf_cat_nutrients" v="Jordnæringsstoffer" eh="64377acf" />
+    <e k="helpLine_sf_cat_fertilizers" v="Gødningstyper" eh="754d59bd" />
+    <e k="helpLine_sf_cat_hud" v="HUD &amp; Jordrapport" eh="9b9888b9" />
+    <e k="helpLine_sf_cat_settings" v="Indstillinger" eh="f4f70727" />
+    <e k="helpLine_sf_cat_multiplayer" v="[EN] Multiplayer" eh="901a7320" />
+    <e k="helpLine_sf_ov_p1_title" v="Hvad gør moddet?" eh="46cbb25b" />
+    <e k="helpLine_sf_ov_p1_intro_title" v="Markbaseret jordregistrering" eh="8fe3248d" />
+    <e k="helpLine_sf_ov_p1_intro_text" v="Hver mark registrerer uafhængigt fem egenskaber: Kvælstof (N), Fosfor (P), Kalium (K), Organisk materiale (OM) og pH. Værdierne gemmes med din gemte spil og bevares på tværs af sessioner." eh="c30216e6" />
+    <e k="helpLine_sf_ov_p1_flow_title" v="Næringsstofcyklussen" eh="15b0d408" />
+    <e k="helpLine_sf_ov_p1_flow_text" v="Afgrøder fjerner næringsstoffer ved høst. Gødning, gylle og kalk genetablerer dem. Moddet sporer et realistisk næringsstofbudget - det afgrøderne tager, skal du sætte tilbage." eh="418041f0" />
+    <e k="helpLine_sf_ov_p2_title" v="Miljøeffekter" eh="e139e84f" />
+    <e k="helpLine_sf_ov_p2_rain_title" v="Regn og udvaskning" eh="33e0d8ea" />
+    <e k="helpLine_sf_ov_p2_rain_text" v="Regn udvasker kvælstof mest, derefter kalium og fosfor. Det forsurer også langsomt pH over tid. Regneffekter kan slås fra i indstillingerne." eh="91e39cc6" />
+    <e k="helpLine_sf_ov_p2_season_title" v="Sæsoner og brakgenopretning" eh="ad2009c8" />
+    <e k="helpLine_sf_ov_p2_season_text" v="Forår tilføjer +0,03 N pr. dag (biologisk aktivitet). Efterår fjerner 0,02 N pr. dag. Marker efterladt ubeplantede i mere end 7 dage genopretter langsomt alle næringsstoffer på egen hånd." eh="e5ebb3b2" />
+    <e k="helpLine_sf_gs_p1_title" v="Dine første skridt" eh="bdd0e0a7" />
+    <e k="helpLine_sf_gs_p1_hud_title" v="Åbn HUD (J-tast)" eh="e1bdea72" />
+    <e k="helpLine_sf_gs_p1_hud_text" v="Tryk J for at slå jordoverlejringen til. Den viser N, P, K, pH og OM for den mark du står på. God / Rimelig / Dårlig statusindikatorer viser hvad der kræver opmærksomhed med det samme." eh="53cef520" />
+    <e k="helpLine_sf_gs_p1_report_title" v="Åbn jordrapporten (K-tast)" eh="e71446cd" />
+    <e k="helpLine_sf_gs_p1_report_text" v="Tryk K for at åbne den fulde gårdsjordrapport. Alle marker er listet med farvekodet næringsstofstatus, sorteret efter hastende behov. Klik på pilen på en række for en detaljeret visning med anbefalinger." eh="9a0d32a6" />
+    <e k="helpLine_sf_gs_p2_title" v="Gødsk og høst" eh="1a52ac04" />
+    <e k="helpLine_sf_gs_p2_fert_title" v="Gødskning af marker" eh="ea52ec26" />
+    <e k="helpLine_sf_gs_p2_fert_text" v="Påfør gødning med en hvilken som helst standard-sprøjte eller spreder. Moddet genkender alle basisspilstyper plus 9 brugerdefinerede typer (UAN-32, MAP, Kaliumklorid osv.). Hver type genopretter forskellige næringsstoffer." eh="fe906e29" />
+    <e k="helpLine_sf_gs_p2_harvest_title" v="Næringsstofudtømning ved høst" eh="a67b6cb5" />
+    <e k="helpLine_sf_gs_p2_harvest_text" v="Hver høst fjerner næringsstoffer fra marken. Krævende afgrøder (kartofler, sukkerroer, sojabønner) udtømmer væsentligt mere end lette afgrøder (byg, havre). Tjek HUD eller jordrapporten efter hver høstcyklus." eh="63f90ed4" />
+    <e k="helpLine_sf_gs_p3_title" v="Sværhedsgrad" eh="7b29ca96" />
+    <e k="helpLine_sf_gs_p3_levels_title" v="Tre sværhedsgrader" eh="52611188" />
+    <e k="helpLine_sf_gs_p3_levels_text" v="Simpel (0,7x): 30% mindre udtømning - god for nye spillere. Realistisk (1,0x): balanceret, kalibreret til virkelige landbrugsrater. Hardcore (1,5x): 50% mere udtømning - intens jordforvaltning påkrævet." eh="f4f1ea30" />
+    <e k="helpLine_sf_gs_p3_access_title" v="Ændring af indstillinger" eh="b421c88f" />
+    <e k="helpLine_sf_gs_p3_access_text" v="Åbn indstillinger via ESC &gt; Indstillinger &gt; Jord &amp; Gødning. I multiplayer kan kun serveradministratoren ændre simuleringsindstillinger. Alle HUD-visningsindstillinger er pr. spiller og deles ikke." eh="f36a5639" />
+    <e k="helpLine_sf_nu_p1_title" v="Kvælstof og fosfor" eh="27d37372" />
+    <e k="helpLine_sf_nu_p1_n_title" v="Kvælstof (N) - Skala 0 til 100" eh="10a358f4" />
+    <e k="helpLine_sf_nu_p1_n_text" v="Det mest mobile næringsstof - udtømmes hurtigst og udvaskes kraftigt i regn. Dårlig: under 30. God: over 50. Hæv med: flydende gødning, UAN-32, UAN-28, vandfri ammoniak, urea, AMS, gylle eller ajle." eh="58d62253" />
+    <e k="helpLine_sf_nu_p1_p_title" v="Fosfor (P) - Skala 0 til 100" eh="979bba64" />
+    <e k="helpLine_sf_nu_p1_p_text" v="Binder sig tæt til jord og udvaskes meget langsomt. Udtømmes primært ved høst. Raps har det højeste P-behov. Dårlig: under 25. God: over 45. Hæv med: MAP, DAP, startgødning eller flydende gødning." eh="92c5ac66" />
+    <e k="helpLine_sf_nu_p2_title" v="Kalium og pH" eh="6bd92f25" />
+    <e k="helpLine_sf_nu_p2_k_title" v="Kalium (K) - Skala 0 til 100" eh="2a16e8bc" />
+    <e k="helpLine_sf_nu_p2_k_text" v="Kritisk for rod- og knoldafgrøder. Kartofler og sukkerroer udtømmer K kraftigt ved hver høst. Udvaskes moderat i regn. Dårlig: under 20. God: over 40. Hæv med: kaliumklorid (0-0-60), ajle, digestat eller flydende gødning." eh="7230fee4" />
+    <e k="helpLine_sf_nu_p2_ph_title" v="pH - Skala 5,0 til 7,5" eh="944beca2" />
+    <e k="helpLine_sf_nu_p2_ph_text" v="De fleste afgrøder trives ved pH 6,5 til 7,0. Regn forsurer langsomt jord over tid. pH genopretter sig ikke af sig selv - kun kalk eller flydende kalk hæver den. Dårlig: under 5,5. Anvend kalk hvis pH falder inden næste plantning." eh="08e0aefd" />
+    <e k="helpLine_sf_nu_p3_title" v="Organisk materiale" eh="6305f4bb" />
+    <e k="helpLine_sf_nu_p3_om_title" v="Organisk materiale (OM) - Skala 0 til 10" eh="58f490f3" />
+    <e k="helpLine_sf_nu_p3_om_text" v="Opbygges meget langsomt og udtømmes ikke ved høst. Dårlig: under 2,5. God: over 4,0. Hæv med: gylle, ajle, digestat, kompost, biosolider, hønsemøg, pelleteret gødning, eller ved at hakke halm tilbage i marken." eh="f9a02359" />
+    <e k="helpLine_sf_nu_p3_fallow_title" v="Brakgenopretning" eh="14133b0b" />
+    <e k="helpLine_sf_nu_p3_fallow_text" v="En mark efterladt ubeplanted i 7+ dage genopretter langsomt næringsstoffer. Pr. dag: N +0,07, P +0,03, K +0,05, OM +0,01. Sædskifte og hvileperioder har stadig reel værdi i dette modd." eh="81fa82b3" />
+    <e k="helpLine_sf_fe_p1_title" v="Basisspilstyper" eh="fd941c0d" />
+    <e k="helpLine_sf_fe_p1_base_title" v="Flydende, fast, gylle og ajle" eh="4668dca7" />
+    <e k="helpLine_sf_fe_p1_base_text" v="Flydende gødning tilføjer afbalanceret N+P+K. Fast gødning er højere i N og P. Gylle og ajle tilføjer N, P, K og organisk materiale. Digestat (biogasbiprodukt) er rigt på K og tilføjer også OM. Alt anvendes med standardudstyr." eh="64069a56" />
+    <e k="helpLine_sf_fe_p1_lime_title" v="Kalk og pH-korrektion" eh="8933cce1" />
+    <e k="helpLine_sf_fe_p1_lime_text" v="Kalk er den eneste basisspils pH-korrektion - den tilføjer ikke næringsstoffer. Flydende Kalk og Gips hæver også pH (Gips tilføjer også lidt OM). Anvend når pH falder under 6,0." eh="833a967f" />
+    <e k="helpLine_sf_fe_p2_title" v="Brugerdefinerede kvælstof- og PK-kilder" eh="1021f8c9" />
+    <e k="helpLine_sf_fe_p2_n_title" v="Kvælstofkilder (brugerdefinerede storsække)" eh="9dfe5a5a" />
+    <e k="helpLine_sf_fe_p2_n_text" v="UAN-32 (32-0-0) og UAN-28 (28-0-0) er flydende kvælstofopløsninger. Vandfri ammoniak (82-0-0) er det højeste-N-produkt pr. liter. Urea (46-0-0) og AMS (21-0-0-24S) er tør granulat. Alle er kun N." eh="6a100c25" />
+    <e k="helpLine_sf_fe_p2_pk_title" v="Fosfor- og kaliumkilder" eh="a2d4091b" />
+    <e k="helpLine_sf_fe_p2_pk_text" v="MAP (11-52-0): højeste P pr. liter. DAP (18-46-0): høj P med noget N. Kaliumklorid (0-0-60): rent K. Startgødning (10-34-0): høj-P nedfældningsprodukt med afbalanceret N+K. Alle tilgængelige som storsække i butikken." eh="75a86964" />
+    <e k="helpLine_sf_fe_p3_title" v="Organiske produkter og forbrændingsrisiko" eh="7ab807d1" />
+    <e k="helpLine_sf_fe_p3_organic_title" v="Organiske og langsomt frigivende produkter" eh="0199e6be" />
+    <e k="helpLine_sf_fe_p3_organic_text" v="Kompost er den stærkeste OM-opbygger (+0,12 pr. 1.000 L). Biosolider og hønsemøg tilføjer N, P og OM. Pelleteret gødning er en koncentreret afbalanceret organisk gødning." eh="3d16e4ee" />
+    <e k="helpLine_sf_fe_p3_burn_title" v="Overudbringningsforbrændingsrisiko" eh="e986cc54" />
+    <e k="helpLine_sf_fe_p3_burn_text" v="Påføring over 1,25x basisraten risikerer gødningsforbrænding (-0,15 pH og -5 N). Ved 1,50x eller højere er forbrænding garanteret (-0,30 pH og -12 N). Brug SF Rate Op / Rate Ned-tasterne til at kontrollere udbringningsraten." eh="7bccc46a" />
+    <e k="helpLine_sf_hu_p1_title" v="Jord-HUD'et" eh="6522879b" />
+    <e k="helpLine_sf_hu_p1_toggle_title" v="Slå HUD til/fra (J-tast)" eh="402283ba" />
+    <e k="helpLine_sf_hu_p1_toggle_text" v="Tryk J for at vise eller skjule jordoverlejringen. Den registrerer den mark du er på og viser N, P, K, pH og OM. Når Ukrudt-, Skadedyrs- eller Sygdomsindstillinger er aktiveret, vises disse rækker nederst i panelet." eh="3dcb9bfe" />
+    <e k="helpLine_sf_hu_p1_status_title" v="Aflæsning af status" eh="291c3aac" />
+    <e k="helpLine_sf_hu_p1_status_text" v="Hvert næringsstof viser God (ingen handling nødvendig), Rimelig (overvej behandling snart) eller Dårlig (handling nødvendig). Det overordnede mærke i titellinjen afspejler den dårligste værdi på tværs af alle sporede dimensioner." eh="3b8c2c6e" />
+    <e k="helpLine_sf_hu_p2_title" v="Marksundhedstryk" eh="b4d35b30" />
+    <e k="helpLine_sf_hu_p2_press_title" v="Ukrudt, skadedyr og sygdom" eh="0a3fae00" />
+    <e k="helpLine_sf_hu_p2_press_text" v="Tre trykscorer (0 til 100) sporer biologiske trusler pr. mark. Ukontrolleret reducerer de udbyttet ved høst: Ukrudt op til -30%, Skadedyr -20%, Sygdom -25%. HUD-rækker U, I og S viser farvekodet alvorlighed: grøn (lav), gul (moderat), rød (høj)." eh="3fc3c400" />
+    <e k="helpLine_sf_hu_p2_treat_title" v="Behandling af tryk" eh="cb24bf50" />
+    <e k="helpLine_sf_hu_p2_treat_text" v="Herbicid reducerer ukrudtstryk - enhver jordbehandling nulstiller det også. Insekticid reducerer skadedyrstryk med 25 point og undertrykker genvækst i 10 dage. Fungicid reducerer sygdom med 20 point og undertrykker i 12 dage." eh="4d65bdec" />
+    <e k="helpLine_sf_hu_p3_title" v="Jordrapporten" eh="35fcce6c" />
+    <e k="helpLine_sf_hu_p3_open_title" v="Åbning af rapporten (K-tast)" eh="62e3f629" />
+    <e k="helpLine_sf_hu_p3_open_text" v="Tryk K for at åbne den fulde gårdsjordrapport. Resumélinjen viser totale sporede marker, hvor mange der mangler gødning og en vægtet Gårdsundhedsprocent. Marker er sorteret efter hastende behov." eh="38a5bd2e" />
+    <e k="helpLine_sf_hu_p3_detail_title" v="Markdetaljer og anbefalinger" eh="c99d2b89" />
+    <e k="helpLine_sf_hu_p3_detail_text" v="Klik på pilen på en række for at åbne markens detaljerede visning: næringsstofværdier, tryksniveauer, en udbyttetabsprognose og anbefalinger. Tryk Tilbage eller Escape for at vende tilbage til tabellen." eh="38dd2c6d" />
+    <e k="helpLine_sf_se_p1_title" v="Simuleringsindstillinger" eh="cbf13e3c" />
+    <e k="helpLine_sf_se_p1_server_title" v="Serverindstillinger (kun administrator i multiplayer)" eh="49f37ed7" />
+    <e k="helpLine_sf_se_p1_server_text" v="Frugtbarhedssystem, næringsstofcyklusser, sæsoneffekter, regneffekter, pløjebonus, ukrudt-/skadedyrs-/sygdomstryk, gødningsomkostninger, notifikationer, sædskifte og automatisk hastighedskontrol. I multiplayer kan kun serveradministratoren ændre disse." eh="abca5e43" />
+    <e k="helpLine_sf_se_p1_diff_title" v="Sværhedsgrad" eh="7b29ca96" />
+    <e k="helpLine_sf_se_p1_diff_text" v="Simpel (0,7x) reducerer udtømning med 30% for en afslappet oplevelse. Realistisk (1,0x) er den balancerede standard. Hardcore (1,5x) øger udtømning med 50% for intens jordforvaltning. Tilgås via ESC &gt; Indstillinger &gt; Jord &amp; Gødning." eh="740a3a4e" />
+    <e k="helpLine_sf_se_p2_title" v="HUD og hastighedskontrol" eh="399f4910" />
+    <e k="helpLine_sf_se_p2_hud_title" v="HUD-indstillinger pr. spiller" eh="0df76500" />
+    <e k="helpLine_sf_se_p2_hud_text" v="Hver spiller styrer sit eget HUD. Muligheder: Vis HUD (til/fra), Position (5 forudindstillinger + træk), Farvetema (Grøn / Blå / Rav / Mono), Skriftstørrelse (Lille / Mellem / Stor), Gennemsigtighed (25% til 100%), Imperiale enheder (til/fra)." eh="f3934884" />
+    <e k="helpLine_sf_se_p2_rate_title" v="Sprøjtehastighedskontrol" eh="5ecdfa23" />
+    <e k="helpLine_sf_se_p2_rate_text" v="Mens du er i en sprøjte eller spreder, brug SF Rate Op (]) og SF Rate Ned ([) til at justere udbringningsraten fra 0,10x til 2,00x. Slå automatisk hastighedskontrol til (Skift+L) for at lade moddet sigte mod optimale næringsstofniveauer." eh="dd385e39" />
+    <e k="helpLine_sf_mp_p1_title" v="Sådan fungerer multiplayer" eh="8a4ce30e" />
+    <e k="helpLine_sf_mp_p1_auth_title" v="Serverautoritativ simulering" eh="8d324792" />
+    <e k="helpLine_sf_mp_p1_auth_text" v="Al jordsimulering kører på serveren. Klienter modtager fulde markdata og indstillinger ved tilmelding. HUD-visningsindstillinger (position, tema, størrelse) er pr. spiller og synkroniseres aldrig til serveren." eh="db72a3f9" />
+    <e k="helpLine_sf_mp_p1_ded_title" v="Dedikerede servere" eh="4d3a45ba" />
+    <e k="helpLine_sf_mp_p1_ded_text" v="Dedikerede servere kører den fulde simulering uden HUD- eller GUI-overhead. Brug konsolkommandoer (soilStatus, SoilSetDifficulty, SoilShowSettings osv.) til at administrere indstillinger på en dedikeret server." eh="3df784d6" />
+    <e k="helpLine_sf_mp_p2_title" v="PrecisionFarming-kompatibilitet" eh="3647a30c" />
+    <e k="helpLine_sf_mp_p2_compat_title" v="Kørsel af begge modd samtidigt" eh="bc5325f5" />
+    <e k="helpLine_sf_mp_p2_compat_text" v="Begge modd kører fuldt uafhængigt og er fuldt kompatible. Et gødningsgennemkørsel opdaterer begge på samme tid. PF's jordszoner og SoilFertilizer's N/P/K-værdier bruger forskellige modeller og vil ikke være identiske." eh="5c9f8ada" />
+    <e k="helpLine_sf_mp_p2_workflow_title" v="Praktisk arbejdsgang" eh="b6f73f04" />
+    <e k="helpLine_sf_mp_p2_workflow_text" v="Brug PrecisionFarming til at se hvor i en mark der kræver opmærksomhed. Brug SoilFertilizer's HUD og jordrapport til at se hvilket næringsstof der skal påføres. Ét gennemkørsel tilfredsstiller begge modd simultant." eh="cde2c27c" />
+    <e k="sf_crop_rotation_short" v="Sædskifte" eh="def2c162" />
+    <e k="sf_crop_rotation_long" v="Aktiver/deaktiver sædskiftebonus og monoafgrødetræthed (bælgplantsekvenser genopretter kvælstof; samme afgrøde i på hinanden følgende sæsoner øger udtømning)" eh="958b4212" />
+    <e k="sf_report_rotation_bonus" v="Sædskiftebonus" eh="2831a7ac" />
+    <e k="sf_report_rotation_fatigue" v="Træthed: Samme afgrøde" eh="46135880" />
+    <e k="sf_report_rotation_ok" v="Sædskifte: OK" eh="df66b3be" />
+    <e k="sf_gypsum_title" v="Gips (pH-)" eh="56e6dc36" />
+    <e k="sf_compost_title" v="Kompost (organisk)" eh="c3e2071a" />
+    <e k="sf_biosolids_title" v="Biosolider (N+P)" eh="f0c901dc" />
+    <e k="sf_chicken_manure_title" v="Hønsemøg (N+P)" eh="338128e2" />
+    <e k="sf_pelletized_manure_title" v="Pelleteret gødning (NPK)" eh="c1b39b71" />
+    <e k="sf_liquidlime_title" v="Flydende kalk (pH+)" eh="d4ec4bb9" />
+    <e k="helpLine_sf_nu_p4_title" v="Sædskifte" eh="def2c162" />
+    <e k="helpLine_sf_nu_p4_bonus_title" v="Sædskiftebonus" eh="2831a7ac" />
+    <e k="helpLine_sf_nu_p4_bonus_text" v="Dyrkning af en bælgplante (sojabønner, ærter, bønner) efter en ikke-bælgplante giver et gratis kvælstofboost hver forår i 3 dage." eh="e1fce95b" />
+    <e k="helpLine_sf_nu_p4_fatigue_title" v="Afgrødetræthed" eh="236a590c" />
+    <e k="helpLine_sf_nu_p4_fatigue_text" v="Plantning af samme afgrøde to sæsoner i træk øger næringsstofudtrækning med 15%. Roter afgrøder for at undgå jordtræthed." eh="1613f3c6" />
+    <e k="sf_map_layer_off" v="Jordkort: Fra" eh="3e654ade" />
+    <e k="sf_map_layer_n" v="Kvælstof" eh="1e9ef3ba" />
+    <e k="sf_map_layer_p" v="Fosfor" eh="eb4f2688" />
+    <e k="sf_map_layer_k" v="Kalium" eh="3a4edc67" />
+    <e k="sf_map_layer_ph" v="[EN] pH" eh="397dff20" />
+    <e k="sf_map_layer_om" v="Organisk materiale" eh="6305f4bb" />
+    <e k="sf_map_layer_urgency" v="Markhastegrad" eh="419ea5af" />
+    <e k="sf_map_layer_weed" v="Ukrudtstryk" eh="53f8b936" />
+    <e k="sf_map_layer_pest" v="Skadedyrstryk" eh="18a7c2be" />
+    <e k="sf_map_layer_disease" v="Sygdomstryk" eh="2b805cc9" />
+		<e k="sf_map_layer_compaction" v="[EN] Compaction" eh="19cf3ee7" />
+    <e k="sf_map_overlay_cycle" v="Skift+M: Skift jordlag" eh="032fdac7" />
+    <e k="sf_map_page_title" v="Jordlag" eh="04a675fb" />
+    <e k="sf_map_sidebar_header" v="Jordkortlag" eh="81332549" />
+    <e k="sf_map_sidebar_label" v="Aktivt lag" eh="f8a2c198" />
+    <e k="sf_map_sidebar_tooltip" v="Vælg hvilket jordnæringsstof der vises på kortet" eh="eb926e9a" />
+    <e k="sf_map_overlay_low" v="Lav" eh="28d0edd0" />
+    <e k="sf_map_overlay_med" v="Mid" eh="248c9511" />
+    <e k="sf_map_overlay_high" v="Høj" eh="655d20c1" />
+    <e k="sf_pda_screen_title" v="Jord &amp; Gødning" eh="d30a22a9" />
+    <e k="sf_pda_tab_map" v="Jordkort" eh="59f988b2" />
+    <e k="sf_pda_tab_fields" v="Marker" eh="a4ca5edd" />
+    <e k="sf_pda_tab_treatment" v="Behandlingsplan" eh="4ba012e2" />
+    <e k="sf_pda_section_farm_overview" v="Gårdsoversigt" eh="47f2c19a" />
+    <e k="sf_pda_fields_tracked_label" v="Sporede marker" eh="c763e26e" />
+    <e k="sf_pda_fields_owned_label" v="Ejede marker" eh="335f5f7e" />
+    <e k="sf_pda_section_avg_nutrients" v="Gns. næringsstoffer" eh="f06b2704" />
+    <e k="sf_pda_avg_n_label" v="Kvælstof (N)" eh="25cee53b" />
+    <e k="sf_pda_avg_p_label" v="Fosfor (P)" eh="75cb5cd6" />
+    <e k="sf_pda_avg_k_label" v="Kalium (K)" eh="39797137" />
+    <e k="sf_pda_avg_ph_label" v="pH-niveau" eh="0c85daad" />
+    <e k="sf_pda_avg_om_label" v="Organisk materiale" eh="6305f4bb" />
+    <e k="sf_pda_section_pressure" v="Afgrødetryk" eh="a73974d0" />
+    <e k="sf_pda_weed_label" v="Ukrudt" eh="2b75024d" />
+    <e k="sf_pda_pest_label" v="Skadedyr" eh="8f2aee79" />
+    <e k="sf_pda_disease_label" v="Sygdom" eh="e7067a8c" />
+    <e k="sf_pda_section_attention" v="Kræver opmærksomhed" eh="80e48bc3" />
+    <e k="sf_pda_needs_fert_label" v="Mangler gødning" eh="fa9ded5e" />
+    <e k="sf_pda_total_urgent_label" v="I alt kræver opmærksomhed" eh="b3ce2db9" />
+    <e k="sf_pda_no_data_left" v="Ingen markdata endnu." eh="ba71c6b1" />
+    <e k="sf_pda_map_section_title" v="Jordkortlag" eh="85d63132" />
+    <e k="sf_pda_map_active_layer" v="Aktivt lag" eh="f8a2c198" />
+    <e k="sf_pda_map_layer_off_desc" v="Intet jordlag aktivt. Vælg venligst et lag at vise." eh="3bd7e65a" />
+    <e k="sf_pda_map_layer_n_desc" v="Kvælstofindhold på tværs af alle marker. Grøn = god, rød = udtømt." eh="60484ead" />
+    <e k="sf_pda_map_layer_p_desc" v="Fosforindhold på tværs af alle marker. Grøn = god, rød = udtømt." eh="9fa2e72d" />
+    <e k="sf_pda_map_layer_k_desc" v="Kaliumindhold på tværs af alle marker. Grøn = god, rød = udtømt." eh="a61d25b7" />
+    <e k="sf_pda_map_layer_ph_desc" v="Jordens pH-niveau. Optimalt interval er 6,5-7,0 (grøn)." eh="ce7009e7" />
+    <e k="sf_pda_map_layer_om_desc" v="Organisk materialeindhold. Højere er bedre for langsigtet frugtbarhed." eh="f64c5706" />
+    <e k="sf_pda_map_layer_urgency_desc" v="Kombineret behandlingshastegrad. Rød = kræver øjeblikkelig opmærksomhed." eh="f29ddc2b" />
+    <e k="sf_pda_map_layer_weed_desc" v="Ukrudtstrykniveau. Rød = høj infestation, anvend herbicid." eh="24009598" />
+    <e k="sf_pda_map_layer_pest_desc" v="Skadedyrstrykniveau. Rød = høj infestation, anvend insekticid." eh="86ba29dc" />
+    <e k="sf_pda_map_layer_disease_desc" v="Sygdomstrykniveau. Rød = aktivt udbrud, anvend fungicid." eh="5d32d30a" />
+    <e k="sf_pda_map_legend_title" v="Kortforklaring" eh="86448402" />
+    <e k="sf_pda_map_legend_good" v="God" eh="0c6ad70b" />
+    <e k="sf_pda_map_legend_fair" v="Rimelig" eh="f7f20cf0" />
+    <e k="sf_pda_map_legend_poor" v="Dårlig / Lav" eh="32aa75ff" />
+    <e k="sf_pda_map_legend_low" v="Lav" eh="28d0edd0" />
+    <e k="sf_pda_map_legend_medium" v="Mellem" eh="87f8a6ab" />
+    <e k="sf_pda_map_legend_high" v="Høj" eh="655d20c1" />
+    <e k="sf_pda_map_legend_excess" v="Overskud" eh="d1d25b9f" />
+    <e k="sf_pda_map_instructions" v="Tryk Skift+M i spillet for at skifte jordkortlag." eh="b13603aa" />
+    <e k="sf_pda_map_open_btn" v="Åbn jordkort" eh="0901ae30" />
+    <e k="sf_pda_map_unavailable" v="Kortforhåndsvisning utilgængelig" eh="00000000" />
+    <e k="sf_map_health_overall" v="Gennemsnitlig jordsundhed" eh="5533cbe3" />
+    <e k="sf_map_btn_report" v="Åbn gårdsoversigt" eh="6f0800e8" />
+    <e k="sf_map_btn_help" v="Udviklernote (VIRKER IKKE ENDNU)" eh="800e465a" />
+    <e k="sf_map_btn_cycle_layer" v="Skift lag" eh="875dbf22" />
+    <e k="sf_map_btn_treatment" v="Behandlingsplan" eh="4ba012e2" />
+    <e k="sf_map_btn_disable" v="Deaktiver lag" eh="8e75dec5" />
+    <e k="sf_treat_action_ok" v="[EN] OK" eh="e0aa021e" />
+    <e k="sf_help_title" v="Jordens hurtige reference" eh="8986bb6d" />
+    <e k="sf_help_nutrients_header" v="NÆRINGSSTOFFER" eh="9aeb39bf" />
+    <e k="sf_help_n" v="N  (Kvælstof)     - Udtømmes hurtigt. Anvend UAN, Urea eller Gylle." eh="f2d0c792" />
+    <e k="sf_help_p" v="P  (Fosfor)       - Langtidsvirkende. Anvend MAP eller DAP." eh="fdfbd91e" />
+    <e k="sf_help_k" v="K  (Kalium)       - Anvend Kaliumklorid. Vigtigt for rødder." eh="e0217634" />
+    <e k="sf_help_om" v="OM (Org. mat.)    - Opbygges langsomt. Pløj gylle/kompost ned." eh="a4e29617" />
+    <e k="sf_help_soil_header" v="JORDKEMI" eh="19c67ff5" />
+    <e k="sf_help_ph" v="pH  6,5-7,0 = Ideelt.  &lt; 6,5 anvend Kalk.  &gt; 7,5 anvend Gips." eh="8929304d" />
+    <e k="sf_help_pressure_header" v="AFGRØDETRYK" eh="132b0f66" />
+    <e k="sf_help_weed" v="Ukrudt  &gt; 20% - Anvend Herbicid." eh="c8d890df" />
+    <e k="sf_help_pest" v="Skadedyr &gt; 20% - Anvend Insekticid." eh="f4932a05" />
+    <e k="sf_help_disease" v="Sygdom  &gt; 20% - Anvend Fungicid." eh="1bfd0913" />
+    <e k="sf_help_status_header" v="STATUSNIVEAUER" eh="b081c2c6" />
+    <e k="sf_help_good" v="God - Ingen handling nødvendig." eh="03910bec" />
+    <e k="sf_help_fair" v="Rimelig - Overvåg / forebyggende eftergødskning." eh="2922eb1c" />
+    <e k="sf_help_poor" v="Dårlig - Øjeblikkelig behandling påkrævet." eh="b287d206" />
+    <e k="sf_pda_fields_section_title" v="Alle marker" eh="48729e0b" />
+    <e k="sf_pda_col_field" v="Mark" eh="6f16a5f8" />
+    <e k="sf_pda_col_n" v="[EN] N%" eh="30740562" />
+    <e k="sf_pda_col_p" v="[EN] P%" eh="0a5e03bc" />
+    <e k="sf_pda_filter_all" v="Filter: Alle marker" eh="a46a8cb2" />
+    <e k="sf_pda_filter_owned" v="Filter: Kun ejede" eh="258cb971" />
+    <e k="sf_pda_col_k" v="[EN] K%" eh="43e4d0bf" />
+    <e k="sf_pda_col_ph" v="[EN] pH" eh="397dff20" />
+    <e k="sf_pda_col_om" v="[EN] OM" eh="bfbebc07" />
+    <e k="sf_pda_col_status" v="[EN] Status" eh="ec53a8c4" />
+    <e k="sf_pda_no_fields" v="Ingen markdata registreret endnu." eh="72265670" />
+    <e k="sf_pda_status_good" v="God" eh="0c6ad70b" />
+    <e k="sf_pda_status_fair" v="Rimelig" eh="f7f20cf0" />
+    <e k="sf_pda_status_poor" v="Dårlig" eh="0e94d017" />
+    <e k="sf_pda_treatment_section_title" v="Behandlingsplan" eh="4ba012e2" />
+    <e k="sf_pda_col_priority" v="Hastegrad" eh="c94e3850" />
+    <e k="sf_pda_col_needs" v="Behov" eh="94d6125d" />
+    <e k="sf_pda_no_treatment" v="Alle marker er i god stand." eh="fa985166" />
+    <e k="sf_pda_need_n" v="Kvælstof" eh="1e9ef3ba" />
+    <e k="sf_pda_need_p" v="Fosfor" eh="eb4f2688" />
+    <e k="sf_pda_need_k" v="Kalium" eh="3a4edc67" />
+    <e k="sf_pda_need_ph" v="pH-justering" eh="0570e9d2" />
+    <e k="sf_pda_need_weed" v="Herbicid" eh="1029736e" />
+    <e k="sf_pda_need_pest" v="Insekticid" eh="5650eeef" />
+    <e k="sf_pda_need_disease" v="Fungicid" eh="e8512698" />
+    <e k="sf_pda_need_multiple" v="Flere" eh="a0bf169f" />
+    <e k="sf_pda_treatment_minor" v="Mindre" eh="6fed0c37" />
+    <e k="sf_detail_title" v="Markdetalje" eh="03b5acd7" />
+    <e k="sf_detail_close" v="Luk" eh="d3d2e617" />
+    <e k="sf_detail_field_label" v="Mark #" eh="228118ab" />
+    <e k="sf_detail_urgency_label" v="Hastegrad:" eh="9a83237c" />
+    <e k="sf_detail_section_nutrients" v="Jordnæringsstoffer" eh="64377acf" />
+    <e k="sf_detail_section_pressure" v="Afgrødetryk" eh="a73974d0" />
+    <e k="sf_detail_section_history" v="Afgrødehistorik" eh="54c27499" />
+    <e k="sf_detail_n_label" v="Kvælstof (N)" eh="25cee53b" />
+    <e k="sf_detail_p_label" v="Fosfor (P)" eh="75cb5cd6" />
+    <e k="sf_detail_k_label" v="Kalium (K)" eh="39797137" />
+    <e k="sf_detail_ph_label" v="pH-niveau" eh="0c85daad" />
+    <e k="sf_detail_om_label" v="Organisk materiale" eh="6305f4bb" />
+    <e k="sf_detail_weed_label" v="Ukrudtstryk" eh="53f8b936" />
+    <e k="sf_detail_pest_label" v="Skadedyrstryk" eh="18a7c2be" />
+    <e k="sf_detail_disease_label" v="Sygdomstryk" eh="2b805cc9" />
+    <e k="sf_detail_last_crop_label" v="Sidste afgrøde" eh="ff41e5eb" />
+    <e k="sf_detail_rotation_label" v="Sædskiftestatus" eh="83f7f522" />
+    <e k="sf_treat_title" v="Behandlingsrecept" eh="0ccc3ee5" />
+    <e k="sf_treat_section_soil" v="Jordforbedring" eh="09e016e4" />
+    <e k="sf_treat_section_fert" v="Næringsstofpåføring" eh="76521e8e" />
+    <e k="sf_treat_section_prot" v="Afgrødebeskyttelse" eh="bd3fe9cd" />
+    <e k="sf_treat_hint" v="Se 'Produkter'-sektionen i butikken for specialiserede gødningstyper." eh="540bff4d" />
+    <e k="sf_treat_action_optimal" v="Optimal - ingen handling nødvendig." eh="4501a96b" />
+    <e k="sf_treat_action_lime" v="Anvend KALK eller FLYDENDE KALK for at hæve pH." eh="d1420b97" />
+    <e k="sf_treat_action_gypsum" v="Anvend GIPS for at sænke pH / forbedre struktur." eh="4cb3f0dc" />
+    <e k="sf_treat_action_om_low" v="Pløj GYLLE, KOMPOST ned eller hak halm." eh="33ec544c" />
+    <e k="sf_treat_action_om_fair" v="Overvåg. Vedligehold organiske inputs." eh="ae3af748" />
+    <e k="sf_treat_action_n_poor" v="Anvend UAN32, UREA eller VANDFRI AMMONIAK." eh="ebc225b0" />
+    <e k="sf_treat_action_n_fair" v="Anvend AMS eller STARTGØDNING." eh="dc8fbeba" />
+    <e k="sf_treat_action_p_poor" v="Anvend MAP eller DAP (Fosfor)." eh="ec2d9afa" />
+    <e k="sf_treat_action_p_fair" v="Anvend blandet GØDNING." eh="6f802546" />
+    <e k="sf_treat_action_k_poor" v="Anvend KALIUMKLORID (Kalium)." eh="bb2960f3" />
+    <e k="sf_treat_action_k_fair" v="Anvend blandet GØDNING." eh="6f802546" />
+    <e k="sf_treat_action_weed" v="Anvend HERBICID øjeblikkeligt." eh="625551c5" />
+    <e k="sf_treat_action_pest" v="Anvend INSEKTICID øjeblikkeligt." eh="f4db9a03" />
+    <e k="sf_treat_action_disease" v="Anvend FUNGICID øjeblikkeligt." eh="9228323a" />
+    <e k="sf_detail_rotation_ok" v="OK" eh="e0aa021e" />
+    <e k="sf_detail_rotation_bonus" v="Bælgplantebonus (+N)" eh="8ab86f6a" />
+    <e k="sf_detail_rotation_fatigue" v="Træthed (x1,15 udtømning)" eh="522a6d93" />
+    <e k="sf_detail_no_field" v="Ingen data tilgængelig." eh="c6d95d5e" />
+    <e k="sf_detail_no_crop" v="Ingen registreret" eh="a4b5a996" />
+    <e k="sf_pda_btn_help" v="Udviklernote" eh="5320d63f" />
+    <e k="sf_pda_help_github" v="DIN FEEDBACK BETYDER NOGET! Hvis du støder på fejl, har forslag til nye funktioner eller ønsker at bidrage til koden, kan du besøge projektet på GitHub. Du kan åbne et Issue eller en Pull Request til enhver tid for at hjælpe med at gøre denne mod bedre for alle. Tak for testningen!" eh="3a10b023" />
+    <e k="sf_pda_help_note" v="Bemærk: Jordlagsfanen på kortsiden VIRKER IKKE. Jeg er bekendt med problemet og arbejder på en løsning. (hvilket kan tage noget tid)" eh="2d8f5dc7" />
+    <e k="sf_pda_help_text" v="Hej, det er mig, udvikleren! Jeg har flyttet jordkortlagene til det native PDA-kort (ESC &gt; Kort) for en mere gnidningsfri oplevelse. Du kan nu vælge lag direkte fra sidebjælken. PDA-siden er stadig ved at blive poleret, så hold dig opdateret!" eh="58e05bdf" />
+    <e k="sf_pda_map_jump_hint" v="Klik på et felt for at hoppe til det på kortet" eh="006d5371" />
+    <e k="sf_pda_map_native_hint" v="Jordlagsvisualiseringen er flyttet! Du kan nu tilgå og skifte alle jordlag direkte fra det native PDA-kortes sidebjælke (ESC &gt; Kort). Se efter kategorien 'Jordlag' i sidebjælkens prikker." eh="87f73b10" />
+    <e k="sf_pda_treatment_hint" v="Felterne opført til højre kræver behandling. Klik på en række for at se anbefalede inputs og estimerede mængder." eh="5748d316" />
+    <!-- HUD labels -->
+    <e k="sf_hud_label_ph" v="pH" />
+    <e k="sf_hud_label_om" v="OM" />
+    <e k="sf_hud_unit_ppm" v="(ppm)" />
+    <e k="sf_hud_coverage" v="Dækning: %d%% / %d%%" />
+    <e k="sf_hud_compaction" v="komprimering: %d%%" />
+    <!-- Sprayer rate HUD -->
+    <e k="sf_sprayer_auto_on" v="PÅFØRINGSRATE (AUTO: TIL)" />
+    <e k="sf_sprayer_auto_off" v="PÅFØRINGSRATE (AUTO: FRA) [%s]" />
+    <e k="sf_sprayer_target" v="Mål: " />
+    <e k="sf_sprayer_burn_guaranteed" v="RISIKO FOR SVIDNING: GARANTERET" />
+    <e k="sf_sprayer_burn_possible" v="RISIKO FOR SVIDNING: MULIG" />
+    <!-- Notifications -->
+    <e k="sf_notify_welcome" v="Jord &amp; gødningsmod aktiv | j = hud | k = jordrapport | skriv 'soilfertility' for at se kommandoer" />
+    <e k="sf_notify_mod_active_title" v="Jord &amp; gødningsmod aktiv" />
+    <e k="sf_notify_mod_active_body" v="Realistisk jordsystem med fuld event-integration" />
+    <e k="sf_notify_init_delayed" v="Jordmod: initialisering af marken er forsinket. forsøger alternativ metode..." />
+    <e k="sf_notify_init_success" v="Jordmod: initialisering af marken gennemført!" />
+    <e k="sf_notify_critical_title" v="Kritisk alarm" />
+    <e k="sf_notify_critical_body" v="Mark %d kræver øjeblikkelig opmærksomhed! alvorlighed: %d%%" />
+    <e k="sf_notify_treated_title" v="Jordopdatering" />
+    <e k="sf_notify_treated_body" v="Mark %d fuldt behandlet med %s" />
+    <e k="sf_notify_burn_title" v="Gødningssvidning" />
+    <e k="sf_notify_burn_body" v="Mark %d: skade fra overpåføring (pH %.1f)" />
+    <e k="sf_notify_sync_error" v="Jordmod: problem med datasynkronisering registreret. rapportér venligst, hvis det fortsætter." />
+    <!-- Panel categories -->
+    <e k="sf_panel_cat_sim" v="Simulation" />
+    <e k="sf_panel_cat_sim_desc" v="Landbrugsmekanik, sværhedsgrad og næringsstofkredsløb" />
+    <e k="sf_panel_cat_display" v="Display &amp; HUD" />
+    <e k="sf_panel_cat_display_desc" v="Hud-udseende, farvetema, position og skriftstørrelse" />
+    <e k="sf_panel_cat_overlay" v="kortlag" />
+    <e k="sf_panel_cat_overlay_desc" v="Aktivt lag vist på pda-kortet" />
+<e k="sf_panel_hdr_core" v="kernesystemer" />
+<e k="sf_panel_hdr_difficulty" v="sværhedsgrad" />
+<e k="sf_panel_hdr_environment" v="miljø" />
+<e k="sf_panel_hdr_crop_stress" v="afgrødestress" />
+<e k="sf_panel_hdr_visibility" v="synlighed" />
+<e k="sf_panel_hdr_hud_style" v="hud-stil" />
+<e k="sf_panel_hdr_position" v="position" />
+<e k="sf_panel_hdr_layer" v="lag" />
+<e k="sf_panel_hdr_performance" v="ydeevne" />
+<e k="sf_panel_hdr_mod_ctrl" v="modstyring &amp; sværhedsgrad" />
+<e k="sf_panel_hdr_systems" v="systemer" />
+<e k="sf_panel_hdr_actions" v="handlinger &amp; markværktøjer" />
+
+<e k="sf_panel_admin_yes" v="admin: ja" />
+<e k="sf_panel_admin_no" v="admin: nej" />
+<e k="sf_panel_multiplayer" v="multiplayer" />
+<e k="sf_panel_singleplayer" v="singleplayer" />
+<e k="sf_panel_btn_back" v="&lt; tilbage" />
+<e k="sf_panel_btn_reset_cat" v="nulstil kategori" />
+<e k="sf_panel_btn_close_hint" v="shift+o for at lukke" />
+<e k="sf_panel_select_category" v="vælg en kategori for at konfigurere indstillinger" />
+<e k="sf_panel_btn_configure" v="konfigurer &gt;&gt;" />
+<e k="sf_panel_btn_open" v="åbn &gt;&gt;" />
+
+<e k="sf_desc_enabled" v="aktiver / deaktiver hele moddet" />
+<e k="sf_desc_debugMode" v="ekstra logning til fejlfinding" />
+<e k="sf_desc_fertilitySystem" v="fuld modellering af jordens frugtbarhed" />
+<e k="sf_desc_nutrientCycles" v="sporer nedbrydning og genopbygning af n/p/k" />
+<e k="sf_desc_fertilizerCosts" v="realistiske spilomkostninger for gødning" />
+<e k="sf_desc_showNotifications" v="notifikationer om jordstatus i spillet" />
+<e k="sf_desc_showHUD" v="vis jord-hud-overlay" />
+<e k="sf_desc_hudPosition" v="forudindstillet hud-position" />
+<e k="sf_desc_hudColorTheme" v="farvetema for hud-elementer" />
+<e k="sf_desc_hudFontSize" v="hud-tekststørrelse" />
+<e k="sf_desc_hudTransparency" v="gennemsigtighed for hud-baggrund" />
+<e k="sf_desc_seasonalEffects" v="sæsonbaserede jordændringer" />
+<e k="sf_desc_rainEffects" v="regn forårsager udvaskning af næringsstoffer" />
+<e k="sf_desc_plowingBonus" v="pløjningsbonus for jordforbedring" />
+<e k="sf_desc_weedPressure" v="sporer og straffer ukrudtsspredning" />
+<e k="sf_desc_pestPressure" v="sporer insektangreb" />
+<e k="sf_desc_diseasePressure" v="sporer svampesygdomme i afgrøder" />
+<e k="sf_desc_compactionEnabled" v="jordkomprimering fra tunge køretøjer" />
+<e k="sf_desc_difficulty" v="intensitet af næringsstofdræn" />
+<e k="sf_desc_replenishmentRate" v="hastighed for gødningsgenopbygning" />
+<e k="sf_desc_useImperialUnits" v="brug imperiale enheder (us tons/acre)" />
+<e k="sf_desc_autoRateControl" v="automatisk styring af påføringsrate" />
+<e k="sf_desc_cropRotation" v="fordele og ulemper ved sædskifte" />
+<e k="sf_desc_activeMapLayer" v="næringslag vist på pda-kortet" />
+<e k="sf_desc_overlayDensity" v="antal datapunkter (lav=8k, mellem=20k, høj=40k)" />
+
+<e k="sf_rr_1" v="meget langsom (0.25x)" />
+<e k="sf_rr_2" v="langsom (0.5x)" />
+<e k="sf_rr_3" v="normal (1.0x)" />
+<e k="sf_rr_4" v="hurtig (1.5x)" />
+<e k="sf_rr_5" v="meget hurtig (2.0x)" />
+
+<e k="sf_layer_1" v="fra" />
+<e k="sf_layer_2" v="nitrogen" />
+<e k="sf_layer_3" v="fosfor" />
+<e k="sf_layer_4" v="kalium" />
+<e k="sf_layer_5" v="ph" />
+<e k="sf_layer_6" v="organisk materiale" />
+<e k="sf_layer_7" v="hastende" />
+<e k="sf_layer_8" v="ukrudt" />
+<e k="sf_layer_9" v="skadedyr" />
+<e k="sf_layer_10" v="sygdom" />
+<e k="sf_layer_11" v="komprimering" />
+
+<e k="sf_density_1" v="lav" />
+<e k="sf_density_2" v="mellem" />
+<e k="sf_density_3" v="høj" />
+
+<e k="sf_admin_save_label" v="gem jorddata" />
+<e k="sf_admin_save_desc" v="gem alle jorddata nu" />
+<e k="sf_admin_reset_label" v="nulstil alle indstillinger" />
+<e k="sf_admin_reset_desc" v="gendan alle indstillinger til standard" />
+<e k="sf_admin_drain_label" v="tøm køretøjets tanke" />
+<e k="sf_admin_drain_desc" v="tøm sprøjte og redskaber (50% refusion)" />
+<e k="sf_admin_field_info_label" v="aktuel markinfo" />
+<e k="sf_admin_field_info_desc" v="jorddata for marken ved din position" />
+<e k="sf_admin_field_forecast_label" v="markprognose" />
+<e k="sf_admin_field_forecast_desc" v="udbytteprognose for marken ved din position" />
+<e k="sf_admin_list_fields_label" v="vis alle marker" />
+<e k="sf_admin_list_fields_desc" v="skriv alle markdata til spillets log" />
+    <e k="sf_infobox_title" v="[EN] Soil Nutrients" />
+    <e k="sf_infobox_grade" v="[EN] Soil Grade" />
+    <e k="sf_infobox_needs" v="[EN] Needs" />
+    <e k="sf_infobox_fertilizer" v="[EN] Fertilizer" />
+    </elements>
+</l10n>
