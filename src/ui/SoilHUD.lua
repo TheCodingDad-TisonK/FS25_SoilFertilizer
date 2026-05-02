@@ -88,6 +88,9 @@ function SoilHUD.new(soilSystem, settings)
     -- Single overlay handle
     self.fillOverlay = nil
 
+    -- Native FS25 InfoDisplay box (appears alongside base game FIELD INFO panel)
+    self.fieldInfoBox = nil
+
     return self
 end
 
@@ -101,6 +104,27 @@ function SoilHUD:initialize()
     else
         SoilLogger.warning("SoilHUD: createImageOverlay not available")
     end
+
+    -- ── Native FS25 Field Info box ────────────────────────
+    -- Creates an InfoDisplayKeyValueBox that sits alongside the base-game FIELD INFO
+    -- panel (same visual style). The box is populated every frame by updateFieldInfoBox()
+    -- while the player is standing on a field; it auto-hides when showNextFrame() stops
+    -- being called (i.e. off-field).
+    -- API confirmed from PlaceableInfoTrigger: g_currentMission.hud.infoDisplay:createBox(InfoDisplayKeyValueBox)
+    if g_currentMission and g_currentMission.hud and g_currentMission.hud.infoDisplay then
+        local ok, box = pcall(function()
+            return g_currentMission.hud.infoDisplay:createBox(InfoDisplayKeyValueBox)
+        end)
+        if ok and box then
+            self.fieldInfoBox = box
+            SoilLogger.info("SoilHUD: FieldInfoBox registered with native HUD infoDisplay")
+        else
+            SoilLogger.warning("SoilHUD: infoDisplay:createBox() failed — SOIL NUTRIENTS box will not appear")
+        end
+    else
+        SoilLogger.info("SoilHUD: infoDisplay not available (server or early init) — skipping FieldInfoBox")
+    end
+
     self.initialized = true
     SoilLogger.info("SoilHUD initialized at (%.3f, %.3f) scale=%.2f", self.panelX, self.panelY, self.scale)
     return true
@@ -112,6 +136,15 @@ function SoilHUD:delete()
     if self.fillOverlay then
         delete(self.fillOverlay)
         self.fillOverlay = nil
+    end
+    -- Remove the native FieldInfoBox from the HUD before shutdown
+    if self.fieldInfoBox then
+        if g_currentMission and g_currentMission.hud and g_currentMission.hud.infoDisplay then
+            pcall(function()
+                g_currentMission.hud.infoDisplay:destroyBox(self.fieldInfoBox)
+            end)
+        end
+        self.fieldInfoBox = nil
     end
     self.initialized = false
 end
@@ -294,12 +327,24 @@ end
 -- Returns true when the event is consumed so the caller can propagate eventUsed correctly.
 function SoilHUD:onMouseEvent(posX, posY, isDown, isUp, button, eventUsed)
     if not self.initialized then return false end
+
+    -- RMB: toggle edit mode — BEFORE showHUD/visible guards so it works reliably
+    -- on foot as well as in a vehicle (fix from GitHub issue #130).
+    if isDown and button == Input.MOUSE_BUTTON_RIGHT then
+        if self.settings.enabled then
+            if self.editMode then
+                self:exitEditMode()
+            else
+                self:enterEditMode()
+            end
+            return true
+        end
+        return false
+    end
+
     if not self.settings.enabled then return false end
     if not self.settings.showHUD then return false end
     if not self.visible then return false end
-
-    -- RMB toggle is now handled by the SF_HUD_DRAG input action (registered in SoilFertilityManager)
-
     if not self.editMode then return false end
 
     -- LMB down: start drag or resize
@@ -397,6 +442,146 @@ function SoilHUD:update(dt)
         self.fieldDetectTimer = 0
         self:refreshFieldData()
     end
+
+    self:updateFieldInfoBox()
+end
+
+-- ── Native FIELD INFO box ────────────────────────────────
+-- Populates an InfoDisplayKeyValueBox (same style as the base game FIELD INFO panel)
+-- with a full soil summary for the current field. Called every frame so showNextFrame()
+-- keeps the box visible; stops calling when off-field so it auto-hides.
+function SoilHUD:updateFieldInfoBox()
+    local box = self.fieldInfoBox
+    if not box then return end
+
+    local info = self.cachedFieldInfo
+    if not info then return end
+
+    if not g_SoilFertilityManager or not g_SoilFertilityManager.settings.enabled then return end
+
+    local ppm = SoilConstants.PPM_DISPLAY or { N = 1, P = 1, K = 1 }
+    local rc  = SoilConstants.REPORT_COLORS or {}
+    local phGoodLow  = rc.PH_GOOD_LOW  or 6.0
+    local phGoodHigh = rc.PH_GOOD_HIGH or 7.0
+    local phFairLow  = rc.PH_FAIR_LOW  or 5.5
+    local phFairHigh = rc.PH_FAIR_HIGH or 7.5
+    local omGood     = rc.OM_GOOD      or 4.0
+    local omFair     = rc.OM_FAIR      or 2.5
+
+    local weedMed    = (SoilConstants.WEED_PRESSURE    and SoilConstants.WEED_PRESSURE.MEDIUM)    or 50
+    local pestMed    = (SoilConstants.PEST_PRESSURE    and SoilConstants.PEST_PRESSURE.MEDIUM)    or 50
+    local diseaseMed = (SoilConstants.DISEASE_PRESSURE and SoilConstants.DISEASE_PRESSURE.MEDIUM) or 50
+
+    -- ── Overall soil grade (worst-case of all indicators) ──
+    local grade = "Good"
+    for _, key in ipairs({"nitrogen", "phosphorus", "potassium"}) do
+        local st = info[key] and info[key].status
+        if     st == "Poor"                  then grade = "Poor"
+        elseif st == "Fair" and grade ~= "Poor" then grade = "Fair" end
+    end
+    if info.pH then
+        if   info.pH < phFairLow or info.pH > phFairHigh then grade = "Poor"
+        elseif (info.pH < phGoodLow or info.pH > phGoodHigh) and grade ~= "Poor" then grade = "Fair" end
+    end
+    if info.organicMatter then
+        if   info.organicMatter < omFair and grade ~= "Poor" then grade = "Poor"
+        elseif info.organicMatter < omGood  and grade ~= "Poor" then grade = "Fair" end
+    end
+    local weedPct    = math.floor((info.weedPressure    or 0) + 0.5)
+    local pestPct    = math.floor((info.pestPressure    or 0) + 0.5)
+    local diseasePct = math.floor((info.diseasePressure or 0) + 0.5)
+    local compPct    = math.floor((info.compaction      or 0) + 0.5)
+    if weedPct    >= weedMed    and grade ~= "Poor" then grade = "Fair" end
+    if pestPct    >= pestMed                        then grade = "Poor" end
+    if diseasePct >= diseaseMed                     then grade = "Poor" end
+
+    -- ── Yield penalty (N/P/K deficit vs crop threshold) ────
+    local yieldStr = g_i18n:getText("sf_hud_optimal") or "Optimal"
+    local ys = SoilConstants.YIELD_SENSITIVITY
+    if ys then
+        local cropLower = info.lastCrop and string.lower(info.lastCrop) or nil
+        local isNonCrop = cropLower and ys.NON_CROP_NAMES and ys.NON_CROP_NAMES[cropLower]
+        if not isNonCrop then
+            local tier     = (cropLower and ys.CROP_TIERS and ys.CROP_TIERS[cropLower]) or ys.DEFAULT_TIER
+            local tierData = ys.TIERS and ys.TIERS[tier]
+            local thresh   = ys.OPTIMAL_THRESHOLD or 70
+            if tierData then
+                local nDef    = math.max(0, thresh - info.nitrogen.value)   / thresh
+                local pDef    = math.max(0, thresh - info.phosphorus.value) / thresh
+                local kDef    = math.max(0, thresh - info.potassium.value)  / thresh
+                local penalty = math.min(ys.MAX_PENALTY, (nDef + pDef + kDef) / 3 * tierData.scale)
+                local pct     = math.floor(penalty * 100 + 0.5)
+                if pct > 0 then
+                    yieldStr = string.format("~-%d%%", pct)
+                    if grade == "Good" then grade = "Fair" end
+                end
+            end
+        end
+    end
+
+    -- ── Crop rotation label ─────────────────────────────────
+    local rotStr
+    if info.rotationStatus then
+        if     info.rotationStatus == "Bonus"   then rotStr = g_i18n:getText("sf_report_rotation_bonus")   or "Bonus"
+        elseif info.rotationStatus == "Fatigue" then
+            rotStr = g_i18n:getText("sf_report_rotation_fatigue") or "Fatigue"
+            if grade == "Good" then grade = "Fair" end
+        else                                         rotStr = g_i18n:getText("sf_report_rotation_ok")      or "OK"
+        end
+    end
+
+    -- ── Nutrient value formatter (current / crop-target) ───
+    local ct = info.cropTargets
+    local function fmtNutrient(rawValue, label, ppmMult)
+        local val = math.floor(rawValue * ppmMult + 0.5)
+        if ct and ct[label] then
+            return string.format("%d / %d", val, math.floor(ct[label].opt * ppmMult + 0.5))
+        end
+        return tostring(val)
+    end
+
+    -- ── Needs summary (actionable issues list) ─────────────
+    local needs = {}
+    if     info.nitrogen.status   == "Poor" then table.insert(needs, "N!")
+    elseif info.nitrogen.status   == "Fair" then table.insert(needs, "N")  end
+    if     info.phosphorus.status == "Poor" then table.insert(needs, "P!")
+    elseif info.phosphorus.status == "Fair" then table.insert(needs, "P")  end
+    if     info.potassium.status  == "Poor" then table.insert(needs, "K!")
+    elseif info.potassium.status  == "Fair" then table.insert(needs, "K")  end
+    if info.pH and (info.pH < phGoodLow or info.pH > phGoodHigh) then table.insert(needs, "pH") end
+    if weedPct    >= weedMed    then table.insert(needs, g_i18n:getText("sf_hud_weeds")   or "Weeds")   end
+    if pestPct    >= pestMed    then table.insert(needs, g_i18n:getText("sf_hud_pests")   or "Pests")   end
+    if diseasePct >= diseaseMed then table.insert(needs, g_i18n:getText("sf_hud_disease") or "Disease") end
+    if compPct    > 10          then table.insert(needs, g_i18n:getText("sf_hud_compaction") or "Compaction") end
+
+    local protected = g_i18n:getText("sf_hud_protected") or "protected"
+    local function pressureLine(pct, active)
+        if active then return string.format("%d%% (%s)", pct, protected) end
+        return string.format("%d%%", pct)
+    end
+
+    -- ── Populate box ────────────────────────────────────────
+    box:clear()
+    box:setTitle(g_i18n:getText("sf_fieldinfo_box_title") or "Soil Nutrients")
+
+    box:addLine(g_i18n:getText("sf_fieldinfo_grade") or "Soil Grade", grade)
+    box:addLine(g_i18n:getText("sf_fieldinfo_yield") or "Yield",      yieldStr)
+    if rotStr then
+        box:addLine(g_i18n:getText("sf_fieldinfo_rotation") or "Rotation", rotStr)
+    end
+    box:addLine("N (ppm)", fmtNutrient(info.nitrogen.value,   "N", ppm.N))
+    box:addLine("P (ppm)", fmtNutrient(info.phosphorus.value, "P", ppm.P))
+    box:addLine("K (ppm)", fmtNutrient(info.potassium.value,  "K", ppm.K))
+    box:addLine("pH",      string.format("%.1f", info.pH))
+    box:addLine("OM",      string.format("%.1f%%", info.organicMatter))
+    if weedPct    > 0 then box:addLine(g_i18n:getText("sf_hud_weeds")      or "Weeds",      pressureLine(weedPct,    info.herbicideActive))  end
+    if pestPct    > 0 then box:addLine(g_i18n:getText("sf_hud_pests")      or "Pests",      pressureLine(pestPct,    info.insecticideActive)) end
+    if diseasePct > 0 then box:addLine(g_i18n:getText("sf_hud_disease")    or "Disease",    pressureLine(diseasePct, info.fungicideActive))   end
+    if compPct    > 0 then box:addLine(g_i18n:getText("sf_hud_compaction") or "Compaction", string.format("%d%%", compPct)) end
+    box:addLine(g_i18n:getText("sf_fieldinfo_needs") or "Needs",
+        #needs > 0 and table.concat(needs, ", ") or (g_i18n:getText("sf_report_rec_optimal") or "All good"))
+
+    box:showNextFrame()
 end
 
 -- ── Field detection ──────────────────────────────────────
