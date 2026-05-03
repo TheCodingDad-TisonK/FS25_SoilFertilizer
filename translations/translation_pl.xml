@@ -28,7 +28,7 @@
     <e k="sf_difficulty_long" v="Ustaw poziom trudności: Prosty, Realistyczny, Hardcore" eh="cfb758a4" />
     <e k="sf_diff_1" v="Prosty" eh="1fbb1e39" />
     <e k="sf_diff_2" v="Realistyczny" eh="408c999f" />
-    <e k="sf_diff_3" v="[EN] Hardcore" eh="1c800aa9" />
+    <e k="sf_diff_3" v="Hardcore" eh="1c800aa9" />
 	<e k="sf_ui_soilReport_syncing" v="Synchronizowanie danych gleby..." eh="03f01c4d" />
 	<e k="sf_ui_soilReport_syncTimeout" v=" Nie można załadować właściciela pola. Proszę zamknąć i ponownie otworzyć raport." eh="9f699982" />
     <e k="sf_fertilizer_cost_short" v="Koszty Nawozu" eh="6870d88b" />
@@ -50,17 +50,17 @@
     <e k="sf_hud_color_1" v="Zielony" eh="d382816a" />
     <e k="sf_hud_color_2" v="Niebieski" eh="9594eec9" />
     <e k="sf_hud_color_3" v="Bursztynowy" eh="88068e33" />
-    <e k="sf_hud_color_4" v="[EN] Mono" eh="5d9b47bd" />
+    <e k="sf_hud_color_4" v="Mono" eh="5d9b47bd" />
     <e k="sf_diff_short" v="Trudność" eh="7b29ca96" />
     <e k="sf_diff_long" v="Poziom trudności zarządzania glebą" eh="d6f4560c" />
-    <e k="sf_auto_rate_short" v="Automatyczna kontrola dawki" eh="6f99137d" />
-    <e k="sf_auto_rate_long" v="Automatycznie dostosowuje dawkę nawożenia do potrzeb pola" eh="a9ca9f6b" />
     <e k="sf_rr_short" v="Wskaźnik uzupełniania zapasów" eh="b363b336" />
 	<e k="sf_rr_long" v="Jak szybko nawóz odbudowuje składniki odżywcze pola (0.25x Bardzo wolno do 2.0x Bardzo szybko)" eh="afe78a6d" />
+    <e k="sf_auto_rate_short" v="Automatyczna kontrola dawki" eh="6f99137d" />
+    <e k="sf_auto_rate_long" v="Automatycznie dostosowuje dawkę nawożenia do potrzeb pola" eh="a9ca9f6b" />
     <e k="sf_hud_theme_1" v="Zielony" eh="d382816a" />
     <e k="sf_hud_theme_2" v="Niebieski" eh="9594eec9" />
     <e k="sf_hud_theme_3" v="Bursztynowy" eh="88068e33" />
-    <e k="sf_hud_theme_4" v="[EN] Mono" eh="5d9b47bd" />
+    <e k="sf_hud_theme_4" v="Mono" eh="5d9b47bd" />
     <e k="sf_hud_font_size_short" v="Rozmiar czcionki HUD" eh="fd6ca64a" />
     <e k="sf_hud_font_size_long" v="Dostosuj rozmiar tekstu dla lepszej czytelności" eh="c338854f" />
     <e k="sf_hud_font_1" v="Mały" eh="2660064e" />
@@ -73,20 +73,6 @@
     <e k="sf_hud_trans_3" v="Średni" eh="87f8a6ab" />
     <e k="sf_hud_trans_4" v="Ciemny" eh="a18366b2" />
     <e k="sf_hud_trans_5" v="Solidny" eh="e41480b6" />
-    <e k="sf_hud_title" v="Monitor Gleby" eh="f8cda642" />
-    <e k="sf_hud_field" v="Pole %d" eh="08988997" />
-    <e k="sf_hud_noField" v="Brak pola, przejdź na obszar pola" eh="62c55e9e" />
-    <e k="sf_hud_fallow" v="Ugór" eh="eafe5913" />
-    <e k="sf_hud_weeds" v="Chwasty" eh="324181de" />
-    <e k="sf_hud_pests" v="Szkodniki" eh="2fed5101" />
-    <e k="sf_hud_disease" v="Choroby" eh="e7067a8c" />
-    <e k="sf_hud_protected" v="(chronione)" eh="8273211e" />
-    <e k="sf_hud_yield" v="Plon" eh="97345487" />
-    <e k="sf_hud_estYield" v="Szac. plon" eh="32a4135e" />
-    <e k="sf_hud_optimal" v="Optymalny" eh="cb61fef1" />
-    <e k="sf_hud_post_harvest" v="[EN] Post-harvest · Fertilize" />
-    <e k="sf_hud_hint_edit" v="Przegciągnięcie: przesuń   ku górze: zmien rozmiar   RMB: gotowe" eh="987ebf45" />
-    <e k="sf_hud_hint_normal" v="RMB: przesuń/zmień rozmiar" eh="afc8f13b" />
     <e k="sf_use_imperial_short" v="Jednostki imperialne" eh="ff2701ad" />
     <e k="sf_use_imperial_long" v="Wyświetlaj dawki w gal/ac i lb/ac (wyłączone = L/ha i kg/ha)" eh="17efa489" />
     <e k="sf_active_map_layer_short" v="Aktywna warstwa mapy" eh="1861765f" />
@@ -110,15 +96,13 @@
 	<e k="sf_report_back" v="Cofnij" eh="0557fa92" />
     <e k="sf_report_difficulty" v="Trudność:" eh="3abaf54f" />
     <e k="sf_report_col_field" v="Pole" eh="6f16a5f8" />
-    <e k="sf_report_col_Weed" v="Chwasty" eh="324181de" />
-    <e k="sf_report_col_Pest" v="Szkodniki" eh="2fed5101" />
     <e k="sf_report_col_last_crop" v="Ostatni Plon" eh="ff41e5eb" />
     <e k="sf_report_col_fert" v="Nawóz" eh="9e6d0eb4" />
     <e k="sf_report_no_data" v="Brak danych o glebie. Wejdź na pole, aby rozpocząć śledzenie." eh="1528a4cb" />
     <e k="sf_report_prev" v="Poprz" eh="14230d11" />
     <e k="sf_report_next" v="Nast" eh="10ac3d04" />
     <e k="sf_report_yes" v="TAK" eh="7469a286" />
-    <e k="sf_report_ok" v="[EN] OK" eh="e0aa021e" />
+    <e k="sf_report_ok" v="OK" eh="e0aa021e" />
     <e k="sf_report_none" v="Brak" eh="6adf97f8" />
     <e k="sf_report_rec_n_poor" v="Potrzebny azot" eh="5dca0711" />
     <e k="sf_report_rec_n_fair" v="Dostateczny azot" eh="35ad072d" />
@@ -137,17 +121,6 @@
     <e k="sf_report_rec_good" v="Dobre" eh="0c6ad70b" />
     <e k="sf_report_rec_fair" v="Dostateczny" eh="f7f20cf0" />
     <e k="sf_report_rec_poor" v="Słabe" eh="0e94d017" />
-        <e k="sf_report_nutrients" v="Składniki odżywcze (ppm)" eh="0e94d018" />
-        <e k="sf_report_nitrogen" v="Azot (N)" eh="0e94d019" />
-        <e k="sf_report_phosphorus" v="Fosfor (P)" eh="0e94d01a" />
-        <e k="sf_report_potassium" v="Potas (K)" eh="0e94d01b" />
-        <e k="sf_report_pressures" v="Ryzyka" eh="0e94d01g" />
-        <e k="sf_report_weed_pressure" v="Ryzyko chwastów" eh="0e94d01c" />
-        <e k="sf_report_pest_pressure" v="Ryzyko szkodników" eh="0e94d01d" />
-        <e k="sf_report_disease_pressure" v="Ryzyko chorób" eh="0e94d01e" />
-        <e k="sf_report_yield_forecast" v="Prognoza plonu" eh="0e94d01f" />
-        <e k="sf_report_action_plan" v="Zalecenia" eh="0e94d020" />
-        <e  k="sf_report_organic_matter" v="Materia organiczna" eh="0e94d021" />
     <e k="sf_uan32_title" v="UAN 32 Nawóz azotowy (N)" eh="90913bb8" />
     <e k="sf_uan28_title" v="UAN 28 Nawóz azotowy (N)" eh="9d902cd7" />
     <e k="sf_anhydrous_title" v="Amoniak bezwodny (N)" eh="3fc85c02" />
@@ -173,11 +146,11 @@
     <e k="sf_bigBag_anhydrous_function" v="Nawóz azotowy (ciekły)" eh="27de5f41" />
     <e k="sf_bigBag_urea_name" v="Big Bag Mocznik 46-0-0" eh="8e8cbaae" />
     <e k="sf_bigBag_urea_function" v="Nawóz azotowy (suchy)" eh="63efea20" />
-    <e k="sf_bigBag_ams_name" v="[EN] Big Bag AMS 21-0-0-24S" eh="7f71ee68" />
+    <e k="sf_bigBag_ams_name" v="Big Bag AMS 21-0-0-24S" eh="7f71ee68" />
     <e k="sf_bigBag_ams_function" v="Nawóz azotowy (suchy)" eh="63efea20" />
-    <e k="sf_bigBag_map_name" v="[EN] Big Bag MAP 11-52-0" eh="8a5a059b" />
+    <e k="sf_bigBag_map_name" v="Big Bag MAP 11-52-0" eh="8a5a059b" />
     <e k="sf_bigBag_map_function" v="Nawóz fosforowy (suchy)" eh="0cc85c60" />
-    <e k="sf_bigBag_dap_name" v="[EN] Big Bag DAP 18-46-0" eh="fb4e9987" />
+    <e k="sf_bigBag_dap_name" v="Big Bag DAP 18-46-0" eh="fb4e9987" />
     <e k="sf_bigBag_dap_function" v="Nawóz fosforowy (suchy)" eh="0cc85c60" />
     <e k="sf_bigBag_potash_name" v="Big Bag Sól potasowa 0-0-60" eh="eb771556" />
     <e k="sf_bigBag_potash_function" v="Nawóz potasowy (suchy)" eh="18015099" />
@@ -209,6 +182,20 @@
     <e k="sf_bigBag_pelletized_manure_function" v="Nawóz organiczny (suchy)" eh="374c7b1e" />
     <e k="sf_bigBag_liquidlime_name" v="Big Bag płyne wapno" eh="4f8caca1" />
     <e k="sf_bigBag_liquidlime_function" v="podnoszący pH (ciekły)" eh="7a118b6d" />
+    <e k="sf_hud_title" v="Monitor Gleby" eh="f8cda642" />
+    <e k="sf_hud_field" v="Pole %d" eh="08988997" />
+    <e k="sf_hud_noField" v="Brak pola, przejdź na obszar pola" eh="62c55e9e" />
+    <e k="sf_hud_fallow" v="Ugór" eh="eafe5913" />
+    <e k="sf_hud_weeds" v="Chwasty" eh="324181de" />
+    <e k="sf_hud_pests" v="Szkodniki" eh="2fed5101" />
+    <e k="sf_hud_disease" v="Choroby" eh="e7067a8c" />
+    <e k="sf_hud_protected" v="(chronione)" eh="8273211e" />
+    <e k="sf_hud_yield" v="Plon" eh="97345487" />
+    <e k="sf_hud_estYield" v="Szac. plon" eh="32a4135e" />
+    <e k="sf_hud_optimal" v="Optymalny" eh="cb61fef1" />
+    <e k="sf_hud_post_harvest" v="Nawożenie po zbiorze" eh="d64d5d59" />
+    <e k="sf_hud_hint_edit" v="Przegciągnięcie: przesuń   ku górze: zmien rozmiar   RMB: gotowe" eh="987ebf45" />
+    <e k="sf_hud_hint_normal" v="RMB: przesuń/zmień rozmiar" eh="afc8f13b" />
     <e k="sf_report_detail_n_ok" v="Azot: Optymalny" eh="13782bd9" />
     <e k="sf_report_detail_p_ok" v="Fosfor: Optymalny" eh="dbc90f11" />
     <e k="sf_report_detail_k_ok" v="Potas: Optymalny" eh="0197b4ba" />
@@ -222,7 +209,11 @@
     <e k="sf_report_yield_hint" v="Na podstawie N/P/K vs próg optymalny" eh="022663e0" />
     <e k="sf_report_yield_loss" v="Plon ~-%d%%" eh="d64d5d59" />
 
+    <!-- ======================================================
+         HELP LINES (ESC > Help > Realistic Soil & Fertilizer)
+         ====================================================== -->
 
+    <!-- Category titles -->
 	<e k="helpLine_sf_cat_overview" v="Przegląd" eh="3b878279" />
 	<e k="helpLine_sf_cat_started" v="Pierwsze kroki" eh="bf647454" />
 	<e k="helpLine_sf_cat_nutrients" v="Składniki glebowe" eh="64377acf" />
@@ -230,96 +221,122 @@
 	<e k="helpLine_sf_cat_hud" v=" HUD &amp;amp; Raport Glebowy" eh="9b9888b9" />
 	<e k="helpLine_sf_cat_settings" v="Ustawienia" eh="f4f70727" />
 	<e k="helpLine_sf_cat_multiplayer" v="Tryb wieloosobowy" eh="901a7320" />
+
+    <!-- Category 1: Overview -->
 	<e k="helpLine_sf_ov_p1_title" v="Co robi ten mod" eh="46cbb25b" />
 	<e k="helpLine_sf_ov_p1_intro_title" v="Dla każdego pola monitoring gleby " eh="8fe3248d" />
 	<e k="helpLine_sf_ov_p1_intro_text" v="Każde pole niezależnie śledzi pięć właściwości: Azot (N), Fosfor (P), Potas (K), Materia Organiczna (OM) i pH. Wartości są zapisywane razem z grą i utrzymywane przez sesje." eh="c30216e6" />
 	<e k="helpLine_sf_ov_p1_flow_title" v="Cykl składników" eh="15b0d408" />
 	<e k="helpLine_sf_ov_p1_flow_text" v=" Rośliny pobierają składniki odżywcze podczas zbiorów. Nawozy, kompost, obornik i wapno je odbudowują. Mod śledzi realistyczny budżet składników odżywczych - to, co rośliny pobierają, trzeba zwrócić." eh="418041f0" />
+
 	<e k="helpLine_sf_ov_p2_title" v="Efekty środowiskowe" eh="e139e84f" />
 	<e k="helpLine_sf_ov_p2_rain_title" v="Deszcz i wypłukiwanie" eh="33e0d8ea" />
 	<e k="helpLine_sf_ov_p2_rain_text" v="Deszcz wypłukuje najszybciej azot, potem potas, na końcu fosfor. Równieź powoli zakwasz glebę. Efekty deszczu mogą być wyłączone w ustawieniach." eh="91e39cc6" />
 	<e k="helpLine_sf_ov_p2_season_title" v="Pory roku i regeneracja pól" eh="ad2009c8" />
 	<e k="helpLine_sf_ov_p2_season_text" v="Wiosną dodaje się +0.03 N dziennie (aktywność biologiczna). Jesienią usuwa się 0.02 N dziennie. Pola pozostawione bez uprawy dłużej niż 7 dni  powoli się regenerują." eh="e5ebb3b2" />
-	<e k="helpLine_sf_gs_p1_title" v="Twoje pierwsze kroki" eh="bdd0e0a7" />
+    
+    <!-- Category 2: Getting Started -->    
+    <e k="helpLine_sf_gs_p1_title" v="Twoje pierwsze kroki" eh="bdd0e0a7" />
 	<e k="helpLine_sf_gs_p1_hud_title" v="Otwórz HUD (klawisz J)" eh="e1bdea72" />
 	<e k="helpLine_sf_gs_p1_hud_text" v="Naciśnij J, aby przełączyć nakładkę gleby na żywo. Pokazuje N, P, K, pH i OM dla pola, w którym się znajdujesz. Etykiety statusu: Dobry / Umiarkowany / Słaby informują Cię o tym, co wymaga uwagi na pierwszy rzut oka." eh="53cef520" />
 	<e k="helpLine_sf_gs_p1_report_title" v="Otwórz raport glebowy (klawisz k)" eh="e71446cd" />
 	<e k="helpLine_sf_gs_p1_report_text" v="Naciśnij K aby otworzyć pełny raport glebowy. Każde pole jest wymienione z kolorowymi statusami składników, posortowanymi według pilności. Kliknij strzałkę na dowolnym wierszu, aby uzyskać szczegółowy widok z rekomendacjami." eh="9a0d32a6" />
-	<e k="helpLine_sf_gs_p2_title" v="Nawożenie i zbiory" eh="1a52ac04" />
+	
+    <e k="helpLine_sf_gs_p2_title" v="Nawożenie i zbiory" eh="1a52ac04" />
 	<e k="helpLine_sf_gs_p2_fert_title" v="Nawożenie pól" eh="ea52ec26" />
 	<e k="helpLine_sf_gs_p2_fert_text" v="Zastosuj nawóz za pomocą dowolnego standardowego opryskiwacza lub rozsiewacza. Mod rozpoznaje wszystkie typy gry podstawowej plus 9 niestandardowych typów (UAN-32, MAP, Potash, itp.). Każdy typ odbudowuje różne składniki odżywcze - patrz kategoria Nawozy dla pełnych informacji." eh="fe906e29" />
 	<e k="helpLine_sf_gs_p2_harvest_title" v="Pobieranie po zbiorach" eh="a67b6cb5" />
 	<e k="helpLine_sf_gs_p2_harvest_text" v="Każdy zbiór usuwa składniki odżywcze z pola. Rośliny wymagające (ziemniaki, burak cukrowy, soja) znacznie bardziej je pobierają niż rośliny mniej wymagające (pszenica, żyto). Sprawdź HUD lub raport glebowy po każdym cyklu zbiorów." eh="63f90ed4" />
-	<e k="helpLine_sf_gs_p3_title" v="Trudność" eh="7b29ca96" />
+	
+    <e k="helpLine_sf_gs_p3_title" v="Trudność" eh="7b29ca96" />
 	<e k="helpLine_sf_gs_p3_levels_title" v="Trzy poziomy trudności" eh="52611188" />
 	<e k="helpLine_sf_gs_p3_levels_text" v="Prosty (0.7x): 30% mniej pobierania składników - dobry dla nowych graczy. Realistyczny (1.0x): zrównoważony, dopasowany do rzeczywistych warunków. Hardcore (1.5x): 50% więcej pobiernia składników - wymaga intensywnego zarządzania glebą." eh="f4f1ea30" />
 	<e k="helpLine_sf_gs_p3_access_title" v="Zmiana ustawień" eh="b421c88f" />
 	<e k="helpLine_sf_gs_p3_access_text" v="Otwórz ustawienia naciskając ESC &amp;gt; Settings &amp;gt; Soil &amp;amp; Fertilizer. W trybie wieloosobowym, tylko administrator serwera może zmieniać ustawienia symulacji. Wszystkie opcje wyświetlania HUD są indywidualne dla każdego gracza i nie są dzielone." eh="f36a5639" />
+
+    <!-- Category 3: Soil Nutrients -->
 	<e k="helpLine_sf_nu_p1_title" v="Azot i Fosfor" eh="27d37372" />
 	<e k="helpLine_sf_nu_p1_n_title" v=" Azot (N)  —  Zakres: 0 to 100" eh="10a358f4" />
 	<e k="helpLine_sf_nu_p1_n_text" v="Najbardziej mobliny składnik odżywczy roślin - wykorzystywany jest najszybciej i wymywa się najszybciej podczas deszczu. Niski: poniżej 30. Dobry: powyżej 50. Można zwiększyć przy pomocy : nawozów płynnych, UAN-32, UAN-28, bezwodny amoniak, mocznik, AMS, obornika, lub gnojowicy." eh="58d62253" />
 	<e k="helpLine_sf_nu_p1_p_title" v=" Fosfor (P)  —  Zakres: 0 to 100" eh="979bba64" />
 	<e k="helpLine_sf_nu_p1_p_text" v="Silnie wiąże się z glebą i bardzo powoli ulega wymywaniu. Jego zasoby wyczerpują się głównie w wyniku pobierania przez rośliny. Rzepak ma największe zapotrzebowanie na fosfor. Niski: poniżej 25. Dobry: powyżej 45. Można zwiększyć przy pomocy : MAP, DAP, nawozu startowego , lub płynnych nawozów." eh="92c5ac66" />
-	<e k="helpLine_sf_nu_p2_title" v="Potas (K) i pH" eh="6bd92f25" />
+	
+    <e k="helpLine_sf_nu_p2_title" v="Potas (K) i pH" eh="6bd92f25" />
 	<e k="helpLine_sf_nu_p2_k_title" v=" Potas (K) - Zakres 0 to 100" eh="2a16e8bc" />
 	<e k="helpLine_sf_nu_p2_k_text" v=" Niezwykle ważny dla roślin korzeniowych i bulwiastych. Ziemniaki i buraki cukrowe wykorzystują K podczas sezonu wegatycyjnego. Umiarkowanie wymywa się podczas deszczu. Niski: poniżej 20. dobry powyżej 40. Można zwiększyć przy pomocy: Soli potasowej (0-0-60), gnojowicy, kompostu, lub płynnych nawozów." eh="7230fee4" />
 	<e k="helpLine_sf_nu_p2_ph_title" v=" pH  —  Zakres: 5.0 to 7.5" eh="944beca2" />
 	<e k="helpLine_sf_nu_p2_ph_text" v="Większość upraw najlepiej rozwija się przy pH od 6,5 do 7,0. Deszcz z czasem powoduje powolne zakwaszanie gleby. Poziom pH nie wraca do normy samoczynnie – podwyższyć go można jedynie za pomocą wapna lub płynnego wapna. Niski poziom: poniżej 5,5. Jeśli poziom pH spada, należy zastosować wapno przed kolejnym siewem/sadzeniem." eh="08e0aefd" />
-	<e k="helpLine_sf_nu_p3_title" v="Materia organiczna (próchnica)" eh="6305f4bb" />
+	
+    <e k="helpLine_sf_nu_p3_title" v="Materia organiczna (próchnica)" eh="6305f4bb" />
 	<e k="helpLine_sf_nu_p3_om_title" v="Materia organiczna (próchnica) (OM) - Zakres 0 do 10" eh="58f490f3" />
 	<e k="helpLine_sf_nu_p3_om_text" v="Zwiększa się bardzo powoli i nie ulega zmniejszeniu w wyniku zbiorów. Słaby: poniżej 2,5. Dobry: powyżej 4,0. Można go zwiększyć poprzez stosowanie: obornika, gnojowicy, pozostałości po fermentacji, kompostu, osadów ściekowych, ściółki z chowu drobiu, granulowanego obornika lub poprzez rozdrabnianie słomy i rozrzucanie jej na polu." eh="f9a02359" />
 	<e k="helpLine_sf_nu_p3_fallow_title" v="Ugorowanie" eh="14133b0b" />
 	<e k="helpLine_sf_nu_p3_fallow_text" v="Pole zostawione na 7 i więcej dni powoli odbudowuje składniki. Na dzień: N +0.07, P +0.03, K +0.05, OM +0.01. Płodozmian i okresy ugorowania nadal mają realne znaczenie w tym modzie." eh="81fa82b3" />
-	<e k="helpLine_sf_fe_p1_title" v="Bazowe typy nawozów" eh="fd941c0d" />
+	
+    <!-- Category 4: Fertilizers -->
+    <e k="helpLine_sf_fe_p1_title" v="Bazowe typy nawozów" eh="fd941c0d" />
 	<e k="helpLine_sf_fe_p1_base_title" v="Płynne, Stałe, Obornik i gnojowica" eh="4668dca7" />
 	<e k="helpLine_sf_fe_p1_base_text" v="Płyny nawóz dodaje zblinasowaną dawkę N+P+K. Nawóz stały jest bogatszy w  N i P. Obornik i Gnojowica dodaje N, P, K, i Materię organiczną. Kompost (produkt uboczny biogazowni) jest bogaty w K i również dodaje OM. Wszystkie te nawozy można aplikować przy pomocy standardowych maszyn." eh="64069a56" />
 	<e k="helpLine_sf_fe_p1_lime_title" v="Wapno i regulacja pH " eh="8933cce1" />
 	<e k="helpLine_sf_fe_p1_lime_text" v="Wapno jest jednym regulatorem pH - nie dodaje on żadnych składników. Płyne wapno i gips również zwiększa pH(gips dodaje śladowe ilości OM). Użyj kiedy pH spadnie ponieżj 6.0 by zachować opytymalne pH dla roślin." eh="833a967f" />
-	<e k="helpLine_sf_fe_p2_title" v="Dodatkowe żródła Azotu i Potasu/Fosforu" eh="1021f8c9" />
+	
+    <e k="helpLine_sf_fe_p2_title" v="Dodatkowe żródła Azotu i Potasu/Fosforu" eh="1021f8c9" />
 	<e k="helpLine_sf_fe_p2_n_title" v="Żródła azotu (dodatkowe big bagi)" eh="9dfe5a5a" />
 	<e k="helpLine_sf_fe_p2_n_text" v="UAN-32 (32-0-0) i UAN-28 (28-0-0) są płynymi rozwiazaniami aplikacji azotu. Amoniak bezwodny (82-0-0) jest największym żródłem azotu na lirt. Mocznik (46-0-0) i AMS (siarczan amonu) (21-0-0-24S) są suchymi granulami. Wyszystkie zawierają tylko Azot - nie wpływają na zawartość P, K, i pH." eh="6a100c25" />
 	<e k="helpLine_sf_fe_p2_pk_title" v="Żródła Fosoru i Potasu " eh="a2d4091b" />
 	<e k="helpLine_sf_fe_p2_pk_text" v=" MAP (11-52-0): największa zawrtość P na litr. DAP (18-46-0): duża zawartość P z trochę N. Sól potasowa (0-0-60): czysty K. Startowy(NPK) (10-34-0): Wysoka zawrtość Fosforu z blinansowaną zawrtościa Azotu i Potasu, może byc stosowana w podsiewacz. Wszystkie są dostepnie w sklepie w postaci big bagów." eh="75a86964" />
-	<e k="helpLine_sf_fe_p3_title" v="Produkty organiczne i ryzyku przypaleń" eh="7ab807d1" />
+	
+    <e k="helpLine_sf_fe_p3_title" v="Produkty organiczne i ryzyku przypaleń" eh="7ab807d1" />
 	<e k="helpLine_sf_fe_p3_organic_title" v="Organiczne i wolne działające produkty" eh="0199e6be" />
 	<e k="helpLine_sf_fe_p3_organic_text" v="Komppost jest największym budowniczym próchnicy(OM) (+0.12 na 1,000 L). Osady ściekowe i kurzak dodaje N, P, i OM. Nawozy w postaci granulatu to skoncentrowane, zbilansowane nawozy organiczne. Wszystkie te opcje napełniania są dostępne po zainstalowaniu odpowiednich modyfikacji sprzętu." eh="3d16e4ee" />
 	<e k="helpLine_sf_fe_p3_burn_title" v="Przedawkowanie i ryzyko przypaleń " eh="e986cc54" />
 	<e k="helpLine_sf_fe_p3_burn_text" v="Dawka 1.25x większa niz podstawowa dawka obniży zawrtość o  (-0.15 pH i -5 N). Przy 1.50x lub większym przedawkowniu, przyplanie jest więcej niż pewne przy każdej aplikacji nawozu straty to (-0.30 pH i -12 N). Wykorzystaj przyciski odpowiedzalne za zwiększanie lub zmieniejszenie dawki aby konrolować poziom nawożenia." eh="7bccc46a" />
-	<e k="helpLine_sf_hu_p1_title" v="Nakładka nformacje o glebie" eh="6522879b" />
+	
+    <!-- Category 5: HUD and Soil Report -->
+    <e k="helpLine_sf_hu_p1_title" v="Nakładka nformacje o glebie" eh="6522879b" />
 	<e k="helpLine_sf_hu_p1_toggle_title" v="Włacz nakładkę informacje o glebie (klawisz J)" eh="402283ba" />
 	<e k="helpLine_sf_hu_p1_toggle_text" v="Naciśnij klawisz J, aby wyświetlić lub ukryć nakładkę z danymi o glebie na żywo. Funkcja ta rozpoznaje pole, na którym się znajdujesz, i wyświetla wartości N, P, K, pH oraz zawartość materii organicznej. Gdy włączone są ustawienia dotyczące chwastów, szkodników lub chorób, odpowiednie wiersze pojawiają się na dole panelu." eh="3dcb9bfe" />
 	<e k="helpLine_sf_hu_p1_status_title" v="Jak odczytywać zawrtości " eh="291c3aac" />
 	<e k="helpLine_sf_hu_p1_status_text" v="Każdy składnik odżywczy ma ocenę: Dobrą (nie trzeba podejmować żadnych działań), Przeciętną (należy rozważyć podjęcie działań w najbliższym czasie) lub Słabą (konieczne jest podjęcie działań – ma to wpływ na plon). The overall badge in the title bar reflects the worst value across all tracked dimensions including weed, pest, and disease." eh="3b8c2c6e" />
-	<e k="helpLine_sf_hu_p2_title" v="Stan pola (presje)" eh="b4d35b30" />
+	
+    <e k="helpLine_sf_hu_p2_title" v="Stan pola (presje)" eh="b4d35b30" />
 	<e k="helpLine_sf_hu_p2_press_title" v="Chwasty, szkodniki i choroby" eh="0a3fae00" />
 	<e k="helpLine_sf_hu_p2_press_text" v="Każda z presji ma swoją punktacje (0 do 100). Brak lustracji może spodować redukcje plonu o : Chwasty do -30%, Szkodniki -20%, Choroby -25%. Na HUD'zie  W(chwasty), I(insekty), i D(choroby) pokazuje poziom presji: zielony (niski), żółty (średni), czerwony (wysoki)." eh="3fc3c400" />
 	<e k="helpLine_sf_hu_p2_treat_title" v="Zapobieganie presją" eh="cb24bf50" />
 	<e k="helpLine_sf_hu_p2_treat_text" v="Herbicyd redukuje presję chwastów - każda uprawa również obniża presję chwastów do zera. Środek owadobójczy zmniejsza liczebność szkodników o 25 punktów i hamuje ponowny wzrost przez 10 dni. Środek grzybobójczy zmniejsza ryzyko wystąpienia chorób o 20 punktów i zapewnia ochronę przez 12 dni. Każdy system można wyłączyć w ustawieniach." eh="4d65bdec" />
-	<e k="helpLine_sf_hu_p3_title" v="Raport glebowy" eh="35fcce6c" />
+	
+    <e k="helpLine_sf_hu_p3_title" v="Raport glebowy" eh="35fcce6c" />
 	<e k="helpLine_sf_hu_p3_open_title" v="Otwieranie raportu (klawisz K)" eh="62e3f629" />
 	<e k="helpLine_sf_hu_p3_open_text" v="Naciśnij K, aby otworzyć pełny raport glebowy. Pasek podsumowujący pokazuje całkowitą liczbę śledzonych pól, ile z nich potrzebuje nawozu i ważoną procentową wartość zdrowia farmy. Pola są sortowane według pilności - najgorszy stan pierwszy." eh="38a5bd2e" />
 	<e k="helpLine_sf_hu_p3_detail_title" v="Szczegóły pola i zalecenia" eh="c99d2b89" />
 	<e k="helpLine_sf_hu_p3_detail_text" v="Naciśnij strzałkę na dowolnym wierszu, aby otworzyć widok szczegółowy danego pola: wartości składników odżywczych, poziomy presji, prognoza strart w plonach i lista zaleceń w formie listy punktowanej, która dokładnie mówi, co należy zastosować. Naciśnij klawisz Wstecz lub Escape, aby wrócić do tabeli." eh="38dd2c6d" />
-	<e k="helpLine_sf_se_p1_title" v="Ustawienia symulacji" eh="cbf13e3c" />
+	
+     <!-- Category 6: Settings -->
+    <e k="helpLine_sf_se_p1_title" v="Ustawienia symulacji" eh="cbf13e3c" />
 	<e k="helpLine_sf_se_p1_server_title" v="Ustawienia serwera (tylko administrator w trybie wieloosobowym)" eh="49f37ed7" />
 	<e k="helpLine_sf_se_p1_server_text" v="System żyzności, system składników odżywczych , efekty sezonowe, efekt deszczu, bonus orki, presję Chwastów/Szkodników/Chorób , Koszty nawożenia, Powiadomienia, Płodozmian, i Automatyczna dawka wysiewu. W trybie wieloosobowym, tylko administrator serwera może zmieniać te ustawienia. Zmiany są synchronizowane z wszystkimi  natychmiast." eh="abca5e43" />
 	<e k="helpLine_sf_se_p1_diff_title" v="Poziom trudności" eh="7b29ca96" />
 	<e k="helpLine_sf_se_p1_diff_text" v="Prosty (0.7x) zmniejsza wykorzystanie gleby o 30% dla komforotowego doświadczenia. Realistyczny (1.0x) to zrównoważony domyślny. Hardcore (1.5x) zwiększa zużycie o 50% dla intensywnego zarządzania glebą. Dostęp poprzez ESC &amp;gt; Ustawienia &amp;gt; Gleba &amp;amp; Nawóz." eh="740a3a4e" />
-	<e k="helpLine_sf_se_p2_title" v="HUD i kontrola dawki" eh="399f4910" />
+	
+    <e k="helpLine_sf_se_p2_title" v="HUD i kontrola dawki" eh="399f4910" />
 	<e k="helpLine_sf_se_p2_hud_title" v="Personalne ustawienia HUD" eh="0df76500" />
 	<e k="helpLine_sf_se_p2_hud_text" v="Każdy gracz kontroluje swój własny HUD - nie jest synchronizowany z serwerem. Opcje: Pokaż HUD (włącz/wyłącz), Pozycja (5 presetów + przeciąganie), Motyw kolorów (Zielony / Niebieski / bursztynowy / Mono), Rozmiar czcionki (Mały / Średni / Duży), Przezroczystość (25% do 100%), Jednostki imperialne (włącz/wyłącz)." eh="f3934884" />
 	<e k="helpLine_sf_se_p2_rate_title" v="Kontrola dawki opryskiwacza" eh="5ecdfa23" />
 	<e k="helpLine_sf_se_p2_rate_text" v="Podczas korzystania z opryskiwacza lub rozsiewacza, użyj klawiszy zwiększ dawkę (]) i zmniejsz dawkę ([), aby dostosować wskaźnik stosowania od 0.10x do 2.00x. Przełącz tryb automatycznej kontroli dawki (Shift+L), aby pozwolić modyfikacji automatycznie osiągać optymalne poziomy składników odżywczych i unikać ryzyka przypalenia." eh="dd385e39" />
-	<e k="helpLine_sf_mp_p1_title" v="Jak działa tryb wieloosobowy" eh="8a4ce30e" />
+	
+    <!-- Category 7: Multiplayer and PrecisionFarming -->
+    <e k="helpLine_sf_mp_p1_title" v="Jak działa tryb wieloosobowy" eh="8a4ce30e" />
 	<e k="helpLine_sf_mp_p1_auth_title" v="Symulacja autorytatywna serwera" eh="8d324792" />
 	<e k="helpLine_sf_mp_p1_auth_text" v="Wszystkie symulacje gleby działają na serwerze. Klienci otrzymują pełne dane pola i ustawienia po dołączeniu, z automatycznym ponowieniem, jeśli serwer nadal się ładuje. Ustawienia wyświetlania HUD (pozycja, motyw, rozmiar) są indywidualne dla każdego gracza i nigdy nie są synchronizowane z serwerem." eh="db72a3f9" />
 	<e k="helpLine_sf_mp_p1_ded_title" v="Serwery dedykowane" eh="4d3a45ba" />
 	<e k="helpLine_sf_mp_p1_ded_text" v="Serwery dedykowane uruchamiają pełną symulację bez żadnego narzucania usatawień HUD lub GUI - jest to oczekiwane i normalne. Użyj poleceń konsoli (soilStatus, SoilSetDifficulty, SoilShowSettings, itp.) do zarządzania i weryfikacji ustawień na dedykowanym serwerze." eh="3df784d6" />
-	<e k="helpLine_sf_mp_p2_title" v="Kompatybilność z Rolnictwem precyzyjnym " eh="3647a30c" />
+	
+    <e k="helpLine_sf_mp_p2_title" v="Kompatybilność z Rolnictwem precyzyjnym " eh="3647a30c" />
 	<e k="helpLine_sf_mp_p2_compat_title" v="Uruchomienia z oba modami" eh="bc5325f5" />
 	<e k="helpLine_sf_mp_p2_compat_text" v="Oba mody działają niezależnie i są w pełni zgodne. Jeden przejazd nawożenia aktualizuje oba moduly w tym samym czasie - nie musisz nawozić dwukrotnie. Strefy gleby w PF i wartości N/P/K w SoilFertilizer używają różnych modeli i nie będą identyczne." eh="5c9f8ada" />
 	<e k="helpLine_sf_mp_p2_workflow_title" v="Współpraca w praktyce" eh="b6f73f04" />
 	<e k="helpLine_sf_mp_p2_workflow_text" v="Wykorzystaj Rolnictwo Precyzyjne by zobaczyć gdzie w polu potrzebuje uwagi. Wykorzystaj HUD i raport glebowy SoilFertilizer, aby zobaczyć, jaki składnik odżywczy zastosować. Jeden przejazd spełnia jednocześnie oba moduły i nigdy nie dadzą sprzecznych zaleceń." eh="cde2c27c" />
+    
     <e k="sf_crop_rotation_short" v="Płodozmian" eh="def2c162" />
     <e k="sf_crop_rotation_long" v="Włącz/Wyłącz bonus od stosowania płodozmianów i negatywny wpływ monokultury (Uprawa roślin strączkowych przywraca azot; uprawa tej samej rośliny przez kilka sezonów zwiększa zużycie składników odżywczych)" eh="958b4212" />
     <e k="sf_report_rotation_bonus" v="Bonus za płodozmian" eh="2831a7ac" />
@@ -336,11 +353,13 @@
     <e k="helpLine_sf_nu_p4_bonus_text" v="Uprawa roślin strączkowych (fasola, groch, fasola) po uprawie innych roślin dodaje darmowy azotu każdej wiosny przez 3 dni." eh="e1fce95b" />
     <e k="helpLine_sf_nu_p4_fatigue_title" v="Monokultura" eh="236a590c" />
     <e k="helpLine_sf_nu_p4_fatigue_text" v="Uprawa tej samej rośliny przez dwa sezony z rzędu zwiększa zużycie składników odżywczych o 15%. Rotuj rośliny, aby uniknąć wyjałowienia gleby." eh="1613f3c6" />
-	<e k="sf_map_layer_off" v="Mapa glebowa: wyłączona" eh="3e654ade" />
+	
+    <!-- Soil Map Overlay (SoilMapOverlay.lua) --> 
+    <e k="sf_map_layer_off" v="Mapa glebowa: wyłączona" eh="3e654ade" />
 	<e k="sf_map_layer_n" v="Azot" eh="1e9ef3ba" />
 	<e k="sf_map_layer_p" v="Fosfor" eh="eb4f2688" />
 	<e k="sf_map_layer_k" v="Potas" eh="3a4edc67" />
-	<e k="sf_map_layer_ph" v="[EN] pH" eh="397dff20" />
+	<e k="sf_map_layer_ph" v="pH" eh="397dff20" />
 	<e k="sf_map_layer_om" v="Materia organiczna" eh="6305f4bb" />
 	<e k="sf_map_layer_urgency" v="Piorytet pola" eh="419ea5af" />
 	<e k="sf_map_layer_weed" v="Presja chwastów" eh="53f8b936" />
@@ -376,6 +395,7 @@
     <e k="sf_pda_disease_label" v="Choroby" eh="e7067a8c" />
     <e k="sf_pda_section_attention" v="Potrzebuje uwagi" eh="80e48bc3" />
     <e k="sf_pda_needs_fert_label" v="Potrzebuje nawozu" eh="fa9ded5e" />
+    <e k="sf_pda_total_urgent_label" v="Łącznie wymaga uwagi" eh="b3ce2db9" />
     <e k="sf_pda_no_data_left" v="Brak danych o polach." eh="ba71c6b1" />
     <!-- Map Tab -->
     <e k="sf_pda_map_section_title" v="Warstwy mapy glebowej" eh="85d63132" />
@@ -399,7 +419,13 @@
     <e k="sf_pda_map_legend_high" v="Wysoki" eh="655d20c1" />
     <e k="sf_pda_map_legend_excess" v="Nadmiar" eh="d1d25b9f" />
     <e k="sf_pda_map_instructions" v="Naciśnij Shift+M w grze, aby przełączyć warstwy mapy glebowej." eh="b13603aa" />
+    <e k="sf_pda_map_jump_hint" v="Kliknij pole, aby przejść do niego na mapie" eh="006d5371" />
+    <e k="sf_pda_map_native_hint" v="Funkcja wizualizacji warstw gleby została przeniesiona! Teraz możesz wyświetlać i przełączać wszystkie warstwy gleby bezpośrednio z natywnego paska bocznego aplikacji PDA Map (ESC &amp;gt; Map). Poszukaj kategorii &quot;Warstwy gleby&quot; wśród ikonek na pasku bocznym." eh="87f73b10" />
     <e k="sf_pda_map_open_btn" v="Otwórz Mapę Gleby" eh="0901ae30" />
+    <e k="sf_pda_btn_help" v="Notatka dewelopera" eh="5320d63f" />
+    <e k="sf_pda_help_text" v="Cześć, jestem deweloperem! Jak widzisz, ta strona jest jeszcze w trakcie budowy. Warstwy mapy to obecnie tylko podglądy wizualne (niedziałające do zaznaczania), a wiele elementów interfejsu wymaga jeszcze ostatecznych poprawek." eh="58e05bdf" />
+    <e k="sf_pda_help_github" v="TWOJA OPINIA MA ZNACZENIE! Jeśli napotkasz błędy, masz sugestie dotyczące nowych funkcji lub chcesz wnieść wkład w kod, odwiedź projekt na GitHubie. Możesz otworzyć Issue lub Pull Request w dowolnym momencie, aby pomóc ulepszyć ten mod dla wszystkich. Dziękujemy za testowanie!" eh="3a10b023" />
+	<e k="sf_pda_help_note" v="Zakładka &quot;Warstwy gleby&quot; na stronie mapy NIE DZIAŁA. Wiem o tym i pracuję nad rozwiązaniem tego problemu (co może trochę potrwać)." eh="2d8f5dc7" />
     <e k="sf_pda_map_unavailable" v="Podgląd mapy niedostępny" eh="00000000" />
 	<e k="sf_map_health_overall" v="Średni poziom zdrowia gleby" eh="5533cbe3" />
 	<e k="sf_map_btn_report" v="Otwórz przegląd gospodarstwa" eh="6f0800e8" />
@@ -407,7 +433,7 @@
     <e k="sf_map_btn_cycle_layer" v="Zmień warstwę" eh="875dbf22" />
     <e k="sf_map_btn_treatment" v="Plan działania" eh="4ba012e2" />
     <e k="sf_map_btn_disable" v="Wyłącz nakładkę" eh="8e75dec5" />
-    <e k="sf_treat_action_ok" v="[EN] OK" eh="e0aa021e" />
+    <e k="sf_treat_action_ok" v="OK" eh="e0aa021e" />
     <e k="sf_help_title" v="Szybki przegląd gleby" eh="8986bb6d" />
     <e k="sf_help_nutrients_header" v="Składniki odżywcze" eh="9aeb39bf" />
     <e k="sf_help_n" v="N  (Azot)     - Wykorzystywany szybko. Zastosuj UAN, Moczenik lub Obornik." eh="f2d0c792" />
@@ -427,14 +453,14 @@
     <!-- Fields Tab -->
     <e k="sf_pda_fields_section_title" v="Wszystkie Pola" eh="48729e0b" />
     <e k="sf_pda_col_field" v="Pole" eh="6f16a5f8" />
-    <e k="sf_pda_col_n" v="[EN] N%" eh="30740562" />
-    <e k="sf_pda_col_p" v="[EN] P%" eh="0a5e03bc" />
+    <e k="sf_pda_col_n" v="N%" eh="30740562" />
+    <e k="sf_pda_col_p" v="P%" eh="0a5e03bc" />
 	<e k="sf_pda_filter_all" v="Filtr: Wszystkie Pola" eh="a46a8cb2" />
 	<e k="sf_pda_filter_owned" v="Filtr: Własne Pola" eh="258cb971" />
-    <e k="sf_pda_col_k" v="[EN] K%" eh="43e4d0bf" />
-    <e k="sf_pda_col_ph" v="[EN] pH" eh="397dff20" />
-    <e k="sf_pda_col_om" v="[EN] OM" eh="bfbebc07" />
-    <e k="sf_pda_col_status" v="[EN] Status" eh="ec53a8c4" />
+    <e k="sf_pda_col_k" v="K%" eh="43e4d0bf" />
+    <e k="sf_pda_col_ph" v="pH" eh="397dff20" />
+    <e k="sf_pda_col_om" v="OM" eh="bfbebc07" />
+    <e k="sf_pda_col_status" v="Status" eh="ec53a8c4" />
     <e k="sf_pda_no_fields" v="Brak zebranych danych z pola." eh="72265670" />
     <e k="sf_pda_status_good" v="Dobry" eh="0c6ad70b" />
     <e k="sf_pda_status_fair" v="Umiarkowany" eh="f7f20cf0" />
@@ -444,6 +470,7 @@
     <e k="sf_pda_col_priority" v="Priorytet" eh="c94e3850" />
     <e k="sf_pda_col_needs" v="Potrzeby" eh="94d6125d" />
     <e k="sf_pda_no_treatment" v="Wszystkie pola są w dobrym stanie." eh="fa985166" />
+    <e k="sf_pda_treatment_hint" v="Pola wymienione po prawej stronie wymagają działania. Kliknij wiersz, aby zobaczyć zalecane środki i szacowane ilości." eh="5748d316" />
     <e k="sf_pda_need_n" v="Azot" eh="1e9ef3ba" />
     <e k="sf_pda_need_p" v="Fosfor" eh="eb4f2688" />
     <e k="sf_pda_need_k" v="Potas" eh="3a4edc67" />
@@ -492,146 +519,180 @@
 	<e k="sf_treat_action_weed" v="Zastosuj Herbicyd natychmiast." eh="625551c5" />
 	<e k="sf_treat_action_pest" v="Zastosuj Insektycyd natychmiast." eh="f4db9a03" />
 	<e k="sf_treat_action_disease" v="Zastosuj Fungicyd natychmiast." eh="9228323a" />
-    <e k="sf_detail_rotation_ok" v="[EN] OK" eh="e0aa021e" />
+    <e k="sf_detail_rotation_ok" v="OK" eh="e0aa021e" />
     <e k="sf_detail_rotation_bonus" v="Bonus roślin strączkowych (+N)" eh="8ab86f6a" />
     <e k="sf_detail_rotation_fatigue" v="Degreadacja gleby przez monokulture (x1.15 wyjałowienie gleby)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="Brak dostępnych danych." eh="c6d95d5e" />
-    <e k="sf_detail_no_crop" v="Brak zarejestrowanych upraw." eh="a4b5a996" />
+    <e k="sf_detail_no_crop" v="Brak zarejestrowanych upraw." eh="a4b5a996" /> 
 
-    <e k="sf_pda_btn_help" v="Notatka dewelopera" eh="5320d63f" />
-    <e k="sf_pda_help_github" v="TWOJA OPINIA MA ZNACZENIE! Jeśli napotkasz błędy, masz sugestie dotyczące nowych funkcji lub chcesz wnieść wkład w kod, odwiedź projekt na GitHubie. Możesz otworzyć Issue lub Pull Request w dowolnym momencie, aby pomóc ulepszyć ten mod dla wszystkich. Dziękujemy za testowanie!" eh="3a10b023" />
-	<e k="sf_pda_help_note" v="Zakładka „Warstwy gleby" na stronie mapy NIE DZIAŁA. Wiem o tym i pracuję nad rozwiązaniem tego problemu (co może trochę potrwać)." eh="2d8f5dc7" />
-    <e k="sf_pda_help_text" v="Cześć, jestem deweloperem! Jak widzisz, ta strona jest jeszcze w trakcie budowy. Warstwy mapy to obecnie tylko podglądy wizualne (niedziałające do zaznaczania), a wiele elementów interfejsu wymaga jeszcze ostatecznych poprawek." eh="58e05bdf" />
-    <e k="sf_pda_map_jump_hint" v="Kliknij pole, aby przejść do niego na mapie" eh="006d5371" />
-	<e k="sf_pda_map_native_hint" v="Funkcja wizualizacji warstw gleby została przeniesiona! Teraz możesz wyświetlać i przełączać wszystkie warstwy gleby bezpośrednio z natywnego paska bocznego aplikacji PDA Map (ESC &amp;gt; Map). Poszukaj kategorii „Warstwy gleby" wśród ikonek na pasku bocznym." eh="87f73b10" />
-    <e k="sf_pda_total_urgent_label" v="Łącznie wymaga uwagi" eh="b3ce2db9" />
-    <e k="sf_pda_treatment_hint" v="Pola wymienione po prawej stronie wymagają działania. Kliknij wiersz, aby zobaczyć zalecane środki i szacowane ilości." eh="5748d316" />
-    <!-- HUD labels -->
-    <e k="sf_hud_label_ph" v="[EN] pH" />
-    <e k="sf_hud_label_om" v="[EN] OM" />
-    <e k="sf_hud_unit_ppm" v="[EN] (ppm)" />
-    <e k="sf_hud_coverage" v="[EN] Coverage: %d%% / %d%%" />
-    <e k="sf_hud_compaction" v="[EN] Compaction: %d%%" />
-    <!-- Sprayer rate HUD -->
-    <e k="sf_sprayer_auto_on" v="[EN] APP. RATE  ( AUTO: ON )" />
-    <e k="sf_sprayer_auto_off" v="[EN] APP. RATE  AUTO: OFF [%s]" />
-    <e k="sf_sprayer_target" v="[EN] Target: " />
-    <e k="sf_sprayer_burn_guaranteed" v="[EN] BURN RISK: GUARANTEED" />
-    <e k="sf_sprayer_burn_possible" v="[EN] BURN RISK: POSSIBLE" />
-    <!-- Notifications -->
-    <e k="sf_notify_welcome" v="[EN] Soil &amp; Fertilizer Mod Active | J = HUD | K = Soil Report | Type 'soilfertility' for commands" />
-    <e k="sf_notify_mod_active_title" v="[EN] Soil &amp; Fertilizer Mod Active" />
-    <e k="sf_notify_mod_active_body" v="[EN] Real soil system with full event hooks" />
-    <e k="sf_notify_init_delayed" v="[EN] Soil Mod: Field initialization delayed. Trying alternative method..." />
-    <e k="sf_notify_init_success" v="[EN] Soil Mod: Field initialization successful!" />
-    <e k="sf_notify_critical_title" v="[EN] Critical Care Alert" />
-    <e k="sf_notify_critical_body" v="[EN] Field %d requires immediate attention! Urgency: %d%%" />
-    <e k="sf_notify_treated_title" v="[EN] Soil Update" />
-    <e k="sf_notify_treated_body" v="[EN] Field %d fully treated with %s" />
-    <e k="sf_notify_burn_title" v="[EN] Fertilizer Burn" />
-    <e k="sf_notify_burn_body" v="[EN] Field %d: over-application damage (pH %.1f)" />
-    <e k="sf_notify_sync_error" v="[EN] Soil Mod: Data sync issue detected. Please report if this persists." />
-    <!-- Panel categories -->
-    <e k="sf_panel_cat_sim" v="[EN] Simulation" />
-    <e k="sf_panel_cat_sim_desc" v="[EN] Farm mechanics, difficulty and nutrient cycles" />
-    <e k="sf_panel_cat_display" v="[EN] Display &amp; HUD" />
-    <e k="sf_panel_cat_display_desc" v="[EN] HUD appearance, color theme, position and font size" />
-    <e k="sf_panel_cat_overlay" v="[EN] Map Overlay" />
-    <e k="sf_panel_cat_overlay_desc" v="[EN] Active overlay layer shown in the PDA map" />
-    <e k="sf_panel_hdr_core" v="[EN] Core Systems" />
-    <e k="sf_panel_hdr_difficulty" v="[EN] Difficulty" />
-    <e k="sf_panel_hdr_environment" v="[EN] Environment" />
-    <e k="sf_panel_hdr_crop_stress" v="[EN] Crop Stress" />
-    <e k="sf_panel_hdr_visibility" v="[EN] Visibility" />
-    <e k="sf_panel_hdr_hud_style" v="[EN] HUD Style" />
-    <e k="sf_panel_hdr_position" v="[EN] Position" />
-    <e k="sf_panel_hdr_layer" v="[EN] Layer" />
-    <e k="sf_panel_hdr_performance" v="[EN] Performance" />
-    <e k="sf_panel_hdr_mod_ctrl" v="[EN] Mod Control &amp; Difficulty" />
-    <e k="sf_panel_hdr_systems" v="[EN] Systems" />
-    <e k="sf_panel_hdr_actions" v="[EN] Actions &amp; Field Tools" />
-    <!-- Panel chrome -->
-    <e k="sf_panel_admin_yes" v="[EN] Admin: YES" />
-    <e k="sf_panel_admin_no" v="[EN] Admin: NO" />
-    <e k="sf_panel_multiplayer" v="[EN] Multiplayer" />
-    <e k="sf_panel_singleplayer" v="[EN] Single Player" />
-    <e k="sf_panel_btn_back" v="[EN] &lt; Back" />
-    <e k="sf_panel_btn_reset_cat" v="[EN] Reset Cat." />
-    <e k="sf_panel_btn_close_hint" v="[EN] SHIFT+O to close" />
-    <e k="sf_panel_select_category" v="[EN] Select a category to configure settings" />
-    <e k="sf_panel_btn_configure" v="[EN] Configure &gt;&gt;" />
-    <e k="sf_panel_btn_open" v="[EN] Open &gt;&gt;" />
-    <!-- Setting descriptions -->
-    <e k="sf_desc_enabled" v="[EN] Activate / deactivate the entire mod" />
-    <e k="sf_desc_debugMode" v="[EN] Extra logging for troubleshooting" />
-    <e k="sf_desc_fertilitySystem" v="[EN] Full soil fertility modeling" />
-    <e k="sf_desc_nutrientCycles" v="[EN] Track N/P/K depletion and recovery" />
-    <e k="sf_desc_fertilizerCosts" v="[EN] Real in-game cost for fertilizers" />
-    <e k="sf_desc_showNotifications" v="[EN] In-game soil status notifications" />
-    <e k="sf_desc_showHUD" v="[EN] Show the soil HUD overlay" />
-    <e k="sf_desc_hudPosition" v="[EN] HUD preset anchor position" />
-    <e k="sf_desc_hudColorTheme" v="[EN] Color palette for HUD elements" />
-    <e k="sf_desc_hudFontSize" v="[EN] HUD text size" />
-    <e k="sf_desc_hudTransparency" v="[EN] HUD background transparency" />
-    <e k="sf_desc_seasonalEffects" v="[EN] Season-driven soil changes" />
-    <e k="sf_desc_rainEffects" v="[EN] Rain causes nutrient leaching" />
-    <e k="sf_desc_plowingBonus" v="[EN] Plow bonus for soil recovery" />
-    <e k="sf_desc_weedPressure" v="[EN] Track and penalize weed spread" />
-    <e k="sf_desc_pestPressure" v="[EN] Track insect pest infestation" />
-    <e k="sf_desc_diseasePressure" v="[EN] Track fungal crop diseases" />
-    <e k="sf_desc_compactionEnabled" v="[EN] Heavy vehicle soil compaction" />
-    <e k="sf_desc_difficulty" v="[EN] Nutrient drain intensity level" />
-    <e k="sf_desc_replenishmentRate" v="[EN] Fertilizer nutrient restoration speed" />
-    <e k="sf_desc_useImperialUnits" v="[EN] Use imperial units (US tons/acre)" />
-    <e k="sf_desc_autoRateControl" v="[EN] Smart sprayer application rates" />
-    <e k="sf_desc_cropRotation" v="[EN] Rotation benefits and penalties" />
-    <e k="sf_desc_activeMapLayer" v="[EN] Nutrient layer shown in PDA map" />
-    <e k="sf_desc_overlayDensity" v="[EN] Sample point budget (Low=8k, Med=20k, High=40k)" />
-    <!-- Multi-option values -->
-    <e k="sf_rr_1" v="[EN] Very Slow (0.25x)" />
-    <e k="sf_rr_2" v="[EN] Slow (0.5x)" />
-    <e k="sf_rr_3" v="[EN] Normal (1.0x)" />
-    <e k="sf_rr_4" v="[EN] Fast (1.5x)" />
-    <e k="sf_rr_5" v="[EN] Very Fast (2.0x)" />
-    <e k="sf_layer_1" v="[EN] Off" />
-    <e k="sf_layer_2" v="[EN] Nitrogen" />
-    <e k="sf_layer_3" v="[EN] Phosphorus" />
-    <e k="sf_layer_4" v="[EN] Potassium" />
-    <e k="sf_layer_5" v="[EN] pH" />
-    <e k="sf_layer_6" v="[EN] Org Matter" />
-    <e k="sf_layer_7" v="[EN] Urgency" />
-    <e k="sf_layer_8" v="[EN] Weed" />
-    <e k="sf_layer_9" v="[EN] Pest" />
-    <e k="sf_layer_10" v="[EN] Disease" />
-    <e k="sf_layer_11" v="[EN] Compaction" />
-    <e k="sf_density_1" v="[EN] Low" />
-    <e k="sf_density_2" v="[EN] Medium" />
-    <e k="sf_density_3" v="[EN] High" />
-    <!-- Admin action items -->
-    <e k="sf_admin_save_label" v="[EN] Save Soil Data" />
-    <e k="sf_admin_save_desc" v="[EN] Force-save all soil data now" />
-    <e k="sf_admin_reset_label" v="[EN] Reset All Settings" />
-    <e k="sf_admin_reset_desc" v="[EN] Restore every setting to its default" />
-    <e k="sf_admin_drain_label" v="[EN] Drain Vehicle Tanks" />
-    <e k="sf_admin_drain_desc" v="[EN] Empty sprayer + implements (50% refund)" />
-    <e k="sf_admin_field_info_label" v="[EN] Current Field Info" />
-    <e k="sf_admin_field_info_desc" v="[EN] Soil data for the field at your position" />
-    <e k="sf_admin_field_forecast_label" v="[EN] Field Forecast" />
-    <e k="sf_admin_field_forecast_desc" v="[EN] Yield forecast for field at position" />
-    <e k="sf_admin_list_fields_label" v="[EN] List All Fields" />
-    <e k="sf_admin_list_fields_desc" v="[EN] Dump all field soil data to game log" />
-    <e k="sf_infobox_title" v="[EN] Soil Nutrients" />
-    <e k="sf_infobox_grade" v="[EN] Soil Grade" />
-    <e k="sf_infobox_needs" v="[EN] Needs" />
-    <e k="sf_infobox_fertilizer" v="[EN] Fertilizer" />
+    <!-- ======================================================
+         HUD LABELS, UNITS & COVERAGE
+         ====================================================== -->
+    <e k="sf_hud_label_ph" v="pH" />
+    <e k="sf_hud_label_om" v="OM" />
+    <e k="sf_hud_unit_ppm" v="(ppm)" />
+    <e k="sf_hud_coverage" v="Pokrycie: %d%% / %d%%" />
+    <e k="sf_hud_compaction" v="Zagęszczanie: %d%%" />
+
+    <!-- ======================================================
+         SPRAYER RATE HUD
+         ====================================================== -->
+    <e k="sf_sprayer_auto_on" v="Automatyczna. DAWKA  ( AUTO: Wł )" />
+    <e k="sf_sprayer_auto_off" v="Automatyczna. DAWKA  AUTO: Wył [%s]" />
+    <e k="sf_sprayer_target" v="Docelowa: " />
+    <e k="sf_sprayer_burn_guaranteed" v="Ryzyka przypalenia: GWARANTOWANA" />
+    <e k="sf_sprayer_burn_possible" v="Ryzyko przypalenia: MOŻLIWE" />
+
+    <!-- ======================================================
+         NOTIFICATIONS
+         ====================================================== -->
+    <e k="sf_notify_welcome" v="Realistyczne Nawożenie &amp; Gleby Włączone | J = HUD | K = Raport glebowy | Użyj 'soilfertility' dla komend" />
+    <e k="sf_notify_mod_active_title" v="Realistyczne Nawożenie &amp; Gleby Włączone" />
+    <e k="sf_notify_mod_active_body" v="System realistycznych gleb i nawożeń z pełnym zestawem funkcji i zdarzeń" />
+    <e k="sf_notify_init_delayed" v="Mod gleby Opóźnienie w inicjalizacji pola. Próbuję zastosować alternatywną metodę..." />
+    <e k="sf_notify_init_success" v="Mod gleby: Inicjalizacja pola zakończona sukcesem!" />
+    <e k="sf_notify_critical_title" v="Krytyczne zaniedbanie" />
+    <e k="sf_notify_critical_body" v="Pole %d wymaga natychmiastowej uwagi! Pilność: %d%%" />
+    <e k="sf_notify_treated_title" v="Aktualizacja Gleby" />
+    <e k="sf_notify_treated_body" v="Pole %d zostało w pełni zadabane z użyciem %s" />
+    <e k="sf_notify_burn_title" v="Przypalenie rośliny" />
+    <e k="sf_notify_burn_body" v="Pole %d: uszkodzenie spowodowane nadmiarem nawozu (pH %.1f)" />
+    <e k="sf_notify_sync_error" v="Soil Mod: Wykryto problem z synchronizacją danych. Proszę zgłosić, jeśli problem będzie się powtarzał." />
+
+    <!-- ======================================================
+         SETTINGS PANEL — CATEGORIES & SECTION HEADERS
+         ====================================================== -->
+    <e k="sf_panel_cat_sim" v="Symulacja" />
+    <e k="sf_panel_cat_sim_desc" v="Mechanika farmy, trudność i cykle składników odżywczych" />
+    <e k="sf_panel_cat_display" v="Wyświetlanie &amp; HUD" />
+    <e k="sf_panel_cat_display_desc" v="Wygląd HUD, motyw kolorów, pozycja i rozmiar czcionki" />
+    <e k="sf_panel_cat_overlay" v="Nakładka Mapy" />
+    <e k="sf_panel_cat_overlay_desc" v="Aktywna warstwa nakładki wyświetlana w mapie PDA" />
+    <e k="sf_panel_hdr_core" v="Systemy Główne" />
+    <e k="sf_panel_hdr_difficulty" v="Poziom trudności" />
+    <e k="sf_panel_hdr_environment" v="Środowisko" />
+    <e k="sf_panel_hdr_crop_stress" v="Stres Roślin" />
+    <e k="sf_panel_hdr_visibility" v="Widoczność" />
+    <e k="sf_panel_hdr_hud_style" v="Styl HUD" />
+    <e k="sf_panel_hdr_position" v="Pozycja" />
+    <e k="sf_panel_hdr_layer" v="Warstwa" />
+    <e k="sf_panel_hdr_performance" v="Wydajność" />
+    <e k="sf_panel_hdr_mod_ctrl" v="Kontrola Moda &amp; Trudność" />
+    <e k="sf_panel_hdr_systems" v="Systemy" />
+    <e k="sf_panel_hdr_actions" v="Akcje &amp; Narzędzia Pola" />
+
+    <!-- ======================================================
+         SETTINGS PANEL — CHROME
+         ====================================================== -->
+    <e k="sf_panel_admin_yes" v="Admin: Tak" />
+    <e k="sf_panel_admin_no" v="Admin: Nie" />
+    <e k="sf_panel_multiplayer" v="Tryb wieloosobowy" />
+    <e k="sf_panel_singleplayer" v="Tryb jednoosobowy" />
+    <e k="sf_panel_btn_back" v="&lt; cofnij" />
+    <e k="sf_panel_btn_reset_cat" v="Reset Kategorii" />
+    <e k="sf_panel_btn_close_hint" v="SHIFT+O w celu zamknięcia" />
+    <e k="sf_panel_select_category" v="Wybierz kategorię, aby skonfigurować ustawienia" />
+    <e k="sf_panel_btn_configure" v="Konfiguruj >>" />
+    <e k="sf_panel_btn_open" v="Otwórz >>" />
+
+    <!-- ======================================================
+         SETTINGS PANEL — SETTING DESCRIPTIONS
+         ====================================================== -->
+    <e k="sf_desc_enabled" v="Wyłącz / włącz cały mod" />
+    <e k="sf_desc_debugMode" v="Dodatkowe logowanie do rozwiązywania problemów" />
+    <e k="sf_desc_fertilitySystem" v="Pełne modelowanie płodności gleby" />
+    <e k="sf_desc_nutrientCycles" v="Śledzenie wyczerpywania i odnawiania N/P/K" />
+    <e k="sf_desc_fertilizerCosts" v="Realne koszty w grze dla nawozów" />
+    <e k="sf_desc_showNotifications" v="Powiadomienia o stanie gleby w grze" />
+    <e k="sf_desc_showHUD" v="Pokaż nakładkę HUD gleby" />
+    <e k="sf_desc_hudPosition" v="Gotowe ustawienia pozycji HUD" />
+    <e k="sf_desc_hudColorTheme" v="Paleta kolorów dla elementów HUD" />
+    <e k="sf_desc_hudFontSize" v="Rozmiar tekstu HUD" />
+    <e k="sf_desc_hudTransparency" v="Przezroczystość tła HUD" />
+    <e k="sf_desc_seasonalEffects" v="Zmiany gleby zależne od pór roku" />
+    <e k="sf_desc_rainEffects" v="Deszcz powoduje wymywanie składników odżywczych" />
+    <e k="sf_desc_plowingBonus" v="Bonus za orkę gleby" />
+    <e k="sf_desc_weedPressure" v="Śledzenie i karanie rozprzestrzeniania się chwastów" />
+    <e k="sf_desc_pestPressure" v="Śledzenie zakażeń szkodników" />
+    <e k="sf_desc_diseasePressure" v="Śledzenie chorób grzybowych roślin" />
+    <e k="sf_desc_compactionEnabled" v="Zagęszczenie gleby przez ciężkie pojazdy" />
+    <e k="sf_desc_difficulty" v="Poziom intensywności wymywania składników odżywczych" />
+    <e k="sf_desc_replenishmentRate" v="Prędkość odnawiania składników odżywczych w nawozach" />
+    <e k="sf_desc_useImperialUnits" v="Użyj jednostek imperialnych (US tony/akry)" />
+    <e k="sf_desc_autoRateControl" v="Inteligentne strefy stosowania środków ochrony roślin" />
+    <e k="sf_desc_cropRotation" v="Zyski i kary za rotację upraw" />
+    <e k="sf_desc_activeMapLayer" v="Warstwa składników odżywczych wyświetlana w mapie PDA" />
+    <e k="sf_desc_overlayDensity" v="Budżet punktów próbkowania (Niski=8k, Średni=20k, Wysoki=40k)" />
+
+    <!-- ======================================================
+         SETTINGS PANEL — MULTI-OPTION VALUES
+         ====================================================== -->
+    <e k="sf_rr_1" v="Bardzo wolno (0.25x)" />
+    <e k="sf_rr_2" v="Wolno (0.5x)" />
+    <e k="sf_rr_3" v="Normalnie (1.0x)" />
+    <e k="sf_rr_4" v="Szybko (1.5x)" />
+    <e k="sf_rr_5" v="Bardzo szybko (2.0x)" />
+    <e k="sf_layer_1" v="Wyłączone" />
+    <e k="sf_layer_2" v="Azot" />
+    <e k="sf_layer_3" v="Fosfor" />
+    <e k="sf_layer_4" v="Potas" />
+    <e k="sf_layer_5" v="pH" />
+    <e k="sf_layer_6" v="Materia organiczna" />
+    <e k="sf_layer_7" v="Pilność" />
+    <e k="sf_layer_8" v="Chwasty" />
+    <e k="sf_layer_9" v="Szkodniki" />
+    <e k="sf_layer_10" v="Choroby" />
+    <e k="sf_layer_11" v="Zagęszczenie" />
+    <e k="sf_density_1" v="Niski" />
+    <e k="sf_density_2" v="Średni" />
+    <e k="sf_density_3" v="Wysoki" />
+
+    <!-- ======================================================
+         SETTINGS PANEL — ADMIN ACTION ITEMS
+         ====================================================== -->
+    <e k="sf_admin_save_label" v="Zapisz dane gleby" />
+    <e k="sf_admin_save_desc" v="Wymuś zapisanie wszystkich danych gleby" />
+    <e k="sf_admin_reset_label" v="Resetuj wszystkie ustawienia" />
+    <e k="sf_admin_reset_desc" v="Przywróć każde ustawienie do wartości domyślnej" />
+    <e k="sf_admin_drain_label" v="Opróżnij zbiorniki pojazdu" />
+    <e k="sf_admin_drain_desc" v="Opróżnij opryskiwacz + narzędzia (50% zwrotu)" />
+    <e k="sf_admin_field_info_label" v="Informacje o polu" />
+    <e k="sf_admin_field_info_desc" v="Dane gleby dla pola na którym jesteś" />
+    <e k="sf_admin_field_forecast_label" v="Prognoza pola" />
+    <e k="sf_admin_field_forecast_desc" v="Prognoza plonu dla pola na którym jesteś" />
+    <e k="sf_admin_list_fields_label" v="Lista wszystkich pól" />
+    <e k="sf_admin_list_fields_desc" v="Zapisz dane wszystkich pól do logu gry" />
+    <e k="sf_infobox_title" v="Składniki odżywcze gleby" />
+    <e k="sf_infobox_grade" v="Stopień gleby" />
+    <e k="sf_infobox_needs" v="Potrzeby" />
+    <e k="sf_infobox_fertilizer" v="Nawóz" />
 
     <!-- ======================================================
          FIELD INFO BOX (native FS25 FIELD INFO panel extension)
          ====================================================== -->
-    <e k="sf_fieldinfo_box_title" v="[EN] Soil Nutrients" />
-    <e k="sf_fieldinfo_grade" v="[EN] Soil Grade" />
-    <e k="sf_fieldinfo_yield" v="[EN] Yield" />
-    <e k="sf_fieldinfo_rotation" v="[EN] Rotation" />
-    <e k="sf_fieldinfo_needs" v="[EN] Needs" />
+    <e k="sf_fieldinfo_box_title" v="Składniki odżywcze gleby" />
+    <e k="sf_fieldinfo_grade" v="Stopień gleby" />
+    <e k="sf_fieldinfo_yield" v="Plon" />
+    <e k="sf_fieldinfo_rotation" v="Płodozmian" />
+    <e k="sf_fieldinfo_needs" v="Potrzeby" />
+
+
+
+
+    <e k="sf_report_col_Weed" v="Chwasty" eh="324181de" />
+    <e k="sf_report_col_Pest" v="Szkodniki" eh="2fed5101" />
+
+    <e k="sf_report_nutrients" v="Składniki odżywcze (ppm)" eh="0e94d018" />
+    <e k="sf_report_nitrogen" v="Azot (N)" eh="0e94d019" />
+    <e k="sf_report_phosphorus" v="Fosfor (P)" eh="0e94d01a" />
+    <e k="sf_report_potassium" v="Potas (K)" eh="0e94d01b" />
+    <e k="sf_report_pressures" v="Ryzyka" eh="0e94d01g" />
+    <e k="sf_report_weed_pressure" v="Ryzyko chwastów" eh="0e94d01c" />
+    <e k="sf_report_pest_pressure" v="Ryzyko szkodników" eh="0e94d01d" />
+    <e k="sf_report_disease_pressure" v="Ryzyko chorób" eh="0e94d01e" />
+    <e k="sf_report_yield_forecast" v="Prognoza plonu" eh="0e94d01f" />
+    <e k="sf_report_action_plan" v="Zalecenia" eh="0e94d020" />
+    <e  k="sf_report_organic_matter" v="Materia organiczna" eh="0e94d021" />
+  
     </elements>
 </l10n>
