@@ -38,7 +38,7 @@
     <e k="sf_hud_yield" v="Udbytte" eh="97345487" />
     <e k="sf_hud_estYield" v="Est. udbytte" eh="32a4135e" />
     <e k="sf_hud_optimal" v="Optimal" eh="cb61fef1" />
-    <e k="sf_hud_post_harvest" v="Efterhøst - Gød" />
+    <e k="sf_hud_post_harvest" v="Efterhøst - Gød" eh="634de6fe" />
     <e k="sf_hud_hint_edit" v="Træk: flyt   Hjørne: ændr størrelse   HMK: færdig" eh="987ebf45" />
     <e k="sf_hud_hint_normal" v="HMK: flyt/ændr størrelse" eh="afc8f13b" />
     <e k="sf_use_imperial_short" v="Imperiale enheder" eh="ff2701ad" />
@@ -483,133 +483,143 @@
     <e k="sf_pda_map_native_hint" v="Jordlagsvisualiseringen er flyttet! Du kan nu tilgå og skifte alle jordlag direkte fra det native PDA-kortes sidebjælke (ESC &gt; Kort). Se efter kategorien 'Jordlag' i sidebjælkens prikker." eh="87f73b10" />
     <e k="sf_pda_treatment_hint" v="Felterne opført til højre kræver behandling. Klik på en række for at se anbefalede inputs og estimerede mængder." eh="5748d316" />
     <!-- HUD labels -->
-    <e k="sf_hud_label_ph" v="pH" />
-    <e k="sf_hud_label_om" v="OM" />
-    <e k="sf_hud_unit_ppm" v="(ppm)" />
-    <e k="sf_hud_coverage" v="Dækning: %d%% / %d%%" />
-    <e k="sf_hud_compaction" v="komprimering: %d%%" />
+    <e k="sf_hud_label_ph" v="pH" eh="397dff20" />
+    <e k="sf_hud_label_om" v="OM" eh="bfbebc07" />
+    <e k="sf_hud_unit_ppm" v="(ppm)" eh="71b18c32" />
+    <e k="sf_hud_coverage" v="Dækning: %d%% / %d%%" eh="d407bb6d" />
+    <e k="sf_hud_compaction" v="komprimering: %d%%" eh="bef3a4f5" />
     <!-- Sprayer rate HUD -->
-    <e k="sf_sprayer_auto_on" v="PÅFØRINGSRATE (AUTO: TIL)" />
-    <e k="sf_sprayer_auto_off" v="PÅFØRINGSRATE (AUTO: FRA) [%s]" />
-    <e k="sf_sprayer_target" v="Mål: " />
-    <e k="sf_sprayer_burn_guaranteed" v="RISIKO FOR SVIDNING: GARANTERET" />
-    <e k="sf_sprayer_burn_possible" v="RISIKO FOR SVIDNING: MULIG" />
+    <e k="sf_sprayer_auto_on" v="PÅFØRINGSRATE (AUTO: TIL)" eh="099b5dac" />
+    <e k="sf_sprayer_auto_off" v="PÅFØRINGSRATE (AUTO: FRA) [%s]" eh="848cc106" />
+    <e k="sf_sprayer_target" v="Mål: " eh="31d43504" />
+    <e k="sf_sprayer_burn_guaranteed" v="RISIKO FOR SVIDNING: GARANTERET" eh="422601c4" />
+    <e k="sf_sprayer_burn_possible" v="RISIKO FOR SVIDNING: MULIG" eh="25b251b6" />
     <!-- Notifications -->
-    <e k="sf_notify_welcome" v="Jord &amp; gødningsmod aktiv | j = hud | k = jordrapport | skriv 'soilfertility' for at se kommandoer" />
-    <e k="sf_notify_mod_active_title" v="Jord &amp; gødningsmod aktiv" />
-    <e k="sf_notify_mod_active_body" v="Realistisk jordsystem med fuld event-integration" />
-    <e k="sf_notify_init_delayed" v="Jordmod: initialisering af marken er forsinket. forsøger alternativ metode..." />
-    <e k="sf_notify_init_success" v="Jordmod: initialisering af marken gennemført!" />
-    <e k="sf_notify_critical_title" v="Kritisk alarm" />
-    <e k="sf_notify_critical_body" v="Mark %d kræver øjeblikkelig opmærksomhed! alvorlighed: %d%%" />
-    <e k="sf_notify_treated_title" v="Jordopdatering" />
-    <e k="sf_notify_treated_body" v="Mark %d fuldt behandlet med %s" />
-    <e k="sf_notify_burn_title" v="Gødningssvidning" />
-    <e k="sf_notify_burn_body" v="Mark %d: skade fra overpåføring (pH %.1f)" />
-    <e k="sf_notify_sync_error" v="Jordmod: problem med datasynkronisering registreret. rapportér venligst, hvis det fortsætter." />
+    <e k="sf_notify_welcome" v="Jord &amp; gødningsmod aktiv | j = hud | k = jordrapport | skriv 'soilfertility' for at se kommandoer" eh="3fde93cd" />
+    <e k="sf_notify_mod_active_title" v="Jord &amp; gødningsmod aktiv" eh="15edc102" />
+    <e k="sf_notify_mod_active_body" v="Realistisk jordsystem med fuld event-integration" eh="901e2106" />
+    <e k="sf_notify_init_delayed" v="Jordmod: initialisering af marken er forsinket. forsøger alternativ metode..." eh="f8bd28f8" />
+    <e k="sf_notify_init_success" v="Jordmod: initialisering af marken gennemført!" eh="46214360" />
+    <e k="sf_notify_critical_title" v="Kritisk alarm" eh="3f981d0c" />
+    <e k="sf_notify_critical_body" v="Mark %d kræver øjeblikkelig opmærksomhed! alvorlighed: %d%%" eh="171246aa" />
+    <e k="sf_notify_treated_title" v="Jordopdatering" eh="4633156e" />
+    <e k="sf_notify_treated_body" v="Mark %d fuldt behandlet med %s" eh="585aa9b7" />
+    <e k="sf_notify_burn_title" v="Gødningssvidning" eh="ad8ed599" />
+    <e k="sf_notify_burn_body" v="Mark %d: skade fra overpåføring (pH %.1f)" eh="cb731ee3" />
+    <e k="sf_notify_sync_error" v="Jordmod: problem med datasynkronisering registreret. rapportér venligst, hvis det fortsætter." eh="1a307946" />
     <!-- Panel categories -->
-    <e k="sf_panel_cat_sim" v="Simulation" />
-    <e k="sf_panel_cat_sim_desc" v="Landbrugsmekanik, sværhedsgrad og næringsstofkredsløb" />
-    <e k="sf_panel_cat_display" v="Display &amp; HUD" />
-    <e k="sf_panel_cat_display_desc" v="Hud-udseende, farvetema, position og skriftstørrelse" />
-    <e k="sf_panel_cat_overlay" v="kortlag" />
-    <e k="sf_panel_cat_overlay_desc" v="Aktivt lag vist på pda-kortet" />
-<e k="sf_panel_hdr_core" v="kernesystemer" />
-<e k="sf_panel_hdr_difficulty" v="sværhedsgrad" />
-<e k="sf_panel_hdr_environment" v="miljø" />
-<e k="sf_panel_hdr_crop_stress" v="afgrødestress" />
-<e k="sf_panel_hdr_visibility" v="synlighed" />
-<e k="sf_panel_hdr_hud_style" v="hud-stil" />
-<e k="sf_panel_hdr_position" v="position" />
-<e k="sf_panel_hdr_layer" v="lag" />
-<e k="sf_panel_hdr_performance" v="ydeevne" />
-<e k="sf_panel_hdr_mod_ctrl" v="modstyring &amp; sværhedsgrad" />
-<e k="sf_panel_hdr_systems" v="systemer" />
-<e k="sf_panel_hdr_actions" v="handlinger &amp; markværktøjer" />
+    <e k="sf_panel_cat_sim" v="Simulation" eh="4f502b57" />
+    <e k="sf_panel_cat_sim_desc" v="Landbrugsmekanik, sværhedsgrad og næringsstofkredsløb" eh="3c584cdb" />
+    <e k="sf_panel_cat_display" v="Display &amp; HUD" eh="1a553532" />
+    <e k="sf_panel_cat_display_desc" v="Hud-udseende, farvetema, position og skriftstørrelse" eh="5b91fada" />
+    <e k="sf_panel_cat_overlay" v="kortlag" eh="28b898b6" />
+    <e k="sf_panel_cat_overlay_desc" v="Aktivt lag vist på pda-kortet" eh="a5892aef" />
+<e k="sf_panel_hdr_core" v="kernesystemer" eh="44a497a5" />
+<e k="sf_panel_hdr_difficulty" v="sværhedsgrad" eh="7b29ca96" />
+<e k="sf_panel_hdr_environment" v="miljø" eh="0ba29c6a" />
+<e k="sf_panel_hdr_crop_stress" v="afgrødestress" eh="260167bb" />
+<e k="sf_panel_hdr_visibility" v="synlighed" eh="1729a56c" />
+<e k="sf_panel_hdr_hud_style" v="hud-stil" eh="1d4a8cac" />
+<e k="sf_panel_hdr_position" v="position" eh="52f5e0bc" />
+<e k="sf_panel_hdr_layer" v="lag" eh="359b71e8" />
+<e k="sf_panel_hdr_performance" v="ydeevne" eh="9446a98a" />
+<e k="sf_panel_hdr_mod_ctrl" v="modstyring &amp; sværhedsgrad" eh="f38ed047" />
+<e k="sf_panel_hdr_systems" v="systemer" eh="d6856404" />
+<e k="sf_panel_hdr_actions" v="handlinger &amp; markværktøjer" eh="82bb7b83" />
 
-<e k="sf_panel_admin_yes" v="admin: ja" />
-<e k="sf_panel_admin_no" v="admin: nej" />
-<e k="sf_panel_multiplayer" v="multiplayer" />
-<e k="sf_panel_singleplayer" v="singleplayer" />
-<e k="sf_panel_btn_back" v="&lt; tilbage" />
-<e k="sf_panel_btn_reset_cat" v="nulstil kategori" />
-<e k="sf_panel_btn_close_hint" v="shift+o for at lukke" />
-<e k="sf_panel_select_category" v="vælg en kategori for at konfigurere indstillinger" />
-<e k="sf_panel_btn_configure" v="konfigurer &gt;&gt;" />
-<e k="sf_panel_btn_open" v="åbn &gt;&gt;" />
+<e k="sf_panel_admin_yes" v="admin: ja" eh="4628842a" />
+<e k="sf_panel_admin_no" v="admin: nej" eh="a9394f7b" />
+<e k="sf_panel_multiplayer" v="multiplayer" eh="901a7320" />
+<e k="sf_panel_singleplayer" v="singleplayer" eh="da602601" />
+<e k="sf_panel_btn_back" v="&lt; tilbage" eh="b1f1e41f" />
+<e k="sf_panel_btn_reset_cat" v="nulstil kategori" eh="b66faa88" />
+<e k="sf_panel_btn_close_hint" v="shift+o for at lukke" eh="254406e3" />
+<e k="sf_panel_select_category" v="vælg en kategori for at konfigurere indstillinger" eh="a277d257" />
+<e k="sf_panel_btn_configure" v="konfigurer &gt;&gt;" eh="a2cb3902" />
+<e k="sf_panel_btn_open" v="åbn &gt;&gt;" eh="6624d17c" />
 
-<e k="sf_desc_enabled" v="aktiver / deaktiver hele moddet" />
-<e k="sf_desc_debugMode" v="ekstra logning til fejlfinding" />
-<e k="sf_desc_fertilitySystem" v="fuld modellering af jordens frugtbarhed" />
-<e k="sf_desc_nutrientCycles" v="sporer nedbrydning og genopbygning af n/p/k" />
-<e k="sf_desc_fertilizerCosts" v="realistiske spilomkostninger for gødning" />
-<e k="sf_desc_showNotifications" v="notifikationer om jordstatus i spillet" />
-<e k="sf_desc_showHUD" v="vis jord-hud-overlay" />
-<e k="sf_desc_hudPosition" v="forudindstillet hud-position" />
-<e k="sf_desc_hudColorTheme" v="farvetema for hud-elementer" />
-<e k="sf_desc_hudFontSize" v="hud-tekststørrelse" />
-<e k="sf_desc_hudTransparency" v="gennemsigtighed for hud-baggrund" />
-<e k="sf_desc_seasonalEffects" v="sæsonbaserede jordændringer" />
-<e k="sf_desc_rainEffects" v="regn forårsager udvaskning af næringsstoffer" />
-<e k="sf_desc_plowingBonus" v="pløjningsbonus for jordforbedring" />
-<e k="sf_desc_weedPressure" v="sporer og straffer ukrudtsspredning" />
-<e k="sf_desc_pestPressure" v="sporer insektangreb" />
-<e k="sf_desc_diseasePressure" v="sporer svampesygdomme i afgrøder" />
-<e k="sf_desc_compactionEnabled" v="jordkomprimering fra tunge køretøjer" />
-<e k="sf_desc_difficulty" v="intensitet af næringsstofdræn" />
-<e k="sf_desc_replenishmentRate" v="hastighed for gødningsgenopbygning" />
-<e k="sf_desc_useImperialUnits" v="brug imperiale enheder (us tons/acre)" />
-<e k="sf_desc_autoRateControl" v="automatisk styring af påføringsrate" />
-<e k="sf_desc_cropRotation" v="fordele og ulemper ved sædskifte" />
-<e k="sf_desc_activeMapLayer" v="næringslag vist på pda-kortet" />
-<e k="sf_desc_overlayDensity" v="antal datapunkter (lav=8k, mellem=20k, høj=40k)" />
+<e k="sf_desc_enabled" v="aktiver / deaktiver hele moddet" eh="895364cb" />
+<e k="sf_desc_debugMode" v="ekstra logning til fejlfinding" eh="de508edb" />
+<e k="sf_desc_fertilitySystem" v="fuld modellering af jordens frugtbarhed" eh="40efd611" />
+<e k="sf_desc_nutrientCycles" v="sporer nedbrydning og genopbygning af n/p/k" eh="6eff80b3" />
+<e k="sf_desc_fertilizerCosts" v="realistiske spilomkostninger for gødning" eh="1c197c9f" />
+<e k="sf_desc_showNotifications" v="notifikationer om jordstatus i spillet" eh="7f275b4b" />
+<e k="sf_desc_showHUD" v="vis jord-hud-overlay" eh="fa8b9224" />
+<e k="sf_desc_hudPosition" v="forudindstillet hud-position" eh="98c8bcea" />
+<e k="sf_desc_hudColorTheme" v="farvetema for hud-elementer" eh="97271907" />
+<e k="sf_desc_hudFontSize" v="hud-tekststørrelse" eh="48a6fc15" />
+<e k="sf_desc_hudTransparency" v="gennemsigtighed for hud-baggrund" eh="d20d72dc" />
+<e k="sf_desc_seasonalEffects" v="sæsonbaserede jordændringer" eh="f515f484" />
+<e k="sf_desc_rainEffects" v="regn forårsager udvaskning af næringsstoffer" eh="82fec75d" />
+<e k="sf_desc_plowingBonus" v="pløjningsbonus for jordforbedring" eh="23522b97" />
+<e k="sf_desc_weedPressure" v="sporer og straffer ukrudtsspredning" eh="df20c38d" />
+<e k="sf_desc_pestPressure" v="sporer insektangreb" eh="12b3412e" />
+<e k="sf_desc_diseasePressure" v="sporer svampesygdomme i afgrøder" eh="0858395f" />
+<e k="sf_desc_compactionEnabled" v="jordkomprimering fra tunge køretøjer" eh="a7d3a795" />
+<e k="sf_desc_difficulty" v="intensitet af næringsstofdræn" eh="54a7902e" />
+<e k="sf_desc_replenishmentRate" v="hastighed for gødningsgenopbygning" eh="858d2b23" />
+<e k="sf_desc_useImperialUnits" v="brug imperiale enheder (us tons/acre)" eh="8ba3d81a" />
+<e k="sf_desc_autoRateControl" v="automatisk styring af påføringsrate" eh="bb4e5880" />
+<e k="sf_desc_cropRotation" v="fordele og ulemper ved sædskifte" eh="bb79b03a" />
+<e k="sf_desc_activeMapLayer" v="næringslag vist på pda-kortet" eh="3c01c599" />
+<e k="sf_desc_overlayDensity" v="antal datapunkter (lav=8k, mellem=20k, høj=40k)" eh="42503763" />
 
-<e k="sf_rr_1" v="meget langsom (0.25x)" />
-<e k="sf_rr_2" v="langsom (0.5x)" />
-<e k="sf_rr_3" v="normal (1.0x)" />
-<e k="sf_rr_4" v="hurtig (1.5x)" />
-<e k="sf_rr_5" v="meget hurtig (2.0x)" />
+<e k="sf_rr_1" v="meget langsom (0.25x)" eh="b681a1b4" />
+<e k="sf_rr_2" v="langsom (0.5x)" eh="db69874d" />
+<e k="sf_rr_3" v="normal (1.0x)" eh="930452c1" />
+<e k="sf_rr_4" v="hurtig (1.5x)" eh="4c8ebfdb" />
+<e k="sf_rr_5" v="meget hurtig (2.0x)" eh="bd682dd5" />
 
-<e k="sf_layer_1" v="fra" />
-<e k="sf_layer_2" v="nitrogen" />
-<e k="sf_layer_3" v="fosfor" />
-<e k="sf_layer_4" v="kalium" />
-<e k="sf_layer_5" v="ph" />
-<e k="sf_layer_6" v="organisk materiale" />
-<e k="sf_layer_7" v="hastende" />
-<e k="sf_layer_8" v="ukrudt" />
-<e k="sf_layer_9" v="skadedyr" />
-<e k="sf_layer_10" v="sygdom" />
-<e k="sf_layer_11" v="komprimering" />
+<e k="sf_layer_1" v="fra" eh="d15305d7" />
+<e k="sf_layer_2" v="nitrogen" eh="1e9ef3ba" />
+<e k="sf_layer_3" v="fosfor" eh="eb4f2688" />
+<e k="sf_layer_4" v="kalium" eh="3a4edc67" />
+<e k="sf_layer_5" v="ph" eh="397dff20" />
+<e k="sf_layer_6" v="organisk materiale" eh="d2e254bc" />
+<e k="sf_layer_7" v="hastende" eh="c94e3850" />
+<e k="sf_layer_8" v="ukrudt" eh="2b75024d" />
+<e k="sf_layer_9" v="skadedyr" eh="8f2aee79" />
+<e k="sf_layer_10" v="sygdom" eh="e7067a8c" />
+<e k="sf_layer_11" v="komprimering" eh="19cf3ee7" />
 
-<e k="sf_density_1" v="lav" />
-<e k="sf_density_2" v="mellem" />
-<e k="sf_density_3" v="høj" />
+<e k="sf_density_1" v="lav" eh="28d0edd0" />
+<e k="sf_density_2" v="mellem" eh="87f8a6ab" />
+<e k="sf_density_3" v="høj" eh="655d20c1" />
 
-<e k="sf_admin_save_label" v="gem jorddata" />
-<e k="sf_admin_save_desc" v="gem alle jorddata nu" />
-<e k="sf_admin_reset_label" v="nulstil alle indstillinger" />
-<e k="sf_admin_reset_desc" v="gendan alle indstillinger til standard" />
-<e k="sf_admin_drain_label" v="tøm køretøjets tanke" />
-<e k="sf_admin_drain_desc" v="tøm sprøjte og redskaber (50% refusion)" />
-<e k="sf_admin_field_info_label" v="aktuel markinfo" />
-<e k="sf_admin_field_info_desc" v="jorddata for marken ved din position" />
-<e k="sf_admin_field_forecast_label" v="markprognose" />
-<e k="sf_admin_field_forecast_desc" v="udbytteprognose for marken ved din position" />
-<e k="sf_admin_list_fields_label" v="vis alle marker" />
-<e k="sf_admin_list_fields_desc" v="skriv alle markdata til spillets log" />
-    <e k="sf_infobox_title" v="[EN] Soil Nutrients" />
-    <e k="sf_infobox_grade" v="[EN] Soil Grade" />
-    <e k="sf_infobox_needs" v="[EN] Needs" />
-    <e k="sf_infobox_fertilizer" v="[EN] Fertilizer" />
+<e k="sf_admin_save_label" v="gem jorddata" eh="d4e9a279" />
+<e k="sf_admin_save_desc" v="gem alle jorddata nu" eh="f365613a" />
+<e k="sf_admin_reset_label" v="nulstil alle indstillinger" eh="6e7d5f9f" />
+<e k="sf_admin_reset_desc" v="gendan alle indstillinger til standard" eh="599b7454" />
+		<e k="sf_panel_hdr_field_tools" v="[EN] Field Tools" eh="2b250a56" />
+		<e k="sf_nav_field_tools_label" v="[EN] Field Tools" eh="2b250a56" />
+		<e k="sf_nav_field_tools_desc" v="[EN] Open specific tools to inspect and modify field states" eh="360db19b" />
+		<e k="sf_panel_hdr_vehicle_tools" v="[EN] Vehicle Tools" eh="9b6d6e4c" />
+		<e k="sf_nav_vehicle_tools_label" v="[EN] Vehicle Tools" eh="9b6d6e4c" />
+		<e k="sf_nav_vehicle_tools_desc" v="[EN] Open specific tools for connected vehicles and implements" eh="1a8b2100" />
+<e k="sf_admin_drain_label" v="tøm køretøjets tanke" eh="d216b101" />
+<e k="sf_admin_drain_desc" v="tøm sprøjte og redskaber (50% refusion)" eh="5e048a34" />
+<e k="sf_admin_field_info_label" v="aktuel markinfo" eh="5df500d6" />
+<e k="sf_admin_field_info_desc" v="jorddata for marken ved din position" eh="b7e2a72d" />
+<e k="sf_admin_field_forecast_label" v="markprognose" eh="1df41470" />
+<e k="sf_admin_field_forecast_desc" v="udbytteprognose for marken ved din position" eh="67e56b9d" />
+<e k="sf_admin_list_fields_label" v="vis alle marker" eh="efeb1b25" />
+<e k="sf_admin_list_fields_desc" v="skriv alle markdata til spillets log" eh="c9fa812e" />
+		<e k="sf_admin_field_set_state_label" v="[EN] Set Field State" eh="5b0d7a31" />
+		<e k="sf_admin_field_set_state_desc" v="[EN] Manually tweak N, P, K, pH, and OM values for current field" eh="a491e190" />
+		<e k="sf_admin_field_recover_label" v="[EN] Recover Field" eh="e1c82ff0" />
+		<e k="sf_admin_field_recover_desc" v="[EN] Reset the current field to default safe values (fix mistakes)" eh="68b687a2" />
+    <e k="sf_infobox_title" v="[EN] Soil Nutrients" eh="64377acf" />
+    <e k="sf_infobox_grade" v="[EN] Soil Grade" eh="65d1be5f" />
+    <e k="sf_infobox_needs" v="[EN] Needs" eh="94d6125d" />
+    <e k="sf_infobox_fertilizer" v="[EN] Fertilizer" eh="cd248829" />
 
     <!-- ======================================================
          FIELD INFO BOX (native FS25 FIELD INFO panel extension)
          ====================================================== -->
-    <e k="sf_fieldinfo_box_title" v="[EN] Soil Nutrients" />
-    <e k="sf_fieldinfo_grade" v="[EN] Soil Grade" />
-    <e k="sf_fieldinfo_yield" v="[EN] Yield" />
-    <e k="sf_fieldinfo_rotation" v="[EN] Rotation" />
-    <e k="sf_fieldinfo_needs" v="[EN] Needs" />
+    <e k="sf_fieldinfo_box_title" v="[EN] Soil Nutrients" eh="64377acf" />
+    <e k="sf_fieldinfo_grade" v="[EN] Soil Grade" eh="65d1be5f" />
+    <e k="sf_fieldinfo_yield" v="[EN] Yield" eh="97345487" />
+    <e k="sf_fieldinfo_rotation" v="[EN] Rotation" eh="f1a42bd4" />
+    <e k="sf_fieldinfo_needs" v="[EN] Needs" eh="94d6125d" />
     </elements>
 </l10n>

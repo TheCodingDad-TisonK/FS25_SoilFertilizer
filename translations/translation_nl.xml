@@ -84,7 +84,7 @@
     <e k="sf_hud_yield" v="Opbrengst" eh="97345487" />
     <e k="sf_hud_estYield" v="Verw. opbrengst" eh="32a4135e" />
     <e k="sf_hud_optimal" v="Optimaal" eh="cb61fef1" />
-    <e k="sf_hud_post_harvest" v="Na de oogst · Bemesten" />
+    <e k="sf_hud_post_harvest" v="Na de oogst · Bemesten" eh="634de6fe" />
     <e k="sf_hud_hint_edit" v="Sleep: verplaatsen   Hoek: formaat wijzigen   Rechtsklik: gereed" eh="987ebf45" />
     <e k="sf_hud_hint_normal" v="Rechtsklik: verplaatsen/vergroten" eh="afc8f13b" />
     <e k="sf_use_imperial_short" v="Imperiale eenheden" eh="ff2701ad" />
@@ -488,131 +488,141 @@
     <e k="sf_pda_total_urgent_label" v="Totaal dat aandacht nodig heeft" eh="b3ce2db9" />
     <e k="sf_pda_treatment_hint" v="De velden rechts hebben behandeling nodig. Klik op een rij om aanbevolen inputs en geschatte hoeveelheden te zien." eh="5748d316" />
     <!-- HUD labels -->
-    <e k="sf_hud_label_ph" v="pH" />
-    <e k="sf_hud_label_om" v="OS" />
-    <e k="sf_hud_unit_ppm" v="(ppm)" />
-    <e k="sf_hud_coverage" v="Dekking: %d%% / %d%%" />
-    <e k="sf_hud_compaction" v="Verdichting: %d%%" />
+    <e k="sf_hud_label_ph" v="pH" eh="397dff20" />
+    <e k="sf_hud_label_om" v="OS" eh="bfbebc07" />
+    <e k="sf_hud_unit_ppm" v="(ppm)" eh="71b18c32" />
+    <e k="sf_hud_coverage" v="Dekking: %d%% / %d%%" eh="d407bb6d" />
+    <e k="sf_hud_compaction" v="Verdichting: %d%%" eh="bef3a4f5" />
     <!-- Sprayer rate HUD -->
-    <e k="sf_sprayer_auto_on" v="TOE. SNELHEID  ( AUTO: AAN )" />
-    <e k="sf_sprayer_auto_off" v="TOE. SNELHEID  AUTO: UIT [%s]" />
-    <e k="sf_sprayer_target" v="Doel: " />
-    <e k="sf_sprayer_burn_guaranteed" v="VERBRANDINGSRISICO: GEGARANDEERD" />
-    <e k="sf_sprayer_burn_possible" v="VERBRANDINGSRISICO: MOGELIJK" />
+    <e k="sf_sprayer_auto_on" v="TOE. SNELHEID  ( AUTO: AAN )" eh="099b5dac" />
+    <e k="sf_sprayer_auto_off" v="TOE. SNELHEID  AUTO: UIT [%s]" eh="848cc106" />
+    <e k="sf_sprayer_target" v="Doel: " eh="31d43504" />
+    <e k="sf_sprayer_burn_guaranteed" v="VERBRANDINGSRISICO: GEGARANDEERD" eh="422601c4" />
+    <e k="sf_sprayer_burn_possible" v="VERBRANDINGSRISICO: MOGELIJK" eh="25b251b6" />
     <!-- Notifications -->
-    <e k="sf_notify_welcome" v="Bodem &amp; Meststof Mod Actief | J = HUD | K = Bodemrapport | Typ 'soilfertility' voor opdrachten" />
-    <e k="sf_notify_mod_active_title" v="Bodem &amp; Meststof Mod Actief" />
-    <e k="sf_notify_mod_active_body" v="Echt bodemsysteem met volledige gebeurteniskoppelingen" />
-    <e k="sf_notify_init_delayed" v="Bodem Mod: Veldinitialisatie vertraagd. Alternatieve methode wordt geprobeerd..." />
-    <e k="sf_notify_init_success" v="Bodem Mod: Veldinitialisatie geslaagd!" />
-    <e k="sf_notify_critical_title" v="Kritieke Zorgwaarschuwing" />
-    <e k="sf_notify_critical_body" v="Veld %d vereist onmiddellijke aandacht! Urgentie: %d%%" />
-    <e k="sf_notify_treated_title" v="Bodemupdate" />
-    <e k="sf_notify_treated_body" v="Veld %d volledig behandeld met %s" />
-    <e k="sf_notify_burn_title" v="Meststofverbranding" />
-    <e k="sf_notify_burn_body" v="Veld %d: schade door overgift (pH %.1f)" />
-    <e k="sf_notify_sync_error" v="Bodem Mod: Gegevenssynchronisatieprobleem gedetecteerd. Meld dit als het aanhoudt." />
+    <e k="sf_notify_welcome" v="Bodem &amp; Meststof Mod Actief | J = HUD | K = Bodemrapport | Typ 'soilfertility' voor opdrachten" eh="3fde93cd" />
+    <e k="sf_notify_mod_active_title" v="Bodem &amp; Meststof Mod Actief" eh="15edc102" />
+    <e k="sf_notify_mod_active_body" v="Echt bodemsysteem met volledige gebeurteniskoppelingen" eh="901e2106" />
+    <e k="sf_notify_init_delayed" v="Bodem Mod: Veldinitialisatie vertraagd. Alternatieve methode wordt geprobeerd..." eh="f8bd28f8" />
+    <e k="sf_notify_init_success" v="Bodem Mod: Veldinitialisatie geslaagd!" eh="46214360" />
+    <e k="sf_notify_critical_title" v="Kritieke Zorgwaarschuwing" eh="3f981d0c" />
+    <e k="sf_notify_critical_body" v="Veld %d vereist onmiddellijke aandacht! Urgentie: %d%%" eh="171246aa" />
+    <e k="sf_notify_treated_title" v="Bodemupdate" eh="4633156e" />
+    <e k="sf_notify_treated_body" v="Veld %d volledig behandeld met %s" eh="585aa9b7" />
+    <e k="sf_notify_burn_title" v="Meststofverbranding" eh="ad8ed599" />
+    <e k="sf_notify_burn_body" v="Veld %d: schade door overgift (pH %.1f)" eh="cb731ee3" />
+    <e k="sf_notify_sync_error" v="Bodem Mod: Gegevenssynchronisatieprobleem gedetecteerd. Meld dit als het aanhoudt." eh="1a307946" />
     <!-- Panel categories -->
-    <e k="sf_panel_cat_sim" v="Simulatie" />
-    <e k="sf_panel_cat_sim_desc" v="Boerderijmechanica, moeilijkheid en voedingsstoffencycli" />
-    <e k="sf_panel_cat_display" v="Weergave &amp; HUD" />
-    <e k="sf_panel_cat_display_desc" v="HUD-uiterlijk, kleurthema, positie en lettergrootte" />
-    <e k="sf_panel_cat_overlay" v="Kaartoverlay" />
-    <e k="sf_panel_cat_overlay_desc" v="Actieve overlaylaag getoond op de PDA-kaart" />
-    <e k="sf_panel_hdr_core" v="Kernsystemen" />
-    <e k="sf_panel_hdr_difficulty" v="Moeilijkheid" />
-    <e k="sf_panel_hdr_environment" v="Omgeving" />
-    <e k="sf_panel_hdr_crop_stress" v="Gewasbelasting" />
-    <e k="sf_panel_hdr_visibility" v="Zichtbaarheid" />
-    <e k="sf_panel_hdr_hud_style" v="HUD-stijl" />
-    <e k="sf_panel_hdr_position" v="Positie" />
-    <e k="sf_panel_hdr_layer" v="Laag" />
-    <e k="sf_panel_hdr_performance" v="Prestaties" />
-    <e k="sf_panel_hdr_mod_ctrl" v="Modbeheer &amp; Moeilijkheid" />
-    <e k="sf_panel_hdr_systems" v="Systemen" />
-    <e k="sf_panel_hdr_actions" v="Acties &amp; Veldgereedschappen" />
+    <e k="sf_panel_cat_sim" v="Simulatie" eh="4f502b57" />
+    <e k="sf_panel_cat_sim_desc" v="Boerderijmechanica, moeilijkheid en voedingsstoffencycli" eh="3c584cdb" />
+    <e k="sf_panel_cat_display" v="Weergave &amp; HUD" eh="1a553532" />
+    <e k="sf_panel_cat_display_desc" v="HUD-uiterlijk, kleurthema, positie en lettergrootte" eh="5b91fada" />
+    <e k="sf_panel_cat_overlay" v="Kaartoverlay" eh="28b898b6" />
+    <e k="sf_panel_cat_overlay_desc" v="Actieve overlaylaag getoond op de PDA-kaart" eh="a5892aef" />
+    <e k="sf_panel_hdr_core" v="Kernsystemen" eh="44a497a5" />
+    <e k="sf_panel_hdr_difficulty" v="Moeilijkheid" eh="7b29ca96" />
+    <e k="sf_panel_hdr_environment" v="Omgeving" eh="0ba29c6a" />
+    <e k="sf_panel_hdr_crop_stress" v="Gewasbelasting" eh="260167bb" />
+    <e k="sf_panel_hdr_visibility" v="Zichtbaarheid" eh="1729a56c" />
+    <e k="sf_panel_hdr_hud_style" v="HUD-stijl" eh="1d4a8cac" />
+    <e k="sf_panel_hdr_position" v="Positie" eh="52f5e0bc" />
+    <e k="sf_panel_hdr_layer" v="Laag" eh="359b71e8" />
+    <e k="sf_panel_hdr_performance" v="Prestaties" eh="9446a98a" />
+    <e k="sf_panel_hdr_mod_ctrl" v="Modbeheer &amp; Moeilijkheid" eh="f38ed047" />
+    <e k="sf_panel_hdr_systems" v="Systemen" eh="d6856404" />
+    <e k="sf_panel_hdr_actions" v="Acties &amp; Veldgereedschappen" eh="82bb7b83" />
     <!-- Panel chrome -->
-    <e k="sf_panel_admin_yes" v="Beheerder: JA" />
-    <e k="sf_panel_admin_no" v="Beheerder: NEE" />
-    <e k="sf_panel_multiplayer" v="Meerdere spelers" />
-    <e k="sf_panel_singleplayer" v="Singleplayer" />
-    <e k="sf_panel_btn_back" v="&lt; Terug" />
-    <e k="sf_panel_btn_reset_cat" v="Cat. herstellen" />
-    <e k="sf_panel_btn_close_hint" v="SHIFT+O om te sluiten" />
-    <e k="sf_panel_select_category" v="Selecteer een categorie om instellingen te configureren" />
-    <e k="sf_panel_btn_configure" v="Configureren &gt;&gt;" />
-    <e k="sf_panel_btn_open" v="Openen &gt;&gt;" />
+    <e k="sf_panel_admin_yes" v="Beheerder: JA" eh="4628842a" />
+    <e k="sf_panel_admin_no" v="Beheerder: NEE" eh="a9394f7b" />
+    <e k="sf_panel_multiplayer" v="Meerdere spelers" eh="901a7320" />
+    <e k="sf_panel_singleplayer" v="Singleplayer" eh="da602601" />
+    <e k="sf_panel_btn_back" v="&lt; Terug" eh="b1f1e41f" />
+    <e k="sf_panel_btn_reset_cat" v="Cat. herstellen" eh="b66faa88" />
+    <e k="sf_panel_btn_close_hint" v="SHIFT+O om te sluiten" eh="254406e3" />
+    <e k="sf_panel_select_category" v="Selecteer een categorie om instellingen te configureren" eh="a277d257" />
+    <e k="sf_panel_btn_configure" v="Configureren &gt;&gt;" eh="a2cb3902" />
+    <e k="sf_panel_btn_open" v="Openen &gt;&gt;" eh="6624d17c" />
     <!-- Setting descriptions -->
-    <e k="sf_desc_enabled" v="De volledige mod activeren / deactiveren" />
-    <e k="sf_desc_debugMode" v="Extra logging voor probleemoplossing" />
-    <e k="sf_desc_fertilitySystem" v="Volledig bodemvruchtbaarheidsmodel" />
-    <e k="sf_desc_nutrientCycles" v="N/P/K-uitputting en -herstel bijhouden" />
-    <e k="sf_desc_fertilizerCosts" v="Echte in-game kosten voor meststoffen" />
-    <e k="sf_desc_showNotifications" v="In-game bodemstatusmeldingen" />
-    <e k="sf_desc_showHUD" v="De bodem-HUD-overlay tonen" />
-    <e k="sf_desc_hudPosition" v="Vooringestelde ankerpositie voor HUD" />
-    <e k="sf_desc_hudColorTheme" v="Kleurenpalet voor HUD-elementen" />
-    <e k="sf_desc_hudFontSize" v="HUD-tekstgrootte" />
-    <e k="sf_desc_hudTransparency" v="HUD-achtergrondtransparantie" />
-    <e k="sf_desc_seasonalEffects" v="Seizoensgebonden bodemveranderingen" />
-    <e k="sf_desc_rainEffects" v="Regen veroorzaakt voedingsstofuitspoeling" />
-    <e k="sf_desc_plowingBonus" v="Ploegbonus voor bodembehoud" />
-    <e k="sf_desc_weedPressure" v="Onkruidverspreiding bijhouden en bestraffen" />
-    <e k="sf_desc_pestPressure" v="Insectenplagen bijhouden" />
-    <e k="sf_desc_diseasePressure" v="Schimmelziekten in gewassen bijhouden" />
-    <e k="sf_desc_compactionEnabled" v="Bodemverdichting door zware voertuigen" />
-    <e k="sf_desc_difficulty" v="Intensiteitsniveau van voedingsstofuitputting" />
-    <e k="sf_desc_replenishmentRate" v="Snelheid van voedingsstofherstel door meststof" />
-    <e k="sf_desc_useImperialUnits" v="Imperiale eenheden gebruiken (US ton/acre)" />
-    <e k="sf_desc_autoRateControl" v="Slimme toedieningssnelheden voor sproeier" />
-    <e k="sf_desc_cropRotation" v="Vruchtwisselingsvoordelen en -straffen" />
-    <e k="sf_desc_activeMapLayer" v="Voedingsstoffenlaag getoond op PDA-kaart" />
-    <e k="sf_desc_overlayDensity" v="Steekproefpuntenbudget (Laag=8k, Middel=20k, Hoog=40k)" />
+    <e k="sf_desc_enabled" v="De volledige mod activeren / deactiveren" eh="895364cb" />
+    <e k="sf_desc_debugMode" v="Extra logging voor probleemoplossing" eh="de508edb" />
+    <e k="sf_desc_fertilitySystem" v="Volledig bodemvruchtbaarheidsmodel" eh="40efd611" />
+    <e k="sf_desc_nutrientCycles" v="N/P/K-uitputting en -herstel bijhouden" eh="6eff80b3" />
+    <e k="sf_desc_fertilizerCosts" v="Echte in-game kosten voor meststoffen" eh="1c197c9f" />
+    <e k="sf_desc_showNotifications" v="In-game bodemstatusmeldingen" eh="7f275b4b" />
+    <e k="sf_desc_showHUD" v="De bodem-HUD-overlay tonen" eh="fa8b9224" />
+    <e k="sf_desc_hudPosition" v="Vooringestelde ankerpositie voor HUD" eh="98c8bcea" />
+    <e k="sf_desc_hudColorTheme" v="Kleurenpalet voor HUD-elementen" eh="97271907" />
+    <e k="sf_desc_hudFontSize" v="HUD-tekstgrootte" eh="48a6fc15" />
+    <e k="sf_desc_hudTransparency" v="HUD-achtergrondtransparantie" eh="d20d72dc" />
+    <e k="sf_desc_seasonalEffects" v="Seizoensgebonden bodemveranderingen" eh="f515f484" />
+    <e k="sf_desc_rainEffects" v="Regen veroorzaakt voedingsstofuitspoeling" eh="82fec75d" />
+    <e k="sf_desc_plowingBonus" v="Ploegbonus voor bodembehoud" eh="23522b97" />
+    <e k="sf_desc_weedPressure" v="Onkruidverspreiding bijhouden en bestraffen" eh="df20c38d" />
+    <e k="sf_desc_pestPressure" v="Insectenplagen bijhouden" eh="12b3412e" />
+    <e k="sf_desc_diseasePressure" v="Schimmelziekten in gewassen bijhouden" eh="0858395f" />
+    <e k="sf_desc_compactionEnabled" v="Bodemverdichting door zware voertuigen" eh="a7d3a795" />
+    <e k="sf_desc_difficulty" v="Intensiteitsniveau van voedingsstofuitputting" eh="54a7902e" />
+    <e k="sf_desc_replenishmentRate" v="Snelheid van voedingsstofherstel door meststof" eh="858d2b23" />
+    <e k="sf_desc_useImperialUnits" v="Imperiale eenheden gebruiken (US ton/acre)" eh="8ba3d81a" />
+    <e k="sf_desc_autoRateControl" v="Slimme toedieningssnelheden voor sproeier" eh="bb4e5880" />
+    <e k="sf_desc_cropRotation" v="Vruchtwisselingsvoordelen en -straffen" eh="bb79b03a" />
+    <e k="sf_desc_activeMapLayer" v="Voedingsstoffenlaag getoond op PDA-kaart" eh="3c01c599" />
+    <e k="sf_desc_overlayDensity" v="Steekproefpuntenbudget (Laag=8k, Middel=20k, Hoog=40k)" eh="42503763" />
     <!-- Multi-option values -->
-    <e k="sf_rr_1" v="Zeer langzaam (0,25x)" />
-    <e k="sf_rr_2" v="Langzaam (0,5x)" />
-    <e k="sf_rr_3" v="Normaal (1,0x)" />
-    <e k="sf_rr_4" v="Snel (1,5x)" />
-    <e k="sf_rr_5" v="Zeer snel (2,0x)" />
-    <e k="sf_layer_1" v="Uit" />
-    <e k="sf_layer_2" v="Stikstof" />
-    <e k="sf_layer_3" v="Fosfor" />
-    <e k="sf_layer_4" v="Kalium" />
-    <e k="sf_layer_5" v="pH" />
-    <e k="sf_layer_6" v="Organische stof" />
-    <e k="sf_layer_7" v="Urgentie" />
-    <e k="sf_layer_8" v="Onkruid" />
-    <e k="sf_layer_9" v="Plagen" />
-    <e k="sf_layer_10" v="Ziekte" />
-    <e k="sf_layer_11" v="Bodemverdichting" />
-    <e k="sf_density_1" v="Laag" />
-    <e k="sf_density_2" v="Middel" />
-    <e k="sf_density_3" v="Hoog" />
+    <e k="sf_rr_1" v="Zeer langzaam (0,25x)" eh="b681a1b4" />
+    <e k="sf_rr_2" v="Langzaam (0,5x)" eh="db69874d" />
+    <e k="sf_rr_3" v="Normaal (1,0x)" eh="930452c1" />
+    <e k="sf_rr_4" v="Snel (1,5x)" eh="4c8ebfdb" />
+    <e k="sf_rr_5" v="Zeer snel (2,0x)" eh="bd682dd5" />
+    <e k="sf_layer_1" v="Uit" eh="d15305d7" />
+    <e k="sf_layer_2" v="Stikstof" eh="1e9ef3ba" />
+    <e k="sf_layer_3" v="Fosfor" eh="eb4f2688" />
+    <e k="sf_layer_4" v="Kalium" eh="3a4edc67" />
+    <e k="sf_layer_5" v="pH" eh="397dff20" />
+    <e k="sf_layer_6" v="Organische stof" eh="d2e254bc" />
+    <e k="sf_layer_7" v="Urgentie" eh="c94e3850" />
+    <e k="sf_layer_8" v="Onkruid" eh="2b75024d" />
+    <e k="sf_layer_9" v="Plagen" eh="8f2aee79" />
+    <e k="sf_layer_10" v="Ziekte" eh="e7067a8c" />
+    <e k="sf_layer_11" v="Bodemverdichting" eh="19cf3ee7" />
+    <e k="sf_density_1" v="Laag" eh="28d0edd0" />
+    <e k="sf_density_2" v="Middel" eh="87f8a6ab" />
+    <e k="sf_density_3" v="Hoog" eh="655d20c1" />
     <!-- Admin action items -->
-    <e k="sf_admin_save_label" v="Bodemgegevens opslaan" />
-    <e k="sf_admin_save_desc" v="Alle bodemgegevens nu geforceerd opslaan" />
-    <e k="sf_admin_reset_label" v="Alle instellingen herstellen" />
-    <e k="sf_admin_reset_desc" v="Elke instelling terugzetten naar de standaardwaarde" />
-    <e k="sf_admin_drain_label" v="Voertuigtanks leegmaken" />
-    <e k="sf_admin_drain_desc" v="Sproeier + uitrusting leegmaken (50% terugbetaling)" />
-    <e k="sf_admin_field_info_label" v="Huidige veldinformatie" />
-    <e k="sf_admin_field_info_desc" v="Bodemgegevens voor het veld op jouw positie" />
-    <e k="sf_admin_field_forecast_label" v="Veldprognose" />
-    <e k="sf_admin_field_forecast_desc" v="Opbrengstprognose voor het veld op jouw positie" />
-    <e k="sf_admin_list_fields_label" v="Alle velden weergeven" />
-    <e k="sf_admin_list_fields_desc" v="Alle veldbodemgegevens naar het spellogboek exporteren" />
-    <e k="sf_infobox_title" v="Bodemvoedingsstoffen" />
-    <e k="sf_infobox_grade" v="Bodemkwaliteit" />
-    <e k="sf_infobox_needs" v="Behoeften" />
-    <e k="sf_infobox_fertilizer" v="Meststof" />
+    <e k="sf_admin_save_label" v="Bodemgegevens opslaan" eh="d4e9a279" />
+    <e k="sf_admin_save_desc" v="Alle bodemgegevens nu geforceerd opslaan" eh="f365613a" />
+    <e k="sf_admin_reset_label" v="Alle instellingen herstellen" eh="6e7d5f9f" />
+    <e k="sf_admin_reset_desc" v="Elke instelling terugzetten naar de standaardwaarde" eh="599b7454" />
+		<e k="sf_panel_hdr_field_tools" v="[EN] Field Tools" eh="2b250a56" />
+		<e k="sf_nav_field_tools_label" v="[EN] Field Tools" eh="2b250a56" />
+		<e k="sf_nav_field_tools_desc" v="[EN] Open specific tools to inspect and modify field states" eh="360db19b" />
+		<e k="sf_panel_hdr_vehicle_tools" v="[EN] Vehicle Tools" eh="9b6d6e4c" />
+		<e k="sf_nav_vehicle_tools_label" v="[EN] Vehicle Tools" eh="9b6d6e4c" />
+		<e k="sf_nav_vehicle_tools_desc" v="[EN] Open specific tools for connected vehicles and implements" eh="1a8b2100" />
+    <e k="sf_admin_drain_label" v="Voertuigtanks leegmaken" eh="d216b101" />
+    <e k="sf_admin_drain_desc" v="Sproeier + uitrusting leegmaken (50% terugbetaling)" eh="5e048a34" />
+    <e k="sf_admin_field_info_label" v="Huidige veldinformatie" eh="5df500d6" />
+    <e k="sf_admin_field_info_desc" v="Bodemgegevens voor het veld op jouw positie" eh="b7e2a72d" />
+    <e k="sf_admin_field_forecast_label" v="Veldprognose" eh="1df41470" />
+    <e k="sf_admin_field_forecast_desc" v="Opbrengstprognose voor het veld op jouw positie" eh="67e56b9d" />
+    <e k="sf_admin_list_fields_label" v="Alle velden weergeven" eh="efeb1b25" />
+    <e k="sf_admin_list_fields_desc" v="Alle veldbodemgegevens naar het spellogboek exporteren" eh="c9fa812e" />
+		<e k="sf_admin_field_set_state_label" v="[EN] Set Field State" eh="5b0d7a31" />
+		<e k="sf_admin_field_set_state_desc" v="[EN] Manually tweak N, P, K, pH, and OM values for current field" eh="a491e190" />
+		<e k="sf_admin_field_recover_label" v="[EN] Recover Field" eh="e1c82ff0" />
+		<e k="sf_admin_field_recover_desc" v="[EN] Reset the current field to default safe values (fix mistakes)" eh="68b687a2" />
+    <e k="sf_infobox_title" v="Bodemvoedingsstoffen" eh="64377acf" />
+    <e k="sf_infobox_grade" v="Bodemkwaliteit" eh="65d1be5f" />
+    <e k="sf_infobox_needs" v="Behoeften" eh="94d6125d" />
+    <e k="sf_infobox_fertilizer" v="Meststof" eh="cd248829" />
 
     <!-- ======================================================
          FIELD INFO BOX (native FS25 FIELD INFO panel extension)
          ====================================================== -->
-    <e k="sf_fieldinfo_box_title" v="Bodemvoedingsstoffen" />
-    <e k="sf_fieldinfo_grade" v="Bodemkwaliteit" />
-    <e k="sf_fieldinfo_yield" v="Opbrengst" />
-    <e k="sf_fieldinfo_rotation" v="Vruchtwisseling" />
-    <e k="sf_fieldinfo_needs" v="Behoeften" />
+    <e k="sf_fieldinfo_box_title" v="Bodemvoedingsstoffen" eh="64377acf" />
+    <e k="sf_fieldinfo_grade" v="Bodemkwaliteit" eh="65d1be5f" />
+    <e k="sf_fieldinfo_yield" v="Opbrengst" eh="97345487" />
+    <e k="sf_fieldinfo_rotation" v="Vruchtwisseling" eh="f1a42bd4" />
+    <e k="sf_fieldinfo_needs" v="Behoeften" eh="94d6125d" />
     </elements>
 </l10n>
