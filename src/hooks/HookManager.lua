@@ -2961,41 +2961,113 @@ function HookManager:installFillTypeMaterialHook()
     end
 
     local fm = g_fillTypeManager
-    local fertIdx    = fm:getFillTypeIndexByName("FERTILIZER")
+    local origGetTexIdx = fm.getTextureArrayIndexByFillTypeIndex
+
+    -- Helper: resolve the first vanilla fill type from a priority list that actually
+    -- has a textureArrayIndex registered on this map's terrain fill layer array.
+    -- Returns the fill type INDEX (not textureArrayIndex) of the best match, or nil.
+    local function bestVanilla(priorityNames)
+        for _, name in ipairs(priorityNames) do
+            local idx = fm:getFillTypeIndexByName(name)
+            if idx then
+                local texIdx = origGetTexIdx(fm, idx)
+                if texIdx ~= nil then
+                    return idx
+                end
+            end
+        end
+        return nil
+    end
+
+    -- Per-type visual priority lists (best match first, broad fallbacks last).
+    -- Each list is ordered from closest visual match to broadest fallback.
+    -- All candidates are vanilla FS25 base-game fill types guaranteed to exist
+    -- on standard maps. The runtime probe above ensures we only use types that
+    -- actually have a registered texture on the current map.
+    --
+    -- Appearance reference:
+    --   LIME            → bright white powder
+    --   FERTILIZER      → off-white/pale granular
+    --   MANURE          → dark brown chunky organic
+    --   DIGESTATE       → dark brown/grey liquid-spread organic
+    --   LIQUIDMANURE    → dark brown liquid slurry
+    --   LIQUIDFERTILIZER→ amber/clear liquid
+    --   SEEDS           → small pale tan granules
+    --   STRAW           → golden-yellow fibre
+    --   CHAFF           → greenish/yellow fine fibre
+
+    local PER_TYPE_PRIORITIES = {
+        -- ── GRANULAR MINERAL FERTILIZERS ──────────────────────────────────
+        -- White to off-white crystalline/granular powders
+        UREA     = { "LIME", "FERTILIZER" },            -- Urea is bright white granular → LIME first
+        AMS      = { "FERTILIZER", "LIME" },            -- AMS is off-white/light grey granular
+        MAP      = { "FERTILIZER", "LIME" },            -- MAP is off-white/light brown granular
+        DAP      = { "FERTILIZER", "LIME" },            -- DAP is off-white/grey-brown granular
+        POTASH   = { "FERTILIZER", "LIME" },            -- Potassium chloride — pinkish but granular
+        GYPSUM   = { "LIME", "FERTILIZER" },            -- Gypsum is bright white powder → LIME first
+
+        -- ── ORGANIC / COMPOST TYPES ────────────────────────────────────────
+        -- Dark brown to black matte organic material
+        COMPOST          = { "MANURE", "DIGESTATE", "FERTILIZER" },         -- Dark brown chunky compost
+        BIOSOLIDS        = { "DIGESTATE", "MANURE", "FERTILIZER" },         -- Very dark, fine-grained sludge cake
+        CHICKEN_MANURE   = { "MANURE", "DIGESTATE", "FERTILIZER" },         -- Dark brown granular litter
+        PELLETIZED_MANURE = { "MANURE", "DIGESTATE", "FERTILIZER" },        -- Dark brown pellets
+    }
+
+    -- Liquid custom types → LIQUIDFERTILIZER (all liquid, colour difference is minor)
+    local LIQUID_NAMES = {
+        "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME",
+        "INSECTICIDE", "FUNGICIDE",
+        "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH"
+    }
     local liqFertIdx = fm:getFillTypeIndexByName("LIQUIDFERTILIZER")
 
+    -- Build the final remap table: customFillTypeIndex → bestVanillaFillTypeIndex
     local remap = {}
-    if fertIdx then
-        for _, name in ipairs({ "UREA", "AMS", "MAP", "DAP", "POTASH",
-                                 "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM" }) do
-            local idx = fm:getFillTypeIndexByName(name)
-            if idx then remap[idx] = fertIdx end
+    local logLines = {}
+
+    for customName, priorities in pairs(PER_TYPE_PRIORITIES) do
+        local customIdx = fm:getFillTypeIndexByName(customName)
+        if customIdx then
+            local vanillaIdx = bestVanilla(priorities)
+            if vanillaIdx then
+                remap[customIdx] = vanillaIdx
+                local vanillaFT = fm:getFillTypeByIndex(vanillaIdx)
+                table.insert(logLines, string.format("  %-20s → %s", customName, vanillaFT and vanillaFT.name or "?"))
+            else
+                SoilLogger.warning("Fill type material hook: no texture array entry found for %s priorities (%s) — type will show default",
+                    customName, table.concat(priorities, ", "))
+            end
         end
     end
+
     if liqFertIdx then
-        for _, name in ipairs({ "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME",
-                                 "INSECTICIDE", "FUNGICIDE",
-                                 "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH" }) do
-            local idx = fm:getFillTypeIndexByName(name)
-            if idx then remap[idx] = liqFertIdx end
+        -- Only add to remap if liqFertIdx actually has a textureArrayIndex
+        local liqTexIdx = origGetTexIdx(fm, liqFertIdx)
+        if liqTexIdx then
+            for _, name in ipairs(LIQUID_NAMES) do
+                local idx = fm:getFillTypeIndexByName(name)
+                if idx then
+                    remap[idx] = liqFertIdx
+                end
+            end
         end
     end
 
     if not next(remap) then
-        SoilLogger.warning("Fill type material hook: no custom fill types found — skipping")
+        SoilLogger.warning("Fill type material hook: no custom fill types could be remapped — skipping")
         return false
     end
 
     local count = 0
     for _ in pairs(remap) do count = count + 1 end
 
-    local origGetTexIdx = fm.getTextureArrayIndexByFillTypeIndex
     fm.getTextureArrayIndexByFillTypeIndex = function(mgr, fillTypeIndex, ...)
         local result = origGetTexIdx(mgr, fillTypeIndex, ...)
         if result == nil and fillTypeIndex then
-            local mapped = remap[fillTypeIndex]
-            if mapped then
-                result = origGetTexIdx(mgr, mapped, ...)
+            local vanillaIdx = remap[fillTypeIndex]
+            if vanillaIdx then
+                result = origGetTexIdx(mgr, vanillaIdx, ...)
             end
         end
         return result
@@ -3005,7 +3077,8 @@ function HookManager:installFillTypeMaterialHook()
         fm.getTextureArrayIndexByFillTypeIndex = origGetTexIdx
     end)
 
-    SoilLogger.info("[OK] Fill type material hook installed - %d custom types mapped to vanilla textures", count)
+    SoilLogger.info("[OK] Fill type material hook installed - %d custom types remapped:\n%s",
+        count, table.concat(logLines, "\n"))
     return true
 end
 
