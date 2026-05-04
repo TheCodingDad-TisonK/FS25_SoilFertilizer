@@ -581,7 +581,7 @@ function SoilFertilityManager:deferredSoilSystemInit()
                 -- Show activation notification
                 if self.sfm.settings.showNotifications and g_currentMission and g_currentMission.hud then
                     g_currentMission.hud:showBlinkingWarning(
-                        "Soil & Fertilizer Mod Active | J = HUD | K = Soil Report | Type 'soilfertility' for commands",
+                        g_i18n:getText("sf_notify_mod_active_hud"),
                         8000
                     )
                 end
@@ -604,6 +604,7 @@ function SoilFertilityManager:deferredSoilSystemInit()
         -- Fallback: try immediate initialization
         SoilLogger.warning("Mission.addUpdateable not available - attempting immediate init")
         self.soilSystem:initialize()
+        self:loadSoilData()
     end
 end
 
@@ -913,8 +914,8 @@ function SoilFertilityManager:update(dt)
         local success, err = pcall(function()
             self.soilHUD:update(dt)
         end)
-        if not success and self.settings and self.settings.debugMode then
-            SoilLogger.debug("HUD update error: %s", tostring(err))
+        if not success then
+            SoilLogger.warning("HUD update error: %s", tostring(err))
         end
     end
 
@@ -989,6 +990,10 @@ end
 ---
 --- Crop-protection products (INSECTICIDE, FUNGICIDE, HERBICIDE/PESTICIDE) use
 --- the relevant pressure value instead of nutrient deficits.
+---
+--- Shape Contract: `fieldData` must be the output of `SoilFertilitySystem:getFieldInfo()`.
+--- Expected fields: `nitrogen.value`, `phosphorus.value`, `potassium.value`, `pH`, `organicMatter`,
+--- `pestPressure` (number), `diseasePressure` (number), `weedPressure` (number).
 ---
 --- The cap of 1.20x keeps the rate below BURN_RISK_THRESHOLD (1.25x) even when
 --- the field is completely depleted, protecting the player from accidental burns.
@@ -1168,6 +1173,16 @@ function SoilFertilityManager:delete()
     if self.vehicleHudDragEventId and g_inputBinding then
         g_inputBinding:removeActionEvent(self.vehicleHudDragEventId)
         self.vehicleHudDragEventId = nil
+    end
+
+    if self.settingsPanelEventId and g_inputBinding then
+        g_inputBinding:removeActionEvent(self.settingsPanelEventId)
+        self.settingsPanelEventId = nil
+    end
+
+    if self.vehicleSettingsPanelEventId and g_inputBinding then
+        g_inputBinding:removeActionEvent(self.vehicleSettingsPanelEventId)
+        self.vehicleSettingsPanelEventId = nil
     end
 
     if self.soilReportDialog then
