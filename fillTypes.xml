@@ -44,6 +44,7 @@
             <physics massPerLiter="0.77" maxPhysicalSurfaceAngle="15"/>
             <economy pricePerLiter="1.65"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
+            <textures diffuse="textures/fillPlanes/urea_diffuse.dds" normal="textures/fillPlanes/urea_normal.dds"/>
             <sprayType sprayTypeStr="SOLID"/>
             <pallet filename="objects/bigBag/urea/bigBag_urea.xml" />
         </fillType>
@@ -52,6 +53,7 @@
             <physics massPerLiter="0.87" maxPhysicalSurfaceAngle="15"/>
             <economy pricePerLiter="1.40"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
+            <textures diffuse="textures/fillPlanes/AMS_diffuse.dds" normal="textures/fillPlanes/AMS_normal.dds"/>
             <sprayType sprayTypeStr="SOLID"/>
             <pallet filename="objects/bigBag/ams/bigBag_ams.xml" />
         </fillType>
@@ -60,6 +62,7 @@
             <physics massPerLiter="0.90" maxPhysicalSurfaceAngle="15"/>
             <economy pricePerLiter="1.95"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
+            <textures diffuse="textures/fillPlanes/MAP_diffuse.dds" normal="textures/fillPlanes/MAP_normal.dds"/>
             <sprayType sprayTypeStr="SOLID"/>
             <pallet filename="objects/bigBag/map/bigBag_map.xml" />
         </fillType>
@@ -68,6 +71,7 @@
             <physics massPerLiter="0.90" maxPhysicalSurfaceAngle="15"/>
             <economy pricePerLiter="1.75"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
+            <textures diffuse="textures/fillPlanes/DAP_diffuse.dds" normal="textures/fillPlanes/DAP_normal.dds"/>
             <sprayType sprayTypeStr="SOLID"/>
             <pallet filename="objects/bigBag/dap/bigBag_dap.xml" />
         </fillType>
@@ -76,6 +80,7 @@
             <physics massPerLiter="0.95" maxPhysicalSurfaceAngle="15"/>
             <economy pricePerLiter="1.80"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
+            <textures diffuse="textures/fillPlanes/potash_diffuse.dds" normal="textures/fillPlanes/potash_normal.dds"/>
             <sprayType sprayTypeStr="SOLID"/>
             <pallet filename="objects/bigBag/potash/bigBag_potash.xml" />
         </fillType>
@@ -148,6 +153,7 @@
             <physics massPerLiter="1.10" maxPhysicalSurfaceAngle="20"/>
             <economy pricePerLiter="0.55"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
+            <textures diffuse="textures/fillPlanes/gypsum_diffuse.dds" normal="textures/fillPlanes/gypsum_normal.dds"/>
             <sprayType sprayTypeStr="SOLID"/>
             <pallet filename="objects/bigBag/gypsum/bigBag_gypsum.xml" />
         </fillType>
@@ -156,6 +162,7 @@
             <physics massPerLiter="0.60" maxPhysicalSurfaceAngle="20"/>
             <economy pricePerLiter="0.35"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
+            <textures diffuse="textures/fillPlanes/compost_diffuse.dds" normal="textures/fillPlanes/compost_normal.dds"/>
             <sprayType sprayTypeStr="SOLID"/>
             <pallet filename="objects/bigBag/compost/bigBag_compost.xml" />
         </fillType>
@@ -164,6 +171,7 @@
             <physics massPerLiter="0.90" maxPhysicalSurfaceAngle="20"/>
             <economy pricePerLiter="0.50"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
+            <textures diffuse="textures/fillPlanes/biosolids_diffuse.dds" normal="textures/fillPlanes/biosolids_normal.dds"/>
             <sprayType sprayTypeStr="SOLID"/>
             <pallet filename="objects/bigBag/biosolids/bigBag_biosolids.xml" />
         </fillType>
@@ -173,6 +181,7 @@
             <physics massPerLiter="0.65" maxPhysicalSurfaceAngle="20"/>
             <economy pricePerLiter="0.45"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
+            <textures diffuse="textures/fillPlanes/chickenlitter_diffuse.dds" normal="textures/fillPlanes/chickenlitter_normal.dds"/>
             <sprayType sprayTypeStr="SOLID"/>
             <pallet filename="objects/bigBag/chicken_manure/bigBag_chicken_manure.xml" />
         </fillType>
@@ -181,6 +190,7 @@
             <physics massPerLiter="0.75" maxPhysicalSurfaceAngle="20"/>
             <economy pricePerLiter="1.10"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
+            <textures diffuse="textures/fillPlanes/PelletizedManure_diffuse.dds" normal="textures/fillPlanes/PelletizedManure_normal.dds"/>
             <sprayType sprayTypeStr="SOLID"/>
             <pallet filename="objects/bigBag/pelletized_manure/bigBag_pelletized_manure.xml" />
         </fillType>
