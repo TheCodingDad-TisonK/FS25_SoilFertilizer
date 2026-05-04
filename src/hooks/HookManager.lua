@@ -3134,6 +3134,12 @@ function HookManager:installSprayerVisualEffectHook()
     )
     self:register(Sprayer, "onUpdateTick", original, "Sprayer.onUpdateTick (sprayer visual effects)")
 
+    local count = 0
+    for _ in pairs(remap) do count = count + 1 end
+    SoilLogger.info("[OK] Sprayer visual effect hook installed on onUpdateTick — %d custom fill types", count)
+    return true
+end
+
 -- =========================================================
 -- HOOK 12: Client Joined (FSBaseMission.onConnectionFinished)
 -- =========================================================
