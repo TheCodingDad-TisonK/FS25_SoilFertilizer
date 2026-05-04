@@ -654,6 +654,14 @@
     <e k="sf_admin_save_desc" v="Force-save all soil data now" />
     <e k="sf_admin_reset_label" v="Reset All Settings" />
     <e k="sf_admin_reset_desc" v="Restore every setting to its default" />
+    
+    <e k="sf_panel_hdr_field_tools" v="Field Tools" />
+    <e k="sf_nav_field_tools_label" v="Field Tools" />
+    <e k="sf_nav_field_tools_desc" v="Open specific tools to inspect and modify field states" />
+    
+    <e k="sf_panel_hdr_vehicle_tools" v="Vehicle Tools" />
+    <e k="sf_nav_vehicle_tools_label" v="Vehicle Tools" />
+    <e k="sf_nav_vehicle_tools_desc" v="Open specific tools for connected vehicles and implements" />
     <e k="sf_admin_drain_label" v="Drain Vehicle Tanks" />
     <e k="sf_admin_drain_desc" v="Empty sprayer + implements (50% refund)" />
     <e k="sf_admin_field_info_label" v="Current Field Info" />
@@ -662,6 +670,10 @@
     <e k="sf_admin_field_forecast_desc" v="Yield forecast for field at position" />
     <e k="sf_admin_list_fields_label" v="List All Fields" />
     <e k="sf_admin_list_fields_desc" v="Dump all field soil data to game log" />
+    <e k="sf_admin_field_set_state_label" v="Set Field State" />
+    <e k="sf_admin_field_set_state_desc" v="Manually tweak N, P, K, pH, and OM values for current field" />
+    <e k="sf_admin_field_recover_label" v="Recover Field" />
+    <e k="sf_admin_field_recover_desc" v="Reset the current field to default safe values (fix mistakes)" />
     <e k="sf_infobox_title" v="Soil Nutrients" />
     <e k="sf_infobox_grade" v="Soil Grade" />
     <e k="sf_infobox_needs" v="Needs" />
