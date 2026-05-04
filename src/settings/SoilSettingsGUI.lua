@@ -68,6 +68,8 @@ function SoilSettingsGUI:consoleCommandHelp()
     print("SoilSaveData - Force save soil data")
     print("SoilDebug - Toggle debug mode")
     print("SoilDrainVehicle - Drain custom fertilizer from vehicle/implements (50% refund)")
+    print("soilSetState <fieldId> <N> <P> <K> <pH> <OM> - Set state for a field")
+    print("soilRecoverField [fieldId] - Recover field to default values")
     print("==============================================")
     return "Type 'soilfertility' for more info"
 end
@@ -489,4 +491,125 @@ function SoilSettingsGUI:consoleCommandDrainVehicle()
     )
     print(summary)
     return summary
+end
+
+function SoilSettingsGUI:consoleCommandSetState(fieldId, n, p, k, ph, om)
+    if not g_SoilFertilityManager or not g_SoilFertilityManager.soilSystem then
+        return "Error: Soil Mod not initialized"
+    end
+    
+    local sys = g_SoilFertilityManager.soilSystem
+    local fid = tonumber(fieldId)
+    
+    if not fid then
+        -- If no args, tell them to use the UI
+        if g_SoilFertilityManager.settingsUI and g_SoilFertilityManager.settingsUI.panel then
+            local panel = g_SoilFertilityManager.settingsUI.panel
+            if not panel.isVisible then
+                panel:open()
+            end
+            panel.page = "admin"
+            return "Opened settings panel. Navigate to Admin -> Set Field State."
+        end
+        return "Usage: soilSetState <fieldId> <N> <P> <K> <pH> <OM>"
+    end
+    
+    local N = tonumber(n)
+    local P = tonumber(p)
+    local K = tonumber(k)
+    local pH = tonumber(ph)
+    local OM = tonumber(om)
+    
+    if not N or not P or not K or not pH or not OM then
+        return "Usage: soilSetState <fieldId> <N> <P> <K> <pH> <OM>"
+    end
+    
+    local field = sys.fieldData[fid]
+    if not field then
+        sys:initializeField(fid, "wheat")
+        field = sys.fieldData[fid]
+        if not field then return "Error: Could not initialize field " .. tostring(fid) end
+    end
+    
+    field.nitrogen = N
+    field.phosphorus = P
+    field.potassium = K
+    field.pH = pH
+    field.organicMatter = OM
+    
+    local isServer = g_currentMission and g_currentMission:getIsServer()
+    if isServer then
+        g_SoilFertilityManager:saveSoilData()
+    end
+    
+    local msg = string.format("Field %d state set to N:%.0f, P:%.0f, K:%.0f, pH:%.1f, OM:%.1f", fid, N, P, K, pH, OM)
+    if not isServer then msg = msg .. " (Client only! Run on server to persist)" end
+    return msg
+end
+
+function SoilSettingsGUI:consoleCommandRecoverField(fieldId)
+    if not g_SoilFertilityManager or not g_SoilFertilityManager.soilSystem then
+        return "Error: Soil Mod not initialized"
+    end
+    
+    local sys = g_SoilFertilityManager.soilSystem
+    local fid = tonumber(fieldId)
+    
+    if not fid then
+        -- try to get player field
+        local function getPlayerFieldId()
+            local x, z = nil, nil
+            if g_localPlayer and g_localPlayer.rootNode then
+                local ok, wx, _, wz = pcall(getWorldTranslation, g_localPlayer.rootNode)
+                if ok and wx then x, z = wx, wz end
+            end
+            if x == nil and g_currentMission and g_currentMission.controlledVehicle then
+                local v = g_currentMission.controlledVehicle
+                if v and v.rootNode then
+                    local ok, wx, _, wz = pcall(getWorldTranslation, v.rootNode)
+                    if ok and wx then x, z = wx, wz end
+                end
+            end
+            if x == nil then return nil end
+            if g_fieldManager then
+                local ok, f = pcall(function() return g_fieldManager:getFieldAtWorldPosition(x, z) end)
+                if ok and f and f.farmland and f.farmland.id then return f.farmland.id end
+            end
+            if g_farmlandManager then
+                local ok, farmland = pcall(function() return g_farmlandManager:getFarmlandAtWorldPosition(x, z) end)
+                if ok and farmland and farmland.id and farmland.id > 0 then return farmland.id end
+            end
+            return nil
+        end
+        fid = getPlayerFieldId()
+        if not fid then
+            return "Usage: soilRecoverField <fieldId> (or stand on a field)"
+        end
+    end
+    
+    local defaults = SoilConstants and SoilConstants.FIELD_DEFAULTS or {
+        nitrogen=50, phosphorus=50, potassium=50, pH=6.5, organicMatter=5.0
+    }
+    
+    local field = sys.fieldData[fid]
+    if not field then
+        sys:initializeField(fid, "wheat")
+        field = sys.fieldData[fid]
+        if not field then return "Error: Could not initialize field " .. tostring(fid) end
+    end
+    
+    field.nitrogen = defaults.nitrogen
+    field.phosphorus = defaults.phosphorus
+    field.potassium = defaults.potassium
+    field.pH = defaults.pH
+    field.organicMatter = defaults.organicMatter
+    
+    local isServer = g_currentMission and g_currentMission:getIsServer()
+    if isServer then
+        g_SoilFertilityManager:saveSoilData()
+    end
+    
+    local msg = string.format("Field %d recovered to defaults.", fid)
+    if not isServer then msg = msg .. " (Client only! Run on server to persist)" end
+    return msg
 end

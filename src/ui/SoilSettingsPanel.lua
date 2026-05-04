@@ -209,6 +209,9 @@ local SETTING_DESCS = {
 local PAGE_LANDING  = "landing"
 local PAGE_CATEGORY = "category"
 local PAGE_ADMIN    = "admin"
+local PAGE_SET_STATE = "set_state"
+local PAGE_FIELD_TOOLS = "field_tools"
+local PAGE_VEHICLE_TOOLS = "vehicle_tools"
 
 -- ── Admin page layout ─────────────────────────────────────
 local ADMIN_ROW_H = 0.033   -- setting rows (toggle/multi)
@@ -243,10 +246,30 @@ local ADMIN_SECTIONS = {
         items     = {
             { stype = "action", id = "admin_save" },
             { stype = "danger", id = "admin_reset" },
-            { stype = "action", id = "admin_drain" },
+            { stype = "action", id = "nav_field_tools" },
+            { stype = "action", id = "nav_vehicle_tools" },
+        },
+    },
+}
+
+local FIELD_TOOLS_SECTIONS = {
+    {
+        headerKey = "sf_panel_hdr_field_tools",
+        items     = {
             { stype = "action", id = "admin_field_info" },
             { stype = "action", id = "admin_field_forecast" },
             { stype = "action", id = "admin_list_fields" },
+            { stype = "action", id = "admin_field_set_state" },
+            { stype = "danger", id = "admin_field_recover" },
+        },
+    },
+}
+
+local VEHICLE_TOOLS_SECTIONS = {
+    {
+        headerKey = "sf_panel_hdr_vehicle_tools",
+        items     = {
+            { stype = "action", id = "admin_drain" },
         },
     },
 }
@@ -266,6 +289,9 @@ function SoilSettingsPanel.new(settings)
     self.popupMsg     = nil   -- full output text shown in the popup
     self.popupLines   = nil   -- split lines of popupMsg
     self.popupScroll  = 0     -- first visible line index (0-based)
+    self.pageScrollIdx = 0    -- index for scrolling settings lists
+    self.setStateFieldId = nil
+    self.setStateData = {N=50, P=50, K=50, pH=6.5, OM=5.0}
     self.mouseX       = 0
     self.mouseY       = 0
     self.initialized  = false
@@ -300,6 +326,7 @@ function SoilSettingsPanel:open()
     self.popupMsg     = nil
     self.popupLines   = nil
     self.popupScroll  = 0
+    self.pageScrollIdx = 0
     -- Save camera rotation so update() can freeze it every frame (SoilHUD edit-mode pattern)
     self.savedCamRotX, self.savedCamRotY, self.savedCamRotZ = nil, nil, nil
     if getCamera and getRotation then
@@ -437,22 +464,22 @@ function SoilSettingsPanel:draw()
     self:drawRect(PX,          PY,          bw, PH, C.border)
     self:drawRect(PX + PW - bw, PY,         bw, PH, C.border)
 
-    -- Title bar
-    self:drawTitleBar()
-
-    -- Info bar (bottom)
-    self:drawInfoBar()
-
     -- Page content (skipped when popup is open — popup draws its own dim overlay)
     if not self.popupVisible then
         if self.page == PAGE_LANDING then
             self:drawLandingPage()
         elseif self.page == PAGE_CATEGORY then
             self:drawCategoryPage()
-        elseif self.page == PAGE_ADMIN then
+        elseif self.page == PAGE_ADMIN or self.page == PAGE_FIELD_TOOLS or self.page == PAGE_VEHICLE_TOOLS then
             self:drawAdminPage()
+        elseif self.page == PAGE_SET_STATE then
+            if self.drawSetStatePage then self:drawSetStatePage() end
         end
     end
+
+    -- Draw header/footer ON TOP of page content to cover scrolled items
+    self:drawTitleBar()
+    self:drawInfoBar()
 
     -- Popup dialog always drawn on top.
     -- Reset click zones first so page buttons can't be clicked through the popup.
@@ -518,7 +545,8 @@ function SoilSettingsPanel:drawInfoBar()
     self:drawText(PX + PAD, textY, TS_SMALL, adminText, adminColor, RenderText.ALIGN_LEFT, true)
     self:drawText(PX + PAD + 0.10, textY, TS_SMALL, "·  " .. modeText, C.info_mode, RenderText.ALIGN_LEFT, false)
 
-    if self.page == PAGE_CATEGORY or self.page == PAGE_ADMIN then
+    if self.page == PAGE_CATEGORY or self.page == PAGE_ADMIN or self.page == PAGE_SET_STATE
+       or self.page == PAGE_FIELD_TOOLS or self.page == PAGE_VEHICLE_TOOLS then
         -- Back button
         local bbW = 0.085
         local bbH = IB_H * 0.62
@@ -675,6 +703,94 @@ function SoilSettingsPanel:drawCategoryPage()
     self:drawRect(CX, CY_TOP, CW, 0.001, C.divider)
 end
 
+-- ── Set State page ────────────────────────────────────────
+function SoilSettingsPanel:drawSetStatePage()
+    local fid = self.setStateFieldId
+    local sd  = self.setStateData
+
+    -- Title
+    local titleY = CY_TOP - 0.040
+    self:drawText(CX + CW * 0.5, titleY, TS_BODY,
+        string.format("SET FIELD STATE  —  Field #%s", tostring(fid or "?")),
+        C.white, RenderText.ALIGN_CENTER, true)
+    self:drawRect(CX, titleY - 0.006, CW, 0.001, C.divider)
+
+    -- Each nutrient row
+    local params = {
+        { k = "N",  label = "Nitrogen (N)",       min = 0,   max = 100, step = 1,   fmt = "%.0f" },
+        { k = "P",  label = "Phosphorus (P)",     min = 0,   max = 100, step = 1,   fmt = "%.0f" },
+        { k = "K",  label = "Potassium (K)",      min = 0,   max = 100, step = 1,   fmt = "%.0f" },
+        { k = "pH", label = "pH",                 min = 4.0, max = 9.0, step = 0.1, fmt = "%.1f" },
+        { k = "OM", label = "Organic Matter (%)", min = 0.5, max = 15,  step = 0.5, fmt = "%.1f" },
+    }
+
+    local rowH   = 0.040
+    local ctrlW  = 0.030
+    local valW   = 0.065
+    local curY   = titleY - 0.016
+
+    for _, p in ipairs(params) do
+        curY = curY - rowH
+        if curY < CY_BOT then break end
+
+        local val = sd[p.k] or p.min
+
+        -- Row bg
+        self:drawRect(CX, curY, CW, rowH - 0.003, C.row_alt)
+        self:drawRect(CX, curY, 0.003, rowH - 0.003, C.green_dim)
+
+        -- Label
+        self:drawText(CX + 0.012, curY + (rowH - 0.003) * 0.52, TS_BODY,
+            p.label, C.white, RenderText.ALIGN_LEFT, false)
+
+        -- [ - ] value [ + ] controls on the right
+        local rightEdge = CX + CW - 0.012
+        local plusX  = rightEdge - ctrlW
+        local labelX = plusX - valW
+        local minusX = labelX - ctrlW
+
+        -- [–] button
+        local mHov = self:hitTest(minusX, curY + 0.005, ctrlW, rowH - 0.012, self.mouseX, self.mouseY)
+        self:drawRect(minusX, curY + 0.005, ctrlW, rowH - 0.012,
+            mHov and C.back_hover or C.off_bg)
+        self:drawText(minusX + ctrlW * 0.5, curY + (rowH - 0.012) * 0.5 - 0.006, TS_BODY,
+            "-", C.white, RenderText.ALIGN_CENTER, true)
+
+        -- Value label
+        self:drawRect(labelX, curY + 0.005, valW, rowH - 0.012, {0.10, 0.11, 0.15, 0.90})
+        self:drawText(labelX + valW * 0.5, curY + (rowH - 0.012) * 0.5 - 0.006, TS_BODY,
+            string.format(p.fmt, val), C.green, RenderText.ALIGN_CENTER, true)
+
+        -- [+] button
+        local pHov = self:hitTest(plusX, curY + 0.005, ctrlW, rowH - 0.012, self.mouseX, self.mouseY)
+        self:drawRect(plusX, curY + 0.005, ctrlW, rowH - 0.012,
+            pHov and C.back_hover or C.off_bg)
+        self:drawText(plusX + ctrlW * 0.5, curY + (rowH - 0.012) * 0.5 - 0.006, TS_BODY,
+            "+", C.white, RenderText.ALIGN_CENTER, true)
+
+        self:registerClick("set_state_-" .. p.k, minusX, curY + 0.005, ctrlW, rowH - 0.012,
+            { k = p.k, step = -p.step, min = p.min, max = p.max })
+        self:registerClick("set_state_+" .. p.k, plusX, curY + 0.005, ctrlW, rowH - 0.012,
+            { k = p.k, step = p.step, min = p.min, max = p.max })
+    end
+
+    -- Save button
+    local saveBtnW = 0.120
+    local saveBtnH = 0.032
+    local saveBtnX = CX + (CW - saveBtnW) * 0.5
+    local saveBtnY = CY_BOT + 0.014
+    local saveHov  = self:hitTest(saveBtnX, saveBtnY, saveBtnW, saveBtnH, self.mouseX, self.mouseY)
+    self:drawRect(saveBtnX, saveBtnY, saveBtnW, saveBtnH,
+        saveHov and {0.10, 0.45, 0.18, 0.95} or {0.07, 0.25, 0.12, 0.90})
+    self:drawRect(saveBtnX, saveBtnY, 0.003, saveBtnH, C.green)
+    self:drawText(saveBtnX + saveBtnW * 0.5, saveBtnY + saveBtnH * 0.22, TS_SMALL,
+        ">  APPLY TO FIELD",
+        saveHov and C.white or C.green, RenderText.ALIGN_CENTER, true)
+    self:registerClick("set_state_save", saveBtnX, saveBtnY, saveBtnW, saveBtnH)
+
+    self:drawRect(CX, CY_TOP, CW, 0.001, C.divider)
+end
+
 -- ── Admin page ────────────────────────────────────────────
 local function getPlayerFieldId()
     local x, z = nil, nil
@@ -698,8 +814,20 @@ local function getPlayerFieldId()
         local ok, field = pcall(function()
             return g_fieldManager:getFieldAtWorldPosition(x, z)
         end)
-        if ok and field and field.farmland then return field.farmland.id end
+        if ok and field and field.farmland and field.farmland.id then
+            return field.farmland.id
+        end
     end
+
+    if g_farmlandManager then
+        local ok, farmland = pcall(function()
+            return g_farmlandManager:getFarmlandAtWorldPosition(x, z)
+        end)
+        if ok and farmland and farmland.id and farmland.id > 0 then
+            return farmland.id
+        end
+    end
+
     return nil
 end
 
@@ -725,76 +853,91 @@ end
 function SoilSettingsPanel:drawAdminPage()
     local gui = g_SoilFertilityManager and g_SoilFertilityManager.settingsGUI
     local isAdmin = self:isAdmin()
-    local curY = CY_TOP
+    local curY = CY_TOP + (self.pageScrollIdx * ADMIN_ROW_H)
     local rowIdx = 0
 
-    for _, sec in ipairs(ADMIN_SECTIONS) do
+    local sections = ADMIN_SECTIONS
+    if self.page == PAGE_FIELD_TOOLS then
+        sections = FIELD_TOOLS_SECTIONS
+    elseif self.page == PAGE_VEHICLE_TOOLS then
+        sections = VEHICLE_TOOLS_SECTIONS
+    end
+
+    for _, sec in ipairs(sections) do
         -- Section header (red accent)
-        curY = curY - SEC_H
-        if curY < CY_BOT then break end
-        self:drawRect(CX, curY, CW, SEC_H, C.title_bg, 0.60)
-        self:drawRect(CX, curY, 0.003, SEC_H, ADMIN_ACCENT)
-        self:drawText(CX + 0.012, curY + SEC_H * 0.25, TS_SMALL,
-            string.upper(tr(sec.headerKey) or ""), {ADMIN_ACCENT[1], ADMIN_ACCENT[2], ADMIN_ACCENT[3], 1.0},
-            RenderText.ALIGN_LEFT, true)
+        local secY = curY - SEC_H
+        curY = secY
+        if secY < CY_BOT then break end
+
+        if secY <= CY_TOP then
+            self:drawRect(CX, secY, CW, SEC_H, C.title_bg, 0.60)
+            self:drawRect(CX, secY, 0.003, SEC_H, ADMIN_ACCENT)
+            self:drawText(CX + 0.012, secY + SEC_H * 0.25, TS_SMALL,
+                string.upper(tr(sec.headerKey) or ""), {ADMIN_ACCENT[1], ADMIN_ACCENT[2], ADMIN_ACCENT[3], 1.0},
+                RenderText.ALIGN_LEFT, true)
+        end
 
         for _, item in ipairs(sec.items) do
             local isAction = (item.stype == "action" or item.stype == "danger")
             local rh = isAction and ADMIN_ACT_H or ADMIN_ROW_H
-            curY = curY - rh
-            if curY < CY_BOT then break end
+            
+            local itemY = curY - rh
+            curY = itemY
+            if itemY < CY_BOT then break end
 
             rowIdx = rowIdx + 1
-            if rowIdx % 2 == 0 then self:drawRect(CX, curY, CW, rh, C.row_alt) end
+            if itemY <= CY_TOP then
+                if rowIdx % 2 == 0 then self:drawRect(CX, itemY, CW, rh, C.row_alt) end
 
-            if item.stype == "setting" then
-                -- Reuse existing setting row drawing
-                local def = SettingsSchema.byId[item.id]
-                local locked = not def.localOnly and not isAdmin
-                local lc = locked and C.lock_text or C.white
-                local dc = locked and {C.lock_text[1]*0.7, C.lock_text[2]*0.7, C.lock_text[3]*0.7, 1} or C.dim
-                if locked then self:drawRect(CX, curY, 0.003, rh, {0.88, 0.60, 0.18, 0.45}) end
-                local iLabel = tr(def.uiId .. "_short") or item.id
-                local iDescKey = SETTING_DESCS[item.id]
-                local iDesc = (iDescKey and tr(iDescKey)) or ""
-                self:drawText(CX + (locked and 0.010 or 0.008), curY + rh * 0.55, TS_BODY, iLabel, lc, RenderText.ALIGN_LEFT, not locked)
-                self:drawText(CX + (locked and 0.010 or 0.008), curY + rh * 0.15, TS_TINY, iDesc, dc, RenderText.ALIGN_LEFT, false)
-                local ctrlX = CX + CW - 0.012
-                local ctrlY = curY + (rh - TOGGLE_H) * 0.5
-                if def.type == "boolean" then
-                    self:drawToggleControl(ctrlX, ctrlY, item.id, locked)
-                elseif def.type == "number" then
-                    self:drawMultiControl(ctrlX, ctrlY, item.id, locked)
+                if item.stype == "setting" then
+                    -- Reuse existing setting row drawing
+                    local def = SettingsSchema.byId[item.id]
+                    local locked = not def.localOnly and not isAdmin
+                    local lc = locked and C.lock_text or C.white
+                    local dc = locked and {C.lock_text[1]*0.7, C.lock_text[2]*0.7, C.lock_text[3]*0.7, 1} or C.dim
+                    if locked then self:drawRect(CX, itemY, 0.003, rh, {0.88, 0.60, 0.18, 0.45}) end
+                    local iLabel = tr(def.uiId .. "_short") or item.id
+                    local iDescKey = SETTING_DESCS[item.id]
+                    local iDesc = (iDescKey and tr(iDescKey)) or ""
+                    self:drawText(CX + (locked and 0.010 or 0.008), itemY + rh * 0.55, TS_BODY, iLabel, lc, RenderText.ALIGN_LEFT, not locked)
+                    self:drawText(CX + (locked and 0.010 or 0.008), itemY + rh * 0.15, TS_TINY, iDesc, dc, RenderText.ALIGN_LEFT, false)
+                    local ctrlX = CX + CW - 0.012
+                    local ctrlY = itemY + (rh - TOGGLE_H) * 0.5
+                    if def.type == "boolean" then
+                        self:drawToggleControl(ctrlX, ctrlY, item.id, locked)
+                    elseif def.type == "number" then
+                        self:drawMultiControl(ctrlX, ctrlY, item.id, locked)
+                    end
+                else
+                    -- Action / danger button row
+                    local isDanger = (item.stype == "danger")
+                    local btnW = 0.130
+                    local btnH = rh * 0.72
+                    local btnX = CX + CW - btnW - 0.012
+                    local btnY = itemY + (rh - btnH) * 0.5
+                    local hov  = self:hitTest(btnX, btnY, btnW, btnH, self.mouseX, self.mouseY)
+
+                    local aLabel = tr("sf_" .. item.id .. "_label") or item.id
+                    local aDesc  = tr("sf_" .. item.id .. "_desc") or ""
+                    self:drawText(CX + 0.008, itemY + rh * 0.55, TS_BODY, aLabel, C.white, RenderText.ALIGN_LEFT, true)
+                    self:drawText(CX + 0.008, itemY + rh * 0.15, TS_TINY, aDesc, C.dim,   RenderText.ALIGN_LEFT, false)
+
+                    local bgCol = isDanger
+                        and (hov and {0.65, 0.10, 0.10, 0.95} or {0.30, 0.06, 0.06, 0.85})
+                        or  (hov and {0.10, 0.35, 0.15, 0.95} or {0.08, 0.18, 0.10, 0.85})
+                    local acCol = isDanger and ADMIN_ACCENT or C.green
+                    self:drawRect(btnX, btnY, btnW, btnH, bgCol)
+                    self:drawRect(btnX, btnY, 0.002, btnH, acCol)
+                    self:drawText(btnX + btnW * 0.5, btnY + btnH * 0.20, TS_TINY,
+                        isDanger and "!! " .. aLabel or ">  " .. aLabel,
+                        hov and {1,1,1,1} or {0.75,0.75,0.75,1},
+                        RenderText.ALIGN_CENTER, isDanger)
+                    self:registerClick("admin_action_" .. item.id, btnX, btnY, btnW, btnH,
+                        { actionId = item.id, gui = gui })
                 end
-            else
-                -- Action / danger button row
-                local isDanger = (item.stype == "danger")
-                local btnW = 0.130
-                local btnH = rh * 0.72
-                local btnX = CX + CW - btnW - 0.012
-                local btnY = curY + (rh - btnH) * 0.5
-                local hov  = self:hitTest(btnX, btnY, btnW, btnH, self.mouseX, self.mouseY)
 
-                local aLabel = tr("sf_" .. item.id .. "_label") or item.id
-                local aDesc  = tr("sf_" .. item.id .. "_desc") or ""
-                self:drawText(CX + 0.008, curY + rh * 0.55, TS_BODY, aLabel, C.white, RenderText.ALIGN_LEFT, true)
-                self:drawText(CX + 0.008, curY + rh * 0.15, TS_TINY, aDesc, C.dim,   RenderText.ALIGN_LEFT, false)
-
-                local bgCol = isDanger
-                    and (hov and {0.65, 0.10, 0.10, 0.95} or {0.30, 0.06, 0.06, 0.85})
-                    or  (hov and {0.10, 0.35, 0.15, 0.95} or {0.08, 0.18, 0.10, 0.85})
-                local acCol = isDanger and ADMIN_ACCENT or C.green
-                self:drawRect(btnX, btnY, btnW, btnH, bgCol)
-                self:drawRect(btnX, btnY, 0.002, btnH, acCol)
-                self:drawText(btnX + btnW * 0.5, btnY + btnH * 0.20, TS_TINY,
-                    isDanger and "!! " .. aLabel or ">  " .. aLabel,
-                    hov and {1,1,1,1} or {0.75,0.75,0.75,1},
-                    RenderText.ALIGN_CENTER, isDanger)
-                self:registerClick("admin_action_" .. item.id, btnX, btnY, btnW, btnH,
-                    { actionId = item.id, gui = gui })
+                self:drawRect(CX, itemY, CW, 0.0005, C.divider, 0.35)
             end
-
-            self:drawRect(CX, curY, CW, 0.0005, C.divider, 0.35)
         end
 
         curY = curY - 0.005
@@ -803,9 +946,11 @@ function SoilSettingsPanel:drawAdminPage()
     -- Last result message at bottom
     if self.adminMsg then
         local msgY = CY_BOT + 0.004
-        self:drawText(CX + 0.006, msgY, TS_TINY,
-            "Last: " .. self.adminMsg:sub(1, 90),
-            {0.55, 0.80, 0.55, 0.85}, RenderText.ALIGN_LEFT, false)
+        if msgY <= CY_TOP then
+            self:drawText(CX + 0.006, msgY, TS_TINY,
+                "Last: " .. self.adminMsg:sub(1, 90),
+                {0.55, 0.80, 0.55, 0.85}, RenderText.ALIGN_LEFT, false)
+        end
     end
 
     -- Thin top divider
@@ -1093,8 +1238,13 @@ function SoilSettingsPanel:handleClick(id, data)
         self:close()
 
     elseif id == "back" then
-        self.page = PAGE_LANDING
-        self.activeCatIdx = nil
+        if self.page == PAGE_FIELD_TOOLS or self.page == PAGE_VEHICLE_TOOLS or self.page == PAGE_SET_STATE then
+            self.page = PAGE_ADMIN
+        else
+            self.page = PAGE_LANDING
+            self.activeCatIdx = nil
+        end
+        self.pageScrollIdx = 0
 
     elseif id == "reset_cat" then
         self:resetCurrentCategory()
@@ -1104,6 +1254,7 @@ function SoilSettingsPanel:handleClick(id, data)
         if idx and CATEGORIES[idx] then
             self.activeCatIdx = idx
             self.page = PAGE_CATEGORY
+            self.pageScrollIdx = 0
         end
 
     elseif id:sub(1, 11) == "toggle_off_" then
@@ -1152,11 +1303,43 @@ function SoilSettingsPanel:handleClick(id, data)
     elseif id == "open_admin" then
         self.page = PAGE_ADMIN
         self.adminMsg = nil
+        self.pageScrollIdx = 0
+
+    elseif id:sub(1, 10) == "set_state_" then
+        if id == "set_state_save" then
+            if g_SoilFertilityManager and g_SoilFertilityManager.settingsGUI then
+                local sd = self.setStateData
+                local msg = g_SoilFertilityManager.settingsGUI:consoleCommandSetState(
+                    tostring(self.setStateFieldId), tostring(sd.N), tostring(sd.P), tostring(sd.K), tostring(sd.pH), tostring(sd.OM)
+                )
+                self.page = PAGE_ADMIN
+                adminShowMsg(self, msg)
+            end
+        else
+            if data then
+                local nVal = (self.setStateData[data.k] or 0) + data.step
+                if nVal < data.min then nVal = data.min end
+                if nVal > data.max then nVal = data.max end
+                self.setStateData[data.k] = nVal
+            end
+        end
 
     elseif id:sub(1, 13) == "admin_action_" then
         local gui = g_SoilFertilityManager and g_SoilFertilityManager.settingsGUI
         local actionId = data and data.actionId
         local msg = "Action failed."
+        
+        -- Handle navigation actions first
+        if actionId == "nav_field_tools" then
+            self.page = PAGE_FIELD_TOOLS
+            self.pageScrollIdx = 0
+            return
+        elseif actionId == "nav_vehicle_tools" then
+            self.page = PAGE_VEHICLE_TOOLS
+            self.pageScrollIdx = 0
+            return
+        end
+
         if gui and actionId then
             if actionId == "admin_save" then
                 msg = gui:consoleCommandSaveData()
@@ -1180,6 +1363,36 @@ function SoilSettingsPanel:handleClick(id, data)
                 end
             elseif actionId == "admin_list_fields" then
                 msg = gui:consoleCommandListFields()
+            elseif actionId == "admin_field_set_state" then
+                local fid = getPlayerFieldId()
+                if fid then
+                    self.page = PAGE_SET_STATE
+                    self.setStateFieldId = fid
+                    if g_SoilFertilityManager.soilSystem then
+                        local info = g_SoilFertilityManager.soilSystem.fieldData[fid]
+                        if info then
+                            self.setStateData = {
+                                N = info.nitrogen or 50,
+                                P = info.phosphorus or 50,
+                                K = info.potassium or 50,
+                                pH = math.floor((info.pH or 6.5)*10)/10,
+                                OM = math.floor((info.organicMatter or 5.0)*10)/10
+                            }
+                        else
+                            self.setStateData = {N=50, P=50, K=50, pH=6.5, OM=5.0}
+                        end
+                    end
+                    return -- Do not show msg
+                else
+                    msg = "No field at your current position."
+                end
+            elseif actionId == "admin_field_recover" then
+                local fid = getPlayerFieldId()
+                if fid then
+                    msg = gui:consoleCommandRecoverField(tostring(fid))
+                else
+                    msg = "No field at your current position."
+                end
             end
         end
         adminShowMsg(self, msg or "Done.")
