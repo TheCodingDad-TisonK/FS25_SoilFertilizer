@@ -10,11 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.0.8.0] - 2026-04-30
 
 ### Added
-- Nutrient levels (N/P/K), weed pressure, pest pressure, and disease pressure now directly reduce combine harvest yield — closes #279. Previously all penalties were display-only; the combine hopper now receives fewer liters proportional to soil health. N/P/K deficit can reduce yield up to −50% (crop-dependent), weed −30%, pest −30%, disease −25%. All factors multiply together.
+- Nutrient levels (N/P/K), weed pressure, pest pressure, and disease pressure now directly reduce combine harvest yield — closes [#279](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/279). Previously all penalties were display-only; the combine hopper now receives fewer liters proportional to soil health. N/P/K deficit can reduce yield up to −50% (crop-dependent), weed −30%, pest −30%, disease −25%. All factors multiply together.
 - HUD yield forecast and actual combine yield now use the same formula — the `~-20%` warning shown is exactly what hits the tank.
 
 ### Fixed
-- Coverage cell count still wrong in existing saves — re-closes #277. Three-layer fix: (1) scan priority order — `farmland.areaInHa` (from map XML, always set) is now primary; `field.areaHa` defaults to `1.0` in `Field.new()` and is truthy, which blocked the fallback; (2) XML load re-query — after loading each field from save, `fieldArea` is immediately refreshed from live farmland data, correcting stale `1.0` values in old saves automatically on next load with no new game required; (3) safety net at first spray — `totalFieldCells` lazy init re-queries live area for fields created mid-session.
+- Coverage cell count still wrong in existing saves — re-closes [#277](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/277). Three-layer fix: (1) scan priority order — `farmland.areaInHa` (from map XML, always set) is now primary; `field.areaHa` defaults to `1.0` in `Field.new()` and is truthy, which blocked the fallback; (2) XML load re-query — after loading each field from save, `fieldArea` is immediately refreshed from live farmland data, correcting stale `1.0` values in old saves automatically on next load with no new game required; (3) safety net at first spray — `totalFieldCells` lazy init re-queries live area for fields created mid-session.
 
 ---
 
@@ -25,10 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added 100+ new translation keys to all 26 language files (translation_en.xml with native values; all other 25 files with `[EN]` placeholders ready for community translation)
 
 ### Fixed
-- Coverage calculation (#277): field area now correctly reads `field.areaHa` / `field.farmland.areaInHa` per FS25 LUADOC, fixing coverage completing in ~1.5 minutes instead of full-season pace
-- Sprayer rate ghost bar (#278): rate multiplier now passed through to `drawNutrientRow` so the projected ghost bar reflects the current application rate setting
-- Post-harvest HUD alarm (#279): HUD now shows a neutral "Post-harvest · Fertilize" message on the day of harvest instead of an alarming penalty % from freshly depleted soil
-- Weed pressure on grassland (#273): weed growth accumulation and yield penalty are now skipped for grass/poplar/non-row-crop fields
+- Coverage calculation ([#277](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/277)): field area now correctly reads `field.areaHa` / `field.farmland.areaInHa` per FS25 LUADOC, fixing coverage completing in ~1.5 minutes instead of full-season pace
+- Sprayer rate ghost bar ([#278](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/278)): rate multiplier now passed through to `drawNutrientRow` so the projected ghost bar reflects the current application rate setting
+- Post-harvest HUD alarm ([#279](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/279)): HUD now shows a neutral "Post-harvest · Fertilize" message on the day of harvest instead of an alarming penalty % from freshly depleted soil
+- Weed pressure on grassland ([#273](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/273)): weed growth accumulation and yield penalty are now skipped for grass/poplar/non-row-crop fields
 
 ---
 
@@ -42,8 +42,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.0.6.3]  - 2026-04-28
 
 ### Fixed
-- Settings path fix for dedicated servers: `getUserProfileAppPath()` now always receives a properly-terminated path, preventing mangled `modsSettings` directory on some server builds (#267)
-- HUD drag no longer consumes right-mouse-button globally — RMB edit mode now only activates when the cursor is over the HUD panel, restoring normal cursor play elsewhere (#258)
+- Settings path fix for dedicated servers: `getUserProfileAppPath()` now always receives a properly-terminated path, preventing mangled `modsSettings` directory on some server builds ([#267](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/267))
+- HUD drag no longer consumes right-mouse-button globally — RMB edit mode now only activates when the cursor is over the HUD panel, restoring normal cursor play elsewhere ([#258](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/258))
 
 ---
 
@@ -66,7 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.0.6.0] - 2026-04-26
 
 ### Fixed
-- RMB cursor no longer appears when Soil HUD is hidden (#242)
+- RMB cursor no longer appears when Soil HUD is hidden ([#242](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/242))
 - Prevented unintended HUD drag activation while interacting with vehicles
 
 ---
@@ -106,7 +106,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Per-cell soil compaction tracking** (#231): Compaction is now tracked individually per
+- **Per-cell soil compaction tracking** ([#231](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/231)): Compaction is now tracked individually per
   soil cell rather than per field, enabling finer-grained overlay visualization and more
   accurate subsoiler targeting.
 
@@ -130,13 +130,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **LPS calibration for custom spray types** (PR #233 by @antler22): `registerCustomSprayTypes`
+- **LPS calibration for custom spray types** (PR [#233](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/233) by @antler22): `registerCustomSprayTypes`
   was scaling custom LPS off the vanilla display rate (93.5 L/ha) instead of the actual drain
   rate (291.6 L/ha), causing a 3.12× over-drain on every custom fertilizer type. Fixed by
   deriving `customLPS = customRate / 36000` directly. All 22 custom spray types now drain at
   exactly their `BASE_RATES` values.
 
-- **Stale VEHICLE context action event IDs** (PR #233 by @antler22): SF was accumulating
+- **Stale VEHICLE context action event IDs** (PR [#233](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/233) by @antler22): SF was accumulating
   duplicate input event registrations on every vehicle mount and Courseplay seat-change,
   causing keys to fire 2–3× per press and HUD drag to toggle on then immediately back off.
   Fixed by purging all existing SF vehicle event IDs before each re-registration pass.
@@ -150,7 +150,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Soil Compaction System** (#221): Heavy vehicles (8 t or more) now compact the soil they
+- **Soil Compaction System** ([#221](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/221)): Heavy vehicles (8 t or more) now compact the soil they
   drive over. Compaction accumulates per field (0–100%) and applies a nutrient extraction
   penalty of up to 20% at maximum compaction — compacted soil can't deliver its nutrients as
   effectively. Pass with a subsoiler to reduce compaction by 15 points per pass. Compaction
@@ -158,18 +158,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   overlay layer 10, saved to `soilData.xml`, and fully synced in multiplayer. Togglable in
   settings (`compactionEnabled`).
 
-- **Per-Cell Coverage Tracking** (#223): The sprayer now tracks which individual soil cells
+- **Per-Cell Coverage Tracking** ([#223](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/223)): The sprayer now tracks which individual soil cells
   have been covered during an application pass. Coverage fraction is calculated and displayed
   in the HUD (`Coverage: X% / 70% min`). The fully-treated notification is now gated on
   reaching at least 70% field coverage — no more phantom "field treated" messages from a
   single-pass clip across a corner. Coverage data is synced in multiplayer.
 
-- **Rebindable HUD Drag** (#224): HUD drag mode (right-click to reposition the overlay) is
+- **Rebindable HUD Drag** ([#224](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/224)): HUD drag mode (right-click to reposition the overlay) is
   now a proper FS25 input action (`SF_HUD_DRAG`, default: RMB) instead of a hardcoded mouse
   check. Players can rebind it in the standard FS25 key bindings menu. The old
   `hudDragEnabled` toggle in settings has been removed — the action now covers it directly.
 
-- **See-and-Spray Integration** (#220): When Precision Farming's See-and-Spray nozzles would
+- **See-and-Spray Integration** ([#220](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/220)): When Precision Farming's See-and-Spray nozzles would
   deactivate (no native weed detected in a spot), the mod now checks our own `weedPressure`
   field value. If weed pressure is ≥ 20, the nozzle is re-activated so herbicide continues to
   flow. Bridges our field-level weed tracking into the per-nozzle See-and-Spray system.
@@ -179,19 +179,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **`src/utils/SoilUtils.lua`** (new): Shared `SoilUtils.isPlayerAdmin()` utility replaces
   three duplicated admin-check implementations across `SoilSettingsPanel`, `SoilSettingsUI`,
-  and `NetworkEvents` (#217).
+  and `NetworkEvents` ([#217](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/217)).
 
 - **`src/integrations/SeeAndSprayIntegration.lua`** (new): Optional DLC bridge sourced after
   `NetworkEvents`. Guarded at source time (`WeedSpotSpray ~= nil`) and runtime
-  (`g_precisionFarming ~= nil`) — safe no-op when PF is not loaded (#220).
+  (`g_precisionFarming ~= nil`) — safe no-op when PF is not loaded ([#220](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/220)).
 
 - **Load-order guard**: `SoilFertilityManager.new()` now asserts that `SoilFertilitySystem`,
   `HookManager`, and `Settings` are all loaded before construction, catching accidental
-  source-order regressions immediately at startup (#219).
+  source-order regressions immediately at startup ([#219](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/219)).
 
 - **`updatePosition()` call narrowed**: `SoilSettingsPanel:requestChange()` now only calls
   `soilHUD:updatePosition()` for the `hudPosition` setting, not for every local-only setting
-  change (#218).
+  change ([#218](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/218)).
 
 ---
 
@@ -199,15 +199,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **#208 — Admin settings GUI not updating on dedicated server**: When an admin changed a setting, the broadcast excluded the sender's connection. The admin's own panel was never refreshed with the new value. The sender exclusion has been removed — all clients including the admin now receive the `SoilSettingSyncEvent` broadcast.
+- **[#208](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/208) — Admin settings GUI not updating on dedicated server**: When an admin changed a setting, the broadcast excluded the sender's connection. The admin's own panel was never refreshed with the new value. The sender exclusion has been removed — all clients including the admin now receive the `SoilSettingSyncEvent` broadcast.
 
-- **#209 — Admin settings reset to defaults on dedicated server restart**: `settings:load()` was called during `SoilFertilityManager.new()`, before the savegame directory was set by the engine on dedicated servers. Settings always loaded from the wrong path and fell back to defaults. The load is now deferred to `deferredSoilSystemInit()` where `savegameDirectory` is guaranteed to be available.
+- **[#209](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/209) — Admin settings reset to defaults on dedicated server restart**: `settings:load()` was called during `SoilFertilityManager.new()`, before the savegame directory was set by the engine on dedicated servers. Settings always loaded from the wrong path and fell back to defaults. The load is now deferred to `deferredSoilSystemInit()` where `savegameDirectory` is guaranteed to be available.
 
 - **BUG-03 — `SoilFullSyncEvent` hardcoded settings list**: The MP full sync event enumerated 15 settings by name in a hardcoded block. Any new setting added to `SettingsSchema` would be silently absent from MP join syncs. Replaced with schema-driven iteration over `SettingsSchema.definitions` — new settings are now synced automatically. Wire format is unchanged for the existing 15 settings.
 
 - **BUG-05 — `VANILLA_SETTINGS` defined twice in `SoilSettingsUI`**: The list of 3 settings shown in the vanilla settings page was defined as a local variable twice — once before the callbacks (used by those functions) and once after a block of function definitions (the intended single definition, but unreachable as an upvalue). The duplicate was removed and the single declaration moved before all function definitions.
 
-- **#204 — Conflict with FS25_CropRotation**: When a crop was sown, `onSowing()` cleared `field.lastCrop = nil` to force a live `FieldState` detection in the HUD. However, `getFieldInfo()` already performs live `FieldState` detection regardless — the clearing was unnecessary. The side-effect was that `lastCrop` (previous season) and `lastCrop2` (season before) both reflected the same crop when the same crop was replanted, causing duplicate entries in the rotation history. Removed the `onSowing` clearing entirely; the sowing hook installation was also removed from `HookManager`.
+- **[#204](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/204) — Conflict with FS25_CropRotation**: When a crop was sown, `onSowing()` cleared `field.lastCrop = nil` to force a live `FieldState` detection in the HUD. However, `getFieldInfo()` already performs live `FieldState` detection regardless — the clearing was unnecessary. The side-effect was that `lastCrop` (previous season) and `lastCrop2` (season before) both reflected the same crop when the same crop was replanted, causing duplicate entries in the rotation history. Removed the `onSowing` clearing entirely; the sowing hook installation was also removed from `HookManager`.
 
 - **Zombie updaters in `hookInstaller` and batch dispatcher**: Both the deferred hook installer and the MP field batch dispatcher used `return true` / `return false` to signal completion. FS25's `addUpdateable` system ignores return values — updaters run forever unless `g_currentMission:removeUpdateable(self)` is called explicitly. Both updated to call `removeUpdateable` at the correct completion/cleanup points.
 
@@ -233,7 +233,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.9.8.0] - 2026-04-21
 
 ### Fixed
-- **Spreader pallet unload**: All fillTypes were wrapped in an unnecessary `<pallets>` container element — removed it so the game can correctly recognize the `<pallet>` reference. Spreaders can now unload custom fertilizers as bigBag pallets on site by pressing the I key. (Thanks @61nian — PR #202)
+- **Spreader pallet unload**: All fillTypes were wrapped in an unnecessary `<pallets>` container element — removed it so the game can correctly recognize the `<pallet>` reference. Spreaders can now unload custom fertilizers as bigBag pallets on site by pressing the I key. (Thanks @61nian — PR [#202](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/202))
 - **Sprayer pallet unload**: Liquid fillTypes (UAN32, UAN28, ANHYDROUS, STARTER, INSECTICIDE, FUNGICIDE, LIQUID_UREA, LIQUID_AMS, LIQUID_MAP, LIQUID_DAP, LIQUID_POTASH) now correctly unload as liquidTank pallets when pressing I key on a sprayer. Previously these were pointing to bigBag objects which have no liquid fill point.
 - **LIQUIDLIME pallet**: Added missing pallet reference for LIQUIDLIME, which was registered as a sprayer fillType but had no pallet entry at all.
 
@@ -289,7 +289,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `(pH+)` to `(pH−)` across all 26 languages.
 
 - **Tillage reduces weed, pest, and disease pressure**: Any cultivator or plow pass now reduces
-  active weed, pest, and disease pressure on the field. Closes #188.
+  active weed, pest, and disease pressure on the field. Closes [#188](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/188).
 
 ---
 
@@ -535,13 +535,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **Issue #150 — Nil crash in update loop**: `SoilNetworkEvents_SendSprayerRate` was called
+- **Issue [#150](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/150) — Nil crash in update loop**: `SoilNetworkEvents_SendSprayerRate` was called
   unconditionally at three sites in `SoilFertilityManager.lua`. If `NetworkEvents.lua` failed to
   load (missing file, load-order problem, or earlier Lua error), all three call sites would crash
   the per-frame update loop. Added nil guards (`if SoilNetworkEvents_SendSprayerRate then`) at
   all three sites.
 
-- **Issue #125 — AI helper BUY mode fertilizer never consumed**: The
+- **Issue [#125](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/125) — AI helper BUY mode fertilizer never consumed**: The
   `FillUnit.addFillUnitFillLevel` hook in `HookManager.lua` had an incorrect function signature —
   the `farmId` argument (first real param after `self`) was missing, shifting every subsequent
   argument by one position. The `fillLevelDelta >= 0` guard was evaluating `fillUnitIndex >= 0`
@@ -606,7 +606,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   from PDA screen controller, enabling the detailed per-field popup to open upon clicking rows.
 - **Liquid Big Bag icons** — Replaced missing/generic liquid big bag shop icons with the
   proper big-bag silhouette icons for AMS, Urea, MAP, DAP, and Potash.
-- **Issue #149** — Resolved bug where fertilizer would disappear on savegame reload and
+- **Issue [#149](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/149)** — Resolved bug where fertilizer would disappear on savegame reload and
   implement emptying was blocked due to missing pallet definitions in `fillTypes.xml`.
 - **Applicator detection** — Cached `isFertilizerApplicator` result on the vehicle object,
   significantly reducing CPU overhead during field application.
@@ -680,7 +680,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   back to the DEFAULT rate config regardless of the product loaded in the sprayer. Added a
   dedicated HERBICIDE entry with the correct base rate and `liquid` unit type.
 
-- **AI purchase refill hook return value (issue #125)**: The `FillUnit.addFillUnitFillLevel`
+- **AI purchase refill hook return value (issue [#125](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/125))**: The `FillUnit.addFillUnitFillLevel`
   hook was returning `true` in BUY mode to signal "handled" — but the FS25 hook convention
   requires returning the original function's return value to keep the call chain intact.
   Changed to return the original `fillDelta` from the base function, which allows other hooks
@@ -692,13 +692,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **AI purchase refill BUY mode detection (issue #125)**: The hook was checking three spec
+- **AI purchase refill BUY mode detection (issue [#125](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/125))**: The hook was checking three spec
   fields that do not exist in FS25 (`isSprayerBuyingFillType`, `isFillPurchaseActive`,
   `reloadState`), causing the check to always return false and the tank to deplete normally.
   Fixed to use the correct FS25 pattern: `vehicle:getIsAIActive()` combined with
   `g_currentMission.missionInfo.helperBuyFertilizer` (and the slurry / manure equivalents).
 
-- **Coverage buffer requirement extended to crop protection products (issue #143)**: The 90%
+- **Coverage buffer requirement extended to crop protection products (issue [#143](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/143))**: The 90%
   coverage buffer introduced in 1.6.0.0 was only applied to nutrient fertilizers. Insecticide,
   Fungicide, and Herbicide were still applying their effects instantly on any area pass. The
   buffer now covers all five product categories (N, P, K, herbicide, insecticide/fungicide).
@@ -707,7 +707,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   fired immediately on mod load, producing a confusing popup before the player had done anything.
   Removed.
 
-- **FS25_MoistureSystem added to compatibility list** (issue #141).
+- **FS25_MoistureSystem added to compatibility list** (issue [#141](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/141)).
 
 ---
 
@@ -715,7 +715,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Crop rotation tracking** (issue #132): Each field now tracks the last 3 harvested crops
+- **Crop rotation tracking** (issue [#132](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/132)): Each field now tracks the last 3 harvested crops
   (`lastCrop`, `lastCrop2`, `lastCrop3`). On harvest the history shifts automatically so the
   full 3-season sequence is always available. History is saved to `soilData.xml` and synced
   to all clients in multiplayer.
@@ -737,25 +737,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   disabled, no bonus or fatigue fires but the crop history is still recorded so turning it back
   on takes effect immediately.
 
-- **Six new purchasable fertilizer fill types** (issue #133): GYPSUM, COMPOST, BIOSOLIDS,
+- **Six new purchasable fertilizer fill types** (issue [#133](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/133)): GYPSUM, COMPOST, BIOSOLIDS,
   CHICKEN_MANURE, PELLETIZED_MANURE, and LIQUIDLIME are now formally registered in
   `fillTypes.xml`. They appear in the price table, are added to the SPREADER and SPRAYER fill
   type categories, and are routed through the nutrient hook with their pre-existing profiles.
   Note: big bag shop objects for the new organic types are planned for a future patch.
 
-- **Liquid equivalents for all custom fertilizer types** (#137): Added LIQUID_UREA, LIQUID_AMS,
+- **Liquid equivalents for all custom fertilizer types** ([#137](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/137)): Added LIQUID_UREA, LIQUID_AMS,
   LIQUID_MAP, LIQUID_DAP, and LIQUID_POTASH to support sprayer application, with big bags and
   BUY-mode support.
 
 ### Fixed
 
-- **Calibrated application rates for custom fill types** (issue #142): Custom fertilizers like
+- **Calibrated application rates for custom fill types** (issue [#142](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/142)): Custom fertilizers like
   UAN32, Anhydrous, and Urea now have their `litersPerSecond` calibrated to match their
   intended `BASE_RATES` (e.g. 60 L/ha for UAN32) instead of inheriting the vanilla 93.5 L/ha
   rate. This ensures tank consumption and nutrient application are perfectly synced with
   the HUD display and agronomic profiles.
 
-- **Required full field coverage for fertilizer effect** (issue #143): Realism improvement.
+- **Required full field coverage for fertilizer effect** (issue [#143](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/143)): Realism improvement.
   Nutrient levels and crop protection effects (Insecticide/Fungicide/Herbicide) no longer
   update instantly. Instead, applied liters are buffered per product. Effects are only
   credited to the field once ~90% of the volume required for full coverage has been
@@ -794,15 +794,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **HUD text missing in 24 languages (issue #130)**: The HUD overlay was showing raw
+- **HUD text missing in 24 languages (issue [#130](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/130))**: The HUD overlay was showing raw
   translation key names (`sf_hud_title`, `sf_hud_fallow`, `sf_hud_yield`, etc.) for
   every language except English and Ukrainian. Root cause: 13 `sf_hud_*` keys were
   added when the live HUD was implemented but never propagated to the 24 non-EN
   language files. English text added as fallback in all 24 files — proper per-language
   translations can follow in community PRs.
-  Credit: sava4903-coder for identifying this in issue #130.
+  Credit: sava4903-coder for identifying this in issue [#130](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/130).
 
-- **Mouse event double-firing in vehicles (issue #130)**: The `soilMouseHandler`
+- **Mouse event double-firing in vehicles (issue [#130](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/130))**: The `soilMouseHandler`
   registered via `addModEventListener` was not checking the `eventUsed` flag before
   processing mouse input and was not returning it afterward. In vehicles where the
   camera or another listener had already consumed an RMB event, the HUD would still
@@ -817,7 +817,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Yield Forecast (issue #81)**: Live yield penalty estimate now displayed in the HUD while
+- **Yield Forecast (issue [#81](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/81))**: Live yield penalty estimate now displayed in the HUD while
   standing in a field. Shows the projected harvest loss (e.g. `Yield ~-18%`) based on current
   N/P/K deficits, crop sensitivity tier, and the `YIELD_SENSITIVITY` constants. Suppressed for
   non-cropland states (fallow, grass).
@@ -839,7 +839,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   dispatches an unexpected workArea format. Aids verification under non-standard FS25 dispatch modes.
 
 ### Fixed
-- **Mod Compatibility (issue #128)**: Removed the aggressive safe-mode check entirely. The
+- **Mod Compatibility (issue [#128](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/128))**: Removed the aggressive safe-mode check entirely. The
   trigger was mis-firing on harmless visual mods (tire tracks, decal placeables), causing users
   to lose all soil simulation without any real conflict present. Soil simulation now always runs.
 
@@ -853,7 +853,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **Soil Report "Syncing" timeout in multiplayer (issue #120)**: Joining clients on
+- **Soil Report "Syncing" timeout in multiplayer (issue [#120](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/120))**: Joining clients on
   multiplayer servers would often hang on the "Syncing field ownership data..."
   screen, eventually timing out after 15s. This occurred because the ownership
   synchronization check was too restrictive, especially on maps where no land is
@@ -872,7 +872,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **"BUY" refill mode not working with custom fill types** (issue #125): AI workers and
+- **"BUY" refill mode not working with custom fill types** (issue [#125](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/125)): AI workers and
   Courseplay now correctly use the "Buy" helper setting with custom products. Fixed
   a bug where the tank would still deplete or the worker would stop when empty.
   The system now correctly intercepts consumption, charges the farm account, and
@@ -884,7 +884,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **Soil HUD showing wrong or stale crop name (issue #123)**: The HUD was displaying
+- **Soil HUD showing wrong or stale crop name (issue [#123](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/123))**: The HUD was displaying
   the crop from a previous harvest (e.g. "Oat" from 3-4 harvests ago) or showing
   "Fallow" even when a live crop was growing. Root cause: `SoilFertilitySystem:getFieldInfo()`
   called `fsField:getFieldState()`, which **does not exist in FS25**. `FieldState` is a
@@ -907,7 +907,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - **Herbicide / insecticide / fungicide instantly resetting pressure to 0% from any dose**
-  (issue #121): The crop protection hook fired on every game frame (~60×/sec) while the
+  (issue [#121](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/121)): The crop protection hook fired on every game frame (~60×/sec) while the
   sprayer was active. Each frame applied the full `HERBICIDE_PRESSURE_REDUCTION` (30 pts),
   `INSECTICIDE_PRESSURE_REDUCTION` (25 pts), or `FUNGICIDE_PRESSURE_REDUCTION` (20 pts),
   meaning a single pass across a field applied the reduction hundreds of times and drove
@@ -920,7 +920,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   that field. One application event per field per in-game day — consistent with the existing
   `fertNotifyShown` pattern used for NPK notifications.
 
-- **Double-application of INSECTICIDE / FUNGICIDE crop protection** (related to #121): Both
+- **Double-application of INSECTICIDE / FUNGICIDE crop protection** (related to [#121](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/121)): Both
   fill types are declared in `FERTILIZER_PROFILES` with `pestReduction` / `diseaseReduction`
   markers, causing `applyFertilizer` to route them to `onInsecticideApplied` /
   `onFungicideApplied` internally. The hook additionally called those same functions directly
@@ -943,34 +943,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   check on `sprayFillLevel > 0` and `usage > 0`: if the sprayer has product and consumed some
   this frame, the nutrient application is now always recorded regardless of vanilla terrain state.
 
-- **`getDifficultyName()` crash on MP client sync** (Bug #3): On full-sync receive, the settings
+- **`getDifficultyName()` crash on MP client sync** (Bug [#3](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/3)): On full-sync receive, the settings
   object is a plain Lua table populated field-by-field from the network stream — not a `Settings`
   class instance. Calling `:getDifficultyName()` on it threw `attempt to call a nil value`.
   Replaced with an inline `diffNames[]` table lookup. Also converted the surrounding `print()`
   to `SoilLogger.info()`.
 
-- **`g_currentMission` nil crash in daily soil update** (Bug #8): Seasonal effects block accessed
+- **`g_currentMission` nil crash in daily soil update** (Bug [#8](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/8)): Seasonal effects block accessed
   `g_currentMission.environment` without first guarding `g_currentMission` itself. Added the
   missing nil check — safe on dedicated server shutdown and level reload.
 
-- **Stale full-sync retry handler after level reload** (Bug #10): The module-level
+- **Stale full-sync retry handler after level reload** (Bug [#10](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/10)): The module-level
   `fullSyncRetryHandler` persisted across level reloads in its `success` or `failed` state.
   A reconnecting MP client would call `start()` on a completed handler, which guards on
   `state == "pending"` and is a no-op — the client never re-synced. Fixed by calling
   `reset()` before `start()` in `SoilNetworkEvents_RequestFullSync()`.
 
-- **`math.randomseed()` polluting global PRNG during bulk field scan** (Bug #13): Calling
+- **`math.randomseed()` polluting global PRNG during bulk field scan** (Bug [#13](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/13)): Calling
   `math.randomseed(fieldId * 67890)` on every lazy field creation resets the shared Lua random
   state. During the initial scan many fields are created in the same frame, each overwriting the
   previous seed before its random numbers are drawn. Replaced with a Lua 5.1-compatible
   deterministic LCG hash that produces stable, per-nutrient variation for each field without
   touching the global PRNG.
 
-- **`listAllFields()` always printing `"?"` for FieldManager field IDs** (Bug #27): The function
+- **`listAllFields()` always printing `"?"` for FieldManager field IDs** (Bug [#27](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/27)): The function
   used `field.fieldId` which is always `nil` in FS25. Fixed to use `field.farmland.id`, consistent
   with the rest of the codebase. Converted all `print()` calls in the function to `SoilLogger`.
 
-- **DIAG / debug `print()` calls spamming the log in production** (Bug #26): Several raw
+- **DIAG / debug `print()` calls spamming the log in production** (Bug [#26](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/26)): Several raw
   `print("[SoilFertilizer DIAG] ...")` calls in `SoilHUD`, `SoilReportDialog`,
   `SoilFertilityManager`, and `SoilFertilitySystem` fired unconditionally for every player in
   every session. Replaced with `SoilLogger.debug()` / `.warning()` / `.error()` so they are
@@ -1072,7 +1072,7 @@ Special thanks to **seb** from the FS25 Modding Community Discord for testing an
 
 ### Fixed
 
-#### No field data on dedicated servers with Precision Farming (Issue #40)
+#### No field data on dedicated servers with Precision Farming (Issue [#40](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/40))
 
 - **FIXED**: `checkPFCompatibility` no longer blindly enables read-only mode when Precision Farming is detected
   - Now performs a second step probing the PF API (`g_precisionFarming.fieldData` / `soilMap:getFieldData`) before committing
@@ -1131,10 +1131,10 @@ Special thanks to **seb** from the FS25 Modding Community Discord for testing an
 ## [1.0.6.5] - 2026-02-17
 
 ### Summary
-Polish pass by XelaNull (PR #33). Localization improvements, dialog stacking fixes, pagination cleanup, and mod compatibility corrections.
+Polish pass by XelaNull (PR [#33](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/33)). Localization improvements, dialog stacking fixes, pagination cleanup, and mod compatibility corrections.
 
 ### Fixed
-- Mod compatibility: settings tab integration, J-key binding race condition, slow-server field initialization (Issue #21)
+- Mod compatibility: settings tab integration, J-key binding race condition, slow-server field initialization (Issue [#21](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/21))
 - Settings corruption on dedicated servers with 100+ mods loaded
 
 ### Changed

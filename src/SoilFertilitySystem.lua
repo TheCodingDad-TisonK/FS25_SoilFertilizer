@@ -425,6 +425,9 @@ end
 --- the clearing was unnecessary and harmful to rotation history accuracy.
 ---@param fieldId number The field being sown
 function SoilFertilitySystem:onSowing(fieldId)
+    -- TODO: Implement sowing-time logic (e.g. starter fertilizer uptake, soil temperature
+    -- seeding window checks). Hook installSowingHook() must also be added to installAll()
+    -- before this function has any effect.
 end
 
 --- Hook delegate: called by HookManager when plowing occurs
@@ -1087,7 +1090,7 @@ function SoilFertilitySystem:broadcastAllFieldData()
 end
 
 --- Send all tracked field data to a single newly-joined client.
---- Wire this up from your multiplayer join / connection-accepted handler.
+--- Called from FSBaseMission.onClientConnected via HookManager.
 ---@param connection table The network connection object for the joining client
 function SoilFertilitySystem:onClientJoined(connection)
     if g_server == nil then return end
@@ -1235,7 +1238,7 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing, area)
         compactionCellDays = {},   -- {cellKey → day} per-cell once-per-day throttle (transient)
         compactionSum = 0,         -- running sum of cell values for O(1) average
         compactionTotalCells = 0,  -- total estimated field cells (set lazily from fieldArea)
-        lastAlertYear = 0,    -- In-game year when the last critical alert fired (persisted)
+        lastAlertSeason = nil, -- Season when the last critical alert fired (persisted)
     }
 
     self:log("Lazy-created field %d with area %.2f ha and natural soil variation", fieldId, self.fieldData[fieldId].fieldArea)
@@ -1524,6 +1527,8 @@ end
 -- Apply rain effects
 -- PHASE 1: Only leach owned/active fields — unowned parcels don't need
 -- per-frame nutrient calculations since no player is managing them.
+-- NOTE: This function is called every frame during rain. The per-frame leach is
+-- intentional and correctly physics-integrated via dt scaling, unlike the daily batch.
 function SoilFertilitySystem:applyRainEffects(dt, rainScale)
     if not self.settings.enabled or not self.settings.rainEffects then return end
 
@@ -1554,6 +1559,7 @@ end
 ---@param strawRatio number 0.0-1.0 fraction of straw chopped back into the field (adds organic matter)
 ---@param area number Area harvested in m² (unused; reserved for future area-normalised depletion)
 function SoilFertilitySystem:updateFieldNutrients(fieldId, fruitTypeIndex, harvestedLiters, strawRatio, area)
+    _ = area -- luacheck: ignore area
     if not self.settings.enabled or not self.settings.nutrientCycles then return end
 
     local field = self:getOrCreateField(fieldId, true)
@@ -2360,7 +2366,7 @@ function SoilFertilitySystem:saveToXMLFile(xmlFile, key)
             setXMLInt(xmlFile, fieldKey .. "#fungicideDaysLeft", field.fungicideDaysLeft or 0)
             setXMLInt(xmlFile, fieldKey .. "#dryDayCount", field.dryDayCount or 0)
             setXMLInt(xmlFile, fieldKey .. "#burnDaysLeft", field.burnDaysLeft or 0)
-            setXMLInt(xmlFile, fieldKey .. "#lastAlertYear", field.lastAlertYear or 0)
+            setXMLInt(xmlFile, fieldKey .. "#lastAlertSeason", field.lastAlertSeason or 0)
             setXMLFloat(xmlFile, fieldKey .. "#compaction", field.compaction or 0)
 
             -- Save per-cell compaction data
@@ -2437,7 +2443,7 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
             fungicideDaysLeft = getXMLInt(xmlFile, fieldKey .. "#fungicideDaysLeft") or 0,
             dryDayCount = getXMLInt(xmlFile, fieldKey .. "#dryDayCount") or 0,
             burnDaysLeft = getXMLInt(xmlFile, fieldKey .. "#burnDaysLeft") or 0,
-            lastAlertYear = getXMLInt(xmlFile, fieldKey .. "#lastAlertYear") or 0,
+            lastAlertSeason = getXMLInt(xmlFile, fieldKey .. "#lastAlertSeason") or nil,
             compaction = 0,
             compactionCells = {},
             compactionCellDays = {},
@@ -2534,7 +2540,10 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
 
     -- Re-broadcast after load so clients that were connected during a
     -- save/load cycle get up-to-date values immediately.
-    self:broadcastAllFieldData()
+    if g_server and g_currentMission and g_currentMission.missionDynamicInfo
+       and g_currentMission.missionDynamicInfo.isMultiplayer then
+        self:broadcastAllFieldData()
+    end
 end
 
 -- Debug: List all fields

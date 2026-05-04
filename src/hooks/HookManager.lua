@@ -197,6 +197,14 @@ function HookManager:installAll(soilSystem)
     local fillMatOk = self:installFillTypeMaterialHook()
     if fillMatOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
+    -- Sowing / planting events (Fix Issue #4)
+    local sowingOk = self:installSowingHook()
+    if sowingOk then successCount = successCount + 1 else failCount = failCount + 1 end
+
+    -- Client connection sync (Fix Issue #2)
+    local clientJoinOk = self:installClientJoinHook()
+    if clientJoinOk then successCount = successCount + 1 else failCount = failCount + 1 end
+
     SoilLogger.info("Hook installation complete: %d/%d successful, %d failed",
         successCount, successCount + failCount, failCount)
 
@@ -3126,8 +3134,40 @@ function HookManager:installSprayerVisualEffectHook()
     )
     self:register(Sprayer, "onUpdateTick", original, "Sprayer.onUpdateTick (sprayer visual effects)")
 
-    local count = 0
-    for _ in pairs(remap) do count = count + 1 end
-    SoilLogger.info("[OK] Sprayer visual effect hook installed on onUpdateTick — %d custom fill types", count)
+-- =========================================================
+-- HOOK 12: Client Joined (FSBaseMission.onConnectionFinished)
+-- =========================================================
+--- Hooks FSBaseMission.onConnectionFinished to send soil data to a newly joined client
+---@return boolean success
+function HookManager:installClientJoinHook()
+    if not FSBaseMission or type(FSBaseMission.onConnectionFinished) ~= "function" then
+        SoilLogger.warning("Could not install client join hook - FSBaseMission.onConnectionFinished not available")
+        return false
+    end
+
+    local original = FSBaseMission.onConnectionFinished
+    FSBaseMission.onConnectionFinished = Utils.appendedFunction(
+        original,
+        function(missionSelf, connection)
+            if not g_SoilFertilityManager or
+               not g_SoilFertilityManager.soilSystem or
+               not g_SoilFertilityManager.settings.enabled then
+                return
+            end
+
+            -- Server only - send data to the connecting client
+            if g_server ~= nil and connection then
+                local success, errorMsg = pcall(function()
+                    g_SoilFertilityManager.soilSystem:onClientJoined(connection)
+                end)
+
+                if not success then
+                    SoilLogger.error("Client join hook failed: %s", tostring(errorMsg))
+                end
+            end
+        end
+    )
+    self:register(FSBaseMission, "onConnectionFinished", original, "FSBaseMission.onConnectionFinished (Client Join)")
+    SoilLogger.info("[OK] Client join hook installed successfully")
     return true
 end

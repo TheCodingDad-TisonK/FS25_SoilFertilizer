@@ -16,3 +16,5 @@ desktop.ini
 # Build artifacts
 *.zip.old
 *_temp/
+
+translations/translations/

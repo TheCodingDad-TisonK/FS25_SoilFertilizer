@@ -1247,8 +1247,16 @@ function SoilHUD:getSprayerFillType(sprayer)
 
     -- Fall back to fill unit query (works when parked)
     if not fillTypeIndex then
-        local ok, ft = pcall(function() return sprayer:getFillUnitFillType(1) end)
-        if ok and ft and ft > 0 then fillTypeIndex = ft end
+        local ok, units = pcall(function() return sprayer:getFillUnits() end)
+        if ok and units then
+            for i = 1, #units do
+                local ft = sprayer:getFillUnitFillType(i)
+                if ft and ft > 0 and ft ~= FillType.UNKNOWN then
+                    fillTypeIndex = ft
+                    break
+                end
+            end
+        end
     end
 
     if not fillTypeIndex then return nil end

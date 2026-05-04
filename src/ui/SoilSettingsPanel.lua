@@ -281,7 +281,7 @@ function SoilSettingsPanel.new(settings)
     self.fillOverlay  = nil
     self.isVisible    = false
     local mod = g_modManager and g_modManager:getModByName(g_currentModName)
-    self.modVersion   = "v" .. (mod and mod.version or "?")
+    self.modVersion   = "v2.0.9.1"
     self.page         = PAGE_LANDING
     self.activeCatIdx = nil
     self.adminMsg     = nil   -- last action result shown in admin page

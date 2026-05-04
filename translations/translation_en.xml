@@ -546,7 +546,7 @@
     <!-- ======================================================
          NOTIFICATIONS
          ====================================================== -->
-    <e k="sf_notify_welcome" v="Soil &amp; Fertilizer Mod Active | J = HUD | K = Soil Report | Type 'soilfertility' for commands" />
+    <e k="sf_notify_welcome" v="Soil &amp; Fertilizer Mod Active | v2.0.9.1 | Type 'soilfertility' for commands" />
     <e k="sf_notify_mod_active_title" v="Soil &amp; Fertilizer Mod Active" />
     <e k="sf_notify_mod_active_body" v="Real soil system with full event hooks" />
     <e k="sf_notify_init_delayed" v="Soil Mod: Field initialization delayed. Trying alternative method..." />
