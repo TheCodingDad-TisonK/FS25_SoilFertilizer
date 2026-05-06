@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.1.1.0] - 2026-05-06
+
+### Fixed
+- **Spray visual not appearing for custom fill types** — the visual effect hook was manually starting `FertilizerMotionPathEffect` objects with stale spline entity IDs, producing per-frame `getClosestSplinePosition` script errors and no visible spray. Removed the hook entirely: `ExtendedSprayerEffects` vehicles drive the nozzle shader plane automatically; plain `Sprayer` vehicles use the vanilla `updateSprayerEffects` path, which activates once `processSprayerArea` sets `lastSprayTime`.
+- **Ground density map not updating for custom spray types** — `installDensityMapSprayHook` used `Utils.prependedFunction`, which runs our function *before* the original. Because `wap.sprayType` and `wap.sprayFillType` are set *inside* `onStartWorkAreaProcessing`, our spray-type remap was operating on nil values. Changed to `Utils.appendedFunction` so the vanilla index is remapped after the original populates it. Custom types (LIQUIDLIME, UAN32, etc.) now correctly write the ground colour overlay.
+
+### Known Limitations (Precision Farming DLC)
+- **See & Spray** — not supported in this release. The weed pressure bridge integration is present in the codebase but non-functional; spot-spray nozzles will not activate from our weed pressure data.
+- **PWM nozzle control** — not supported. Per-nozzle pulse-width modulation is a Precision Farming feature and has no integration with this mod.
+- **Section Control + PF dependency** — section-based nutrient credit scaling requires Precision Farming's `ExtendedSprayer` for per-nozzle section state management. Without PF, all sections default to active (coverage fraction 1.0), which is still correct behaviour at field boundaries for vanilla Section Control.
+
+---
+
 ## [2.1.0.0] - 2026-05-06
 
 ### Added
