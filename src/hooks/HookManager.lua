@@ -1321,6 +1321,13 @@ function HookManager:installSprayerAreaHook()
                     g_SoilFertilityManager.soilSystem._lastSprayZ = spz
                 end
 
+                -- Track field coverage using raw liters (before rateMultiplier) so that the
+                -- application-rate knob doesn't inflate coverage beyond the actual area worked.
+                -- Must cover all product types (fertilizer AND direct-path crop protection).
+                if g_SoilFertilityManager.soilSystem then
+                    g_SoilFertilityManager.soilSystem:trackSprayerCoverage(fieldId, liters, fillType.name)
+                end
+
                 if isFertilizer then
                     g_SoilFertilityManager.soilSystem:onFertilizerApplied(fieldId, fillTypeIndex, effectiveLiters)
                 end
