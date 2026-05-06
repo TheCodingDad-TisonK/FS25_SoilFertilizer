@@ -3243,10 +3243,9 @@ function HookManager:installSprayerVisualEffectHook()
     local function startSprayerEffects(vehicle, vanillaFillType)
         local spec = vehicle.spec_sprayer
         if not spec then return end
-        if spec.effects and #spec.effects > 0 then
-            g_effectManager:setEffectTypeInfo(spec.effects, vanillaFillType)
-            g_effectManager:startEffects(spec.effects)
-        end
+        -- Do NOT touch spec.effects — it is the boom-level nozzle effect list managed
+        -- per-section by vanilla's section control. Starting it here overrides the
+        -- individual section shutoff FS25 already performed correctly.
         for _, st in ipairs(spec.sprayTypes or {}) do
             if st.effects and #st.effects > 0 then
                 g_effectManager:setEffectTypeInfo(st.effects, vanillaFillType)
@@ -3260,7 +3259,7 @@ function HookManager:installSprayerVisualEffectHook()
     local function stopSprayerEffects(vehicle)
         local spec = vehicle.spec_sprayer
         if not spec then return end
-        g_effectManager:stopEffects(spec.effects)
+        -- Same rationale: leave spec.effects to vanilla section control.
         for _, st in ipairs(spec.sprayTypes or {}) do
             g_effectManager:stopEffects(st.effects)
             g_animationManager:stopAnimations(st.animationNodes)
