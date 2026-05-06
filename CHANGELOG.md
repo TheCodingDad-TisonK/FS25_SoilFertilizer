@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.1.0.0] - 2026-05-06
+
+### Added
+- **Section Control support** ([#299](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/299), [#298](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/298)) — reads `spec_variableWorkWidth.sections[i].isActive` and scales nutrient credit to the fraction of boom actively spraying. Works with vanilla Section Control and Precision Farming's ExtendedSprayer.
+- **Per-section field attribution** ([#300](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/300)) — nutrient credit is distributed across each active boom section using its `maxWidthNode` world position, enabling accurate field attribution when a wide boom straddles a field boundary.
+- **Weed pressure clears on seeding** ([#304](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/304)) — sowing a crop now resets weed pressure to zero, matching real-world practice where emergence suppresses weeds at the seedling stage. Cultivation weed reduction also raised from 20% to 100%.
+
+### Fixed
+- **Slurry & manure had near-zero soil effect** ([#311](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/311)) — LIQUIDMANURE, MANURE, and DIGESTATE were missing from the custom spray type LPS registration. They fell through to vanilla spray type LPS (often near-zero or undefined), causing `wap.usage` per frame to be tiny and nutrient gain/coverage to be negligible. All three now get `customLPS = 14000 / 36000 = 0.38889 L/s`, consistent with the calibrated rate-to-LPS formula used by all other custom types.
+- **Coverage indicator severely under-reported** ([#309](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/309), [#296](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/296)) — cell-based tracker compared rootNode path against total field cells, making a 28 m boom look like a 1 m boom. Replaced with area-based tracking: `areaThisTick = liters / baseRate_per_ha`. Coverage now advances correctly regardless of boom width or working speed.
+- **Harvest nutrient extraction too aggressive** ([#305](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/305)) — depletion was not normalised by field area, causing large fields to lose far more nutrients than small ones per unit of yield. Factor is now `(harvestedLiters / 1000) / fieldAreaHa`.
+- **Biosolids and chicken manure couldn't load into manure spreaders** ([#308](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/308)) — fill unit patch now covers MANURE-base fill units as well as FERTILIZER-base, allowing these dry organic types to load from bags into manure spreaders.
+- **Incorrect white granular texture on new fill types** ([#307](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/307)) — biosolids, dry chicken manure, and other new fill types now render with correct dark compost textures instead of the white granular default fallback.
+- **Log file filled with position spam during field work** ([#312](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/312)) — per-frame cultivation, plowing, and sowing position messages demoted from `info` to `debug` level.
+
+---
+
 ## [2.0.8.0] - 2026-04-30
 
 ### Added
