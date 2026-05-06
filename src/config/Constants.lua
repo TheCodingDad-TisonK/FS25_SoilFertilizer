@@ -71,8 +71,12 @@ SoilConstants.PLOWING = {
 -- ========================================
 -- CULTIVATION (shallow tillage — non-plowing passes)
 -- ========================================
+-- WEED_PRESSURE_REDUCTION set to 100 so a single full cultivation pass fully clears
+-- weed pressure (the hook fires per-area tick, clamped to 0 by math.max).
+-- Agronomically correct: shallow tillage disrupts annual weed seedlings entirely;
+-- only perennial roots survive, which the game does not distinguish.
 SoilConstants.CULTIVATION = {
-    WEED_PRESSURE_REDUCTION    = 20,  -- Points removed from weed pressure per cultivation pass
+    WEED_PRESSURE_REDUCTION    = 100, -- Full reset (was 20 — insufficient for clearing all weeds)
     PEST_PRESSURE_REDUCTION    = 10,
     DISEASE_PRESSURE_REDUCTION = 15,
 }

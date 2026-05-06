@@ -425,9 +425,28 @@ end
 --- the clearing was unnecessary and harmful to rotation history accuracy.
 ---@param fieldId number The field being sown
 function SoilFertilitySystem:onSowing(fieldId)
-    -- TODO: Implement sowing-time logic (e.g. starter fertilizer uptake, soil temperature
-    -- seeding window checks). Hook installSowingHook() must also be added to installAll()
-    -- before this function has any effect.
+    if not fieldId or fieldId <= 0 then return end
+    local field = self:getOrCreateField(fieldId, false)
+    if not field then return end
+
+    local changed = false
+
+    -- Seeding disrupts weed seedlings via seed opener soil disturbance.
+    -- Fully resets weed pressure: the physical act of drilling/planting breaks
+    -- weed root systems and buries surface seeds in the seed furrow.
+    if self.settings.weedPressure and SoilConstants.WEED_PRESSURE and (field.weedPressure or 0) > 0 then
+        self:debug("[Sowing] Field %d: weed %.0f -> 0", fieldId, field.weedPressure)
+        field.weedPressure = 0
+        field.herbicideDaysLeft = 0
+        changed = true
+    end
+
+    if changed and g_server and g_currentMission and g_currentMission.missionDynamicInfo
+        and g_currentMission.missionDynamicInfo.isMultiplayer then
+        if SoilFieldUpdateEvent then
+            g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
+        end
+    end
 end
 
 --- Hook delegate: called by HookManager when plowing occurs
