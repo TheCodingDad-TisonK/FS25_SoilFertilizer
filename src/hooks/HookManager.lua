@@ -352,8 +352,13 @@ function HookManager:registerCustomSprayTypes()
     -- to drain far too fast even with the daily cap in onHerbicideAppliedDirect (the
     -- cap drains its full 30-point budget in the very first metre of a pass, then
     -- repeats on subsequent game-day passes — issue #276 follow-up bug).
+    -- LIQUIDMANURE, MANURE, DIGESTATE were previously omitted from this list, causing them to fall
+    -- through to whatever vanilla spray type LPS the game uses (often very low or undefined).
+    -- The result: wap.usage was tiny → nutrient gain and coverage nearly zero (issue #311).
+    -- Fix: register all three with customLPS = BASE_RATE / 36000 so they drain at the calibrated rate.
     local liquidNames = { "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME", "HERBICIDE", "INSECTICIDE", "FUNGICIDE",
-                          "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH" }
+                          "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH",
+                          "LIQUIDMANURE", "MANURE", "DIGESTATE" }
     -- Granular/solid types → inherit visual from FERTILIZER
     local solidNames  = { "UREA", "AMS", "MAP", "DAP", "POTASH",
                           "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM" }
