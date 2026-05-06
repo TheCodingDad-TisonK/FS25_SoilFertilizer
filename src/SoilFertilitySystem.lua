@@ -425,9 +425,28 @@ end
 --- the clearing was unnecessary and harmful to rotation history accuracy.
 ---@param fieldId number The field being sown
 function SoilFertilitySystem:onSowing(fieldId)
-    -- TODO: Implement sowing-time logic (e.g. starter fertilizer uptake, soil temperature
-    -- seeding window checks). Hook installSowingHook() must also be added to installAll()
-    -- before this function has any effect.
+    if not fieldId or fieldId <= 0 then return end
+    local field = self:getOrCreateField(fieldId, false)
+    if not field then return end
+
+    local changed = false
+
+    -- Seeding disrupts weed seedlings via seed opener soil disturbance.
+    -- Fully resets weed pressure: the physical act of drilling/planting breaks
+    -- weed root systems and buries surface seeds in the seed furrow.
+    if self.settings.weedPressure and SoilConstants.WEED_PRESSURE and (field.weedPressure or 0) > 0 then
+        self:debug("[Sowing] Field %d: weed %.0f -> 0", fieldId, field.weedPressure)
+        field.weedPressure = 0
+        field.herbicideDaysLeft = 0
+        changed = true
+    end
+
+    if changed and g_server and g_currentMission and g_currentMission.missionDynamicInfo
+        and g_currentMission.missionDynamicInfo.isMultiplayer then
+        if SoilFieldUpdateEvent then
+            g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
+        end
+    end
 end
 
 --- Hook delegate: called by HookManager when plowing occurs
@@ -439,7 +458,7 @@ function SoilFertilitySystem:onPlowing(fieldId)
     local field = self:getOrCreateField(fieldId, true)
     if not field then return end
 
-    self:info("[Plowing] Field %d triggered (plowingBonus=%s, weedPressure=%s)",
+    self:debug("[Plowing] Field %d triggered (plowingBonus=%s, weedPressure=%s)",
         fieldId, tostring(self.settings.plowingBonus), tostring(self.settings.weedPressure))
 
     local changed = false
@@ -468,13 +487,13 @@ function SoilFertilitySystem:onPlowing(fieldId)
             changed = true
         end
 
-        self:info("[Plowing] Field %d: OM %.1f->%.1f, pH %.2f->%.2f",
+        self:debug("[Plowing] Field %d: OM %.1f->%.1f, pH %.2f->%.2f",
             fieldId, omBefore, omAfter, phBefore, phAfter)
     end
 
     -- Plowing benefit 3: Reset weed pressure (independent of plowingBonus)
     if self.settings.weedPressure and (field.weedPressure or 0) > 0 then
-        self:info("[Plowing] Field %d: weed %.0f -> 0", fieldId, field.weedPressure)
+        self:debug("[Plowing] Field %d: weed %.0f -> 0", fieldId, field.weedPressure)
         field.weedPressure = 0
         field.herbicideDaysLeft = 0
         changed = true
@@ -484,7 +503,7 @@ function SoilFertilitySystem:onPlowing(fieldId)
     if self.settings.pestPressure and SoilConstants.PLOWING.PEST_PRESSURE_REDUCTION and (field.pestPressure or 0) > 0 then
         local before = field.pestPressure
         field.pestPressure = math.max(0, before - SoilConstants.PLOWING.PEST_PRESSURE_REDUCTION)
-        self:info("[Plowing] Field %d: pest %.0f -> %.0f", fieldId, before, field.pestPressure)
+        self:debug("[Plowing] Field %d: pest %.0f -> %.0f", fieldId, before, field.pestPressure)
         changed = true
     end
 
@@ -492,7 +511,7 @@ function SoilFertilitySystem:onPlowing(fieldId)
     if self.settings.diseasePressure and SoilConstants.PLOWING.DISEASE_PRESSURE_REDUCTION and (field.diseasePressure or 0) > 0 then
         local before = field.diseasePressure
         field.diseasePressure = math.max(0, before - SoilConstants.PLOWING.DISEASE_PRESSURE_REDUCTION)
-        self:info("[Plowing] Field %d: disease %.0f -> %.0f", fieldId, before, field.diseasePressure)
+        self:debug("[Plowing] Field %d: disease %.0f -> %.0f", fieldId, before, field.diseasePressure)
         changed = true
     end
 
@@ -513,7 +532,7 @@ function SoilFertilitySystem:onCultivation(fieldId)
     local field = self:getOrCreateField(fieldId, false)
     if not field then return end
 
-    self:info("[Cultivation] Field %d triggered (weedPressure=%.0f)", fieldId, field.weedPressure or 0)
+    self:debug("[Cultivation] Field %d triggered (weedPressure=%.0f)", fieldId, field.weedPressure or 0)
 
     local changed = false
     local c = SoilConstants.CULTIVATION
@@ -521,21 +540,21 @@ function SoilFertilitySystem:onCultivation(fieldId)
     if self.settings.weedPressure and c.WEED_PRESSURE_REDUCTION and (field.weedPressure or 0) > 0 then
         local before = field.weedPressure
         field.weedPressure = math.max(0, before - c.WEED_PRESSURE_REDUCTION)
-        self:info("[Cultivation] Field %d: weed %.0f -> %.0f", fieldId, before, field.weedPressure)
+        self:debug("[Cultivation] Field %d: weed %.0f -> %.0f", fieldId, before, field.weedPressure)
         changed = true
     end
 
     if self.settings.pestPressure and c.PEST_PRESSURE_REDUCTION and (field.pestPressure or 0) > 0 then
         local before = field.pestPressure
         field.pestPressure = math.max(0, before - c.PEST_PRESSURE_REDUCTION)
-        self:info("[Cultivation] Field %d: pest %.0f -> %.0f", fieldId, before, field.pestPressure)
+        self:debug("[Cultivation] Field %d: pest %.0f -> %.0f", fieldId, before, field.pestPressure)
         changed = true
     end
 
     if self.settings.diseasePressure and c.DISEASE_PRESSURE_REDUCTION and (field.diseasePressure or 0) > 0 then
         local before = field.diseasePressure
         field.diseasePressure = math.max(0, before - c.DISEASE_PRESSURE_REDUCTION)
-        self:info("[Cultivation] Field %d: disease %.0f -> %.0f", fieldId, before, field.diseasePressure)
+        self:debug("[Cultivation] Field %d: disease %.0f -> %.0f", fieldId, before, field.diseasePressure)
         changed = true
     end
 
@@ -561,7 +580,7 @@ function SoilFertilitySystem:onStripTill(fieldId)
     local st = SoilConstants.STRIP_TILL
     local changed = false
 
-    self:info("[StripTill] Field %d triggered — weed=%.0f pest=%.0f disease=%.0f OM=%.2f",
+    self:debug("[StripTill] Field %d triggered — weed=%.0f pest=%.0f disease=%.0f OM=%.2f",
         fieldId,
         field.weedPressure    or 0,
         field.pestPressure    or 0,
@@ -572,7 +591,7 @@ function SoilFertilitySystem:onStripTill(fieldId)
     if self.settings.weedPressure and (field.weedPressure or 0) > 0 then
         local before = field.weedPressure
         field.weedPressure = math.max(0, before - st.WEED_PRESSURE_REDUCTION)
-        self:info("[StripTill] Field %d: weed %.0f -> %.0f", fieldId, before, field.weedPressure)
+        self:debug("[StripTill] Field %d: weed %.0f -> %.0f", fieldId, before, field.weedPressure)
         changed = true
     end
 
@@ -580,7 +599,7 @@ function SoilFertilitySystem:onStripTill(fieldId)
     if self.settings.pestPressure and (field.pestPressure or 0) > 0 then
         local before = field.pestPressure
         field.pestPressure = math.max(0, before - st.PEST_PRESSURE_REDUCTION)
-        self:info("[StripTill] Field %d: pest %.0f -> %.0f", fieldId, before, field.pestPressure)
+        self:debug("[StripTill] Field %d: pest %.0f -> %.0f", fieldId, before, field.pestPressure)
         changed = true
     end
 
@@ -588,7 +607,7 @@ function SoilFertilitySystem:onStripTill(fieldId)
     if self.settings.diseasePressure and (field.diseasePressure or 0) > 0 then
         local before = field.diseasePressure
         field.diseasePressure = math.max(0, before - st.DISEASE_PRESSURE_REDUCTION)
-        self:info("[StripTill] Field %d: disease %.0f -> %.0f", fieldId, before, field.diseasePressure)
+        self:debug("[StripTill] Field %d: disease %.0f -> %.0f", fieldId, before, field.diseasePressure)
         changed = true
     end
 
@@ -599,7 +618,7 @@ function SoilFertilitySystem:onStripTill(fieldId)
                                   omBefore + st.OM_BOOST)
         if omAfter > omBefore then
             field.organicMatter = omAfter
-            self:info("[StripTill] Field %d: OM %.2f -> %.2f", fieldId, omBefore, omAfter)
+            self:debug("[StripTill] Field %d: OM %.2f -> %.2f", fieldId, omBefore, omAfter)
             changed = true
         end
     end
@@ -1229,9 +1248,10 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing, area)
         dryDayCount = 0,
         nutrientBuffer = {},  -- Tracks [fillTypeIndex] = litersApplied (reset daily)
         zoneData = {},        -- Sparse {cellKey → {N,P,K,pH,OM}} for per-area overlay
-        coveredCells = {},    -- Set of cellKey strings touched by fertilizer today (reset daily)
-        coveredCellCount = 0, -- Running count of coveredCells for O(1) fraction computation
-        totalFieldCells = 0,  -- Estimated cell count from field area (set on first spray)
+        coveredCells = {},    -- Legacy: kept for daily reset compat (no longer used for coverage calc)
+        coveredCellCount = 0, -- Legacy: kept for daily reset compat
+        totalFieldCells = 0,  -- Legacy: kept for daily reset compat
+        coveredAreaHa = 0,    -- Hectares covered today (area-based tracker, reset daily)
         coverageFraction = 0, -- Fraction of field covered today (0.0–1.0)
         compaction = 0,            -- field-average compaction 0–100 (derived from cells)
         compactionCells = {},      -- {cellKey → 0-100} per-cell compaction (10×10 m grid)
@@ -1298,6 +1318,7 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
     field.nutrientBuffer          = {}
     field.coveredCells            = {}
     field.coveredCellCount        = 0
+    field.coveredAreaHa           = 0
     field.coverageFraction        = 0
     field._covLastX               = nil
     field._covLastZ               = nil
@@ -1589,17 +1610,24 @@ function SoilFertilitySystem:updateFieldNutrients(fieldId, fruitTypeIndex, harve
 
     -- NUTRIENT DEPLETION CALCULATION EXPLAINED:
     --
-    -- Step 1: Calculate depletion factor
-    -- Formula: factor = harvested liters / 1000
-    -- Why: Extraction rates in Constants.lua are calibrated per 1000L of harvested crop
-    -- Example: 80,000L wheat harvest → factor = 80
-    local factor = harvestedLiters / 1000
+    -- Step 1: Calculate depletion factor, normalized by field area.
+    -- Combine.addCutterArea fires many times during a harvest — harvestedLiters
+    -- is the yield from one small chunk, and the chunks sum to the total field yield.
+    -- Without area normalization, a 5 ha field (5× the liters of a 1 ha field)
+    -- would deplete 5× more nutrients from the same 0-100 nutrient pool, draining
+    -- it to zero in one harvest pass. Dividing by fieldAreaHa makes depletion
+    -- field-size independent: the same yield density (L/ha) always removes the
+    -- same number of nutrient points regardless of field size.
+    -- Formula: factor = (harvestedLiters / 1000) / fieldAreaHa
+    local fieldAreaHa = (field.fieldArea and field.fieldArea > 0) and field.fieldArea or 1.0
+    local factor = (harvestedLiters / 1000) / fieldAreaHa
 
     -- Step 2: Apply difficulty multiplier
     -- Simple (0.7x): 30% less depletion, easier for new players
     -- Realistic (1.0x): Balanced depletion based on real agricultural rates
     -- Hardcore (1.5x): 50% more depletion, challenging management
-    -- Example: factor 80 × 0.7 (Simple) = 56, or × 1.5 (Hardcore) = 120
+    -- Example: 8000L/ha wheat on a 5ha field → factor = (8000/1000)/5 = 1.6 per chunk
+    -- × 1.0 (Realistic) = 1.6; N removed = 2.00 × 1.6 = 3.2 pts per call
     local diffMultiplier = SoilConstants.DIFFICULTY.MULTIPLIERS[self.settings.difficulty]
     if diffMultiplier then
         factor = factor * diffMultiplier
@@ -1816,8 +1844,8 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
             -- and also caused post-load lookups to miss (number key vs stored string key).
             local cellKey = tostring(cx * 10000 + cz)
 
-            self:trackSprayerCoverage(fieldId, fillType.name)
-            -- trackSprayerCoverage may have refreshed field.fieldArea from farmland on first call
+            -- Coverage is now tracked from the sprayer hook with raw liters (pre-rateMultiplier)
+            -- so it is not called here. See HookManager:installSprayerAreaHook.
             if field.fieldArea and field.fieldArea > 0 then areaInHa = field.fieldArea end
 
             if not field.zoneData then field.zoneData = {} end
@@ -1941,68 +1969,46 @@ local function _soilApplyCappedReduction(dailyTable, fieldId, proposedRed, maxDa
     return clamped
 end
 
---- Track sprayer coverage for any product type (fertilizer or crop protection).
--- Uses the cached _lastSprayX/_lastSprayZ set by the sprayer hook before calling any
--- application function.  Safe to call multiple times per frame — duplicate cells are
--- ignored by the coveredCells set.
+--- Track sprayer coverage using liters consumed per tick as a proxy for area sprayed.
+-- Replaces the old cell-based tracker that used only the rootNode position, which
+-- severely under-reported coverage for wide-boom equipment: a 28 m sprayer covers
+-- ~28 cells per pass but the rootNode only visits 1 cell, so a 95 % pass showed
+-- only ~20 % coverage in the HUD.
 --
--- Minimum-travel gate: the vehicle must advance at least MIN_TRAVEL meters from the
--- last sampled position before a new cell is recorded.  This prevents tight circles
--- (driving on-axis) from inflating coverage on large fields — the rootNode traces an
--- arc that visits many 10 m cells even though the sprayed area barely moves.
----@param fieldId number
----@param productName string|nil
-function SoilFertilitySystem:trackSprayerCoverage(fieldId, productName)
+-- Area-based approach: liters consumed per tick is proportional to
+--   boom_width × speed × LPS_rate
+-- Dividing by the product's reference rate (L/ha) converts liters → hectares covered.
+-- This is field-size and boom-size independent and matches real application density.
+--
+-- Called from the sprayer hook with raw liters (before rateMultiplier) so that a
+-- 1.5× rate setting doesn't inflate coverage beyond actual area worked.
+---@param fieldId     number
+---@param liters      number  Raw liters consumed this tick (pre-rateMultiplier)
+---@param fillTypeName string|nil  Fill type name for base-rate lookup
+function SoilFertilitySystem:trackSprayerCoverage(fieldId, liters, fillTypeName)
+    if not liters or liters <= 0 then return end
     local field = self.fieldData[fieldId]
     if not field then return end
-    local sprayX = self._lastSprayX
-    local sprayZ = self._lastSprayZ
-    if not sprayX or not sprayZ then return end
 
-    -- Require meaningful forward movement before crediting a new cell.
-    -- 12 m > cell diagonal (~14 m), so you must genuinely leave the current
-    -- cell neighbourhood before the next sample is accepted.
-    local MIN_TRAVEL_SQ = 144  -- 12 m²
-    local lx, lz = field._covLastX, field._covLastZ
-    if lx and lz then
-        local dx, dz = sprayX - lx, sprayZ - lz
-        if (dx * dx + dz * dz) < MIN_TRAVEL_SQ then return end
-    end
-    field._covLastX = sprayX
-    field._covLastZ = sprayZ
+    local areaInHa = (field.fieldArea and field.fieldArea > 0) and field.fieldArea or 1.0
 
-    local zone = SoilConstants.ZONE
-    local cx = math.floor(sprayX / zone.CELL_SIZE)
-    local cz = math.floor(sprayZ / zone.CELL_SIZE)
-    local cellKey = tostring(cx * 10000 + cz)
+    -- Look up the reference application rate for this product (L/ha or kg/ha).
+    -- liters / ratePerHa gives the hectares covered this tick.
+    local baseRates = SoilConstants.SPRAYER_RATE and SoilConstants.SPRAYER_RATE.BASE_RATES
+    local rateEntry = fillTypeName and baseRates and (baseRates[fillTypeName] or baseRates.DEFAULT)
+    local ratePerHa = (rateEntry and rateEntry.value and rateEntry.value > 0) and rateEntry.value or 93.5
 
-    if not field.coveredCells then field.coveredCells = {} end
-    if field.coveredCells[cellKey] then return end
-
-    field.coveredCells[cellKey] = true
-    field.coveredCellCount = (field.coveredCellCount or 0) + 1
-
-    if (field.totalFieldCells or 0) == 0 then
-        local areaInHa = field.fieldArea or 1.0
-        if g_farmlandManager then
-            local farmlandObj = g_farmlandManager:getFarmlandById(fieldId)
-            if farmlandObj and farmlandObj.areaInHa and farmlandObj.areaInHa > 0 then
-                field.fieldArea = farmlandObj.areaInHa
-                areaInHa = farmlandObj.areaInHa
-            end
-        end
-        field.totalFieldCells = math.max(1, math.ceil(areaInHa / zone.CELL_AREA_HA))
-    end
+    local areaThisTick = liters / ratePerHa
+    field.coveredAreaHa = (field.coveredAreaHa or 0) + areaThisTick
 
     local prevCoverage = field.coverageFraction or 0
-    field.coverageFraction = math.min(1.0, field.coveredCellCount / field.totalFieldCells)
+    field.coverageFraction = math.min(1.0, field.coveredAreaHa / areaInHa)
 
     local milestones = { 0.10, 0.25, 0.50, 0.75, 1.0 }
     for _, m in ipairs(milestones) do
         if prevCoverage < m and field.coverageFraction >= m then
-            SoilLogger.debug("Coverage field=%d  %.0f%% covered (%d/%d cells)  type=%s",
-                fieldId, m * 100, field.coveredCellCount, field.totalFieldCells,
-                productName or "?")
+            SoilLogger.debug("Coverage field=%d  %.0f%% covered (%.3f/%.3f ha)  type=%s",
+                fieldId, m * 100, field.coveredAreaHa, areaInHa, fillTypeName or "?")
             break
         end
     end
@@ -2048,7 +2054,7 @@ function SoilFertilitySystem:onHerbicideAppliedDirect(fieldId, effectiveness, li
 
     if not field.nutrientBuffer then field.nutrientBuffer = {} end
     field.nutrientBuffer[99991] = (field.nutrientBuffer[99991] or 0) + liters
-    self:trackSprayerCoverage(fieldId, "HERBICIDE")
+    self:trackSprayerCoverage(fieldId, liters, "HERBICIDE")
 end
 
 function SoilFertilitySystem:onInsecticideAppliedDirect(fieldId, effectiveness, liters)
@@ -2076,7 +2082,7 @@ function SoilFertilitySystem:onInsecticideAppliedDirect(fieldId, effectiveness, 
 
     if not field.nutrientBuffer then field.nutrientBuffer = {} end
     field.nutrientBuffer[99992] = (field.nutrientBuffer[99992] or 0) + liters
-    self:trackSprayerCoverage(fieldId, "INSECTICIDE")
+    self:trackSprayerCoverage(fieldId, liters, "INSECTICIDE")
 end
 
 function SoilFertilitySystem:onFungicideAppliedDirect(fieldId, effectiveness, liters)
@@ -2104,7 +2110,7 @@ function SoilFertilitySystem:onFungicideAppliedDirect(fieldId, effectiveness, li
 
     if not field.nutrientBuffer then field.nutrientBuffer = {} end
     field.nutrientBuffer[99993] = (field.nutrientBuffer[99993] or 0) + liters
-    self:trackSprayerCoverage(fieldId, "FUNGICIDE")
+    self:trackSprayerCoverage(fieldId, liters, "FUNGICIDE")
 end
 
 --- Apply over-application burn penalty to a field.

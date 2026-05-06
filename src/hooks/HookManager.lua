@@ -352,8 +352,13 @@ function HookManager:registerCustomSprayTypes()
     -- to drain far too fast even with the daily cap in onHerbicideAppliedDirect (the
     -- cap drains its full 30-point budget in the very first metre of a pass, then
     -- repeats on subsequent game-day passes — issue #276 follow-up bug).
+    -- LIQUIDMANURE, MANURE, DIGESTATE were previously omitted from this list, causing them to fall
+    -- through to whatever vanilla spray type LPS the game uses (often very low or undefined).
+    -- The result: wap.usage was tiny → nutrient gain and coverage nearly zero (issue #311).
+    -- Fix: register all three with customLPS = BASE_RATE / 36000 so they drain at the calibrated rate.
     local liquidNames = { "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME", "HERBICIDE", "INSECTICIDE", "FUNGICIDE",
-                          "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH" }
+                          "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH",
+                          "LIQUIDMANURE", "MANURE", "DIGESTATE" }
     -- Granular/solid types → inherit visual from FERTILIZER
     local solidNames  = { "UREA", "AMS", "MAP", "DAP", "POTASH",
                           "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM" }
@@ -1311,40 +1316,97 @@ function HookManager:installSprayerAreaHook()
                 local rateMultiplier = (rm ~= nil) and rm:getMultiplier(self.id) or 1.0
                 local effectiveLiters = liters * rateMultiplier
 
-                SoilLogger.debug("Sprayer/Spreader hook: Field %d, %s, %.4fL (x%.2f rate)",
-                    fieldId, fillType.name, effectiveLiters, rateMultiplier)
+                -- Section Control: scale nutrient credit when outer boom sections are off.
+                -- wap.usage already reflects section shutoff (VariableWorkWidth.getIsWorkAreaActive
+                -- gates each work area on section.isActive). We apply the fraction here so that
+                -- effectiveLiters correctly represents the nutrient dose for the active portion
+                -- of the field, especially when rateMultiplier != 1.0.
+                local coverageFraction = 1.0
+                if SoilUtils and SoilUtils.getSectionCoverageFraction then
+                    coverageFraction = SoilUtils.getSectionCoverageFraction(self)
+                    if coverageFraction < 1.0 then
+                        effectiveLiters = effectiveLiters * coverageFraction
+                        SoilLogger.debug("SectionControl: %.0f%% boom active → liters scaled to %.4fL",
+                            coverageFraction * 100, effectiveLiters)
+                    end
+                end
 
-                -- Cache sprayer world position for density-map pixel writes in applyFertilizer
+                -- ── Coverage tracking (raw liters, before rateMultiplier) ─────────
+                -- Must run for ALL product types (fertilizer AND crop protection).
                 if g_SoilFertilityManager.soilSystem then
-                    local spx, _, spz = getWorldTranslation(self.rootNode)
-                    g_SoilFertilityManager.soilSystem._lastSprayX = spx
-                    g_SoilFertilityManager.soilSystem._lastSprayZ = spz
+                    g_SoilFertilityManager.soilSystem:trackSprayerCoverage(fieldId, liters, fillType.name)
                 end
 
-                if isFertilizer then
-                    g_SoilFertilityManager.soilSystem:onFertilizerApplied(fieldId, fillTypeIndex, effectiveLiters)
+                -- ── Sub-field section attribution (issue #300) ────────────────────
+                -- When VariableWorkWidth is present, distribute the nutrient credit
+                -- across active section nodes so that boundary passes only affect the
+                -- portion of the field the boom is actually spraying.
+                -- Falls back to the rootNode single-field path when VWW is absent.
+                local rootX, _, rootZ = getWorldTranslation(self.rootNode)
+                local vww = self.spec_variableWorkWidth
+                local soilSys = g_SoilFertilityManager.soilSystem
+
+                local function applySingle(fId, sectionLiters, spx, spz)
+                    if not fId or fId <= 0 then return end
+                    if soilSys then
+                        soilSys._lastSprayX = spx or rootX
+                        soilSys._lastSprayZ = spz or rootZ
+                    end
+                    SoilLogger.debug("Sprayer/Spreader hook: Field %d, %s, %.4fL (x%.2f rate)",
+                        fId, fillType.name, sectionLiters, rateMultiplier)
+                    if isFertilizer then
+                        soilSys:onFertilizerApplied(fId, fillTypeIndex, sectionLiters)
+                    end
+                    if herbOnlyDirect and soilSys.onHerbicideAppliedDirect then
+                        soilSys:onHerbicideAppliedDirect(fId, herbEffectiveness, sectionLiters)
+                    end
+                    if pestOnlyDirect and soilSys.onInsecticideAppliedDirect then
+                        soilSys:onInsecticideAppliedDirect(fId, pestEffectiveness, sectionLiters)
+                    end
+                    if diseaseOnlyDirect and soilSys.onFungicideAppliedDirect then
+                        soilSys:onFungicideAppliedDirect(fId, diseaseEffectiveness, sectionLiters)
+                    end
+                    local entry = SoilConstants.FERTILIZER_PROFILES[fillType.name]
+                    if entry and (entry.N or entry.P or entry.K) and
+                       rateMultiplier > SoilConstants.SPRAYER_RATE.BURN_RISK_THRESHOLD then
+                        soilSys:applyBurnEffect(fId, rateMultiplier)
+                    end
                 end
 
-                -- Herbicide application reduces weed pressure (direct path: non-profile products only)
-                if herbOnlyDirect and g_SoilFertilityManager.soilSystem.onHerbicideAppliedDirect then
-                    g_SoilFertilityManager.soilSystem:onHerbicideAppliedDirect(fieldId, herbEffectiveness, effectiveLiters)
-                end
+                if vww and vww.sections and #vww.sections > 0 then
+                    -- Collect active sections
+                    local activeSections = {}
+                    for _, section in ipairs(vww.sections) do
+                        if section.isActive or section.isCenter then
+                            table.insert(activeSections, section)
+                        end
+                    end
 
-                -- Insecticide application reduces pest pressure (direct path: non-profile products only)
-                if pestOnlyDirect and g_SoilFertilityManager.soilSystem.onInsecticideAppliedDirect then
-                    g_SoilFertilityManager.soilSystem:onInsecticideAppliedDirect(fieldId, pestEffectiveness, effectiveLiters)
-                end
-
-                -- Fungicide application reduces disease pressure (direct path: non-profile products only)
-                if diseaseOnlyDirect and g_SoilFertilityManager.soilSystem.onFungicideAppliedDirect then
-                    g_SoilFertilityManager.soilSystem:onFungicideAppliedDirect(fieldId, diseaseEffectiveness, effectiveLiters)
-                end
-
-                -- Over-application burn check (nutrient fertilizers only, not lime)
-                local entry = SoilConstants.FERTILIZER_PROFILES[fillType.name]
-                local isNutrientFertilizer = entry and (entry.N or entry.P or entry.K)
-                if isNutrientFertilizer and rateMultiplier > SoilConstants.SPRAYER_RATE.BURN_RISK_THRESHOLD then
-                    g_SoilFertilityManager.soilSystem:applyBurnEffect(fieldId, rateMultiplier)
+                    if #activeSections > 0 then
+                        local litersPerSection = effectiveLiters / #activeSections
+                        for _, section in ipairs(activeSections) do
+                            local sx, sz = rootX, rootZ
+                            if not section.isCenter and section.maxWidthNode ~= nil then
+                                local wx, _, wz = getWorldTranslation(section.maxWidthNode)
+                                if wx then
+                                    -- Midpoint: accurate field lookup, better lateral density paint
+                                    sx = (rootX + wx) * 0.5
+                                    sz = (rootZ + wz) * 0.5
+                                end
+                            end
+                            local sectionFieldId = hookMgrRef:getFieldIdAtWorldPosition(sx, sz)
+                            applySingle(sectionFieldId, litersPerSection, sx, sz)
+                        end
+                    else
+                        applySingle(fieldId, effectiveLiters, rootX, rootZ)
+                    end
+                else
+                    -- No VWW: single-field path (rootNode already resolved above)
+                    if soilSys then
+                        soilSys._lastSprayX = rootX
+                        soilSys._lastSprayZ = rootZ
+                    end
+                    applySingle(fieldId, effectiveLiters, rootX, rootZ)
                 end
 
                 -- BUY mode backup refill (issue #125).
@@ -1621,7 +1683,7 @@ function HookManager:installPlowingHook()
             local x, _, z = getWorldTranslation(cultivatorSelf.rootNode)
             local success, errorMsg = pcall(function()
                 local farmlandId = hookMgrRef:getFieldIdAtWorldPosition(x, z)
-                SoilLogger.info("[PlowHook] pos=(%.1f,%.1f) farmlandId=%s isPlow=%s",
+                SoilLogger.debug("[PlowHook] pos=(%.1f,%.1f) farmlandId=%s isPlow=%s",
                     x, z, tostring(farmlandId), tostring(isPlowSpec))
                 if farmlandId and farmlandId > 0 then
                     local isPlowingTool = isPlowSpec
@@ -1910,7 +1972,7 @@ function HookManager:installSowingHook()
                 if not x then return end
 
                 local fieldId = hookMgrRef:getFieldIdAtWorldPosition(x, z)
-                SoilLogger.info("[SowingHook] pos=(%.1f,%.1f) fieldId=%s crop=%s",
+                SoilLogger.debug("[SowingHook] pos=(%.1f,%.1f) fieldId=%s crop=%s",
                     x, z, tostring(fieldId),
                     tostring(spec.workAreaParameters.seedsFruitType))
                 if not fieldId or fieldId <= 0 then return end
@@ -1942,10 +2004,12 @@ function HookManager:installFillUnitHookEarly()
         return false
     end
 
-    local solidNames  = {"UREA", "AMS", "MAP", "DAP", "POTASH",
-                          "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM"}
-    local liquidNames = {"UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME", "INSECTICIDE", "FUNGICIDE",
-                         "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH"}
+    local solidNames         = {"UREA", "AMS", "MAP", "DAP", "POTASH",
+                                 "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM"}
+    local liquidNames        = {"UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME", "INSECTICIDE", "FUNGICIDE",
+                                "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH"}
+    -- Organic dry types also work in manure spreaders (MANURE fill-unit base)
+    local manureCompatNames  = {"BIOSOLIDS", "CHICKEN_MANURE"}
 
     local original = FillUnit.onPostLoad
     FillUnit.onPostLoad = Utils.prependedFunction(original, function(vehicleSelf)
@@ -1953,12 +2017,14 @@ function HookManager:installFillUnitHookEarly()
         if not fm then return end
         local fertIdx    = fm:getFillTypeIndexByName("FERTILIZER")
         local liqFertIdx = fm:getFillTypeIndexByName("LIQUIDFERTILIZER")
+        local manureIdx  = fm:getFillTypeIndexByName("MANURE")
         local spec = vehicleSelf.spec_fillUnit
         if not spec or not spec.fillUnits then return end
         for _, fu in pairs(spec.fillUnits) do
             if fu.supportedFillTypes then
                 local addSolid  = fertIdx    and fu.supportedFillTypes[fertIdx]
                 local addLiquid = liqFertIdx and fu.supportedFillTypes[liqFertIdx]
+                local addManure = manureIdx  and fu.supportedFillTypes[manureIdx]
                 if addSolid then
                     for _, name in ipairs(solidNames) do
                         local idx = fm:getFillTypeIndexByName(name)
@@ -1967,6 +2033,12 @@ function HookManager:installFillUnitHookEarly()
                 end
                 if addLiquid then
                     for _, name in ipairs(liquidNames) do
+                        local idx = fm:getFillTypeIndexByName(name)
+                        if idx then fu.supportedFillTypes[idx] = true end
+                    end
+                end
+                if addManure then
+                    for _, name in ipairs(manureCompatNames) do
                         local idx = fm:getFillTypeIndexByName(name)
                         if idx then fu.supportedFillTypes[idx] = true end
                     end
@@ -2020,13 +2092,22 @@ function HookManager:installFillUnitHook()
         return false
     end
 
+    -- Vanilla MANURE base: enables organic dry products in manure spreaders.
+    -- Manure spreaders support MANURE but not FERTILIZER, so BIOSOLIDS and
+    -- CHICKEN_MANURE (organic dry products) were accepted by trailers (which
+    -- support both) but rejected by dedicated spreaders (MANURE-only fill unit).
+    local manureIndex = fm:getFillTypeIndexByName("MANURE")
+
     local solidNames  = {"UREA", "AMS", "MAP", "DAP", "POTASH",
                           "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM"}
     local liquidNames = {"UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME", "INSECTICIDE", "FUNGICIDE",
                          "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH"}
+    -- These organic dry types also work in manure spreaders (MANURE fill-unit base).
+    local manureCompatNames = {"BIOSOLIDS", "CHICKEN_MANURE"}
 
-    local solidIndices  = {}
-    local liquidIndices = {}
+    local solidIndices       = {}
+    local liquidIndices      = {}
+    local manureCompatIndices = {}
     for _, name in ipairs(solidNames) do
         local idx = fm:getFillTypeIndexByName(name)
         if idx then table.insert(solidIndices, idx) end
@@ -2034,6 +2115,10 @@ function HookManager:installFillUnitHook()
     for _, name in ipairs(liquidNames) do
         local idx = fm:getFillTypeIndexByName(name)
         if idx then table.insert(liquidIndices, idx) end
+    end
+    for _, name in ipairs(manureCompatNames) do
+        local idx = fm:getFillTypeIndexByName(name)
+        if idx then table.insert(manureCompatIndices, idx) end
     end
 
     -- Shared helper: inject custom fill type indices into one vehicle's fill units
@@ -2044,6 +2129,8 @@ function HookManager:installFillUnitHook()
             if fillUnit.supportedFillTypes then
                 local addSolid  = fertIndex    and fillUnit.supportedFillTypes[fertIndex]
                 local addLiquid = liqFertIndex and fillUnit.supportedFillTypes[liqFertIndex]
+                -- Manure spreaders support MANURE; enable organic dry types for them too
+                local addManure = manureIndex  and fillUnit.supportedFillTypes[manureIndex]
                 if addSolid then
                     for _, idx in ipairs(solidIndices) do
                         fillUnit.supportedFillTypes[idx] = true
@@ -2051,6 +2138,11 @@ function HookManager:installFillUnitHook()
                 end
                 if addLiquid then
                     for _, idx in ipairs(liquidIndices) do
+                        fillUnit.supportedFillTypes[idx] = true
+                    end
+                end
+                if addManure then
+                    for _, idx in ipairs(manureCompatIndices) do
                         fillUnit.supportedFillTypes[idx] = true
                     end
                 end
@@ -2079,7 +2171,8 @@ function HookManager:installFillUnitHook()
 
     -- Build customToBase: custom fill type index → vanilla base type index.
     -- Used by getFillUnitSupportsFillType hook below.
-    local customToBase = {}
+    local customToBase  = {}
+    local customToManure = {}  -- organic dry types that also fit in MANURE-based fill units
     if fertIndex then
         for _, idx in ipairs(solidIndices) do
             customToBase[idx] = fertIndex
@@ -2090,6 +2183,11 @@ function HookManager:installFillUnitHook()
             customToBase[idx] = liqFertIndex
         end
     end
+    if manureIndex then
+        for _, idx in ipairs(manureCompatIndices) do
+            customToManure[idx] = manureIndex
+        end
+    end
 
     -- Hook getFillUnitSupportsFillType so Dischargeable:dischargeToObject (vehicle-to-vehicle
     -- auger wagon → spreader, tanker → sprayer, etc.) passes the fill type check for our
@@ -2098,7 +2196,7 @@ function HookManager:installFillUnitHook()
     -- table. Wrapping the method directly is the belt-and-suspenders fix.
     --
     -- Logic: if the vehicle supports the corresponding vanilla base type (FERTILIZER or
-    -- LIQUIDFERTILIZER), it also supports the matching custom type.
+    -- LIQUIDFERTILIZER or MANURE), it also supports the matching custom type.
     if FillUnit.getFillUnitSupportsFillType then
         local origGetSupports = FillUnit.getFillUnitSupportsFillType
         FillUnit.getFillUnitSupportsFillType = function(vehicleSelf, fillUnitIndex, fillType)
@@ -2106,10 +2204,15 @@ function HookManager:installFillUnitHook()
             if origGetSupports(vehicleSelf, fillUnitIndex, fillType) then
                 return true
             end
-            -- Custom type? Check if the vehicle supports the corresponding vanilla base type.
+            -- Custom type? Check against FERTILIZER/LIQUIDFERTILIZER base type.
             local baseType = customToBase[fillType]
-            if baseType then
-                return origGetSupports(vehicleSelf, fillUnitIndex, baseType)
+            if baseType and origGetSupports(vehicleSelf, fillUnitIndex, baseType) then
+                return true
+            end
+            -- Organic dry types (BIOSOLIDS, CHICKEN_MANURE) also fit MANURE-based fill units.
+            local manureBase = customToManure[fillType]
+            if manureBase and origGetSupports(vehicleSelf, fillUnitIndex, manureBase) then
+                return true
             end
             return false
         end
@@ -2961,41 +3064,113 @@ function HookManager:installFillTypeMaterialHook()
     end
 
     local fm = g_fillTypeManager
-    local fertIdx    = fm:getFillTypeIndexByName("FERTILIZER")
+    local origGetTexIdx = fm.getTextureArrayIndexByFillTypeIndex
+
+    -- Helper: resolve the first vanilla fill type from a priority list that actually
+    -- has a textureArrayIndex registered on this map's terrain fill layer array.
+    -- Returns the fill type INDEX (not textureArrayIndex) of the best match, or nil.
+    local function bestVanilla(priorityNames)
+        for _, name in ipairs(priorityNames) do
+            local idx = fm:getFillTypeIndexByName(name)
+            if idx then
+                local texIdx = origGetTexIdx(fm, idx)
+                if texIdx ~= nil then
+                    return idx
+                end
+            end
+        end
+        return nil
+    end
+
+    -- Per-type visual priority lists (best match first, broad fallbacks last).
+    -- Each list is ordered from closest visual match to broadest fallback.
+    -- All candidates are vanilla FS25 base-game fill types guaranteed to exist
+    -- on standard maps. The runtime probe above ensures we only use types that
+    -- actually have a registered texture on the current map.
+    --
+    -- Appearance reference:
+    --   LIME            → bright white powder
+    --   FERTILIZER      → off-white/pale granular
+    --   MANURE          → dark brown chunky organic
+    --   DIGESTATE       → dark brown/grey liquid-spread organic
+    --   LIQUIDMANURE    → dark brown liquid slurry
+    --   LIQUIDFERTILIZER→ amber/clear liquid
+    --   SEEDS           → small pale tan granules
+    --   STRAW           → golden-yellow fibre
+    --   CHAFF           → greenish/yellow fine fibre
+
+    local PER_TYPE_PRIORITIES = {
+        -- ── GRANULAR MINERAL FERTILIZERS ──────────────────────────────────
+        -- White to off-white crystalline/granular powders
+        UREA     = { "LIME", "FERTILIZER" },            -- Urea is bright white granular → LIME first
+        AMS      = { "FERTILIZER", "LIME" },            -- AMS is off-white/light grey granular
+        MAP      = { "FERTILIZER", "LIME" },            -- MAP is off-white/light brown granular
+        DAP      = { "FERTILIZER", "LIME" },            -- DAP is off-white/grey-brown granular
+        POTASH   = { "FERTILIZER", "LIME" },            -- Potassium chloride — pinkish but granular
+        GYPSUM   = { "LIME", "FERTILIZER" },            -- Gypsum is bright white powder → LIME first
+
+        -- ── ORGANIC / COMPOST TYPES ────────────────────────────────────────
+        -- Dark brown to black matte organic material
+        COMPOST          = { "MANURE", "DIGESTATE", "FERTILIZER" },         -- Dark brown chunky compost
+        BIOSOLIDS        = { "DIGESTATE", "MANURE", "FERTILIZER" },         -- Very dark, fine-grained sludge cake
+        CHICKEN_MANURE   = { "MANURE", "DIGESTATE", "FERTILIZER" },         -- Dark brown granular litter
+        PELLETIZED_MANURE = { "MANURE", "DIGESTATE", "FERTILIZER" },        -- Dark brown pellets
+    }
+
+    -- Liquid custom types → LIQUIDFERTILIZER (all liquid, colour difference is minor)
+    local LIQUID_NAMES = {
+        "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME",
+        "INSECTICIDE", "FUNGICIDE",
+        "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH"
+    }
     local liqFertIdx = fm:getFillTypeIndexByName("LIQUIDFERTILIZER")
 
+    -- Build the final remap table: customFillTypeIndex → bestVanillaFillTypeIndex
     local remap = {}
-    if fertIdx then
-        for _, name in ipairs({ "UREA", "AMS", "MAP", "DAP", "POTASH",
-                                 "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM" }) do
-            local idx = fm:getFillTypeIndexByName(name)
-            if idx then remap[idx] = fertIdx end
+    local logLines = {}
+
+    for customName, priorities in pairs(PER_TYPE_PRIORITIES) do
+        local customIdx = fm:getFillTypeIndexByName(customName)
+        if customIdx then
+            local vanillaIdx = bestVanilla(priorities)
+            if vanillaIdx then
+                remap[customIdx] = vanillaIdx
+                local vanillaFT = fm:getFillTypeByIndex(vanillaIdx)
+                table.insert(logLines, string.format("  %-20s → %s", customName, vanillaFT and vanillaFT.name or "?"))
+            else
+                SoilLogger.warning("Fill type material hook: no texture array entry found for %s priorities (%s) — type will show default",
+                    customName, table.concat(priorities, ", "))
+            end
         end
     end
+
     if liqFertIdx then
-        for _, name in ipairs({ "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME",
-                                 "INSECTICIDE", "FUNGICIDE",
-                                 "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH" }) do
-            local idx = fm:getFillTypeIndexByName(name)
-            if idx then remap[idx] = liqFertIdx end
+        -- Only add to remap if liqFertIdx actually has a textureArrayIndex
+        local liqTexIdx = origGetTexIdx(fm, liqFertIdx)
+        if liqTexIdx then
+            for _, name in ipairs(LIQUID_NAMES) do
+                local idx = fm:getFillTypeIndexByName(name)
+                if idx then
+                    remap[idx] = liqFertIdx
+                end
+            end
         end
     end
 
     if not next(remap) then
-        SoilLogger.warning("Fill type material hook: no custom fill types found — skipping")
+        SoilLogger.warning("Fill type material hook: no custom fill types could be remapped — skipping")
         return false
     end
 
     local count = 0
     for _ in pairs(remap) do count = count + 1 end
 
-    local origGetTexIdx = fm.getTextureArrayIndexByFillTypeIndex
     fm.getTextureArrayIndexByFillTypeIndex = function(mgr, fillTypeIndex, ...)
         local result = origGetTexIdx(mgr, fillTypeIndex, ...)
         if result == nil and fillTypeIndex then
-            local mapped = remap[fillTypeIndex]
-            if mapped then
-                result = origGetTexIdx(mgr, mapped, ...)
+            local vanillaIdx = remap[fillTypeIndex]
+            if vanillaIdx then
+                result = origGetTexIdx(mgr, vanillaIdx, ...)
             end
         end
         return result
@@ -3005,7 +3180,8 @@ function HookManager:installFillTypeMaterialHook()
         fm.getTextureArrayIndexByFillTypeIndex = origGetTexIdx
     end)
 
-    SoilLogger.info("[OK] Fill type material hook installed - %d custom types mapped to vanilla textures", count)
+    SoilLogger.info("[OK] Fill type material hook installed - %d custom types remapped:\n%s",
+        count, table.concat(logLines, "\n"))
     return true
 end
 
