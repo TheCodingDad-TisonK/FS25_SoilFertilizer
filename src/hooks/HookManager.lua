@@ -1311,47 +1311,97 @@ function HookManager:installSprayerAreaHook()
                 local rateMultiplier = (rm ~= nil) and rm:getMultiplier(self.id) or 1.0
                 local effectiveLiters = liters * rateMultiplier
 
-                SoilLogger.debug("Sprayer/Spreader hook: Field %d, %s, %.4fL (x%.2f rate)",
-                    fieldId, fillType.name, effectiveLiters, rateMultiplier)
-
-                -- Cache sprayer world position for density-map pixel writes in applyFertilizer
-                if g_SoilFertilityManager.soilSystem then
-                    local spx, _, spz = getWorldTranslation(self.rootNode)
-                    g_SoilFertilityManager.soilSystem._lastSprayX = spx
-                    g_SoilFertilityManager.soilSystem._lastSprayZ = spz
+                -- Section Control: scale nutrient credit when outer boom sections are off.
+                -- wap.usage already reflects section shutoff (VariableWorkWidth.getIsWorkAreaActive
+                -- gates each work area on section.isActive). We apply the fraction here so that
+                -- effectiveLiters correctly represents the nutrient dose for the active portion
+                -- of the field, especially when rateMultiplier != 1.0.
+                local coverageFraction = 1.0
+                if SoilUtils and SoilUtils.getSectionCoverageFraction then
+                    coverageFraction = SoilUtils.getSectionCoverageFraction(self)
+                    if coverageFraction < 1.0 then
+                        effectiveLiters = effectiveLiters * coverageFraction
+                        SoilLogger.debug("SectionControl: %.0f%% boom active → liters scaled to %.4fL",
+                            coverageFraction * 100, effectiveLiters)
+                    end
                 end
 
-                -- Track field coverage using raw liters (before rateMultiplier) so that the
-                -- application-rate knob doesn't inflate coverage beyond the actual area worked.
-                -- Must cover all product types (fertilizer AND direct-path crop protection).
+                -- ── Coverage tracking (raw liters, before rateMultiplier) ─────────
+                -- Must run for ALL product types (fertilizer AND crop protection).
                 if g_SoilFertilityManager.soilSystem then
                     g_SoilFertilityManager.soilSystem:trackSprayerCoverage(fieldId, liters, fillType.name)
                 end
 
-                if isFertilizer then
-                    g_SoilFertilityManager.soilSystem:onFertilizerApplied(fieldId, fillTypeIndex, effectiveLiters)
+                -- ── Sub-field section attribution (issue #300) ────────────────────
+                -- When VariableWorkWidth is present, distribute the nutrient credit
+                -- across active section nodes so that boundary passes only affect the
+                -- portion of the field the boom is actually spraying.
+                -- Falls back to the rootNode single-field path when VWW is absent.
+                local rootX, _, rootZ = getWorldTranslation(self.rootNode)
+                local vww = self.spec_variableWorkWidth
+                local soilSys = g_SoilFertilityManager.soilSystem
+
+                local function applySingle(fId, sectionLiters, spx, spz)
+                    if not fId or fId <= 0 then return end
+                    if soilSys then
+                        soilSys._lastSprayX = spx or rootX
+                        soilSys._lastSprayZ = spz or rootZ
+                    end
+                    SoilLogger.debug("Sprayer/Spreader hook: Field %d, %s, %.4fL (x%.2f rate)",
+                        fId, fillType.name, sectionLiters, rateMultiplier)
+                    if isFertilizer then
+                        soilSys:onFertilizerApplied(fId, fillTypeIndex, sectionLiters)
+                    end
+                    if herbOnlyDirect and soilSys.onHerbicideAppliedDirect then
+                        soilSys:onHerbicideAppliedDirect(fId, herbEffectiveness, sectionLiters)
+                    end
+                    if pestOnlyDirect and soilSys.onInsecticideAppliedDirect then
+                        soilSys:onInsecticideAppliedDirect(fId, pestEffectiveness, sectionLiters)
+                    end
+                    if diseaseOnlyDirect and soilSys.onFungicideAppliedDirect then
+                        soilSys:onFungicideAppliedDirect(fId, diseaseEffectiveness, sectionLiters)
+                    end
+                    local entry = SoilConstants.FERTILIZER_PROFILES[fillType.name]
+                    if entry and (entry.N or entry.P or entry.K) and
+                       rateMultiplier > SoilConstants.SPRAYER_RATE.BURN_RISK_THRESHOLD then
+                        soilSys:applyBurnEffect(fId, rateMultiplier)
+                    end
                 end
 
-                -- Herbicide application reduces weed pressure (direct path: non-profile products only)
-                if herbOnlyDirect and g_SoilFertilityManager.soilSystem.onHerbicideAppliedDirect then
-                    g_SoilFertilityManager.soilSystem:onHerbicideAppliedDirect(fieldId, herbEffectiveness, effectiveLiters)
-                end
+                if vww and vww.sections and #vww.sections > 0 then
+                    -- Collect active sections
+                    local activeSections = {}
+                    for _, section in ipairs(vww.sections) do
+                        if section.isActive or section.isCenter then
+                            table.insert(activeSections, section)
+                        end
+                    end
 
-                -- Insecticide application reduces pest pressure (direct path: non-profile products only)
-                if pestOnlyDirect and g_SoilFertilityManager.soilSystem.onInsecticideAppliedDirect then
-                    g_SoilFertilityManager.soilSystem:onInsecticideAppliedDirect(fieldId, pestEffectiveness, effectiveLiters)
-                end
-
-                -- Fungicide application reduces disease pressure (direct path: non-profile products only)
-                if diseaseOnlyDirect and g_SoilFertilityManager.soilSystem.onFungicideAppliedDirect then
-                    g_SoilFertilityManager.soilSystem:onFungicideAppliedDirect(fieldId, diseaseEffectiveness, effectiveLiters)
-                end
-
-                -- Over-application burn check (nutrient fertilizers only, not lime)
-                local entry = SoilConstants.FERTILIZER_PROFILES[fillType.name]
-                local isNutrientFertilizer = entry and (entry.N or entry.P or entry.K)
-                if isNutrientFertilizer and rateMultiplier > SoilConstants.SPRAYER_RATE.BURN_RISK_THRESHOLD then
-                    g_SoilFertilityManager.soilSystem:applyBurnEffect(fieldId, rateMultiplier)
+                    if #activeSections > 0 then
+                        local litersPerSection = effectiveLiters / #activeSections
+                        for _, section in ipairs(activeSections) do
+                            local sx, sz = rootX, rootZ
+                            if not section.isCenter and section.maxWidthNode ~= nil then
+                                local wx, _, wz = getWorldTranslation(section.maxWidthNode)
+                                if wx then
+                                    -- Midpoint: accurate field lookup, better lateral density paint
+                                    sx = (rootX + wx) * 0.5
+                                    sz = (rootZ + wz) * 0.5
+                                end
+                            end
+                            local sectionFieldId = hookMgrRef:getFieldIdAtWorldPosition(sx, sz)
+                            applySingle(sectionFieldId, litersPerSection, sx, sz)
+                        end
+                    else
+                        applySingle(fieldId, effectiveLiters, rootX, rootZ)
+                    end
+                else
+                    -- No VWW: single-field path (rootNode already resolved above)
+                    if soilSys then
+                        soilSys._lastSprayX = rootX
+                        soilSys._lastSprayZ = rootZ
+                    end
+                    applySingle(fieldId, effectiveLiters, rootX, rootZ)
                 end
 
                 -- BUY mode backup refill (issue #125).
