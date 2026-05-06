@@ -439,7 +439,7 @@ function SoilFertilitySystem:onPlowing(fieldId)
     local field = self:getOrCreateField(fieldId, true)
     if not field then return end
 
-    self:info("[Plowing] Field %d triggered (plowingBonus=%s, weedPressure=%s)",
+    self:debug("[Plowing] Field %d triggered (plowingBonus=%s, weedPressure=%s)",
         fieldId, tostring(self.settings.plowingBonus), tostring(self.settings.weedPressure))
 
     local changed = false
@@ -468,13 +468,13 @@ function SoilFertilitySystem:onPlowing(fieldId)
             changed = true
         end
 
-        self:info("[Plowing] Field %d: OM %.1f->%.1f, pH %.2f->%.2f",
+        self:debug("[Plowing] Field %d: OM %.1f->%.1f, pH %.2f->%.2f",
             fieldId, omBefore, omAfter, phBefore, phAfter)
     end
 
     -- Plowing benefit 3: Reset weed pressure (independent of plowingBonus)
     if self.settings.weedPressure and (field.weedPressure or 0) > 0 then
-        self:info("[Plowing] Field %d: weed %.0f -> 0", fieldId, field.weedPressure)
+        self:debug("[Plowing] Field %d: weed %.0f -> 0", fieldId, field.weedPressure)
         field.weedPressure = 0
         field.herbicideDaysLeft = 0
         changed = true
@@ -484,7 +484,7 @@ function SoilFertilitySystem:onPlowing(fieldId)
     if self.settings.pestPressure and SoilConstants.PLOWING.PEST_PRESSURE_REDUCTION and (field.pestPressure or 0) > 0 then
         local before = field.pestPressure
         field.pestPressure = math.max(0, before - SoilConstants.PLOWING.PEST_PRESSURE_REDUCTION)
-        self:info("[Plowing] Field %d: pest %.0f -> %.0f", fieldId, before, field.pestPressure)
+        self:debug("[Plowing] Field %d: pest %.0f -> %.0f", fieldId, before, field.pestPressure)
         changed = true
     end
 
@@ -492,7 +492,7 @@ function SoilFertilitySystem:onPlowing(fieldId)
     if self.settings.diseasePressure and SoilConstants.PLOWING.DISEASE_PRESSURE_REDUCTION and (field.diseasePressure or 0) > 0 then
         local before = field.diseasePressure
         field.diseasePressure = math.max(0, before - SoilConstants.PLOWING.DISEASE_PRESSURE_REDUCTION)
-        self:info("[Plowing] Field %d: disease %.0f -> %.0f", fieldId, before, field.diseasePressure)
+        self:debug("[Plowing] Field %d: disease %.0f -> %.0f", fieldId, before, field.diseasePressure)
         changed = true
     end
 
@@ -513,7 +513,7 @@ function SoilFertilitySystem:onCultivation(fieldId)
     local field = self:getOrCreateField(fieldId, false)
     if not field then return end
 
-    self:info("[Cultivation] Field %d triggered (weedPressure=%.0f)", fieldId, field.weedPressure or 0)
+    self:debug("[Cultivation] Field %d triggered (weedPressure=%.0f)", fieldId, field.weedPressure or 0)
 
     local changed = false
     local c = SoilConstants.CULTIVATION
@@ -521,21 +521,21 @@ function SoilFertilitySystem:onCultivation(fieldId)
     if self.settings.weedPressure and c.WEED_PRESSURE_REDUCTION and (field.weedPressure or 0) > 0 then
         local before = field.weedPressure
         field.weedPressure = math.max(0, before - c.WEED_PRESSURE_REDUCTION)
-        self:info("[Cultivation] Field %d: weed %.0f -> %.0f", fieldId, before, field.weedPressure)
+        self:debug("[Cultivation] Field %d: weed %.0f -> %.0f", fieldId, before, field.weedPressure)
         changed = true
     end
 
     if self.settings.pestPressure and c.PEST_PRESSURE_REDUCTION and (field.pestPressure or 0) > 0 then
         local before = field.pestPressure
         field.pestPressure = math.max(0, before - c.PEST_PRESSURE_REDUCTION)
-        self:info("[Cultivation] Field %d: pest %.0f -> %.0f", fieldId, before, field.pestPressure)
+        self:debug("[Cultivation] Field %d: pest %.0f -> %.0f", fieldId, before, field.pestPressure)
         changed = true
     end
 
     if self.settings.diseasePressure and c.DISEASE_PRESSURE_REDUCTION and (field.diseasePressure or 0) > 0 then
         local before = field.diseasePressure
         field.diseasePressure = math.max(0, before - c.DISEASE_PRESSURE_REDUCTION)
-        self:info("[Cultivation] Field %d: disease %.0f -> %.0f", fieldId, before, field.diseasePressure)
+        self:debug("[Cultivation] Field %d: disease %.0f -> %.0f", fieldId, before, field.diseasePressure)
         changed = true
     end
 
@@ -561,7 +561,7 @@ function SoilFertilitySystem:onStripTill(fieldId)
     local st = SoilConstants.STRIP_TILL
     local changed = false
 
-    self:info("[StripTill] Field %d triggered — weed=%.0f pest=%.0f disease=%.0f OM=%.2f",
+    self:debug("[StripTill] Field %d triggered — weed=%.0f pest=%.0f disease=%.0f OM=%.2f",
         fieldId,
         field.weedPressure    or 0,
         field.pestPressure    or 0,
@@ -572,7 +572,7 @@ function SoilFertilitySystem:onStripTill(fieldId)
     if self.settings.weedPressure and (field.weedPressure or 0) > 0 then
         local before = field.weedPressure
         field.weedPressure = math.max(0, before - st.WEED_PRESSURE_REDUCTION)
-        self:info("[StripTill] Field %d: weed %.0f -> %.0f", fieldId, before, field.weedPressure)
+        self:debug("[StripTill] Field %d: weed %.0f -> %.0f", fieldId, before, field.weedPressure)
         changed = true
     end
 
@@ -580,7 +580,7 @@ function SoilFertilitySystem:onStripTill(fieldId)
     if self.settings.pestPressure and (field.pestPressure or 0) > 0 then
         local before = field.pestPressure
         field.pestPressure = math.max(0, before - st.PEST_PRESSURE_REDUCTION)
-        self:info("[StripTill] Field %d: pest %.0f -> %.0f", fieldId, before, field.pestPressure)
+        self:debug("[StripTill] Field %d: pest %.0f -> %.0f", fieldId, before, field.pestPressure)
         changed = true
     end
 
@@ -588,7 +588,7 @@ function SoilFertilitySystem:onStripTill(fieldId)
     if self.settings.diseasePressure and (field.diseasePressure or 0) > 0 then
         local before = field.diseasePressure
         field.diseasePressure = math.max(0, before - st.DISEASE_PRESSURE_REDUCTION)
-        self:info("[StripTill] Field %d: disease %.0f -> %.0f", fieldId, before, field.diseasePressure)
+        self:debug("[StripTill] Field %d: disease %.0f -> %.0f", fieldId, before, field.diseasePressure)
         changed = true
     end
 
@@ -599,7 +599,7 @@ function SoilFertilitySystem:onStripTill(fieldId)
                                   omBefore + st.OM_BOOST)
         if omAfter > omBefore then
             field.organicMatter = omAfter
-            self:info("[StripTill] Field %d: OM %.2f -> %.2f", fieldId, omBefore, omAfter)
+            self:debug("[StripTill] Field %d: OM %.2f -> %.2f", fieldId, omBefore, omAfter)
             changed = true
         end
     end

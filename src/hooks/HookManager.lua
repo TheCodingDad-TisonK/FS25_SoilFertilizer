@@ -1621,7 +1621,7 @@ function HookManager:installPlowingHook()
             local x, _, z = getWorldTranslation(cultivatorSelf.rootNode)
             local success, errorMsg = pcall(function()
                 local farmlandId = hookMgrRef:getFieldIdAtWorldPosition(x, z)
-                SoilLogger.info("[PlowHook] pos=(%.1f,%.1f) farmlandId=%s isPlow=%s",
+                SoilLogger.debug("[PlowHook] pos=(%.1f,%.1f) farmlandId=%s isPlow=%s",
                     x, z, tostring(farmlandId), tostring(isPlowSpec))
                 if farmlandId and farmlandId > 0 then
                     local isPlowingTool = isPlowSpec
@@ -1910,7 +1910,7 @@ function HookManager:installSowingHook()
                 if not x then return end
 
                 local fieldId = hookMgrRef:getFieldIdAtWorldPosition(x, z)
-                SoilLogger.info("[SowingHook] pos=(%.1f,%.1f) fieldId=%s crop=%s",
+                SoilLogger.debug("[SowingHook] pos=(%.1f,%.1f) fieldId=%s crop=%s",
                     x, z, tostring(fieldId),
                     tostring(spec.workAreaParameters.seedsFruitType))
                 if not fieldId or fieldId <= 0 then return end
