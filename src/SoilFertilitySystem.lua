@@ -1589,17 +1589,24 @@ function SoilFertilitySystem:updateFieldNutrients(fieldId, fruitTypeIndex, harve
 
     -- NUTRIENT DEPLETION CALCULATION EXPLAINED:
     --
-    -- Step 1: Calculate depletion factor
-    -- Formula: factor = harvested liters / 1000
-    -- Why: Extraction rates in Constants.lua are calibrated per 1000L of harvested crop
-    -- Example: 80,000L wheat harvest → factor = 80
-    local factor = harvestedLiters / 1000
+    -- Step 1: Calculate depletion factor, normalized by field area.
+    -- Combine.addCutterArea fires many times during a harvest — harvestedLiters
+    -- is the yield from one small chunk, and the chunks sum to the total field yield.
+    -- Without area normalization, a 5 ha field (5× the liters of a 1 ha field)
+    -- would deplete 5× more nutrients from the same 0-100 nutrient pool, draining
+    -- it to zero in one harvest pass. Dividing by fieldAreaHa makes depletion
+    -- field-size independent: the same yield density (L/ha) always removes the
+    -- same number of nutrient points regardless of field size.
+    -- Formula: factor = (harvestedLiters / 1000) / fieldAreaHa
+    local fieldAreaHa = (field.fieldArea and field.fieldArea > 0) and field.fieldArea or 1.0
+    local factor = (harvestedLiters / 1000) / fieldAreaHa
 
     -- Step 2: Apply difficulty multiplier
     -- Simple (0.7x): 30% less depletion, easier for new players
     -- Realistic (1.0x): Balanced depletion based on real agricultural rates
     -- Hardcore (1.5x): 50% more depletion, challenging management
-    -- Example: factor 80 × 0.7 (Simple) = 56, or × 1.5 (Hardcore) = 120
+    -- Example: 8000L/ha wheat on a 5ha field → factor = (8000/1000)/5 = 1.6 per chunk
+    -- × 1.0 (Realistic) = 1.6; N removed = 2.00 × 1.6 = 3.2 pts per call
     local diffMultiplier = SoilConstants.DIFFICULTY.MULTIPLIERS[self.settings.difficulty]
     if diffMultiplier then
         factor = factor * diffMultiplier
