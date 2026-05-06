@@ -1949,10 +1949,12 @@ function HookManager:installFillUnitHookEarly()
         return false
     end
 
-    local solidNames  = {"UREA", "AMS", "MAP", "DAP", "POTASH",
-                          "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM"}
-    local liquidNames = {"UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME", "INSECTICIDE", "FUNGICIDE",
-                         "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH"}
+    local solidNames         = {"UREA", "AMS", "MAP", "DAP", "POTASH",
+                                 "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM"}
+    local liquidNames        = {"UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME", "INSECTICIDE", "FUNGICIDE",
+                                "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH"}
+    -- Organic dry types also work in manure spreaders (MANURE fill-unit base)
+    local manureCompatNames  = {"BIOSOLIDS", "CHICKEN_MANURE"}
 
     local original = FillUnit.onPostLoad
     FillUnit.onPostLoad = Utils.prependedFunction(original, function(vehicleSelf)
@@ -1960,12 +1962,14 @@ function HookManager:installFillUnitHookEarly()
         if not fm then return end
         local fertIdx    = fm:getFillTypeIndexByName("FERTILIZER")
         local liqFertIdx = fm:getFillTypeIndexByName("LIQUIDFERTILIZER")
+        local manureIdx  = fm:getFillTypeIndexByName("MANURE")
         local spec = vehicleSelf.spec_fillUnit
         if not spec or not spec.fillUnits then return end
         for _, fu in pairs(spec.fillUnits) do
             if fu.supportedFillTypes then
                 local addSolid  = fertIdx    and fu.supportedFillTypes[fertIdx]
                 local addLiquid = liqFertIdx and fu.supportedFillTypes[liqFertIdx]
+                local addManure = manureIdx  and fu.supportedFillTypes[manureIdx]
                 if addSolid then
                     for _, name in ipairs(solidNames) do
                         local idx = fm:getFillTypeIndexByName(name)
@@ -1974,6 +1978,12 @@ function HookManager:installFillUnitHookEarly()
                 end
                 if addLiquid then
                     for _, name in ipairs(liquidNames) do
+                        local idx = fm:getFillTypeIndexByName(name)
+                        if idx then fu.supportedFillTypes[idx] = true end
+                    end
+                end
+                if addManure then
+                    for _, name in ipairs(manureCompatNames) do
                         local idx = fm:getFillTypeIndexByName(name)
                         if idx then fu.supportedFillTypes[idx] = true end
                     end
@@ -2027,13 +2037,22 @@ function HookManager:installFillUnitHook()
         return false
     end
 
+    -- Vanilla MANURE base: enables organic dry products in manure spreaders.
+    -- Manure spreaders support MANURE but not FERTILIZER, so BIOSOLIDS and
+    -- CHICKEN_MANURE (organic dry products) were accepted by trailers (which
+    -- support both) but rejected by dedicated spreaders (MANURE-only fill unit).
+    local manureIndex = fm:getFillTypeIndexByName("MANURE")
+
     local solidNames  = {"UREA", "AMS", "MAP", "DAP", "POTASH",
                           "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM"}
     local liquidNames = {"UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME", "INSECTICIDE", "FUNGICIDE",
                          "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH"}
+    -- These organic dry types also work in manure spreaders (MANURE fill-unit base).
+    local manureCompatNames = {"BIOSOLIDS", "CHICKEN_MANURE"}
 
-    local solidIndices  = {}
-    local liquidIndices = {}
+    local solidIndices       = {}
+    local liquidIndices      = {}
+    local manureCompatIndices = {}
     for _, name in ipairs(solidNames) do
         local idx = fm:getFillTypeIndexByName(name)
         if idx then table.insert(solidIndices, idx) end
@@ -2041,6 +2060,10 @@ function HookManager:installFillUnitHook()
     for _, name in ipairs(liquidNames) do
         local idx = fm:getFillTypeIndexByName(name)
         if idx then table.insert(liquidIndices, idx) end
+    end
+    for _, name in ipairs(manureCompatNames) do
+        local idx = fm:getFillTypeIndexByName(name)
+        if idx then table.insert(manureCompatIndices, idx) end
     end
 
     -- Shared helper: inject custom fill type indices into one vehicle's fill units
@@ -2051,6 +2074,8 @@ function HookManager:installFillUnitHook()
             if fillUnit.supportedFillTypes then
                 local addSolid  = fertIndex    and fillUnit.supportedFillTypes[fertIndex]
                 local addLiquid = liqFertIndex and fillUnit.supportedFillTypes[liqFertIndex]
+                -- Manure spreaders support MANURE; enable organic dry types for them too
+                local addManure = manureIndex  and fillUnit.supportedFillTypes[manureIndex]
                 if addSolid then
                     for _, idx in ipairs(solidIndices) do
                         fillUnit.supportedFillTypes[idx] = true
@@ -2058,6 +2083,11 @@ function HookManager:installFillUnitHook()
                 end
                 if addLiquid then
                     for _, idx in ipairs(liquidIndices) do
+                        fillUnit.supportedFillTypes[idx] = true
+                    end
+                end
+                if addManure then
+                    for _, idx in ipairs(manureCompatIndices) do
                         fillUnit.supportedFillTypes[idx] = true
                     end
                 end
@@ -2086,7 +2116,8 @@ function HookManager:installFillUnitHook()
 
     -- Build customToBase: custom fill type index → vanilla base type index.
     -- Used by getFillUnitSupportsFillType hook below.
-    local customToBase = {}
+    local customToBase  = {}
+    local customToManure = {}  -- organic dry types that also fit in MANURE-based fill units
     if fertIndex then
         for _, idx in ipairs(solidIndices) do
             customToBase[idx] = fertIndex
@@ -2097,6 +2128,11 @@ function HookManager:installFillUnitHook()
             customToBase[idx] = liqFertIndex
         end
     end
+    if manureIndex then
+        for _, idx in ipairs(manureCompatIndices) do
+            customToManure[idx] = manureIndex
+        end
+    end
 
     -- Hook getFillUnitSupportsFillType so Dischargeable:dischargeToObject (vehicle-to-vehicle
     -- auger wagon → spreader, tanker → sprayer, etc.) passes the fill type check for our
@@ -2105,7 +2141,7 @@ function HookManager:installFillUnitHook()
     -- table. Wrapping the method directly is the belt-and-suspenders fix.
     --
     -- Logic: if the vehicle supports the corresponding vanilla base type (FERTILIZER or
-    -- LIQUIDFERTILIZER), it also supports the matching custom type.
+    -- LIQUIDFERTILIZER or MANURE), it also supports the matching custom type.
     if FillUnit.getFillUnitSupportsFillType then
         local origGetSupports = FillUnit.getFillUnitSupportsFillType
         FillUnit.getFillUnitSupportsFillType = function(vehicleSelf, fillUnitIndex, fillType)
@@ -2113,10 +2149,15 @@ function HookManager:installFillUnitHook()
             if origGetSupports(vehicleSelf, fillUnitIndex, fillType) then
                 return true
             end
-            -- Custom type? Check if the vehicle supports the corresponding vanilla base type.
+            -- Custom type? Check against FERTILIZER/LIQUIDFERTILIZER base type.
             local baseType = customToBase[fillType]
-            if baseType then
-                return origGetSupports(vehicleSelf, fillUnitIndex, baseType)
+            if baseType and origGetSupports(vehicleSelf, fillUnitIndex, baseType) then
+                return true
+            end
+            -- Organic dry types (BIOSOLIDS, CHICKEN_MANURE) also fit MANURE-based fill units.
+            local manureBase = customToManure[fillType]
+            if manureBase and origGetSupports(vehicleSelf, fillUnitIndex, manureBase) then
+                return true
             end
             return false
         end
