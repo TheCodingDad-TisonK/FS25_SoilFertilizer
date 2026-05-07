@@ -86,7 +86,7 @@
     <e k="sf_hud_optimal" v="[EN] Optimal" eh="cb61fef1" />
     <e k="sf_hud_post_harvest" v="[EN] Post-harvest · Fertilize" eh="634de6fe" />
     <e k="sf_hud_hint_edit" v="Ziehen: bewegen   Ecke: Größe ändern   RMT: fertig" eh="987ebf45" />
-    <e k="sf_hud_hint_normal" v="RMT: bewegen/Größe ändern" eh="afc8f13b" />
+    <e k="sf_hud_hint_normal" v="Shift+H: move/resize" eh="00000000" />
     <e k="sf_use_imperial_short" v="Imperiale Einheiten" eh="ff2701ad" />
     <e k="sf_use_imperial_long" v="Ausbringmengen in gal/ac und lb/ac (aus = L/ha und kg/ha)" eh="17efa489" />
     <e k="sf_active_map_layer_short" v="[EN] Active Map Layer" eh="1861765f" />

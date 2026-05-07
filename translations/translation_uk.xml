@@ -195,7 +195,7 @@
     <e k="sf_hud_optimal" v="Оптимально" eh="cb61fef1" />
     <e k="sf_hud_post_harvest" v="[EN] Post-harvest · Fertilize" eh="634de6fe" />
     <e k="sf_hud_hint_edit" v="Перетягування: рух   Кут: розмір   ПКМ: готово" eh="987ebf45" />
-    <e k="sf_hud_hint_normal" v="ПКМ: рух/розмір" eh="afc8f13b" />
+    <e k="sf_hud_hint_normal" v="Shift+H: move/resize" eh="00000000" />
     <e k="sf_report_detail_n_ok" v="Азот: Оптимальний" eh="13782bd9" />
     <e k="sf_report_detail_p_ok" v="Фосфор: Оптимальний" eh="dbc90f11" />
     <e k="sf_report_detail_k_ok" v="Калій: Оптимальний" eh="0197b4ba" />

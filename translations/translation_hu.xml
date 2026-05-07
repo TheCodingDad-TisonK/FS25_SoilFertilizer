@@ -85,8 +85,8 @@
     <e k="sf_hud_estYield" v="[EN] Est. Yield" eh="32a4135e" />
     <e k="sf_hud_optimal" v="[EN] Optimal" eh="cb61fef1" />
     <e k="sf_hud_post_harvest" v="[EN] Post-harvest · Fertilize" eh="634de6fe" />
-    <e k="sf_hud_hint_edit" v="[EN] Drag: move   Corner: resize   RMB: done" eh="987ebf45" />
-    <e k="sf_hud_hint_normal" v="[EN] RMB: move/resize" eh="afc8f13b" />
+    <e k="sf_hud_hint_edit" v="[EN] Drag: move   Corner: resize   RMB/Shift+H: done" eh="987ebf45" />
+    <e k="sf_hud_hint_normal" v="Shift+H: move/resize" eh="afc8f13b" />
     <e k="sf_use_imperial_short" v="Angolszász mértékegységek" eh="ff2701ad" />
     <e k="sf_use_imperial_long" v="Kijuttatási normák gal/ac és lb/ac egységben (ki = L/ha és kg/ha)" eh="17efa489" />
     <e k="sf_active_map_layer_short" v="[EN] Active Map Layer" eh="1861765f" />

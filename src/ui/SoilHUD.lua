@@ -3,7 +3,7 @@
 -- =========================================================
 -- Soil HUD Overlay - live field soil monitor
 -- Shows N/P/K/pH/OM for the field the player is standing on.
--- Toggle with J key. RMB on panel to drag/resize.
+-- Toggle with J key. Shift+H to enter HUD edit mode; RMB or Shift+H again to exit.
 -- =========================================================
 -- Author: TisonK
 -- =========================================================
@@ -328,20 +328,13 @@ end
 function SoilHUD:onMouseEvent(posX, posY, isDown, isUp, button, eventUsed)
     if not self.initialized then return false end
 
-    -- RMB: toggle edit mode.
-    -- Exit edit mode anywhere on screen (natural cancel behaviour).
-    -- Enter edit mode only when cursor is over the HUD panel — this prevents
-    -- consuming RMB events that belong to other mods (CoursePlay, AutoDrive, etc.)
-    -- when the player is not interacting with the soil HUD.
+    -- RMB: cancel/exit edit mode only. Never enters edit mode (that's Shift+H via SF_HUD_DRAG).
+    -- This ensures RMB is never consumed during normal play, so CoursePlay and AutoDrive
+    -- receive their RMB events uninterrupted.
     if isDown and button == Input.MOUSE_BUTTON_RIGHT then
-        if self.settings.enabled then
-            if self.editMode then
-                self:exitEditMode()
-                return true
-            elseif self.settings.showHUD and self.visible and self:isPointerOverHUD(posX, posY) then
-                self:enterEditMode()
-                return true
-            end
+        if self.editMode then
+            self:exitEditMode()
+            return true
         end
         return false
     end

@@ -40,7 +40,7 @@
     <e k="sf_hud_optimal" v="Optimal" eh="cb61fef1" />
     <e k="sf_hud_post_harvest" v="Efterhøst - Gød" eh="634de6fe" />
     <e k="sf_hud_hint_edit" v="Træk: flyt   Hjørne: ændr størrelse   HMK: færdig" eh="987ebf45" />
-    <e k="sf_hud_hint_normal" v="HMK: flyt/ændr størrelse" eh="afc8f13b" />
+    <e k="sf_hud_hint_normal" v="Shift+H: move/resize" eh="00000000" />
     <e k="sf_use_imperial_short" v="Imperiale enheder" eh="ff2701ad" />
     <e k="sf_use_imperial_long" v="Vis udbringningsrater i gal/ac og lb/ac (fra = L/ha og kg/ha)" eh="17efa489" />
     <e k="sf_active_map_layer_short" v="Aktivt kortlag" eh="1861765f" />
