@@ -328,16 +328,20 @@ end
 function SoilHUD:onMouseEvent(posX, posY, isDown, isUp, button, eventUsed)
     if not self.initialized then return false end
 
-    -- RMB: toggle edit mode — BEFORE showHUD/visible guards so it works reliably
-    -- on foot as well as in a vehicle (fix from GitHub issue #130).
+    -- RMB: toggle edit mode.
+    -- Exit edit mode anywhere on screen (natural cancel behaviour).
+    -- Enter edit mode only when cursor is over the HUD panel — this prevents
+    -- consuming RMB events that belong to other mods (CoursePlay, AutoDrive, etc.)
+    -- when the player is not interacting with the soil HUD.
     if isDown and button == Input.MOUSE_BUTTON_RIGHT then
         if self.settings.enabled then
             if self.editMode then
                 self:exitEditMode()
-            else
+                return true
+            elseif self.settings.showHUD and self.visible and self:isPointerOverHUD(posX, posY) then
                 self:enterEditMode()
+                return true
             end
-            return true
         end
         return false
     end
