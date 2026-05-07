@@ -103,7 +103,7 @@
             <binding device="KB_MOUSE_DEFAULT" input="KEY_lshift KEY_o" />
         </actionBinding>
         <actionBinding action="SF_HUD_DRAG">
-            <binding device="KB_MOUSE_DEFAULT" input="MOUSE_BUTTON_RIGHT" />
+            <binding device="KB_MOUSE_DEFAULT" input="KEY_lshift KEY_h" />
         </actionBinding>
     </inputBinding>
 

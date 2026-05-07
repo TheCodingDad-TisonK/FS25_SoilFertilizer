@@ -86,7 +86,7 @@
     <e k="sf_hud_optimal" v="最佳" eh="cb61fef1" />
     <e k="sf_hud_post_harvest" v="[EN] Post-harvest · Fertilize" eh="634de6fe" />
     <e k="sf_hud_hint_edit" v="拖動：移動   角落：縮放   右鍵：完成" eh="987ebf45" />
-    <e k="sf_hud_hint_normal" v="右鍵：移動/縮放" eh="afc8f13b" />
+    <e k="sf_hud_hint_normal" v="Shift+H: move/resize" eh="00000000" />
     <e k="sf_use_imperial_short" v="英制單位" eh="ff2701ad" />
     <e k="sf_use_imperial_long" v="以 gal/ac 和 lb/ac 顯示施用量（關閉則為 L/ha 和 kg/ha）" eh="17efa489" />
     <e k="sf_active_map_layer_short" v="[EN] Active Map Layer" eh="1861765f" />

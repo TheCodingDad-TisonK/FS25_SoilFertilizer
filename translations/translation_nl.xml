@@ -86,7 +86,7 @@
     <e k="sf_hud_optimal" v="Optimaal" eh="cb61fef1" />
     <e k="sf_hud_post_harvest" v="Na de oogst · Bemesten" eh="634de6fe" />
     <e k="sf_hud_hint_edit" v="Sleep: verplaatsen   Hoek: formaat wijzigen   Rechtsklik: gereed" eh="987ebf45" />
-    <e k="sf_hud_hint_normal" v="Rechtsklik: verplaatsen/vergroten" eh="afc8f13b" />
+    <e k="sf_hud_hint_normal" v="Shift+H: move/resize" eh="00000000" />
     <e k="sf_use_imperial_short" v="Imperiale eenheden" eh="ff2701ad" />
     <e k="sf_use_imperial_long" v="Toon doseringen in gal/ac en lb/ac (uit = L/ha en kg/ha)" eh="17efa489" />
     <e k="sf_active_map_layer_short" v="Actieve kaartlaag" eh="1861765f" />

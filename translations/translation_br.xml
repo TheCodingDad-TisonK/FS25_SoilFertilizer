@@ -85,7 +85,7 @@
     <e k="sf_hud_estYield" v="Prod. Est." eh="32a4135e" />
     <e k="sf_hud_optimal" v="Ideal" eh="cb61fef1" />
     <e k="sf_hud_post_harvest" v="[EN] Post-harvest · Fertilize" eh="634de6fe" />
-    <e k="sf_hud_hint_edit" v="Arraste: mover   Canto: redimensionar   RMB: pronto" eh="987ebf45" />
+    <e k="sf_hud_hint_edit" v="Arraste: mover   Canto: redimensionar   RMB/Shift+H: pronto" eh="987ebf45" />
     <e k="sf_hud_hint_normal" v="RMB: mover/redimensionar" eh="afc8f13b" />
     <e k="sf_use_imperial_short" v="Unidades imperiais" eh="ff2701ad" />
     <e k="sf_use_imperial_long" v="Exibir taxas em gal/ac e lb/ac (desativado = L/ha e kg/ha)" eh="17efa489" />

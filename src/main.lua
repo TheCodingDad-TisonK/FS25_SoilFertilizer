@@ -338,13 +338,11 @@ if FillTypeManager and type(FillTypeManager.loadModFillTypes) == "function" then
     FillTypeManager.loadModFillTypes = Utils.prependedFunction(FillTypeManager.loadModFillTypes, injectSFModFillTypes)
 end
 
--- Route mouse events to SoilHUD (for drag/resize edit mode)
--- RMB only enters edit mode when cursor is over the panel (no cross-contamination).
--- We always call onMouseEvent regardless of eventUsed — SoilHUD:onMouseEvent only
--- returns true (consumes the event) when cursor is over the panel OR already in edit
--- mode, so we never steal clicks from game systems.  The old `not eventUsed` guard
--- prevented RMB from reaching the HUD when the game had already tagged the event
--- (e.g. player controller on foot), breaking cursor activation on foot.
+-- Route mouse events to SoilHUD (for drag/resize edit mode).
+-- Edit mode is entered via Shift+H (SF_HUD_DRAG input action) — not via RMB.
+-- RMB only exits edit mode (and only when this mod is already in edit mode).
+-- This guarantees RMB is never consumed during normal play, preserving
+-- CoursePlay, AutoDrive, and other mods that rely on RMB.
 local soilMouseHandler = {}
 function soilMouseHandler:mouseEvent(posX, posY, isDown, isUp, button, eventUsed)
     -- Settings panel eats input first when open

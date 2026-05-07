@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <l10n>
     <elements>
     <e k="sf_section" v="Soil &amp; Fertilizer" eh="d30a22a9" />
@@ -194,8 +194,8 @@
     <e k="sf_hud_estYield" v="Est. Yield" eh="32a4135e" />
     <e k="sf_hud_optimal" v="Optimal" eh="cb61fef1" />
     <e k="sf_hud_post_harvest" v="Post-harvest · Fertilize" eh="634de6fe" />
-    <e k="sf_hud_hint_edit" v="Drag: move   Corner: resize   RMB: done" eh="987ebf45" />
-    <e k="sf_hud_hint_normal" v="RMB: move/resize" eh="afc8f13b" />
+    <e k="sf_hud_hint_edit" v="Drag: move   Corner: resize   RMB/Shift+H: done" eh="987ebf45" />
+    <e k="sf_hud_hint_normal" v="Shift+H: move/resize" eh="00000000" />
     <e k="sf_report_detail_n_ok" v="Nitrogen: Optimal" eh="13782bd9" />
     <e k="sf_report_detail_p_ok" v="Phosphorus: Optimal" eh="dbc90f11" />
     <e k="sf_report_detail_k_ok" v="Potassium: Optimal" eh="0197b4ba" />
