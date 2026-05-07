@@ -1550,12 +1550,28 @@ end
 -- per-frame nutrient calculations since no player is managing them.
 -- NOTE: This function is called every frame during rain. The per-frame leach is
 -- intentional and correctly physics-integrated via dt scaling, unlike the daily batch.
+-- RWE active event id → leaching multiplier (applied to all nutrients during rain)
+local RWE_LEACH_MULTIPLIERS = {
+    fertilizer_penalty = 1.35,
+    crop_yield_penalty = 1.20,
+    fertilizer_bonus   = 0.80,
+    crop_yield_bonus   = 0.85,
+}
+
 function SoilFertilitySystem:applyRainEffects(dt, rainScale)
     if not self.settings.enabled or not self.settings.rainEffects then return end
 
     local rain = SoilConstants.RAIN
     local limits = SoilConstants.NUTRIENT_LIMITS
-    local leachFactor = rainScale * dt * rain.LEACH_BASE_FACTOR
+
+    -- Scale leaching by active RWE event if present
+    local rweMultiplier = 1.0
+    local rwe = g_currentMission and g_currentMission.randomWorldEvents
+    if rwe and rwe.EVENT_STATE then
+        rweMultiplier = RWE_LEACH_MULTIPLIERS[rwe.EVENT_STATE.activeEvent] or 1.0
+    end
+
+    local leachFactor = rainScale * dt * rain.LEACH_BASE_FACTOR * rweMultiplier
     local count = 0
 
     -- Iterate only owned fields (activeFieldIds set, Phase 1)
