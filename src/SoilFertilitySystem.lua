@@ -106,7 +106,7 @@ function SoilFertilitySystem:initialize()
         -- Propagate to shared constants so SoilMapOverlay reads the same resolution
         SoilConstants.ZONE.CELL_SIZE    = self.cellSize
         SoilConstants.ZONE.CELL_AREA_HA = self.cellAreaHa
-        SoilLogger.info("[PERF-P3] Map %.0fm (%.1fx) → cell %dm  %.4f ha/cell",
+        SoilLogger.debug("[PERF-P3] Map %.0fm (%.1fx) → cell %dm  %.4f ha/cell",
             mapSize, scale, self.cellSize, self.cellAreaHa)
     end
 
@@ -404,7 +404,7 @@ function SoilFertilitySystem:onFieldOwnershipChanged(fieldId, farmlandId, farmId
         -- Field sold / abandoned — pull it out of the active simulation set.
         -- fieldData intentionally kept: new owner inherits the soil conditions.
         self:_removeFromActiveSet(fieldId)
-        SoilLogger.info("[PERF-P1] Field %d released by farm — removed from active set (data preserved)", fieldId)
+        SoilLogger.debug("[PERF-P1] Field %d released by farm — removed from active set (data preserved)", fieldId)
         return
     end
 
@@ -412,7 +412,7 @@ function SoilFertilitySystem:onFieldOwnershipChanged(fieldId, farmlandId, farmId
     local field = self:getOrCreateField(fieldId, true)
     if field then
         self:_addToActiveSet(fieldId)
-        SoilLogger.info("[PERF-P1] Field %d acquired by farm %d — added to active set", fieldId, farmId)
+        SoilLogger.debug("[PERF-P1] Field %d acquired by farm %d — added to active set", fieldId, farmId)
     end
 end
 
@@ -907,7 +907,7 @@ function SoilFertilitySystem:update(dt)
                 -- Update lastSeason only after the full pass so all fields see the
                 -- same spring-transition flag (captured at batch-queue time).
                 self.lastSeason = self._dailyBatchSeason
-                SoilLogger.info("[PERF-P4] Day %d daily batch complete: %d field(s) in final slice, %d total",
+                SoilLogger.debug("[PERF-P4] Day %d daily batch complete: %d field(s) in final slice, %d total",
                     self._dailyBatchDay, processed, n)
             else
                 SoilLogger.debug("[PERF-P4] Day %d batch progress: cursor %d/%d (+%d this frame)",
@@ -1167,7 +1167,7 @@ function SoilFertilitySystem:_rebuildActiveList()
     table.sort(list)  -- stable order for deterministic batch processing
     self._activeFieldList = list
     self._activeListDirty = false
-    SoilLogger.info("[PERF-P1] Active list rebuilt: %d owned field(s)", #list)
+    SoilLogger.debug("[PERF-P1] Active list rebuilt: %d owned field(s)", #list)
 end
 
 -- Get or create field data
@@ -1295,7 +1295,7 @@ function SoilFertilitySystem:updateDailySoil()
     self._pendingDailyUpdate = true
     self._dailyBatchCursor   = 0
 
-    SoilLogger.info("[PERF-P4] Day %d: queued daily update for %d active field(s) (batch=%d/frame)",
+    SoilLogger.debug("[PERF-P4] Day %d: queued daily update for %d active field(s) (batch=%d/frame)",
         currentDay, #self._activeFieldList, self.DAILY_BATCH_SIZE)
 end
 

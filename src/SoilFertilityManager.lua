@@ -284,7 +284,7 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
                 )
                 if vHudOk and vHudId then
                     g_SoilFertilityManager.vehicleHUDEventId = vHudId
-                    SoilLogger.info("HUD toggle (J) registered in VEHICLE context")
+                    SoilLogger.debug("HUD toggle (J) registered in VEHICLE context")
                 end
 
                 -- Soil Report (K) in vehicle
@@ -296,7 +296,7 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
                     )
                     if vRepOk and vRepId then
                         g_SoilFertilityManager.vehicleReportEventId = vRepId
-                        SoilLogger.info("Soil Report (K) registered in VEHICLE context")
+                        SoilLogger.debug("Soil Report (K) registered in VEHICLE context")
                     end
                 end
 
@@ -308,7 +308,7 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
                 )
                 if upOk and upId then
                     g_SoilFertilityManager.rateUpEventId = upId
-                    SoilLogger.info("Rate UP (]) registered in VEHICLE context")
+                    SoilLogger.debug("Rate UP (]) registered in VEHICLE context")
                 end
 
                 -- Rate DOWN ([)
@@ -319,7 +319,7 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
                 )
                 if downOk and downId then
                     g_SoilFertilityManager.rateDownEventId = downId
-                    SoilLogger.info("Rate DOWN ([) registered in VEHICLE context")
+                    SoilLogger.debug("Rate DOWN ([) registered in VEHICLE context")
                 end
 
                 -- Auto toggle (Shift+L)
@@ -330,7 +330,7 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
                 )
                 if autoOk and autoId then
                     g_SoilFertilityManager.toggleAutoEventId = autoId
-                    SoilLogger.info("Auto toggle (Shift+L) registered in VEHICLE context")
+                    SoilLogger.debug("Auto toggle (Shift+L) registered in VEHICLE context")
                 end
 
                 -- Settings panel (Shift+O) in VEHICLE context
@@ -343,7 +343,7 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
                     if vSpOk and vSpId then
                         g_SoilFertilityManager.vehicleSettingsPanelEventId = vSpId
                         binding:setActionEventTextVisibility(vSpId, false)
-                        SoilLogger.info("Settings panel (Shift+O) registered in VEHICLE context")
+                        SoilLogger.debug("Settings panel (Shift+O) registered in VEHICLE context")
                     end
                 end
 
@@ -357,7 +357,7 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
                     if vDragOk and vDragId then
                         g_SoilFertilityManager.vehicleHudDragEventId = vDragId
                         binding:setActionEventTextVisibility(vDragId, false)
-                        SoilLogger.info("HUD drag (RMB) registered in VEHICLE context")
+                        SoilLogger.debug("HUD drag (RMB) registered in VEHICLE context")
                     end
                 end
 
@@ -376,7 +376,7 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
                 )
                 if pHudOk and pHudId then
                     g_SoilFertilityManager.toggleHUDEventId = pHudId
-                    SoilLogger.info("HUD toggle (J) re-registered in PLAYER context after vehicle exit")
+                    SoilLogger.debug("HUD toggle (J) re-registered in PLAYER context after vehicle exit")
                 end
 
                 if g_SoilFertilityManager.soilReportDialog then
@@ -387,7 +387,7 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
                     )
                     if pRepOk and pRepId then
                         g_SoilFertilityManager.soilReportEventId = pRepId
-                        SoilLogger.info("Soil Report (K) re-registered in PLAYER context after vehicle exit")
+                        SoilLogger.debug("Soil Report (K) re-registered in PLAYER context after vehicle exit")
                     end
                 end
 
@@ -400,7 +400,7 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
                     if pMapOk and pMapId then
                         g_SoilFertilityManager.cycleMapLayerEventId = pMapId
                         binding:setActionEventTextVisibility(pMapId, false)
-                        SoilLogger.info("Map layer cycle (Shift+M) re-registered in PLAYER context after vehicle exit")
+                        SoilLogger.debug("Map layer cycle (Shift+M) re-registered in PLAYER context after vehicle exit")
                     end
                 end
 
@@ -413,7 +413,7 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
                     if pSpOk and pSpId then
                         g_SoilFertilityManager.settingsPanelEventId = pSpId
                         binding:setActionEventTextVisibility(pSpId, false)
-                        SoilLogger.info("Settings panel (Shift+O) re-registered in PLAYER context after vehicle exit")
+                        SoilLogger.debug("Settings panel (Shift+O) re-registered in PLAYER context after vehicle exit")
                     end
                 end
 
@@ -426,12 +426,12 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
                     if pDragOk and pDragId then
                         g_SoilFertilityManager.hudDragEventId = pDragId
                         binding:setActionEventTextVisibility(pDragId, false)
-                        SoilLogger.info("HUD drag (RMB) re-registered in PLAYER context after vehicle exit")
+                        SoilLogger.debug("HUD drag (RMB) re-registered in PLAYER context after vehicle exit")
                     end
                 end
 
                 binding:endActionEventsModification()
-                SoilLogger.info("PLAYER context inputs restored after vehicle exit")
+                SoilLogger.debug("PLAYER context inputs restored after vehicle exit")
 
                 _soilVehicleHookActive = false
             end
@@ -1107,14 +1107,14 @@ function SoilFertilityManager:delete()
     if self._inputHookOriginal and PlayerInputComponent then
         PlayerInputComponent.registerActionEvents = self._inputHookOriginal
         self._inputHookOriginal = nil
-        SoilLogger.info("PlayerInputComponent hook restored")
+        SoilLogger.debug("PlayerInputComponent hook restored")
     end
 
     -- Restore InputBinding.endActionEventsModification hook if we installed one
     if self._vehicleInputHookOriginal and InputBinding then
         InputBinding.endActionEventsModification = self._vehicleInputHookOriginal
         self._vehicleInputHookOriginal = nil
-        SoilLogger.info("InputBinding.endActionEventsModification hook restored")
+        SoilLogger.debug("InputBinding.endActionEventsModification hook restored")
     end
 
     -- Clean up sprayer rate state

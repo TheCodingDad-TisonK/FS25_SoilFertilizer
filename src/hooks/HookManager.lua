@@ -34,7 +34,7 @@ function HookManager:getFieldIdAtWorldPosition(x, z)
         local BASE_MAP   = 4096
         local BASE_BLOCK = 2
         local blockSize  = math.max(BASE_BLOCK, math.floor(BASE_BLOCK * (mapSize / BASE_MAP)))
-        SoilLogger.info("[PERF-P5] MapDataGrid: map=%.0fm  blockSize=%dm", mapSize, blockSize)
+        SoilLogger.debug("[PERF-P5] MapDataGrid: map=%.0fm  blockSize=%dm", mapSize, blockSize)
         local ok, result = pcall(MapDataGrid.createFromBlockSize, mapSize, blockSize)
         if ok and result then
             self.fieldIdCache = result

@@ -372,7 +372,10 @@ All integrations are detected automatically at runtime and fail gracefully if th
 |---|---|
 | 🌱 **Base game lime indicator** | The base game's "needs liming" flag is a separate system from our pH tracking. Both update when you apply lime through the sprayer, but the indicators can show different states until the field is treated. Workaround: disable the base game's liming requirement in **Settings → Farming → Liming** to rely solely on our HUD. |
 | 🌐 **Multiplayer** | Soil simulation runs on the server only. Clients receive synced state on join and after each harvest or fertiliser event. |
-| 🔬 **Precision Farming** | Compatible — both mods track nutrients independently. No conflicts. |
+| 🔬 **Precision Farming (general)** | Compatible — both mods track nutrients independently. No conflicts. |
+| ❌ **See & Spray (PF DLC)** | The Precision Farming See-and-Spray spot-spray feature is **not supported** in this release. The weed pressure bridge integration exists in the codebase but is non-functional. Spot nozzles will behave as if our weed data is not present. |
+| ❌ **PWM nozzle control (PF DLC)** | Pulse Width Modulation (per-nozzle rate control) is a Precision Farming feature and is **not supported** by this mod. |
+| ⚠️ **Section Control** | Section-based nutrient credit scaling works correctly but requires **Precision Farming's ExtendedSprayer** to be active for section states to be managed per-nozzle. Without PF, all sections are treated as active (coverage fraction = 1.0), which is still correct for plain Section Control at field boundaries. |
 
 ---
 
@@ -390,7 +393,7 @@ This mod is licensed under **[CC BY-NC-ND 4.0](https://creativecommons.org/licen
 
 You may share it in its original form with attribution. You may not sell it, modify and redistribute it, or reupload it under a different name or authorship. Contributions via pull request are explicitly permitted and encouraged.
 
-**Author:** TisonK &nbsp;·&nbsp; **Version:** 2.0.8.0
+**Author:** TisonK &nbsp;·&nbsp; **Version:** 2.1.1.0
 
 © 2026 TisonK — See [LICENSE](LICENSE) for full terms.
 
