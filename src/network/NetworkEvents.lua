@@ -268,7 +268,7 @@ function SoilRequestFullSyncEvent:run(connection)
             end
             local isLast = (batchIndex == totalBatches)
             connection:sendEvent(SoilFieldBatchSyncEvent.new(batch, isLast))
-            SoilLogger.info("Server: Field batch %d/%d sent (%d fields)", batchIndex, totalBatches, endIdx - startIdx + 1)
+            SoilLogger.debug("Server: Field batch %d/%d sent (%d fields)", batchIndex, totalBatches, endIdx - startIdx + 1)
         end
     elseif g_currentMission and g_currentMission.addUpdateable then
         -- Listen server / local host path: drip-feed batches via addUpdateable
@@ -306,7 +306,7 @@ function SoilRequestFullSyncEvent:run(connection)
                 local isLast = (self.batchIndex == self.totalBatches)
                 self.connection:sendEvent(SoilFieldBatchSyncEvent.new(batch, isLast))
 
-                SoilLogger.info("Server: Field batch %d/%d sent (%d fields)",
+                SoilLogger.debug("Server: Field batch %d/%d sent (%d fields)",
                     self.batchIndex, self.totalBatches, endIdx - startIdx + 1)
 
                 self.batchIndex = self.batchIndex + 1
