@@ -2003,7 +2003,7 @@ function HookManager:installFillUnitHookEarly()
         return false
     end
 
-    local solidNames         = {"UREA", "AN", "AMS", "MAP", "DAP", "POTASH",
+    local solidNames         = {"UREA", "AMS", "MAP", "DAP", "POTASH",
                                  "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM"}
     local liquidNames        = {"UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME", "INSECTICIDE", "FUNGICIDE",
                                 "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH"}
@@ -2097,7 +2097,7 @@ function HookManager:installFillUnitHook()
     -- support both) but rejected by dedicated spreaders (MANURE-only fill unit).
     local manureIndex = fm:getFillTypeIndexByName("MANURE")
 
-    local solidNames  = {"UREA", "AN", "AMS", "MAP", "DAP", "POTASH",
+    local solidNames  = {"UREA", "AMS", "MAP", "DAP", "POTASH",
                           "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM"}
     local liquidNames = {"UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME", "INSECTICIDE", "FUNGICIDE",
                          "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH"}
@@ -2295,7 +2295,7 @@ function HookManager:installPurchaseRefillHook()
         "INSECTICIDE", "FUNGICIDE",
         "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH",
         -- Solid
-        "UREA", "AN", "AMS", "MAP", "DAP", "POTASH",
+        "UREA", "AMS", "MAP", "DAP", "POTASH",
         "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM",
     }
 
@@ -2313,7 +2313,7 @@ function HookManager:installPurchaseRefillHook()
         UAN32 = 1.60, UAN28 = 1.50, ANHYDROUS = 1.85, STARTER = 1.70,
         LIQUIDLIME = 1.20, INSECTICIDE = 1.20, FUNGICIDE = 1.30,
         LIQUID_UREA = 1.70, LIQUID_AMS = 1.45, LIQUID_MAP = 2.00, LIQUID_DAP = 1.80, LIQUID_POTASH = 1.85,
-        UREA = 1.65, AN = 1.50, AMS = 1.40, MAP = 1.95, DAP = 1.75, POTASH = 1.80,
+        UREA = 1.65, AMS = 1.40, MAP = 1.95, DAP = 1.75, POTASH = 1.80,
         COMPOST = 0.60, BIOSOLIDS = 0.55, CHICKEN_MANURE = 0.50,
         PELLETIZED_MANURE = 0.70, GYPSUM = 0.35,  -- reduced: amendment, not plant food ($525/ha vs $1200)
     }
@@ -3107,7 +3107,6 @@ function HookManager:installFillTypeMaterialHook()
         -- ── GRANULAR MINERAL FERTILIZERS ──────────────────────────────────
         -- White to off-white crystalline/granular powders
         UREA     = { "LIME", "FERTILIZER" },            -- Urea is bright white granular → LIME first
-        AN       = { "LIME", "FERTILIZER" },            -- AN is also white granular
         AMS      = { "FERTILIZER", "LIME" },            -- AMS is off-white/light grey granular
         MAP      = { "FERTILIZER", "LIME" },            -- MAP is off-white/light brown granular
         DAP      = { "FERTILIZER", "LIME" },            -- DAP is off-white/grey-brown granular

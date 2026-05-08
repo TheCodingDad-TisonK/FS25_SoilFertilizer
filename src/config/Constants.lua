@@ -279,7 +279,7 @@ SoilConstants.FERTILIZER_TYPES = {
     -- Base game
     "LIQUIDFERTILIZER", "FERTILIZER", "MANURE", "LIQUIDMANURE", "DIGESTATE", "LIME",
     -- Nitrogen sources
-    "UAN32", "UAN28", "ANHYDROUS", "AMS", "UREA", "AN",
+    "UAN32", "UAN28", "ANHYDROUS", "AMS", "UREA",
     -- Starter
     "STARTER",
     -- Gypsum
@@ -866,9 +866,6 @@ SoilConstants.COMPACTION = {
     SUBSOILER_REDUCTION       = 15.0,  -- points removed per subsoiler pass
     MAX_COMPACTION            = 100.0,
     NUTRIENT_PENALTY_MAX      = 0.20,  -- max 20% extra nutrient extraction at max compaction
-}
-
-SoilLogger.info("Constants loaded")n at max compaction
 }
 
 SoilLogger.info("Constants loaded")

@@ -175,7 +175,7 @@ function SoilTreatmentDialog:_populateData()
     
     -- N
     if info.nitrogen.value < (thresh.nitrogen.poor or 30) then
-        self:_setAction(self.treatNAction, tr("sf_treat_action_n_poor", "Apply UAN32, UREA, AN, or ANHYDROUS."), COLOR_POOR)
+        self:_setAction(self.treatNAction, tr("sf_treat_action_n_poor", "Apply UAN32, UREA, or ANHYDROUS."), COLOR_POOR)
     elseif info.nitrogen.value < (thresh.nitrogen.fair or 50) then
         self:_setAction(self.treatNAction, tr("sf_treat_action_n_fair", "Apply AMS or STARTER fertilizer."), COLOR_FAIR)
     else
