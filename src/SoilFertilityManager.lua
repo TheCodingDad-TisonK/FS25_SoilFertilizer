@@ -578,7 +578,7 @@ function SoilFertilityManager:deferredSoilSystemInit()
                 -- Load saved soil data now that savegameDirectory is set
                 self.sfm:loadSoilData()
 
-                -- Show activation dialog
+                -- Show version dialog
                 -- The hardcoded values are here for a reason, and will NOT be translated.
                 if self.sfm.settings.showNotifications and InfoDialog.INSTANCE ~= nil then
                     local modInfo = g_modManager and g_modManager:getModByName(self.sfm.modName)
@@ -588,8 +588,8 @@ function SoilFertilityManager:deferredSoilSystemInit()
                         .. "Author: TisonK\n"
                         .. sep .. "\n\n"
                         .. "What's new:\n"
-                        .. "  - Fixed issue with bigbag loading with front loader\n"
-                        .. "  - Added weed canopy suppression and nutrient depletion\n\n"
+                        .. "  - Fixed a math error in mowing depletion\n"
+                        .. "  - Fixed a bug in fertilizer application rates\n\n"
                         .. sep .. "\n\n"
                         .. g_i18n:getText("sf_startup_dialog_footer")
                     InfoDialog.show(text)

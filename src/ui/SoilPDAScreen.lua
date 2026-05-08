@@ -471,7 +471,7 @@ function SoilPDAScreen:onClickHelp()
         local t = tr
         local lines = {
             t("sf_help_nutrients_header", "NUTRIENTS"),
-            t("sf_help_n",  "N  (Nitrogen)     — Depletes fast. Apply UAN, Urea, AN, or Manure."),
+            t("sf_help_n",  "N  (Nitrogen)     — Depletes fast. Apply UAN, Urea, or Manure."),
             t("sf_help_p",  "P  (Phosphorus)   — Long-lasting. Apply MAP or DAP."),
             t("sf_help_k",  "K  (Potassium)    — Apply Potash. Important for roots."),
             t("sf_help_om", "OM (Organic Mat.) — Builds slowly. Plow in manure/compost."),
