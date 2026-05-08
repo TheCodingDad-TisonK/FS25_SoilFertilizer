@@ -340,7 +340,8 @@ function SoilFertilitySystem:onMow(fieldId, fruitTypeIndex, areaHa)
 
     local diffMult = SoilConstants.DIFFICULTY.MULTIPLIERS[self.settings.difficulty] or 1.0
     local haFactor = SoilConstants.MOWER_HA_FACTOR or 6.0
-    local factor   = areaHa * haFactor * diffMult
+    local fieldAreaHa = (field.fieldArea and field.fieldArea > 0) and field.fieldArea or 1.0
+    local factor   = (areaHa / fieldAreaHa) * haFactor * diffMult
 
     local limits = SoilConstants.NUTRIENT_LIMITS
     field.nitrogen   = math.max(limits.MIN, field.nitrogen   - rates.N * factor)
