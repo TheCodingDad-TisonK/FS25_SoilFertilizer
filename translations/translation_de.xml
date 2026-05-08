@@ -300,11 +300,6 @@
 		<e k="helpLine_sf_mp_p1_auth_text" v="Alle Bodensimulationen laufen auf dem Server. Clients erhalten beim Beitritt vollständige Felddaten und Einstellungen, mit automatischem Wiederholungsversuch, wenn der Server noch lädt. HUD-Anzeigeeinstellungen (Position, Thema, Größe) sind pro Spieler und werden nie mit dem Server synchronisiert." eh="db72a3f9" />
 		<e k="helpLine_sf_mp_p1_ded_title" v="Dedizierte Server" eh="4d3a45ba" />
 		<e k="helpLine_sf_mp_p1_ded_text" v="Dedizierte Server führen die vollständige Simulation ohne HUD- oder GUI-Overhead aus - dies ist erwartet und normal. Verwenden Sie Konsolenbefehle (soilStatus, SoilSetDifficulty, SoilShowSettings usw.), um Einstellungen auf einem dedizierten Server zu verwalten und zu überprüfen." eh="3df784d6" />
-		<e k="helpLine_sf_mp_p2_title" v="PrecisionFarming Kompatibilität" eh="3647a30c" />
-		<e k="helpLine_sf_mp_p2_compat_title" v="Beide Mods zusammen ausführen" eh="bc5325f5" />
-		<e k="helpLine_sf_mp_p2_compat_text" v="Beide Mods laufen völlig unabhängig voneinander und sind voll kompatibel. Ein Düngerdurchgang aktualisiert beide gleichzeitig - Sie müssen nicht zweimal düngen. Die Bodenzonen von PF und die N/P/K-Werte von SoilFertilizer verwenden unterschiedliche Modelle und sind nicht identisch." eh="5c9f8ada" />
-		<e k="helpLine_sf_mp_p2_workflow_title" v="Praktischer Arbeitsablauf" eh="b6f73f04" />
-		<e k="helpLine_sf_mp_p2_workflow_text" v="Verwenden Sie PrecisionFarming, um zu sehen, wo in einem Feld Aufmerksamkeit erforderlich ist (Teilflächenpräzision). Verwenden Sie das HUD und den Bodenbericht von SoilFertilizer, um zu sehen, welcher Nährstoff auszubringen ist. Ein Durchgang stellt beide Mods gleichzeitig zufrieden und sie geben nie widersprüchliche Ratschläge." eh="cde2c27c" />
     <e k="sf_crop_rotation_short" v="Fruchtfolge" eh="def2c162" />
     <e k="sf_crop_rotation_long" v="Fruchtfolgenbonus und Monokultur-Ermüdung aktivieren/deaktivieren (Leguminosensequenzen stellen Stickstoff wieder her; aufeinanderfolgende Saisons mit derselben Frucht erhöhen die Verarmung)" eh="958b4212" />
     <e k="sf_report_rotation_bonus" v="Fruchtfolgenbonus" eh="2831a7ac" />

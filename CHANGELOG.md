@@ -13,17 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Spray visual not appearing for custom fill types** — the visual effect hook was manually starting `FertilizerMotionPathEffect` objects with stale spline entity IDs, producing per-frame `getClosestSplinePosition` script errors and no visible spray. Removed the hook entirely: `ExtendedSprayerEffects` vehicles drive the nozzle shader plane automatically; plain `Sprayer` vehicles use the vanilla `updateSprayerEffects` path, which activates once `processSprayerArea` sets `lastSprayTime`.
 - **Ground density map not updating for custom spray types** — `installDensityMapSprayHook` used `Utils.prependedFunction`, which runs our function *before* the original. Because `wap.sprayType` and `wap.sprayFillType` are set *inside* `onStartWorkAreaProcessing`, our spray-type remap was operating on nil values. Changed to `Utils.appendedFunction` so the vanilla index is remapped after the original populates it. Custom types (LIQUIDLIME, UAN32, etc.) now correctly write the ground colour overlay.
 
-### Known Limitations (Precision Farming DLC)
-- **See & Spray** — not supported in this release. The weed pressure bridge integration is present in the codebase but non-functional; spot-spray nozzles will not activate from our weed pressure data.
-- **PWM nozzle control** — not supported. Per-nozzle pulse-width modulation is a Precision Farming feature and has no integration with this mod.
-- **Section Control + PF dependency** — section-based nutrient credit scaling requires Precision Farming's `ExtendedSprayer` for per-nozzle section state management. Without PF, all sections default to active (coverage fraction 1.0), which is still correct behaviour at field boundaries for vanilla Section Control.
-
 ---
 
 ## [2.1.0.0] - 2026-05-06
 
 ### Added
-- **Section Control support** ([#299](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/299), [#298](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/298)) — reads `spec_variableWorkWidth.sections[i].isActive` and scales nutrient credit to the fraction of boom actively spraying. Works with vanilla Section Control and Precision Farming's ExtendedSprayer.
+- **Section Control support** ([#299](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/299), [#298](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/298)) — reads `spec_variableWorkWidth.sections[i].isActive` and scales nutrient credit to the fraction of boom actively spraying.
 - **Per-section field attribution** ([#300](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/300)) — nutrient credit is distributed across each active boom section using its `maxWidthNode` world position, enabling accurate field attribution when a wide boom straddles a field boundary.
 - **Weed pressure clears on seeding** ([#304](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/304)) — sowing a crop now resets weed pressure to zero, matching real-world practice where emergence suppresses weeds at the seedling stage. Cultivation weed reduction also raised from 20% to 100%.
 
@@ -199,11 +194,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   check. Players can rebind it in the standard FS25 key bindings menu. The old
   `hudDragEnabled` toggle in settings has been removed — the action now covers it directly.
 
-- **See-and-Spray Integration** ([#220](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/220)): When Precision Farming's See-and-Spray nozzles would
-  deactivate (no native weed detected in a spot), the mod now checks our own `weedPressure`
-  field value. If weed pressure is ≥ 20, the nozzle is re-activated so herbicide continues to
-  flow. Bridges our field-level weed tracking into the per-nozzle See-and-Spray system.
-  Fully guarded — a no-op if Precision Farming is not installed.
 
 ### Architecture
 
@@ -211,9 +201,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   three duplicated admin-check implementations across `SoilSettingsPanel`, `SoilSettingsUI`,
   and `NetworkEvents` ([#217](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/217)).
 
-- **`src/integrations/SeeAndSprayIntegration.lua`** (new): Optional DLC bridge sourced after
-  `NetworkEvents`. Guarded at source time (`WeedSpotSpray ~= nil`) and runtime
-  (`g_precisionFarming ~= nil`) — safe no-op when PF is not loaded ([#220](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/220)).
 
 - **Load-order guard**: `SoilFertilityManager.new()` now asserts that `SoilFertilitySystem`,
   `HookManager`, and `Settings` are all loaded before construction, catching accidental
@@ -1080,7 +1067,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Multiplayer clients never received full soil state on join**: `SoilNetworkEvents_RequestFullSync()` was implemented but never called. Now triggered in `loadedMission()` for MP clients, with the existing 3-attempt retry handler backing it.
 
-- **Precision Farming compatibility mode removed**: The PF read-only mode was causing field data to silently disappear on servers with PF installed. Both mods now run fully independently. PF users retain their own soil maps; our mod tracks NPK/OM/pH separately.
+- **Compatibility mode removed**: The previous read-only mode was causing field data to silently disappear on dedicated servers. The mod now always runs fully independently and tracks NPK/OM/pH on its own.
 
 - **fillTypeCategory name collision**: Categories named `FERTILIZER` and `LIQUIDFERTILIZER` conflicted with vanilla entries. Renamed to `SPREADER` and `SPRAYER`.
 
@@ -1102,13 +1089,9 @@ Special thanks to **seb** from the FS25 Modding Community Discord for testing an
 
 ### Fixed
 
-#### No field data on dedicated servers with Precision Farming (Issue [#40](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/40))
+#### No field data on dedicated servers (Issue [#40](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/40))
 
-- **FIXED**: `checkPFCompatibility` no longer blindly enables read-only mode when Precision Farming is detected
-  - Now performs a second step probing the PF API (`g_precisionFarming.fieldData` / `soilMap:getFieldData`) before committing
-  - On dedicated servers the PF global exists but its field data API is unpopulated at mod-init time — the mod previously entered a silent broken read-only state as a result
-  - If the API is unreachable, logs a warning and falls back to independent mode so field data is written and synced normally
-  - Log message: `[SoilFertilizer WARNING] Precision Farming detected but API not accessible (dedicated server / load-order issue) - falling back to independent mode`
+- **FIXED**: Removed the read-only mode that was silently activated on dedicated servers, causing all field data to disappear. The mod now always runs in independent mode — field data is always written and synced normally.
 
 - **FIXED**: Clients on dedicated servers never received initial field data
   - Field data was previously only broadcast to clients on harvest or fertilizer events
@@ -1315,7 +1298,7 @@ Polish pass by XelaNull (PR [#33](https://github.com/TheCodingDad-TisonK/FS25_So
 ### Fixed
 - Multiplayer sync improvements
 - HUD visibility feedback enhancement
-- Precision Farming integration improvements
+- Mod compatibility improvements
 - Critical gameplay balance and UX issues
 
 ---
@@ -1367,7 +1350,7 @@ Polish pass by XelaNull (PR [#33](https://github.com/TheCodingDad-TisonK/FS25_So
 - In-game HUD with customization (position, color, font, transparency)
 - Settings GUI integration
 - 10-language localization (en, de, fr, pl, es, it, cz, br, uk, ru)
-- Precision Farming compatibility (read-only mode)
+- Save/load persistence for soil state
 - Save/load persistence
 - Console commands
 

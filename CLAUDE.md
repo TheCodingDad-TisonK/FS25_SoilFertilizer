@@ -276,7 +276,7 @@ Full sync has retry logic: 3 attempts at 5-second intervals.
 - Fertilizer types (liquid, solid, manure, slurry, digestate, lime) with different nutrient profiles
 - Environmental: rain causes nutrient leaching, seasons affect nitrogen, fallow fields slowly recover
 - Update loop throttled to 30-second intervals; daily updates on game-day change
-- Precision Farming compatible — both mods run fully independently, no read-only mode
+
 
 ### Constants
 

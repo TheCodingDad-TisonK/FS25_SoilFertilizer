@@ -3,7 +3,7 @@
 -- =========================================================
 -- Per-field N/P/K/pH/OM tracking: depletion on harvest,
 -- restoration on fertilizer, rain leaching, seasonal effects,
--- fallow recovery, Precision Farming compatibility.
+-- fallow recovery, seasonal effects.
 -- =========================================================
 -- Author: TisonK
 -- =========================================================
@@ -917,7 +917,6 @@ function SoilFertilitySystem:update(dt)
     end
 end
 
--- Check for Precision Farming compatibility
 -- Scan all fields from FieldManager
 ---@return boolean True if successfully scanned fields, false if fields not ready yet
 function SoilFertilitySystem:scanFields()

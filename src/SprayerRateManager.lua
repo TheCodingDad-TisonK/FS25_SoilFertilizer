@@ -4,7 +4,7 @@
 -- Tracks per-vehicle application rate multiplier.
 -- Rate persists for the lifetime of the vehicle object and is
 -- cleared only on mod unload. Players who hop out and back in
--- keep their last-set rate (matching Precision Farming behaviour).
+-- keep their last-set rate between sessions.
 -- =========================================================
 
 ---@class SprayerRateManager

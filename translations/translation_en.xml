@@ -324,18 +324,13 @@
     <e k="helpLine_sf_se_p2_rate_title" v="Sprayer Rate Control" eh="5ecdfa23" />
     <e k="helpLine_sf_se_p2_rate_text" v="While in a sprayer or spreader, use SF Rate Up (]) and SF Rate Down ([) to adjust the application rate from 0.10x to 2.00x. Toggle Auto-Rate Control (Shift+L) to let the mod automatically target optimal nutrient levels and avoid burn risk." eh="dd385e39" />
 
-    <!-- Category 7: Multiplayer and PrecisionFarming -->
+    <!-- Category 7: Multiplayer -->
     <e k="helpLine_sf_mp_p1_title" v="How Multiplayer Works" eh="8a4ce30e" />
     <e k="helpLine_sf_mp_p1_auth_title" v="Server-Authoritative Simulation" eh="8d324792" />
     <e k="helpLine_sf_mp_p1_auth_text" v="All soil simulation runs on the server. Clients receive full field data and settings on join, with automatic retry if the server is still loading. HUD display settings (position, theme, size) are per-player and are never synced to the server." eh="db72a3f9" />
     <e k="helpLine_sf_mp_p1_ded_title" v="Dedicated Servers" eh="4d3a45ba" />
     <e k="helpLine_sf_mp_p1_ded_text" v="Dedicated servers run the full simulation without any HUD or GUI overhead - this is expected and normal. Use console commands (soilStatus, SoilSetDifficulty, SoilShowSettings, etc.) to manage and verify settings on a dedicated server." eh="3df784d6" />
 
-    <e k="helpLine_sf_mp_p2_title" v="PrecisionFarming Compatibility" eh="3647a30c" />
-    <e k="helpLine_sf_mp_p2_compat_title" v="Running Both Mods Together" eh="bc5325f5" />
-    <e k="helpLine_sf_mp_p2_compat_text" v="Both mods run fully independently and are fully compatible. One fertilizer pass updates both at the same time - you do not need to fertilize twice. PF's soil zones and SoilFertilizer's N/P/K values use different models and will not be identical." eh="5c9f8ada" />
-    <e k="helpLine_sf_mp_p2_workflow_title" v="Practical Workflow" eh="b6f73f04" />
-    <e k="helpLine_sf_mp_p2_workflow_text" v="Use PrecisionFarming to see where in a field needs attention (sub-zone precision). Use SoilFertilizer's HUD and soil report to see what nutrient to apply. One pass satisfies both mods simultaneously and they will never give contradictory advice." eh="cde2c27c" />
 
     <e k="sf_crop_rotation_short" v="Crop Rotation" eh="def2c162" />
     <e k="sf_crop_rotation_long" v="Enable/disable crop rotation bonus and mono-crop fatigue (legume sequences restore nitrogen; same-crop consecutive seasons increase depletion)" eh="958b4212" />

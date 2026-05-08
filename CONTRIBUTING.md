@@ -81,7 +81,7 @@ Wrap anything that could fail in `pcall()`. Don't let hook errors propagate to t
 5. **PR description should answer:**
    - What does this change?
    - Why is it needed?
-   - How did you test it? (singleplayer / multiplayer / with Precision Farming?)
+   - How did you test it? (singleplayer / multiplayer?)
    - Related issue number, if any
 
 Maintainers merge development → main on a release cycle, not per-PR.
@@ -106,7 +106,6 @@ Good bug reports save everyone time. Please include:
 **Version**: [e.g. 1.0.7.0 — check modDesc.xml or the mod menu]
 **Singleplayer or Multiplayer**: [SP / MP Host / MP Client]
 **Difficulty**: [Simple / Realistic / Hardcore]
-**Precision Farming active**: [Yes / No]
 **Other mods**: [Paste the list or note if it's a clean mod set]
 
 **What happened**:

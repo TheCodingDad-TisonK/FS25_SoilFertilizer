@@ -318,11 +318,6 @@
     <e k="helpLine_sf_mp_p1_auth_text" v="Alle bodemsimulatieprocessen draaien op de server. Clients ontvangen volledige veldgegevens en instellingen bij het verbinden, met automatische herpoging als de server nog aan het laden is. HUD-weergave-instellingen (positie, thema, grootte) zijn per speler en worden nooit naar de server gesynchroniseerd." eh="db72a3f9" />
     <e k="helpLine_sf_mp_p1_ded_title" v="Dedicated servers" eh="4d3a45ba" />
     <e k="helpLine_sf_mp_p1_ded_text" v="Dedicated servers draaien de volledige simulatie zonder HUD of GUI-overhead — dit is verwacht en normaal. Gebruik consoleopdrachten (soilStatus, SoilSetDifficulty, SoilShowSettings, enz.) om instellingen op een dedicated server te beheren en te controleren." eh="3df784d6" />
-    <e k="helpLine_sf_mp_p2_title" v="Compatibiliteit met PrecisionFarming" eh="3647a30c" />
-    <e k="helpLine_sf_mp_p2_compat_title" v="Beide mods tegelijk gebruiken" eh="bc5325f5" />
-    <e k="helpLine_sf_mp_p2_compat_text" v="Beide mods werken volledig onafhankelijk en zijn volledig compatibel. Eén bemestingsronde werkt beide tegelijk bij — je hoeft niet twee keer te bemesten. De bodemzones van PF en de N/P/K-waarden van SoilFertilizer gebruiken verschillende modellen en zijn niet identiek." eh="5c9f8ada" />
-    <e k="helpLine_sf_mp_p2_workflow_title" v="Praktische werkwijze" eh="b6f73f04" />
-    <e k="helpLine_sf_mp_p2_workflow_text" v="Gebruik PrecisionFarming om te zien welk deel van een veld aandacht nodig heeft (subzoneprecisie). Gebruik de HUD en het bodemrapport van SoilFertilizer om te zien welke voedingsstof je moet toepassen. Eén ronde voldoet aan beide mods tegelijk en ze zullen nooit tegenstrijdig advies geven." eh="cde2c27c" />
 
     <e k="sf_map_layer_off" v="Bodemkaart: Uit" eh="3e654ade" />
     <e k="sf_map_layer_n" v="Stikstof" eh="1e9ef3ba" />

@@ -324,19 +324,13 @@
 	<e k="helpLine_sf_se_p2_rate_title" v="Kontrola dawki opryskiwacza" eh="5ecdfa23" />
 	<e k="helpLine_sf_se_p2_rate_text" v="Podczas korzystania z opryskiwacza lub rozsiewacza, użyj klawiszy zwiększ dawkę (]) i zmniejsz dawkę ([), aby dostosować wskaźnik stosowania od 0.10x do 2.00x. Przełącz tryb automatycznej kontroli dawki (Shift+L), aby pozwolić modyfikacji automatycznie osiągać optymalne poziomy składników odżywczych i unikać ryzyka przypalenia." eh="dd385e39" />
 	
-    <!-- Category 7: Multiplayer and PrecisionFarming -->
+    <!-- Category 7: Multiplayer -->
     <e k="helpLine_sf_mp_p1_title" v="Jak działa tryb wieloosobowy" eh="8a4ce30e" />
 	<e k="helpLine_sf_mp_p1_auth_title" v="Symulacja autorytatywna serwera" eh="8d324792" />
 	<e k="helpLine_sf_mp_p1_auth_text" v="Wszystkie symulacje gleby działają na serwerze. Klienci otrzymują pełne dane pola i ustawienia po dołączeniu, z automatycznym ponowieniem, jeśli serwer nadal się ładuje. Ustawienia wyświetlania HUD (pozycja, motyw, rozmiar) są indywidualne dla każdego gracza i nigdy nie są synchronizowane z serwerem." eh="db72a3f9" />
 	<e k="helpLine_sf_mp_p1_ded_title" v="Serwery dedykowane" eh="4d3a45ba" />
 	<e k="helpLine_sf_mp_p1_ded_text" v="Serwery dedykowane uruchamiają pełną symulację bez żadnego narzucania usatawień HUD lub GUI - jest to oczekiwane i normalne. Użyj poleceń konsoli (soilStatus, SoilSetDifficulty, SoilShowSettings, itp.) do zarządzania i weryfikacji ustawień na dedykowanym serwerze." eh="3df784d6" />
 	
-    <e k="helpLine_sf_mp_p2_title" v="Kompatybilność z Rolnictwem precyzyjnym " eh="3647a30c" />
-	<e k="helpLine_sf_mp_p2_compat_title" v="Uruchomienia z oba modami" eh="bc5325f5" />
-	<e k="helpLine_sf_mp_p2_compat_text" v="Oba mody działają niezależnie i są w pełni zgodne. Jeden przejazd nawożenia aktualizuje oba moduly w tym samym czasie - nie musisz nawozić dwukrotnie. Strefy gleby w PF i wartości N/P/K w SoilFertilizer używają różnych modeli i nie będą identyczne." eh="5c9f8ada" />
-	<e k="helpLine_sf_mp_p2_workflow_title" v="Współpraca w praktyce" eh="b6f73f04" />
-	<e k="helpLine_sf_mp_p2_workflow_text" v="Wykorzystaj Rolnictwo Precyzyjne by zobaczyć gdzie w polu potrzebuje uwagi. Wykorzystaj HUD i raport glebowy SoilFertilizer, aby zobaczyć, jaki składnik odżywczy zastosować. Jeden przejazd spełnia jednocześnie oba moduły i nigdy nie dadzą sprzecznych zaleceń." eh="cde2c27c" />
-    
     <e k="sf_crop_rotation_short" v="Płodozmian" eh="def2c162" />
     <e k="sf_crop_rotation_long" v="Włącz/Wyłącz bonus od stosowania płodozmianów i negatywny wpływ monokultury (Uprawa roślin strączkowych przywraca azot; uprawa tej samej rośliny przez kilka sezonów zwiększa zużycie składników odżywczych)" eh="958b4212" />
     <e k="sf_report_rotation_bonus" v="Bonus za płodozmian" eh="2831a7ac" />

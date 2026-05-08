@@ -7,8 +7,7 @@
 -- the nutrient credit to match the actual portion of boom working.
 --
 -- COMPATIBILITY
---   Works with vanilla VariableWorkWidth AND Precision Farming's
---   ExtendedSprayer, which extends the same spec table.
+--   Works with vanilla VariableWorkWidth (spec_variableWorkWidth).
 --   Gracefully degrades to 1.0 (no-op) if spec is absent.
 --
 -- WHY wap.usage IS ALREADY SCALED

@@ -17,7 +17,7 @@ assignees: ''
 | **Mod version** | <!-- Check the mod menu or modDesc.xml → e.g. 1.0.7.1 --> |
 | **Game mode** | <!-- Singleplayer / Multiplayer Host / Multiplayer Client --> |
 | **Difficulty** | <!-- Simple / Realistic / Hardcore --> |
-| **Precision Farming active** | <!-- Yes / No --> |
+
 
 ## Steps to Reproduce
 

@@ -300,11 +300,6 @@
 		<e k="helpLine_sf_mp_p1_auth_text" v="Tutta la simulazione gira sul server. I client ricevono i dati all'accesso. Le impostazioni HUD sono personali e non vengono sincronizzate col server." eh="db72a3f9" />
 		<e k="helpLine_sf_mp_p1_ded_title" v="Server Dedicati" eh="4d3a45ba" />
 		<e k="helpLine_sf_mp_p1_ded_text" v="Sui server dedicati la simulazione gira normalmente senza HUD. Usa i comandi in console (soilStatus, SoilSetDifficulty, ecc.) per gestire le impostazioni." eh="3df784d6" />
-		<e k="helpLine_sf_mp_p2_title" v="Compatibilità Precision Farming" eh="3647a30c" />
-		<e k="helpLine_sf_mp_p2_compat_title" v="Eseguire entrambe le Mod" eh="bc5325f5" />
-		<e k="helpLine_sf_mp_p2_compat_text" v="Le mod sono indipendenti e compatibili. Una passata di fertilizzante aggiorna entrambe contemporaneamente. PF e SoilFertilizer usano modelli diversi, quindi i valori non saranno identici." eh="5c9f8ada" />
-		<e k="helpLine_sf_mp_p2_workflow_title" v="Flusso di Lavoro Pratico" eh="b6f73f04" />
-		<e k="helpLine_sf_mp_p2_workflow_text" v="Usa Precision Farming per vedere DOVE nel campo serve attenzione. Usa SoilFertilizer per sapere QUALE nutriente applicare. Una sola passata soddisfa entrambe le mod." eh="cde2c27c" />
     <e k="sf_crop_rotation_short" v="Rotazione Colture" eh="def2c162" />
     <e k="sf_crop_rotation_long" v="Attiva/disattiva bonus rotazione e stanchezza da monocultura (le leguminose ripristinano azoto; colture uguali consecutive aumentano l'esaurimento)" eh="958b4212" />
     <e k="sf_report_rotation_bonus" v="Bonus Rotazione" eh="2831a7ac" />

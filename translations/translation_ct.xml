@@ -324,18 +324,14 @@
     <e k="helpLine_sf_se_p2_rate_title" v="噴霧機施用量控制" eh="5ecdfa23" />
     <e k="helpLine_sf_se_p2_rate_text" v="在噴霧器或撒布機中，使用 SF 施用量增加 (]) 和 SF 施用量減少 ([) 來將施用量從 0.10x 調整到 2.00x。切換自動施用量控制 (Shift+L) 以讓模組自動瞄準最佳養分水平並避免燒傷風險。" eh="dd385e39" />
 
-    <!-- Category 7: Multiplayer and PrecisionFarming -->
+    <!-- Category 7: Multiplayer -->
     <e k="helpLine_sf_mp_p1_title" v="多人遊戲工作機制" eh="8a4ce30e" />
     <e k="helpLine_sf_mp_p1_auth_title" v="服務器授權模擬" eh="8d324792" />
     <e k="helpLine_sf_mp_p1_auth_text" v="所有土壤模擬均在服務器上運行。客戶端在加入時接收完整的田地數據和設置，如果服務器仍在加載中則會自動重試。HUD 顯示設置（位置、主題、大小）是每位玩家獨立的，絕不會同步到服務器。" eh="db72a3f9" />
     <e k="helpLine_sf_mp_p1_ded_title" v="專用服務器" eh="4d3a45ba" />
     <e k="helpLine_sf_mp_p1_ded_text" v="專用服務器運行完整的模擬，沒有任何 HUD 或 GUI 開銷——這是預期且正常的。使用控制台命令（soilStatus、SoilSetDifficulty、SoilShowSettings 等）在專用服務器上管理和驗證設置。" eh="3df784d6" />
 
-    <e k="helpLine_sf_mp_p2_title" v="PrecisionFarming 兼容性" eh="3647a30c" />
-    <e k="helpLine_sf_mp_p2_compat_title" v="同時運行兩個模組" eh="bc5325f5" />
-    <e k="helpLine_sf_mp_p2_compat_text" v="兩個模組完全獨立運行且完全兼容。一次施肥作業會同時更新兩者——你不需要施肥兩次。PF 的土壤分區和 SoilFertilizer 的 N/P/K 值使用不同模型，因此不會完全相同。" eh="5c9f8ada" />
-    <e k="helpLine_sf_mp_p2_workflow_title" v="實用工作流程" eh="b6f73f04" />
-    <e k="helpLine_sf_mp_p2_workflow_text" v="使用 PrecisionFarming 查看田地中哪裡需要注意（分區精度）。使用 SoilFertilizer 的 HUD 和土壤報告查看需要施用什麼養分。一次作業可同時滿足兩個模組，且它們絕不會給出相互矛盾的建議。" eh="cde2c27c" />
+
 
     <e k="sf_crop_rotation_short" v="作物輪作" eh="def2c162" />
     <e k="sf_crop_rotation_long" v="啟用/禁用作物輪作獎勵和連作疲勞（豆科植物序列可恢復氮；同種作物連續種植會增加耗損）" eh="958b4212" />
