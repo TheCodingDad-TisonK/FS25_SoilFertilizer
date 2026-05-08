@@ -381,7 +381,7 @@ function SoilSettingsGUI:consoleCommandDrainVehicle()
 
     -- Build a set of custom fill type indices this mod manages
     local customNames = {
-        "UREA","AMS","MAP","DAP","POTASH","COMPOST","BIOSOLIDS",
+        "UREA","AN","AMS","MAP","DAP","POTASH","COMPOST","BIOSOLIDS",
         "CHICKEN_MANURE","PELLETIZED_MANURE","GYPSUM",
         "UAN32","UAN28","ANHYDROUS","STARTER","LIQUIDLIME",
         "INSECTICIDE","FUNGICIDE",
@@ -612,4 +612,5 @@ function SoilSettingsGUI:consoleCommandRecoverField(fieldId)
     local msg = string.format("Field %d recovered to defaults.", fid)
     if not isServer then msg = msg .. " (Client only! Run on server to persist)" end
     return msg
+end
 end
