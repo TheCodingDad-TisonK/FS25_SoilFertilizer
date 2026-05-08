@@ -300,11 +300,6 @@
 		<e k="helpLine_sf_mp_p1_auth_text" v="Toda a simulação do solo roda no servidor. Os clientes recebem os dados e as configurações completas do campo ao entrar, com nova tentativa automática se o servidor ainda estiver carregando. As configurações de exibição do HUD (posição, tema, tamanho) são por jogador e nunca são sincronizadas com o servidor." eh="db72a3f9" />
 		<e k="helpLine_sf_mp_p1_ded_title" v="Servidores Dedicados" eh="4d3a45ba" />
 		<e k="helpLine_sf_mp_p1_ded_text" v="Servidores dedicados executam a simulação completa sem qualquer sobrecarga de HUD ou GUI - isso é esperado e normal. Use comandos de console (soilStatus, SoilSetDifficulty, SoilShowSettings, etc.) para gerenciar e verificar as configurações em um servidor dedicado." eh="3df784d6" />
-		<e k="helpLine_sf_mp_p2_title" v="Compatibilidade com PrecisionFarming" eh="3647a30c" />
-		<e k="helpLine_sf_mp_p2_compat_title" v="Executando Ambos os Mods Juntos" eh="bc5325f5" />
-		<e k="helpLine_sf_mp_p2_compat_text" v="Ambos os mods funcionam de forma totalmente independente e são totalmente compatíveis. Uma passada de fertilizante atualiza ambos ao mesmo tempo - você não precisa fertilizar duas vezes. As zonas de solo do PF e os valores de N/P/K do SoilFertilizer usam modelos diferentes e não serão idênticos." eh="5c9f8ada" />
-		<e k="helpLine_sf_mp_p2_workflow_title" v="Fluxo de Trabalho Prático" eh="b6f73f04" />
-		<e k="helpLine_sf_mp_p2_workflow_text" v="Use o PrecisionFarming para ver onde em um campo precisa de atenção (precisão por subzona). Use o HUD e o relatório do solo do SoilFertilizer para ver qual nutriente aplicar. Uma passada atende a ambos os mods simultaneamente e eles nunca darão conselhos contraditórios." eh="cde2c27c" />
     <e k="sf_crop_rotation_short" v="Rotação de Culturas" eh="def2c162" />
     <e k="sf_crop_rotation_long" v="Ativar/desativar bônus de rotação de culturas e fadiga de monocultura (sequências de leguminosas restauram nitrogênio; safras consecutivas da mesma cultura aumentam o esgotamento)" eh="958b4212" />
     <e k="sf_report_rotation_bonus" v="Bônus de Rotação" eh="2831a7ac" />

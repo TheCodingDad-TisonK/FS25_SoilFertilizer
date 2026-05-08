@@ -300,11 +300,6 @@
 		<e k="helpLine_sf_mp_p1_auth_text" v="Toda la simulación del suelo se ejecuta en el servidor. Los clientes reciben los datos completos de los campos y los ajustes al unirse, con reintento automático si el servidor aún está cargando. Los ajustes de visualización del HUD (posición, tema, tamaño) son por jugador y nunca se sincronizan con el servidor." eh="db72a3f9" />
 		<e k="helpLine_sf_mp_p1_ded_title" v="Servidores Dedicados" eh="4d3a45ba" />
 		<e k="helpLine_sf_mp_p1_ded_text" v="Los servidores dedicados ejecutan la simulación completa sin ninguna sobrecarga de HUD o GUI; esto es lo esperado y normal. Usa comandos de consola (soilStatus, SoilSetDifficulty, SoilShowSettings, etc.) para gestionar y verificar los ajustes en un servidor dedicado." eh="3df784d6" />
-		<e k="helpLine_sf_mp_p2_title" v="Compatibilidad con PrecisionFarming" eh="3647a30c" />
-		<e k="helpLine_sf_mp_p2_compat_title" v="Ejecutar ambos mods juntos" eh="bc5325f5" />
-		<e k="helpLine_sf_mp_p2_compat_text" v="Ambos mods se ejecutan de forma totalmente independiente y son totalmente compatibles. Una pasada de fertilizante actualiza ambos al mismo tiempo: no necesitas fertilizar dos veces. Las zonas de suelo de PF y los valores de N/P/K de SoilFertilizer utilizan modelos diferentes y no serán idénticos." eh="5c9f8ada" />
-		<e k="helpLine_sf_mp_p2_workflow_title" v="Flujo de Trabajo Práctico" eh="b6f73f04" />
-		<e k="helpLine_sf_mp_p2_workflow_text" v="Usa PrecisionFarming para ver qué parte de un campo necesita atención (precisión por subzona). Usa el HUD y el informe de suelo de SoilFertilizer para ver qué nutriente aplicar. Una pasada satisface ambos mods simultáneamente y nunca darán consejos contradictorios." eh="cde2c27c" />
     <e k="sf_crop_rotation_short" v="Rotación de cultivos" eh="def2c162" />
     <e k="sf_crop_rotation_long" v="Activar/desactivar la bonificación por rotación de cultivos y la fatiga por monocultivo (las secuencias de leguminosas restauran el nitrógeno; las temporadas consecutivas del mismo cultivo aumentan el agotamiento)" eh="958b4212" />
     <e k="sf_report_rotation_bonus" v="Bono de rotación" eh="2831a7ac" />

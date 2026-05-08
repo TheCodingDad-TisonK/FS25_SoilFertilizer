@@ -18,7 +18,7 @@
 
 - [ ] Singleplayer — loaded a savegame, no errors in log.txt
 - [ ] Multiplayer — tested as host and/or client
-- [ ] With Precision Farming active
+
 - [ ] Relevant console commands ran (`SoilFieldInfo`, `SoilShowSettings`, etc.)
 
 <!-- Describe what specifically you tested and any edge cases you checked -->

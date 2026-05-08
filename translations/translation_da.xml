@@ -300,11 +300,6 @@
     <e k="helpLine_sf_mp_p1_auth_text" v="Al jordsimulering kører på serveren. Klienter modtager fulde markdata og indstillinger ved tilmelding. HUD-visningsindstillinger (position, tema, størrelse) er pr. spiller og synkroniseres aldrig til serveren." eh="db72a3f9" />
     <e k="helpLine_sf_mp_p1_ded_title" v="Dedikerede servere" eh="4d3a45ba" />
     <e k="helpLine_sf_mp_p1_ded_text" v="Dedikerede servere kører den fulde simulering uden HUD- eller GUI-overhead. Brug konsolkommandoer (soilStatus, SoilSetDifficulty, SoilShowSettings osv.) til at administrere indstillinger på en dedikeret server." eh="3df784d6" />
-    <e k="helpLine_sf_mp_p2_title" v="PrecisionFarming-kompatibilitet" eh="3647a30c" />
-    <e k="helpLine_sf_mp_p2_compat_title" v="Kørsel af begge modd samtidigt" eh="bc5325f5" />
-    <e k="helpLine_sf_mp_p2_compat_text" v="Begge modd kører fuldt uafhængigt og er fuldt kompatible. Et gødningsgennemkørsel opdaterer begge på samme tid. PF's jordszoner og SoilFertilizer's N/P/K-værdier bruger forskellige modeller og vil ikke være identiske." eh="5c9f8ada" />
-    <e k="helpLine_sf_mp_p2_workflow_title" v="Praktisk arbejdsgang" eh="b6f73f04" />
-    <e k="helpLine_sf_mp_p2_workflow_text" v="Brug PrecisionFarming til at se hvor i en mark der kræver opmærksomhed. Brug SoilFertilizer's HUD og jordrapport til at se hvilket næringsstof der skal påføres. Ét gennemkørsel tilfredsstiller begge modd simultant." eh="cde2c27c" />
     <e k="sf_crop_rotation_short" v="Sædskifte" eh="def2c162" />
     <e k="sf_crop_rotation_long" v="Aktiver/deaktiver sædskiftebonus og monoafgrødetræthed (bælgplantsekvenser genopretter kvælstof; samme afgrøde i på hinanden følgende sæsoner øger udtømning)" eh="958b4212" />
     <e k="sf_report_rotation_bonus" v="Sædskiftebonus" eh="2831a7ac" />

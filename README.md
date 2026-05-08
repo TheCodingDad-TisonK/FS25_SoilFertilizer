@@ -161,15 +161,6 @@ The HUD shows compaction as a colour-coded row (green < 20%, amber 20–60%, red
 appears as **overlay layer 10** on the in-game map. Compaction is saved to `soilData.xml` and
 synced to all clients in multiplayer. Toggle it in settings if you prefer to skip this mechanic.
 
-### 📡 See-and-Spray Integration
-
-When the **Precision Farming DLC** See-and-Spray nozzles would deactivate (no native weed
-detected in a particular spot), the mod checks our own `weedPressure` field value. If weed
-pressure is 20% or higher, the nozzle stays open — bridging our field-level weed tracking into
-the precision spot-spray system.
-
-This is a fully guarded integration: if Precision Farming is not installed it is a silent no-op.
-
 ### 📊 Coverage Tracking
 
 The sprayer now tracks which individual soil cells have been covered in an application pass.
@@ -323,7 +314,6 @@ All integrations are detected automatically at runtime and fail gracefully if th
 
 | Mod | Behaviour |
 |---|---|
-| **Precision Farming DLC** | Compatible — both mods run independently. No conflicts. See-and-Spray integration bridges our weed pressure tracking into PF's nozzle activation logic when both are installed. |
 | **FS25_SeasonalCropStress** | Soil pH and organic matter influence evapotranspiration rates per field. |
 | **FS25_NPCFavor** | NPC neighbour favour quests can reference your fields' soil state. |
 | **FS25_MoistureSystem** | Compatible — both mods use independent hooks. No conflicts. |
@@ -372,10 +362,7 @@ All integrations are detected automatically at runtime and fail gracefully if th
 |---|---|
 | 🌱 **Base game lime indicator** | The base game's "needs liming" flag is a separate system from our pH tracking. Both update when you apply lime through the sprayer, but the indicators can show different states until the field is treated. Workaround: disable the base game's liming requirement in **Settings → Farming → Liming** to rely solely on our HUD. |
 | 🌐 **Multiplayer** | Soil simulation runs on the server only. Clients receive synced state on join and after each harvest or fertiliser event. |
-| 🔬 **Precision Farming (general)** | Compatible — both mods track nutrients independently. No conflicts. |
-| ❌ **See & Spray (PF DLC)** | The Precision Farming See-and-Spray spot-spray feature is **not supported** in this release. The weed pressure bridge integration exists in the codebase but is non-functional. Spot nozzles will behave as if our weed data is not present. |
-| ❌ **PWM nozzle control (PF DLC)** | Pulse Width Modulation (per-nozzle rate control) is a Precision Farming feature and is **not supported** by this mod. |
-| ⚠️ **Section Control** | Section-based nutrient credit scaling works correctly but requires **Precision Farming's ExtendedSprayer** to be active for section states to be managed per-nozzle. Without PF, all sections are treated as active (coverage fraction = 1.0), which is still correct for plain Section Control at field boundaries. |
+| ⚠️ **Section Control** | Section-based nutrient credit scaling works correctly. When outer boom sections are shut off at field boundaries, nutrient credit scales to the active fraction. |
 
 ---
 

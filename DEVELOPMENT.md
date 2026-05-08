@@ -82,7 +82,6 @@ FS25_SoilFertilizer/
 │   │   ├── SoilTreatmentDialog.lua    # Treatment recommendation dialog
 │   │   └── SoilReportDialog.lua    # Full-farm soil report dialog
 │   ├── integrations/
-│   │   └── SeeAndSprayIntegration.lua  # Precision Farming See-and-Spray bridge (v2.0)
 │   └── utils/
 │       ├── Logger.lua              # Centralized logging
 │       ├── AsyncRetryHandler.lua   # Retry pattern utility
@@ -445,7 +444,7 @@ FS25 does not expose Z-order APIs for Overlays. Render order is determined by ca
 - [ ] Toggle settings — changes take effect and persist after save/reload
 - [ ] Save and reload — all field data and settings survive
 - [ ] Multiplayer — server/client sync works (client joins and sees field data immediately)
-- [ ] With Precision Farming — both mods run independently, no conflicts
+
 
 ### Debug Logging
 
