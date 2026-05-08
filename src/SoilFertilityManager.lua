@@ -579,18 +579,20 @@ function SoilFertilityManager:deferredSoilSystemInit()
                 self.sfm:loadSoilData()
 
                 -- Show activation dialog
+                -- The hardcoded values are here for a reason, and will NOT be translated.
                 if self.sfm.settings.showNotifications and InfoDialog.INSTANCE ~= nil then
-                    local modInfo = g_modManager and g_modManager:getModByName(g_currentModName)
+                    local modInfo = g_modManager and g_modManager:getModByName(self.sfm.modName)
                     local version = (modInfo and modInfo.version) or "?"
                     local sep = "--------------------------------"
-                    local text = "Soil & Fertilizer  |  v" .. version .. "\n"
+                    local text = "FS25_SoilFertilizer  |  v" .. version .. "\n"
+                        .. "Author: TisonK\n"
                         .. sep .. "\n\n"
                         .. "What's new:\n"
+                        .. "  - Created this new version dialog on startup\n"
                         .. "  - Removed Precision Farming dependency\n"
                         .. "  - Fixed debug logging in field hooks\n"
                         .. "  - Community translations updated (FR, PL, IT)\n\n"
-                        .. sep .. "\n"
-                        .. "Author: TisonK\n\n"
+                        .. sep .. "\n\n"
                         .. g_i18n:getText("sf_startup_dialog_footer")
                     InfoDialog.show(text)
                 end
