@@ -431,7 +431,7 @@
     <e k="sf_treat_action_ok" v="OK" eh="e0aa021e" />
     <e k="sf_help_title" v="Soil Quick Reference" eh="8986bb6d" />
     <e k="sf_help_nutrients_header" v="NUTRIENTS" eh="9aeb39bf" />
-    <e k="sf_help_n" v="N  (Nitrogen)     - Depletes fast. Apply UAN, Urea, or Manure." eh="f2d0c792" />
+    <e k="sf_help_n" v="N  (Nitrogen)     - Depletes fast. Apply UAN, Urea, AN, or Manure." eh="f2d0c792" />
     <e k="sf_help_p" v="P  (Phosphorus)   - Long-lasting. Apply MAP or DAP." eh="fdfbd91e" />
     <e k="sf_help_k" v="K  (Potassium)    - Apply Potash. Important for roots." eh="e0217634" />
     <e k="sf_help_om" v="OM (Organic Mat.) - Builds slowly. Plow in manure/compost." eh="a4e29617" />
@@ -680,6 +680,10 @@
     <e k="sf_fieldinfo_grade" v="Soil Grade" eh="65d1be5f" />
     <e k="sf_fieldinfo_yield" v="Yield" eh="97345487" />
     <e k="sf_fieldinfo_rotation" v="Rotation" eh="f1a42bd4" />
+    <e k="sf_fieldinfo_needs" v="Needs" eh="94d6125d" />
+    </elements>
+</l10n>
+ion" v="Rotation" eh="f1a42bd4" />
     <e k="sf_fieldinfo_needs" v="Needs" eh="94d6125d" />
     </elements>
 </l10n>

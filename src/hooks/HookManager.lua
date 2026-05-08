@@ -2313,7 +2313,7 @@ function HookManager:installPurchaseRefillHook()
         UAN32 = 1.60, UAN28 = 1.50, ANHYDROUS = 1.85, STARTER = 1.70,
         LIQUIDLIME = 1.20, INSECTICIDE = 1.20, FUNGICIDE = 1.30,
         LIQUID_UREA = 1.70, LIQUID_AMS = 1.45, LIQUID_MAP = 2.00, LIQUID_DAP = 1.80, LIQUID_POTASH = 1.85,
-        UREA = 1.65, AMS = 1.40, MAP = 1.95, DAP = 1.75, POTASH = 1.80,
+        UREA = 1.65, AN = 1.50, AMS = 1.40, MAP = 1.95, DAP = 1.75, POTASH = 1.80,
         COMPOST = 0.60, BIOSOLIDS = 0.55, CHICKEN_MANURE = 0.50,
         PELLETIZED_MANURE = 0.70, GYPSUM = 0.35,  -- reduced: amendment, not plant food ($525/ha vs $1200)
     }
@@ -3355,5 +3355,7 @@ function HookManager:installClientJoinHook()
     )
     self:register(FSBaseMission, "onConnectionFinished", original, "FSBaseMission.onConnectionFinished (Client Join)")
     SoilLogger.info("[OK] Client join hook installed successfully")
+    return true
+end.info("[OK] Client join hook installed successfully")
     return true
 end
