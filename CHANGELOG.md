@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.1.5.5] - 2026-05-08
+
+### Fixed
+- **Nutrient depletion on grass** — fixed a math error where depletion from mowing scaled linearly with field size instead of area percentage, causing massive nutrient drain on large fields (Issue #332).
+- **Manual application rate ignored** — Sprayer usage calculations now correctly factor in the user's manual application rate (MAP) multiplier when speed-based consumption is active (Issue #333).
+
+---
+
 ## [2.1.5.4] - 2026-05-08
 
 ### Fixed

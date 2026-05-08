@@ -2753,7 +2753,12 @@ function HookManager:installSprayerUsageHook()
                 if okW and w and w > 0 then workWidth = w end
             end
 
-            local usage = fillScale * lps * actualSpeedKmh * workWidth * dt * 0.001
+            local mapMult = 1.0
+            if g_SoilFertilityManager and g_SoilFertilityManager.sprayerRateManager then
+                mapMult = g_SoilFertilityManager.sprayerRateManager:getMultiplier(sprayerSelf.id or 0)
+            end
+
+            local usage = fillScale * mapMult * lps * actualSpeedKmh * workWidth * dt * 0.001
 
             -- Throttled diagnostic: log once per 4 s per vehicle (debug mode only).
             -- Shows speed / width / lps / usage-per-second / effective L/ha so you can
