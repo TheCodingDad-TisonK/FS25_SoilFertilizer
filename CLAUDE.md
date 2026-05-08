@@ -351,6 +351,22 @@ If a file exceeds 1500 lines, refactor it into smaller modules with clear single
 
 ---
 
+## Release Checklist
+
+Every release must include ALL of the following before tagging:
+
+| Step | What to update | Location |
+|------|---------------|----------|
+| 1 | Bump `<version>` | `modDesc.xml` |
+| 2 | Bump version string | `README.md` — line with `**Version:**` |
+| 3 | Update startup dialog changelog bullets | `src/SoilFertilityManager.lua` — the hardcoded `What's new:` block in the `showNotifications` dialog |
+| 4 | Build zip (after version bump commit) | `bash build.sh --deploy` |
+| 5 | Copy zip into repo | `cp ../FS25_SoilFertilizer.zip ./FS25_SoilFertilizer.zip` |
+
+Steps 1–3 must all be committed before running the build so the zip contains the correct version and dialog text.
+
+---
+
 ## No Branding / No Advertising
 
 - **Never** add "Generated with Claude Code", "Co-Authored-By: Claude", or any claude.ai links to commit messages, PR descriptions, code comments, or any other output.
