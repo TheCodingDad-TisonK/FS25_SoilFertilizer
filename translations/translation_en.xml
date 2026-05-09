@@ -542,7 +542,12 @@
          NOTIFICATIONS
          ====================================================== -->
     <e k="sf_notify_welcome" v="Soil &amp; Fertilizer Mod Active | Shift+O to open settings | Type 'soilfertility' for commands" eh="3fde93cd" />
-    <e k="sf_startup_dialog_footer" v="Your soil remembers everything 🌱" />
+    <e k="sf_startup_dialog_info" v="(You can disable this and other notifications in the settings panel)" />
+    <e k="sf_startup_dialog_version" v="What's new in this version:" />
+    <e k="sf_startup_dialog_footer" v="Thank you for using my mod, it means a lot to me <3" />
+    <e k="sf_startup_dialog_footer2" v="Found a bug? Please report it on github!" />
+    <e k="sf_startup_dialog_footer3" v="Happy farming and don't forget:" />
+    <e k="sf_startup_dialog_footer4" v="Your soil remembers everything..." />
     <e k="sf_notify_init_delayed" v="Soil Mod: Field initialization delayed. Trying alternative method..." eh="f8bd28f8" />
     <e k="sf_notify_init_success" v="Soil Mod: Field initialization successful!" eh="46214360" />
     <e k="sf_notify_critical_title" v="Critical Care Alert" eh="3f981d0c" />
