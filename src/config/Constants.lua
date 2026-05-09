@@ -103,6 +103,60 @@ SoilConstants.STRIP_TILL = {
 }
 
 -- ========================================
+-- RESIDUE INCORPORATION (Issue #338)
+-- ========================================
+-- When post-harvest tillage works stubble and straw residue back into
+-- the soil, it decomposes and releases a small amount of organic matter
+-- and nutrients (especially N and K from cereal straw, P is minimal).
+-- Each tillage type has its own incorporation efficiency:
+--   Plow      : deepest incorporation — highest OM and N release
+--   Cultivator: shallow mixing — moderate OM release, small NPK
+--   Strip-till: partial surface coverage — lowest incorporation
+--   Sowing    : direct-drill openers disturb minimal residue
+--
+-- All values are per-pass additive boosts (on the 0-100 scale for N/P/K,
+-- and on the 0-10 OM scale). They are small by design — straw residue
+-- decomposes over weeks/months, so a single tillage pass incorporates
+-- only a fraction. The plowingBonus setting gates the plow path; all
+-- other paths are gated by the new residueIncorporation setting.
+--
+-- Agronomic reference (Midwestern US extension, kg/ha per tonne of straw):
+--   Cereal straw typically contains: N=6, P=0.8, K=12, C=430 (kg/tonne)
+--   OM contribution ≈ 40-50% of straw C converted to stable humus over 1+ yr
+--   A single tillage pass incorporates ~30-60% of surface residue.
+--   At 4-6 t/ha straw (wheat/maize at game scale), that translates to:
+--   Plow:      OM+0.12, N+0.8, P+0.1, K+0.6  (60% incorporation efficiency)
+--   Cultivator:OM+0.06, N+0.4, P+0.05,K+0.3  (30% incorporation)
+--   Strip-till: OM+0.03, N+0.2, P+0.02,K+0.15 (15% — only tilled strips)
+--   Direct-drill: OM+0.02, N+0.1, P+0.01,K+0.08 (10% — opener disturbance only)
+SoilConstants.RESIDUE_INCORPORATION = {
+    PLOW = {
+        OM = 0.12,   -- organic matter gain per pass
+        N  = 0.8,    -- nitrogen release per pass
+        P  = 0.1,    -- phosphorus release per pass
+        K  = 0.6,    -- potassium release per pass
+    },
+    CULTIVATOR = {
+        OM = 0.06,
+        N  = 0.4,
+        P  = 0.05,
+        K  = 0.3,
+    },
+    STRIP_TILL = {
+        OM = 0.03,
+        N  = 0.2,
+        P  = 0.02,
+        K  = 0.15,
+    },
+    DIRECT_DRILL = {
+        OM = 0.02,
+        N  = 0.1,
+        P  = 0.01,
+        K  = 0.08,
+    },
+}
+
+-- ========================================
 -- NUTRIENT LIMITS
 -- ========================================
 SoilConstants.NUTRIENT_LIMITS = {

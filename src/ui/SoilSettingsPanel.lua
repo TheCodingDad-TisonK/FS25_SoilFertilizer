@@ -114,7 +114,7 @@ local CATEGORIES = {
             },
             {
                 headerKey = "sf_panel_hdr_environment",
-                items     = { "seasonalEffects", "rainEffects", "plowingBonus" }
+                items     = { "seasonalEffects", "rainEffects", "plowingBonus", "residueIncorporation" }
             },
             {
                 headerKey = "sf_panel_hdr_crop_stress",
@@ -188,6 +188,7 @@ local SETTING_DESCS = {
     seasonalEffects   = "sf_desc_seasonalEffects",
     rainEffects       = "sf_desc_rainEffects",
     plowingBonus      = "sf_desc_plowingBonus",
+    residueIncorporation = "sf_desc_residueIncorporation",
     weedPressure      = "sf_desc_weedPressure",
     pestPressure      = "sf_desc_pestPressure",
     diseasePressure   = "sf_desc_diseasePressure",

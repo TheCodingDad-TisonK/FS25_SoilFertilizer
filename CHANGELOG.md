@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.1.5.6] - 2026-05-09
+
+### Added
+- **Residue incorporation from tillage** ([#338](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/338)) — cultivators, disk harrows, plows, strip-till implements, and direct-drill seeders now release a small amount of organic matter and nutrients (N, P, K) when working post-harvest stubble back into the soil. This models the decomposition of chopped straw and root residues naturally occurring in real agriculture. Each tillage type has its own incorporation efficiency:
+
+  | Tool | OM gain | N | P | K | Notes |
+  |---|---|---|---|---|---|
+  | Plow | +0.12 | +0.8 | +0.10 | +0.6 | Deepest burial, highest release |
+  | Cultivator / disk harrow | +0.06 | +0.4 | +0.05 | +0.3 | Shallow mixing |
+  | Strip-till / ridge tiller | +0.03 | +0.2 | +0.02 | +0.15 | Tilled strips only (~30% surface) |
+  | Direct-drill seeder | +0.02 | +0.1 | +0.01 | +0.08 | Opener slot disturbance only |
+
+- **New setting: Residue Incorporation** — toggle this feature on or off independently of the existing Plowing Bonus setting. Enabled by default.
+
+---
+
 ## [2.1.5.5] - 2026-05-08
 
 ### Fixed

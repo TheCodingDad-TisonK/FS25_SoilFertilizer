@@ -12,6 +12,8 @@
     <e k="sf_rain_effects_long" v="Włącz/wyłącz wpływ deszczu na glebę (wypłukiwanie składników, zmiany pH)" eh="de3b14b9" />
     <e k="sf_plowing_bonus_short" v="Bonus Orki" eh="541ec752" />
     <e k="sf_plowing_bonus_long" v="Włącz/wyłącz korzyści orki dla żyzności gleby (poprawiony azot i materia organiczna)" eh="fe701c1c" />
+    <e k="sf_residue_incorporation_short" v="[EN] Residue Incorporation" eh="" />
+    <e k="sf_residue_incorporation_long" v="[EN] Enable/disable nutrient release from crop residue worked into soil by tillage tools (cultivators, plows, strip-till, direct drills)" eh="" />
     <e k="sf_weed_pressure_short" v="Presja Chwastów" eh="7f71ee68" />
     <e k="sf_weed_pressure_long" v="Włącz/wyłącz dynamiczny wzrost chwastów i wpływ na plon" eh="27de5f41" />
     <e k="sf_pest_pressure_short" v="Presja szkodników" eh="eb771556" />
@@ -612,6 +614,7 @@
     <e k="sf_desc_seasonalEffects" v="Zmiany gleby zależne od pór roku" eh="f515f484" />
     <e k="sf_desc_rainEffects" v="Deszcz powoduje wymywanie składników odżywczych" eh="82fec75d" />
     <e k="sf_desc_plowingBonus" v="Bonus za orkę gleby" eh="23522b97" />
+    <e k="sf_desc_residueIncorporation" v="[EN] Tillage releases residue nutrients" eh="" />
     <e k="sf_desc_weedPressure" v="Śledzenie i karanie rozprzestrzeniania się chwastów" eh="df20c38d" />
     <e k="sf_desc_pestPressure" v="Śledzenie zakażeń szkodników" eh="12b3412e" />
     <e k="sf_desc_diseasePressure" v="Śledzenie chorób grzybowych roślin" eh="0858395f" />

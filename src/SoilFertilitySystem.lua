@@ -438,6 +438,26 @@ function SoilFertilitySystem:onSowing(fieldId)
         changed = true
     end
 
+    -- Direct-drill residue incorporation: seed openers disturb a small fraction of
+    -- surface residue, releasing a minimal nutrient pulse. This models the reality
+    -- that no-till/direct seeders still cause some residue breakdown at the opener slot.
+    if self.settings.residueIncorporation and SoilConstants.RESIDUE_INCORPORATION then
+        local ri     = SoilConstants.RESIDUE_INCORPORATION.DIRECT_DRILL
+        local limits = SoilConstants.NUTRIENT_LIMITS
+        local omBefore = field.organicMatter or SoilConstants.FIELD_DEFAULTS.organicMatter
+        local omAfter  = math.min(limits.ORGANIC_MATTER_MAX, omBefore + ri.OM)
+        if omAfter > omBefore then
+            field.organicMatter = omAfter
+            changed = true
+        end
+        field.nitrogen   = math.min(limits.MAX, (field.nitrogen   or 0) + ri.N)
+        field.phosphorus = math.min(limits.MAX, (field.phosphorus or 0) + ri.P)
+        field.potassium  = math.min(limits.MAX, (field.potassium  or 0) + ri.K)
+        SoilLogger.debug("[Sowing] Field %d: direct-drill residue — OM+%.2f N+%.1f P+%.2f K+%.1f",
+            fieldId, ri.OM, ri.N, ri.P, ri.K)
+        changed = true
+    end
+
     if changed and g_server and g_currentMission and g_currentMission.missionDynamicInfo
         and g_currentMission.missionDynamicInfo.isMultiplayer then
         if SoilFieldUpdateEvent then
@@ -512,6 +532,26 @@ function SoilFertilitySystem:onPlowing(fieldId)
         changed = true
     end
 
+    -- Plowing benefit 6: Residue incorporation — straw stubble worked in releases OM and NPK
+    -- Gated by residueIncorporation setting (separate from plowingBonus so OM/pH and
+    -- residue nutrient release can be toggled independently).
+    if self.settings.residueIncorporation and SoilConstants.RESIDUE_INCORPORATION then
+        local ri     = SoilConstants.RESIDUE_INCORPORATION.PLOW
+        local limits = SoilConstants.NUTRIENT_LIMITS
+        local omBefore = field.organicMatter or SoilConstants.FIELD_DEFAULTS.organicMatter
+        local omAfter  = math.min(limits.ORGANIC_MATTER_MAX, omBefore + ri.OM)
+        if omAfter > omBefore then
+            field.organicMatter = omAfter
+            changed = true
+        end
+        field.nitrogen   = math.min(limits.MAX, (field.nitrogen   or 0) + ri.N)
+        field.phosphorus = math.min(limits.MAX, (field.phosphorus or 0) + ri.P)
+        field.potassium  = math.min(limits.MAX, (field.potassium  or 0) + ri.K)
+        SoilLogger.debug("[Plowing] Field %d: residue incorporated — OM+%.2f N+%.1f P+%.2f K+%.1f",
+            fieldId, ri.OM, ri.N, ri.P, ri.K)
+        changed = true
+    end
+
     if changed and g_server and g_currentMission and g_currentMission.missionDynamicInfo and g_currentMission.missionDynamicInfo.isMultiplayer then
         if SoilFieldUpdateEvent then
             g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
@@ -552,6 +592,25 @@ function SoilFertilitySystem:onCultivation(fieldId)
         local before = field.diseasePressure
         field.diseasePressure = math.max(0, before - c.DISEASE_PRESSURE_REDUCTION)
         SoilLogger.debug("[Cultivation] Field %d: disease %.0f -> %.0f", fieldId, before, field.diseasePressure)
+        changed = true
+    end
+
+    -- Residue incorporation: shallow cultivation mixes surface straw residue into topsoil.
+    -- Releases smaller amounts than deep plowing (only topsoil mixing, no burial).
+    if self.settings.residueIncorporation and SoilConstants.RESIDUE_INCORPORATION then
+        local ri     = SoilConstants.RESIDUE_INCORPORATION.CULTIVATOR
+        local limits = SoilConstants.NUTRIENT_LIMITS
+        local omBefore = field.organicMatter or SoilConstants.FIELD_DEFAULTS.organicMatter
+        local omAfter  = math.min(limits.ORGANIC_MATTER_MAX, omBefore + ri.OM)
+        if omAfter > omBefore then
+            field.organicMatter = omAfter
+            changed = true
+        end
+        field.nitrogen   = math.min(limits.MAX, (field.nitrogen   or 0) + ri.N)
+        field.phosphorus = math.min(limits.MAX, (field.phosphorus or 0) + ri.P)
+        field.potassium  = math.min(limits.MAX, (field.potassium  or 0) + ri.K)
+        SoilLogger.debug("[Cultivation] Field %d: residue incorporated — OM+%.2f N+%.1f P+%.2f K+%.1f",
+            fieldId, ri.OM, ri.N, ri.P, ri.K)
         changed = true
     end
 
@@ -618,6 +677,19 @@ function SoilFertilitySystem:onStripTill(fieldId)
             SoilLogger.debug("[StripTill] Field %d: OM %.2f -> %.2f", fieldId, omBefore, omAfter)
             changed = true
         end
+    end
+
+    -- Residue incorporation: strip-till knifes work only tilled strips (~30% of surface),
+    -- so residue nutrient release is the smallest of all tillage types.
+    if self.settings.residueIncorporation and SoilConstants.RESIDUE_INCORPORATION then
+        local ri     = SoilConstants.RESIDUE_INCORPORATION.STRIP_TILL
+        local limits = SoilConstants.NUTRIENT_LIMITS
+        field.nitrogen   = math.min(limits.MAX, (field.nitrogen   or 0) + ri.N)
+        field.phosphorus = math.min(limits.MAX, (field.phosphorus or 0) + ri.P)
+        field.potassium  = math.min(limits.MAX, (field.potassium  or 0) + ri.K)
+        SoilLogger.debug("[StripTill] Field %d: residue incorporated — N+%.1f P+%.2f K+%.1f",
+            fieldId, ri.N, ri.P, ri.K)
+        changed = true
     end
 
     if changed and g_server and g_currentMission

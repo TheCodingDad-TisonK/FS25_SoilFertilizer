@@ -180,6 +180,7 @@ The mod isn't just about what you put in — it's about what the world takes out
 | 🌧️ **pH acidification** | Rain is slightly acidic. Ignore liming long enough and your soil will show it. |
 | 🌾 **Fallow recovery** | Fields left unplanted for 7+ days slowly recover nutrients on their own. |
 | 🚜 **Plowing bonus** | Aerates soil, nudging pH toward neutral and boosting organic matter mixing. |
+| 🌿 **Residue incorporation** | Working post-harvest stubble back into the soil releases a small NPK and OM pulse from decomposing straw. Deeper tillage releases more; direct-drills release the least. |
 
 ### 📊 Soil HUD
 
@@ -251,6 +252,7 @@ Press **`Shift+O`** anywhere in-game (on foot or in a vehicle) to open the full 
 | **Seasonal effects** | On / Off | Spring nitrogen boost and fall nitrogen loss |
 | **Rain effects** | On / Off | Leaching and pH acidification from rain |
 | **Plowing bonus** | On / Off | Whether plowing improves OM and pH |
+| **Residue incorporation** | On / Off | Whether tillage tools release nutrients from worked-in straw residue |
 | **Weed pressure** | On / Off | Track weed competition per field |
 | **Pest pressure** | On / Off | Track insect pest populations per field |
 | **Disease pressure** | On / Off | Track crop disease per field |

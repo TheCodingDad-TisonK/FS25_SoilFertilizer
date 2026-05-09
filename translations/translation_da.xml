@@ -164,6 +164,8 @@
     <e k="sf_rain_effects_long" v="Aktiver/deaktiver regnens påvirkning af jord (næringsstofudvaskning, pH-ændringer)" eh="de3b14b9" />
     <e k="sf_plowing_bonus_short" v="Pløjebonus" eh="541ec752" />
     <e k="sf_plowing_bonus_long" v="Aktiver/deaktiver pløjningens fordele for jordfrugtbarhed (forbedret kvælstof og organisk materiale)" eh="fe701c1c" />
+    <e k="sf_residue_incorporation_short" v="[EN] Residue Incorporation" eh="" />
+    <e k="sf_residue_incorporation_long" v="[EN] Enable/disable nutrient release from crop residue worked into soil by tillage tools (cultivators, plows, strip-till, direct drills)" eh="" />
     <e k="sf_weed_pressure_short" v="Ukrudtstryk" eh="53f8b936" />
     <e k="sf_weed_pressure_long" v="Aktiver/deaktiver dynamisk ukrudtsvækst og udbyttepåvirkning" eh="ac99a865" />
     <e k="sf_pest_pressure_short" v="Skadedyrstryk" eh="18a7c2be" />
@@ -553,6 +555,7 @@
 <e k="sf_desc_seasonalEffects" v="sæsonbaserede jordændringer" eh="f515f484" />
 <e k="sf_desc_rainEffects" v="regn forårsager udvaskning af næringsstoffer" eh="82fec75d" />
 <e k="sf_desc_plowingBonus" v="pløjningsbonus for jordforbedring" eh="23522b97" />
+    <e k="sf_desc_residueIncorporation" v="[EN] Tillage releases residue nutrients" eh="" />
 <e k="sf_desc_weedPressure" v="sporer og straffer ukrudtsspredning" eh="df20c38d" />
 <e k="sf_desc_pestPressure" v="sporer insektangreb" eh="12b3412e" />
 <e k="sf_desc_diseasePressure" v="sporer svampesygdomme i afgrøder" eh="0858395f" />
