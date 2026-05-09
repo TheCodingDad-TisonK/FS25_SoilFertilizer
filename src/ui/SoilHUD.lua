@@ -590,12 +590,12 @@ function SoilHUD:refreshFieldData()
         return
     end
 
-    local fieldId = self:detectCurrentFieldId()
+    local fieldId, x, z = self:detectCurrentFieldId()
     local prevId  = self.cachedFieldId
     self.cachedFieldId = fieldId
 
     if fieldId then
-        self.cachedFieldInfo = soilSys:getFieldInfo(fieldId)
+        self.cachedFieldInfo = soilSys:getFieldInfo(fieldId, x, z)
 
         if fieldId ~= prevId and self.cachedFieldInfo then
             local info = self.cachedFieldInfo
@@ -660,28 +660,29 @@ function SoilHUD:detectCurrentFieldId()
     -- even when the method is callable. Always use pcall directly.
     -- NOTE: field.fieldId / field.id / field.index all return nil in FS25.
     -- The correct identifier is field.farmland.id (confirmed in SoilFertilitySystem).
+    local fieldId = nil
     if g_fieldManager then
         local ok, field = pcall(function()
             return g_fieldManager:getFieldAtWorldPosition(x, z)
         end)
         if ok and field and field.farmland and field.farmland.id then
-            return field.farmland.id
+            fieldId = field.farmland.id
         end
     end
 
     -- Tier 2: farmland object lookup
     -- NOTE: getFarmlandIdAtWorldPosition does not exist in FS25.
     -- getFarmlandAtWorldPosition returns a farmland object; read .id from it.
-    if g_farmlandManager then
+    if not fieldId and g_farmlandManager then
         local ok, farmland = pcall(function()
             return g_farmlandManager:getFarmlandAtWorldPosition(x, z)
         end)
         if ok and farmland and farmland.id and farmland.id > 0 then
-            return farmland.id
+            fieldId = farmland.id
         end
     end
 
-    return nil
+    return fieldId, x, z
 end
 
 -- ── Toggle visibility (J key) ────────────────────────────

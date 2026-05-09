@@ -300,6 +300,17 @@ local function getCellLayerValue(cell, layerIdx)
     elseif layerIdx == 3 then return cell.K
     elseif layerIdx == 4 then return cell.pH
     elseif layerIdx == 5 then return cell.OM
+    elseif layerIdx == 6 then
+        -- Urgency calculation (local approximation)
+        local n = cell.N or 0
+        local p = cell.P or 0
+        local k = cell.K or 0
+        -- Simplified urgency for map: inverse of NPK average relative to 100
+        return 100 - (n + p + k) / 3
+    elseif layerIdx == 7 then return cell.weedPressure
+    elseif layerIdx == 8 then return cell.pestPressure
+    elseif layerIdx == 9 then return cell.diseasePressure
+    elseif layerIdx == 10 then return cell.compaction
     end
     return nil
 end
@@ -377,9 +388,9 @@ function SoilMapOverlay:updateSamplePoints(force)
                                 totalPoints = totalPoints + 1
                             end
                         end
-                    elseif layerIdx >= 1 and layerIdx <= 5 then
-                        -- zoneData per-cell path: standard maps, layers 1-5 (N/P/K/pH/OM).
-                        -- Cells that have been sprayed show their local value; unvisited cells
+                    elseif layerIdx >= 1 and layerIdx <= 10 then
+                        -- zoneData per-cell path: standard maps, layers 1-10.
+                        -- Cells that have been modified show their local value; unvisited cells
                         -- fall back to the field average so the map is always fully coloured.
                         local fieldEntry = self.soilSystem.fieldData and self.soilSystem.fieldData[farmlandId]
                         local zoneData = fieldEntry and fieldEntry.zoneData
@@ -390,8 +401,8 @@ function SoilMapOverlay:updateSamplePoints(force)
                                 if zoneData then
                                     local cx = math.floor(pt.x / zone.CELL_SIZE)
                                     local cz = math.floor(pt.z / zone.CELL_SIZE)
-                                    -- PHASE 2: integer key matches applyFertilizer() change
-                                    local cell = zoneData[cx * 10000 + cz]
+                                    local cellKey = tostring(cx * 10000 + cz)
+                                    local cell = zoneData[cellKey]
                                     if cell then
                                         local val = getCellLayerValue(cell, layerIdx)
                                         if val then r, g, b = self:valueToLayerColor(layerIdx, val) end
@@ -403,7 +414,7 @@ function SoilMapOverlay:updateSamplePoints(force)
                             end
                         end
                     else
-                        -- Field-average path: layers 6-9 (urgency, weed, pest, disease)
+                        -- Fallback for any other layers (usually 0/off or future)
                         local r, g, b = self:getLayerColor(layerIdx, info, farmlandId)
                         for _, pt in ipairs(polyPts) do
                             if totalPoints < maxPoints then

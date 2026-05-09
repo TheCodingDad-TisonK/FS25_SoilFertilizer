@@ -424,7 +424,7 @@ end
 ---@param area number Area processed in hectares
 function SoilFertilitySystem:onSowing(fieldId, area)
     if not fieldId or fieldId <= 0 then return end
-    local field = self:getOrCreateField(fieldId, false)
+    local field = self:getOrCreateField(fieldId, true)
     if not field then return end
 
     local areaHa = area or 0.001
@@ -456,10 +456,41 @@ function SoilFertilitySystem:onSowing(fieldId, area)
             field.organicMatter = omAfter
             changed = true
         end
-        field.nitrogen   = math.min(limits.MAX, (field.nitrogen   or 0) + (ri.N * factor))
-        field.phosphorus = math.min(limits.MAX, (field.phosphorus or 0) + (ri.P * factor))
-        field.potassium  = math.min(limits.MAX, (field.potassium  or 0) + (ri.K * factor))
+
+        local dN, dP, dK = ri.N * factor, ri.P * factor, ri.K * factor
+        field.nitrogen   = math.min(limits.MAX, (field.nitrogen   or 0) + dN)
+        field.phosphorus = math.min(limits.MAX, (field.phosphorus or 0) + dP)
+        field.potassium  = math.min(limits.MAX, (field.potassium  or 0) + dK)
         changed = true
+        SoilLogger.debug("Residue incorporation (sowing) field %d: +N%.4f +P%.4f +K%.4f (factor %.4f)",
+            fieldId, dN, dP, dK, factor)
+
+        -- Local zoneData update for HUD/PDA visibility
+        local tx, tz = self._lastTillageX, self._lastTillageZ
+        if tx and tz then
+            local zone = SoilConstants.ZONE
+            local cellKey = tostring(math.floor(tx / zone.CELL_SIZE) * 10000 + math.floor(tz / zone.CELL_SIZE))
+            if not field.zoneData then field.zoneData = {} end
+            if not field.zoneData[cellKey] then
+                field.zoneData[cellKey] = {
+                    N = field.nitrogen, P = field.phosphorus, K = field.potassium,
+                    pH = field.pH, OM = field.organicMatter,
+                    weedPressure = field.weedPressure, pestPressure = field.pestPressure,
+                    diseasePressure = field.diseasePressure, compaction = field.compaction
+                }
+            end
+            local cell = field.zoneData[cellKey]
+            local cellFactor = areaHa / zone.CELL_AREA_HA
+            cell.N = math.min(limits.MAX, cell.N + ri.N * cellFactor)
+            cell.P = math.min(limits.MAX, cell.P + ri.P * cellFactor)
+            cell.K = math.min(limits.MAX, cell.K + ri.K * cellFactor)
+            cell.OM = math.min(limits.ORGANIC_MATTER_MAX, cell.OM + ri.OM * cellFactor)
+
+            -- Weed reduction per cell for direct drill
+            if self.settings.weedPressure and cell.weedPressure then
+                cell.weedPressure = math.max(0, cell.weedPressure - (cell.weedPressure * cellFactor))
+            end
+        end
     end
 
     if changed and g_server and g_currentMission and g_currentMission.missionDynamicInfo
@@ -483,10 +514,8 @@ function SoilFertilitySystem:onPlowing(fieldId, area)
     local areaHa = area or 0.001
     local fieldAreaHa = field.fieldArea and field.fieldArea > 0 and field.fieldArea or 1.0
 
-    -- Per-day area accumulation cap: total effect of all ticks on one day cannot
-    -- exceed plowing the full field once (factor capped at 1.0 cumulative).
-    -- The hook fires ~22x/sec so without this a 3-second pass would apply
-    -- hundreds of full-field-equivalents of OM/pH/weed reduction.
+    -- Per-day area accumulation cap: total effect across all ticks cannot exceed
+    -- one full-field-equivalent per day. Prevents double-counting on repeated passes.
     local today = (g_currentMission and g_currentMission.environment and
                    g_currentMission.environment.currentDay) or 0
     if not self._plowAreaToday then self._plowAreaToday = {} end
@@ -495,9 +524,8 @@ function SoilFertilitySystem:onPlowing(fieldId, area)
         entry = { day = today, used = 0 }
         self._plowAreaToday[fieldId] = entry
     end
-    local remaining = math.max(0, fieldAreaHa - entry.used)
-    local clampedArea = math.min(areaHa, remaining)
-    if clampedArea <= 0 then return end  -- daily cap reached
+    local clampedArea = math.min(areaHa, math.max(0, fieldAreaHa - entry.used))
+    if clampedArea <= 0 then return end
     entry.used = entry.used + clampedArea
     local factor = clampedArea / fieldAreaHa
 
@@ -569,10 +597,48 @@ function SoilFertilitySystem:onPlowing(fieldId, area)
             field.organicMatter = omAfter
             changed = true
         end
-        field.nitrogen   = math.min(limits.MAX, (field.nitrogen   or 0) + (ri.N * factor))
-        field.phosphorus = math.min(limits.MAX, (field.phosphorus or 0) + (ri.P * factor))
-        field.potassium  = math.min(limits.MAX, (field.potassium  or 0) + (ri.K * factor))
+
+        local dN, dP, dK = ri.N * factor, ri.P * factor, ri.K * factor
+        field.nitrogen   = math.min(limits.MAX, (field.nitrogen   or 0) + dN)
+        field.phosphorus = math.min(limits.MAX, (field.phosphorus or 0) + dP)
+        field.potassium  = math.min(limits.MAX, (field.potassium  or 0) + dK)
         changed = true
+        SoilLogger.debug("Residue incorporation (plowing) field %d: +N%.4f +P%.4f +K%.4f (factor %.4f)",
+            fieldId, dN, dP, dK, factor)
+
+        -- Local zoneData update for HUD/PDA visibility
+        local tx, tz = self._lastTillageX, self._lastTillageZ
+        if tx and tz then
+            local zone = SoilConstants.ZONE
+            local cellKey = tostring(math.floor(tx / zone.CELL_SIZE) * 10000 + math.floor(tz / zone.CELL_SIZE))
+            if not field.zoneData then field.zoneData = {} end
+            if not field.zoneData[cellKey] then
+                field.zoneData[cellKey] = {
+                    N = field.nitrogen, P = field.phosphorus, K = field.potassium,
+                    pH = field.pH, OM = field.organicMatter,
+                    weedPressure = field.weedPressure, pestPressure = field.pestPressure,
+                    diseasePressure = field.diseasePressure, compaction = field.compaction
+                }
+            end
+            local cell = field.zoneData[cellKey]
+            -- Cell-factor: area processed in THIS tick relative to one cell area (usually 0.01 ha)
+            local cellFactor = areaHa / zone.CELL_AREA_HA
+            cell.N = math.min(limits.MAX, cell.N + ri.N * cellFactor)
+            cell.P = math.min(limits.MAX, cell.P + ri.P * cellFactor)
+            cell.K = math.min(limits.MAX, cell.K + ri.K * cellFactor)
+            cell.OM = math.min(limits.ORGANIC_MATTER_MAX, cell.OM + ri.OM * cellFactor)
+
+            -- Pressure reductions per cell
+            if self.settings.weedPressure then
+                cell.weedPressure = math.max(0, (cell.weedPressure or field.weedPressure or 0) - (field.weedPressure or 0) * cellFactor)
+            end
+            if self.settings.pestPressure and SoilConstants.PLOWING.PEST_PRESSURE_REDUCTION then
+                cell.pestPressure = math.max(0, (cell.pestPressure or field.pestPressure or 0) - SoilConstants.PLOWING.PEST_PRESSURE_REDUCTION * cellFactor)
+            end
+            if self.settings.diseasePressure and SoilConstants.PLOWING.DISEASE_PRESSURE_REDUCTION then
+                cell.diseasePressure = math.max(0, (cell.diseasePressure or field.diseasePressure or 0) - SoilConstants.PLOWING.DISEASE_PRESSURE_REDUCTION * cellFactor)
+            end
+        end
     end
 
     if changed and g_server and g_currentMission and g_currentMission.missionDynamicInfo and g_currentMission.missionDynamicInfo.isMultiplayer then
@@ -590,7 +656,7 @@ function SoilFertilitySystem:onCultivation(fieldId, area)
     if not fieldId or fieldId <= 0 then return end
     if not SoilConstants.CULTIVATION then return end
 
-    local field = self:getOrCreateField(fieldId, false)
+    local field = self:getOrCreateField(fieldId, true)
     if not field then return end
 
     local areaHa = area or 0.001
@@ -605,9 +671,8 @@ function SoilFertilitySystem:onCultivation(fieldId, area)
         centry = { day = today, used = 0 }
         self._cultivAreaToday[fieldId] = centry
     end
-    local cremaining = math.max(0, fieldAreaHa - centry.used)
-    local cclampedArea = math.min(areaHa, cremaining)
-    if cclampedArea <= 0 then return end  -- daily cap reached
+    local cclampedArea = math.min(areaHa, math.max(0, fieldAreaHa - centry.used))
+    if cclampedArea <= 0 then return end
     centry.used = centry.used + cclampedArea
     local factor = cclampedArea / fieldAreaHa
 
@@ -646,10 +711,47 @@ function SoilFertilitySystem:onCultivation(fieldId, area)
             field.organicMatter = omAfter
             changed = true
         end
-        field.nitrogen   = math.min(limits.MAX, (field.nitrogen   or 0) + (ri.N * factor))
-        field.phosphorus = math.min(limits.MAX, (field.phosphorus or 0) + (ri.P * factor))
-        field.potassium  = math.min(limits.MAX, (field.potassium  or 0) + (ri.K * factor))
+
+        local dN, dP, dK = ri.N * factor, ri.P * factor, ri.K * factor
+        field.nitrogen   = math.min(limits.MAX, (field.nitrogen   or 0) + dN)
+        field.phosphorus = math.min(limits.MAX, (field.phosphorus or 0) + dP)
+        field.potassium  = math.min(limits.MAX, (field.potassium  or 0) + dK)
         changed = true
+        SoilLogger.debug("Residue incorporation (cultivation) field %d: +N%.4f +P%.4f +K%.4f (factor %.4f)",
+            fieldId, dN, dP, dK, factor)
+
+        -- Local zoneData update for HUD/PDA visibility
+        local tx, tz = self._lastTillageX, self._lastTillageZ
+        if tx and tz then
+            local zone = SoilConstants.ZONE
+            local cellKey = tostring(math.floor(tx / zone.CELL_SIZE) * 10000 + math.floor(tz / zone.CELL_SIZE))
+            if not field.zoneData then field.zoneData = {} end
+            if not field.zoneData[cellKey] then
+                field.zoneData[cellKey] = {
+                    N = field.nitrogen, P = field.phosphorus, K = field.potassium,
+                    pH = field.pH, OM = field.organicMatter,
+                    weedPressure = field.weedPressure, pestPressure = field.pestPressure,
+                    diseasePressure = field.diseasePressure, compaction = field.compaction
+                }
+            end
+            local cell = field.zoneData[cellKey]
+            local cellFactor = areaHa / zone.CELL_AREA_HA
+            cell.N = math.min(limits.MAX, cell.N + ri.N * cellFactor)
+            cell.P = math.min(limits.MAX, cell.P + ri.P * cellFactor)
+            cell.K = math.min(limits.MAX, cell.K + ri.K * cellFactor)
+            cell.OM = math.min(limits.ORGANIC_MATTER_MAX, cell.OM + ri.OM * cellFactor)
+
+            -- Pressure reductions per cell
+            if self.settings.weedPressure and c.WEED_PRESSURE_REDUCTION then
+                cell.weedPressure = math.max(0, (cell.weedPressure or field.weedPressure or 0) - c.WEED_PRESSURE_REDUCTION * cellFactor)
+            end
+            if self.settings.pestPressure and c.PEST_PRESSURE_REDUCTION then
+                cell.pestPressure = math.max(0, (cell.pestPressure or field.pestPressure or 0) - c.PEST_PRESSURE_REDUCTION * cellFactor)
+            end
+            if self.settings.diseasePressure and c.DISEASE_PRESSURE_REDUCTION then
+                cell.diseasePressure = math.max(0, (cell.diseasePressure or field.diseasePressure or 0) - c.DISEASE_PRESSURE_REDUCTION * cellFactor)
+            end
+        end
     end
 
     if changed and g_server and g_currentMission and g_currentMission.missionDynamicInfo and g_currentMission.missionDynamicInfo.isMultiplayer then
@@ -664,44 +766,39 @@ end
 --- weed control is partial but pest disruption is deeper than cultivation.
 --- No pH normalization (no soil-layer inversion). Small OM boost.
 ---@param fieldId number
-function SoilFertilitySystem:onStripTill(fieldId)
+---@param area number Area processed in hectares
+function SoilFertilitySystem:onStripTill(fieldId, area)
     if not fieldId or fieldId <= 0 then return end
     if not SoilConstants.STRIP_TILL then return end
 
-    local field = self:getOrCreateField(fieldId, false)
+    local field = self:getOrCreateField(fieldId, true)
     if not field then return end
+
+    local areaHa = area or 0.001
+    local fieldAreaHa = field.fieldArea and field.fieldArea > 0 and field.fieldArea or 1.0
+    local factor = areaHa / fieldAreaHa
 
     local st = SoilConstants.STRIP_TILL
     local changed = false
 
-    SoilLogger.debug("[StripTill] Field %d triggered — weed=%.0f pest=%.0f disease=%.0f OM=%.2f",
-        fieldId,
-        field.weedPressure    or 0,
-        field.pestPressure    or 0,
-        field.diseasePressure or 0,
-        field.organicMatter   or 0)
-
     -- Partial weed suppression (only tilled strips are disrupted)
     if self.settings.weedPressure and (field.weedPressure or 0) > 0 then
         local before = field.weedPressure
-        field.weedPressure = math.max(0, before - st.WEED_PRESSURE_REDUCTION)
-        SoilLogger.debug("[StripTill] Field %d: weed %.0f -> %.0f", fieldId, before, field.weedPressure)
+        field.weedPressure = math.max(0, before - st.WEED_PRESSURE_REDUCTION * factor)
         changed = true
     end
 
     -- Deep knife action disrupts soil-dwelling pest larvae (better than cultivator)
     if self.settings.pestPressure and (field.pestPressure or 0) > 0 then
         local before = field.pestPressure
-        field.pestPressure = math.max(0, before - st.PEST_PRESSURE_REDUCTION)
-        SoilLogger.debug("[StripTill] Field %d: pest %.0f -> %.0f", fieldId, before, field.pestPressure)
+        field.pestPressure = math.max(0, before - st.PEST_PRESSURE_REDUCTION * factor)
         changed = true
     end
 
     -- Minimal disease benefit — residue stays on surface between strips
     if self.settings.diseasePressure and (field.diseasePressure or 0) > 0 then
         local before = field.diseasePressure
-        field.diseasePressure = math.max(0, before - st.DISEASE_PRESSURE_REDUCTION)
-        SoilLogger.debug("[StripTill] Field %d: disease %.0f -> %.0f", fieldId, before, field.diseasePressure)
+        field.diseasePressure = math.max(0, before - st.DISEASE_PRESSURE_REDUCTION * factor)
         changed = true
     end
 
@@ -709,10 +806,9 @@ function SoilFertilitySystem:onStripTill(fieldId)
     if st.OM_BOOST and st.OM_BOOST > 0 then
         local omBefore = field.organicMatter or SoilConstants.FIELD_DEFAULTS.organicMatter
         local omAfter  = math.min(SoilConstants.NUTRIENT_LIMITS.ORGANIC_MATTER_MAX,
-                                  omBefore + st.OM_BOOST)
+                                  omBefore + st.OM_BOOST * factor)
         if omAfter > omBefore then
             field.organicMatter = omAfter
-            SoilLogger.debug("[StripTill] Field %d: OM %.2f -> %.2f", fieldId, omBefore, omAfter)
             changed = true
         end
     end
@@ -722,12 +818,47 @@ function SoilFertilitySystem:onStripTill(fieldId)
     if self.settings.residueIncorporation and SoilConstants.RESIDUE_INCORPORATION then
         local ri     = SoilConstants.RESIDUE_INCORPORATION.STRIP_TILL
         local limits = SoilConstants.NUTRIENT_LIMITS
-        field.nitrogen   = math.min(limits.MAX, (field.nitrogen   or 0) + ri.N)
-        field.phosphorus = math.min(limits.MAX, (field.phosphorus or 0) + ri.P)
-        field.potassium  = math.min(limits.MAX, (field.potassium  or 0) + ri.K)
-        SoilLogger.debug("[StripTill] Field %d: residue incorporated — N+%.1f P+%.2f K+%.1f",
-            fieldId, ri.N, ri.P, ri.K)
+
+        local dN, dP, dK = ri.N * factor, ri.P * factor, ri.K * factor
+        field.nitrogen   = math.min(limits.MAX, (field.nitrogen   or 0) + dN)
+        field.phosphorus = math.min(limits.MAX, (field.phosphorus or 0) + dP)
+        field.potassium  = math.min(limits.MAX, (field.potassium  or 0) + dK)
         changed = true
+        SoilLogger.debug("Residue incorporation (strip-till) field %d: +N%.4f +P%.4f +K%.4f (factor %.4f)",
+            fieldId, dN, dP, dK, factor)
+
+        -- Local zoneData update for HUD/PDA visibility
+        local tx, tz = self._lastTillageX, self._lastTillageZ
+        if tx and tz then
+            local zone = SoilConstants.ZONE
+            local cellKey = tostring(math.floor(tx / zone.CELL_SIZE) * 10000 + math.floor(tz / zone.CELL_SIZE))
+            if not field.zoneData then field.zoneData = {} end
+            if not field.zoneData[cellKey] then
+                field.zoneData[cellKey] = {
+                    N = field.nitrogen, P = field.phosphorus, K = field.potassium,
+                    pH = field.pH, OM = field.organicMatter,
+                    weedPressure = field.weedPressure, pestPressure = field.pestPressure,
+                    diseasePressure = field.diseasePressure, compaction = field.compaction
+                }
+            end
+            local cell = field.zoneData[cellKey]
+            local cellFactor = areaHa / zone.CELL_AREA_HA
+            cell.N = math.min(limits.MAX, cell.N + ri.N * cellFactor)
+            cell.P = math.min(limits.MAX, cell.P + ri.P * cellFactor)
+            cell.K = math.min(limits.MAX, cell.K + ri.K * cellFactor)
+            cell.OM = math.min(limits.ORGANIC_MATTER_MAX, cell.OM + ri.OM * cellFactor)
+
+            -- Pressure reductions per cell for strip-till
+            if self.settings.weedPressure then
+                cell.weedPressure = math.max(0, (cell.weedPressure or field.weedPressure or 0) - st.WEED_PRESSURE_REDUCTION * cellFactor)
+            end
+            if self.settings.pestPressure then
+                cell.pestPressure = math.max(0, (cell.pestPressure or field.pestPressure or 0) - st.PEST_PRESSURE_REDUCTION * cellFactor)
+            end
+            if self.settings.diseasePressure then
+                cell.diseasePressure = math.max(0, (cell.diseasePressure or field.diseasePressure or 0) - st.DISEASE_PRESSURE_REDUCTION * cellFactor)
+            end
+        end
     end
 
     if changed and g_server and g_currentMission
@@ -2015,6 +2146,10 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
                     K  = field.potassium,
                     pH = field.pH,
                     OM = field.organicMatter,
+                    weedPressure = field.weedPressure,
+                    pestPressure = field.pestPressure,
+                    diseasePressure = field.diseasePressure,
+                    compaction = field.compaction,
                 }
             end
             local cell = field.zoneData[cellKey]
@@ -2030,6 +2165,10 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
             if entry.K  then cell.K  = math.min(limits.MAX,                     cell.K  + entry.K  * cellFactor) end
             if entry.pH then cell.pH = math.max(limits.PH_MIN, math.min(limits.PH_MAX, cell.pH + entry.pH * cellFactor)) end
             if entry.OM then cell.OM = math.min(limits.ORGANIC_MATTER_MAX,      cell.OM + entry.OM * cellFactor) end
+
+            -- Also update pressure in cell if entry has reductions (direct path fallback)
+            if entry.pestReduction    then cell.pestPressure    = math.max(0, (cell.pestPressure or field.pestPressure or 0) - entry.pestReduction * cellFactor) end
+            if entry.diseaseReduction then cell.diseasePressure = math.max(0, (cell.diseasePressure or field.diseasePressure or 0) - entry.diseaseReduction * cellFactor) end
         end
     end
 
@@ -2075,7 +2214,23 @@ function SoilFertilitySystem:onInsecticideAppliedIncremental(fieldId, reduction)
     field.pestPressure = math.max(0, before - reduction)
     field.insecticideDaysLeft = pp.INSECTICIDE_DURATION_DAYS
 
-    -- Sync only occasionally or on significant changes to save bandwidth in MP
+    -- Local zoneData update
+    local x, z = self._lastSprayX, self._lastSprayZ
+    if x and z then
+        local zone = SoilConstants.ZONE
+        local cellKey = tostring(math.floor(x / zone.CELL_SIZE) * 10000 + math.floor(z / zone.CELL_SIZE))
+        if not field.zoneData then field.zoneData = {} end
+        if not field.zoneData[cellKey] then
+            field.zoneData[cellKey] = {
+                N = field.nitrogen, P = field.phosphorus, K = field.potassium,
+                pH = field.pH, OM = field.organicMatter,
+                weedPressure = field.weedPressure, pestPressure = field.pestPressure,
+                diseasePressure = field.diseasePressure, compaction = field.compaction
+            }
+        end
+        local cell = field.zoneData[cellKey]
+        cell.pestPressure = math.max(0, (cell.pestPressure or field.pestPressure or 0) - reduction)
+    end
 end
 
 --- Incremental fungicide application
@@ -2088,6 +2243,24 @@ function SoilFertilitySystem:onFungicideAppliedIncremental(fieldId, reduction)
     local before = field.diseasePressure or 0
     field.diseasePressure = math.max(0, before - reduction)
     field.fungicideDaysLeft = dp.FUNGICIDE_DURATION_DAYS
+
+    -- Local zoneData update
+    local x, z = self._lastSprayX, self._lastSprayZ
+    if x and z then
+        local zone = SoilConstants.ZONE
+        local cellKey = tostring(math.floor(x / zone.CELL_SIZE) * 10000 + math.floor(z / zone.CELL_SIZE))
+        if not field.zoneData then field.zoneData = {} end
+        if not field.zoneData[cellKey] then
+            field.zoneData[cellKey] = {
+                N = field.nitrogen, P = field.phosphorus, K = field.potassium,
+                pH = field.pH, OM = field.organicMatter,
+                weedPressure = field.weedPressure, pestPressure = field.pestPressure,
+                diseasePressure = field.diseasePressure, compaction = field.compaction
+            }
+        end
+        local cell = field.zoneData[cellKey]
+        cell.diseasePressure = math.max(0, (cell.diseasePressure or field.diseasePressure or 0) - reduction)
+    end
 end
 
 -- =====================================================================
@@ -2328,14 +2501,36 @@ end
 
 --- Get field info for display (HUD, console, etc)
 ---@param fieldId number The field ID to query
+---@param x number|nil Optional world X coordinate for local cell lookup
+---@param z number|nil Optional world Z coordinate for local cell lookup
 ---@return table|nil Field info with nutrient values and status, or nil if not found
-function SoilFertilitySystem:getFieldInfo(fieldId)
+function SoilFertilitySystem:getFieldInfo(fieldId, x, z)
     if not fieldId or fieldId <= 0 then return nil end
 
     local field = self:getOrCreateField(fieldId, true)
     if not field then
         self:warning("Field %d not found in getFieldInfo", fieldId)
         return nil
+    end
+
+    -- Use local cell data if position is provided and cell exists
+    local n  = field.nitrogen   or SoilConstants.FIELD_DEFAULTS.nitrogen
+    local p  = field.phosphorus or SoilConstants.FIELD_DEFAULTS.phosphorus
+    local k  = field.potassium  or SoilConstants.FIELD_DEFAULTS.potassium
+    local ph = field.pH         or SoilConstants.FIELD_DEFAULTS.pH
+    local om = field.organicMatter or SoilConstants.FIELD_DEFAULTS.organicMatter
+
+    if x and z and field.zoneData then
+        local zone = SoilConstants.ZONE
+        local cellKey = tostring(math.floor(x / zone.CELL_SIZE) * 10000 + math.floor(z / zone.CELL_SIZE))
+        local cell = field.zoneData[cellKey]
+        if cell then
+            n  = cell.N  or n
+            p  = cell.P  or p
+            k  = cell.K  or k
+            ph = cell.pH or ph
+            om = cell.OM or om
+        end
     end
 
     local thresholds = SoilConstants.STATUS_THRESHOLDS
@@ -2423,12 +2618,12 @@ function SoilFertilitySystem:getFieldInfo(fieldId)
     return {
         fieldId = fieldId,
         fieldArea = field.fieldArea or 1.0,
-        nitrogen = { value = math.floor(field.nitrogen), status = nutrientStatus(field.nitrogen, "nitrogen") },
-        phosphorus = { value = math.floor(field.phosphorus), status = nutrientStatus(field.phosphorus, "phosphorus") },
-        potassium = { value = math.floor(field.potassium), status = nutrientStatus(field.potassium, "potassium") },
+        nitrogen = { value = math.floor(n), status = nutrientStatus(n, "nitrogen") },
+        phosphorus = { value = math.floor(p), status = nutrientStatus(p, "phosphorus") },
+        potassium = { value = math.floor(k), status = nutrientStatus(k, "potassium") },
         cropTargets = cropTargets,
-        organicMatter = field.organicMatter,
-        pH = field.pH,
+        organicMatter = om,
+        pH = ph,
         lastCrop = cropName,
         lastCrop2 = field.lastCrop2,
         rotationStatus = rotationStatus,
@@ -2556,6 +2751,10 @@ function SoilFertilitySystem:saveToXMLFile(xmlFile, key)
                     setXMLFloat(xmlFile, zk .. "#K",  cell.K  or 0)
                     setXMLFloat(xmlFile, zk .. "#pH", cell.pH or 6.0)
                     setXMLFloat(xmlFile, zk .. "#OM", cell.OM or 0)
+                    setXMLFloat(xmlFile, zk .. "#WP", cell.weedPressure or 0)
+                    setXMLFloat(xmlFile, zk .. "#PP", cell.pestPressure or 0)
+                    setXMLFloat(xmlFile, zk .. "#DP", cell.diseasePressure or 0)
+                    setXMLFloat(xmlFile, zk .. "#CP", cell.compaction or 0)
                     zoneIdx = zoneIdx + 1
                 end
             end
@@ -2653,6 +2852,10 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
                 K  = getXMLFloat(xmlFile, zk .. "#K")  or 0,
                 pH = getXMLFloat(xmlFile, zk .. "#pH") or 6.0,
                 OM = getXMLFloat(xmlFile, zk .. "#OM") or 0,
+                weedPressure = getXMLFloat(xmlFile, zk .. "#WP") or 0,
+                pestPressure = getXMLFloat(xmlFile, zk .. "#PP") or 0,
+                diseasePressure = getXMLFloat(xmlFile, zk .. "#DP") or 0,
+                compaction = getXMLFloat(xmlFile, zk .. "#CP") or 0,
             }
             zi = zi + 1
         end
@@ -2755,21 +2958,31 @@ function SoilFertilitySystem:onCompaction(farmlandId, worldX, worldZ)
     local zone = SoilConstants.ZONE
     local cx = math.floor(worldX / zone.CELL_SIZE)
     local cz = math.floor(worldZ / zone.CELL_SIZE)
-    local cellKey = cx .. "_" .. cz
+    local cellKey = tostring(cx * 10000 + cz)
 
     local currentDay = (g_currentMission and g_currentMission.environment and
                         g_currentMission.environment.currentDay) or 0
 
-    if not field.compactionCells    then field.compactionCells    = {} end
     if not field.compactionCellDays then field.compactionCellDays = {} end
-
     if field.compactionCellDays[cellKey] == currentDay then return end
     field.compactionCellDays[cellKey] = currentDay
 
-    local prev   = field.compactionCells[cellKey] or 0
+    -- 1. Update unified zoneData for HUD/Map
+    if not field.zoneData then field.zoneData = {} end
+    if not field.zoneData[cellKey] then
+        field.zoneData[cellKey] = {
+            N = field.nitrogen, P = field.phosphorus, K = field.potassium,
+            pH = field.pH, OM = field.organicMatter,
+            weedPressure = field.weedPressure, pestPressure = field.pestPressure,
+            diseasePressure = field.diseasePressure, compaction = field.compaction
+        }
+    end
+    local cell = field.zoneData[cellKey]
+    local prev = cell.compaction or 0
     local newVal = math.min(cp.MAX_COMPACTION, prev + cp.COMPACTION_PER_PASS)
-    field.compactionCells[cellKey] = newVal
+    cell.compaction = newVal
 
+    -- 2. Update field average
     field.compactionSum = (field.compactionSum or 0) + (newVal - prev)
     if (field.compactionTotalCells or 0) == 0 then
         local areaInHa = field.fieldArea or 1.0
@@ -2792,22 +3005,26 @@ function SoilFertilitySystem:onSubsoilerPass(farmlandId, worldX, worldZ)
     local field = self:getOrCreateField(farmlandId, false)
     if not field then return end
 
-    if not field.compactionCells then field.compactionCells = {} end
-
     local zone = SoilConstants.ZONE
-    local cx   = math.floor(worldX / zone.CELL_SIZE)
-    local cz   = math.floor(worldZ / zone.CELL_SIZE)
-    local cellKey = cx .. "_" .. cz
+    local cx = math.floor(worldX / zone.CELL_SIZE)
+    local cz = math.floor(worldZ / zone.CELL_SIZE)
+    local cellKey = tostring(cx * 10000 + cz)
 
-    local prev = field.compactionCells[cellKey] or 0
+    if not field.zoneData then field.zoneData = {} end
+    if not field.zoneData[cellKey] then
+        field.zoneData[cellKey] = {
+            N = field.nitrogen, P = field.phosphorus, K = field.potassium,
+            pH = field.pH, OM = field.organicMatter,
+            weedPressure = field.weedPressure, pestPressure = field.pestPressure,
+            diseasePressure = field.diseasePressure, compaction = field.compaction
+        }
+    end
+    local cell = field.zoneData[cellKey]
+    local prev = cell.compaction or 0
     if prev <= 0 then return end
 
     local newVal = math.max(0, prev - cp.SUBSOILER_REDUCTION)
-    if newVal > 0 then
-        field.compactionCells[cellKey] = newVal
-    else
-        field.compactionCells[cellKey] = nil
-    end
+    cell.compaction = newVal
 
     field.compactionSum = math.max(0, (field.compactionSum or 0) - (prev - newVal))
     local tc = field.compactionTotalCells or 0

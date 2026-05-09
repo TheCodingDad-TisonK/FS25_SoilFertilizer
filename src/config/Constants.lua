@@ -131,28 +131,28 @@ SoilConstants.STRIP_TILL = {
 --   Direct-drill: OM+0.02, N+0.1, P+0.01,K+0.08 (10% — opener disturbance only)
 SoilConstants.RESIDUE_INCORPORATION = {
     PLOW = {
-        OM = 0.12,   -- organic matter gain per pass
-        N  = 0.8,    -- nitrogen release per pass
-        P  = 0.1,    -- phosphorus release per pass
-        K  = 0.6,    -- potassium release per pass
+        OM = 0.15,   -- increased from 0.12
+        N  = 5.0,    -- increased from 0.8 for game visibility
+        P  = 1.5,    -- increased from 0.1
+        K  = 3.5,    -- increased from 0.6
     },
     CULTIVATOR = {
-        OM = 0.06,
-        N  = 0.4,
-        P  = 0.05,
-        K  = 0.3,
+        OM = 0.08,   -- increased from 0.06
+        N  = 2.5,    -- increased from 0.4
+        P  = 0.8,    -- increased from 0.05
+        K  = 1.8,    -- increased from 0.3
     },
     STRIP_TILL = {
-        OM = 0.03,
-        N  = 0.2,
-        P  = 0.02,
-        K  = 0.15,
+        OM = 0.05,
+        N  = 1.2,
+        P  = 0.4,
+        K  = 0.8,
     },
     DIRECT_DRILL = {
-        OM = 0.02,
-        N  = 0.1,
-        P  = 0.01,
-        K  = 0.08,
+        OM = 0.03,
+        N  = 0.6,
+        P  = 0.2,
+        K  = 0.4,
     },
 }
 

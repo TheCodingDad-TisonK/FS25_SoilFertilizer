@@ -1663,24 +1663,24 @@ function HookManager:installPlowingHook()
             if not hasProcessed then return end
             if not g_SoilFertilityManager or
                not g_SoilFertilityManager.soilSystem or
-               not g_SoilFertilityManager.settings.enabled or
-               not g_SoilFertilityManager.settings.plowingBonus then
+               not g_SoilFertilityManager.settings.enabled then
                 return
             end
             if not cultivatorSelf.isServer then return end
 
-            -- Confirm cultivator work area actually changed terrain this tick
+            -- Confirm cultivator ACTUALLY changed terrain this tick (not just lifted/scanning).
+            -- lastChangedArea = pixels that flipped to the cultivated state this tick.
+            -- lastStatsArea   = pixels scanned by the work-area raycaster (non-zero even
+            --                   when the plow is lifted during headland turns).
+            -- Using lastStatsArea as the guard caused the daily cap to drain during turns.
             local spec = cultivatorSelf.spec_cultivator
             if not spec or not spec.workAreaParameters then return end
-            local statsArea = spec.workAreaParameters.lastStatsArea
+            local statsArea = spec.workAreaParameters.lastChangedArea
             if not statsArea or statsArea <= 0 then return end
 
             local isPlowSpec = cultivatorSelf.spec_plow ~= nil or cultivatorSelf.spec_subsoiler ~= nil
 
-            -- Convert density-map pixels → hectares (same conversion the mower hook uses).
-            -- lastStatsArea is raw pixel count, NOT metres² or hectares.
-            -- Passing pixels directly caused factor = pixels/fieldAreaHa which exploded
-            -- to thousands× the correct value at 22 ticks/sec.
+            -- Convert density-map pixels → hectares (same as mower hook).
             if not g_currentMission or type(g_currentMission.getFruitPixelsToSqm) ~= "function" then return end
             local areaHa = MathUtil.areaToHa(statsArea, g_currentMission:getFruitPixelsToSqm())
             if areaHa <= 0 then return end
@@ -1702,8 +1702,12 @@ function HookManager:installPlowingHook()
                     end
 
                     if isPlowingTool then
+                        g_SoilFertilityManager.soilSystem._lastTillageX = x
+                        g_SoilFertilityManager.soilSystem._lastTillageZ = z
                         g_SoilFertilityManager.soilSystem:onPlowing(farmlandId, areaHa)
                     else
+                        g_SoilFertilityManager.soilSystem._lastTillageX = x
+                        g_SoilFertilityManager.soilSystem._lastTillageZ = z
                         g_SoilFertilityManager.soilSystem:onCultivation(farmlandId, areaHa)
                     end
 
@@ -1768,19 +1772,19 @@ function HookManager:installDedicatedPlowHook()
             if not hasProcessed then return end
             if not g_SoilFertilityManager or
                not g_SoilFertilityManager.soilSystem or
-               not g_SoilFertilityManager.settings.enabled or
-               not g_SoilFertilityManager.settings.plowingBonus then
+               not g_SoilFertilityManager.settings.enabled then
                 return
             end
             if not plowSelf.isServer then return end
 
-            -- Confirm plow work area actually changed terrain this tick
+            -- Confirm plow ACTUALLY changed terrain (lastChangedArea, not lastStatsArea).
+            -- lastStatsArea is non-zero during headland turns with the plow lifted.
             local spec = plowSelf.spec_plow
             if not spec or not spec.workAreaParameters then return end
-            local statsArea = spec.workAreaParameters.lastStatsArea
+            local statsArea = spec.workAreaParameters.lastChangedArea
             if not statsArea or statsArea <= 0 then return end
 
-            -- Convert density-map pixels to hectares (same as mower hook).
+            -- Convert density-map pixels → hectares.
             if not g_currentMission or type(g_currentMission.getFruitPixelsToSqm) ~= "function" then return end
             local areaHa = MathUtil.areaToHa(statsArea, g_currentMission:getFruitPixelsToSqm())
             if areaHa <= 0 then return end
@@ -1793,6 +1797,8 @@ function HookManager:installDedicatedPlowHook()
                 SoilLogger.debug("[DedicatedPlowHook] pos=(%.1f,%.1f) farmlandId=%s",
                     x, z, tostring(farmlandId))
                 if farmlandId and farmlandId > 0 then
+                    g_SoilFertilityManager.soilSystem._lastTillageX = x
+                    g_SoilFertilityManager.soilSystem._lastTillageZ = z
                     g_SoilFertilityManager.soilSystem:onPlowing(farmlandId, areaHa)
 
                     -- Dedicated plows are always heavy equipment
@@ -1857,13 +1863,13 @@ function HookManager:installWeederHook()
             end
             if not weederSelf.isServer then return end
 
-            -- Confirm weeder actually changed terrain this tick
+            -- Confirm weeder ACTUALLY changed terrain (lastChangedArea).
             local spec = weederSelf.spec_weeder
             if not spec or not spec.workAreaParameters then return end
-            local statsArea = spec.workAreaParameters.lastStatsArea
+            local statsArea = spec.workAreaParameters.lastChangedArea
             if not statsArea or statsArea <= 0 then return end
 
-            -- Convert density-map pixels to hectares (same as mower hook).
+            -- Convert density-map pixels → hectares.
             if not g_currentMission or type(g_currentMission.getFruitPixelsToSqm) ~= "function" then return end
             local areaHa = MathUtil.areaToHa(statsArea, g_currentMission:getFruitPixelsToSqm())
             if areaHa <= 0 then return end
@@ -1873,6 +1879,8 @@ function HookManager:installWeederHook()
                 local farmlandId = hookMgrRef:getFieldIdAtWorldPosition(x, z)
                 SoilLogger.debug("[WeederHook] pos=(%.1f,%.1f) farmlandId=%s", x, z, tostring(farmlandId))
                 if farmlandId and farmlandId > 0 then
+                    g_SoilFertilityManager.soilSystem._lastTillageX = x
+                    g_SoilFertilityManager.soilSystem._lastTillageZ = z
                     g_SoilFertilityManager.soilSystem:onCultivation(farmlandId, areaHa)
                     SoilLogger.debug("[WeederHook] Field %d: mechanical weed removal applied", farmlandId)
                 end
@@ -1933,8 +1941,18 @@ function HookManager:installRidgeTillerHook()
                 local fieldId = self:getFieldIdAtWorldPosition(centerX, centerZ)
                 if not fieldId or fieldId <= 0 then return end
 
-                SoilLogger.debug("[RidgeTillerHook] Field %d at (%.1f, %.1f)", fieldId, centerX, centerZ)
-                g_SoilFertilityManager.soilSystem:onStripTill(fieldId)
+                -- Since RidgeTiller doesn't provide area directly, estimate from width/height
+                -- Parallelogram area formula: |(wx-sx)*(hz-sz) - (hx-sx)*(wz-sz)|
+                local dx1, dz1 = wx - sx, wz - sz
+                local dx2, dz2 = hx - sx, hz - sz
+                local areaSqm = math.abs(dx1 * dz2 - dx2 * dz1)
+                local areaHa = areaSqm / 10000
+
+                SoilLogger.debug("[RidgeTillerHook] Field %d at (%.1f, %.1f) area=%.5f ha",
+                    fieldId, centerX, centerZ, areaHa)
+                g_SoilFertilityManager.soilSystem._lastTillageX = centerX
+                g_SoilFertilityManager.soilSystem._lastTillageZ = centerZ
+                g_SoilFertilityManager.soilSystem:onStripTill(fieldId, areaHa)
             end)
 
             if not success then
@@ -1996,6 +2014,8 @@ function HookManager:installSowingHook()
                 if not fieldId or fieldId <= 0 then return end
 
                 local statsArea = spec.workAreaParameters.lastStatsArea or spec.workAreaParameters.lastChangedArea or 0.001
+                g_SoilFertilityManager.soilSystem._lastTillageX = x
+                g_SoilFertilityManager.soilSystem._lastTillageZ = z
                 g_SoilFertilityManager.soilSystem:onSowing(fieldId, statsArea)
             end)
 
