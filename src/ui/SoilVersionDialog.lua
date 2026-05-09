@@ -24,6 +24,7 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines. Will NOT be translated.
 SoilVersionDialog.CHANGELOG = {
     "- Improved the version dialog layout",
+    "- Added new fertilizer types: AN 34.5",
     "- Fixed a math error in mowing depletion",
     "- Fixed a bug in fertilizer application rates",
 }

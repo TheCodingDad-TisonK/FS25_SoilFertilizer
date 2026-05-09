@@ -140,6 +140,7 @@ local function loadedMission(mission, node)
             STARTER        = "hud_fill_Starter.dds",
             -- Solid granular sources
             UREA           = "hud_fill_UREA.dds",
+            AN             = "hud_fill_AN.dds",
             AMS            = "hud_fill_AMS.dds",
             MAP            = "hud_fill_map.dds",
             DAP            = "hud_fill_dap.dds",
