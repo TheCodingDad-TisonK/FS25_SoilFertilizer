@@ -1676,8 +1676,17 @@ function HookManager:installPlowingHook()
             if not statsArea or statsArea <= 0 then return end
 
             local isPlowSpec = cultivatorSelf.spec_plow ~= nil or cultivatorSelf.spec_subsoiler ~= nil
-            SoilLogger.debug("[PlowHook] onEndWorkAreaProcessing fired — isPlow=%s area=%.1f",
-                tostring(isPlowSpec), statsArea)
+
+            -- Convert density-map pixels → hectares (same conversion the mower hook uses).
+            -- lastStatsArea is raw pixel count, NOT metres² or hectares.
+            -- Passing pixels directly caused factor = pixels/fieldAreaHa which exploded
+            -- to thousands× the correct value at 22 ticks/sec.
+            if not g_currentMission or type(g_currentMission.getFruitPixelsToSqm) ~= "function" then return end
+            local areaHa = MathUtil.areaToHa(statsArea, g_currentMission:getFruitPixelsToSqm())
+            if areaHa <= 0 then return end
+
+            SoilLogger.debug("[PlowHook] onEndWorkAreaProcessing fired — isPlow=%s area=%.1f px (%.5f ha)",
+                tostring(isPlowSpec), statsArea, areaHa)
 
             local x, _, z = getWorldTranslation(cultivatorSelf.rootNode)
             local success, errorMsg = pcall(function()
@@ -1693,9 +1702,9 @@ function HookManager:installPlowingHook()
                     end
 
                     if isPlowingTool then
-                        g_SoilFertilityManager.soilSystem:onPlowing(farmlandId)
+                        g_SoilFertilityManager.soilSystem:onPlowing(farmlandId, areaHa)
                     else
-                        g_SoilFertilityManager.soilSystem:onCultivation(farmlandId)
+                        g_SoilFertilityManager.soilSystem:onCultivation(farmlandId, areaHa)
                     end
 
                     -- Compaction: check if subsoiler or heavy vehicle
@@ -1771,7 +1780,12 @@ function HookManager:installDedicatedPlowHook()
             local statsArea = spec.workAreaParameters.lastStatsArea
             if not statsArea or statsArea <= 0 then return end
 
-            SoilLogger.debug("[DedicatedPlowHook] onEndWorkAreaProcessing fired — area=%.1f", statsArea)
+            -- Convert density-map pixels to hectares (same as mower hook).
+            if not g_currentMission or type(g_currentMission.getFruitPixelsToSqm) ~= "function" then return end
+            local areaHa = MathUtil.areaToHa(statsArea, g_currentMission:getFruitPixelsToSqm())
+            if areaHa <= 0 then return end
+
+            SoilLogger.debug("[DedicatedPlowHook] onEndWorkAreaProcessing fired — area=%.1f px (%.5f ha)", statsArea, areaHa)
 
             local x, _, z = getWorldTranslation(plowSelf.rootNode)
             local success, errorMsg = pcall(function()
@@ -1779,7 +1793,7 @@ function HookManager:installDedicatedPlowHook()
                 SoilLogger.debug("[DedicatedPlowHook] pos=(%.1f,%.1f) farmlandId=%s",
                     x, z, tostring(farmlandId))
                 if farmlandId and farmlandId > 0 then
-                    g_SoilFertilityManager.soilSystem:onPlowing(farmlandId)
+                    g_SoilFertilityManager.soilSystem:onPlowing(farmlandId, areaHa)
 
                     -- Dedicated plows are always heavy equipment
                     if g_SoilFertilityManager.settings.compactionEnabled then
@@ -1849,12 +1863,17 @@ function HookManager:installWeederHook()
             local statsArea = spec.workAreaParameters.lastStatsArea
             if not statsArea or statsArea <= 0 then return end
 
+            -- Convert density-map pixels to hectares (same as mower hook).
+            if not g_currentMission or type(g_currentMission.getFruitPixelsToSqm) ~= "function" then return end
+            local areaHa = MathUtil.areaToHa(statsArea, g_currentMission:getFruitPixelsToSqm())
+            if areaHa <= 0 then return end
+
             local x, _, z = getWorldTranslation(weederSelf.rootNode)
             local success, errorMsg = pcall(function()
                 local farmlandId = hookMgrRef:getFieldIdAtWorldPosition(x, z)
                 SoilLogger.debug("[WeederHook] pos=(%.1f,%.1f) farmlandId=%s", x, z, tostring(farmlandId))
                 if farmlandId and farmlandId > 0 then
-                    g_SoilFertilityManager.soilSystem:onCultivation(farmlandId)
+                    g_SoilFertilityManager.soilSystem:onCultivation(farmlandId, areaHa)
                     SoilLogger.debug("[WeederHook] Field %d: mechanical weed removal applied", farmlandId)
                 end
             end)
@@ -1976,7 +1995,8 @@ function HookManager:installSowingHook()
                     tostring(spec.workAreaParameters.seedsFruitType))
                 if not fieldId or fieldId <= 0 then return end
 
-                g_SoilFertilityManager.soilSystem:onSowing(fieldId)
+                local statsArea = spec.workAreaParameters.lastStatsArea or spec.workAreaParameters.lastChangedArea or 0.001
+                g_SoilFertilityManager.soilSystem:onSowing(fieldId, statsArea)
             end)
 
             if not ok then

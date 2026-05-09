@@ -421,20 +421,44 @@ end
 --- Live FieldState detection in getFieldInfo() works regardless of lastCrop, so
 --- the clearing was unnecessary and harmful to rotation history accuracy.
 ---@param fieldId number The field being sown
-function SoilFertilitySystem:onSowing(fieldId)
+---@param area number Area processed in hectares
+function SoilFertilitySystem:onSowing(fieldId, area)
     if not fieldId or fieldId <= 0 then return end
     local field = self:getOrCreateField(fieldId, false)
     if not field then return end
 
+    local areaHa = area or 0.001
+    local fieldAreaHa = field.fieldArea and field.fieldArea > 0 and field.fieldArea or 1.0
+    local factor = areaHa / fieldAreaHa
+
     local changed = false
 
     -- Seeding disrupts weed seedlings via seed opener soil disturbance.
-    -- Fully resets weed pressure: the physical act of drilling/planting breaks
-    -- weed root systems and buries surface seeds in the seed furrow.
+    -- Partially resets weed pressure based on area processed.
     if self.settings.weedPressure and SoilConstants.WEED_PRESSURE and (field.weedPressure or 0) > 0 then
-        SoilLogger.debug("[Sowing] Field %d: weed %.0f -> 0", fieldId, field.weedPressure)
-        field.weedPressure = 0
-        field.herbicideDaysLeft = 0
+        local weedReduction = field.weedPressure * factor
+        field.weedPressure = math.max(0, field.weedPressure - weedReduction)
+        if factor > 0.01 then
+            field.herbicideDaysLeft = 0
+        end
+        changed = true
+    end
+
+    -- Direct-drill residue incorporation: seed openers disturb a small fraction of
+    -- surface residue, releasing a minimal nutrient pulse. This models the reality
+    -- that no-till/direct seeders still cause some residue breakdown at the opener slot.
+    if self.settings.residueIncorporation and SoilConstants.RESIDUE_INCORPORATION then
+        local ri     = SoilConstants.RESIDUE_INCORPORATION.DIRECT_DRILL
+        local limits = SoilConstants.NUTRIENT_LIMITS
+        local omBefore = field.organicMatter or SoilConstants.FIELD_DEFAULTS.organicMatter
+        local omAfter  = math.min(limits.ORGANIC_MATTER_MAX, omBefore + (ri.OM * factor))
+        if omAfter > omBefore then
+            field.organicMatter = omAfter
+            changed = true
+        end
+        field.nitrogen   = math.min(limits.MAX, (field.nitrogen   or 0) + (ri.N * factor))
+        field.phosphorus = math.min(limits.MAX, (field.phosphorus or 0) + (ri.P * factor))
+        field.potassium  = math.min(limits.MAX, (field.potassium  or 0) + (ri.K * factor))
         changed = true
     end
 
@@ -449,21 +473,40 @@ end
 --- Hook delegate: called by HookManager when plowing occurs
 --- Increases organic matter and normalizes pH
 ---@param fieldId number The field being plowed
-function SoilFertilitySystem:onPlowing(fieldId)
+---@param area number Area processed in hectares (e.g. from lastStatsArea)
+function SoilFertilitySystem:onPlowing(fieldId, area)
     if not fieldId or fieldId <= 0 then return end
 
     local field = self:getOrCreateField(fieldId, true)
     if not field then return end
 
-    SoilLogger.debug("[Plowing] Field %d triggered (plowingBonus=%s, weedPressure=%s)",
-        fieldId, tostring(self.settings.plowingBonus), tostring(self.settings.weedPressure))
+    local areaHa = area or 0.001
+    local fieldAreaHa = field.fieldArea and field.fieldArea > 0 and field.fieldArea or 1.0
+
+    -- Per-day area accumulation cap: total effect of all ticks on one day cannot
+    -- exceed plowing the full field once (factor capped at 1.0 cumulative).
+    -- The hook fires ~22x/sec so without this a 3-second pass would apply
+    -- hundreds of full-field-equivalents of OM/pH/weed reduction.
+    local today = (g_currentMission and g_currentMission.environment and
+                   g_currentMission.environment.currentDay) or 0
+    if not self._plowAreaToday then self._plowAreaToday = {} end
+    local entry = self._plowAreaToday[fieldId]
+    if not entry or entry.day ~= today then
+        entry = { day = today, used = 0 }
+        self._plowAreaToday[fieldId] = entry
+    end
+    local remaining = math.max(0, fieldAreaHa - entry.used)
+    local clampedArea = math.min(areaHa, remaining)
+    if clampedArea <= 0 then return end  -- daily cap reached
+    entry.used = entry.used + clampedArea
+    local factor = clampedArea / fieldAreaHa
 
     local changed = false
 
     -- Plowing benefits 1 & 2: OM increase and pH normalization (only if plowingBonus enabled)
     if self.settings.plowingBonus then
         local omBefore = field.organicMatter or SoilConstants.FIELD_DEFAULTS.organicMatter
-        local omIncrease = 0.5
+        local omIncrease = 0.5 * factor
         local omAfter = math.min(omBefore + omIncrease, SoilConstants.NUTRIENT_LIMITS.ORGANIC_MATTER_MAX)
         if omAfter > omBefore then
             field.organicMatter = omAfter
@@ -472,7 +515,7 @@ function SoilFertilitySystem:onPlowing(fieldId)
 
         local phBefore = field.pH or SoilConstants.FIELD_DEFAULTS.pH
         local phTarget = 7.0
-        local phNormalization = 0.1
+        local phNormalization = 0.1 * factor
         local phAfter = phBefore
         if phBefore < phTarget then
             phAfter = math.min(phBefore + phNormalization, phTarget)
@@ -483,32 +526,52 @@ function SoilFertilitySystem:onPlowing(fieldId)
             field.pH = phAfter
             changed = true
         end
-
-        SoilLogger.debug("[Plowing] Field %d: OM %.1f->%.1f, pH %.2f->%.2f",
-            fieldId, omBefore, omAfter, phBefore, phAfter)
     end
 
     -- Plowing benefit 3: Reset weed pressure (independent of plowingBonus)
+    -- This is a destructive mechanical action, so it instantly kills weeds in the processed area.
+    -- Since we track average weed pressure, we reduce it proportionally.
     if self.settings.weedPressure and (field.weedPressure or 0) > 0 then
-        SoilLogger.debug("[Plowing] Field %d: weed %.0f -> 0", fieldId, field.weedPressure)
-        field.weedPressure = 0
-        field.herbicideDaysLeft = 0
+        local weedReduction = field.weedPressure * factor
+        field.weedPressure = math.max(0, field.weedPressure - weedReduction)
+        -- Only fully reset herbicide days if we did a large chunk, but for simplicity we let it be
+        if factor > 0.01 then
+            field.herbicideDaysLeft = 0
+        end
         changed = true
     end
 
     -- Plowing benefit 4: Reduce pest pressure (independent of plowingBonus)
     if self.settings.pestPressure and SoilConstants.PLOWING.PEST_PRESSURE_REDUCTION and (field.pestPressure or 0) > 0 then
         local before = field.pestPressure
-        field.pestPressure = math.max(0, before - SoilConstants.PLOWING.PEST_PRESSURE_REDUCTION)
-        SoilLogger.debug("[Plowing] Field %d: pest %.0f -> %.0f", fieldId, before, field.pestPressure)
+        local reduction = SoilConstants.PLOWING.PEST_PRESSURE_REDUCTION * factor
+        field.pestPressure = math.max(0, before - reduction)
         changed = true
     end
 
     -- Plowing benefit 5: Reduce disease pressure (independent of plowingBonus)
     if self.settings.diseasePressure and SoilConstants.PLOWING.DISEASE_PRESSURE_REDUCTION and (field.diseasePressure or 0) > 0 then
         local before = field.diseasePressure
-        field.diseasePressure = math.max(0, before - SoilConstants.PLOWING.DISEASE_PRESSURE_REDUCTION)
-        SoilLogger.debug("[Plowing] Field %d: disease %.0f -> %.0f", fieldId, before, field.diseasePressure)
+        local reduction = SoilConstants.PLOWING.DISEASE_PRESSURE_REDUCTION * factor
+        field.diseasePressure = math.max(0, before - reduction)
+        changed = true
+    end
+
+    -- Plowing benefit 6: Residue incorporation — straw stubble worked in releases OM and NPK
+    -- Gated by residueIncorporation setting (separate from plowingBonus so OM/pH and
+    -- residue nutrient release can be toggled independently).
+    if self.settings.residueIncorporation and SoilConstants.RESIDUE_INCORPORATION then
+        local ri     = SoilConstants.RESIDUE_INCORPORATION.PLOW
+        local limits = SoilConstants.NUTRIENT_LIMITS
+        local omBefore = field.organicMatter or SoilConstants.FIELD_DEFAULTS.organicMatter
+        local omAfter  = math.min(limits.ORGANIC_MATTER_MAX, omBefore + (ri.OM * factor))
+        if omAfter > omBefore then
+            field.organicMatter = omAfter
+            changed = true
+        end
+        field.nitrogen   = math.min(limits.MAX, (field.nitrogen   or 0) + (ri.N * factor))
+        field.phosphorus = math.min(limits.MAX, (field.phosphorus or 0) + (ri.P * factor))
+        field.potassium  = math.min(limits.MAX, (field.potassium  or 0) + (ri.K * factor))
         changed = true
     end
 
@@ -522,36 +585,70 @@ end
 --- Called when a shallow cultivator passes over a field.
 --- Partially reduces weed, pest, and disease pressure.
 ---@param fieldId number
-function SoilFertilitySystem:onCultivation(fieldId)
+---@param area number Area processed in hectares (e.g. from lastStatsArea)
+function SoilFertilitySystem:onCultivation(fieldId, area)
     if not fieldId or fieldId <= 0 then return end
     if not SoilConstants.CULTIVATION then return end
 
     local field = self:getOrCreateField(fieldId, false)
     if not field then return end
 
-    SoilLogger.debug("[Cultivation] Field %d triggered (weedPressure=%.0f)", fieldId, field.weedPressure or 0)
+    local areaHa = area or 0.001
+    local fieldAreaHa = field.fieldArea and field.fieldArea > 0 and field.fieldArea or 1.0
+
+    -- Per-day area accumulation cap (same rationale as onPlowing).
+    local today = (g_currentMission and g_currentMission.environment and
+                   g_currentMission.environment.currentDay) or 0
+    if not self._cultivAreaToday then self._cultivAreaToday = {} end
+    local centry = self._cultivAreaToday[fieldId]
+    if not centry or centry.day ~= today then
+        centry = { day = today, used = 0 }
+        self._cultivAreaToday[fieldId] = centry
+    end
+    local cremaining = math.max(0, fieldAreaHa - centry.used)
+    local cclampedArea = math.min(areaHa, cremaining)
+    if cclampedArea <= 0 then return end  -- daily cap reached
+    centry.used = centry.used + cclampedArea
+    local factor = cclampedArea / fieldAreaHa
 
     local changed = false
     local c = SoilConstants.CULTIVATION
 
     if self.settings.weedPressure and c.WEED_PRESSURE_REDUCTION and (field.weedPressure or 0) > 0 then
         local before = field.weedPressure
-        field.weedPressure = math.max(0, before - c.WEED_PRESSURE_REDUCTION)
-        SoilLogger.debug("[Cultivation] Field %d: weed %.0f -> %.0f", fieldId, before, field.weedPressure)
+        local reduction = c.WEED_PRESSURE_REDUCTION * factor
+        field.weedPressure = math.max(0, before - reduction)
         changed = true
     end
 
     if self.settings.pestPressure and c.PEST_PRESSURE_REDUCTION and (field.pestPressure or 0) > 0 then
         local before = field.pestPressure
-        field.pestPressure = math.max(0, before - c.PEST_PRESSURE_REDUCTION)
-        SoilLogger.debug("[Cultivation] Field %d: pest %.0f -> %.0f", fieldId, before, field.pestPressure)
+        local reduction = c.PEST_PRESSURE_REDUCTION * factor
+        field.pestPressure = math.max(0, before - reduction)
         changed = true
     end
 
     if self.settings.diseasePressure and c.DISEASE_PRESSURE_REDUCTION and (field.diseasePressure or 0) > 0 then
         local before = field.diseasePressure
-        field.diseasePressure = math.max(0, before - c.DISEASE_PRESSURE_REDUCTION)
-        SoilLogger.debug("[Cultivation] Field %d: disease %.0f -> %.0f", fieldId, before, field.diseasePressure)
+        local reduction = c.DISEASE_PRESSURE_REDUCTION * factor
+        field.diseasePressure = math.max(0, before - reduction)
+        changed = true
+    end
+
+    -- Residue incorporation: shallow cultivation mixes surface straw residue into topsoil.
+    -- Releases smaller amounts than deep plowing (only topsoil mixing, no burial).
+    if self.settings.residueIncorporation and SoilConstants.RESIDUE_INCORPORATION then
+        local ri     = SoilConstants.RESIDUE_INCORPORATION.CULTIVATOR
+        local limits = SoilConstants.NUTRIENT_LIMITS
+        local omBefore = field.organicMatter or SoilConstants.FIELD_DEFAULTS.organicMatter
+        local omAfter  = math.min(limits.ORGANIC_MATTER_MAX, omBefore + (ri.OM * factor))
+        if omAfter > omBefore then
+            field.organicMatter = omAfter
+            changed = true
+        end
+        field.nitrogen   = math.min(limits.MAX, (field.nitrogen   or 0) + (ri.N * factor))
+        field.phosphorus = math.min(limits.MAX, (field.phosphorus or 0) + (ri.P * factor))
+        field.potassium  = math.min(limits.MAX, (field.potassium  or 0) + (ri.K * factor))
         changed = true
     end
 
@@ -618,6 +715,19 @@ function SoilFertilitySystem:onStripTill(fieldId)
             SoilLogger.debug("[StripTill] Field %d: OM %.2f -> %.2f", fieldId, omBefore, omAfter)
             changed = true
         end
+    end
+
+    -- Residue incorporation: strip-till knifes work only tilled strips (~30% of surface),
+    -- so residue nutrient release is the smallest of all tillage types.
+    if self.settings.residueIncorporation and SoilConstants.RESIDUE_INCORPORATION then
+        local ri     = SoilConstants.RESIDUE_INCORPORATION.STRIP_TILL
+        local limits = SoilConstants.NUTRIENT_LIMITS
+        field.nitrogen   = math.min(limits.MAX, (field.nitrogen   or 0) + ri.N)
+        field.phosphorus = math.min(limits.MAX, (field.phosphorus or 0) + ri.P)
+        field.potassium  = math.min(limits.MAX, (field.potassium  or 0) + ri.K)
+        SoilLogger.debug("[StripTill] Field %d: residue incorporated — N+%.1f P+%.2f K+%.1f",
+            fieldId, ri.N, ri.P, ri.K)
+        changed = true
     end
 
     if changed and g_server and g_currentMission

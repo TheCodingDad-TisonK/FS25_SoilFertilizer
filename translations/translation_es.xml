@@ -12,6 +12,8 @@
     <e k="sf_rain_effects_long" v="Activar/desactivar el impacto de la lluvia en el suelo (lixiviación de nutrientes, cambios de pH)" eh="de3b14b9" />
     <e k="sf_plowing_bonus_short" v="Bono de Arado" eh="541ec752" />
     <e k="sf_plowing_bonus_long" v="Activar/desactivar los beneficios del arado para la fertilidad del suelo (mejora de nitrógeno y materia orgánica)" eh="fe701c1c" />
+    <e k="sf_residue_incorporation_short" v="[EN] Residue Incorporation" eh="" />
+    <e k="sf_residue_incorporation_long" v="[EN] Enable/disable nutrient release from crop residue worked into soil by tillage tools (cultivators, plows, strip-till, direct drills)" eh="" />
     <e k="sf_weed_pressure_short" v="Presión de Maleza" eh="7f71ee68" />
     <e k="sf_weed_pressure_long" v="Activar/desactivar el crecimiento dinámico de maleza y su impacto en el rendimiento" eh="27de5f41" />
     <e k="sf_pest_pressure_short" v="Presión de Plagas" eh="eb771556" />
@@ -559,6 +561,7 @@
     <e k="sf_desc_seasonalEffects" v="[EN] Season-driven soil changes" eh="f515f484" />
     <e k="sf_desc_rainEffects" v="[EN] Rain causes nutrient leaching" eh="82fec75d" />
     <e k="sf_desc_plowingBonus" v="[EN] Plow bonus for soil recovery" eh="23522b97" />
+    <e k="sf_desc_residueIncorporation" v="[EN] Tillage releases residue nutrients" eh="" />
     <e k="sf_desc_weedPressure" v="[EN] Track and penalize weed spread" eh="df20c38d" />
     <e k="sf_desc_pestPressure" v="[EN] Track insect pest infestation" eh="12b3412e" />
     <e k="sf_desc_diseasePressure" v="[EN] Track fungal crop diseases" eh="0858395f" />

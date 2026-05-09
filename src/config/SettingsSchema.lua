@@ -111,6 +111,12 @@ SettingsSchema.definitions = {
         uiId = "sf_plowing_bonus",
     },
     {
+        id = "residueIncorporation",
+        type = "boolean",
+        default = true,
+        uiId = "sf_residue_incorporation",
+    },
+    {
         id = "weedPressure",
         type = "boolean",
         default = true,

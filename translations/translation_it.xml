@@ -12,6 +12,8 @@
     <e k="sf_rain_effects_long" v="Attiva/disattiva impatto pioggia su suolo (lisciviazione nutrienti, cambiamenti pH)" eh="de3b14b9" />
     <e k="sf_plowing_bonus_short" v="Bonus Aratura" eh="541ec752" />
     <e k="sf_plowing_bonus_long" v="Attiva/disattiva benefici aratura per fertilità suolo (miglior azoto e materia organica)" eh="fe701c1c" />
+    <e k="sf_residue_incorporation_short" v="[EN] Residue Incorporation" eh="" />
+    <e k="sf_residue_incorporation_long" v="[EN] Enable/disable nutrient release from crop residue worked into soil by tillage tools (cultivators, plows, strip-till, direct drills)" eh="" />
     <e k="sf_weed_pressure_short" v="Pressione Erbacce" eh="7f71ee68" />
     <e k="sf_weed_pressure_long" v="Attiva/disattiva la crescita dinamica delle erbacce e l'impatto sulla resa" eh="27de5f41" />
     <e k="sf_pest_pressure_short" v="Pressione Parassiti" eh="eb771556" />
@@ -553,6 +555,7 @@
     <e k="sf_desc_seasonalEffects" v="Cambiamenti del suolo basati sulle stagioni" eh="f515f484" />
     <e k="sf_desc_rainEffects" v="La pioggia causa il lisciviamento dei nutrienti" eh="82fec75d" />
     <e k="sf_desc_plowingBonus" v="Bonus aratura per il recupero del suolo" eh="23522b97" />
+    <e k="sf_desc_residueIncorporation" v="[EN] Tillage releases residue nutrients" eh="" />
     <e k="sf_desc_weedPressure" v="Monitora e penalizza la diffusione delle erbacce" eh="df20c38d" />
     <e k="sf_desc_pestPressure" v="Monitora l'infestazione di insetti nocivi" eh="12b3412e" />
     <e k="sf_desc_diseasePressure" v="Monitora le malattie fungine delle colture" eh="0858395f" />

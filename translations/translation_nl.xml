@@ -12,6 +12,8 @@
     <e k="sf_rain_effects_long" v="Regenimpact op de bodem in-/uitschakelen (uitspoeling van voedingsstoffen, pH-veranderingen)" eh="de3b14b9" />
     <e k="sf_plowing_bonus_short" v="Ploegbonus" eh="541ec752" />
     <e k="sf_plowing_bonus_long" v="Ploegvoordelen voor bodemvruchtbaarheid in-/uitschakelen (verbeterde stikstof en organische stof)" eh="fe701c1c" />
+    <e k="sf_residue_incorporation_short" v="[EN] Residue Incorporation" eh="" />
+    <e k="sf_residue_incorporation_long" v="[EN] Enable/disable nutrient release from crop residue worked into soil by tillage tools (cultivators, plows, strip-till, direct drills)" eh="" />
     <e k="sf_weed_pressure_short" v="Onkruiddruk" eh="7f71ee68" />
     <e k="sf_weed_pressure_long" v="Dynamische onkruidgroei en opbrengstimpact in-/uitschakelen" eh="27de5f41" />
     <e k="sf_pest_pressure_short" v="Plagen druk" eh="eb771556" />
@@ -558,6 +560,7 @@
     <e k="sf_desc_seasonalEffects" v="Seizoensgebonden bodemveranderingen" eh="f515f484" />
     <e k="sf_desc_rainEffects" v="Regen veroorzaakt voedingsstofuitspoeling" eh="82fec75d" />
     <e k="sf_desc_plowingBonus" v="Ploegbonus voor bodembehoud" eh="23522b97" />
+    <e k="sf_desc_residueIncorporation" v="[EN] Tillage releases residue nutrients" eh="" />
     <e k="sf_desc_weedPressure" v="Onkruidverspreiding bijhouden en bestraffen" eh="df20c38d" />
     <e k="sf_desc_pestPressure" v="Insectenplagen bijhouden" eh="12b3412e" />
     <e k="sf_desc_diseasePressure" v="Schimmelziekten in gewassen bijhouden" eh="0858395f" />

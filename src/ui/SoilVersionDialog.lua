@@ -21,12 +21,12 @@ local SF_VER_MOD_DIR  = g_currentModDirectory
 SoilVersionDialog.INSTANCE = nil
 
 -- Hardcoded changelog for this release — update each version bump.
--- Any number of lines. Will NOT be translated.
+-- Any number of lines.
+-- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
-    "- Improved the version dialog layout",
-    "- Added new fertilizer types: AN 34.5",
-    "- Fixed a math error in mowing depletion",
-    "- Fixed a bug in fertilizer application rates",
+    "- Tillage tools now release OM and NPK from straw residue",
+    "- Added settings option for residue incorporation",
+    "- Added new translation keys (native needs updating)",
 }
 
 -- ── i18n helper ───────────────────────────────────────────
@@ -72,7 +72,7 @@ function SoilVersionDialog.register(modDirectory)
     end
 end
 
----@param version string  e.g. "2.1.5.5"
+---@param version string  e.g. "2.1.5.6"
 function SoilVersionDialog.show(version)
     if SoilVersionDialog.INSTANCE == nil then
         SoilVersionDialog.register(SF_VER_MOD_DIR)
