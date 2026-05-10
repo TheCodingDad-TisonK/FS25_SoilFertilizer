@@ -265,6 +265,11 @@ function HookManager:uninstallAll()
         end
     end
 
+    -- Remove the addModEventListener client-join listener
+    if self._clientJoinListener then
+        removeModEventListener(self._clientJoinListener)
+        self._clientJoinListener = nil
+    end
     self.hooks = {}
     self.installed = false
     SoilLogger.info("All hooks uninstalled")
@@ -1009,22 +1014,27 @@ end
 -- preserve any other mod's chain rather than replacing it outright.
 ---@return boolean success True if hook installed successfully
 function HookManager:installYieldModifierHook()
-    if not Combine or type(Combine.addFillUnitFillLevel) ~= "function" then
-        SoilLogger.warning("Yield modifier hook: Combine.addFillUnitFillLevel not available — yield reduction skipped")
+    -- FillUnit.addFillUnitFillLevel is the correct FS25 hook target.
+    -- Combine does NOT register addFillUnitFillLevel as its own class method --
+    -- it inherits it from FillUnit via the vehicle specialization system.
+    -- Hooking Combine.addFillUnitFillLevel therefore always fails (nil check).
+    -- Real FS25 signature: addFillUnitFillLevel(self, farmId, fillUnitIndex, fillLevelDelta, fillTypeIndex, toolType, fillPositionData)
+    if not FillUnit or type(FillUnit.addFillUnitFillLevel) ~= "function" then
+        SoilLogger.warning("Yield modifier hook: FillUnit.addFillUnitFillLevel not available â yield reduction skipped")
         return false
     end
 
-    local original = Combine.addFillUnitFillLevel
+    local original = FillUnit.addFillUnitFillLevel
 
-    -- Factory so the same modifier logic wraps any chainFn — used for both the
-    -- class-level hook and per-vehicle instance patching (issue #284: wrapping
-    -- preserves other mods' specialization chains such as RealisticHarvesting).
+    -- Factory so the same modifier logic wraps any chainFn
     local function makeYieldWrapper(chainFn)
-        return function(combineSelf, fillUnitIndex, fillLevelDelta, fillTypeIndex, toolType, fillPositionData, extraAttributes)
-            -- Only apply modifier on the server when filling the hopper (delta > 0)
-            -- and all SF systems are ready.
+        -- Correct FS25 signature includes farmId as first arg after self
+        return function(combineSelf, farmId, fillUnitIndex, fillLevelDelta, fillTypeIndex, toolType, fillPositionData)
+            -- Only apply modifier on the server when filling the hopper (delta > 0),
+            -- only for combine spec vehicles, and only when SF systems are ready.
             local modifiedDelta = fillLevelDelta
             if combineSelf.isServer
+                and combineSelf.spec_combine ~= nil
                 and fillLevelDelta and fillLevelDelta > 0
                 and fillTypeIndex
                 and g_SoilFertilityManager
@@ -1033,15 +1043,12 @@ function HookManager:installYieldModifierHook()
                 and g_SoilFertilityManager.settings.nutrientCycles
             then
                 local ok, errMsg = pcall(function()
-                    -- Resolve the fruit type from the fill type so computeYieldModifier
-                    -- receives the fruitType index it expects (not the fillType index).
                     local fruitType = nil
                     if g_fruitTypeManager then
                         local ft = g_fruitTypeManager:getFruitTypeByFillTypeIndex(fillTypeIndex)
                         if ft then fruitType = ft.index end
                     end
-
-                    if not fruitType or fruitType <= 0 then return end  -- not a harvestable fruit
+                    if not fruitType or fruitType <= 0 then return end
 
                     local x, _, z = getWorldTranslation(combineSelf.rootNode)
                     if not x then return end
@@ -1060,25 +1067,23 @@ function HookManager:installYieldModifierHook()
                     local yieldModifier = g_SoilFertilityManager.soilSystem:computeYieldModifier(fieldId, fruitType)
                     if yieldModifier ~= 1.0 then
                         modifiedDelta = fillLevelDelta * yieldModifier
-                        SoilLogger.debug("Yield modifier hook: Field %d Fruit %d modifier=%.3f (%.1fL → %.1fL)",
+                        SoilLogger.debug("Yield modifier hook: Field %d Fruit %d modifier=%.3f (%.1fL â %.1fL)",
                             fieldId, fruitType, yieldModifier, fillLevelDelta, modifiedDelta)
                     end
                 end)
                 if not ok then
                     SoilLogger.error("Yield modifier hook failed: %s", tostring(errMsg))
-                    modifiedDelta = fillLevelDelta  -- safe fallback: no penalty
+                    modifiedDelta = fillLevelDelta
                 end
             end
-
-            return chainFn(combineSelf, fillUnitIndex, modifiedDelta, fillTypeIndex, toolType, fillPositionData, extraAttributes)
+            return chainFn(combineSelf, farmId, fillUnitIndex, modifiedDelta, fillTypeIndex, toolType, fillPositionData)
         end
     end
 
-    Combine.addFillUnitFillLevel = makeYieldWrapper(original)
-    self:register(Combine, "addFillUnitFillLevel", original, "Combine.addFillUnitFillLevel")
+    FillUnit.addFillUnitFillLevel = makeYieldWrapper(original)
+    self:register(FillUnit, "addFillUnitFillLevel", original, "FillUnit.addFillUnitFillLevel (yield modifier)")
 
-    -- Wrap existing combine instances (not replace) to preserve other mods'
-    -- specialization chains (e.g. RealisticHarvesting's addFillUnitFillLevel overwrite).
+    -- Wrap existing combine instances to preserve other mods specialization chains.
     local patched = 0
     local vehicleSystem = g_currentMission and g_currentMission.vehicleSystem
     if vehicleSystem and vehicleSystem.vehicles then
@@ -1090,7 +1095,7 @@ function HookManager:installYieldModifierHook()
         end
     end
 
-    SoilLogger.info("[OK] Yield modifier hook installed (Combine.addFillUnitFillLevel) — %d existing combines patched", patched)
+    SoilLogger.info("[OK] Yield modifier hook installed (FillUnit.addFillUnitFillLevel) â %d existing combines patched", patched)
     return true
 end
 
@@ -1911,58 +1916,11 @@ end
 --   OM:      small boost (subsurface incorporation in tilled strips only)
 ---@return boolean success
 function HookManager:installRidgeTillerHook()
-    -- RidgeTiller may not be present on all maps/mods — fail gracefully
-    if not RidgeTiller or type(RidgeTiller.processRidgeTillerArea) ~= "function" then
-        SoilLogger.warning("[RidgeTillerHook] RidgeTiller.processRidgeTillerArea not available — strip-till integration skipped")
-        return false
-    end
-
-    local original = RidgeTiller.processRidgeTillerArea
-    RidgeTiller.processRidgeTillerArea = Utils.appendedFunction(
-        original,
-        function(ridgeSelf, workArea, dt)
-            if not g_SoilFertilityManager or
-               not g_SoilFertilityManager.soilSystem or
-               not g_SoilFertilityManager.settings.enabled then
-                return
-            end
-
-            if not workArea or type(workArea) ~= "table" then return end
-            if not workArea.start or not workArea.width or not workArea.height then return end
-
-            local sx, _, sz = getWorldTranslation(workArea.start)
-            local wx, _, wz = getWorldTranslation(workArea.width)
-            local hx, _, hz = getWorldTranslation(workArea.height)
-            local centerX = (sx + wx + hx) / 3
-            local centerZ = (sz + wz + hz) / 3
-
-            local success, errorMsg = pcall(function()
-                -- PHASE 5: use shared MapDataGrid-backed cache (self = HookManager upvalue)
-                local fieldId = self:getFieldIdAtWorldPosition(centerX, centerZ)
-                if not fieldId or fieldId <= 0 then return end
-
-                -- Since RidgeTiller doesn't provide area directly, estimate from width/height
-                -- Parallelogram area formula: |(wx-sx)*(hz-sz) - (hx-sx)*(wz-sz)|
-                local dx1, dz1 = wx - sx, wz - sz
-                local dx2, dz2 = hx - sx, hz - sz
-                local areaSqm = math.abs(dx1 * dz2 - dx2 * dz1)
-                local areaHa = areaSqm / 10000
-
-                SoilLogger.debug("[RidgeTillerHook] Field %d at (%.1f, %.1f) area=%.5f ha",
-                    fieldId, centerX, centerZ, areaHa)
-                g_SoilFertilityManager.soilSystem._lastTillageX = centerX
-                g_SoilFertilityManager.soilSystem._lastTillageZ = centerZ
-                g_SoilFertilityManager.soilSystem:onStripTill(fieldId, areaHa)
-            end)
-
-            if not success then
-                SoilLogger.error("[RidgeTillerHook] failed: %s", tostring(errorMsg))
-            end
-        end
-    )
-
-    self:register(RidgeTiller, "processRidgeTillerArea", original, "RidgeTiller.processRidgeTillerArea")
-    SoilLogger.info("[OK] RidgeTiller hook installed — strip-till (RIDGEFORMER) events now tracked")
+    -- RidgeTiller is an FS22 class that does not exist in FS25.
+    -- FS25 uses Cultivator for all tillage work areas including strip-till.
+    -- This hook is kept as a no-op to avoid log spam; strip-till effects
+    -- are captured via the Cultivator hook (installPlowingHook) instead.
+    SoilLogger.info("RidgeTiller hook skipped (FS22 class, not present in FS25)")
     return true
 end
 
@@ -3366,34 +3324,31 @@ end
 --- Hooks FSBaseMission.onConnectionFinished to send soil data to a newly joined client
 ---@return boolean success
 function HookManager:installClientJoinHook()
-    if not FSBaseMission or type(FSBaseMission.onConnectionFinished) ~= "function" then
-        SoilLogger.warning("Could not install client join hook - FSBaseMission.onConnectionFinished not available")
-        return false
-    end
-
-    local original = FSBaseMission.onConnectionFinished
-    FSBaseMission.onConnectionFinished = Utils.appendedFunction(
-        original,
-        function(missionSelf, connection)
+    -- FSBaseMission.onConnectionFinished does not exist in FS25.
+    -- The correct FS25 pattern is addModEventListener with an onClientJoined(connection)
+    -- method, which the C++ engine calls on all registered mod event listeners
+    -- when a new client successfully connects to the server.
+    local listener = {
+        onClientJoined = function(self, connection)
             if not g_SoilFertilityManager or
                not g_SoilFertilityManager.soilSystem or
                not g_SoilFertilityManager.settings.enabled then
                 return
             end
-
-            -- Server only - send data to the connecting client
+            -- Server only - send full state to the connecting client
             if g_server ~= nil and connection then
                 local success, errorMsg = pcall(function()
                     g_SoilFertilityManager.soilSystem:onClientJoined(connection)
                 end)
-
                 if not success then
                     SoilLogger.error("Client join hook failed: %s", tostring(errorMsg))
                 end
             end
         end
-    )
-    self:register(FSBaseMission, "onConnectionFinished", original, "FSBaseMission.onConnectionFinished (Client Join)")
-    SoilLogger.info("[OK] Client join hook installed successfully")
+    }
+    addModEventListener(listener)
+    -- Store reference so uninstallAll can remove it
+    self._clientJoinListener = listener
+    SoilLogger.info("[OK] Client join hook installed (addModEventListener/onClientJoined)")
     return true
 end

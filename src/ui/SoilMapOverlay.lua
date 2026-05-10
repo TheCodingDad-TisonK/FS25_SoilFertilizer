@@ -95,6 +95,9 @@ function SoilMapOverlay.new(soilSystem, settings)
     -- Manual Button Rects for click detection
     self.buttonRects = {}
 
+    -- Cell inspection tooltip: set by onMapClick, cleared on layer change or re-click
+    self.selectedCell = nil   -- { worldX, worldZ, farmlandId, info }
+
     return self
 end
 
@@ -153,6 +156,7 @@ end
 function SoilMapOverlay:setLayer(layerIdx)
     if self.settings.activeMapLayer == layerIdx then return end
     self.settings.activeMapLayer = layerIdx
+    self.selectedCell = nil  -- dismiss tooltip on layer switch
     self:requestRefresh()
     SoilLogger.debug("SoilMapOverlay: layer set to %d (%s)", layerIdx, g_i18n:getText(SoilMapOverlay.LAYER_KEYS[layerIdx] or "unknown"))
 end
@@ -491,6 +495,9 @@ function SoilMapOverlay:onDraw(frame, mapElement, ingameMap, pageIndex)
                            point.r, point.g, point.b, SoilMapOverlay.ALPHA)
         end
     end
+
+    -- Draw the cell inspection tooltip on top of tiles
+    self:drawCellTooltip(ingameMap, mapX, mapY, mapWidth, mapHeight)
 end
 
 function SoilMapOverlay:worldToScreenPosition(ingameMap, worldX, worldZ)
@@ -512,6 +519,220 @@ function SoilMapOverlay:worldToScreenPosition(ingameMap, worldX, worldZ)
     objectZ = objectZ * (ingameMap.mapExtensionScaleFactor or 1) + (ingameMap.mapExtensionOffsetZ or 0)
 
     return layout:getMapObjectPosition(objectX, objectZ, 0, 0)
+end
+
+--- Invert worldToScreenPosition: convert a screen coordinate back to world XZ.
+--- Uses the same 3-probe affine method as onDraw so the result is exact.
+---@param ingameMap table
+---@param screenX   number  Normalized screen X
+---@param screenY   number  Normalized screen Y
+---@return number|nil worldX
+---@return number|nil worldZ
+function SoilMapOverlay:screenToWorldPosition(ingameMap, screenX, screenY)
+    local terrainSz = (g_currentMission and g_currentMission.terrainSize) or 2048
+    local drawStep  = SoilMapOverlay.POLYGON_STEP * math.max(1.0, terrainSz / 2048.0)
+
+    local ax, ay = self:worldToScreenPosition(ingameMap, 0, 0)
+    local bx, by = self:worldToScreenPosition(ingameMap, drawStep, 0)
+    local cx, cy = self:worldToScreenPosition(ingameMap, 0, drawStep)
+    if not ax then return nil, nil end
+
+    -- Affine matrix: screen = A * world  →  world = A^-1 * screen
+    local mxx = (bx - ax) / drawStep
+    local myx = (by - ay) / drawStep
+    local mxz = (cx - ax) / drawStep
+    local myz = (cy - ay) / drawStep
+
+    -- Solve 2x2: [mxx mxz; myx myz] * [X; Z] = [screenX-ax; screenY-ay]
+    local det = mxx * myz - mxz * myx
+    if math.abs(det) < 1e-12 then return nil, nil end
+
+    local dx = screenX - ax
+    local dy = screenY - ay
+    local worldX =  (myz * dx - mxz * dy) / det
+    local worldZ = (-myx * dx + mxx * dy) / det
+    return worldX, worldZ
+end
+
+--- Called from SoilMapHooks.onMouseEvent when the soil page is active and the
+--- user clicks the map area. Finds which soil cell was clicked and stores it
+--- as self.selectedCell for drawing the tooltip in onDraw.
+---@param ingameMap table   The IngameMap object
+---@param screenX   number  Normalized screen X of click
+---@param screenY   number  Normalized screen Y of click
+function SoilMapOverlay:onMapClick(ingameMap, screenX, screenY)
+    local worldX, worldZ = self:screenToWorldPosition(ingameMap, screenX, screenY)
+    if not worldX then
+        self.selectedCell = nil
+        return
+    end
+
+    -- Snap to cell grid
+    local zone     = SoilConstants.ZONE
+    local cellSize = zone.CELL_SIZE
+    local cellCX   = math.floor(worldX / cellSize)
+    local cellCZ   = math.floor(worldZ / cellSize)
+
+    -- If user clicked the already-selected cell, deselect (toggle)
+    if self.selectedCell
+       and self.selectedCell.cellCX == cellCX
+       and self.selectedCell.cellCZ == cellCZ then
+        self.selectedCell = nil
+        return
+    end
+
+    local farmlandId = g_farmlandManager and g_farmlandManager:getFarmlandAtWorldPosition(worldX, worldZ)
+    if type(farmlandId) == "table" then farmlandId = farmlandId.id end
+    if not farmlandId or farmlandId <= 0 then
+        self.selectedCell = nil
+        return
+    end
+
+    -- Cell centre
+    local cellWorldX = cellCX * cellSize + cellSize * 0.5
+    local cellWorldZ = cellCZ * cellSize + cellSize * 0.5
+
+    local info = self.soilSystem and self.soilSystem:getFieldInfo(farmlandId, cellWorldX, cellWorldZ)
+    if not info then
+        self.selectedCell = nil
+        return
+    end
+
+    self.selectedCell = {
+        cellCX    = cellCX,
+        cellCZ    = cellCZ,
+        worldX    = cellWorldX,
+        worldZ    = cellWorldZ,
+        farmlandId = farmlandId,
+        info      = info,
+    }
+    SoilLogger.debug("SoilMapOverlay: cell selected field=%s cell=[%d,%d]",
+        tostring(farmlandId), cellCX, cellCZ)
+end
+
+--- Draw the cell-inspection tooltip over the selected cell on the PDA map.
+---@param ingameMap table
+---@param mapX      number  Left edge of map render area (normalized)
+---@param mapY      number  Bottom edge of map render area (normalized)
+---@param mapWidth  number
+---@param mapHeight number
+function SoilMapOverlay:drawCellTooltip(ingameMap, mapX, mapY, mapWidth, mapHeight)
+    local sel = self.selectedCell
+    if not sel then return end
+
+    local sx, sy = self:worldToScreenPosition(ingameMap, sel.worldX, sel.worldZ)
+    if not sx then return end
+
+    sx = math.max(mapX, math.min(mapX + mapWidth,  sx))
+    sy = math.max(mapY, math.min(mapY + mapHeight, sy))
+
+    local info = sel.info
+    local ppm  = SoilConstants.PPM_DISPLAY or { N = 1, P = 1, K = 1 }
+
+    -- getNormalizedScreenValues(widthPx, heightPx) → normalizedW, normalizedH
+    -- Always capture both return values and use the one that matches the axis.
+    local boxW,  boxH   = getNormalizedScreenValues(200, 168)
+    local padX,  _      = getNormalizedScreenValues(10,  0)
+    local _,     lineH  = getNormalizedScreenValues(0,   15)
+    local _,     titleH = getNormalizedScreenValues(0,   22)
+    local _,     textSz = getNormalizedScreenValues(0,   11)
+    local _,     titSz  = getNormalizedScreenValues(0,   13)
+    local _,     bdrT   = getNormalizedScreenValues(0,   1)
+    local dotSz, _      = getNormalizedScreenValues(5,   0)
+
+    -- Box position: prefer right of anchor, flip left if it overflows
+    local gapX = getNormalizedScreenValues(16, 0)
+    local bx = sx + gapX
+    if bx + boxW > mapX + mapWidth then
+        bx = sx - boxW - gapX
+    end
+    local by = sy - boxH * 0.5
+    by = math.max(mapY, math.min(mapY + mapHeight - boxH, by))
+
+    -- Highlight dot
+    drawFilledRect(sx - dotSz * 0.5, sy - dotSz * 0.5, dotSz, dotSz, 1, 1, 1, 0.95)
+
+    -- Connector line
+    local lineEndX = (bx > sx) and bx or (bx + boxW)
+    local _, lineH1 = getNormalizedScreenValues(0, 1)
+    drawFilledRect(math.min(sx, lineEndX), sy - lineH1 * 0.5,
+                   math.abs(lineEndX - sx), lineH1, 0.6, 0.7, 0.9, 0.5)
+
+    -- Background + borders
+    drawFilledRect(bx, by, boxW, boxH, 0.04, 0.04, 0.07, 0.93)
+    drawFilledRect(bx,               by + boxH - bdrT, boxW, bdrT, 0.4, 0.65, 1.0, 0.8)
+    drawFilledRect(bx,               by,               boxW, bdrT, 0.4, 0.65, 1.0, 0.4)
+    drawFilledRect(bx,               by,               bdrT, boxH, 0.4, 0.65, 1.0, 0.4)
+    drawFilledRect(bx + boxW - bdrT, by,               bdrT, boxH, 0.4, 0.65, 1.0, 0.4)
+
+    -- Title bar
+    local titleY = by + boxH - titleH
+    setTextBold(true)
+    setTextColor(0.65, 0.85, 1.0, 1.0)
+    setTextAlignment(RenderText.ALIGN_LEFT)
+    setTextVerticalAlignment(RenderText.VERTICAL_ALIGN_MIDDLE)
+    renderText(bx + padX, titleY + titleH * 0.5, titSz,
+               string.format("Field %d  [%d, %d]", sel.farmlandId, sel.cellCX, sel.cellCZ))
+    setTextBold(false)
+    drawFilledRect(bx + padX, titleY - bdrT, boxW - padX * 2, bdrT, 0.4, 0.65, 1.0, 0.3)
+
+    -- Row helper: label left, value right, at absolute screen Y
+    local function row(label, value, absY, r, g, b)
+        local midY = absY + lineH * 0.5
+        setTextColor(0.55, 0.55, 0.62, 1.0)
+        setTextAlignment(RenderText.ALIGN_LEFT)
+        renderText(bx + padX, midY, textSz, label)
+        setTextColor(r, g, b, 1.0)
+        setTextAlignment(RenderText.ALIGN_RIGHT)
+        renderText(bx + boxW - padX, midY, textSz, value)
+    end
+
+    local function nColor(status)
+        if status == "Good" then return 0.25, 0.85, 0.25
+        elseif status == "Fair" then return 0.90, 0.82, 0.18
+        else return 0.88, 0.25, 0.25 end
+    end
+    local function phColor(ph)
+        local rc = SoilConstants.REPORT_COLORS
+        if ph >= rc.PH_GOOD_LOW and ph <= rc.PH_GOOD_HIGH then return 0.25, 0.85, 0.25
+        elseif ph >= rc.PH_FAIR_LOW and ph <= rc.PH_FAIR_HIGH then return 0.90, 0.82, 0.18
+        else return 0.88, 0.25, 0.25 end
+    end
+    local function omColor(om)
+        local rc = SoilConstants.REPORT_COLORS
+        if om >= rc.OM_GOOD then return 0.25, 0.85, 0.25
+        elseif om >= rc.OM_FAIR then return 0.90, 0.82, 0.18
+        else return 0.88, 0.25, 0.25 end
+    end
+    local function pressureColor(pct)
+        local wp = SoilConstants.WEED_PRESSURE
+        if pct < wp.LOW then return 0.25, 0.85, 0.25
+        elseif pct < wp.MEDIUM then return 0.90, 0.82, 0.18
+        else return 0.88, 0.25, 0.25 end
+    end
+
+    -- Rows step downward from just below the title divider
+    local rowY = titleY - lineH * 1.15
+    row("Nitrogen (N)",   string.format("%d ppm", math.floor(info.nitrogen.value   * ppm.N + 0.5)), rowY, nColor(info.nitrogen.status)) ; rowY = rowY - lineH
+    row("Phosphorus (P)", string.format("%d ppm", math.floor(info.phosphorus.value * ppm.P + 0.5)), rowY, nColor(info.phosphorus.status)) ; rowY = rowY - lineH
+    row("Potassium (K)",  string.format("%d ppm", math.floor(info.potassium.value  * ppm.K + 0.5)), rowY, nColor(info.potassium.status)) ; rowY = rowY - lineH
+    row("pH",             string.format("%.1f",   info.pH),                                         rowY, phColor(info.pH)) ; rowY = rowY - lineH
+    row("Organic Matter", string.format("%.1f%%", info.organicMatter),                              rowY, omColor(info.organicMatter)) ; rowY = rowY - lineH * 0.8
+
+    drawFilledRect(bx + padX, rowY + lineH * 0.4, boxW - padX * 2, bdrT, 0.3, 0.3, 0.4, 0.4)
+    rowY = rowY - lineH * 0.6
+
+    local wp = math.floor((info.weedPressure    or 0) + 0.5)
+    local pp = math.floor((info.pestPressure    or 0) + 0.5)
+    local dp = math.floor((info.diseasePressure or 0) + 0.5)
+    row("Weed",    string.format("%d%%", wp), rowY, pressureColor(wp)) ; rowY = rowY - lineH
+    row("Pest",    string.format("%d%%", pp), rowY, pressureColor(pp)) ; rowY = rowY - lineH
+    row("Disease", string.format("%d%%", dp), rowY, pressureColor(dp))
+
+    setTextBold(false)
+    setTextColor(1, 1, 1, 1)
+    setTextAlignment(RenderText.ALIGN_LEFT)
+    setTextVerticalAlignment(RenderText.VERTICAL_ALIGN_BASELINE)
 end
 
 -- ── Sidebar Rendering ─────────────────────────────────────
