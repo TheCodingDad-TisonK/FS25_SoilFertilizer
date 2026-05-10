@@ -57,6 +57,36 @@ SettingsSchema.definitions = {
         localOnly = true,  -- per-player HUD visibility, not synced to server
     },
     {
+        id = "showMiniReport",
+        type = "boolean",
+        default = true,
+        uiId = "sf_show_mini_report",
+        localOnly = true,
+    },
+    {
+        id = "miniReportX",
+        type = "number",
+        default = 0.18,
+        uiId = "sf_mini_report_x",
+        localOnly = true,
+    },
+    {
+        id = "miniReportY",
+        type = "number",
+        default = 0.015,
+        uiId = "sf_mini_report_y",
+        localOnly = true,
+    },
+    {
+        id = "miniReportScale",
+        type = "number",
+        default = 1.0,
+        min = 0.5,
+        max = 2.0,
+        uiId = "sf_mini_report_scale",
+        localOnly = true,
+    },
+    {
         id = "hudPosition",
         type = "number",
         default = 1,  -- 1=Top Right, 2=Top Left, 3=Bottom Right, 4=Bottom Left, 5=Center Right, 6=Custom

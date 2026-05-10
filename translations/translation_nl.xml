@@ -628,5 +628,13 @@
     <e k="sf_fieldinfo_yield" v="Opbrengst" eh="97345487" />
     <e k="sf_fieldinfo_rotation" v="Vruchtwisseling" eh="f1a42bd4" />
     <e k="sf_fieldinfo_needs" v="Behoeften" eh="94d6125d" />
+    <e k="sf_field" v="Veld" eh="00000000" />
+    <e k="sf_no_field" v="Geen veld geselecteerd" eh="00000000" />
+    <e k="sf_overall_Good" v="Goed" eh="00000000" />
+    <e k="sf_overall_Fair" v="Matig" eh="00000000" />
+    <e k="sf_overall_Poor" v="Slecht" eh="00000000" />
+    <e k="sf_cell_report" v="Cel Rapport" eh="00000000" />
+    <e k="sf_cell_no_data" v="Betreed veld om te meten" eh="00000000" />
+    <e k="sf_cell" v="Cel" eh="00000000" />
     </elements>
 </l10n>

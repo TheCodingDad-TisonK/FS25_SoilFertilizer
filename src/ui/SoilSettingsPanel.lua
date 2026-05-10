@@ -130,7 +130,7 @@ local CATEGORIES = {
         sections = {
             {
                 headerKey = "sf_panel_hdr_visibility",
-                items     = { "showHUD", "useImperialUnits" }
+                items     = { "showHUD", "showMiniReport", "useImperialUnits" }
             },
             {
                 headerKey = "sf_panel_hdr_hud_style",
@@ -194,6 +194,7 @@ local SETTING_DESCS = {
     diseasePressure   = "sf_desc_diseasePressure",
     compactionEnabled = "sf_desc_compactionEnabled",
     showHUD           = "sf_desc_showHUD",
+    showMiniReport    = "sf_desc_showMiniReport",
     useImperialUnits  = "sf_desc_useImperialUnits",
     hudColorTheme     = "sf_desc_hudColorTheme",
     hudFontSize       = "sf_desc_hudFontSize",
