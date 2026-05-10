@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.1.5.7] - 2026-05-11
+
+### Translation Update
+- All 25 languages have been written in their respective language
+- All 25 translations (627 keys per language) are synced to the english version
+
+
+---
+
 ## [2.1.5.6] - 2026-05-09
 
 ### Added

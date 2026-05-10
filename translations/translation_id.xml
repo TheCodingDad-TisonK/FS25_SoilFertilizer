@@ -1,641 +1,712 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <l10n>
     <elements>
+    <e k="sf_section" v="Tanah &amp; Pupuk" eh="f31197fb" />
+    <e k="sf_enabled_short" v="Aktifkan Mod" eh="cf7fea13" />
+    <e k="sf_enabled_long" v="Mengaktifkan atau menonaktifkan mod tanah &amp; pupuk" eh="a891399a" />
+    <e k="sf_debug_short" v="Mode DEBUG" eh="2ddcdc76" />
+    <e k="sf_debug_long" v="Aktifkan/nonaktifkan mode debug (pencatatan tambahan)" eh="f6f20240" />
+    <e k="sf_seasonal_effects_short" v="Efek Musiman" eh="c16ea608" />
+    <e k="sf_seasonal_effects_long" v="Aktifkan/nonaktifkan dampak musiman pada nutrisi tanah (dorongan pertumbuhan musim semi, perlambatan musim gugur)" eh="3eea94c7" />
+    <e k="sf_rain_effects_short" v="Efek Hujan" eh="a2a1758b" />
+    <e k="sf_rain_effects_long" v="Aktifkan/nonaktifkan dampak hujan pada tanah (pencucian nutrisi, perubahan pH)" eh="de3b14b9" />
+    <e k="sf_plowing_bonus_short" v="Bonus Membajak" eh="541ec752" />
+    <e k="sf_plowing_bonus_long" v="Aktifkan/nonaktifkan manfaat membajak bagi kesuburan tanah (peningkatan nitrogen dan bahan organik)" eh="fe701c1c" />
+    <e k="sf_residue_incorporation_short" v="Inkorporasi Residu" eh="f4352cb5" />
+    <e k="sf_residue_incorporation_long" v="Aktifkan/nonaktifkan pelepasan nutrisi dari residu tanaman yang diolah ke dalam tanah oleh alat pengolah tanah (kultivator, bajak, strip-till, drill langsung)" eh="2e43448f" />
+    <e k="sf_weed_pressure_short" v="Tekanan Gulma" eh="53f8b936" />
+    <e k="sf_weed_pressure_long" v="Aktifkan/nonaktifkan pertumbuhan gulma dinamis dan dampak hasil" eh="ac99a865" />
+    <e k="sf_pest_pressure_short" v="Tekanan Hama" eh="18a7c2be" />
+    <e k="sf_pest_pressure_long" v="Aktifkan/nonaktifkan sistem serangan serangga dan hama" eh="2ba11abc" />
+    <e k="sf_disease_pressure_short" v="Tekanan Penyakit" eh="2b805cc9" />
+    <e k="sf_disease_pressure_long" v="Aktifkan/nonaktifkan sistem penyakit jamur dan tanaman" eh="9080edbc" />
+    <e k="sf_compaction_short" v="Pemadatan Tanah" eh="68734a56" />
+    <e k="sf_compaction_long" v="Aktifkan/nonaktifkan sistem pemadatan tanah kendaraan berat" eh="a0995ec5" />
+    <e k="sf_fertility_short" v="Sistem Kesuburan" eh="f7e27d58" />
+    <e k="sf_fertility_long" v="Aktifkan/nonaktifkan sistem kesuburan tanah dinamis" eh="ea074366" />
+    <e k="sf_nutrients_short" v="Siklus Nutrisi" eh="ffab595d" />
+    <e k="sf_nutrients_long" v="Aktifkan/nonaktifkan penipisan dan pemulihan nutrisi yang realistis" eh="dbe9c8ff" />
+    <e k="sf_difficulty_short" v="Kesulitan" eh="7b29ca96" />
+    <e k="sf_difficulty_long" v="Atur tingkat kesulitan: Sederhana, Realistis, Hardcore" eh="cfb758a4" />
+    <e k="sf_diff_1" v="Sederhana" eh="1fbb1e39" />
+    <e k="sf_diff_2" v="Realistis" eh="408c999f" />
+    <e k="sf_diff_3" v="Hardcore" eh="1c800aa9" />
+    <e k="sf_ui_soilReport_syncing" v="Sinkronisasi data tanah..." eh="03f01c4d" />
+    <e k="sf_ui_soilReport_syncTimeout" v="Tidak dapat memuat kepemilikan lahan. Silakan tutup dan buka kembali laporan." eh="9f699982" />
+    <e k="sf_fertilizer_cost_short" v="Biaya Pupuk" eh="6870d88b" />
+    <e k="sf_fertilizer_cost_long" v="Aktifkan/nonaktifkan biaya pembelian pupuk yang realistis" eh="12b03fbb" />
+    <e k="sf_notifications_short" v="Notifikasi" eh="a274f4d4" />
+    <e k="sf_notifications_long" v="Aktifkan/nonaktifkan notifikasi tanah dan pupuk" eh="9a872f8f" />
+    <e k="sf_show_hud_short" v="Tampilkan HUD" eh="c94fd4d7" />
+    <e k="sf_show_hud_long" v="Tampilkan/sembunyikan overlay HUD info tanah (F8 untuk beralih sementara)" eh="4e2e11b6" />
+    <e k="sf_show_mini_report_short" v="Tampilkan Laporan Sel" eh="6b14e786" />
+    <e k="sf_show_mini_report_long" v="Tampilkan/sembunyikan overlay laporan sel minimap" eh="9f57fb65" />
+    <e k="sf_hud_position_short" v="Posisi HUD" eh="5ac371f2" />
+    <e k="sf_hud_position_long" v="Pilih di mana HUD info tanah muncul di layar" eh="d7b9c109" />
+    <e k="sf_hud_pos_1" v="Kanan Atas" eh="5f9f6784" />
+    <e k="sf_hud_pos_2" v="Kiri Atas" eh="ac71274a" />
+    <e k="sf_hud_pos_3" v="Kanan Bawah" eh="4d297f5d" />
+    <e k="sf_hud_pos_4" v="Kiri Bawah" eh="7eb55425" />
+    <e k="sf_hud_pos_5" v="Tengah Kanan" eh="d7afdc5a" />
+    <e k="sf_hud_pos_6" v="Kustom" eh="90589c47" />
+    <e k="sf_hud_color_theme_short" v="Tema Warna HUD" eh="4a73f95b" />
+    <e k="sf_hud_color_theme_long" v="Pilih skema warna untuk tampilan info tanah" eh="3218bca6" />
     <e k="sf_hud_color_1" v="Hijau" eh="d382816a" />
     <e k="sf_hud_color_2" v="Biru" eh="9594eec9" />
-    <e k="sf_hud_color_3" v="[EN] Amber" eh="88068e33" />
-    <e k="sf_hud_color_4" v="[EN] Mono" eh="5d9b47bd" />
-    <e k="sf_diff_short" v="Kesulitan" eh="7b29ca96" />
-    <e k="sf_diff_long" v="Tingkat kesulitan manajemen tanah" eh="d6f4560c" />
-		<e k="sf_rr_short" v="[EN] Replenishment Rate" eh="b363b336" />
-		<e k="sf_rr_long" v="[EN] How quickly fertilizer restores field nutrients (0.25x Very Slow to 2.0x Very Fast)" eh="afe78a6d" />
-    <e k="sf_auto_rate_short" v="Kontrol laju otomatis" eh="6f99137d" />
+    <e k="sf_hud_color_3" v="Amber" eh="88068e33" />
+    <e k="sf_hud_color_4" v="Mono" eh="5d9b47bd" />
+		<e k="sf_diff_short" v="Kesulitan" eh="7b29ca96" />
+		<e k="sf_diff_long" v="Tingkat kesulitan pengelolaan tanah" eh="d6f4560c" />
+    <e k="sf_rr_short" v="Laju Pemulihan" eh="b363b336" />
+    <e k="sf_rr_long" v="Seberapa cepat pupuk memulihkan nutrisi lahan (0.25x Sangat Lambat hingga 2.0x Sangat Cepat)" eh="afe78a6d" />
+    <e k="sf_auto_rate_short" v="Kontrol Laju Otomatis" eh="6f99137d" />
     <e k="sf_auto_rate_long" v="Secara otomatis menyesuaikan laju aplikasi pupuk berdasarkan kebutuhan lahan" eh="a9ca9f6b" />
-		<e k="sf_hud_theme_1" v="[EN] Green" eh="d382816a" />
-		<e k="sf_hud_theme_2" v="[EN] Blue" eh="9594eec9" />
-		<e k="sf_hud_theme_3" v="[EN] Amber" eh="88068e33" />
-		<e k="sf_hud_theme_4" v="[EN] Mono" eh="5d9b47bd" />
-		<e k="sf_hud_font_size_short" v="[EN] HUD Font Size" eh="fd6ca64a" />
-		<e k="sf_hud_font_size_long" v="[EN] Adjust text size for better readability" eh="c338854f" />
-		<e k="sf_hud_font_1" v="[EN] Small" eh="2660064e" />
-		<e k="sf_hud_font_2" v="[EN] Medium" eh="87f8a6ab" />
-		<e k="sf_hud_font_3" v="[EN] Large" eh="3a69b34c" />
-		<e k="sf_hud_transparency_short" v="[EN] HUD Transparency" eh="e8a009e4" />
-		<e k="sf_hud_transparency_long" v="[EN] Set background transparency level (Clear = see-through, Solid = opaque)" eh="152e390a" />
-		<e k="sf_hud_trans_1" v="[EN] Clear" eh="dc30bc0c" />
-		<e k="sf_hud_trans_2" v="[EN] Light" eh="9914a0ce" />
-		<e k="sf_hud_trans_3" v="[EN] Medium" eh="87f8a6ab" />
-		<e k="sf_hud_trans_4" v="[EN] Dark" eh="a18366b2" />
-		<e k="sf_hud_trans_5" v="[EN] Solid" eh="e41480b6" />
-    <e k="sf_hud_title" v="[EN] SOIL MONITOR" eh="f8cda642" />
-    <e k="sf_hud_field" v="[EN] Field %d" eh="08988997" />
-    <e k="sf_hud_noField" v="[EN] Walk onto a field" eh="62c55e9e" />
-    <e k="sf_hud_fallow" v="[EN] Fallow" eh="eafe5913" />
-    <e k="sf_hud_weeds" v="[EN] Weeds" eh="324181de" />
-    <e k="sf_hud_pests" v="[EN] Pests" eh="2fed5101" />
-    <e k="sf_hud_disease" v="[EN] Disease" eh="e7067a8c" />
-    <e k="sf_hud_protected" v="[EN] (protected)" eh="8273211e" />
-    <e k="sf_hud_yield" v="[EN] Yield" eh="97345487" />
-    <e k="sf_hud_estYield" v="[EN] Est. Yield" eh="32a4135e" />
-    <e k="sf_hud_optimal" v="[EN] Optimal" eh="cb61fef1" />
-    <e k="sf_hud_post_harvest" v="[EN] Post-harvest · Fertilize" eh="634de6fe" />
-    <e k="sf_hud_hint_edit" v="[EN] Drag: move   Corner: resize   RMB/Shift+H: done" eh="987ebf45" />
-    <e k="sf_hud_hint_normal" v="Shift+H: move/resize" eh="afc8f13b" />
-		<e k="sf_use_imperial_short" v="[EN] Imperial Units" eh="ff2701ad" />
-		<e k="sf_use_imperial_long" v="[EN] Show application rates in gal/ac and lb/ac (off = L/ha and kg/ha)" eh="17efa489" />
-    <e k="sf_active_map_layer_short" v="[EN] Active Map Layer" eh="1861765f" />
-    <e k="sf_active_map_layer_long" v="[EN] Nutrient layer shown as overlay in the PDA map" eh="d7755cc8" />
-    <e k="sf_overlay_density_short" v="[EN] Map Detail" eh="a525859a" />
-    <e k="sf_overlay_density_long" v="[EN] Sample point budget for the PDA soil overlay. Low = better FPS, High = fuller coverage on large maps." eh="89215ce5" />
-    <e k="input_SF_OPEN_SETTINGS" v="[EN] Open Soil Settings" eh="2e31c0dd" />
-		<e k="sf_reset" v="[EN] Reset Soil Settings" eh="467bc2f5" />
-		<e k="input_SF_TOGGLE_HUD" v="[EN] Toggle Soil HUD" eh="f0224a10" />
-    <e k="input_SF_HUD_DRAG" v="[EN] HUD Drag Mode" eh="cb2eb762" />
-		<e k="input_SF_SOIL_REPORT" v="[EN] Soil Report" eh="c33180ef" />
-		<e k="input_SF_RATE_UP" v="[EN] Increase Fertilizer Rate" eh="6e601ef5" />
-		<e k="input_SF_RATE_DOWN" v="[EN] Decrease Fertilizer Rate" eh="30712026" />
-    <e k="input_SF_TOGGLE_AUTO" v="Beralih laju otomatis" eh="a8642cf0" />
-        <e k="input_SF_CYCLE_MAP_LAYER" v="[EN] Cycle Soil Map Layer" eh="8e4a716c" />
-        <e k="input_SF_SOIL_PDA" v="[EN] Open Soil PDA" eh="7d70f7b4" />
-		<e k="sf_report_title" v="[EN] Soil &amp; Fertilizer Report" eh="a76f8218" />
-		<e k="sf_report_fields_tracked" v="[EN] Fields Tracked:" eh="7b1e59b8" />
-		<e k="sf_report_need_fert" v="[EN] Need Fertilizer:" eh="110b60f2" />
-		<e k="sf_report_farm_health" v="[EN] Farm Health:" eh="a5330ade" />
-		<e k="sf_report_back" v="[EN] Back" eh="0557fa92" />
-		<e k="sf_report_difficulty" v="[EN] Difficulty:" eh="3abaf54f" />
-		<e k="sf_report_col_field" v="[EN] Field" eh="6f16a5f8" />
-		<e k="sf_report_col_last_crop" v="[EN] Last Crop" eh="ff41e5eb" />
-		<e k="sf_report_col_fert" v="[EN] Fert?" eh="9e6d0eb4" />
-		<e k="sf_report_no_data" v="[EN] No soil data available. Walk onto a field to start tracking." eh="1528a4cb" />
-		<e k="sf_report_prev" v="[EN] Prev" eh="14230d11" />
-		<e k="sf_report_next" v="[EN] Next" eh="10ac3d04" />
-		<e k="sf_report_yes" v="[EN] YES" eh="7469a286" />
-		<e k="sf_report_ok" v="[EN] OK" eh="e0aa021e" />
-		<e k="sf_report_none" v="[EN] None" eh="6adf97f8" />
-		<e k="sf_report_rec_n_poor" v="[EN] Needs Nitrogen" eh="5dca0711" />
-		<e k="sf_report_rec_n_fair" v="[EN] Low Nitrogen" eh="35ad072d" />
-		<e k="sf_report_rec_p_poor" v="[EN] Needs Phosphorus" eh="e8fa326f" />
-		<e k="sf_report_rec_p_fair" v="[EN] Low Phosphorus" eh="077e12cf" />
-		<e k="sf_report_rec_k_poor" v="[EN] Needs Potassium" eh="f23194e0" />
-		<e k="sf_report_rec_k_fair" v="[EN] Low Potassium" eh="2006c0a2" />
-		<e k="sf_report_rec_ph_adjust" v="[EN] Adjust pH" eh="84f6bbbc" />
-		<e k="sf_report_rec_ph_monitor" v="[EN] Monitor pH" eh="6dfcded4" />
-		<e k="sf_report_rec_om_increase" v="[EN] Increase Organic Matter" eh="c2a930af" />
-		<e k="sf_report_rec_om_maintain" v="[EN] Maintain Organic Matter" eh="e7655847" />
-    <e k="sf_report_rec_pest" v="[EN] Pest Risk" eh="22e0f3bf" />
-    <e k="sf_report_rec_disease" v="[EN] Disease Risk" eh="c342956b" />
-		<e k="sf_report_rec_needs" v="[EN] Needs:" eh="3e6d95cf" />
-		<e k="sf_report_rec_optimal" v="[EN] Soil Health: Optimal" eh="6ee9d19b" />
-    <e k="sf_report_rec_good" v="[EN] Good" eh="0c6ad70b" />
-    <e k="sf_report_rec_fair" v="[EN] Fair" eh="f7f20cf0" />
-    <e k="sf_report_rec_poor" v="[EN] Poor" eh="0e94d017" />
-		<e k="sf_uan32_title" v="[EN] UAN 32 Fertilizer (N)" eh="90913bb8" />
-		<e k="sf_uan28_title" v="[EN] UAN 28 Fertilizer (N)" eh="9d902cd7" />
-		<e k="sf_anhydrous_title" v="[EN] Anhydrous Ammonia (N)" eh="3fc85c02" />
-		<e k="sf_starter_title" v="[EN] Starter Fertilizer 10-34-0 (P)" eh="8c1a1ddc" />
-		<e k="sf_urea_title" v="[EN] Urea 46-0-0 (N)" eh="659b3097" />
-		    <e k="sf_an_title" v="Ammonium Nitrate 34.5-0-0 (N)" eh="" />
-<e k="sf_ams_title" v="[EN] Ammonium Sulfate 21-0-0 (N)" eh="033d1845" />
-		<e k="sf_map_title" v="[EN] MAP Fertilizer 11-52-0 (P)" eh="31aa2534" />
-		<e k="sf_dap_title" v="[EN] DAP Fertilizer 18-46-0 (P)" eh="5030a80a" />
-		<e k="sf_potash_title" v="[EN] Potash 0-0-60 (K)" eh="8db6c54c" />
-		<e k="sf_liquid_urea_title" v="[EN] Liquid Urea (N)" eh="7fee4f12" />
-		<e k="sf_liquid_ams_title" v="[EN] Liquid Ammonium Sulfate (N)" eh="0daf3a6f" />
-		<e k="sf_liquid_map_title" v="[EN] Liquid MAP (P)" eh="3ce7c8c9" />
-		<e k="sf_liquid_dap_title" v="[EN] Liquid DAP (P)" eh="86bd893e" />
-		<e k="sf_liquid_potash_title" v="[EN] Liquid Potash (K)" eh="72ac9fd3" />
-		<e k="sf_insecticide_title" v="[EN] Insecticide" eh="5650eeef" />
-		<e k="sf_fungicide_title" v="[EN] Fungicide" eh="e8512698" />
-		<e k="sf_report_page_info" v="[EN] Fields %d-%d of %d  |  Page %d of %d" eh="8db851d1" />
-    <e k="sf_bigBag_uan32_name" v="Big Bag UAN 32-0-0" eh="7bdc4d9d" />
-    <e k="sf_bigBag_uan32_function" v="Pupuk nitrogen (cair)" eh="27de5f41" />
-    <e k="sf_bigBag_uan28_name" v="Big Bag UAN 28-0-0" eh="997781d5" />
-    <e k="sf_bigBag_uan28_function" v="Pupuk nitrogen (cair)" eh="27de5f41" />
-    <e k="sf_bigBag_anhydrous_name" v="Big Bag Amonia Anhidrat 82-0-0" eh="44914201" />
-    <e k="sf_bigBag_anhydrous_function" v="Pupuk nitrogen (cair)" eh="27de5f41" />
-    <e k="sf_bigBag_urea_name" v="[EN] Big Bag Urea 46-0-0" eh="8e8cbaae" />
-    <e k="sf_bigBag_urea_function" v="Pupuk nitrogen (kering)" eh="63efea20" />
-        <e k="sf_bigBag_an_name" v="Big Bag AN 34.5-0-0" eh="" />
-    <e k="sf_bigBag_an_function" v="Nitrogen Fertilizer (dry)" eh="" />
-<e k="sf_bigBag_ams_name" v="[EN] Big Bag AMS 21-0-0-24S" eh="7f71ee68" />
-    <e k="sf_bigBag_ams_function" v="Pupuk nitrogen (kering)" eh="63efea20" />
-    <e k="sf_bigBag_map_name" v="[EN] Big Bag MAP 11-52-0" eh="8a5a059b" />
-    <e k="sf_bigBag_map_function" v="Pupuk fosfor (kering)" eh="0cc85c60" />
-    <e k="sf_bigBag_dap_name" v="[EN] Big Bag DAP 18-46-0" eh="fb4e9987" />
-    <e k="sf_bigBag_dap_function" v="Pupuk fosfor (kering)" eh="0cc85c60" />
+    <e k="sf_hud_theme_1" v="Hijau" eh="d382816a" />
+    <e k="sf_hud_theme_2" v="Biru" eh="9594eec9" />
+    <e k="sf_hud_theme_3" v="Amber" eh="88068e33" />
+    <e k="sf_hud_theme_4" v="Mono" eh="5d9b47bd" />
+    <e k="sf_hud_font_size_short" v="Ukuran Font HUD" eh="fd6ca64a" />
+    <e k="sf_hud_font_size_long" v="Sesuaikan ukuran teks untuk keterbacaan yang lebih baik" eh="c338854f" />
+    <e k="sf_hud_font_1" v="Kecil" eh="2660064e" />
+    <e k="sf_hud_font_2" v="Sedang" eh="87f8a6ab" />
+    <e k="sf_hud_font_3" v="Besar" eh="3a69b34c" />
+    <e k="sf_hud_transparency_short" v="Transparansi HUD" eh="e8a009e4" />
+    <e k="sf_hud_transparency_long" v="Atur tingkat transparansi latar belakang (Bening = tembus pandang, Padat = buram)" eh="152e390a" />
+    <e k="sf_hud_trans_1" v="Bening" eh="dc30bc0c" />
+    <e k="sf_hud_trans_2" v="Ringan" eh="9914a0ce" />
+    <e k="sf_hud_trans_3" v="Sedang" eh="87f8a6ab" />
+    <e k="sf_hud_trans_4" v="Gelap" eh="a18366b2" />
+    <e k="sf_hud_trans_5" v="Padat" eh="e41480b6" />
+    <e k="sf_use_imperial_short" v="Unit Imperial" eh="ff2701ad" />
+    <e k="sf_use_imperial_long" v="Tampilkan laju aplikasi dalam gal/ac dan lb/ac (mati = L/ha dan kg/ha)" eh="17efa489" />
+    <e k="sf_active_map_layer_short" v="Lapisan Peta Aktif" eh="1861765f" />
+    <e k="sf_active_map_layer_long" v="Lapisan nutrisi ditampilkan sebagai overlay di peta PDA" eh="d7755cc8" />
+    <e k="sf_overlay_density_short" v="Detail Peta" eh="a525859a" />
+    <e k="sf_overlay_density_long" v="Anggaran titik sampel untuk overlay tanah PDA. Rendah = FPS lebih baik, Tinggi = cakupan lebih penuh pada peta besar." eh="89215ce5" />
+    <e k="input_SF_OPEN_SETTINGS" v="Buka Pengaturan Tanah" eh="2e31c0dd" />
+    <e k="sf_reset" v="Atur Ulang Pengaturan Tanah" eh="467bc2f5" />
+    <e k="input_SF_TOGGLE_HUD" v="Beralih HUD Tanah" eh="f0224a10" />
+    <e k="input_SF_HUD_DRAG" v="Mode Seret HUD" eh="cb2eb762" />
+    <e k="input_SF_SOIL_REPORT" v="Laporan Tanah" eh="c33180ef" />
+    <e k="input_SF_TOGGLE_CELL_MAP" v="Beralih Peta Sel Tanah" eh="3a7e9b9d" />
+    <e k="input_SF_RATE_UP" v="Naikkan Laju Pupuk" eh="6e601ef5" />
+    <e k="input_SF_RATE_DOWN" v="Turunkan Laju Pupuk" eh="30712026" />
+    <e k="input_SF_TOGGLE_AUTO" v="Beralih Laju Otomatis" eh="a8642cf0" />
+    <e k="input_SF_CYCLE_MAP_LAYER" v="Siklus Lapisan Peta Tanah" eh="8e4a716c" />
+    <e k="input_SF_SOIL_PDA" v="Buka PDA Tanah" eh="7d70f7b4" />
+    <e k="sf_report_title" v="Laporan Tanah &amp; Pupuk" eh="3b4e9448" />
+    <e k="sf_report_fields_tracked" v="Lahan Dilacak:" eh="7b1e59b8" />
+    <e k="sf_report_need_fert" v="Butuh Pupuk:" eh="110b60f2" />
+    <e k="sf_report_farm_health" v="Kesehatan Pertanian:" eh="a5330ade" />
+    <e k="sf_report_back" v="Kembali" eh="0557fa92" />
+    <e k="sf_report_difficulty" v="Kesulitan:" eh="3abaf54f" />
+    <e k="sf_report_col_field" v="Lahan" eh="6f16a5f8" />
+    <e k="sf_report_col_last_crop" v="Tanaman Terakhir" eh="ff41e5eb" />
+    <e k="sf_report_col_fert" v="Pupuk?" eh="9e6d0eb4" />
+    <e k="sf_report_no_data" v="Tidak ada data tanah yang tersedia. Masuk ke lahan untuk mulai melacak." eh="1528a4cb" />
+    <e k="sf_report_prev" v="Seb" eh="14230d11" />
+    <e k="sf_report_next" v="Ber" eh="10ac3d04" />
+    <e k="sf_report_yes" v="YA" eh="7469a286" />
+    <e k="sf_report_ok" v="OK" eh="e0aa021e" />
+    <e k="sf_report_none" v="Tidak ada" eh="6adf97f8" />
+    <e k="sf_report_rec_n_poor" v="Butuh Nitrogen" eh="5dca0711" />
+    <e k="sf_report_rec_n_fair" v="Nitrogen Rendah" eh="35ad072d" />
+    <e k="sf_report_rec_p_poor" v="Butuh Fosfor" eh="e8fa326f" />
+    <e k="sf_report_rec_p_fair" v="Fosfor Rendah" eh="077e12cf" />
+    <e k="sf_report_rec_k_poor" v="Butuh Kalium" eh="f23194e0" />
+    <e k="sf_report_rec_k_fair" v="Kalium Rendah" eh="2006c0a2" />
+    <e k="sf_report_rec_ph_adjust" v="Sesuaikan pH" eh="84f6bbbc" />
+    <e k="sf_report_rec_ph_monitor" v="Monitor pH" eh="6dfcded4" />
+    <e k="sf_report_rec_om_increase" v="Tingkatkan Bahan Organik" eh="c2a930af" />
+    <e k="sf_report_rec_om_maintain" v="Pertahankan Bahan Organik" eh="e7655847" />
+    <e k="sf_report_rec_pest" v="Risiko Hama" eh="22e0f3bf" />
+    <e k="sf_report_rec_disease" v="Risko Penyakit" eh="c342956b" />
+    <e k="sf_report_rec_needs" v="Butuh:" eh="3e6d95cf" />
+    <e k="sf_report_rec_optimal" v="Kesehatan Tanah: Optimal" eh="6ee9d19b" />
+    <e k="sf_report_rec_good" v="Baik" eh="0c6ad70b" />
+    <e k="sf_report_rec_fair" v="Cukup" eh="f7f20cf0" />
+    <e k="sf_report_rec_poor" v="Buruk" eh="0e94d017" />
+    <e k="sf_uan32_title" v="Pupuk UAN 32 (N)" eh="90913bb8" />
+    <e k="sf_uan28_title" v="Pupuk UAN 28 (N)" eh="9d902cd7" />
+    <e k="sf_anhydrous_title" v="Amonia Anhidrat (N)" eh="3fc85c02" />
+    <e k="sf_starter_title" v="Pupuk Starter 10-34-0 (P)" eh="8c1a1ddc" />
+    <e k="sf_urea_title" v="Urea 46-0-0 (N)" eh="659b3097" />
+    <e k="sf_an_title" v="Amonium Nitrat 34.5-0-0 (N)" eh="29f6ee93" />
+    <e k="sf_ams_title" v="Amonium Sulfat 21-0-0 (N)" eh="033d1845" />
+    <e k="sf_map_title" v="Pupuk MAP 11-52-0 (P)" eh="31aa2534" />
+    <e k="sf_dap_title" v="Pupuk DAP 18-46-0 (P)" eh="5030a80a" />
+    <e k="sf_potash_title" v="Kalium 0-0-60 (K)" eh="8db6c54c" />
+    <e k="sf_liquid_urea_title" v="Urea Cair (N)" eh="7fee4f12" />
+    <e k="sf_liquid_ams_title" v="Amonium Sulfat Cair (N)" eh="0daf3a6f" />
+    <e k="sf_liquid_map_title" v="MAP Cair (P)" eh="3ce7c8c9" />
+    <e k="sf_liquid_dap_title" v="DAP Cair (P)" eh="86bd893e" />
+    <e k="sf_liquid_potash_title" v="Kalium Cair (K)" eh="72ac9fd3" />
+    <e k="sf_insecticide_title" v="Insektisida" eh="5650eeef" />
+    <e k="sf_fungicide_title" v="Fungisida" eh="e8512698" />
+    <e k="sf_report_page_info" v="Lahan %d-%d dari %d  |  Halaman %d dari %d" eh="8db851d1" />
+    <e k="sf_bigBag_uan32_name" v="IBC UAN 32-0-0" eh="574747ce" />
+    <e k="sf_bigBag_uan32_function" v="Pupuk Nitrogen (cair)" eh="27de5f41" />
+    <e k="sf_bigBag_uan28_name" v="IBC UAN 28-0-0" eh="7eeec815" />
+    <e k="sf_bigBag_uan28_function" v="Pupuk Nitrogen (cair)" eh="27de5f41" />
+    <e k="sf_bigBag_anhydrous_name" v="IBC Amonia Anhidrat 82-0-0" eh="fb09e6ce" />
+    <e k="sf_bigBag_anhydrous_function" v="Pupuk Nitrogen (cair)" eh="27de5f41" />
+    <e k="sf_bigBag_urea_name" v="Big Bag Urea 46-0-0" eh="8e8cbaae" />
+    <e k="sf_bigBag_urea_function" v="Pupuk Nitrogen (kering)" eh="63efea20" />
+    <e k="sf_bigBag_an_name" v="Big Bag AN 34.5-0-0" eh="45f56f60" />
+    <e k="sf_bigBag_an_function" v="Pupuk Nitrogen (kering)" eh="63efea20" />
+    <e k="sf_bigBag_ams_name" v="Big Bag AMS 21-0-0-24S" eh="7f71ee68" />
+    <e k="sf_bigBag_ams_function" v="Pupuk Nitrogen (kering)" eh="63efea20" />
+    <e k="sf_bigBag_map_name" v="Big Bag MAP 11-52-0" eh="8a5a059b" />
+    <e k="sf_bigBag_map_function" v="Pupuk Fosfor (kering)" eh="0cc85c60" />
+    <e k="sf_bigBag_dap_name" v="Big Bag DAP 18-46-0" eh="fb4e9987" />
+    <e k="sf_bigBag_dap_function" v="Pupuk Fosfor (kering)" eh="0cc85c60" />
     <e k="sf_bigBag_potash_name" v="Big Bag Kalium 0-0-60" eh="eb771556" />
-    <e k="sf_bigBag_potash_function" v="Pupuk kalium (kering)" eh="18015099" />
-		<e k="sf_bigBag_liquid_urea_name" v="[EN] IBC Liquid Urea" eh="c40b906f" />
-		<e k="sf_bigBag_liquid_urea_function" v="[EN] Nitrogen Fertilizer (liquid)" eh="27de5f41" />
-		<e k="sf_bigBag_liquid_ams_name" v="[EN] IBC Liquid AMS" eh="32e6c8bb" />
-		<e k="sf_bigBag_liquid_ams_function" v="[EN] Nitrogen Fertilizer (liquid)" eh="27de5f41" />
-		<e k="sf_bigBag_liquid_map_name" v="[EN] IBC Liquid MAP" eh="4628addb" />
-		<e k="sf_bigBag_liquid_map_function" v="[EN] Phosphorus Fertilizer (liquid)" eh="eeb5ef5d" />
-		<e k="sf_bigBag_liquid_dap_name" v="[EN] IBC Liquid DAP" eh="82fb3c06" />
-		<e k="sf_bigBag_liquid_dap_function" v="[EN] Phosphorus Fertilizer (liquid)" eh="eeb5ef5d" />
-		<e k="sf_bigBag_liquid_potash_name" v="[EN] IBC Liquid Potash" eh="7176856d" />
-		<e k="sf_bigBag_liquid_potash_function" v="[EN] Potassium Fertilizer (liquid)" eh="52169d4a" />
-    <e k="sf_bigBag_starter_name" v="Big Bag Pupuk Starter 10-34-0" eh="953fd6c0" />
-    <e k="sf_bigBag_insecticide_name" v="Big Bag Insecticide" eh="fa0200a7" />
-    <e k="sf_bigBag_insecticide_function" v="[EN] Insecticide (liquid)" eh="09580f6b" />
-    <e k="sf_bigBag_fungicide_name" v="Big Bag Fungicide" eh="a3d4e59c" />
-    <e k="sf_bigBag_fungicide_function" v="[EN] Fungicide (liquid)" eh="745c34cb" />
-    <e k="sf_bigBag_starter_function" v="Pupuk starter (cair)" eh="2c36ea57" />
-		<e k="sf_bigBag_gypsum_name" v="[EN] Big Bag Gypsum" eh="40fc8169" />
-		<e k="sf_bigBag_gypsum_function" v="[EN] Soil Amendment (dry)" eh="51503c54" />
-    <e k="sf_bigBag_compost_name" v="[EN] Big Bag Compost" eh="14322c5d" />
-    <e k="sf_bigBag_compost_function" v="[EN] Organic Soil Amendment (dry)" eh="9dd2256a" />
-    <e k="sf_bigBag_biosolids_name" v="[EN] Big Bag Biosolids" eh="61a60ff3" />
-    <e k="sf_bigBag_biosolids_function" v="[EN] Organic Fertilizer (dry)" eh="374c7b1e" />
-    <e k="sf_bigBag_chicken_manure_name" v="[EN] Big Bag Chicken Manure" eh="cb60fddc" />
-    <e k="sf_bigBag_chicken_manure_function" v="[EN] Organic Fertilizer (dry)" eh="374c7b1e" />
-    <e k="sf_bigBag_pelletized_manure_name" v="[EN] Big Bag Pelletized Manure" eh="064be7fa" />
-    <e k="sf_bigBag_pelletized_manure_function" v="[EN] Organic Fertilizer (dry)" eh="374c7b1e" />
-    <e k="sf_bigBag_liquidlime_name" v="[EN] Liquid Lime Tank" eh="4f8caca1" />
-    <e k="sf_bigBag_liquidlime_function" v="[EN] pH Raising Agent (liquid)" eh="7a118b6d" />
+    <e k="sf_bigBag_potash_function" v="Pupuk Kalium (kering)" eh="18015099" />
+    <e k="sf_bigBag_liquid_urea_name" v="IBC Urea Cair" eh="c40b906f" />
+    <e k="sf_bigBag_liquid_urea_function" v="Pupuk Nitrogen (cair)" eh="27de5f41" />
+    <e k="sf_bigBag_liquid_ams_name" v="IBC AMS Cair" eh="32e6c8bb" />
+    <e k="sf_bigBag_liquid_ams_function" v="Pupuk Nitrogen (cair)" eh="27de5f41" />
+    <e k="sf_bigBag_liquid_map_name" v="IBC MAP Cair" eh="4628addb" />
+    <e k="sf_bigBag_liquid_map_function" v="Pupuk Fosfor (cair)" eh="eeb5ef5d" />
+    <e k="sf_bigBag_liquid_dap_name" v="IBC DAP Cair" eh="82fb3c06" />
+    <e k="sf_bigBag_liquid_dap_function" v="Pupuk Fosfor (cair)" eh="eeb5ef5d" />
+    <e k="sf_bigBag_liquid_potash_name" v="IBC Kalium Cair" eh="7176856d" />
+    <e k="sf_bigBag_liquid_potash_function" v="Pupuk Kalium (cair)" eh="52169d4a" />
+    <e k="sf_bigBag_starter_name" v="IBC Starter 10-34-0" eh="62b13bd1" />
+    <e k="sf_bigBag_insecticide_name" v="IBC Insektisida" eh="c8f0aabb" />
+    <e k="sf_bigBag_insecticide_function" v="Insektisida (cair)" eh="09580f6b" />
+    <e k="sf_bigBag_fungicide_name" v="IBC Fungisida" eh="2a1c78d4" />
+    <e k="sf_bigBag_fungicide_function" v="Fungisida (cair)" eh="745c34cb" />
+    <e k="sf_bigBag_starter_function" v="Pupuk Starter (cair)" eh="2c36ea57" />
+    <e k="sf_bigBag_gypsum_name" v="Big Bag Gips" eh="40fc8169" />
+    <e k="sf_bigBag_gypsum_function" v="Pembenah Tanah (kering)" eh="51503c54" />
+    <e k="sf_bigBag_compost_name" v="Big Bag Kompos" eh="14322c5d" />
+    <e k="sf_bigBag_compost_function" v="Pembenah Tanah Organik (kering)" eh="9dd2256a" />
+    <e k="sf_bigBag_biosolids_name" v="Big Bag Biosolid" eh="61a60ff3" />
+    <e k="sf_bigBag_biosolids_function" v="Pupuk Organik (kering)" eh="374c7b1e" />
+    <e k="sf_bigBag_chicken_manure_name" v="Big Bag Kotoran Ayam" eh="cb60fddc" />
+    <e k="sf_bigBag_chicken_manure_function" v="Pupuk Organik (kering)" eh="374c7b1e" />
+    <e k="sf_bigBag_pelletized_manure_name" v="Big Bag Pupuk Kandang Pelet" eh="064be7fa" />
+    <e k="sf_bigBag_pelletized_manure_function" v="Pupuk Organik (kering)" eh="374c7b1e" />
+    <e k="sf_bigBag_liquidlime_name" v="Tangki Kapur Cair" eh="4f8caca1" />
+    <e k="sf_bigBag_liquidlime_function" v="Agen Peningkat pH (cair)" eh="7a118b6d" />
+    <e k="sf_hud_title" v="MONITOR TANAH" eh="f8cda642" />
+    <e k="sf_hud_field" v="Lahan %d" eh="08988997" />
+    <e k="sf_hud_noField" v="Masuk ke dalam lahan" eh="62c55e9e" />
+    <e k="sf_hud_fallow" v="Bera" eh="eafe5913" />
+    <e k="sf_hud_weeds" v="Gulma" eh="324181de" />
+    <e k="sf_hud_pests" v="Hama" eh="2fed5101" />
+    <e k="sf_hud_disease" v="Penyakit" eh="e7067a8c" />
+    <e k="sf_hud_protected" v="(terlindungi)" eh="8273211e" />
+    <e k="sf_hud_yield" v="Hasil" eh="97345487" />
+    <e k="sf_hud_estYield" v="Est. Hasil" eh="32a4135e" />
+    <e k="sf_hud_optimal" v="Optimal" eh="cb61fef1" />
+    <e k="sf_hud_post_harvest" v="Pasca-panen · Pupuk" eh="634de6fe" />
+    <e k="sf_hud_hint_edit" v="Seret: pindah   Sudut: ubah ukuran   RMB/Shift+H: selesai" eh="c3f1820c" />
+    <e k="sf_hud_hint_normal" v="Shift+H: pindah/ubah ukuran" eh="f1d565b1" />
+    <e k="sf_report_detail_n_ok" v="Nitrogen: Optimal" eh="13782bd9" />
+    <e k="sf_report_detail_p_ok" v="Fosfor: Optimal" eh="dbc90f11" />
+    <e k="sf_report_detail_k_ok" v="Kalium: Optimal" eh="0197b4ba" />
+    <e k="sf_report_status_monitor" v="Monitor" eh="d2986ac8" />
+    <e k="sf_report_status_adjust" v="Sesuaikan" eh="51d7a685" />
+    <e k="sf_report_status_maintain" v="Pertahankan" eh="ade01a5a" />
+    <e k="sf_report_status_increase" v="Tingkatkan" eh="aac247ca" />
+    <e k="sf_report_pressure_low" v="Rendah" eh="28d0edd0" />
+    <e k="sf_report_pressure_moderate" v="Sedang" eh="1eb79d43" />
+    <e k="sf_report_pressure_high" v="Tinggi" eh="655d20c1" />
+    <e k="sf_report_yield_hint" v="Berdasarkan N/P/K vs ambang batas optimal" eh="022663e0" />
+    <e k="sf_report_yield_loss" v="Hasil ~-%d%%" eh="d64d5d59" />
 
-		<e k="sf_section" v="[EN] Soil &amp; Fertilizer" eh="d30a22a9" />
-		<e k="sf_enabled_short" v="[EN] Enable Mod" eh="cf7fea13" />
-		<e k="sf_enabled_long" v="[EN] Enable or disable the soil &amp; fertilizer mod" eh="e377fd59" />
-		<e k="sf_debug_short" v="[EN] DEBUG Mode" eh="2ddcdc76" />
-		<e k="sf_debug_long" v="[EN] Enable/disable debug mode (extra logging)" eh="f6f20240" />
-		<e k="sf_seasonal_effects_short" v="[EN] Seasonal Effects" eh="c16ea608" />
-		<e k="sf_seasonal_effects_long" v="[EN] Enable/disable seasonal impact on soil nutrients (spring growth boost, fall slowdown)" eh="3eea94c7" />
-		<e k="sf_rain_effects_short" v="[EN] Rain Effects" eh="a2a1758b" />
-		<e k="sf_rain_effects_long" v="[EN] Enable/disable rain impact on soil (nutrient leaching, pH changes)" eh="de3b14b9" />
-		<e k="sf_plowing_bonus_short" v="[EN] Plowing Bonus" eh="541ec752" />
-		<e k="sf_plowing_bonus_long" v="[EN] Enable/disable plowing benefits to soil fertility (improved nitrogen and organic matter)" eh="fe701c1c" />
-    <e k="sf_residue_incorporation_short" v="[EN] Residue Incorporation" eh="" />
-    <e k="sf_residue_incorporation_long" v="[EN] Enable/disable nutrient release from crop residue worked into soil by tillage tools (cultivators, plows, strip-till, direct drills)" eh="" />
-    <e k="sf_weed_pressure_short" v="[EN] Weed Pressure" eh="53f8b936" />
-    <e k="sf_weed_pressure_long" v="[EN] Enable/disable dynamic weed growth and yield impact" eh="ac99a865" />
-    <e k="sf_pest_pressure_short" v="[EN] Pest Pressure" eh="18a7c2be" />
-    <e k="sf_pest_pressure_long" v="[EN] Enable/disable insect and pest infestation system" eh="2ba11abc" />
-    <e k="sf_disease_pressure_short" v="[EN] Disease Pressure" eh="2b805cc9" />
-    <e k="sf_disease_pressure_long" v="[EN] Enable/disable fungal and crop disease system" eh="9080edbc" />
-    <e k="sf_compaction_short" v="[EN] Soil Compaction" eh="68734a56" />
-    <e k="sf_compaction_long" v="[EN] Enable/disable heavy vehicle soil compaction system" eh="a0995ec5" />
-		<e k="sf_fertility_short" v="[EN] Fertility System" eh="f7e27d58" />
-		<e k="sf_fertility_long" v="[EN] Enable/disable dynamic soil fertility system" eh="ea074366" />
-		<e k="sf_nutrients_short" v="[EN] Nutrient Cycles" eh="ffab595d" />
-		<e k="sf_nutrients_long" v="[EN] Enable/disable realistic nutrient depletion and replenishment" eh="dbe9c8ff" />
-		<e k="sf_difficulty_short" v="[EN] Difficulty" eh="7b29ca96" />
-		<e k="sf_difficulty_long" v="[EN] Set difficulty level: Simple, Realistic, Hardcore" eh="cfb758a4" />
-		<e k="sf_diff_1" v="[EN] Simple" eh="1fbb1e39" />
-		<e k="sf_diff_2" v="[EN] Realistic" eh="408c999f" />
-		<e k="sf_diff_3" v="[EN] Hardcore" eh="1c800aa9" />
-		<e k="sf_ui_soilReport_syncing" v="[EN] Syncing soil data..." eh="03f01c4d" />
-		<e k="sf_ui_soilReport_syncTimeout" v="[EN] Could not load field ownership. Please close and reopen the report." eh="9f699982" />
-		<e k="sf_fertilizer_cost_short" v="[EN] Fertilizer Costs" eh="6870d88b" />
-		<e k="sf_fertilizer_cost_long" v="[EN] Enable/disable realistic fertilizer purchase costs" eh="12b03fbb" />
-		<e k="sf_notifications_short" v="[EN] Notifications" eh="a274f4d4" />
-		<e k="sf_notifications_long" v="[EN] Enable/disable soil and fertilizer notifications" eh="9a872f8f" />
-		<e k="sf_show_hud_short" v="[EN] Show HUD" eh="c94fd4d7" />
-		<e k="sf_show_hud_long" v="[EN] Show/hide the soil info HUD overlay (F8 to toggle temporarily)" eh="4e2e11b6" />
-		<e k="sf_hud_position_short" v="[EN] HUD Position" eh="5ac371f2" />
-		<e k="sf_hud_position_long" v="[EN] Choose where the soil info HUD appears on screen" eh="d7b9c109" />
-		<e k="sf_hud_pos_1" v="[EN] Top Right" eh="5f9f6784" />
-		<e k="sf_hud_pos_2" v="[EN] Top Left" eh="ac71274a" />
-		<e k="sf_hud_pos_3" v="[EN] Bottom Right" eh="4d297f5d" />
-		<e k="sf_hud_pos_4" v="[EN] Bottom Left" eh="7eb55425" />
-		<e k="sf_hud_pos_5" v="[EN] Center Right" eh="d7afdc5a" />
-		<e k="sf_hud_pos_6" v="[EN] Custom" eh="90589c47" />
-		<e k="sf_hud_color_theme_short" v="[EN] HUD Color Theme" eh="4a73f95b" />
-		<e k="sf_hud_color_theme_long" v="[EN] Choose the color scheme for soil info display" eh="3218bca6" />    <e k="sf_report_detail_n_ok" v="[EN] Nitrogen: Optimal" eh="13782bd9" />
-    <e k="sf_report_detail_p_ok" v="[EN] Phosphorus: Optimal" eh="dbc90f11" />
-    <e k="sf_report_detail_k_ok" v="[EN] Potassium: Optimal" eh="0197b4ba" />
-    <e k="sf_report_status_monitor" v="[EN] Monitor" eh="d2986ac8" />
-    <e k="sf_report_status_adjust" v="[EN] Adjust" eh="51d7a685" />
-    <e k="sf_report_status_maintain" v="[EN] Maintain" eh="ade01a5a" />
-    <e k="sf_report_status_increase" v="[EN] Increase" eh="aac247ca" />
-    <e k="sf_report_pressure_low" v="[EN] Low" eh="28d0edd0" />
-    <e k="sf_report_pressure_moderate" v="[EN] Moderate" eh="1eb79d43" />
-    <e k="sf_report_pressure_high" v="[EN] High" eh="655d20c1" />
-    <e k="sf_report_yield_hint" v="[EN] Based on N/P/K vs optimal threshold" eh="022663e0" />
-    <e k="sf_report_yield_loss" v="[EN] Yield ~-%d%%" eh="d64d5d59" />
-		<e k="helpLine_sf_cat_overview" v="[EN] Overview" eh="3b878279" />
-		<e k="helpLine_sf_cat_started" v="[EN] Getting Started" eh="bf647454" />
-		<e k="helpLine_sf_cat_nutrients" v="[EN] Soil Nutrients" eh="64377acf" />
-		<e k="helpLine_sf_cat_fertilizers" v="[EN] Fertilizers" eh="754d59bd" />
-		<e k="helpLine_sf_cat_hud" v="[EN] HUD &amp; Soil Report" eh="9b9888b9" />
-		<e k="helpLine_sf_cat_settings" v="[EN] Settings" eh="f4f70727" />
-		<e k="helpLine_sf_cat_multiplayer" v="[EN] Multiplayer" eh="901a7320" />
-		<e k="helpLine_sf_ov_p1_title" v="[EN] What It Does" eh="46cbb25b" />
-		<e k="helpLine_sf_ov_p1_intro_title" v="[EN] Per-Field Soil Tracking" eh="8fe3248d" />
-		<e k="helpLine_sf_ov_p1_intro_text" v="[EN] Every field independently tracks five properties: Nitrogen (N), Phosphorus (P), Potassium (K), Organic Matter (OM), and pH. Values are saved with your savegame and persist across sessions." eh="c30216e6" />
-		<e k="helpLine_sf_ov_p1_flow_title" v="[EN] The Nutrient Cycle" eh="15b0d408" />
-		<e k="helpLine_sf_ov_p1_flow_text" v="[EN] Crops remove nutrients at harvest. Fertilizer, manure, slurry, and lime restore them. The mod tracks a realistic nutrient budget - what crops take out, you must put back." eh="418041f0" />
-		<e k="helpLine_sf_ov_p2_title" v="[EN] Environmental Effects" eh="e139e84f" />
-		<e k="helpLine_sf_ov_p2_rain_title" v="[EN] Rain and Leaching" eh="33e0d8ea" />
-		<e k="helpLine_sf_ov_p2_rain_text" v="[EN] Rain leaches Nitrogen most heavily, then Potassium, then Phosphorus. It also slowly acidifies pH over time. Rain effects can be toggled off in Settings." eh="91e39cc6" />
-		<e k="helpLine_sf_ov_p2_season_title" v="[EN] Seasons and Fallow Recovery" eh="ad2009c8" />
-		<e k="helpLine_sf_ov_p2_season_text" v="[EN] Spring adds +0.03 N per day (biological activity). Fall removes 0.02 N per day. Fields left unplanted for more than 7 days slowly recover all nutrients on their own." eh="e5ebb3b2" />
-		<e k="helpLine_sf_gs_p1_title" v="[EN] Your First Steps" eh="bdd0e0a7" />
-		<e k="helpLine_sf_gs_p1_hud_title" v="[EN] Open the HUD (J key)" eh="e1bdea72" />
-		<e k="helpLine_sf_gs_p1_hud_text" v="[EN] Press J to toggle the live soil overlay. It shows N, P, K, pH, and OM for the field you are standing in. Good / Fair / Poor status labels tell you what needs attention at a glance." eh="53cef520" />
-		<e k="helpLine_sf_gs_p1_report_title" v="[EN] Open the Soil Report (K key)" eh="e71446cd" />
-		<e k="helpLine_sf_gs_p1_report_text" v="[EN] Press K to open the full farm soil report. Every field is listed with color-coded nutrient status, sorted by urgency. Click the arrow on any row for a detailed view with recommendations." eh="9a0d32a6" />
-		<e k="helpLine_sf_gs_p2_title" v="[EN] Fertilize and Harvest" eh="1a52ac04" />
-		<e k="helpLine_sf_gs_p2_fert_title" v="[EN] Fertilizing Fields" eh="ea52ec26" />
-		<e k="helpLine_sf_gs_p2_fert_text" v="[EN] Apply fertilizer with any standard sprayer or spreader. The mod recognizes all base-game types plus 9 custom types (UAN-32, MAP, Potash, etc.). Each type restores different nutrients - see the Fertilizers category for full profiles." eh="fe906e29" />
-		<e k="helpLine_sf_gs_p2_harvest_title" v="[EN] Harvest Depletion" eh="a67b6cb5" />
-		<e k="helpLine_sf_gs_p2_harvest_text" v="[EN] Every harvest removes nutrients from the field. Demanding crops (potato, sugar beet, soybean) deplete significantly more than light feeders (barley, oats). Re-check the HUD or soil report after each harvest cycle." eh="63f90ed4" />
-		<e k="helpLine_sf_gs_p3_title" v="[EN] Difficulty" eh="7b29ca96" />
-		<e k="helpLine_sf_gs_p3_levels_title" v="[EN] Three Difficulty Levels" eh="52611188" />
-		<e k="helpLine_sf_gs_p3_levels_text" v="[EN] Simple (0.7x): 30% less depletion - good for new players. Realistic (1.0x): balanced, calibrated to real agricultural rates. Hardcore (1.5x): 50% more depletion - intensive soil management required." eh="f4f1ea30" />
-		<e k="helpLine_sf_gs_p3_access_title" v="[EN] Changing Settings" eh="b421c88f" />
-		<e k="helpLine_sf_gs_p3_access_text" v="[EN] Open settings at ESC &gt; Settings &gt; Soil &amp; Fertilizer. In multiplayer, only the server admin can change simulation settings. All HUD display options are per-player and not shared." eh="f36a5639" />
-		<e k="helpLine_sf_nu_p1_title" v="[EN] Nitrogen and Phosphorus" eh="27d37372" />
-		<e k="helpLine_sf_nu_p1_n_title" v="[EN] Nitrogen (N) - Scale 0 to 100" eh="10a358f4" />
-		<e k="helpLine_sf_nu_p1_n_text" v="[EN] Most mobile nutrient - depletes fastest and leaches heavily in rain. Poor: below 30. Good: above 50. Raise with: liquid fertilizer, UAN-32, UAN-28, anhydrous ammonia, urea, AMS, manure, or slurry." eh="58d62253" />
-		<e k="helpLine_sf_nu_p1_p_title" v="[EN] Phosphorus (P) - Scale 0 to 100" eh="979bba64" />
-		<e k="helpLine_sf_nu_p1_p_text" v="[EN] Binds tightly to soil and leaches very slowly. Depletes mainly through harvest. Canola has the highest P demand. Poor: below 25. Good: above 45. Raise with: MAP, DAP, starter fertilizer, or liquid fertilizer." eh="92c5ac66" />
-		<e k="helpLine_sf_nu_p2_title" v="[EN] Potassium and pH" eh="6bd92f25" />
-		<e k="helpLine_sf_nu_p2_k_title" v="[EN] Potassium (K) - Scale 0 to 100" eh="2a16e8bc" />
-		<e k="helpLine_sf_nu_p2_k_text" v="[EN] Critical for root and tuber crops. Potato and sugar beet deplete K heavily each harvest. Leaches moderately in rain. Poor: below 20. Good: above 40. Raise with: potash (0-0-60), slurry, digestate, or liquid fertilizer." eh="7230fee4" />
-		<e k="helpLine_sf_nu_p2_ph_title" v="[EN] pH - Scale 5.0 to 7.5" eh="944beca2" />
-		<e k="helpLine_sf_nu_p2_ph_text" v="[EN] Most crops thrive at pH 6.5 to 7.0. Rain slowly acidifies soil over time. pH does not recover on its own - only lime or liquid lime raises it. Poor: below 5.5. Apply lime if pH is falling before the next planting." eh="08e0aefd" />
-		<e k="helpLine_sf_nu_p3_title" v="[EN] Organic Matter" eh="6305f4bb" />
-		<e k="helpLine_sf_nu_p3_om_title" v="[EN] Organic Matter (OM) - Scale 0 to 10" eh="58f490f3" />
-		<e k="helpLine_sf_nu_p3_om_text" v="[EN] Builds very slowly and is not depleted by harvest. Poor: below 2.5. Good: above 4.0. Raise with: manure, slurry, digestate, compost, biosolids, chicken litter, pelletized manure, or by chopping straw back into the field." eh="f9a02359" />
-		<e k="helpLine_sf_nu_p3_fallow_title" v="[EN] Fallow Recovery" eh="14133b0b" />
-		<e k="helpLine_sf_nu_p3_fallow_text" v="[EN] A field left unplanted for 7+ days slowly recovers nutrients. Per day: N +0.07, P +0.03, K +0.05, OM +0.01. Crop rotation and periods of rest still have real value in this mod." eh="81fa82b3" />
-		<e k="helpLine_sf_fe_p1_title" v="[EN] Base Game Types" eh="fd941c0d" />
-		<e k="helpLine_sf_fe_p1_base_title" v="[EN] Liquid, Solid, Manure and Slurry" eh="4668dca7" />
-		<e k="helpLine_sf_fe_p1_base_text" v="[EN] Liquid Fertilizer adds balanced N+P+K. Solid Fertilizer is higher in N and P. Manure and Slurry add N, P, K, and Organic Matter. Digestate (biogas byproduct) is high in K and also adds OM. All applied with standard equipment." eh="64069a56" />
-		<e k="helpLine_sf_fe_p1_lime_title" v="[EN] Lime and pH Correction" eh="8933cce1" />
-		<e k="helpLine_sf_fe_p1_lime_text" v="[EN] Lime is the only base-game pH correction - it does not add nutrients. Custom types Liquid Lime and Gypsum also raise pH (Gypsum adds minor OM too). Apply when pH drops below 6.0 to keep crops in their optimal range." eh="833a967f" />
-		<e k="helpLine_sf_fe_p2_title" v="[EN] Custom Nitrogen and PK Sources" eh="1021f8c9" />
-		<e k="helpLine_sf_fe_p2_n_title" v="[EN] Nitrogen Sources (custom big bags)" eh="9dfe5a5a" />
-		<e k="helpLine_sf_fe_p2_n_text" v="[EN] UAN-32 (32-0-0) and UAN-28 (28-0-0) are liquid nitrogen solutions. Anhydrous Ammonia (82-0-0) is the highest-N product per litre. Urea (46-0-0) and AMS (21-0-0-24S) are dry granular. All are N only - no effect on P, K, or pH." eh="6a100c25" />
-		<e k="helpLine_sf_fe_p2_pk_title" v="[EN] Phosphorus and Potassium Sources" eh="a2d4091b" />
-		<e k="helpLine_sf_fe_p2_pk_text" v="[EN] MAP (11-52-0): highest P per litre. DAP (18-46-0): high P with some N. Potash (0-0-60): pure K. Starter (10-34-0): high-P in-furrow product with balanced N+K. All available as purchasable big bags in the shop." eh="75a86964" />
-		<e k="helpLine_sf_fe_p3_title" v="[EN] Organic Products and Burn Risk" eh="7ab807d1" />
-		<e k="helpLine_sf_fe_p3_organic_title" v="[EN] Organic and Slow-Release Products" eh="0199e6be" />
-		<e k="helpLine_sf_fe_p3_organic_text" v="[EN] Compost is the strongest OM builder (+0.12 per 1,000 L). Biosolids and Chicken Litter add N, P, and OM. Pelletized Manure is a concentrated balanced organic. All are custom fill types available when compatible equipment mods are installed." eh="3d16e4ee" />
-		<e k="helpLine_sf_fe_p3_burn_title" v="[EN] Overapplication Burn Risk" eh="e986cc54" />
-		<e k="helpLine_sf_fe_p3_burn_text" v="[EN] Applying above 1.25x the base rate risks fertilizer burn (-0.15 pH and -5 N). At 1.50x or higher, burn is guaranteed every pass (-0.30 pH and -12 N). Use SF Rate Up / Rate Down keys in the vehicle to control the application rate." eh="7bccc46a" />
-		<e k="helpLine_sf_hu_p1_title" v="[EN] The Soil HUD" eh="6522879b" />
-		<e k="helpLine_sf_hu_p1_toggle_title" v="[EN] Toggling the HUD (J key)" eh="402283ba" />
-		<e k="helpLine_sf_hu_p1_toggle_text" v="[EN] Press J to show or hide the live soil overlay. It detects the field you are on and shows N, P, K, pH, and OM. When Weed, Pest, or Disease settings are enabled, those rows appear at the bottom of the panel." eh="3dcb9bfe" />
-		<e k="helpLine_sf_hu_p1_status_title" v="[EN] Reading the Status" eh="291c3aac" />
-		<e k="helpLine_sf_hu_p1_status_text" v="[EN] Each nutrient shows Good (no action needed), Fair (consider treating soon), or Poor (action needed - yield affected). The overall badge in the title bar reflects the worst value across all tracked dimensions including weed, pest, and disease." eh="3b8c2c6e" />
-		<e k="helpLine_sf_hu_p2_title" v="[EN] Field Health Pressures" eh="b4d35b30" />
-		<e k="helpLine_sf_hu_p2_press_title" v="[EN] Weed, Pest and Disease" eh="0a3fae00" />
-		<e k="helpLine_sf_hu_p2_press_text" v="[EN] Three pressure scores (0 to 100) track biological threats per field. Left unchecked they reduce yield at harvest: Weed up to -30%, Pest -20%, Disease -25%. HUD rows W, I, and D show color-coded severity: green (low), yellow (moderate), red (high)." eh="3fc3c400" />
-		<e k="helpLine_sf_hu_p2_treat_title" v="[EN] Treating Pressure" eh="cb24bf50" />
-		<e k="helpLine_sf_hu_p2_treat_text" v="[EN] Herbicide reduces weed pressure - any tillage also resets it to zero. Insecticide reduces pest pressure by 25 pts and suppresses regrowth for 10 days. Fungicide reduces disease by 20 pts and suppresses for 12 days. Each system can be toggled off in Settings." eh="4d65bdec" />
-		<e k="helpLine_sf_hu_p3_title" v="[EN] The Soil Report" eh="35fcce6c" />
-		<e k="helpLine_sf_hu_p3_open_title" v="[EN] Opening the Report (K key)" eh="62e3f629" />
-		<e k="helpLine_sf_hu_p3_open_text" v="[EN] Press K to open the full farm soil report. The summary bar shows total fields tracked, how many need fertilizer, and a weighted Farm Health percentage. Fields are sorted by urgency - worst condition first." eh="38a5bd2e" />
-		<e k="helpLine_sf_hu_p3_detail_title" v="[EN] Field Detail and Recommendations" eh="c99d2b89" />
-		<e k="helpLine_sf_hu_p3_detail_text" v="[EN] Click the arrow on any row to open that field's detail view: nutrient values, pressure levels, a yield penalty forecast, and a bulleted recommendation list telling you exactly what to apply. Press Back or Escape to return to the table." eh="38dd2c6d" />
-		<e k="helpLine_sf_se_p1_title" v="[EN] Simulation Settings" eh="cbf13e3c" />
-		<e k="helpLine_sf_se_p1_server_title" v="[EN] Server Settings (Admin Only in Multiplayer)" eh="49f37ed7" />
-		<e k="helpLine_sf_se_p1_server_text" v="[EN] Fertility System, Nutrient Cycles, Seasonal Effects, Rain Effects, Plowing Bonus, Weed/Pest/Disease Pressure, Fertilizer Costs, Notifications, Crop Rotation, and Auto-Rate Control. In multiplayer, only the server admin can change these. Changes sync to all clients instantly." eh="abca5e43" />
-		<e k="helpLine_sf_se_p1_diff_title" v="[EN] Difficulty" eh="7b29ca96" />
-		<e k="helpLine_sf_se_p1_diff_text" v="[EN] Simple (0.7x) reduces depletion by 30% for a relaxed experience. Realistic (1.0x) is the balanced default. Hardcore (1.5x) increases depletion by 50% for intensive soil management. Access via ESC &gt; Settings &gt; Soil &amp; Fertilizer." eh="740a3a4e" />
-		<e k="helpLine_sf_se_p2_title" v="[EN] HUD and Rate Control" eh="399f4910" />
-		<e k="helpLine_sf_se_p2_hud_title" v="[EN] Per-Player HUD Options" eh="0df76500" />
-		<e k="helpLine_sf_se_p2_hud_text" v="[EN] Each player controls their own HUD - not synced to the server. Options: Show HUD (on/off), Position (5 presets + drag), Color Theme (Green / Blue / Amber / Mono), Font Size (Small / Medium / Large), Transparency (25% to 100%), Imperial Units (on/off)." eh="f3934884" />
-		<e k="helpLine_sf_se_p2_rate_title" v="[EN] Sprayer Rate Control" eh="5ecdfa23" />
-		<e k="helpLine_sf_se_p2_rate_text" v="[EN] While in a sprayer or spreader, use SF Rate Up (]) and SF Rate Down ([) to adjust the application rate from 0.10x to 2.00x. Toggle Auto-Rate Control (Shift+L) to let the mod automatically target optimal nutrient levels and avoid burn risk." eh="dd385e39" />
-		<e k="helpLine_sf_mp_p1_title" v="[EN] How Multiplayer Works" eh="8a4ce30e" />
-		<e k="helpLine_sf_mp_p1_auth_title" v="[EN] Server-Authoritative Simulation" eh="8d324792" />
-		<e k="helpLine_sf_mp_p1_auth_text" v="[EN] All soil simulation runs on the server. Clients receive full field data and settings on join, with automatic retry if the server is still loading. HUD display settings (position, theme, size) are per-player and are never synced to the server." eh="db72a3f9" />
-		<e k="helpLine_sf_mp_p1_ded_title" v="[EN] Dedicated Servers" eh="4d3a45ba" />
-		<e k="helpLine_sf_mp_p1_ded_text" v="[EN] Dedicated servers run the full simulation without any HUD or GUI overhead - this is expected and normal. Use console commands (soilStatus, SoilSetDifficulty, SoilShowSettings, etc.) to manage and verify settings on a dedicated server." eh="3df784d6" />
-    <e k="sf_crop_rotation_short" v="[EN] Crop Rotation" eh="def2c162" />
-    <e k="sf_crop_rotation_long" v="[EN] Enable/disable crop rotation bonus and mono-crop fatigue (legume sequences restore nitrogen; same-crop consecutive seasons increase depletion)" eh="958b4212" />
-    <e k="sf_report_rotation_bonus" v="[EN] Rotation Bonus" eh="2831a7ac" />
-    <e k="sf_report_rotation_fatigue" v="[EN] Fatigue: Same Crop" eh="46135880" />
-    <e k="sf_report_rotation_ok" v="[EN] Rotation: OK" eh="df66b3be" />
-    <e k="sf_gypsum_title" v="[EN] Gypsum (pH-)" eh="d66da34c" />
-    <e k="sf_compost_title" v="[EN] Compost (Organic)" eh="c3e2071a" />
-    <e k="sf_biosolids_title" v="[EN] Biosolids (N+P)" eh="f0c901dc" />
-    <e k="sf_chicken_manure_title" v="[EN] Chicken Manure (N+P)" eh="338128e2" />
-    <e k="sf_pelletized_manure_title" v="[EN] Pelletized Manure (NPK)" eh="c1b39b71" />
-    <e k="sf_liquidlime_title" v="[EN] Liquid Lime (pH+)" eh="d4ec4bb9" />
-    <e k="helpLine_sf_nu_p4_title" v="[EN] Crop Rotation" eh="def2c162" />
-    <e k="helpLine_sf_nu_p4_bonus_title" v="[EN] Rotation Bonus" eh="2831a7ac" />
-    <e k="helpLine_sf_nu_p4_bonus_text" v="[EN] Growing a legume crop (soybeans, peas, beans) after a non-legume adds a free nitrogen boost each spring for 3 days." eh="e1fce95b" />
-    <e k="helpLine_sf_nu_p4_fatigue_title" v="[EN] Crop Fatigue" eh="236a590c" />
-    <e k="helpLine_sf_nu_p4_fatigue_text" v="[EN] Planting the same crop two seasons in a row increases nutrient extraction by 15%. Rotate crops to avoid soil fatigue." eh="1613f3c6" />
-		<e k="sf_map_layer_off" v="[EN] Soil Map: Off" eh="3e654ade" />
-		<e k="sf_map_layer_n" v="[EN] Nitrogen" eh="1e9ef3ba" />
-		<e k="sf_map_layer_p" v="[EN] Phosphorus" eh="eb4f2688" />
-		<e k="sf_map_layer_k" v="[EN] Potassium" eh="3a4edc67" />
-		<e k="sf_map_layer_ph" v="[EN] pH" eh="397dff20" />
-		<e k="sf_map_layer_om" v="[EN] Organic Matter" eh="6305f4bb" />
-		<e k="sf_map_layer_urgency" v="[EN] Field Urgency" eh="419ea5af" />
-		<e k="sf_map_layer_weed" v="[EN] Weed Pressure" eh="53f8b936" />
-		<e k="sf_map_layer_pest" v="[EN] Pest Pressure" eh="18a7c2be" />
-		<e k="sf_map_layer_disease" v="[EN] Disease Pressure" eh="2b805cc9" />
-    <e k="sf_map_layer_compaction" v="[EN] Compaction" eh="19cf3ee7" />
-		<e k="sf_map_overlay_cycle" v="[EN] Shift+M: Cycle Soil Layer" eh="032fdac7" />
-		<e k="sf_map_page_title" v="[EN] Soil Layers" eh="04a675fb" />
-		<e k="sf_map_sidebar_header" v="[EN] Soil Map Layer" eh="81332549" />
-		<e k="sf_map_sidebar_label" v="[EN] Active Layer" eh="f8a2c198" />
-		<e k="sf_map_sidebar_tooltip" v="[EN] Select which soil nutrient to display on the map" eh="eb926e9a" />
-		<e k="sf_map_overlay_low" v="[EN] Low" eh="28d0edd0" />
-		<e k="sf_map_overlay_med" v="[EN] Med" eh="248c9511" />
-		<e k="sf_map_overlay_high" v="[EN] High" eh="655d20c1" />
+    <!-- ======================================================
+         HELP LINES (ESC > Help > Realistic Soil & Fertilizer)
+         ====================================================== -->
+
+    <!-- Category titles -->
+    <e k="helpLine_sf_cat_overview" v="Ikhtisar" eh="3b878279" />
+    <e k="helpLine_sf_cat_started" v="Memulai" eh="bf647454" />
+    <e k="helpLine_sf_cat_nutrients" v="Nutrisi Tanah" eh="64377acf" />
+    <e k="helpLine_sf_cat_fertilizers" v="Pupuk" eh="754d59bd" />
+    <e k="helpLine_sf_cat_hud" v="HUD &amp; Laporan Tanah" eh="655b1b40" />
+    <e k="helpLine_sf_cat_settings" v="Pengaturan" eh="f4f70727" />
+    <e k="helpLine_sf_cat_multiplayer" v="Multiplayer" eh="901a7320" />
+
+    <!-- Category 1: Overview -->
+    <e k="helpLine_sf_ov_p1_title" v="Apa Fungsinya" eh="46cbb25b" />
+    <e k="helpLine_sf_ov_p1_intro_title" v="Pelacakan Tanah per Lahan" eh="8fe3248d" />
+    <e k="helpLine_sf_ov_p1_intro_text" v="Setiap lahan secara independen melacak lima properti: Nitrogen (N), Fosfor (P), Kalium (K), Bahan Organik (OM), dan pH. Nilai disimpan dengan savegame Anda dan bertahan di seluruh sesi." eh="c30216e6" />
+    <e k="helpLine_sf_ov_p1_flow_title" v="Siklus Nutrisi" eh="15b0d408" />
+    <e k="helpLine_sf_ov_p1_flow_text" v="Tanaman menyerap nutrisi saat panen. Pupuk, kotoran hewan, hígtrágya, dan kapur memulihkannya. Mod ini melacak anggaran nutrisi yang realistis - apa yang diambil tanaman, harus Anda kembalikan." eh="418041f0" />
+
+    <e k="helpLine_sf_ov_p2_title" v="Efek Lingkungan" eh="e139e84f" />
+    <e k="helpLine_sf_ov_p2_rain_title" v="Hujan dan Pencucian" eh="33e0d8ea" />
+    <e k="helpLine_sf_ov_p2_rain_text" v="Hujan mencuci Nitrogen paling berat, lalu Kalium, lalu Fosfor. Ini juga perlahan mengasamkan pH seiring waktu. Efek hujan dapat dinonaktifkan di Pengaturan." eh="91e39cc6" />
+    <e k="helpLine_sf_ov_p2_season_title" v="Musim dan Pemulihan Lahan Bera" eh="ad2009c8" />
+    <e k="helpLine_sf_ov_p2_season_text" v="Musim semi menambah +0.03 N per hari (aktivitas biologis). Musim gugur mengurangi 0.02 N per hari. Lahan yang dibiarkan tidak ditanami selama lebih dari 7 hari secara perlahan memulihkan semua nutrisi dengan sendirinya." eh="e5ebb3b2" />
+
+    <!-- Category 2: Getting Started -->
+    <e k="helpLine_sf_gs_p1_title" v="Langkah Pertama Anda" eh="bdd0e0a7" />
+    <e k="helpLine_sf_gs_p1_hud_title" v="Buka HUD (tombol J)" eh="e1bdea72" />
+    <e k="helpLine_sf_gs_p1_hud_text" v="Tekan J untuk beralih overlay tanah langsung. Ini menunjukkan N, P, K, pH, dan OM untuk lahan tempat Anda berdiri. Label status Baik / Cukup / Buruk memberi tahu Anda apa yang butuh perhatian dalam sekejap." eh="53cef520" />
+    <e k="helpLine_sf_gs_p1_report_title" v="Buka Laporan Tanah (tombol K)" eh="e71446cd" />
+    <e k="helpLine_sf_gs_p1_report_text" v="Tekan K untuk membuka laporan tanah pertanian lengkap. Setiap lahan terdaftar dengan status nutrisi berkode warna, diurutkan berdasarkan urgensi. Klik panah pada baris mana pun untuk tampilan detail dengan rekomendasi." eh="9a0d32a6" />
+
+    <e k="helpLine_sf_gs_p2_title" v="Pupuk dan Panen" eh="1a52ac04" />
+    <e k="helpLine_sf_gs_p2_fert_title" v="Memupuk Lahan" eh="ea52ec26" />
+    <e k="helpLine_sf_gs_p2_fert_text" v="Terapkan pupuk dengan sprayer atau spreader standar apa pun. Mod ini mengenali semua jenis game dasar ditambah 9 jenis kustom (UAN-32, MAP, Kalium, dll.). Setiap jenis memulihkan nutrisi yang berbeda - lihat kategori Pupuk untuk profil lengkap." eh="fe906e29" />
+    <e k="helpLine_sf_gs_p2_harvest_title" v="Penipisan Panen" eh="a67b6cb5" />
+    <e k="helpLine_sf_gs_p2_harvest_text" v="Setiap panen mengambil nutrisi dari lahan. Tanaman yang menuntut (kentang, bit gula, kedelai) menghabiskan lebih banyak secara signifikan daripada pemakan ringan (barley, gandum). Periksa kembali HUD atau laporan tanah setelah setiap siklus panen." eh="63f90ed4" />
+
+    <e k="helpLine_sf_gs_p3_title" v="Kesulitan" eh="7b29ca96" />
+    <e k="helpLine_sf_gs_p3_levels_title" v="Tiga Tingkat Kesulitan" eh="52611188" />
+    <e k="helpLine_sf_gs_p3_levels_text" v="Sederhana (0.7x): Penipisan 30% lebih sedikit - baik untuk pemain baru. Realistis (1.0x): seimbang, dikalibrasi ke tingkat pertanian nyata. Hardcore (1.5x): Penipisan 50% lebih banyak - diperlukan manajemen tanah yang intensif." eh="f4f1ea30" />
+    <e k="helpLine_sf_gs_p3_access_title" v="Mengubah Pengaturan" eh="b421c88f" />
+    <e k="helpLine_sf_gs_p3_access_text" v="Buka pengaturan di ESC > Pengaturan > Tanah &amp; Pupuk. Dalam multiplayer, hanya admin server yang dapat mengubah pengaturan simulasi. Semua opsi tampilan HUD bersifat per pemain dan tidak dibagikan." eh="4ba9d860" />
+
+    <!-- Category 3: Soil Nutrients -->
+    <e k="helpLine_sf_nu_p1_title" v="Nitrogen dan Fosfor" eh="27d37372" />
+    <e k="helpLine_sf_nu_p1_n_title" v="Nitrogen (N) - Skala 0 hingga 100" eh="10a358f4" />
+    <e k="helpLine_sf_nu_p1_n_text" v="Nutrisi paling mobile - paling cepat habis dan tercuci berat saat hujan. Buruk: di bawah 30. Baik: di atas 50. Tingkatkan dengan: pupuk cair, UAN-32, UAN-28, amonia anhidrat, urea, AMS, kotoran hewan, atau hígtrágya." eh="58d62253" />
+    <e k="helpLine_sf_nu_p1_p_title" v="Fosfor (P) - Skala 0 hingga 100" eh="979bba64" />
+    <e k="helpLine_sf_nu_p1_p_text" v="Mengikat erat pada tanah dan tercuci sangat lambat. Berkurang terutama melalui panen. Canola memiliki permintaan P tertinggi. Buruk: di bawah 25. Baik: di atas 45. Tingkatkan dengan: MAP, DAP, pupuk starter, atau pupuk cair." eh="92c5ac66" />
+
+    <e k="helpLine_sf_nu_p2_title" v="Kalium dan pH" eh="6bd92f25" />
+    <e k="helpLine_sf_nu_p2_k_title" v="Kalium (K) - Skala 0 hingga 100" eh="2a16e8bc" />
+    <e k="helpLine_sf_nu_p2_k_text" v="Kritis untuk tanaman umbi dan akar. Kentang dan bit gula menghabiskan K secara berat setiap panen. Tercuci secara moderat saat hujan. Buruk: di bawah 20. Baik: di atas 40. Tingkatkan dengan: kalium (0-0-60), hígtrágya, digestate, atau pupuk cair." eh="7230fee4" />
+    <e k="helpLine_sf_nu_p2_ph_title" v="pH - Skala 5.0 hingga 7.5" eh="944beca2" />
+    <e k="helpLine_sf_nu_p2_ph_text" v="Kebanyakan tanaman tumbuh subur pada pH 6.5 hingga 7.0. Hujan perlahan mengasamkan tanah seiring waktu. pH tidak pulih dengan sendirinya - hanya kapur atau kapur cair yang meningkatkannya. Buruk: di bawah 5.5. Terapkan kapur jika pH turun sebelum penanaman berikutnya." eh="08e0aefd" />
+
+    <e k="helpLine_sf_nu_p3_title" v="Bahan Organik" eh="6305f4bb" />
+    <e k="helpLine_sf_nu_p3_om_title" v="Bahan Organik (OM) - Skala 0 hingga 10" eh="58f490f3" />
+    <e k="helpLine_sf_nu_p3_om_text" v="Meningkat sangat lambat dan tidak berkurang oleh panen. Buruk: di bawah 2.5. Baik: di atas 4.0. Tingkatkan dengan: kotoran hewan, hígtrágya, digestate, kompos, biosolid, kotoran ayam, pupuk kandang pelet, atau dengan mencacah jerami kembali ke lahan." eh="f9a02359" />
+    <e k="helpLine_sf_nu_p3_fallow_title" v="Pemulihan Lahan Bera" eh="14133b0b" />
+    <e k="helpLine_sf_nu_p3_fallow_text" v="Lahan yang dibiarkan tidak ditanami selama 7+ hari perlahan memulihkan nutrisi. Per hari: N +0.07, P +0.03, K +0.05, OM +0.01. Rotasi tanaman dan periode istirahat tetap memiliki nilai nyata dalam mod ini." eh="81fa82b3" />
+
+    <!-- Category 4: Fertilizers -->
+    <e k="helpLine_sf_fe_p1_title" v="Jenis Game Dasar" eh="fd941c0d" />
+    <e k="helpLine_sf_fe_p1_base_title" v="Cair, Padat, Kotoran Hewan dan Slurry" eh="4668dca7" />
+    <e k="helpLine_sf_fe_p1_base_text" v="Pupuk Cair menambahkan N+P+K yang seimbang. Pupuk Padat lebih tinggi N dan P. Kotoran hewan dan Slurry menambahkan N, P, K, dan Bahan Organik. Digestate (produk sampingan biogas) tinggi K dan juga menambahkan OM. Semua diterapkan dengan peralatan standar." eh="64069a56" />
+    <e k="helpLine_sf_fe_p1_lime_title" v="Kapur dan Koreksi pH" eh="8933cce1" />
+    <e k="helpLine_sf_fe_p1_lime_text" v="Kapur adalah satu-satunya koreksi pH game dasar - kapur tidak menambah nutrisi. Jenis kustom Kapur Cair dan Gips juga meningkatkan pH (Gips menambahkan sedikit OM juga). Terapkan saat pH turun di bawah 6.0 untuk menjaga tanaman dalam rentang optimalnya." eh="833a967f" />
+
+    <e k="helpLine_sf_fe_p2_title" v="Sumber Nitrogen dan PK Kustom" eh="1021f8c9" />
+    <e k="helpLine_sf_fe_p2_n_title" v="Sumber Nitrogen (big bag kustom)" eh="9dfe5a5a" />
+    <e k="helpLine_sf_fe_p2_n_text" v="UAN-32 (32-0-0) dan UAN-28 (28-0-0) adalah larutan nitrogen cair. Amonia Anhidrat (82-0-0) adalah produk N tertinggi per liter. Urea (46-0-0) dan AMS (21-0-0-24S) adalah butiran kering. Semuanya hanya N - tidak berpengaruh pada P, K, atau pH." eh="6a100c25" />
+    <e k="helpLine_sf_fe_p2_pk_title" v="Sumber Fosfor dan Kalium" eh="a2d4091b" />
+    <e k="helpLine_sf_fe_p2_pk_text" v="MAP (11-52-0): P tertinggi per liter. DAP (18-46-0): P tinggi dengan sedikit N. Kalium (0-0-60): K murni. Starter (10-34-0): produk dalam alur tinggi-P dengan N+K seimbang. Semuanya tersedia sebagai big bag yang dapat dibeli di toko." eh="75a86964" />
+
+    <e k="helpLine_sf_fe_p3_title" v="Produk Organik dan Risiko Terbakar" eh="7ab807d1" />
+    <e k="helpLine_sf_fe_p3_organic_title" v="Produk Organik dan Pelepasan Lambat" eh="0199e6be" />
+    <e k="helpLine_sf_fe_p3_organic_text" v="Kompos adalah pembangun OM terkuat (+0.12 per 1.000 L). Biosolid dan Kotoran Ayam menambahkan N, P, dan OM. Pupuk Kandang Pelet adalah organik seimbang yang terkonsentrasi. Semuanya adalah jenis isian kustom yang tersedia saat mod peralatan yang kompatibel dipasang." eh="3d16e4ee" />
+    <e k="helpLine_sf_fe_p3_burn_title" v="Risiko Terbakar Akibat Aplikasi Berlebih" eh="e986cc54" />
+    <e k="helpLine_sf_fe_p3_burn_text" v="Menerapkan di atas 1.25x laju dasar berisiko membakar tanaman (-0.15 pH dan -5 N). Pada 1.50x atau lebih tinggi, terbakar dijamin setiap lintasan (-0.30 pH dan -12 N). Gunakan tombol SF Rate Up / Rate Down di kendaraan untuk mengontrol laju aplikasi." eh="7bccc46a" />
+
+    <!-- Category 5: HUD and Soil Report -->
+    <e k="helpLine_sf_hu_p1_title" v="HUD Tanah" eh="6522879b" />
+    <e k="helpLine_sf_hu_p1_toggle_title" v="Beralih HUD (tombol J)" eh="402283ba" />
+    <e k="helpLine_sf_hu_p1_toggle_text" v="Tekan J untuk menampilkan atau menyembunyikan overlay tanah langsung. Ini mendeteksi lahan tempat Anda berada dan menunjukkan N, P, K, pH, dan OM. Saat pengaturan Gulma, Hama, atau Penyakit diaktifkan, baris tersebut muncul di bagian bawah panel." eh="3dcb9bfe" />
+    <e k="helpLine_sf_hu_p1_status_title" v="Membaca Status" eh="291c3aac" />
+    <e k="helpLine_sf_hu_p1_status_text" v="Setiap nutrisi menunjukkan Baik (tidak perlu tindakan), Cukup (pertimbangkan perawatan segera), atau Buruk (tindakan diperlukan - hasil terpengaruh). Lencana keseluruhan di bilah judul mencerminkan nilai terburuk di semua dimensi yang dilacak termasuk gulma, hama, dan penyakit." eh="3b8c2c6e" />
+
+    <e k="helpLine_sf_hu_p2_title" v="Tekanan Kesehatan Lahan" eh="b4d35b30" />
+    <e k="helpLine_sf_hu_p2_press_title" v="Gulma, Hama dan Penyakit" eh="0a3fae00" />
+    <e k="helpLine_sf_hu_p2_press_text" v="Tiga skor tekanan (0 hingga 100) melacak ancaman biologis per lahan. Jika dibiarkan tidak terkendali, mereka mengurangi hasil panen: Gulma hingga -30%, Hama -20%, Penyakit -25%. Baris HUD W, I, dan D menunjukkan tingkat keparahan berkode warna: hijau (rendah), kuning (sedang), merah (tinggi)." eh="3fc3c400" />
+    <e k="helpLine_sf_hu_p2_treat_title" v="Mengobati Tekanan" eh="cb24bf50" />
+    <e k="helpLine_sf_hu_p2_treat_text" v="Herbisida mengurangi tekanan gulma - pengolahan tanah apa pun juga menyetel ulangnya ke nol. Insektisida mengurangi tekanan hama sebesar 25 poin dan menekan pertumbuhan kembali selama 10 hari. Fungisida mengurangi penyakit sebesar 20 poin dan menekan selama 12 hari. Setiap sistem dapat dinonaktifkan di Pengaturan." eh="4d65bdec" />
+
+    <e k="helpLine_sf_hu_p3_title" v="Laporan Tanah" eh="35fcce6c" />
+    <e k="helpLine_sf_hu_p3_open_title" v="Membuka Laporan (tombol K)" eh="62e3f629" />
+    <e k="helpLine_sf_hu_p3_open_text" v="Tekan K untuk membuka laporan tanah pertanian lengkap. Bilah ringkasan menunjukkan total lahan yang dilacak, berapa banyak yang butuh pupuk, dan persentase Kesehatan Pertanian tertimbang. Lahan diurutkan berdasarkan urgensi - kondisi terburuk lebih dulu." eh="38a5bd2e" />
+    <e k="helpLine_sf_hu_p3_detail_title" v="Detail Lahan dan Rekomendasi" eh="c99d2b89" />
+    <e k="helpLine_sf_hu_p3_detail_text" v="Klik panah pada baris mana pun untuk membuka tampilan detail lahan tersebut: nilai nutrisi, tingkat tekanan, prakiraan penalti hasil, dan daftar rekomendasi poin-poin yang memberi tahu Anda apa yang harus diterapkan. Tekan Kembali atau Escape untuk kembali ke tabel." eh="38dd2c6d" />
+
+    <!-- Category 6: Settings -->
+    <e k="helpLine_sf_se_p1_title" v="Pengaturan Simulasi" eh="cbf13e3c" />
+    <e k="helpLine_sf_se_p1_server_title" v="Pengaturan Server (Hanya Admin di Multiplayer)" eh="49f37ed7" />
+    <e k="helpLine_sf_se_p1_server_text" v="Sistem Kesuburan, Siklus Nutrisi, Efek Musiman, Efek Hujan, Bonus Membajak, Tekanan Gulma/Hama/Penyakit, Biaya Pupuk, Notifikasi, Rotasi Tanaman, dan Kontrol Laju Otomatis. Dalam multiplayer, hanya admin server yang dapat mengubah ini. Perubahan disinkronkan ke semua klien secara instan." eh="abca5e43" />
+    <e k="helpLine_sf_se_p1_diff_title" v="Kesulitan" eh="7b29ca96" />
+    <e k="helpLine_sf_se_p1_diff_text" v="Sederhana (0.7x) mengurangi penipisan sebesar 30% untuk pengalaman santai. Realistis (1.0x) adalah standar yang seimbang. Hardcore (1.5x) meningkatkan penipisan sebesar 50% untuk manajemen tanah yang intensif. Akses melalui ESC > Pengaturan > Tanah &amp; Pupuk." eh="ca93ca3e" />
+
+    <e k="helpLine_sf_se_p2_title" v="HUD dan Kontrol Laju" eh="399f4910" />
+    <e k="helpLine_sf_se_p2_hud_title" v="Opsi HUD Per Pemain" eh="0df76500" />
+    <e k="helpLine_sf_se_p2_hud_text" v="Setiap pemain mengontrol HUD mereka sendiri - tidak disinkronkan ke server. Opsi: Tampilkan HUD (aktif/mati), Posisi (5 preset + seret), Tema Warna (Hijau / Biru / Amber / Mono), Ukuran Font (Kecil / Sedang / Besar), Transparansi (25% hingga 100%), Unit Imperial (aktif/mati)." eh="f3934884" />
+    <e k="helpLine_sf_se_p2_rate_title" v="Kontrol Laju Sprayer" eh="5ecdfa23" />
+    <e k="helpLine_sf_se_p2_rate_text" v="Saat berada di sprayer atau spreader, gunakan SF Rate Up (]) dan SF Rate Down ([) untuk menyesuaikan laju aplikasi dari 0.10x hingga 2.00x. Aktifkan Kontrol Laju Otomatis (Shift+L) agar mod secara otomatis menargetkan level nutrisi optimal dan menghindari risiko terbakar." eh="dd385e39" />
+
+    <!-- Category 7: Multiplayer -->
+    <e k="helpLine_sf_mp_p1_title" v="Cara Kerja Multiplayer" eh="8a4ce30e" />
+    <e k="helpLine_sf_mp_p1_auth_title" v="Simulasi Berwenang Server" eh="8d324792" />
+    <e k="helpLine_sf_mp_p1_auth_text" v="Semua simulasi tanah berjalan di server. Klien menerima data lahan lengkap dan pengaturan saat bergabung, dengan upaya ulang otomatis jika server masih memuat. Pengaturan tampilan HUD (posisi, tema, ukuran) bersifat per pemain dan tidak pernah disinkronkan ke server." eh="db72a3f9" />
+    <e k="helpLine_sf_mp_p1_ded_title" v="Server Terdedikasi" eh="4d3a45ba" />
+    <e k="helpLine_sf_mp_p1_ded_text" v="Server terdedikasi menjalankan simulasi penuh tanpa overhead HUD atau GUI - ini diharapkan dan normal. Gunakan perintah konsol (soilStatus, SoilSetDifficulty, SoilShowSettings, dll.) untuk mengelola dan memverifikasi pengaturan pada server terdedikasi." eh="3df784d6" />
+
+
+    <e k="sf_crop_rotation_short" v="Rotasi Tanaman" eh="def2c162" />
+    <e k="sf_crop_rotation_long" v="Aktifkan/nonaktifkan bonus rotasi tanaman dan kelelahan tanaman tunggal (urutan polong-polongan memulihkan nitrogen; tanaman yang sama di musim berturut-turut meningkatkan penipisan)" eh="958b4212" />
+    <e k="sf_report_rotation_bonus" v="Bonus Rotasi" eh="2831a7ac" />
+    <e k="sf_report_rotation_fatigue" v="Kelelahan: Tanaman Sama" eh="46135880" />
+    <e k="sf_report_rotation_ok" v="Rotasi: OK" eh="df66b3be" />
+    <e k="sf_gypsum_title" v="Gips (pH-)" eh="d66da34c" />
+    <e k="sf_compost_title" v="Kompos (Organik)" eh="c3e2071a" />
+    <e k="sf_biosolids_title" v="Biosolid (N+P)" eh="f0c901dc" />
+    <e k="sf_chicken_manure_title" v="Kotoran Ayam (N+P)" eh="338128e2" />
+    <e k="sf_pelletized_manure_title" v="Pupuk Kandang Pelet (NPK)" eh="c1b39b71" />
+    <e k="sf_liquidlime_title" v="Kapur Cair (pH+)" eh="d4ec4bb9" />
+    <e k="helpLine_sf_nu_p4_title" v="Rotasi Tanaman" eh="def2c162" />
+    <e k="helpLine_sf_nu_p4_bonus_title" v="Bonus Rotasi" eh="2831a7ac" />
+    <e k="helpLine_sf_nu_p4_bonus_text" v="Menanam tanaman polong-polongan (kedelai, kacang polong, buncis) setelah non-polong-polongan menambahkan dorongan nitrogen gratis setiap musim semi selama 3 hari." eh="e1fce95b" />
+    <e k="helpLine_sf_nu_p4_fatigue_title" v="Kelelahan Tanaman" eh="236a590c" />
+    <e k="helpLine_sf_nu_p4_fatigue_text" v="Menanam tanaman yang sama dua musim berturut-turut meningkatkan ekstraksi nutrisi sebesar 15%. Rotasikan tanaman untuk menghindari kelelahan tanah." eh="1613f3c6" />
+
+    <!-- Soil Map Overlay (SoilMapOverlay.lua) -->
+    <e k="sf_map_layer_off" v="Peta Tanah: Mati" eh="3e654ade" />
+    <e k="sf_map_layer_n" v="Nitrogen" eh="1e9ef3ba" />
+    <e k="sf_map_layer_p" v="Fosfor" eh="eb4f2688" />
+    <e k="sf_map_layer_k" v="Kalium" eh="3a4edc67" />
+    <e k="sf_map_layer_ph" v="pH" eh="397dff20" />
+    <e k="sf_map_layer_om" v="Bahan Organik" eh="6305f4bb" />
+    <e k="sf_map_layer_urgency" v="Urgensi Lahan" eh="419ea5af" />
+    <e k="sf_map_layer_weed" v="Tekanan Gulma" eh="53f8b936" />
+    <e k="sf_map_layer_pest" v="Tekanan Hama" eh="18a7c2be" />
+    <e k="sf_map_layer_disease" v="Tekanan Penyakit" eh="2b805cc9" />
+    <e k="sf_map_layer_compaction" v="Pemadatan" eh="19cf3ee7" />
+    <e k="sf_map_overlay_cycle" v="Shift+M: Siklus Lapisan Tanah" eh="032fdac7" />
+    <e k="sf_map_page_title" v="Lapisan Tanah" eh="04a675fb" />
+    <e k="sf_map_sidebar_header" v="Lapisan Peta Tanah" eh="81332549" />
+    <e k="sf_map_sidebar_label" v="Lapisan Aktif" eh="f8a2c198" />
+    <e k="sf_map_sidebar_tooltip" v="Pilih nutrisi tanah mana yang akan ditampilkan di peta" eh="eb926e9a" />
+    <e k="sf_map_overlay_low" v="Rendah" eh="28d0edd0" />
+    <e k="sf_map_overlay_med" v="Sedang" eh="248c9511" />
+    <e k="sf_map_overlay_high" v="Tinggi" eh="655d20c1" />
 
     <!-- Soil PDA Screen (SoilPDAScreen.lua) -->
-    <e k="sf_pda_screen_title" v="[EN] Soil &amp; Fertilizer" eh="d30a22a9" />
-    <e k="sf_pda_tab_map" v="[EN] Soil Map" eh="59f988b2" />
-    <e k="sf_pda_tab_fields" v="[EN] Fields" eh="a4ca5edd" />
-    <e k="sf_pda_tab_treatment" v="[EN] Treatment Plan" eh="4ba012e2" />
-    <e k="sf_pda_section_farm_overview" v="[EN] Farm Overview" eh="47f2c19a" />
-    <e k="sf_pda_fields_tracked_label" v="[EN] Fields Tracked" eh="c763e26e" />
-    <e k="sf_pda_fields_owned_label" v="[EN] Fields Owned" eh="335f5f7e" />
-    <e k="sf_pda_section_avg_nutrients" v="[EN] Avg. Nutrients" eh="f06b2704" />
-    <e k="sf_pda_avg_n_label" v="[EN] Nitrogen (N)" eh="25cee53b" />
-    <e k="sf_pda_avg_p_label" v="[EN] Phosphorus (P)" eh="75cb5cd6" />
-    <e k="sf_pda_avg_k_label" v="[EN] Potassium (K)" eh="39797137" />
-    <e k="sf_pda_avg_ph_label" v="[EN] pH Level" eh="0c85daad" />
-    <e k="sf_pda_avg_om_label" v="[EN] Organic Matter" eh="6305f4bb" />
-    <e k="sf_pda_section_pressure" v="[EN] Crop Pressure" eh="a73974d0" />
-    <e k="sf_pda_weed_label" v="[EN] Weed" eh="2b75024d" />
-    <e k="sf_pda_pest_label" v="[EN] Pest" eh="8f2aee79" />
-    <e k="sf_pda_disease_label" v="[EN] Disease" eh="e7067a8c" />
-    <e k="sf_pda_section_attention" v="[EN] Needs Attention" eh="80e48bc3" />
-    <e k="sf_pda_needs_fert_label" v="[EN] Need Fertilizer" eh="fa9ded5e" />
-    <e k="sf_pda_no_data_left" v="[EN] No field data yet." eh="ba71c6b1" />
+    <e k="sf_pda_screen_title" v="Tanah &amp; Pupuk" eh="f31197fb" />
+    <e k="sf_pda_tab_map" v="Peta Tanah" eh="59f988b2" />
+    <e k="sf_pda_tab_fields" v="Lahan" eh="a4ca5edd" />
+    <e k="sf_pda_tab_treatment" v="Rencana Perawatan" eh="4ba012e2" />
+    <e k="sf_pda_section_farm_overview" v="Ikhtisar Pertanian" eh="47f2c19a" />
+    <e k="sf_pda_fields_tracked_label" v="Lahan Dilacak" eh="c763e26e" />
+    <e k="sf_pda_fields_owned_label" v="Lahan Dimiliki" eh="335f5f7e" />
+    <e k="sf_pda_section_avg_nutrients" v="Rata-rata Nutrisi" eh="f06b2704" />
+    <e k="sf_pda_avg_n_label" v="Nitrogen (N)" eh="25cee53b" />
+    <e k="sf_pda_avg_p_label" v="Fosfor (P)" eh="75cb5cd6" />
+    <e k="sf_pda_avg_k_label" v="Kalium (K)" eh="39797137" />
+    <e k="sf_pda_avg_ph_label" v="Tingkat pH" eh="0c85daad" />
+    <e k="sf_pda_avg_om_label" v="Bahan Organik" eh="6305f4bb" />
+    <e k="sf_pda_section_pressure" v="Tekanan Tanaman" eh="a73974d0" />
+    <e k="sf_pda_weed_label" v="Gulma" eh="2b75024d" />
+    <e k="sf_pda_pest_label" v="Hama" eh="8f2aee79" />
+    <e k="sf_pda_disease_label" v="Penyakit" eh="e7067a8c" />
+    <e k="sf_pda_section_attention" v="Butuh Perhatian" eh="80e48bc3" />
+    <e k="sf_pda_needs_fert_label" v="Butuh Pupuk" eh="fa9ded5e" />
+    <e k="sf_pda_total_urgent_label" v="Total butuh perhatian" eh="b3ce2db9" />
+    <e k="sf_pda_no_data_left" v="Belum ada data lahan." eh="ba71c6b1" />
     <!-- Map Tab -->
-    <e k="sf_pda_map_section_title" v="[EN] Soil Map Layers" eh="85d63132" />
-    <e k="sf_pda_map_active_layer" v="[EN] Active Layer" eh="f8a2c198" />
-    <e k="sf_pda_map_layer_off_desc" v="No soil layer active. Press Shift+M to cycle layers." eh="009d9017" />
-    <e k="sf_pda_map_layer_n_desc" v="[EN] Nitrogen content across all fields. Green = good, red = depleted." eh="60484ead" />
-    <e k="sf_pda_map_layer_p_desc" v="[EN] Phosphorus content across all fields. Green = good, red = depleted." eh="9fa2e72d" />
-    <e k="sf_pda_map_layer_k_desc" v="[EN] Potassium content across all fields. Green = good, red = depleted." eh="a61d25b7" />
-    <e k="sf_pda_map_layer_ph_desc" v="[EN] Soil pH level. Optimal range is 6.5-7.0 (green)." eh="ce7009e7" />
-    <e k="sf_pda_map_layer_om_desc" v="[EN] Organic matter content. Higher is better for long-term fertility." eh="f64c5706" />
-    <e k="sf_pda_map_layer_urgency_desc" v="[EN] Combined treatment urgency. Red = needs immediate attention." eh="f29ddc2b" />
-    <e k="sf_pda_map_layer_weed_desc" v="[EN] Weed pressure level. Red = high infestation, apply herbicide." eh="24009598" />
-    <e k="sf_pda_map_layer_pest_desc" v="[EN] Pest pressure level. Red = high infestation, apply insecticide." eh="86ba29dc" />
-    <e k="sf_pda_map_layer_disease_desc" v="[EN] Disease pressure level. Red = active outbreak, apply fungicide." eh="5d32d30a" />
-    <e k="sf_pda_map_legend_title" v="[EN] Map Legend" eh="86448402" />
-    <e k="sf_pda_map_legend_good" v="[EN] Good" eh="0c6ad70b" />
-    <e k="sf_pda_map_legend_fair" v="[EN] Fair" eh="f7f20cf0" />
-    <e k="sf_pda_map_legend_poor" v="[EN] Poor / Low" eh="32aa75ff" />
-    <e k="sf_pda_map_legend_low" v="[EN] Low" eh="28d0edd0" />
-    <e k="sf_pda_map_legend_medium" v="[EN] Medium" eh="87f8a6ab" />
-    <e k="sf_pda_map_legend_high" v="[EN] High" eh="655d20c1" />
-    <e k="sf_pda_map_legend_excess" v="[EN] Excess" eh="d1d25b9f" />
-    <e k="sf_pda_map_instructions" v="Press Shift+M in-game to cycle soil map layers." eh="b13603aa" />
-    <e k="sf_pda_map_open_btn" v="Open Soil Map" eh="0901ae30" />
-    <e k="sf_pda_map_unavailable" v="[EN] Map preview unavailable" eh="43983f81" />
-		<e k="sf_map_health_overall" v="[EN] Average Soil Health" eh="5533cbe3" />
-		<e k="sf_map_btn_report" v="[EN] Open Farm Overview" eh="6f0800e8" />
-		<e k="sf_map_btn_help" v="[EN] Dev Note (NOT WORKING YET)" eh="800e465a" />
-    <e k="sf_map_btn_cycle_layer" v="Ganti lapisan" eh="875dbf22" />
-    <e k="sf_map_btn_treatment" v="Rencana perawatan" eh="4ba012e2" />
-    <e k="sf_map_btn_disable" v="Nonaktifkan overlay" eh="8e75dec5" />
-    <e k="sf_treat_action_ok" v="[EN] OK" eh="e0aa021e" />
-    <e k="sf_help_title" v="[EN] Soil Quick Reference" eh="8986bb6d" />
-    <e k="sf_help_nutrients_header" v="[EN] NUTRIENTS" eh="9aeb39bf" />
-    <e k="sf_help_n" v="[EN] N  (Nitrogen)     - Depletes fast. Apply UAN, Urea, or Manure." eh="f2d0c792" />
-    <e k="sf_help_p" v="[EN] P  (Phosphorus)   - Long-lasting. Apply MAP or DAP." eh="fdfbd91e" />
-    <e k="sf_help_k" v="[EN] K  (Potassium)    - Apply Potash. Important for roots." eh="e0217634" />
-    <e k="sf_help_om" v="[EN] OM (Organic Mat.) - Builds slowly. Plow in manure/compost." eh="a4e29617" />
-    <e k="sf_help_soil_header" v="[EN] SOIL CHEMISTRY" eh="19c67ff5" />
-    <e k="sf_help_ph" v="[EN] pH  6.5-7.0 = Ideal.  < 6.5 apply Lime.  > 7.5 apply Gypsum." eh="8929304d" />
-    <e k="sf_help_pressure_header" v="[EN] CROP PRESSURE" eh="132b0f66" />
-    <e k="sf_help_weed" v="[EN] Weed    > 20% - Apply Herbicide." eh="c8d890df" />
-    <e k="sf_help_pest" v="[EN] Pest    > 20% - Apply Insecticide." eh="f4932a05" />
-    <e k="sf_help_disease" v="[EN] Disease > 20% - Apply Fungicide." eh="1bfd0913" />
-    <e k="sf_help_status_header" v="[EN] STATUS LEVELS" eh="b081c2c6" />
-    <e k="sf_help_good" v="[EN] Good - No action needed." eh="03910bec" />
-    <e k="sf_help_fair" v="[EN] Fair - Monitor / preventive top-up." eh="2922eb1c" />
-    <e k="sf_help_poor" v="[EN] Poor - Immediate treatment required." eh="b287d206" />
+    <e k="sf_pda_map_section_title" v="Lapisan Peta Tanah" eh="85d63132" />
+    <e k="sf_pda_map_active_layer" v="Lapisan Aktif" eh="f8a2c198" />
+    <e k="sf_pda_map_layer_off_desc" v="Tidak ada lapisan tanah aktif. Silakan pilih lapisan untuk ditampilkan." eh="3bd7e65a" />
+    <e k="sf_pda_map_layer_n_desc" v="Kandungan nitrogen di semua lahan. Hijau = baik, merah = habis." eh="60484ead" />
+    <e k="sf_pda_map_layer_p_desc" v="Kandungan fosfor di semua lahan. Hijau = baik, merah = habis." eh="9fa2e72d" />
+    <e k="sf_pda_map_layer_k_desc" v="Kandungan kalium di semua lahan. Hijau = baik, merah = habis." eh="a61d25b7" />
+    <e k="sf_pda_map_layer_ph_desc" v="Tingkat pH tanah. Rentang optimal adalah 6.5-7.0 (hijau)." eh="ce7009e7" />
+    <e k="sf_pda_map_layer_om_desc" v="Kandungan bahan organik. Lebih tinggi lebih baik untuk kesuburan jangka panjang." eh="f64c5706" />
+    <e k="sf_pda_map_layer_urgency_desc" v="Urgensi perawatan gabungan. Merah = butuh perhatian segera." eh="f29ddc2b" />
+    <e k="sf_pda_map_layer_weed_desc" v="Tingkat tekanan gulma. Merah = infestasi tinggi, terapkan herbisida." eh="24009598" />
+    <e k="sf_pda_map_layer_pest_desc" v="Tingkat tekanan hama. Merah = infestasi tinggi, terapkan insektisida." eh="86ba29dc" />
+    <e k="sf_pda_map_layer_disease_desc" v="Tingkat tekanan penyakit. Merah = wabah aktif, terapkan fungisida." eh="5d32d30a" />
+    <e k="sf_pda_map_legend_title" v="Legenda Peta" eh="86448402" />
+    <e k="sf_pda_map_legend_good" v="Baik" eh="0c6ad70b" />
+    <e k="sf_pda_map_legend_fair" v="Cukup" eh="f7f20cf0" />
+    <e k="sf_pda_map_legend_poor" v="Buruk / Rendah" eh="32aa75ff" />
+    <e k="sf_pda_map_legend_low" v="Rendah" eh="28d0edd0" />
+    <e k="sf_pda_map_legend_medium" v="Sedang" eh="87f8a6ab" />
+    <e k="sf_pda_map_legend_high" v="Tinggi" eh="655d20c1" />
+    <e k="sf_pda_map_legend_excess" v="Berlebih" eh="d1d25b9f" />
+    <e k="sf_pda_map_instructions" v="Pilih lapisan di sidebar untuk melihatnya di peta." eh="eee76c81" />
+    <e k="sf_pda_map_jump_hint" v="Klik lahan untuk melompat ke sana di peta" eh="006d5371" />
+    <e k="sf_pda_map_native_hint" v="Visualisasi lapisan tanah telah dipindahkan! Anda sekarang dapat mengakses dan beralih semua lapisan tanah langsung dari sidebar Peta PDA asli (ESC > Peta). Cari kategori 'Lapisan Tanah' di titik-titik sidebar." eh="3210d828" />
+    <e k="sf_pda_map_open_btn" v="CATATAN DEV" eh="ef40b93f" />
+    <e k="sf_pda_btn_help" v="Bantuan" eh="6a26f548" />
+    <e k="sf_pda_help_text" v="Halo, saya pengembangnya! Saya telah memindahkan lapisan peta tanah ke Peta PDA asli (ESC > Peta) untuk pengalaman yang lebih mulus. Anda sekarang dapat memilih lapisan langsung dari sidebar. Halaman PDA masih dipoles, jadi nantikan pembaruan lebih lanjut!" eh="67643ddd" />
+    <e k="sf_pda_help_github" v="UMPAN BALIK ANDA PENTING! Jika Anda menemukan bug, memiliki saran fitur baru, atau ingin berkontribusi pada kode, silakan kunjungi proyek di GitHub. Anda dapat membuka Issue atau Pull Request kapan saja untuk membantu membuat mod ini lebih baik bagi semua orang. Terima kasih telah menguji!" eh="3a10b023" />
+    <e k="sf_pda_help_note" v="Catatan: Tab lapisan tanah di halaman peta TIDAK BERFUNGSI. Saya menyadari masalah ini dan sedang mengerjakan perbaikannya (yang mungkin memakan waktu)." eh="2d8f5dc7" />
+    <e k="sf_pda_map_unavailable" v="Pratinjau peta tidak tersedia" eh="43983f81" />
+    <e k="sf_map_health_overall" v="Rata-rata Kesehatan Tanah" eh="5533cbe3" />
+    <e k="sf_map_btn_report" v="Buka Ikhtisar Pertanian" eh="6f0800e8" />
+    <e k="sf_map_btn_help" v="Catatan Dev (BELUM BERFUNGSI)" eh="800e465a" />
+    <e k="sf_map_btn_cycle_layer" v="Siklus Lapisan" eh="875dbf22" />
+    <e k="sf_map_btn_treatment" v="Rencana Perawatan" eh="4ba012e2" />
+    <e k="sf_map_btn_disable" v="Nonaktifkan Overlay" eh="8e75dec5" />
+    <e k="sf_treat_action_ok" v="OK" eh="e0aa021e" />
+    <e k="sf_help_title" v="Referensi Cepat Tanah" eh="8986bb6d" />
+    <e k="sf_help_nutrients_header" v="NUTRISI" eh="9aeb39bf" />
+    <e k="sf_help_n" v="N  (Nitrogen)     - Cepat habis. Terapkan UAN, Urea, atau Kotoran Hewan." eh="f2d0c792" />
+    <e k="sf_help_p" v="P  (Fosfor)      - Tahan lama. Terapkan MAP atau DAP." eh="fdfbd91e" />
+    <e k="sf_help_k" v="K  (Kalium)       - Terapkan Kalium. Penting untuk akar." eh="e0217634" />
+    <e k="sf_help_om" v="OM (Bahan Organik) - Terbentuk lambat. Bajak kotoran hewan/kompos." eh="a4e29617" />
+    <e k="sf_help_soil_header" v="KIMIA TANAH" eh="19c67ff5" />
+    <e k="sf_help_ph" v="pH  6.5-7.0 = Ideal.  < 6.5 terapkan Kapur.  > 7.5 terapkan Gips." eh="8929304d" />
+    <e k="sf_help_pressure_header" v="TEKANAN TANAMAN" eh="132b0f66" />
+    <e k="sf_help_weed" v="Gulma    > 20% - Terapkan Herbisida." eh="c8d890df" />
+    <e k="sf_help_pest" v="Hama     > 20% - Terapkan Insektisida." eh="f4932a05" />
+    <e k="sf_help_disease" v="Penyakit > 20% - Terapkan Fungisida." eh="1bfd0913" />
+    <e k="sf_help_status_header" v="TINGKAT STATUS" eh="b081c2c6" />
+    <e k="sf_help_good" v="Baik - Tidak perlu tindakan." eh="03910bec" />
+    <e k="sf_help_fair" v="Cukup - Monitor / penambahan preventif." eh="2922eb1c" />
+    <e k="sf_help_poor" v="Buruk - Perlu perawatan segera." eh="b287d206" />
     <!-- Fields Tab -->
-    <e k="sf_pda_fields_section_title" v="[EN] All Fields" eh="48729e0b" />
-    <e k="sf_pda_col_field" v="[EN] Field" eh="6f16a5f8" />
-    <e k="sf_pda_col_n" v="[EN] N%" eh="30740562" />
-    <e k="sf_pda_col_p" v="[EN] P%" eh="0a5e03bc" />
-		<e k="sf_pda_filter_all" v="[EN] Filter: All Fields" eh="a46a8cb2" />
-		<e k="sf_pda_filter_owned" v="[EN] Filter: Owned Only" eh="258cb971" />
-    <e k="sf_pda_col_k" v="[EN] K%" eh="43e4d0bf" />
-    <e k="sf_pda_col_ph" v="[EN] pH" eh="397dff20" />
-    <e k="sf_pda_col_om" v="[EN] OM" eh="bfbebc07" />
-    <e k="sf_pda_col_status" v="[EN] Status" eh="ec53a8c4" />
-    <e k="sf_pda_no_fields" v="[EN] No field data recorded yet." eh="72265670" />
-    <e k="sf_pda_status_good" v="[EN] Good" eh="0c6ad70b" />
-    <e k="sf_pda_status_fair" v="[EN] Fair" eh="f7f20cf0" />
-    <e k="sf_pda_status_poor" v="[EN] Poor" eh="0e94d017" />
+    <e k="sf_pda_fields_section_title" v="Semua Lahan" eh="48729e0b" />
+    <e k="sf_pda_col_field" v="Lahan" eh="6f16a5f8" />
+    <e k="sf_pda_col_n" v="N%" eh="30740562" />
+    <e k="sf_pda_col_p" v="P%" eh="0a5e03bc" />
+    <e k="sf_pda_filter_all" v="Filter: Semua Lahan" eh="a46a8cb2" />
+    <e k="sf_pda_filter_owned" v="Filter: Milik Sendiri" eh="258cb971" />
+    <e k="sf_pda_col_k" v="K%" eh="43e4d0bf" />
+    <e k="sf_pda_col_ph" v="pH" eh="397dff20" />
+    <e k="sf_pda_col_om" v="OM" eh="bfbebc07" />
+    <e k="sf_pda_col_status" v="Status" eh="ec53a8c4" />
+    <e k="sf_pda_no_fields" v="Belum ada data lahan yang tercatat." eh="72265670" />
+    <e k="sf_pda_status_good" v="Baik" eh="0c6ad70b" />
+    <e k="sf_pda_status_fair" v="Cukup" eh="f7f20cf0" />
+    <e k="sf_pda_status_poor" v="Buruk" eh="0e94d017" />
     <!-- Treatment Tab -->
-    <e k="sf_pda_treatment_section_title" v="[EN] Treatment Plan" eh="4ba012e2" />
-    <e k="sf_pda_col_priority" v="[EN] Urgency" eh="c94e3850" />
-    <e k="sf_pda_col_needs" v="[EN] Needs" eh="94d6125d" />
-    <e k="sf_pda_no_treatment" v="[EN] All fields are in good condition." eh="fa985166" />
-    <e k="sf_pda_need_n" v="[EN] Nitrogen" eh="1e9ef3ba" />
-    <e k="sf_pda_need_p" v="[EN] Phosphorus" eh="eb4f2688" />
-    <e k="sf_pda_need_k" v="[EN] Potassium" eh="3a4edc67" />
-    <e k="sf_pda_need_ph" v="[EN] pH Adjust" eh="0570e9d2" />
-    <e k="sf_pda_need_weed" v="[EN] Herbicide" eh="1029736e" />
-    <e k="sf_pda_need_pest" v="[EN] Insecticide" eh="5650eeef" />
-    <e k="sf_pda_need_disease" v="[EN] Fungicide" eh="e8512698" />
-    <e k="sf_pda_need_multiple" v="[EN] Multiple" eh="a0bf169f" />
-    <e k="sf_pda_treatment_minor" v="[EN] Minor" eh="6fed0c37" />
+    <e k="sf_pda_treatment_section_title" v="Rencana Perawatan" eh="4ba012e2" />
+    <e k="sf_pda_col_priority" v="Urgensi" eh="c94e3850" />
+    <e k="sf_pda_col_needs" v="Butuh" eh="94d6125d" />
+    <e k="sf_pda_no_treatment" v="Semua lahan dalam kondisi baik." eh="fa985166" />
+    <e k="sf_pda_treatment_hint" v="Lahan yang terdaftar di sebelah kanan butuh perawatan. Klik baris untuk melihat input yang direkomendasikan dan perkiraan jumlahnya." eh="5748d316" />
+    <e k="sf_pda_need_n" v="Nitrogen" eh="1e9ef3ba" />
+    <e k="sf_pda_need_p" v="Fosfor" eh="eb4f2688" />
+    <e k="sf_pda_need_k" v="Kalium" eh="3a4edc67" />
+    <e k="sf_pda_need_ph" v="Sesuaikan pH" eh="0570e9d2" />
+    <e k="sf_pda_need_weed" v="Herbisida" eh="1029736e" />
+    <e k="sf_pda_need_pest" v="Insektisida" eh="5650eeef" />
+    <e k="sf_pda_need_disease" v="Fungisida" eh="e8512698" />
+    <e k="sf_pda_need_multiple" v="Beberapa" eh="a0bf169f" />
+    <e k="sf_pda_treatment_minor" v="Minor" eh="6fed0c37" />
     <!-- Field Detail Dialog (SoilFieldDetailDialog.lua) -->
-    <e k="sf_detail_title" v="[EN] Field Detail" eh="03b5acd7" />
-    <e k="sf_detail_close" v="[EN] Close" eh="d3d2e617" />
-    <e k="sf_detail_field_label" v="[EN] Field #" eh="228118ab" />
-    <e k="sf_detail_urgency_label" v="[EN] Urgency:" eh="9a83237c" />
-    <e k="sf_detail_section_nutrients" v="[EN] Soil Nutrients" eh="64377acf" />
-    <e k="sf_detail_section_pressure" v="[EN] Crop Pressure" eh="a73974d0" />
-    <e k="sf_detail_section_history" v="[EN] Crop History" eh="54c27499" />
-    <e k="sf_detail_n_label" v="[EN] Nitrogen (N)" eh="25cee53b" />
-    <e k="sf_detail_p_label" v="[EN] Phosphorus (P)" eh="75cb5cd6" />
-    <e k="sf_detail_k_label" v="[EN] Potassium (K)" eh="39797137" />
-    <e k="sf_detail_ph_label" v="[EN] pH Level" eh="0c85daad" />
-    <e k="sf_detail_om_label" v="[EN] Organic Matter" eh="6305f4bb" />
-    <e k="sf_detail_weed_label" v="[EN] Weed Pressure" eh="53f8b936" />
-    <e k="sf_detail_pest_label" v="[EN] Pest Pressure" eh="18a7c2be" />
-    <e k="sf_detail_disease_label" v="[EN] Disease Pressure" eh="2b805cc9" />
-    <e k="sf_detail_last_crop_label" v="[EN] Last Crop" eh="ff41e5eb" />
-    <e k="sf_detail_rotation_label" v="[EN] Rotation Status" eh="83f7f522" />
-		<e k="sf_treat_title" v="[EN] Treatment Prescription" eh="0ccc3ee5" />
-		<e k="sf_treat_section_soil" v="[EN] Soil Amelioration" eh="09e016e4" />
-		<e k="sf_treat_section_fert" v="[EN] Nutrient Application" eh="76521e8e" />
-		<e k="sf_treat_section_prot" v="[EN] Crop Protection" eh="bd3fe9cd" />
-		<e k="sf_treat_hint" v="[EN] Refer to the 'Products' section of the shop for specialized fertilizers." eh="540bff4d" />
-		<e k="sf_treat_action_optimal" v="[EN] Optimal - No action needed." eh="4501a96b" />
-		<e k="sf_treat_action_lime" v="[EN] Apply LIME or LIQUID LIME to raise pH." eh="d1420b97" />
-		<e k="sf_treat_action_gypsum" v="[EN] Apply GYPSUM to lower pH / improve structure." eh="4cb3f0dc" />
-		<e k="sf_treat_action_om_low" v="[EN] Plow in MANURE, COMPOST, or chop straw." eh="33ec544c" />
-		<e k="sf_treat_action_om_fair" v="[EN] Monitor. Maintain organic inputs." eh="ae3af748" />
-		<e k="sf_treat_action_n_poor" v="[EN] Apply UAN32, UREA, or ANHYDROUS." eh="ebc225b0" />
-		<e k="sf_treat_action_n_fair" v="[EN] Apply AMS or STARTER fertilizer." eh="dc8fbeba" />
-		<e k="sf_treat_action_p_poor" v="[EN] Apply MAP or DAP (Phosphorus)." eh="ec2d9afa" />
-		<e k="sf_treat_action_p_fair" v="[EN] Apply blended FERTILIZER." eh="6f802546" />
-		<e k="sf_treat_action_k_poor" v="[EN] Apply POTASH (Potassium)." eh="bb2960f3" />
-		<e k="sf_treat_action_k_fair" v="[EN] Apply blended FERTILIZER." eh="6f802546" />
-		<e k="sf_treat_action_weed" v="[EN] Apply HERBICIDE immediately." eh="625551c5" />
-		<e k="sf_treat_action_pest" v="[EN] Apply INSECTICIDE immediately." eh="f4db9a03" />
-		<e k="sf_treat_action_disease" v="[EN] Apply FUNGICIDE immediately." eh="9228323a" />
-    <e k="sf_detail_rotation_ok" v="[EN] OK" eh="e0aa021e" />
-    <e k="sf_detail_rotation_bonus" v="[EN] Legume Bonus (+N)" eh="8ab86f6a" />
-    <e k="sf_detail_rotation_fatigue" v="[EN] Fatigue (x1.15 depletion)" eh="522a6d93" />
-    <e k="sf_detail_no_field" v="[EN] No data available." eh="c6d95d5e" />
-    <e k="sf_detail_no_crop" v="[EN] None recorded" eh="a4b5a996" />
-    <e k="sf_pda_btn_help" v="Catatan Dev" eh="5320d63f" />
-    <e k="sf_pda_help_github" v="MASUKAN ANDA PENTING! Jika Anda menemukan bug, memiliki saran fitur baru, atau ingin berkontribusi pada kode, kunjungi proyek di GitHub. Anda dapat membuka Issue atau Pull Request kapan saja untuk membantu membuat mod ini lebih baik bagi semua orang. Terima kasih telah menguji!" eh="3a10b023" />
-		<e k="sf_pda_help_note" v="[EN] Note: The soil layers tab on the map page is NOT WORKING. Im aware of the issue and working on a fix. (which might take some time)" eh="2d8f5dc7" />
-    <e k="sf_pda_help_text" v="Halo, saya sang pengembang! Seperti yang Anda lihat, halaman ini masih dalam pengerjaan. Layer peta saat ini hanya pratinjau visual (tidak berfungsi untuk pemilihan), dan banyak elemen UI masih memerlukan polesan akhir." eh="58e05bdf" />
-    <e k="sf_pda_map_jump_hint" v="Klik bidang untuk melompat ke sana di peta" eh="006d5371" />
-		<e k="sf_pda_map_native_hint" v="[EN] The soil layer visualization has moved! You can now access and toggle all soil layers directly from the native PDA Map sidebar (ESC &gt; Map). Look for the 'Soil Layers' category in the sidebar dots." eh="87f73b10" />
-    <e k="sf_pda_total_urgent_label" v="Total yang memerlukan perhatian" eh="b3ce2db9" />
-    <e k="sf_pda_treatment_hint" v="Bidang yang tercantum di sebelah kanan memerlukan perawatan. Klik baris untuk melihat input yang disarankan dan perkiraan jumlahnya." eh="5748d316" />
-    <!-- HUD labels -->
-    <e k="sf_hud_label_ph" v="[EN] pH" eh="397dff20" />
-    <e k="sf_hud_label_om" v="[EN] OM" eh="bfbebc07" />
-    <e k="sf_hud_unit_ppm" v="[EN] (ppm)" eh="71b18c32" />
-    <e k="sf_hud_coverage" v="[EN] Coverage: %d%% / %d%%" eh="d407bb6d" />
-    <e k="sf_hud_compaction" v="[EN] Compaction: %d%%" eh="bef3a4f5" />
-    <!-- Sprayer rate HUD -->
-    <e k="sf_sprayer_auto_on" v="[EN] APP. RATE  ( AUTO: ON )" eh="099b5dac" />
-    <e k="sf_sprayer_auto_off" v="[EN] APP. RATE  AUTO: OFF [%s]" eh="848cc106" />
-    <e k="sf_sprayer_target" v="[EN] Target: " eh="31d43504" />
-    <e k="sf_sprayer_burn_guaranteed" v="[EN] BURN RISK: GUARANTEED" eh="422601c4" />
-    <e k="sf_sprayer_burn_possible" v="[EN] BURN RISK: POSSIBLE" eh="25b251b6" />
-    <!-- Notifications -->
-    <e k="sf_notify_welcome" v="[EN] Soil &amp; Fertilizer Mod Active | J = HUD | K = Soil Report | Type 'soilfertility' for commands" eh="3fde93cd" />
-    <e k="sf_startup_dialog_version" v="What's new in this version:" />
-    <e k="sf_startup_dialog_footer" v="Thank you for using my mod, it means a lot to me &lt;3" />
-    <e k="sf_startup_dialog_footer2" v="Found a bug? Please report it on github!" />
-    <e k="sf_startup_dialog_footer3" v="Happy farming and don't forget:" />
-    <e k="sf_startup_dialog_footer4" v="Your soil remembers everything..." />
-    <e k="sf_notify_init_delayed" v="[EN] Soil Mod: Field initialization delayed. Trying alternative method..." eh="f8bd28f8" />
-    <e k="sf_notify_init_success" v="[EN] Soil Mod: Field initialization successful!" eh="46214360" />
-    <e k="sf_notify_critical_title" v="[EN] Critical Care Alert" eh="3f981d0c" />
-    <e k="sf_notify_critical_body" v="[EN] Field %d requires immediate attention! Urgency: %d%%" eh="171246aa" />
-    <e k="sf_notify_treated_title" v="[EN] Soil Update" eh="4633156e" />
-    <e k="sf_notify_treated_body" v="[EN] Field %d fully treated with %s" eh="585aa9b7" />
-    <e k="sf_notify_burn_title" v="[EN] Fertilizer Burn" eh="ad8ed599" />
-    <e k="sf_notify_burn_body" v="[EN] Field %d: over-application damage (pH %.1f)" eh="cb731ee3" />
-    <e k="sf_notify_sync_error" v="[EN] Soil Mod: Data sync issue detected. Please report if this persists." eh="1a307946" />
-    <!-- Panel categories -->
-    <e k="sf_panel_cat_sim" v="[EN] Simulation" eh="4f502b57" />
-    <e k="sf_panel_cat_sim_desc" v="[EN] Farm mechanics, difficulty and nutrient cycles" eh="3c584cdb" />
-    <e k="sf_panel_cat_display" v="[EN] Display &amp; HUD" eh="1a553532" />
-    <e k="sf_panel_cat_display_desc" v="[EN] HUD appearance, color theme, position and font size" eh="5b91fada" />
-    <e k="sf_panel_cat_overlay" v="[EN] Map Overlay" eh="28b898b6" />
-    <e k="sf_panel_cat_overlay_desc" v="[EN] Active overlay layer shown in the PDA map" eh="a5892aef" />
-    <e k="sf_panel_hdr_core" v="[EN] Core Systems" eh="44a497a5" />
-    <e k="sf_panel_hdr_difficulty" v="[EN] Difficulty" eh="7b29ca96" />
-    <e k="sf_panel_hdr_environment" v="[EN] Environment" eh="0ba29c6a" />
-    <e k="sf_panel_hdr_crop_stress" v="[EN] Crop Stress" eh="260167bb" />
-    <e k="sf_panel_hdr_visibility" v="[EN] Visibility" eh="1729a56c" />
-    <e k="sf_panel_hdr_hud_style" v="[EN] HUD Style" eh="1d4a8cac" />
-    <e k="sf_panel_hdr_position" v="[EN] Position" eh="52f5e0bc" />
-    <e k="sf_panel_hdr_layer" v="[EN] Layer" eh="359b71e8" />
-    <e k="sf_panel_hdr_performance" v="[EN] Performance" eh="9446a98a" />
-    <e k="sf_panel_hdr_mod_ctrl" v="[EN] Mod Control &amp; Difficulty" eh="f38ed047" />
-    <e k="sf_panel_hdr_systems" v="[EN] Systems" eh="d6856404" />
-    <e k="sf_panel_hdr_actions" v="[EN] Actions &amp; Field Tools" eh="82bb7b83" />
-    <!-- Panel chrome -->
-    <e k="sf_panel_admin_yes" v="[EN] Admin: YES" eh="4628842a" />
-    <e k="sf_panel_admin_no" v="[EN] Admin: NO" eh="a9394f7b" />
-    <e k="sf_panel_multiplayer" v="[EN] Multiplayer" eh="901a7320" />
-    <e k="sf_panel_singleplayer" v="[EN] Single Player" eh="da602601" />
-    <e k="sf_panel_btn_back" v="[EN] &lt; Back" eh="b1f1e41f" />
-    <e k="sf_panel_btn_reset_cat" v="[EN] Reset Cat." eh="b66faa88" />
-    <e k="sf_panel_btn_close_hint" v="[EN] SHIFT+O to close" eh="254406e3" />
-    <e k="sf_panel_select_category" v="[EN] Select a category to configure settings" eh="a277d257" />
-    <e k="sf_panel_btn_configure" v="[EN] Configure &gt;&gt;" eh="a2cb3902" />
-    <e k="sf_panel_btn_open" v="[EN] Open &gt;&gt;" eh="6624d17c" />
-    <!-- Setting descriptions -->
-    <e k="sf_desc_enabled" v="[EN] Activate / deactivate the entire mod" eh="895364cb" />
-    <e k="sf_desc_debugMode" v="[EN] Extra logging for troubleshooting" eh="de508edb" />
-    <e k="sf_desc_fertilitySystem" v="[EN] Full soil fertility modeling" eh="40efd611" />
-    <e k="sf_desc_nutrientCycles" v="[EN] Track N/P/K depletion and recovery" eh="6eff80b3" />
-    <e k="sf_desc_fertilizerCosts" v="[EN] Real in-game cost for fertilizers" eh="1c197c9f" />
-    <e k="sf_desc_showNotifications" v="[EN] In-game soil status notifications" eh="7f275b4b" />
-    <e k="sf_desc_showHUD" v="[EN] Show the soil HUD overlay" eh="fa8b9224" />
-    <e k="sf_desc_hudPosition" v="[EN] HUD preset anchor position" eh="98c8bcea" />
-    <e k="sf_desc_hudColorTheme" v="[EN] Color palette for HUD elements" eh="97271907" />
-    <e k="sf_desc_hudFontSize" v="[EN] HUD text size" eh="48a6fc15" />
-    <e k="sf_desc_hudTransparency" v="[EN] HUD background transparency" eh="d20d72dc" />
-    <e k="sf_desc_seasonalEffects" v="[EN] Season-driven soil changes" eh="f515f484" />
-    <e k="sf_desc_rainEffects" v="[EN] Rain causes nutrient leaching" eh="82fec75d" />
-    <e k="sf_desc_plowingBonus" v="[EN] Plow bonus for soil recovery" eh="23522b97" />
-    <e k="sf_desc_residueIncorporation" v="[EN] Tillage releases residue nutrients" eh="" />
-    <e k="sf_desc_weedPressure" v="[EN] Track and penalize weed spread" eh="df20c38d" />
-    <e k="sf_desc_pestPressure" v="[EN] Track insect pest infestation" eh="12b3412e" />
-    <e k="sf_desc_diseasePressure" v="[EN] Track fungal crop diseases" eh="0858395f" />
-    <e k="sf_desc_compactionEnabled" v="[EN] Heavy vehicle soil compaction" eh="a7d3a795" />
-    <e k="sf_desc_difficulty" v="[EN] Nutrient drain intensity level" eh="54a7902e" />
-    <e k="sf_desc_replenishmentRate" v="[EN] Fertilizer nutrient restoration speed" eh="858d2b23" />
-    <e k="sf_desc_useImperialUnits" v="[EN] Use imperial units (US tons/acre)" eh="8ba3d81a" />
-    <e k="sf_desc_autoRateControl" v="[EN] Smart sprayer application rates" eh="bb4e5880" />
-    <e k="sf_desc_cropRotation" v="[EN] Rotation benefits and penalties" eh="bb79b03a" />
-    <e k="sf_desc_activeMapLayer" v="[EN] Nutrient layer shown in PDA map" eh="3c01c599" />
-    <e k="sf_desc_overlayDensity" v="[EN] Sample point budget (Low=8k, Med=20k, High=40k)" eh="42503763" />
-    <!-- Multi-option values -->
-    <e k="sf_rr_1" v="[EN] Very Slow (0.25x)" eh="b681a1b4" />
-    <e k="sf_rr_2" v="[EN] Slow (0.5x)" eh="db69874d" />
-    <e k="sf_rr_3" v="[EN] Normal (1.0x)" eh="930452c1" />
-    <e k="sf_rr_4" v="[EN] Fast (1.5x)" eh="4c8ebfdb" />
-    <e k="sf_rr_5" v="[EN] Very Fast (2.0x)" eh="bd682dd5" />
-    <e k="sf_layer_1" v="[EN] Off" eh="d15305d7" />
-    <e k="sf_layer_2" v="[EN] Nitrogen" eh="1e9ef3ba" />
-    <e k="sf_layer_3" v="[EN] Phosphorus" eh="eb4f2688" />
-    <e k="sf_layer_4" v="[EN] Potassium" eh="3a4edc67" />
-    <e k="sf_layer_5" v="[EN] pH" eh="397dff20" />
-    <e k="sf_layer_6" v="[EN] Org Matter" eh="d2e254bc" />
-    <e k="sf_layer_7" v="[EN] Urgency" eh="c94e3850" />
-    <e k="sf_layer_8" v="[EN] Weed" eh="2b75024d" />
-    <e k="sf_layer_9" v="[EN] Pest" eh="8f2aee79" />
-    <e k="sf_layer_10" v="[EN] Disease" eh="e7067a8c" />
-    <e k="sf_layer_11" v="[EN] Compaction" eh="19cf3ee7" />
-    <e k="sf_density_1" v="[EN] Low" eh="28d0edd0" />
-    <e k="sf_density_2" v="[EN] Medium" eh="87f8a6ab" />
-    <e k="sf_density_3" v="[EN] High" eh="655d20c1" />
-    <!-- Admin action items -->
-    <e k="sf_admin_save_label" v="[EN] Save Soil Data" eh="d4e9a279" />
-    <e k="sf_admin_save_desc" v="[EN] Force-save all soil data now" eh="f365613a" />
-    <e k="sf_admin_reset_label" v="[EN] Reset All Settings" eh="6e7d5f9f" />
-    <e k="sf_admin_reset_desc" v="[EN] Restore every setting to its default" eh="599b7454" />
-		<e k="sf_panel_hdr_field_tools" v="[EN] Field Tools" eh="2b250a56" />
-		<e k="sf_nav_field_tools_label" v="[EN] Field Tools" eh="2b250a56" />
-		<e k="sf_nav_field_tools_desc" v="[EN] Open specific tools to inspect and modify field states" eh="360db19b" />
-		<e k="sf_panel_hdr_vehicle_tools" v="[EN] Vehicle Tools" eh="9b6d6e4c" />
-		<e k="sf_nav_vehicle_tools_label" v="[EN] Vehicle Tools" eh="9b6d6e4c" />
-		<e k="sf_nav_vehicle_tools_desc" v="[EN] Open specific tools for connected vehicles and implements" eh="1a8b2100" />
-    <e k="sf_admin_drain_label" v="[EN] Drain Vehicle Tanks" eh="d216b101" />
-    <e k="sf_admin_drain_desc" v="[EN] Empty sprayer + implements (50% refund)" eh="5e048a34" />
-    <e k="sf_admin_field_info_label" v="[EN] Current Field Info" eh="5df500d6" />
-    <e k="sf_admin_field_info_desc" v="[EN] Soil data for the field at your position" eh="b7e2a72d" />
-    <e k="sf_admin_field_forecast_label" v="[EN] Field Forecast" eh="1df41470" />
-    <e k="sf_admin_field_forecast_desc" v="[EN] Yield forecast for field at position" eh="67e56b9d" />
-    <e k="sf_admin_list_fields_label" v="[EN] List All Fields" eh="efeb1b25" />
-    <e k="sf_admin_list_fields_desc" v="[EN] Dump all field soil data to game log" eh="c9fa812e" />
-		<e k="sf_admin_field_set_state_label" v="[EN] Set Field State" eh="5b0d7a31" />
-		<e k="sf_admin_field_set_state_desc" v="[EN] Manually tweak N, P, K, pH, and OM values for current field" eh="a491e190" />
-		<e k="sf_admin_field_recover_label" v="[EN] Recover Field" eh="e1c82ff0" />
-		<e k="sf_admin_field_recover_desc" v="[EN] Reset the current field to default safe values (fix mistakes)" eh="68b687a2" />
-    <e k="sf_infobox_title" v="[EN] Soil Nutrients" eh="64377acf" />
-    <e k="sf_infobox_grade" v="[EN] Soil Grade" eh="65d1be5f" />
-    <e k="sf_infobox_needs" v="[EN] Needs" eh="94d6125d" />
-    <e k="sf_infobox_fertilizer" v="[EN] Fertilizer" eh="cd248829" />
+    <e k="sf_detail_title" v="Detail Lahan" eh="03b5acd7" />
+    <e k="sf_detail_close" v="Tutup" eh="d3d2e617" />
+    <e k="sf_detail_field_label" v="Lahan #" eh="228118ab" />
+    <e k="sf_detail_urgency_label" v="Urgensi:" eh="9a83237c" />
+    <e k="sf_detail_section_nutrients" v="Nutrisi Tanah" eh="64377acf" />
+    <e k="sf_detail_section_pressure" v="Tekanan Tanaman" eh="a73974d0" />
+    <e k="sf_detail_section_history" v="Riwayat Tanaman" eh="54c27499" />
+    <e k="sf_detail_n_label" v="Nitrogen (N)" eh="25cee53b" />
+    <e k="sf_detail_p_label" v="Fosfor (P)" eh="75cb5cd6" />
+    <e k="sf_detail_k_label" v="Kalium (K)" eh="39797137" />
+    <e k="sf_detail_ph_label" v="Tingkat pH" eh="0c85daad" />
+    <e k="sf_detail_om_label" v="Bahan Organik" eh="6305f4bb" />
+    <e k="sf_detail_weed_label" v="Tekanan Gulma" eh="53f8b936" />
+    <e k="sf_detail_pest_label" v="Tekanan Hama" eh="18a7c2be" />
+    <e k="sf_detail_disease_label" v="Tekanan Penyakit" eh="2b805cc9" />
+    <e k="sf_detail_last_crop_label" v="Tanaman Terakhir" eh="ff41e5eb" />
+    <e k="sf_detail_rotation_label" v="Status Rotasi" eh="83f7f522" />
+
+    <!-- Treatment Prescription Dialog (SoilTreatmentDialog.lua) -->
+    <e k="sf_treat_title" v="Resep Perawatan" eh="0ccc3ee5" />
+    <e k="sf_treat_section_soil" v="Pembenahan Tanah" eh="09e016e4" />
+    <e k="sf_treat_section_fert" v="Aplikasi Nutrisi" eh="76521e8e" />
+    <e k="sf_treat_section_prot" v="Perlindungan Tanaman" eh="bd3fe9cd" />
+    <e k="sf_treat_hint" v="Lihat bagian 'Produk' di toko untuk pupuk khusus." eh="540bff4d" />
+    <e k="sf_treat_action_optimal" v="Optimal - Tidak perlu tindakan." eh="4501a96b" />
+    <e k="sf_treat_action_lime" v="Terapkan KAPUR atau KAPUR CAIR untuk meningkatkan pH." eh="d1420b97" />
+    <e k="sf_treat_action_gypsum" v="Terapkan GIPS untuk menurunkan pH / memperbaiki struktur." eh="4cb3f0dc" />
+    <e k="sf_treat_action_om_low" v="Bajak KOTORAN HEWAN, KOMPOS, atau cacah jerami." eh="33ec544c" />
+    <e k="sf_treat_action_om_fair" v="Monitor. Pertahankan input organik." eh="ae3af748" />
+    <e k="sf_treat_action_n_poor" v="Terapkan UAN32, UREA, atau ANHIDRAT." eh="ebc225b0" />
+    <e k="sf_treat_action_n_fair" v="Terapkan AMS atau pupuk STARTER." eh="dc8fbeba" />
+    <e k="sf_treat_action_p_poor" v="Terapkan MAP atau DAP (Fosfor)." eh="ec2d9afa" />
+    <e k="sf_treat_action_p_fair" v="Terapkan CAMPURAN PUPUK." eh="6f802546" />
+    <e k="sf_treat_action_k_poor" v="Terapkan KALIUM (Kalium)." eh="bb2960f3" />
+    <e k="sf_treat_action_k_fair" v="Terapkan CAMPURAN PUPUK." eh="6f802546" />
+    <e k="sf_treat_action_weed" v="Terapkan HERBISIDA segera." eh="625551c5" />
+    <e k="sf_treat_action_pest" v="Terapkan INSEKTISIDA segera." eh="f4db9a03" />
+    <e k="sf_treat_action_disease" v="Terapkan FUNGISIDA segera." eh="9228323a" />
+    <e k="sf_detail_rotation_ok" v="OK" eh="e0aa021e" />
+    <e k="sf_detail_rotation_bonus" v="Bonus Polong-polongan (+N)" eh="8ab86f6a" />
+    <e k="sf_detail_rotation_fatigue" v="Kelelahan (penipisan x1.15)" eh="522a6d93" />
+    <e k="sf_detail_no_field" v="Tidak ada data tersedia." eh="c6d95d5e" />
+    <e k="sf_detail_no_crop" v="Tidak tercatat" eh="a4b5a996" />
+
+    <!-- ======================================================
+         HUD LABELS, UNITS & COVERAGE
+         ====================================================== -->
+    <e k="sf_hud_label_ph" v="pH" eh="397dff20" />
+    <e k="sf_hud_label_om" v="OM" eh="bfbebc07" />
+    <e k="sf_hud_unit_ppm" v="(ppm)" eh="71b18c32" />
+    <e k="sf_hud_coverage" v="Cakupan: %d%% / %d%%" eh="d407bb6d" />
+    <e k="sf_hud_compaction" v="Pemadatan: %d%%" eh="bef3a4f5" />
+
+    <!-- ======================================================
+         SPRAYER RATE HUD
+         ====================================================== -->
+    <e k="sf_sprayer_auto_on" v="LAJU APL.  ( AUTO: AKTIF )" eh="099b5dac" />
+    <e k="sf_sprayer_auto_off" v="LAJU APL.  AUTO: MATI [%s]" eh="848cc106" />
+    <e k="sf_sprayer_target" v="Target:" eh="31d43504" />
+    <e k="sf_sprayer_burn_guaranteed" v="RISIKO TERBAKAR: DIJAMIN" eh="422601c4" />
+    <e k="sf_sprayer_burn_possible" v="RISIKO TERBAKAR: MUNGKIN" eh="25b251b6" />
+
+    <!-- ======================================================
+         NOTIFICATIONS
+         ====================================================== -->
+    <e k="sf_notify_welcome" v="Mod Tanah &amp; Pupuk Aktif | Shift+O buka pengaturan | Ketik 'soilfertility' untuk perintah" eh="d97e4139" />
+    <e k="sf_startup_dialog_version" v="Yang baru di versi ini:" eh="0b25f5c2" />
+    <e k="sf_startup_dialog_footer" v="Terima kasih telah menggunakan mod saya, ini sangat berarti bagi saya <3" eh="0f08d735" />
+    <e k="sf_startup_dialog_footer2" v="Menemukan bug? Silakan laporkan di GitHub!" eh="728e2cf3" />
+    <e k="sf_startup_dialog_footer3" v="Selamat bertani dan jangan lupa:" eh="aa38e511" />
+    <e k="sf_startup_dialog_footer4" v="Tanah Anda mengingat segalanya..." eh="1a3e5c35" />
+    <e k="sf_notify_init_delayed" v="Mod Tanah: Inisialisasi lahan tertunda. Mencoba metode alternatif..." eh="f8bd28f8" />
+    <e k="sf_notify_init_success" v="Mod Tanah: Inisialisasi lahan berhasil!" eh="46214360" />
+    <e k="sf_notify_critical_title" v="Waspada Perawatan Kritis" eh="3f981d0c" />
+    <e k="sf_notify_critical_body" v="Lahan %d butuh perhatian segera! Urgensi: %d%%" eh="171246aa" />
+    <e k="sf_notify_treated_title" v="Pembaruan Tanah" eh="4633156e" />
+    <e k="sf_notify_treated_body" v="Lahan %d telah dirawat sepenuhnya dengan %s" eh="585aa9b7" />
+    <e k="sf_notify_burn_title" v="Terbakar Pupuk" eh="ad8ed599" />
+    <e k="sf_notify_burn_body" v="Lahan %d: kerusakan aplikasi berlebih (pH %.1f)" eh="cb731ee3" />
+    <e k="sf_notify_sync_error" v="Mod Tanah: Masalah sinkronisasi data terdeteksi. Silakan lapor jika berlanjut." eh="1a307946" />
+
+    <!-- ======================================================
+         SETTINGS PANEL — CATEGORIES & SECTION HEADERS
+         ====================================================== -->
+    <e k="sf_panel_cat_sim" v="Simulasi" eh="4f502b57" />
+    <e k="sf_panel_cat_sim_desc" v="Mekanika pertanian, kesulitan, dan siklus nutrisi" eh="3c584cdb" />
+    <e k="sf_panel_cat_display" v="Tampilan &amp; HUD" eh="37b17394" />
+    <e k="sf_panel_cat_display_desc" v="Tampilan HUD, tema warna, posisi, dan ukuran font" eh="5b91fada" />
+    <e k="sf_panel_cat_overlay" v="Overlay Peta" eh="28b898b6" />
+    <e k="sf_panel_cat_overlay_desc" v="Lapisan overlay aktif yang ditampilkan di peta PDA" eh="a5892aef" />
+    <e k="sf_panel_hdr_core" v="Sistem Inti" eh="44a497a5" />
+    <e k="sf_panel_hdr_difficulty" v="Kesulitan" eh="7b29ca96" />
+    <e k="sf_panel_hdr_environment" v="Lingkungan" eh="0ba29c6a" />
+    <e k="sf_panel_hdr_crop_stress" v="Stres Tanaman" eh="260167bb" />
+    <e k="sf_panel_hdr_visibility" v="Visibilitas" eh="1729a56c" />
+    <e k="sf_panel_hdr_hud_style" v="Gaya HUD" eh="1d4a8cac" />
+    <e k="sf_panel_hdr_position" v="Posisi" eh="52f5e0bc" />
+    <e k="sf_panel_hdr_layer" v="Lapisan" eh="359b71e8" />
+    <e k="sf_panel_hdr_performance" v="Performa" eh="9446a98a" />
+    <e k="sf_panel_hdr_mod_ctrl" v="Kontrol Mod &amp; Kesulitan" eh="ae2e88fb" />
+    <e k="sf_panel_hdr_systems" v="Sistem" eh="d6856404" />
+    <e k="sf_panel_hdr_actions" v="Aksi &amp; Alat Lahan" eh="f64ba1c9" />
+
+    <!-- ======================================================
+         SETTINGS PANEL — CHROME
+         ====================================================== -->
+    <e k="sf_panel_admin_yes" v="Admin: YA" eh="4628842a" />
+    <e k="sf_panel_admin_no" v="Admin: TIDAK" eh="a9394f7b" />
+    <e k="sf_panel_multiplayer" v="Multiplayer" eh="901a7320" />
+    <e k="sf_panel_singleplayer" v="Single Player" eh="da602601" />
+    <e k="sf_panel_btn_back" v="&lt; Kembali" eh="36cf3e1f" />
+    <e k="sf_panel_btn_reset_cat" v="Atur Ulang Kat." eh="b66faa88" />
+    <e k="sf_panel_btn_close_hint" v="SHIFT+O untuk menutup" eh="254406e3" />
+    <e k="sf_panel_select_category" v="Pilih kategori untuk mengatur pengaturan" eh="a277d257" />
+    <e k="sf_panel_btn_configure" v="Konfigurasi >>" eh="a2cb3902" />
+    <e k="sf_panel_btn_open" v="Buka >>" eh="6624d17c" />
+
+    <!-- ======================================================
+         SETTINGS PANEL — SETTING DESCRIPTIONS
+         ====================================================== -->
+    <e k="sf_desc_enabled" v="Aktifkan / nonaktifkan seluruh mod" eh="895364cb" />
+    <e k="sf_desc_debugMode" v="Pencatatan tambahan untuk pemecahan masalah" eh="de508edb" />
+    <e k="sf_desc_fertilitySystem" v="Pemodelan kesuburan tanah penuh" eh="40efd611" />
+    <e k="sf_desc_nutrientCycles" v="Lacak penipisan dan pemulihan N/P/K" eh="6eff80b3" />
+    <e k="sf_desc_fertilizerCosts" v="Biaya pupuk dalam game yang nyata" eh="1c197c9f" />
+    <e k="sf_desc_showNotifications" v="Notifikasi status tanah dalam game" eh="7f275b4b" />
+    <e k="sf_desc_showHUD" v="Tampilkan overlay HUD tanah" eh="fa8b9224" />
+    <e k="sf_desc_showMiniReport" v="Tampilkan overlay laporan sel minimap" eh="b847f98c" />
+    <e k="sf_desc_hudPosition" v="Posisi jangkar preset HUD" eh="98c8bcea" />
+    <e k="sf_desc_hudColorTheme" v="Palet warna untuk elemen HUD" eh="97271907" />
+    <e k="sf_desc_hudFontSize" v="Ukuran teks HUD" eh="48a6fc15" />
+    <e k="sf_desc_hudTransparency" v="Transparansi latar belakang HUD" eh="d20d72dc" />
+    <e k="sf_desc_seasonalEffects" v="Perubahan tanah berdasarkan musim" eh="f515f484" />
+    <e k="sf_desc_rainEffects" v="Hujan menyebabkan pencucian nutrisi" eh="82fec75d" />
+    <e k="sf_desc_plowingBonus" v="Bonus bajak untuk pemulihan tanah" eh="23522b97" />
+    <e k="sf_desc_residueIncorporation" v="Pengolahan tanah melepaskan nutrisi residu" eh="e8cd556b" />
+    <e k="sf_desc_weedPressure" v="Lacak dan beri penalti penyebaran gulma" eh="df20c38d" />
+    <e k="sf_desc_pestPressure" v="Lacak serangan hama serangga" eh="12b3412e" />
+    <e k="sf_desc_diseasePressure" v="Lacak penyakit jamur tanaman" eh="0858395f" />
+    <e k="sf_desc_compactionEnabled" v="Pemadatan tanah kendaraan berat" eh="a7d3a795" />
+    <e k="sf_desc_difficulty" v="Tingkat intensitas penipisan nutrisi" eh="54a7902e" />
+    <e k="sf_desc_replenishmentRate" v="Kecepatan pemulihan nutrisi pupuk" eh="858d2b23" />
+    <e k="sf_desc_useImperialUnits" v="Gunakan unit imperial (ton AS/hektar)" eh="8ba3d81a" />
+    <e k="sf_desc_autoRateControl" v="Laju aplikasi sprayer cerdas" eh="bb4e5880" />
+    <e k="sf_desc_cropRotation" v="Manfaat dan penalti rotasi" eh="bb79b03a" />
+    <e k="sf_desc_activeMapLayer" v="Lapisan nutrisi ditunjukkan di peta PDA" eh="3c01c599" />
+    <e k="sf_desc_overlayDensity" v="Anggaran titik sampel (Rendah=8k, Sed=20k, Tinggi=40k)" eh="42503763" />
+
+    <!-- ======================================================
+         SETTINGS PANEL — MULTI-OPTION VALUES
+         ====================================================== -->
+    <e k="sf_rr_1" v="Sangat Lambat (0.25x)" eh="b681a1b4" />
+    <e k="sf_rr_2" v="Lambat (0.5x)" eh="db69874d" />
+    <e k="sf_rr_3" v="Normal (1.0x)" eh="930452c1" />
+    <e k="sf_rr_4" v="Cepat (1.5x)" eh="4c8ebfdb" />
+    <e k="sf_rr_5" v="Sangat Cepat (2.0x)" eh="bd682dd5" />
+    <e k="sf_layer_1" v="Mati" eh="d15305d7" />
+    <e k="sf_layer_2" v="Nitrogen" eh="1e9ef3ba" />
+    <e k="sf_layer_3" v="Fosfor" eh="eb4f2688" />
+    <e k="sf_layer_4" v="Kalium" eh="3a4edc67" />
+    <e k="sf_layer_5" v="pH" eh="397dff20" />
+    <e k="sf_layer_6" v="Bahan Organik" eh="d2e254bc" />
+    <e k="sf_layer_7" v="Urgensi" eh="c94e3850" />
+    <e k="sf_layer_8" v="Gulma" eh="2b75024d" />
+    <e k="sf_layer_9" v="Hama" eh="8f2aee79" />
+    <e k="sf_layer_10" v="Penyakit" eh="e7067a8c" />
+    <e k="sf_layer_11" v="Pemadatan" eh="19cf3ee7" />
+    <e k="sf_density_1" v="Rendah" eh="28d0edd0" />
+    <e k="sf_density_2" v="Sedang" eh="87f8a6ab" />
+    <e k="sf_density_3" v="Tinggi" eh="655d20c1" />
+
+    <!-- ======================================================
+         SETTINGS PANEL — ADMIN ACTION ITEMS
+         ====================================================== -->
+    <e k="sf_admin_save_label" v="Simpan Data Tanah" eh="d4e9a279" />
+    <e k="sf_admin_save_desc" v="Paksa simpan semua data tanah sekarang" eh="f365613a" />
+    <e k="sf_admin_reset_label" v="Atur Ulang Semua Pengaturan" eh="6e7d5f9f" />
+    <e k="sf_admin_reset_desc" v="Kembalikan setiap pengaturan ke defaultnya" eh="599b7454" />
+    
+    <e k="sf_panel_hdr_field_tools" v="Alat Lahan" eh="2b250a56" />
+    <e k="sf_nav_field_tools_label" v="Alat Lahan" eh="2b250a56" />
+    <e k="sf_nav_field_tools_desc" v="Buka alat khusus untuk memeriksa dan memodifikasi status lahan" eh="360db19b" />
+    
+    <e k="sf_panel_hdr_vehicle_tools" v="Alat Kendaraan" eh="9b6d6e4c" />
+    <e k="sf_nav_vehicle_tools_label" v="Alat Kendaraan" eh="9b6d6e4c" />
+    <e k="sf_nav_vehicle_tools_desc" v="Buka alat khusus untuk kendaraan dan implement yang terhubung" eh="1a8b2100" />
+    <e k="sf_admin_drain_label" v="Kuras Tangki Kendaraan" eh="d216b101" />
+    <e k="sf_admin_drain_desc" v="Kosongkan sprayer + implement (pengembalian 50%)" eh="5e048a34" />
+    <e k="sf_admin_field_info_label" v="Info Lahan Saat Ini" eh="5df500d6" />
+    <e k="sf_admin_field_info_desc" v="Data tanah untuk lahan di posisi Anda" eh="b7e2a72d" />
+    <e k="sf_admin_field_forecast_label" v="Prakiraan Lahan" eh="1df41470" />
+    <e k="sf_admin_field_forecast_desc" v="Prakiraan hasil untuk lahan di posisi Anda" eh="67e56b9d" />
+    <e k="sf_admin_list_fields_label" v="Daftar Semua Lahan" eh="efeb1b25" />
+    <e k="sf_admin_list_fields_desc" v="Buang semua data tanah lahan ke log game" eh="c9fa812e" />
+    <e k="sf_admin_field_set_state_label" v="Setel Status Lahan" eh="5b0d7a31" />
+    <e k="sf_admin_field_set_state_desc" v="Ubah nilai N, P, K, pH, dan OM secara manual untuk lahan saat ini" eh="a491e190" />
+    <e k="sf_admin_field_recover_label" v="Pulihkan Lahan" eh="e1c82ff0" />
+    <e k="sf_admin_field_recover_desc" v="Atur ulang lahan saat ini ke nilai aman default (perbaiki kesalahan)" eh="68b687a2" />
+    <e k="sf_infobox_title" v="Nutrisi Tanah" eh="64377acf" />
+    <e k="sf_infobox_grade" v="Kualitas Tanah" eh="65d1be5f" />
+    <e k="sf_infobox_needs" v="Butuh" eh="94d6125d" />
+    <e k="sf_infobox_fertilizer" v="Pupuk" eh="cd248829" />
 
     <!-- ======================================================
          FIELD INFO BOX (native FS25 FIELD INFO panel extension)
          ====================================================== -->
-    <e k="sf_fieldinfo_box_title" v="[EN] Soil Nutrients" eh="64377acf" />
-    <e k="sf_fieldinfo_grade" v="[EN] Soil Grade" eh="65d1be5f" />
-    <e k="sf_fieldinfo_yield" v="[EN] Yield" eh="97345487" />
-    <e k="sf_fieldinfo_rotation" v="[EN] Rotation" eh="f1a42bd4" />
-    <e k="sf_fieldinfo_needs" v="[EN] Needs" eh="94d6125d" />
-    <e k="sf_field" v="Field" eh="00000000" />
-    <e k="sf_no_field" v="No field selected" eh="00000000" />
-    <e k="sf_overall_Good" v="Good" eh="00000000" />
-    <e k="sf_overall_Fair" v="Fair" eh="00000000" />
-    <e k="sf_overall_Poor" v="Poor" eh="00000000" />
-    <e k="sf_cell_report" v="Cell Report" eh="00000000" />
-    <e k="sf_cell_no_data" v="Step on field to sample" eh="00000000" />
-    <e k="sf_cell" v="Cell" eh="00000000" />
+    <e k="sf_fieldinfo_box_title" v="Nutrisi Tanah" eh="64377acf" />
+    <e k="sf_fieldinfo_grade" v="Kualitas Tanah" eh="65d1be5f" />
+    <e k="sf_fieldinfo_yield" v="Hasil" eh="97345487" />
+    <e k="sf_fieldinfo_rotation" v="Rotasi" eh="f1a42bd4" />
+    <e k="sf_fieldinfo_needs" v="Butuh" eh="94d6125d" />
+    <e k="sf_field" v="Lahan" eh="6f16a5f8" />
+    <e k="sf_no_field" v="Tidak ada lahan dipilih" eh="717ff56f" />
+    <e k="sf_overall_Good" v="Baik" eh="0c6ad70b" />
+    <e k="sf_overall_Fair" v="Cukup" eh="f7f20cf0" />
+    <e k="sf_overall_Poor" v="Buruk" eh="0e94d017" />
+    <e k="sf_cell_report" v="Laporan Sel" eh="2a403943" />
+    <e k="sf_cell_no_data_title" v="Data sel tidak ditemukan" eh="dc41c753" />
+    <e k="sf_cell_no_data" v="Tidak ada data tanah di lokasi ini" eh="5dfa58aa" />
+    <e k="sf_cell" v="Sel" eh="1a66ab62" />
+    <e k="sf_cell_dialog_title" v="Inspeksi Sel Tanah" eh="7ce7fc03" />
+    <e k="sf_cell_sidebar_header" v="Detail Sel" eh="6fc5243e" />
+    <e k="sf_cell_coord" v="Koordinat" eh="99171d3a" />
+    <e k="sf_cell_click_hint" v="Klik peta untuk memeriksa sel tanah" eh="fc9d240b" />
     </elements>
 </l10n>
