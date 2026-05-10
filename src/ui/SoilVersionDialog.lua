@@ -27,6 +27,8 @@ SoilVersionDialog.CHANGELOG = {
     "- Tillage tools now release OM and NPK from straw residue",
     "- Added settings option for residue incorporation",
     "- Added new translation keys (native needs updating)",
+    "- Added new cell report HUD (tracks per-cell)",
+    "- Added new settings option for cell report HUD",
 }
 
 -- ── i18n helper ───────────────────────────────────────────

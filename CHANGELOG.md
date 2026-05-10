@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   | Direct-drill seeder | +0.02 | +0.1 | +0.01 | +0.08 | Opener slot disturbance only |
 
 - **New setting: Residue Incorporation** — toggle this feature on or off independently of the existing Plowing Bonus setting. Enabled by default.
+- Added new cell report HUD (tracks per-cell)
+- Added new settings option for cell report HUD
 
 ---
 
