@@ -24,6 +24,7 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
+    "- Added new soil map cell dialog (shows detailed info on each cell)",
     "- Tillage tools now release OM and NPK from straw residue",
     "- Added settings option for residue incorporation",
     "- Added new translation keys (native needs updating)",

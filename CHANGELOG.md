@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **New setting: Residue Incorporation** — toggle this feature on or off independently of the existing Plowing Bonus setting. Enabled by default.
 - Added new cell report HUD (tracks per-cell)
 - Added new settings option for cell report HUD
+- Added new soil map cell dialog (shows detailed info on each cell)
 
 ---
 
