@@ -12,16 +12,16 @@
     <e k="sf_rain_effects_long" v="Engedélyezze/tiltsa az eső hatását a talajra (tápanyag kimosódás, pH-változások)" eh="de3b14b9" />
     <e k="sf_plowing_bonus_short" v="Szántás Bónusz" eh="541ec752" />
     <e k="sf_plowing_bonus_long" v="A szántás előnyeinek engedélyezése/tiltása a talaj termékenységére (javított nitrogén és szerves anyag)" eh="fe701c1c" />
-    <e k="sf_residue_incorporation_short" v="[EN] Residue Incorporation" eh="" />
-    <e k="sf_residue_incorporation_long" v="[EN] Enable/disable nutrient release from crop residue worked into soil by tillage tools (cultivators, plows, strip-till, direct drills)" eh="" />
-    <e k="sf_weed_pressure_short" v="[EN] Weed Pressure" eh="53f8b936" />
-    <e k="sf_weed_pressure_long" v="[EN] Enable/disable dynamic weed growth and yield impact" eh="ac99a865" />
-    <e k="sf_pest_pressure_short" v="[EN] Pest Pressure" eh="18a7c2be" />
-    <e k="sf_pest_pressure_long" v="[EN] Enable/disable insect and pest infestation system" eh="2ba11abc" />
-    <e k="sf_disease_pressure_short" v="[EN] Disease Pressure" eh="2b805cc9" />
-    <e k="sf_disease_pressure_long" v="[EN] Enable/disable fungal and crop disease system" eh="9080edbc" />
-    <e k="sf_compaction_short" v="[EN] Soil Compaction" eh="68734a56" />
-    <e k="sf_compaction_long" v="[EN] Enable/disable heavy vehicle soil compaction system" eh="a0995ec5" />
+    <e k="sf_residue_incorporation_short" v="Maradvány beforgatás" eh="f4352cb5" />
+    <e k="sf_residue_incorporation_long" v="A talajművelő eszközökkel (kultivátorok, ekék, sávos művelés, direktvető gépek) a talajba juttatott növényi maradványokból származó tápanyag-felszabadulás engedélyezése/tiltása" eh="2e43448f" />
+    <e k="sf_weed_pressure_short" v="Gyomnyomás" eh="53f8b936" />
+    <e k="sf_weed_pressure_long" v="Dinamikus gyomnövekedés és terméshozam-hatás engedélyezése/tiltása" eh="ac99a865" />
+    <e k="sf_pest_pressure_short" v="Kártevőnyomás" eh="18a7c2be" />
+    <e k="sf_pest_pressure_long" v="Rovar- és kártevőfertőzési rendszer engedélyezése/tiltása" eh="2ba11abc" />
+    <e k="sf_disease_pressure_short" v="Betegségnyomás" eh="2b805cc9" />
+    <e k="sf_disease_pressure_long" v="Gombás és növénybetegségi rendszer engedélyezése/tiltása" eh="9080edbc" />
+    <e k="sf_compaction_short" v="Talajtömörödés" eh="68734a56" />
+    <e k="sf_compaction_long" v="Nehézgépjárművek talajtömörödési rendszerének engedélyezése/tiltása" eh="a0995ec5" />
     <e k="sf_fertility_short" v="Termékenységi Rendszer" eh="f7e27d58" />
     <e k="sf_fertility_long" v="Dinamikus talajtermékenységi rendszer engedélyezése/tiltása" eh="ea074366" />
     <e k="sf_nutrients_short" v="Tápanyagciklusok" eh="ffab595d" />
@@ -30,17 +30,17 @@
     <e k="sf_difficulty_long" v="Nehézségi szint beállítása: Egyszerű, Realisztikus, Hardcore" eh="cfb758a4" />
     <e k="sf_diff_1" v="Egyszerű" eh="1fbb1e39" />
     <e k="sf_diff_2" v="Realisztikus" eh="408c999f" />
-    <e k="sf_diff_3" v="[EN] Hardcore" eh="1c800aa9" />
-		<e k="sf_ui_soilReport_syncing" v="[EN] Syncing soil data..." eh="03f01c4d" />
-		<e k="sf_ui_soilReport_syncTimeout" v="[EN] Could not load field ownership. Please close and reopen the report." eh="9f699982" />
+    <e k="sf_diff_3" v="Hardcore" eh="1c800aa9" />
+    <e k="sf_ui_soilReport_syncing" v="Talajadatok szinkronizálása..." eh="03f01c4d" />
+    <e k="sf_ui_soilReport_syncTimeout" v="Nem sikerült betölteni a mezőtulajdonjogokat. Kérjük, zárja be és nyissa meg újra a jelentést." eh="9f699982" />
     <e k="sf_fertilizer_cost_short" v="Műtrágya Költségek" eh="6870d88b" />
     <e k="sf_fertilizer_cost_long" v="Realisztikus műtrágya-vásárlási költségek engedélyezése/tiltása" eh="12b03fbb" />
     <e k="sf_notifications_short" v="Értesítések" eh="a274f4d4" />
     <e k="sf_notifications_long" v="Talaj és műtrágya értesítések engedélyezése/tiltása" eh="9a872f8f" />
     <e k="sf_show_hud_short" v="HUD megjelenítése" eh="c94fd4d7" />
     <e k="sf_show_hud_long" v="Talajinformáció HUD átfedés megjelenítése/elrejtése (F8 az ideiglenes váltáshoz)" eh="4e2e11b6" />
-		<e k="sf_show_mini_report_short" v="[EN] Show Cell Report" eh="6b14e786" />
-		<e k="sf_show_mini_report_long" v="[EN] Show/hide the minimap cell report overlay" eh="9f57fb65" />
+    <e k="sf_show_mini_report_short" v="Cella jelentés mutatása" eh="6b14e786" />
+    <e k="sf_show_mini_report_long" v="Minimap cella jelentés átfedés megjelenítése/elrejtése" eh="9f57fb65" />
     <e k="sf_hud_position_short" v="HUD pozíció" eh="5ac371f2" />
     <e k="sf_hud_position_long" v="Válassza ki, hol jelenjen meg a talajinformáció HUD a képernyőn" eh="d7b9c109" />
     <e k="sf_hud_pos_1" v="Jobb felső" eh="5f9f6784" />
@@ -54,65 +54,51 @@
     <e k="sf_hud_color_1" v="Zöld" eh="d382816a" />
     <e k="sf_hud_color_2" v="Kék" eh="9594eec9" />
     <e k="sf_hud_color_3" v="Borostyán" eh="88068e33" />
-    <e k="sf_hud_color_4" v="[EN] Mono" eh="5d9b47bd" />
+    <e k="sf_hud_color_4" v="Monokróm" eh="5d9b47bd" />
     <e k="sf_diff_short" v="Nehézség" eh="7b29ca96" />
     <e k="sf_diff_long" v="Talajkezelés nehézségi szintje" eh="d6f4560c" />
-		<e k="sf_rr_short" v="[EN] Replenishment Rate" eh="b363b336" />
-		<e k="sf_rr_long" v="[EN] How quickly fertilizer restores field nutrients (0.25x Very Slow to 2.0x Very Fast)" eh="afe78a6d" />
+    <e k="sf_rr_short" v="Feltöltési sebesség" eh="b363b336" />
+    <e k="sf_rr_long" v="Milyen gyorsan állítja vissza a műtrágya a terület tápanyagait (0.25x Nagyon lassú - 2.0x Nagyon gyors)" eh="afe78a6d" />
     <e k="sf_auto_rate_short" v="Automatikus adagolás vezérlés" eh="6f99137d" />
     <e k="sf_auto_rate_long" v="Automatikusan állítja be a műtrágya kijuttatási arányát a terület igényei alapján" eh="a9ca9f6b" />
     <e k="sf_hud_theme_1" v="Zöld" eh="d382816a" />
     <e k="sf_hud_theme_2" v="Kék" eh="9594eec9" />
     <e k="sf_hud_theme_3" v="Borostyán" eh="88068e33" />
-    <e k="sf_hud_theme_4" v="[EN] Mono" eh="5d9b47bd" />
+    <e k="sf_hud_theme_4" v="Monokróm" eh="5d9b47bd" />
     <e k="sf_hud_font_size_short" v="HUD betűméret" eh="fd6ca64a" />
     <e k="sf_hud_font_size_long" v="Állítsa be a szöveg méretét a jobb olvashatóság érdekében" eh="c338854f" />
     <e k="sf_hud_font_1" v="Kicsi" eh="2660064e" />
     <e k="sf_hud_font_2" v="Közepes" eh="87f8a6ab" />
     <e k="sf_hud_font_3" v="Nagy" eh="3a69b34c" />
     <e k="sf_hud_transparency_short" v="HUD átlátszóság" eh="e8a009e4" />
-    <e k="sf_hud_transparency_long" v="Háttér átlátszósági szint beállítása (Átlátszó = áttetszÅ‘, Tömör = átlátszatlan)" eh="152e390a" />
+    <e k="sf_hud_transparency_long" v="Háttér átlátszósági szint beállítása (Átlátszó = áttetsző, Tömör = átlátszatlan)" eh="152e390a" />
     <e k="sf_hud_trans_1" v="Átlátszó" eh="dc30bc0c" />
     <e k="sf_hud_trans_2" v="Könnyű" eh="9914a0ce" />
     <e k="sf_hud_trans_3" v="Közepes" eh="87f8a6ab" />
     <e k="sf_hud_trans_4" v="Sötét" eh="a18366b2" />
     <e k="sf_hud_trans_5" v="Tömör" eh="e41480b6" />
-    <e k="sf_hud_title" v="[EN] SOIL MONITOR" eh="f8cda642" />
-    <e k="sf_hud_field" v="[EN] Field %d" eh="08988997" />
-    <e k="sf_hud_noField" v="[EN] Walk onto a field" eh="62c55e9e" />
-    <e k="sf_hud_fallow" v="[EN] Fallow" eh="eafe5913" />
-    <e k="sf_hud_weeds" v="[EN] Weeds" eh="324181de" />
-    <e k="sf_hud_pests" v="[EN] Pests" eh="2fed5101" />
-    <e k="sf_hud_disease" v="[EN] Disease" eh="e7067a8c" />
-    <e k="sf_hud_protected" v="[EN] (protected)" eh="8273211e" />
-    <e k="sf_hud_yield" v="[EN] Yield" eh="97345487" />
-    <e k="sf_hud_estYield" v="[EN] Est. Yield" eh="32a4135e" />
-    <e k="sf_hud_optimal" v="[EN] Optimal" eh="cb61fef1" />
-    <e k="sf_hud_post_harvest" v="[EN] Post-harvest · Fertilize" eh="634de6fe" />
-    <e k="sf_hud_hint_edit" v="[EN] Drag: move   Corner: resize   RMB/Shift+H: done" eh="987ebf45" />
-    <e k="sf_hud_hint_normal" v="[EN] Shift+H: move/resize" eh="f1d565b1" />
     <e k="sf_use_imperial_short" v="Angolszász mértékegységek" eh="ff2701ad" />
     <e k="sf_use_imperial_long" v="Kijuttatási normák gal/ac és lb/ac egységben (ki = L/ha és kg/ha)" eh="17efa489" />
-    <e k="sf_active_map_layer_short" v="[EN] Active Map Layer" eh="1861765f" />
-    <e k="sf_active_map_layer_long" v="[EN] Nutrient layer shown as overlay in the PDA map" eh="d7755cc8" />
-    <e k="sf_overlay_density_short" v="[EN] Map Detail" eh="a525859a" />
-    <e k="sf_overlay_density_long" v="[EN] Sample point budget for the PDA soil overlay. Low = better FPS, High = fuller coverage on large maps." eh="89215ce5" />
-    <e k="input_SF_OPEN_SETTINGS" v="[EN] Open Soil Settings" eh="2e31c0dd" />
+    <e k="sf_active_map_layer_short" v="Aktív térképréteg" eh="1861765f" />
+    <e k="sf_active_map_layer_long" v="Tápanyagréteg megjelenítése átfedésként a PDA térképen" eh="d7755cc8" />
+    <e k="sf_overlay_density_short" v="Térkép részletesség" eh="a525859a" />
+    <e k="sf_overlay_density_long" v="Mintavételi pontok kerete a PDA talajátfedéshez. Alacsony = jobb FPS, Magas = teljesebb lefedettség nagy térképeken." eh="89215ce5" />
+    <e k="input_SF_OPEN_SETTINGS" v="Talaj beállítások megnyitása" eh="2e31c0dd" />
     <e k="sf_reset" v="Talajbeállítások alaphelyzetbe állítása" eh="467bc2f5" />
     <e k="input_SF_TOGGLE_HUD" v="Talaj HUD váltása" eh="f0224a10" />
-    <e k="input_SF_HUD_DRAG" v="[EN] HUD Drag Mode" eh="cb2eb762" />
+    <e k="input_SF_HUD_DRAG" v="HUD mozgatási mód" eh="cb2eb762" />
     <e k="input_SF_SOIL_REPORT" v="Talajjelentés" eh="c33180ef" />
-		<e k="input_SF_TOGGLE_CELL_MAP" v="[EN] Toggle Soil Cell Map" eh="3a7e9b9d" />
+    <e k="input_SF_TOGGLE_CELL_MAP" v="Talajcella térkép váltása" eh="3a7e9b9d" />
     <e k="input_SF_RATE_UP" v="Műtrágya arány növelése" eh="6e601ef5" />
     <e k="input_SF_RATE_DOWN" v="Műtrágya arány csökkentése" eh="30712026" />
     <e k="input_SF_TOGGLE_AUTO" v="Automatikus adagolás váltása" eh="a8642cf0" />
-        <e k="input_SF_CYCLE_MAP_LAYER" v="[EN] Cycle Soil Map Layer" eh="8e4a716c" />
-        <e k="input_SF_SOIL_PDA" v="[EN] Open Soil PDA" eh="7d70f7b4" />
-    <e k="sf_report_title" v="[EN] Soil &amp; Fertilizer Report" eh="3b4e9448" />
+    <e k="input_SF_CYCLE_MAP_LAYER" v="Talaj térképréteg váltása" eh="8e4a716c" />
+    <e k="input_SF_SOIL_PDA" v="Talaj PDA megnyitása" eh="7d70f7b4" />
+    <e k="sf_report_title" v="Talaj &amp; Műtrágya Jelentés" eh="3b4e9448" />
     <e k="sf_report_fields_tracked" v="Követett Mezők:" eh="7b1e59b8" />
     <e k="sf_report_need_fert" v="Műtrágya Szükséges:" eh="110b60f2" />
-		<e k="sf_report_farm_health" v="[EN] Farm Health:" eh="a5330ade" />
-		<e k="sf_report_back" v="[EN] Back" eh="0557fa92" />
+    <e k="sf_report_farm_health" v="Gazdaság állapota:" eh="a5330ade" />
+    <e k="sf_report_back" v="Vissza" eh="0557fa92" />
     <e k="sf_report_difficulty" v="Nehézség:" eh="3abaf54f" />
     <e k="sf_report_col_field" v="Mező" eh="6f16a5f8" />
     <e k="sf_report_col_last_crop" v="Utolsó Termény" eh="ff41e5eb" />
@@ -121,7 +107,7 @@
     <e k="sf_report_prev" v="Előző" eh="14230d11" />
     <e k="sf_report_next" v="Köv" eh="10ac3d04" />
     <e k="sf_report_yes" v="IGEN" eh="7469a286" />
-    <e k="sf_report_ok" v="[EN] OK" eh="e0aa021e" />
+    <e k="sf_report_ok" v="OK" eh="e0aa021e" />
     <e k="sf_report_none" v="Nincs" eh="6adf97f8" />
     <e k="sf_report_rec_n_poor" v="Nitrogén szükséges" eh="5dca0711" />
     <e k="sf_report_rec_n_fair" v="Alacsony nitrogén" eh="35ad072d" />
@@ -133,518 +119,567 @@
     <e k="sf_report_rec_ph_monitor" v="pH figyelése" eh="6dfcded4" />
     <e k="sf_report_rec_om_increase" v="Szerves anyag növelése" eh="c2a930af" />
     <e k="sf_report_rec_om_maintain" v="Szerves anyag fenntartása" eh="e7655847" />
-    <e k="sf_report_rec_pest" v="[EN] Pest Risk" eh="22e0f3bf" />
-    <e k="sf_report_rec_disease" v="[EN] Disease Risk" eh="c342956b" />
+    <e k="sf_report_rec_pest" v="Kártevő kockázat" eh="22e0f3bf" />
+    <e k="sf_report_rec_disease" v="Betegség kockázat" eh="c342956b" />
     <e k="sf_report_rec_needs" v="Szükséges:" eh="3e6d95cf" />
     <e k="sf_report_rec_optimal" v="Talaj egészség: Optimális" eh="6ee9d19b" />
-    <e k="sf_report_rec_good" v="[EN] Good" eh="0c6ad70b" />
-    <e k="sf_report_rec_fair" v="[EN] Fair" eh="f7f20cf0" />
-    <e k="sf_report_rec_poor" v="[EN] Poor" eh="0e94d017" />
+    <e k="sf_report_rec_good" v="Jó" eh="0c6ad70b" />
+    <e k="sf_report_rec_fair" v="Közepes" eh="f7f20cf0" />
+    <e k="sf_report_rec_poor" v="Gyenge" eh="0e94d017" />
     <e k="sf_uan32_title" v="UAN 32 Nitrogén műtrágya (N)" eh="90913bb8" />
     <e k="sf_uan28_title" v="UAN 28 Nitrogén műtrágya (N)" eh="9d902cd7" />
     <e k="sf_anhydrous_title" v="Vízmentes ammónia (N)" eh="3fc85c02" />
     <e k="sf_starter_title" v="Starter műtrágya 10-34-0 (P)" eh="8c1a1ddc" />
     <e k="sf_urea_title" v="Karbamid 46-0-0 (N)" eh="659b3097" />
-        <e k="sf_an_title" v="[EN] Ammonium Nitrate 34.5-0-0 (N)" eh="29f6ee93" />
-<e k="sf_ams_title" v="Ammónium-szulfát 21-0-0 (N)" eh="033d1845" />
+    <e k="sf_an_title" v="Ammónium-nitrát 34.5-0-0 (N)" eh="29f6ee93" />
+    <e k="sf_ams_title" v="Ammónium-szulfát 21-0-0 (N)" eh="033d1845" />
     <e k="sf_map_title" v="MAP műtrágya 11-52-0 (P)" eh="31aa2534" />
     <e k="sf_dap_title" v="DAP műtrágya 18-46-0 (P)" eh="5030a80a" />
     <e k="sf_potash_title" v="Hamuzsír 0-0-60 (K)" eh="8db6c54c" />
-		<e k="sf_liquid_urea_title" v="[EN] Liquid Urea (N)" eh="7fee4f12" />
-		<e k="sf_liquid_ams_title" v="[EN] Liquid Ammonium Sulfate (N)" eh="0daf3a6f" />
-		<e k="sf_liquid_map_title" v="[EN] Liquid MAP (P)" eh="3ce7c8c9" />
-		<e k="sf_liquid_dap_title" v="[EN] Liquid DAP (P)" eh="86bd893e" />
-		<e k="sf_liquid_potash_title" v="[EN] Liquid Potash (K)" eh="72ac9fd3" />
-		<e k="sf_insecticide_title" v="[EN] Insecticide" eh="5650eeef" />
-		<e k="sf_fungicide_title" v="[EN] Fungicide" eh="e8512698" />
+    <e k="sf_liquid_urea_title" v="Folyékony karbamid (N)" eh="7fee4f12" />
+    <e k="sf_liquid_ams_title" v="Folyékony ammónium-szulfát (N)" eh="0daf3a6f" />
+    <e k="sf_liquid_map_title" v="Folyékony MAP (P)" eh="3ce7c8c9" />
+    <e k="sf_liquid_dap_title" v="Folyékony DAP (P)" eh="86bd893e" />
+    <e k="sf_liquid_potash_title" v="Folyékony hamuzsír (K)" eh="72ac9fd3" />
+    <e k="sf_insecticide_title" v="Rovarölő szer" eh="5650eeef" />
+    <e k="sf_fungicide_title" v="Gombaölő szer" eh="e8512698" />
     <e k="sf_report_page_info" v="Mezők %d-%d / %d  |  Oldal %d / %d" eh="8db851d1" />
-    <e k="sf_bigBag_uan32_name" v="[EN] IBC UAN 32-0-0" eh="574747ce" />
+    <e k="sf_bigBag_uan32_name" v="IBC UAN 32-0-0" eh="574747ce" />
     <e k="sf_bigBag_uan32_function" v="Nitrogén műtrágya (folyékony)" eh="27de5f41" />
-    <e k="sf_bigBag_uan28_name" v="[EN] IBC UAN 28-0-0" eh="7eeec815" />
+    <e k="sf_bigBag_uan28_name" v="IBC UAN 28-0-0" eh="7eeec815" />
     <e k="sf_bigBag_uan28_function" v="Nitrogén műtrágya (folyékony)" eh="27de5f41" />
-    <e k="sf_bigBag_anhydrous_name" v="[EN] IBC Anhydrous Ammonia 82-0-0" eh="fb09e6ce" />
+    <e k="sf_bigBag_anhydrous_name" v="IBC Vízmentes ammónia 82-0-0" eh="fb09e6ce" />
     <e k="sf_bigBag_anhydrous_function" v="Nitrogén műtrágya (folyékony)" eh="27de5f41" />
     <e k="sf_bigBag_urea_name" v="Big Bag Karbamid 46-0-0" eh="8e8cbaae" />
     <e k="sf_bigBag_urea_function" v="Nitrogén műtrágya (száraz)" eh="63efea20" />
-        <e k="sf_bigBag_an_name" v="[EN] Big Bag AN 34.5-0-0" eh="45f56f60" />
-    <e k="sf_bigBag_an_function" v="[EN] Nitrogen Fertilizer (dry)" eh="63efea20" />
-<e k="sf_bigBag_ams_name" v="[EN] Big Bag AMS 21-0-0-24S" eh="7f71ee68" />
+    <e k="sf_bigBag_an_name" v="Big Bag AN 34.5-0-0" eh="45f56f60" />
+    <e k="sf_bigBag_an_function" v="Nitrogén műtrágya (száraz)" eh="63efea20" />
+    <e k="sf_bigBag_ams_name" v="Big Bag AMS 21-0-0-24S" eh="7f71ee68" />
     <e k="sf_bigBag_ams_function" v="Nitrogén műtrágya (száraz)" eh="63efea20" />
-    <e k="sf_bigBag_map_name" v="[EN] Big Bag MAP 11-52-0" eh="8a5a059b" />
+    <e k="sf_bigBag_map_name" v="Big Bag MAP 11-52-0" eh="8a5a059b" />
     <e k="sf_bigBag_map_function" v="Foszfor műtrágya (száraz)" eh="0cc85c60" />
-    <e k="sf_bigBag_dap_name" v="[EN] Big Bag DAP 18-46-0" eh="fb4e9987" />
+    <e k="sf_bigBag_dap_name" v="Big Bag DAP 18-46-0" eh="fb4e9987" />
     <e k="sf_bigBag_dap_function" v="Foszfor műtrágya (száraz)" eh="0cc85c60" />
     <e k="sf_bigBag_potash_name" v="Big Bag Hamuzsír 0-0-60" eh="eb771556" />
     <e k="sf_bigBag_potash_function" v="Kálium műtrágya (száraz)" eh="18015099" />
-		<e k="sf_bigBag_liquid_urea_name" v="[EN] IBC Liquid Urea" eh="c40b906f" />
-		<e k="sf_bigBag_liquid_urea_function" v="[EN] Nitrogen Fertilizer (liquid)" eh="27de5f41" />
-		<e k="sf_bigBag_liquid_ams_name" v="[EN] IBC Liquid AMS" eh="32e6c8bb" />
-		<e k="sf_bigBag_liquid_ams_function" v="[EN] Nitrogen Fertilizer (liquid)" eh="27de5f41" />
-		<e k="sf_bigBag_liquid_map_name" v="[EN] IBC Liquid MAP" eh="4628addb" />
-		<e k="sf_bigBag_liquid_map_function" v="[EN] Phosphorus Fertilizer (liquid)" eh="eeb5ef5d" />
-		<e k="sf_bigBag_liquid_dap_name" v="[EN] IBC Liquid DAP" eh="82fb3c06" />
-		<e k="sf_bigBag_liquid_dap_function" v="[EN] Phosphorus Fertilizer (liquid)" eh="eeb5ef5d" />
-		<e k="sf_bigBag_liquid_potash_name" v="[EN] IBC Liquid Potash" eh="7176856d" />
-		<e k="sf_bigBag_liquid_potash_function" v="[EN] Potassium Fertilizer (liquid)" eh="52169d4a" />
-    <e k="sf_bigBag_starter_name" v="[EN] IBC Starter 10-34-0" eh="62b13bd1" />
-    <e k="sf_bigBag_insecticide_name" v="[EN] IBC Insecticide" eh="c8f0aabb" />
-    <e k="sf_bigBag_insecticide_function" v="[EN] Insecticide (liquid)" eh="09580f6b" />
-    <e k="sf_bigBag_fungicide_name" v="[EN] IBC Fungicide" eh="2a1c78d4" />
-    <e k="sf_bigBag_fungicide_function" v="[EN] Fungicide (liquid)" eh="745c34cb" />
+    <e k="sf_bigBag_liquid_urea_name" v="IBC Folyékony karbamid" eh="c40b906f" />
+    <e k="sf_bigBag_liquid_urea_function" v="Nitrogén műtrágya (folyékony)" eh="27de5f41" />
+    <e k="sf_bigBag_liquid_ams_name" v="IBC Folyékony AMS" eh="32e6c8bb" />
+    <e k="sf_bigBag_liquid_ams_function" v="Nitrogén műtrágya (folyékony)" eh="27de5f41" />
+    <e k="sf_bigBag_liquid_map_name" v="IBC Folyékony MAP" eh="4628addb" />
+    <e k="sf_bigBag_liquid_map_function" v="Foszfor műtrágya (folyékony)" eh="eeb5ef5d" />
+    <e k="sf_bigBag_liquid_dap_name" v="IBC Folyékony DAP" eh="82fb3c06" />
+    <e k="sf_bigBag_liquid_dap_function" v="Foszfor műtrágya (folyékony)" eh="eeb5ef5d" />
+    <e k="sf_bigBag_liquid_potash_name" v="IBC Folyékony hamuzsír" eh="7176856d" />
+    <e k="sf_bigBag_liquid_potash_function" v="Kálium műtrágya (folyékony)" eh="52169d4a" />
+    <e k="sf_bigBag_starter_name" v="IBC Starter 10-34-0" eh="62b13bd1" />
+    <e k="sf_bigBag_insecticide_name" v="IBC Rovarölő szer" eh="c8f0aabb" />
+    <e k="sf_bigBag_insecticide_function" v="Rovarölő szer (folyékony)" eh="09580f6b" />
+    <e k="sf_bigBag_fungicide_name" v="IBC Gombaölő szer" eh="2a1c78d4" />
+    <e k="sf_bigBag_fungicide_function" v="Gombaölő szer (folyékony)" eh="745c34cb" />
     <e k="sf_bigBag_starter_function" v="Starter műtrágya (folyékony)" eh="2c36ea57" />
-		<e k="sf_bigBag_gypsum_name" v="[EN] Big Bag Gypsum" eh="40fc8169" />
-		<e k="sf_bigBag_gypsum_function" v="[EN] Soil Amendment (dry)" eh="51503c54" />
-    <e k="sf_bigBag_compost_name" v="[EN] Big Bag Compost" eh="14322c5d" />
-    <e k="sf_bigBag_compost_function" v="[EN] Organic Soil Amendment (dry)" eh="9dd2256a" />
-    <e k="sf_bigBag_biosolids_name" v="[EN] Big Bag Biosolids" eh="61a60ff3" />
-    <e k="sf_bigBag_biosolids_function" v="[EN] Organic Fertilizer (dry)" eh="374c7b1e" />
-    <e k="sf_bigBag_chicken_manure_name" v="[EN] Big Bag Chicken Manure" eh="cb60fddc" />
-    <e k="sf_bigBag_chicken_manure_function" v="[EN] Organic Fertilizer (dry)" eh="374c7b1e" />
-    <e k="sf_bigBag_pelletized_manure_name" v="[EN] Big Bag Pelletized Manure" eh="064be7fa" />
-    <e k="sf_bigBag_pelletized_manure_function" v="[EN] Organic Fertilizer (dry)" eh="374c7b1e" />
-    <e k="sf_bigBag_liquidlime_name" v="[EN] Liquid Lime Tank" eh="4f8caca1" />
-    <e k="sf_bigBag_liquidlime_function" v="[EN] pH Raising Agent (liquid)" eh="7a118b6d" />
-    <e k="sf_report_detail_n_ok" v="[EN] Nitrogen: Optimal" eh="13782bd9" />
-    <e k="sf_report_detail_p_ok" v="[EN] Phosphorus: Optimal" eh="dbc90f11" />
-    <e k="sf_report_detail_k_ok" v="[EN] Potassium: Optimal" eh="0197b4ba" />
-    <e k="sf_report_status_monitor" v="[EN] Monitor" eh="d2986ac8" />
-    <e k="sf_report_status_adjust" v="[EN] Adjust" eh="51d7a685" />
-    <e k="sf_report_status_maintain" v="[EN] Maintain" eh="ade01a5a" />
-    <e k="sf_report_status_increase" v="[EN] Increase" eh="aac247ca" />
-    <e k="sf_report_pressure_low" v="[EN] Low" eh="28d0edd0" />
-    <e k="sf_report_pressure_moderate" v="[EN] Moderate" eh="1eb79d43" />
-    <e k="sf_report_pressure_high" v="[EN] High" eh="655d20c1" />
-    <e k="sf_report_yield_hint" v="[EN] Based on N/P/K vs optimal threshold" eh="022663e0" />
-    <e k="sf_report_yield_loss" v="[EN] Yield ~-%d%%" eh="d64d5d59" />
-		<e k="helpLine_sf_cat_overview" v="[EN] Overview" eh="3b878279" />
-		<e k="helpLine_sf_cat_started" v="[EN] Getting Started" eh="bf647454" />
-		<e k="helpLine_sf_cat_nutrients" v="[EN] Soil Nutrients" eh="64377acf" />
-		<e k="helpLine_sf_cat_fertilizers" v="[EN] Fertilizers" eh="754d59bd" />
-		<e k="helpLine_sf_cat_hud" v="[EN] HUD &amp; Soil Report" eh="9b9888b9" />
-		<e k="helpLine_sf_cat_settings" v="[EN] Settings" eh="f4f70727" />
-		<e k="helpLine_sf_cat_multiplayer" v="[EN] Multiplayer" eh="901a7320" />
-		<e k="helpLine_sf_ov_p1_title" v="[EN] What It Does" eh="46cbb25b" />
-		<e k="helpLine_sf_ov_p1_intro_title" v="[EN] Per-Field Soil Tracking" eh="8fe3248d" />
-		<e k="helpLine_sf_ov_p1_intro_text" v="[EN] Every field independently tracks five properties: Nitrogen (N), Phosphorus (P), Potassium (K), Organic Matter (OM), and pH. Values are saved with your savegame and persist across sessions." eh="c30216e6" />
-		<e k="helpLine_sf_ov_p1_flow_title" v="[EN] The Nutrient Cycle" eh="15b0d408" />
-		<e k="helpLine_sf_ov_p1_flow_text" v="[EN] Crops remove nutrients at harvest. Fertilizer, manure, slurry, and lime restore them. The mod tracks a realistic nutrient budget - what crops take out, you must put back." eh="418041f0" />
-		<e k="helpLine_sf_ov_p2_title" v="[EN] Environmental Effects" eh="e139e84f" />
-		<e k="helpLine_sf_ov_p2_rain_title" v="[EN] Rain and Leaching" eh="33e0d8ea" />
-		<e k="helpLine_sf_ov_p2_rain_text" v="[EN] Rain leaches Nitrogen most heavily, then Potassium, then Phosphorus. It also slowly acidifies pH over time. Rain effects can be toggled off in Settings." eh="91e39cc6" />
-		<e k="helpLine_sf_ov_p2_season_title" v="[EN] Seasons and Fallow Recovery" eh="ad2009c8" />
-		<e k="helpLine_sf_ov_p2_season_text" v="[EN] Spring adds +0.03 N per day (biological activity). Fall removes 0.02 N per day. Fields left unplanted for more than 7 days slowly recover all nutrients on their own." eh="e5ebb3b2" />
-		<e k="helpLine_sf_gs_p1_title" v="[EN] Your First Steps" eh="bdd0e0a7" />
-		<e k="helpLine_sf_gs_p1_hud_title" v="[EN] Open the HUD (J key)" eh="e1bdea72" />
-		<e k="helpLine_sf_gs_p1_hud_text" v="[EN] Press J to toggle the live soil overlay. It shows N, P, K, pH, and OM for the field you are standing in. Good / Fair / Poor status labels tell you what needs attention at a glance." eh="53cef520" />
-		<e k="helpLine_sf_gs_p1_report_title" v="[EN] Open the Soil Report (K key)" eh="e71446cd" />
-		<e k="helpLine_sf_gs_p1_report_text" v="[EN] Press K to open the full farm soil report. Every field is listed with color-coded nutrient status, sorted by urgency. Click the arrow on any row for a detailed view with recommendations." eh="9a0d32a6" />
-		<e k="helpLine_sf_gs_p2_title" v="[EN] Fertilize and Harvest" eh="1a52ac04" />
-		<e k="helpLine_sf_gs_p2_fert_title" v="[EN] Fertilizing Fields" eh="ea52ec26" />
-		<e k="helpLine_sf_gs_p2_fert_text" v="[EN] Apply fertilizer with any standard sprayer or spreader. The mod recognizes all base-game types plus 9 custom types (UAN-32, MAP, Potash, etc.). Each type restores different nutrients - see the Fertilizers category for full profiles." eh="fe906e29" />
-		<e k="helpLine_sf_gs_p2_harvest_title" v="[EN] Harvest Depletion" eh="a67b6cb5" />
-		<e k="helpLine_sf_gs_p2_harvest_text" v="[EN] Every harvest removes nutrients from the field. Demanding crops (potato, sugar beet, soybean) deplete significantly more than light feeders (barley, oats). Re-check the HUD or soil report after each harvest cycle." eh="63f90ed4" />
-		<e k="helpLine_sf_gs_p3_title" v="[EN] Difficulty" eh="7b29ca96" />
-		<e k="helpLine_sf_gs_p3_levels_title" v="[EN] Three Difficulty Levels" eh="52611188" />
-		<e k="helpLine_sf_gs_p3_levels_text" v="[EN] Simple (0.7x): 30% less depletion - good for new players. Realistic (1.0x): balanced, calibrated to real agricultural rates. Hardcore (1.5x): 50% more depletion - intensive soil management required." eh="f4f1ea30" />
-		<e k="helpLine_sf_gs_p3_access_title" v="[EN] Changing Settings" eh="b421c88f" />
-		<e k="helpLine_sf_gs_p3_access_text" v="[EN] Open settings at ESC &gt; Settings &gt; Soil &amp; Fertilizer. In multiplayer, only the server admin can change simulation settings. All HUD display options are per-player and not shared." eh="f36a5639" />
-		<e k="helpLine_sf_nu_p1_title" v="[EN] Nitrogen and Phosphorus" eh="27d37372" />
-		<e k="helpLine_sf_nu_p1_n_title" v="[EN] Nitrogen (N) - Scale 0 to 100" eh="10a358f4" />
-		<e k="helpLine_sf_nu_p1_n_text" v="[EN] Most mobile nutrient - depletes fastest and leaches heavily in rain. Poor: below 30. Good: above 50. Raise with: liquid fertilizer, UAN-32, UAN-28, anhydrous ammonia, urea, AMS, manure, or slurry." eh="58d62253" />
-		<e k="helpLine_sf_nu_p1_p_title" v="[EN] Phosphorus (P) - Scale 0 to 100" eh="979bba64" />
-		<e k="helpLine_sf_nu_p1_p_text" v="[EN] Binds tightly to soil and leaches very slowly. Depletes mainly through harvest. Canola has the highest P demand. Poor: below 25. Good: above 45. Raise with: MAP, DAP, starter fertilizer, or liquid fertilizer." eh="92c5ac66" />
-		<e k="helpLine_sf_nu_p2_title" v="[EN] Potassium and pH" eh="6bd92f25" />
-		<e k="helpLine_sf_nu_p2_k_title" v="[EN] Potassium (K) - Scale 0 to 100" eh="2a16e8bc" />
-		<e k="helpLine_sf_nu_p2_k_text" v="[EN] Critical for root and tuber crops. Potato and sugar beet deplete K heavily each harvest. Leaches moderately in rain. Poor: below 20. Good: above 40. Raise with: potash (0-0-60), slurry, digestate, or liquid fertilizer." eh="7230fee4" />
-		<e k="helpLine_sf_nu_p2_ph_title" v="[EN] pH - Scale 5.0 to 7.5" eh="944beca2" />
-		<e k="helpLine_sf_nu_p2_ph_text" v="[EN] Most crops thrive at pH 6.5 to 7.0. Rain slowly acidifies soil over time. pH does not recover on its own - only lime or liquid lime raises it. Poor: below 5.5. Apply lime if pH is falling before the next planting." eh="08e0aefd" />
-		<e k="helpLine_sf_nu_p3_title" v="[EN] Organic Matter" eh="6305f4bb" />
-		<e k="helpLine_sf_nu_p3_om_title" v="[EN] Organic Matter (OM) - Scale 0 to 10" eh="58f490f3" />
-		<e k="helpLine_sf_nu_p3_om_text" v="[EN] Builds very slowly and is not depleted by harvest. Poor: below 2.5. Good: above 4.0. Raise with: manure, slurry, digestate, compost, biosolids, chicken litter, pelletized manure, or by chopping straw back into the field." eh="f9a02359" />
-		<e k="helpLine_sf_nu_p3_fallow_title" v="[EN] Fallow Recovery" eh="14133b0b" />
-		<e k="helpLine_sf_nu_p3_fallow_text" v="[EN] A field left unplanted for 7+ days slowly recovers nutrients. Per day: N +0.07, P +0.03, K +0.05, OM +0.01. Crop rotation and periods of rest still have real value in this mod." eh="81fa82b3" />
-		<e k="helpLine_sf_fe_p1_title" v="[EN] Base Game Types" eh="fd941c0d" />
-		<e k="helpLine_sf_fe_p1_base_title" v="[EN] Liquid, Solid, Manure and Slurry" eh="4668dca7" />
-		<e k="helpLine_sf_fe_p1_base_text" v="[EN] Liquid Fertilizer adds balanced N+P+K. Solid Fertilizer is higher in N and P. Manure and Slurry add N, P, K, and Organic Matter. Digestate (biogas byproduct) is high in K and also adds OM. All applied with standard equipment." eh="64069a56" />
-		<e k="helpLine_sf_fe_p1_lime_title" v="[EN] Lime and pH Correction" eh="8933cce1" />
-		<e k="helpLine_sf_fe_p1_lime_text" v="[EN] Lime is the only base-game pH correction - it does not add nutrients. Custom types Liquid Lime and Gypsum also raise pH (Gypsum adds minor OM too). Apply when pH drops below 6.0 to keep crops in their optimal range." eh="833a967f" />
-		<e k="helpLine_sf_fe_p2_title" v="[EN] Custom Nitrogen and PK Sources" eh="1021f8c9" />
-		<e k="helpLine_sf_fe_p2_n_title" v="[EN] Nitrogen Sources (custom big bags)" eh="9dfe5a5a" />
-		<e k="helpLine_sf_fe_p2_n_text" v="[EN] UAN-32 (32-0-0) and UAN-28 (28-0-0) are liquid nitrogen solutions. Anhydrous Ammonia (82-0-0) is the highest-N product per litre. Urea (46-0-0) and AMS (21-0-0-24S) are dry granular. All are N only - no effect on P, K, or pH." eh="6a100c25" />
-		<e k="helpLine_sf_fe_p2_pk_title" v="[EN] Phosphorus and Potassium Sources" eh="a2d4091b" />
-		<e k="helpLine_sf_fe_p2_pk_text" v="[EN] MAP (11-52-0): highest P per litre. DAP (18-46-0): high P with some N. Potash (0-0-60): pure K. Starter (10-34-0): high-P in-furrow product with balanced N+K. All available as purchasable big bags in the shop." eh="75a86964" />
-		<e k="helpLine_sf_fe_p3_title" v="[EN] Organic Products and Burn Risk" eh="7ab807d1" />
-		<e k="helpLine_sf_fe_p3_organic_title" v="[EN] Organic and Slow-Release Products" eh="0199e6be" />
-		<e k="helpLine_sf_fe_p3_organic_text" v="[EN] Compost is the strongest OM builder (+0.12 per 1,000 L). Biosolids and Chicken Litter add N, P, and OM. Pelletized Manure is a concentrated balanced organic. All are custom fill types available when compatible equipment mods are installed." eh="3d16e4ee" />
-		<e k="helpLine_sf_fe_p3_burn_title" v="[EN] Overapplication Burn Risk" eh="e986cc54" />
-		<e k="helpLine_sf_fe_p3_burn_text" v="[EN] Applying above 1.25x the base rate risks fertilizer burn (-0.15 pH and -5 N). At 1.50x or higher, burn is guaranteed every pass (-0.30 pH and -12 N). Use SF Rate Up / Rate Down keys in the vehicle to control the application rate." eh="7bccc46a" />
-		<e k="helpLine_sf_hu_p1_title" v="[EN] The Soil HUD" eh="6522879b" />
-		<e k="helpLine_sf_hu_p1_toggle_title" v="[EN] Toggling the HUD (J key)" eh="402283ba" />
-		<e k="helpLine_sf_hu_p1_toggle_text" v="[EN] Press J to show or hide the live soil overlay. It detects the field you are on and shows N, P, K, pH, and OM. When Weed, Pest, or Disease settings are enabled, those rows appear at the bottom of the panel." eh="3dcb9bfe" />
-		<e k="helpLine_sf_hu_p1_status_title" v="[EN] Reading the Status" eh="291c3aac" />
-		<e k="helpLine_sf_hu_p1_status_text" v="[EN] Each nutrient shows Good (no action needed), Fair (consider treating soon), or Poor (action needed - yield affected). The overall badge in the title bar reflects the worst value across all tracked dimensions including weed, pest, and disease." eh="3b8c2c6e" />
-		<e k="helpLine_sf_hu_p2_title" v="[EN] Field Health Pressures" eh="b4d35b30" />
-		<e k="helpLine_sf_hu_p2_press_title" v="[EN] Weed, Pest and Disease" eh="0a3fae00" />
-		<e k="helpLine_sf_hu_p2_press_text" v="[EN] Three pressure scores (0 to 100) track biological threats per field. Left unchecked they reduce yield at harvest: Weed up to -30%, Pest -20%, Disease -25%. HUD rows W, I, and D show color-coded severity: green (low), yellow (moderate), red (high)." eh="3fc3c400" />
-		<e k="helpLine_sf_hu_p2_treat_title" v="[EN] Treating Pressure" eh="cb24bf50" />
-		<e k="helpLine_sf_hu_p2_treat_text" v="[EN] Herbicide reduces weed pressure - any tillage also resets it to zero. Insecticide reduces pest pressure by 25 pts and suppresses regrowth for 10 days. Fungicide reduces disease by 20 pts and suppresses for 12 days. Each system can be toggled off in Settings." eh="4d65bdec" />
-		<e k="helpLine_sf_hu_p3_title" v="[EN] The Soil Report" eh="35fcce6c" />
-		<e k="helpLine_sf_hu_p3_open_title" v="[EN] Opening the Report (K key)" eh="62e3f629" />
-		<e k="helpLine_sf_hu_p3_open_text" v="[EN] Press K to open the full farm soil report. The summary bar shows total fields tracked, how many need fertilizer, and a weighted Farm Health percentage. Fields are sorted by urgency - worst condition first." eh="38a5bd2e" />
-		<e k="helpLine_sf_hu_p3_detail_title" v="[EN] Field Detail and Recommendations" eh="c99d2b89" />
-		<e k="helpLine_sf_hu_p3_detail_text" v="[EN] Click the arrow on any row to open that field's detail view: nutrient values, pressure levels, a yield penalty forecast, and a bulleted recommendation list telling you exactly what to apply. Press Back or Escape to return to the table." eh="38dd2c6d" />
-		<e k="helpLine_sf_se_p1_title" v="[EN] Simulation Settings" eh="cbf13e3c" />
-		<e k="helpLine_sf_se_p1_server_title" v="[EN] Server Settings (Admin Only in Multiplayer)" eh="49f37ed7" />
-		<e k="helpLine_sf_se_p1_server_text" v="[EN] Fertility System, Nutrient Cycles, Seasonal Effects, Rain Effects, Plowing Bonus, Weed/Pest/Disease Pressure, Fertilizer Costs, Notifications, Crop Rotation, and Auto-Rate Control. In multiplayer, only the server admin can change these. Changes sync to all clients instantly." eh="abca5e43" />
-		<e k="helpLine_sf_se_p1_diff_title" v="[EN] Difficulty" eh="7b29ca96" />
-		<e k="helpLine_sf_se_p1_diff_text" v="[EN] Simple (0.7x) reduces depletion by 30% for a relaxed experience. Realistic (1.0x) is the balanced default. Hardcore (1.5x) increases depletion by 50% for intensive soil management. Access via ESC &gt; Settings &gt; Soil &amp; Fertilizer." eh="740a3a4e" />
-		<e k="helpLine_sf_se_p2_title" v="[EN] HUD and Rate Control" eh="399f4910" />
-		<e k="helpLine_sf_se_p2_hud_title" v="[EN] Per-Player HUD Options" eh="0df76500" />
-		<e k="helpLine_sf_se_p2_hud_text" v="[EN] Each player controls their own HUD - not synced to the server. Options: Show HUD (on/off), Position (5 presets + drag), Color Theme (Green / Blue / Amber / Mono), Font Size (Small / Medium / Large), Transparency (25% to 100%), Imperial Units (on/off)." eh="f3934884" />
-		<e k="helpLine_sf_se_p2_rate_title" v="[EN] Sprayer Rate Control" eh="5ecdfa23" />
-		<e k="helpLine_sf_se_p2_rate_text" v="[EN] While in a sprayer or spreader, use SF Rate Up (]) and SF Rate Down ([) to adjust the application rate from 0.10x to 2.00x. Toggle Auto-Rate Control (Shift+L) to let the mod automatically target optimal nutrient levels and avoid burn risk." eh="dd385e39" />
-		<e k="helpLine_sf_mp_p1_title" v="[EN] How Multiplayer Works" eh="8a4ce30e" />
-		<e k="helpLine_sf_mp_p1_auth_title" v="[EN] Server-Authoritative Simulation" eh="8d324792" />
-		<e k="helpLine_sf_mp_p1_auth_text" v="[EN] All soil simulation runs on the server. Clients receive full field data and settings on join, with automatic retry if the server is still loading. HUD display settings (position, theme, size) are per-player and are never synced to the server." eh="db72a3f9" />
-		<e k="helpLine_sf_mp_p1_ded_title" v="[EN] Dedicated Servers" eh="4d3a45ba" />
-		<e k="helpLine_sf_mp_p1_ded_text" v="[EN] Dedicated servers run the full simulation without any HUD or GUI overhead - this is expected and normal. Use console commands (soilStatus, SoilSetDifficulty, SoilShowSettings, etc.) to manage and verify settings on a dedicated server." eh="3df784d6" />
-    <e k="sf_crop_rotation_short" v="[EN] Crop Rotation" eh="def2c162" />
-    <e k="sf_crop_rotation_long" v="[EN] Enable/disable crop rotation bonus and mono-crop fatigue (legume sequences restore nitrogen; same-crop consecutive seasons increase depletion)" eh="958b4212" />
-    <e k="sf_report_rotation_bonus" v="[EN] Rotation Bonus" eh="2831a7ac" />
-    <e k="sf_report_rotation_fatigue" v="[EN] Fatigue: Same Crop" eh="46135880" />
-    <e k="sf_report_rotation_ok" v="[EN] Rotation: OK" eh="df66b3be" />
-    <e k="sf_gypsum_title" v="[EN] Gypsum (pH-)" eh="d66da34c" />
-    <e k="sf_compost_title" v="[EN] Compost (Organic)" eh="c3e2071a" />
-    <e k="sf_biosolids_title" v="[EN] Biosolids (N+P)" eh="f0c901dc" />
-    <e k="sf_chicken_manure_title" v="[EN] Chicken Manure (N+P)" eh="338128e2" />
-    <e k="sf_pelletized_manure_title" v="[EN] Pelletized Manure (NPK)" eh="c1b39b71" />
-    <e k="sf_liquidlime_title" v="[EN] Liquid Lime (pH+)" eh="d4ec4bb9" />
-    <e k="helpLine_sf_nu_p4_title" v="[EN] Crop Rotation" eh="def2c162" />
-    <e k="helpLine_sf_nu_p4_bonus_title" v="[EN] Rotation Bonus" eh="2831a7ac" />
-    <e k="helpLine_sf_nu_p4_bonus_text" v="[EN] Growing a legume crop (soybeans, peas, beans) after a non-legume adds a free nitrogen boost each spring for 3 days." eh="e1fce95b" />
-    <e k="helpLine_sf_nu_p4_fatigue_title" v="[EN] Crop Fatigue" eh="236a590c" />
-    <e k="helpLine_sf_nu_p4_fatigue_text" v="[EN] Planting the same crop two seasons in a row increases nutrient extraction by 15%. Rotate crops to avoid soil fatigue." eh="1613f3c6" />
-		<e k="sf_map_layer_off" v="[EN] Soil Map: Off" eh="3e654ade" />
-		<e k="sf_map_layer_n" v="[EN] Nitrogen" eh="1e9ef3ba" />
-		<e k="sf_map_layer_p" v="[EN] Phosphorus" eh="eb4f2688" />
-		<e k="sf_map_layer_k" v="[EN] Potassium" eh="3a4edc67" />
-		<e k="sf_map_layer_ph" v="[EN] pH" eh="397dff20" />
-		<e k="sf_map_layer_om" v="[EN] Organic Matter" eh="6305f4bb" />
-		<e k="sf_map_layer_urgency" v="[EN] Field Urgency" eh="419ea5af" />
-		<e k="sf_map_layer_weed" v="[EN] Weed Pressure" eh="53f8b936" />
-		<e k="sf_map_layer_pest" v="[EN] Pest Pressure" eh="18a7c2be" />
-		<e k="sf_map_layer_disease" v="[EN] Disease Pressure" eh="2b805cc9" />
-    <e k="sf_map_layer_compaction" v="[EN] Compaction" eh="19cf3ee7" />
-		<e k="sf_map_overlay_cycle" v="[EN] Shift+M: Cycle Soil Layer" eh="032fdac7" />
-		<e k="sf_map_page_title" v="[EN] Soil Layers" eh="04a675fb" />
-		<e k="sf_map_sidebar_header" v="[EN] Soil Map Layer" eh="81332549" />
-		<e k="sf_map_sidebar_label" v="[EN] Active Layer" eh="f8a2c198" />
-		<e k="sf_map_sidebar_tooltip" v="[EN] Select which soil nutrient to display on the map" eh="eb926e9a" />
-		<e k="sf_map_overlay_low" v="[EN] Low" eh="28d0edd0" />
-		<e k="sf_map_overlay_med" v="[EN] Med" eh="248c9511" />
-		<e k="sf_map_overlay_high" v="[EN] High" eh="655d20c1" />
+    <e k="sf_bigBag_gypsum_name" v="Big Bag Gipsz" eh="40fc8169" />
+    <e k="sf_bigBag_gypsum_function" v="Talajjavító (száraz)" eh="51503c54" />
+    <e k="sf_bigBag_compost_name" v="Big Bag Komposzt" eh="14322c5d" />
+    <e k="sf_bigBag_compost_function" v="Szerves talajjavító (száraz)" eh="9dd2256a" />
+    <e k="sf_bigBag_biosolids_name" v="Big Bag Bioszolárd" eh="61a60ff3" />
+    <e k="sf_bigBag_biosolids_function" v="Szerves műtrágya (száraz)" eh="374c7b1e" />
+    <e k="sf_bigBag_chicken_manure_name" v="Big Bag Csirketrágya" eh="cb60fddc" />
+    <e k="sf_bigBag_chicken_manure_function" v="Szerves műtrágya (száraz)" eh="374c7b1e" />
+    <e k="sf_bigBag_pelletized_manure_name" v="Big Bag Pelletált trágya" eh="064be7fa" />
+    <e k="sf_bigBag_pelletized_manure_function" v="Szerves műtrágya (száraz)" eh="374c7b1e" />
+    <e k="sf_bigBag_liquidlime_name" v="Folyékony mész tartály" eh="4f8caca1" />
+    <e k="sf_bigBag_liquidlime_function" v="pH növelő szer (folyékony)" eh="7a118b6d" />
+    <e k="sf_hud_title" v="TALAJ MONITOR" eh="f8cda642" />
+    <e k="sf_hud_field" v="Mező %d" eh="08988997" />
+    <e k="sf_hud_noField" v="Sétáljon egy mezőre" eh="62c55e9e" />
+    <e k="sf_hud_fallow" v="Ugar" eh="eafe5913" />
+    <e k="sf_hud_weeds" v="Gyomok" eh="324181de" />
+    <e k="sf_hud_pests" v="Kártevők" eh="2fed5101" />
+    <e k="sf_hud_disease" v="Betegség" eh="e7067a8c" />
+    <e k="sf_hud_protected" v="(védett)" eh="8273211e" />
+    <e k="sf_hud_yield" v="Hozam" eh="97345487" />
+    <e k="sf_hud_estYield" v="Becsült hozam" eh="32a4135e" />
+    <e k="sf_hud_optimal" v="Optimális" eh="cb61fef1" />
+    <e k="sf_hud_post_harvest" v="Betakarítás után · Műtrágyázás" eh="634de6fe" />
+    <e k="sf_hud_hint_edit" v="Húzás: mozgatás   Sarok: átméretezés   RMB/Shift+H: kész" eh="c3f1820c" />
+    <e k="sf_hud_hint_normal" v="Shift+H: mozgatás/átméretezés" eh="f1d565b1" />
+    <e k="sf_report_detail_n_ok" v="Nitrogén: Optimális" eh="13782bd9" />
+    <e k="sf_report_detail_p_ok" v="Foszfor: Optimális" eh="dbc90f11" />
+    <e k="sf_report_detail_k_ok" v="Kálium: Optimális" eh="0197b4ba" />
+    <e k="sf_report_status_monitor" v="Megfigyelés" eh="d2986ac8" />
+    <e k="sf_report_status_adjust" v="Beállítás" eh="51d7a685" />
+    <e k="sf_report_status_maintain" v="Fenntartás" eh="ade01a5a" />
+    <e k="sf_report_status_increase" v="Növelés" eh="aac247ca" />
+    <e k="sf_report_pressure_low" v="Alacsony" eh="28d0edd0" />
+    <e k="sf_report_pressure_moderate" v="Közepes" eh="1eb79d43" />
+    <e k="sf_report_pressure_high" v="Magas" eh="655d20c1" />
+    <e k="sf_report_yield_hint" v="Az N/P/K arány alapján az optimális küszöbhöz képest" eh="022663e0" />
+    <e k="sf_report_yield_loss" v="Hozam ~-%d%%" eh="d64d5d59" />
+
+    <!-- ======================================================
+         HELP LINES (ESC > Help > Realistic Soil & Fertilizer)
+         ====================================================== -->
+
+    <!-- Category titles -->
+    <e k="helpLine_sf_cat_overview" v="Áttekintés" eh="3b878279" />
+    <e k="helpLine_sf_cat_started" v="Első lépések" eh="bf647454" />
+    <e k="helpLine_sf_cat_nutrients" v="Talaj tápanyagok" eh="64377acf" />
+    <e k="helpLine_sf_cat_fertilizers" v="Műtrágyák" eh="754d59bd" />
+    <e k="helpLine_sf_cat_hud" v="HUD &amp; Talajjelentés" eh="655b1b40" />
+    <e k="helpLine_sf_cat_settings" v="Beállítások" eh="f4f70727" />
+    <e k="helpLine_sf_cat_multiplayer" v="Többjátékos mód" eh="901a7320" />
+
+    <!-- Category 1: Overview -->
+    <e k="helpLine_sf_ov_p1_title" v="Mit csinál a mod?" eh="46cbb25b" />
+    <e k="helpLine_sf_ov_p1_intro_title" v="Mezőszintű talajkövetés" eh="8fe3248d" />
+    <e k="helpLine_sf_ov_p1_intro_text" v="Minden mező függetlenül követ öt tulajdonságot: Nitrogén (N), Foszfor (P), Kálium (K), Szerves anyag (OM) és pH. Az értékek elmentődnek a játékállással." eh="c30216e6" />
+    <e k="helpLine_sf_ov_p1_flow_title" v="A tápanyagciklus" eh="15b0d408" />
+    <e k="helpLine_sf_ov_p1_flow_text" v="A növények betakarításkor kivonják a tápanyagokat. A műtrágya, a trágya, a hígtrágya és a mész visszaállítja azokat. A mod realisztikus tápanyag-költségvetést követ." eh="418041f0" />
+
+    <e k="helpLine_sf_ov_p2_title" v="Környezeti hatások" eh="e139e84f" />
+    <e k="helpLine_sf_ov_p2_rain_title" v="Eső és kimosódás" eh="33e0d8ea" />
+    <e k="helpLine_sf_ov_p2_rain_text" v="Az eső leginkább a Nitrogént mossa ki, majd a Káliumot és a Foszfort. Idővel lassan savasítja a pH-t is. Az esőhatások kikapcsolhatók a Beállításokban." eh="91e39cc6" />
+    <e k="helpLine_sf_ov_p2_season_title" v="Évszakok és ugar regeneráció" eh="ad2009c8" />
+    <e k="helpLine_sf_ov_p2_season_text" v="A tavasz naponta +0.03 N-t ad (biológiai aktivitás). Az ősz 0.02 N-t von le naponta. A több mint 7 napig bevetetlenül hagyott mezők lassan maguktól regenerálódnak." eh="e5ebb3b2" />
+
+    <!-- Category 2: Getting Started -->
+    <e k="helpLine_sf_gs_p1_title" v="Az első lépések" eh="bdd0e0a7" />
+    <e k="helpLine_sf_gs_p1_hud_title" v="HUD megnyitása (J gomb)" eh="e1bdea72" />
+    <e k="helpLine_sf_gs_p1_hud_text" v="Nyomja meg a J gombot az élő talajátfedés váltásához. Megmutatja az N, P, K, pH és OM értékeket az aktuális mezőn. A Jó / Közepes / Gyenge jelzések mutatják, mi igényel figyelmet." eh="53cef520" />
+    <e k="helpLine_sf_gs_p1_report_title" v="Talajjelentés megnyitása (K gomb)" eh="e71446cd" />
+    <e k="helpLine_sf_gs_p1_report_text" v="Nyomja meg a K gombot a teljes gazdaság talajjelentésének megnyitásához. Minden mező fel van sorolva, sürgősség szerint rendezve. Kattintson a nyílra a részletes ajánlásokért." eh="9a0d32a6" />
+
+    <e k="helpLine_sf_gs_p2_title" v="Műtrágyázás és betakarítás" eh="1a52ac04" />
+    <e k="helpLine_sf_gs_p2_fert_title" v="Mezők műtrágyázása" eh="ea52ec26" />
+    <e k="helpLine_sf_gs_p2_fert_text" v="Juttasson ki műtrágyát bármilyen standard géppel. A mod felismeri az alapjáték típusait és 9 egyedi típust (UAN-32, MAP, Hamuzsír, stb.). Minden típus más tápanyagot pótol." eh="fe906e29" />
+    <e k="helpLine_sf_gs_p2_harvest_title" v="Betakarítási kimerülés" eh="a67b6cb5" />
+    <e k="helpLine_sf_gs_p2_harvest_text" v="Minden betakarítás tápanyagot von el. Az igényes növények (burgonya, cukorrépa, szója) jelentősen többet, mint a könnyűek (árpa, zab). Ellenőrizze a HUD-ot minden ciklus után." eh="63f90ed4" />
+
+    <e k="helpLine_sf_gs_p3_title" v="Nehézség" eh="7b29ca96" />
+    <e k="helpLine_sf_gs_p3_levels_title" v="Három nehézségi szint" eh="52611188" />
+    <e k="helpLine_sf_gs_p3_levels_text" v="Egyszerű (0.7x): 30%-kal kevesebb kimerülés. Realisztikus (1.0x): kiegyensúlyozott, valós adatok alapján. Hardcore (1.5x): 50%-kal több kimerülés - intenzív kezelést igényel." eh="f4f1ea30" />
+    <e k="helpLine_sf_gs_p3_access_title" v="Beállítások módosítása" eh="b421c88f" />
+    <e k="helpLine_sf_gs_p3_access_text" v="Beállítások megnyitása: ESC > Beállítások > Talaj &amp; Műtrágya. Többjátékos módban csak a szerver adminisztrátor módosíthatja a szimulációt. A HUD opciók játékosonként egyediek." eh="4ba9d860" />
+
+    <!-- Category 3: Soil Nutrients -->
+    <e k="helpLine_sf_nu_p1_title" v="Nitrogén és Foszfor" eh="27d37372" />
+    <e k="helpLine_sf_nu_p1_n_title" v="Nitrogén (N) - Skála 0-tól 100-ig" eh="10a358f4" />
+    <e k="helpLine_sf_nu_p1_n_text" v="A legmobilabb tápanyag - leggyorsabban kimerül. Gyenge: 30 alatt. Jó: 50 felett. Emelés: folyékony műtrágya, UAN-32, UAN-28, vízmentes ammónia, karbamid, AMS, trágya vagy hígtrágya." eh="58d62253" />
+    <e k="helpLine_sf_nu_p1_p_title" v="Foszfor (P) - Skála 0-tól 100-ig" eh="979bba64" />
+    <e k="helpLine_sf_nu_p1_p_text" v="Erősen kötődik a talajhoz, lassan mosódik ki. Főleg betakarítással ürül. A repce igénye a legmagasabb. Gyenge: 25 alatt. Jó: 45 felett. Emelés: MAP, DAP, starter vagy folyékony műtrágya." eh="92c5ac66" />
+
+    <e k="helpLine_sf_nu_p2_title" v="Kálium és pH" eh="6bd92f25" />
+    <e k="helpLine_sf_nu_p2_k_title" v="Kálium (K) - Skála 0-tól 100-ig" eh="2a16e8bc" />
+    <e k="helpLine_sf_nu_p2_k_text" v="Kritikus a gyökér- és gumós növényeknek. A burgonya és cukorrépa erősen meríti a K-t. Gyenge: 20 alatt. Jó: 40 felett. Emelés: hamuzsír (0-0-60), hígtrágya, fermentlé vagy folyékony műtrágya." eh="7230fee4" />
+    <e k="helpLine_sf_nu_p2_ph_title" v="pH - Skála 5.0-tól 7.5-ig" eh="944beca2" />
+    <e k="helpLine_sf_nu_p2_ph_text" v="A legtöbb növény 6.5 - 7.0 pH között érzi jól magát. Az eső lassan savasít. A pH nem javul magától - csak mész vagy folyékony mész emeli. Gyenge: 5.5 alatt. Meszezzen, ha a pH leesik." eh="08e0aefd" />
+
+    <!-- Category 3 continued -->
+    <e k="helpLine_sf_nu_p3_title" v="Szerves anyag" eh="6305f4bb" />
+    <e k="helpLine_sf_nu_p3_om_title" v="Szerves anyag (OM) - Skála 0-tól 10-ig" eh="58f490f3" />
+    <e k="helpLine_sf_nu_p3_om_text" v="Nagyon lassan épül fel. Gyenge: 2.5 alatt. Jó: 4.0 felett. Emelés: trágya, hígtrágya, komposzt, bioszólárd, csirketrágya, pelletált trágya vagy a szalma visszadolgozása a mezőbe." eh="f9a02359" />
+    <e k="helpLine_sf_nu_p3_fallow_title" v="Ugar regeneráció" eh="14133b0b" />
+    <e k="helpLine_sf_nu_p3_fallow_text" v="A 7+ napig bevetetlen mező lassan regenerálódik. Naponta: N +0.07, P +0.03, K +0.05, OM +0.01. A vetésforgónak és a pihentetésnek valódi értéke van ebben a modban." eh="81fa82b3" />
+
+    <!-- Category 4: Fertilizers -->
+    <e k="helpLine_sf_fe_p1_title" v="Alapjáték típusok" eh="fd941c0d" />
+    <e k="helpLine_sf_fe_p1_base_title" v="Folyékony, szilárd, trágya és hígtrágya" eh="4668dca7" />
+    <e k="helpLine_sf_fe_p1_base_text" v="A folyékony műtrágya kiegyensúlyozott N+P+K-t ad. A szilárd műtrágya magasabb N és P tartalmú. A trágyák N, P, K és szerves anyagot is adnak. A fermentlé magas K tartalmú." eh="64069a56" />
+    <e k="helpLine_sf_fe_p1_lime_title" v="Mész és pH korrekció" eh="8933cce1" />
+    <e k="helpLine_sf_fe_p1_lime_text" v="A mész az egyetlen alapjáték pH korrekció - nem ad tápanyagot. Az egyedi folyékony mész és gipsz is emeli a pH-t. Meszezzen, ha a pH 6.0 alá esik az optimális tartomány érdekében." eh="833a967f" />
+
+    <e k="helpLine_sf_fe_p2_title" v="Egyedi Nitrogén és PK források" eh="1021f8c9" />
+    <e k="helpLine_sf_fe_p2_n_title" v="Nitrogén források (egyedi zsákok)" eh="9dfe5a5a" />
+    <e k="helpLine_sf_fe_p2_n_text" v="Az UAN-32 és UAN-28 folyékony nitrogén oldatok. A vízmentes ammónia a legmagasabb N tartalmú termék. A karbamid és az AMS száraz granulátumok. Csak N-t tartalmaznak." eh="6a100c25" />
+    <e k="helpLine_sf_fe_p2_pk_title" v="Foszfor és Kálium források" eh="a2d4091b" />
+    <e k="helpLine_sf_fe_p2_pk_text" v="MAP: legmagasabb P tartalom. DAP: magas P és némi N. Hamuzsír: tiszta K. Starter: magas P tartalmú termék kiegyensúlyozott N+K aránnyal. Mind elérhető a boltban." eh="75a86964" />
+
+    <e k="helpLine_sf_fe_p3_title" v="Szerves termékek és kiégési kockázat" eh="7ab807d1" />
+    <e k="helpLine_sf_fe_p3_organic_title" v="Szerves és lassú felszívódású termékek" eh="0199e6be" />
+    <e k="helpLine_sf_fe_p3_organic_text" v="A komposzt a legerősebb OM építő. A bioszólárd és csirketrágya N, P és OM-et ad. A pelletált trágya koncentrált, kiegyensúlyozott szerves anyag. Egyedi típusokként érhetők el." eh="3d16e4ee" />
+    <e k="helpLine_sf_fe_p3_burn_title" v="Túladagolási kiégési kockázat" eh="e986cc54" />
+    <e k="helpLine_sf_fe_p3_burn_text" v="Az alapmennyiség 1.25-szöröse felett fennáll a kiégés veszélye (-0.15 pH és -5 N). 1.50-szeres felett a kiégés garantált (-0.30 pH és -12 N). Használja az arányvezérlő gombokat." eh="7bccc46a" />
+
+    <!-- Category 5: HUD and Soil Report -->
+    <e k="helpLine_sf_hu_p1_title" v="A Talaj HUD" eh="6522879b" />
+    <e k="helpLine_sf_hu_p1_toggle_title" v="HUD váltása (J gomb)" eh="402283ba" />
+    <e k="helpLine_sf_hu_p1_toggle_text" v="Nyomja meg a J gombot a talajátfedés megjelenítéséhez/elrejtéséhez. Érzékeli a mezőt és mutatja az N, P, K, pH és OM értékeket. A Gyom, Kártevő és Betegség sorok alul jelennek meg." eh="3dcb9bfe" />
+    <e k="helpLine_sf_hu_p1_status_title" v="Az állapot leolvasása" eh="291c3aac" />
+    <e k="helpLine_sf_hu_p1_status_text" v="Minden tápanyag mutatja a Jó, Közepes vagy Gyenge állapotot. A címsorban lévő jelvény a legrosszabb értéket tükrözi az összes követett dimenzió közül." eh="3b8c2c6e" />
+
+    <e k="helpLine_sf_hu_p2_title" v="Mezőegészségügyi nyomás" eh="b4d35b30" />
+    <e k="helpLine_sf_hu_p2_press_title" v="Gyom, kártevő és betegség" eh="0a3fae00" />
+    <e k="helpLine_sf_hu_p2_press_text" v="Három pontszám (0-100) követi a biológiai fenyegetéseket. Kezeletlenül csökkentik a hozamot: Gyom -30%, Kártevő -20%, Betegség -25%. A HUD sorok (W, I, D) mutatják a súlyosságot." eh="3fc3c400" />
+    <e k="helpLine_sf_hu_p2_treat_title" v="Kezelés" eh="cb24bf50" />
+    <e k="helpLine_sf_hu_p2_treat_text" v="A gyomirtó csökkenti a gyomnyomást - a talajművelés nullázza. A rovarölő 25 ponttal csökkenti a kártevőket és 10 napig gátolja őket. A gombaölő 20 ponttal csökkenti a betegséget és 12 napig gátolja." eh="4d65bdec" />
+
+    <e k="helpLine_sf_hu_p3_title" v="A Talajjelentés" eh="35fcce6c" />
+    <e k="helpLine_sf_hu_p3_open_title" v="Jelentés megnyitása (K gomb)" eh="62e3f629" />
+    <e k="helpLine_sf_hu_p3_open_text" v="Nyomja meg a K gombot a jelentéshez. Az összefoglaló mutatja a követett mezőket, a műtrágyát igénylőket és a gazdaság általános állapotát. A mezők sürgősség szerint vannak rendezve." eh="38a5bd2e" />
+    <e k="helpLine_sf_hu_p3_detail_title" v="Részletek és ajánlások" eh="c99d2b89" />
+    <e k="helpLine_sf_hu_p3_detail_text" v="Kattintson a nyílra a részletes nézethez: tápanyagértékek, nyomásszintek, hozamveszteség-előrejelzés és ajánlási lista. Visszatérés a Back vagy Escape gombbal." eh="38dd2c6d" />
+
+    <!-- Category 6: Settings -->
+    <e k="helpLine_sf_se_p1_title" v="Szimulációs beállítások" eh="cbf13e3c" />
+    <e k="helpLine_sf_se_p1_server_title" v="Szerverbeállítások (Csak adminisztrátornak)" eh="49f37ed7" />
+    <e k="helpLine_sf_se_p1_server_text" v="Termékenység, tápanyagciklusok, évszakok, eső, szántás bónusz, gyom/kártevő/betegség, költségek, értesítések és vetésforgó. Ezeket csak az admin módosíthatja szerveren." eh="abca5e43" />
+    <e k="helpLine_sf_se_p1_diff_title" v="Nehézség" eh="7b29ca96" />
+    <e k="helpLine_sf_se_p1_diff_text" v="Egyszerű (0.7x): 30%-kal kevesebb kimerülés. Realisztikus (1.0x): alapértelmezett. Hardcore (1.5x): 50%-kal több kimerülés. Elérés: ESC > Beállítások > Talaj &amp; Műtrágya." eh="ca93ca3e" />
+
+    <e k="helpLine_sf_se_p2_title" v="HUD és adagolás vezérlés" eh="399f4910" />
+    <e k="helpLine_sf_se_p2_hud_title" v="Játékosonkénti HUD opciók" eh="0df76500" />
+    <e k="helpLine_sf_se_p2_hud_text" v="Mindenki a saját HUD-ját vezérli. Opciók: HUD mutatása, Pozíció (5 előre beállított + mozgatás), Színtéma, Betűméret, Átlátszóság, Mértékegységek." eh="f3934884" />
+    <e k="helpLine_sf_se_p2_rate_title" v="Permetező adagolás vezérlés" eh="5ecdfa23" />
+    <e k="helpLine_sf_se_p2_rate_text" v="Permetezéskor használja az arány növelése (]) és csökkentése ([) gombokat (0.10x - 2.00x). Az automata adagolás (Shift+L) célba veszi az optimális szinteket és elkerüli a kiégést." eh="dd385e39" />
+
+    <!-- Category 7: Multiplayer -->
+    <e k="helpLine_sf_mp_p1_title" v="Hogyan működik a többjátékos mód?" eh="8a4ce30e" />
+    <e k="helpLine_sf_mp_p1_auth_title" v="Szerveroldali szimuláció" eh="8d324792" />
+    <e k="helpLine_sf_mp_p1_auth_text" v="Minden szimuláció a szerveren fut. A kliensek csatlakozáskor megkapják az adatokat. A HUD beállítások egyéniek és nem szinkronizálódnak a szerverrel." eh="db72a3f9" />
+    <e k="helpLine_sf_mp_p1_ded_title" v="Dedikált szerverek" eh="4d3a45ba" />
+    <e k="helpLine_sf_mp_p1_ded_text" v="A dedikált szerverek HUD nélkül futtatják a szimulációt. Használja a konzol parancsokat (soilStatus, SoilSetDifficulty, stb.) a kezeléshez." eh="3df784d6" />
+
+
+    <e k="sf_crop_rotation_short" v="Vetésforgó" eh="def2c162" />
+    <e k="sf_crop_rotation_long" v="Vetésforgó bónusz és monokultúrás fáradtság engedélyezése/tiltása (pillangósok nitrogént pótolnak; azonos növény egymás után növeli a kimerülést)" eh="958b4212" />
+    <e k="sf_report_rotation_bonus" v="Vetésforgó bónusz" eh="2831a7ac" />
+    <e k="sf_report_rotation_fatigue" v="Fáradtság: Azonos növény" eh="46135880" />
+    <e k="sf_report_rotation_ok" v="Vetésforgó: OK" eh="df66b3be" />
+    <e k="sf_gypsum_title" v="Gipsz (pH-)" eh="d66da34c" />
+    <e k="sf_compost_title" v="Komposzt (szerves)" eh="c3e2071a" />
+    <e k="sf_biosolids_title" v="Bioszólárd (N+P)" eh="f0c901dc" />
+    <e k="sf_chicken_manure_title" v="Csirketrágya (N+P)" eh="338128e2" />
+    <e k="sf_pelletized_manure_title" v="Pelletált trágya (NPK)" eh="c1b39b71" />
+    <e k="sf_liquidlime_title" v="Folyékony mész (pH+)" eh="d4ec4bb9" />
+    <e k="helpLine_sf_nu_p4_title" v="Vetésforgó" eh="def2c162" />
+    <e k="helpLine_sf_nu_p4_bonus_title" v="Vetésforgó bónusz" eh="2831a7ac" />
+    <e k="helpLine_sf_nu_p4_bonus_text" v="Pillangós növény (szója, borsó, bab) termesztése nem pillangós után ingyen nitrogén löketet ad minden tavasszal 3 napig." eh="e1fce95b" />
+    <e k="helpLine_sf_nu_p4_fatigue_title" v="Növényi fáradtság" eh="236a590c" />
+    <e k="helpLine_sf_nu_p4_fatigue_text" v="Ugyanazon növény termesztése két egymást követő évben 15%-kal növeli a tápanyag-kivonást. Forgassa a növényeket a talajfáradtság elkerülésére." eh="1613f3c6" />
+
+    <!-- Soil Map Overlay (SoilMapOverlay.lua) -->
+    <e k="sf_map_layer_off" v="Talajtérkép: Ki" eh="3e654ade" />
+    <e k="sf_map_layer_n" v="Nitrogén" eh="1e9ef3ba" />
+    <e k="sf_map_layer_p" v="Foszfor" eh="eb4f2688" />
+    <e k="sf_map_layer_k" v="Kálium" eh="3a4edc67" />
+    <e k="sf_map_layer_ph" v="pH" eh="397dff20" />
+    <e k="sf_map_layer_om" v="Szerves anyag" eh="6305f4bb" />
+    <e k="sf_map_layer_urgency" v="Mező sürgősség" eh="419ea5af" />
+    <e k="sf_map_layer_weed" v="Gyomnyomás" eh="53f8b936" />
+    <e k="sf_map_layer_pest" v="Kártevőnyomás" eh="18a7c2be" />
+    <e k="sf_map_layer_disease" v="Betegségnyomás" eh="2b805cc9" />
+    <e k="sf_map_layer_compaction" v="Tömörödés" eh="19cf3ee7" />
+    <e k="sf_map_overlay_cycle" v="Shift+M: Talajréteg váltása" eh="032fdac7" />
+    <e k="sf_map_page_title" v="Talajrétegek" eh="04a675fb" />
+    <e k="sf_map_sidebar_header" v="Talajtérkép réteg" eh="81332549" />
+    <e k="sf_map_sidebar_label" v="Aktív réteg" eh="f8a2c198" />
+    <e k="sf_map_sidebar_tooltip" v="Válassza ki a térképen megjeleníteni kívánt tápanyagot" eh="eb926e9a" />
+    <e k="sf_map_overlay_low" v="Alacsony" eh="28d0edd0" />
+    <e k="sf_map_overlay_med" v="Közepes" eh="248c9511" />
+    <e k="sf_map_overlay_high" v="Magas" eh="655d20c1" />
 
     <!-- Soil PDA Screen (SoilPDAScreen.lua) -->
-    <e k="sf_pda_screen_title" v="[EN] Soil &amp; Fertilizer" eh="d30a22a9" />
-    <e k="sf_pda_tab_map" v="[EN] Soil Map" eh="59f988b2" />
-    <e k="sf_pda_tab_fields" v="[EN] Fields" eh="a4ca5edd" />
-    <e k="sf_pda_tab_treatment" v="[EN] Treatment Plan" eh="4ba012e2" />
-    <e k="sf_pda_section_farm_overview" v="[EN] Farm Overview" eh="47f2c19a" />
-    <e k="sf_pda_fields_tracked_label" v="[EN] Fields Tracked" eh="c763e26e" />
-    <e k="sf_pda_fields_owned_label" v="[EN] Fields Owned" eh="335f5f7e" />
-    <e k="sf_pda_section_avg_nutrients" v="[EN] Avg. Nutrients" eh="f06b2704" />
-    <e k="sf_pda_avg_n_label" v="[EN] Nitrogen (N)" eh="25cee53b" />
-    <e k="sf_pda_avg_p_label" v="[EN] Phosphorus (P)" eh="75cb5cd6" />
-    <e k="sf_pda_avg_k_label" v="[EN] Potassium (K)" eh="39797137" />
-    <e k="sf_pda_avg_ph_label" v="[EN] pH Level" eh="0c85daad" />
-    <e k="sf_pda_avg_om_label" v="[EN] Organic Matter" eh="6305f4bb" />
-    <e k="sf_pda_section_pressure" v="[EN] Crop Pressure" eh="a73974d0" />
-    <e k="sf_pda_weed_label" v="[EN] Weed" eh="2b75024d" />
-    <e k="sf_pda_pest_label" v="[EN] Pest" eh="8f2aee79" />
-    <e k="sf_pda_disease_label" v="[EN] Disease" eh="e7067a8c" />
-    <e k="sf_pda_section_attention" v="[EN] Needs Attention" eh="80e48bc3" />
-    <e k="sf_pda_needs_fert_label" v="[EN] Need Fertilizer" eh="fa9ded5e" />
-    <e k="sf_pda_no_data_left" v="[EN] No field data yet." eh="ba71c6b1" />
+    <e k="sf_pda_screen_title" v="Talaj &amp; Műtrágya" eh="f31197fb" />
+    <e k="sf_pda_tab_map" v="Talajtérkép" eh="59f988b2" />
+    <e k="sf_pda_tab_fields" v="Mezők" eh="a4ca5edd" />
+    <e k="sf_pda_tab_treatment" v="Kezelési terv" eh="4ba012e2" />
+    <e k="sf_pda_section_farm_overview" v="Gazdaság áttekintése" eh="47f2c19a" />
+    <e k="sf_pda_fields_tracked_label" v="Követett mezők" eh="c763e26e" />
+    <e k="sf_pda_fields_owned_label" v="Saját mezők" eh="335f5f7e" />
+    <e k="sf_pda_section_avg_nutrients" v="Átlagos tápanyagok" eh="f06b2704" />
+    <e k="sf_pda_avg_n_label" v="Nitrogén (N)" eh="25cee53b" />
+    <e k="sf_pda_avg_p_label" v="Foszfor (P)" eh="75cb5cd6" />
+    <e k="sf_pda_avg_k_label" v="Kálium (K)" eh="39797137" />
+    <e k="sf_pda_avg_ph_label" v="pH szint" eh="0c85daad" />
+    <e k="sf_pda_avg_om_label" v="Szerves anyag" eh="6305f4bb" />
+    <e k="sf_pda_section_pressure" v="Növényi nyomás" eh="a73974d0" />
+    <e k="sf_pda_weed_label" v="Gyom" eh="2b75024d" />
+    <e k="sf_pda_pest_label" v="Kártevő" eh="8f2aee79" />
+    <e k="sf_pda_disease_label" v="Betegség" eh="e7067a8c" />
+    <e k="sf_pda_section_attention" v="Figyelmet igényel" eh="80e48bc3" />
+    <e k="sf_pda_needs_fert_label" v="Műtrágyázás szükséges" eh="fa9ded5e" />
+    <e k="sf_pda_total_urgent_label" v="Összesen figyelmet igényel" eh="b3ce2db9" />
+    <e k="sf_pda_no_data_left" v="Nincsenek még mezőadatok." eh="ba71c6b1" />
     <!-- Map Tab -->
-    <e k="sf_pda_map_section_title" v="[EN] Soil Map Layers" eh="85d63132" />
-    <e k="sf_pda_map_active_layer" v="[EN] Active Layer" eh="f8a2c198" />
-    <e k="sf_pda_map_layer_off_desc" v="[EN] No soil layer active. Please select a layer to display." eh="3bd7e65a" />
-    <e k="sf_pda_map_layer_n_desc" v="[EN] Nitrogen content across all fields. Green = good, red = depleted." eh="60484ead" />
-    <e k="sf_pda_map_layer_p_desc" v="[EN] Phosphorus content across all fields. Green = good, red = depleted." eh="9fa2e72d" />
-    <e k="sf_pda_map_layer_k_desc" v="[EN] Potassium content across all fields. Green = good, red = depleted." eh="a61d25b7" />
-    <e k="sf_pda_map_layer_ph_desc" v="[EN] Soil pH level. Optimal range is 6.5-7.0 (green)." eh="ce7009e7" />
-    <e k="sf_pda_map_layer_om_desc" v="[EN] Organic matter content. Higher is better for long-term fertility." eh="f64c5706" />
-    <e k="sf_pda_map_layer_urgency_desc" v="[EN] Combined treatment urgency. Red = needs immediate attention." eh="f29ddc2b" />
-    <e k="sf_pda_map_layer_weed_desc" v="[EN] Weed pressure level. Red = high infestation, apply herbicide." eh="24009598" />
-    <e k="sf_pda_map_layer_pest_desc" v="[EN] Pest pressure level. Red = high infestation, apply insecticide." eh="86ba29dc" />
-    <e k="sf_pda_map_layer_disease_desc" v="[EN] Disease pressure level. Red = active outbreak, apply fungicide." eh="5d32d30a" />
-    <e k="sf_pda_map_legend_title" v="[EN] Map Legend" eh="86448402" />
-    <e k="sf_pda_map_legend_good" v="[EN] Good" eh="0c6ad70b" />
-    <e k="sf_pda_map_legend_fair" v="[EN] Fair" eh="f7f20cf0" />
-    <e k="sf_pda_map_legend_poor" v="[EN] Poor / Low" eh="32aa75ff" />
-    <e k="sf_pda_map_legend_low" v="[EN] Low" eh="28d0edd0" />
-    <e k="sf_pda_map_legend_medium" v="[EN] Medium" eh="87f8a6ab" />
-    <e k="sf_pda_map_legend_high" v="[EN] High" eh="655d20c1" />
-    <e k="sf_pda_map_legend_excess" v="[EN] Excess" eh="d1d25b9f" />
-    <e k="sf_pda_map_instructions" v="[EN] Select a layer on the sidebar to view it on the map." eh="eee76c81" />
-    <e k="sf_pda_map_open_btn" v="[EN] DEV NOTE" eh="ef40b93f" />
-    <e k="sf_pda_map_unavailable" v="[EN] Map preview unavailable" eh="43983f81" />
-		<e k="sf_map_health_overall" v="[EN] Average Soil Health" eh="5533cbe3" />
-		<e k="sf_map_btn_report" v="[EN] Open Farm Overview" eh="6f0800e8" />
-		<e k="sf_map_btn_help" v="[EN] Dev Note (NOT WORKING YET)" eh="800e465a" />
+    <e k="sf_pda_map_section_title" v="Talajtérkép rétegek" eh="85d63132" />
+    <e k="sf_pda_map_active_layer" v="Aktív réteg" eh="f8a2c198" />
+    <e k="sf_pda_map_layer_off_desc" v="Nincs aktív talajréteg. Kérjük, válasszon egyet." eh="3bd7e65a" />
+    <e k="sf_pda_map_layer_n_desc" v="Nitrogén tartalom minden mezőn. Zöld = jó, piros = kimerült." eh="60484ead" />
+    <e k="sf_pda_map_layer_p_desc" v="Foszfor tartalom minden mezőn. Zöld = jó, piros = kimerült." eh="9fa2e72d" />
+    <e k="sf_pda_map_layer_k_desc" v="Kálium tartalom minden mezőn. Zöld = jó, piros = kimerült." eh="a61d25b7" />
+    <e k="sf_pda_map_layer_ph_desc" v="Talaj pH szint. Az optimális tartomány 6.5-7.0 (zöld)." eh="ce7009e7" />
+    <e k="sf_pda_map_layer_om_desc" v="Szervesanyag-tartalom. A magasabb jobb a hosszú távú termékenységhez." eh="f64c5706" />
+    <e k="sf_pda_map_layer_urgency_desc" v="Kombinált kezelési sürgősség. Piros = azonnali figyelmet igényel." eh="f29ddc2b" />
+    <e k="sf_pda_map_layer_weed_desc" v="Gyomnyomás szintje. Piros = magas fertőzöttség, gyomirtó szükséges." eh="24009598" />
+    <e k="sf_pda_map_layer_pest_desc" v="Kártevőnyomás szintje. Piros = magas fertőzöttség, rovarölő szükséges." eh="86ba29dc" />
+    <e k="sf_pda_map_layer_disease_desc" v="Betegségnyomás szintje. Piros = aktív járvány, gombaölő szükséges." eh="5d32d30a" />
+    <e k="sf_pda_map_legend_title" v="Térkép jelmagyarázat" eh="86448402" />
+    <e k="sf_pda_map_legend_good" v="Jó" eh="0c6ad70b" />
+    <e k="sf_pda_map_legend_fair" v="Közepes" eh="f7f20cf0" />
+    <e k="sf_pda_map_legend_poor" v="Gyenge / Alacsony" eh="32aa75ff" />
+    <e k="sf_pda_map_legend_low" v="Alacsony" eh="28d0edd0" />
+    <e k="sf_pda_map_legend_medium" v="Közepes" eh="87f8a6ab" />
+    <e k="sf_pda_map_legend_high" v="Magas" eh="655d20c1" />
+    <e k="sf_pda_map_legend_excess" v="Többlet" eh="d1d25b9f" />
+    <e k="sf_pda_map_instructions" v="Válasszon egy réteget az oldalsávon a térképen való megjelenítéshez." eh="eee76c81" />
+    <e k="sf_pda_map_jump_hint" v="Kattintson egy mezőre az ugráshoz" eh="006d5371" />
+    <e k="sf_pda_map_native_hint" v="A talajréteg-megjelenítés elköltözött! Mostantól minden talajréteget közvetlenül a natív PDA térkép oldalsávjáról érhet el és kapcsolhat (ESC > Térkép). Keresse a „Talajrétegek” kategóriát az oldalsáv pontjai között." eh="3210d828" />
+    <e k="sf_pda_map_open_btn" v="DEV MEGJEGYZÉS" eh="ef40b93f" />
+    <e k="sf_pda_btn_help" v="Súgó" eh="6a26f548" />
+    <e k="sf_pda_help_text" v="Üdv, a fejlesztő vagyok! A talajrétegeket áthelyeztem a natív PDA térképre (ESC > Térkép) a zökkenőmentesebb élmény érdekében. Mostantól közvetlenül az oldalsávról választhat rétegeket. A PDA oldal még finomítás alatt áll, várja a további frissítéseket!" eh="67643ddd" />
+    <e k="sf_pda_help_github" v="A VISSZAJELZÉSED SZÁMÍT! Ha hibákat találsz, javaslataid vannak, vagy szeretnél hozzájárulni, látogasd meg a projektet a GitHubon. Bármikor megnyithatsz egy Issue-t vagy Pull Request-et. Köszönöm a tesztelést!" eh="3a10b023" />
+    <e k="sf_pda_help_note" v="Megjegyzés: A térképoldal talajrétegek füle MÉG NEM MŰKÖDIK. Tisztában vagyok vele, és dolgozom a javításon." eh="2d8f5dc7" />
+    <e k="sf_pda_map_unavailable" v="Térkép előnézet nem elérhető" eh="43983f81" />
+    <e k="sf_map_health_overall" v="Átlagos talaj egészség" eh="5533cbe3" />
+    <e k="sf_map_btn_report" v="Gazdaság áttekintés" eh="6f0800e8" />
+    <e k="sf_map_btn_help" v="Dev megjegyzés (MÉG NEM MŰKÖDIK)" eh="800e465a" />
     <e k="sf_map_btn_cycle_layer" v="Réteg váltás" eh="875dbf22" />
     <e k="sf_map_btn_treatment" v="Kezelési terv" eh="4ba012e2" />
-    <e k="sf_map_btn_disable" v="Réteg kikapcsolása" eh="8e75dec5" />
-    <e k="sf_treat_action_ok" v="[EN] OK" eh="e0aa021e" />
-    <e k="sf_help_title" v="[EN] Soil Quick Reference" eh="8986bb6d" />
-    <e k="sf_help_nutrients_header" v="[EN] NUTRIENTS" eh="9aeb39bf" />
-    <e k="sf_help_n" v="[EN] N  (Nitrogen)     - Depletes fast. Apply UAN, Urea, or Manure." eh="f2d0c792" />
-    <e k="sf_help_p" v="[EN] P  (Phosphorus)   - Long-lasting. Apply MAP or DAP." eh="fdfbd91e" />
-    <e k="sf_help_k" v="[EN] K  (Potassium)    - Apply Potash. Important for roots." eh="e0217634" />
-    <e k="sf_help_om" v="[EN] OM (Organic Mat.) - Builds slowly. Plow in manure/compost." eh="a4e29617" />
-    <e k="sf_help_soil_header" v="[EN] SOIL CHEMISTRY" eh="19c67ff5" />
-    <e k="sf_help_ph" v="[EN] pH  6.5-7.0 = Ideal.  < 6.5 apply Lime.  > 7.5 apply Gypsum." eh="8929304d" />
-    <e k="sf_help_pressure_header" v="[EN] CROP PRESSURE" eh="132b0f66" />
-    <e k="sf_help_weed" v="[EN] Weed    > 20% - Apply Herbicide." eh="c8d890df" />
-    <e k="sf_help_pest" v="[EN] Pest    > 20% - Apply Insecticide." eh="f4932a05" />
-    <e k="sf_help_disease" v="[EN] Disease > 20% - Apply Fungicide." eh="1bfd0913" />
-    <e k="sf_help_status_header" v="[EN] STATUS LEVELS" eh="b081c2c6" />
-    <e k="sf_help_good" v="[EN] Good - No action needed." eh="03910bec" />
-    <e k="sf_help_fair" v="[EN] Fair - Monitor / preventive top-up." eh="2922eb1c" />
-    <e k="sf_help_poor" v="[EN] Poor - Immediate treatment required." eh="b287d206" />
+    <e k="sf_map_btn_disable" v="Átfedés kikapcsolása" eh="8e75dec5" />
+    <e k="sf_treat_action_ok" v="OK" eh="e0aa021e" />
+    <e k="sf_help_title" v="Talaj gyorsreferencia" eh="8986bb6d" />
+    <e k="sf_help_nutrients_header" v="TÁPANYAGOK" eh="9aeb39bf" />
+    <e k="sf_help_n" v="N (Nitrogén)    - Gyorsan ürül. Pótlás: UAN, Karbamid vagy Trágya." eh="f2d0c792" />
+    <e k="sf_help_p" v="P (Foszfor)    - Tartós. Pótlás: MAP vagy DAP." eh="fdfbd91e" />
+    <e k="sf_help_k" v="K (Kálium)     - Pótlás: Hamuzsír. Fontos a gyökereknek." eh="e0217634" />
+    <e k="sf_help_om" v="OM (Szerves a.) - Lassan épül. Trágya/Komposzt beszántása." eh="a4e29617" />
+    <e k="sf_help_soil_header" v="TALAJKÉMIA" eh="19c67ff5" />
+    <e k="sf_help_ph" v="pH 6.5-7.0 = Ideális. < 6.5 mész. > 7.5 gipsz." eh="8929304d" />
+    <e k="sf_help_pressure_header" v="NÖVÉNYI NYOMÁS" eh="132b0f66" />
+    <e k="sf_help_weed" v="Gyom    > 20% - Gyomirtó szer." eh="c8d890df" />
+    <e k="sf_help_pest" v="Kártevő > 20% - Rovarölő szer." eh="f4932a05" />
+    <e k="sf_help_disease" v="Betegség > 20% - Gombaölő szer." eh="1bfd0913" />
+    <e k="sf_help_status_header" v="ÁLLAPOT SZINTEK" eh="b081c2c6" />
+    <e k="sf_help_good" v="Jó - Nincs szükség beavatkozásra." eh="03910bec" />
+    <e k="sf_help_fair" v="Közepes - Figyelés / megelőző pótlás." eh="2922eb1c" />
+    <e k="sf_help_poor" v="Gyenge - Azonnali kezelés szükséges." eh="b287d206" />
     <!-- Fields Tab -->
-    <e k="sf_pda_fields_section_title" v="[EN] All Fields" eh="48729e0b" />
-    <e k="sf_pda_col_field" v="[EN] Field" eh="6f16a5f8" />
-    <e k="sf_pda_col_n" v="[EN] N%" eh="30740562" />
-    <e k="sf_pda_col_p" v="[EN] P%" eh="0a5e03bc" />
-		<e k="sf_pda_filter_all" v="[EN] Filter: All Fields" eh="a46a8cb2" />
-		<e k="sf_pda_filter_owned" v="[EN] Filter: Owned Only" eh="258cb971" />
-    <e k="sf_pda_col_k" v="[EN] K%" eh="43e4d0bf" />
-    <e k="sf_pda_col_ph" v="[EN] pH" eh="397dff20" />
-    <e k="sf_pda_col_om" v="[EN] OM" eh="bfbebc07" />
-    <e k="sf_pda_col_status" v="[EN] Status" eh="ec53a8c4" />
-    <e k="sf_pda_no_fields" v="[EN] No field data recorded yet." eh="72265670" />
-    <e k="sf_pda_status_good" v="[EN] Good" eh="0c6ad70b" />
-    <e k="sf_pda_status_fair" v="[EN] Fair" eh="f7f20cf0" />
-    <e k="sf_pda_status_poor" v="[EN] Poor" eh="0e94d017" />
+    <e k="sf_pda_fields_section_title" v="Összes mező" eh="48729e0b" />
+    <e k="sf_pda_col_field" v="Mező" eh="6f16a5f8" />
+    <e k="sf_pda_col_n" v="N%" eh="30740562" />
+    <e k="sf_pda_col_p" v="P%" eh="0a5e03bc" />
+    <e k="sf_pda_filter_all" v="Szűrő: Összes mező" eh="a46a8cb2" />
+    <e k="sf_pda_filter_owned" v="Szűrő: Csak saját" eh="258cb971" />
+    <e k="sf_pda_col_k" v="K%" eh="43e4d0bf" />
+    <e k="sf_pda_col_ph" v="pH" eh="397dff20" />
+    <e k="sf_pda_col_om" v="OM" eh="bfbebc07" />
+    <e k="sf_pda_col_status" v="Állapot" eh="ec53a8c4" />
+    <e k="sf_pda_no_fields" v="Még nincsenek mezőadatok rögzítve." eh="72265670" />
+    <e k="sf_pda_status_good" v="Jó" eh="0c6ad70b" />
+    <e k="sf_pda_status_fair" v="Közepes" eh="f7f20cf0" />
+    <e k="sf_pda_status_poor" v="Gyenge" eh="0e94d017" />
     <!-- Treatment Tab -->
-    <e k="sf_pda_treatment_section_title" v="[EN] Treatment Plan" eh="4ba012e2" />
-    <e k="sf_pda_col_priority" v="[EN] Urgency" eh="c94e3850" />
-    <e k="sf_pda_col_needs" v="[EN] Needs" eh="94d6125d" />
-    <e k="sf_pda_no_treatment" v="[EN] All fields are in good condition." eh="fa985166" />
-    <e k="sf_pda_need_n" v="[EN] Nitrogen" eh="1e9ef3ba" />
-    <e k="sf_pda_need_p" v="[EN] Phosphorus" eh="eb4f2688" />
-    <e k="sf_pda_need_k" v="[EN] Potassium" eh="3a4edc67" />
-    <e k="sf_pda_need_ph" v="[EN] pH Adjust" eh="0570e9d2" />
-    <e k="sf_pda_need_weed" v="[EN] Herbicide" eh="1029736e" />
-    <e k="sf_pda_need_pest" v="[EN] Insecticide" eh="5650eeef" />
-    <e k="sf_pda_need_disease" v="[EN] Fungicide" eh="e8512698" />
-    <e k="sf_pda_need_multiple" v="[EN] Multiple" eh="a0bf169f" />
-    <e k="sf_pda_treatment_minor" v="[EN] Minor" eh="6fed0c37" />
+    <e k="sf_pda_treatment_section_title" v="Kezelési terv" eh="4ba012e2" />
+    <e k="sf_pda_col_priority" v="Sürgősség" eh="c94e3850" />
+    <e k="sf_pda_col_needs" v="Szükséges" eh="94d6125d" />
+    <e k="sf_pda_no_treatment" v="Minden mező jó állapotban van." eh="fa985166" />
+    <e k="sf_pda_treatment_hint" v="A jobb oldalon felsorolt mezők kezelést igényelnek. Kattintson egy sorra az ajánlott bemenetek és becsült mennyiségek megtekintéséhez." eh="5748d316" />
+    <e k="sf_pda_need_n" v="Nitrogén" eh="1e9ef3ba" />
+    <e k="sf_pda_need_p" v="Foszfor" eh="eb4f2688" />
+    <e k="sf_pda_need_k" v="Kálium" eh="3a4edc67" />
+    <e k="sf_pda_need_ph" v="pH igazítás" eh="0570e9d2" />
+    <e k="sf_pda_need_weed" v="Gyomirtó" eh="1029736e" />
+    <e k="sf_pda_need_pest" v="Rovarölő" eh="5650eeef" />
+    <e k="sf_pda_need_disease" v="Gombaölő" eh="e8512698" />
+    <e k="sf_pda_need_multiple" v="Több minden" eh="a0bf169f" />
+    <e k="sf_pda_treatment_minor" v="Csekély" eh="6fed0c37" />
     <!-- Field Detail Dialog (SoilFieldDetailDialog.lua) -->
-    <e k="sf_detail_title" v="[EN] Field Detail" eh="03b5acd7" />
-    <e k="sf_detail_close" v="[EN] Close" eh="d3d2e617" />
-    <e k="sf_detail_field_label" v="[EN] Field #" eh="228118ab" />
-    <e k="sf_detail_urgency_label" v="[EN] Urgency:" eh="9a83237c" />
-    <e k="sf_detail_section_nutrients" v="[EN] Soil Nutrients" eh="64377acf" />
-    <e k="sf_detail_section_pressure" v="[EN] Crop Pressure" eh="a73974d0" />
-    <e k="sf_detail_section_history" v="[EN] Crop History" eh="54c27499" />
-    <e k="sf_detail_n_label" v="[EN] Nitrogen (N)" eh="25cee53b" />
-    <e k="sf_detail_p_label" v="[EN] Phosphorus (P)" eh="75cb5cd6" />
-    <e k="sf_detail_k_label" v="[EN] Potassium (K)" eh="39797137" />
-    <e k="sf_detail_ph_label" v="[EN] pH Level" eh="0c85daad" />
-    <e k="sf_detail_om_label" v="[EN] Organic Matter" eh="6305f4bb" />
-    <e k="sf_detail_weed_label" v="[EN] Weed Pressure" eh="53f8b936" />
-    <e k="sf_detail_pest_label" v="[EN] Pest Pressure" eh="18a7c2be" />
-    <e k="sf_detail_disease_label" v="[EN] Disease Pressure" eh="2b805cc9" />
-    <e k="sf_detail_last_crop_label" v="[EN] Last Crop" eh="ff41e5eb" />
-    <e k="sf_detail_rotation_label" v="[EN] Rotation Status" eh="83f7f522" />
-		<e k="sf_treat_title" v="[EN] Treatment Prescription" eh="0ccc3ee5" />
-		<e k="sf_treat_section_soil" v="[EN] Soil Amelioration" eh="09e016e4" />
-		<e k="sf_treat_section_fert" v="[EN] Nutrient Application" eh="76521e8e" />
-		<e k="sf_treat_section_prot" v="[EN] Crop Protection" eh="bd3fe9cd" />
-		<e k="sf_treat_hint" v="[EN] Refer to the 'Products' section of the shop for specialized fertilizers." eh="540bff4d" />
-		<e k="sf_treat_action_optimal" v="[EN] Optimal - No action needed." eh="4501a96b" />
-		<e k="sf_treat_action_lime" v="[EN] Apply LIME or LIQUID LIME to raise pH." eh="d1420b97" />
-		<e k="sf_treat_action_gypsum" v="[EN] Apply GYPSUM to lower pH / improve structure." eh="4cb3f0dc" />
-		<e k="sf_treat_action_om_low" v="[EN] Plow in MANURE, COMPOST, or chop straw." eh="33ec544c" />
-		<e k="sf_treat_action_om_fair" v="[EN] Monitor. Maintain organic inputs." eh="ae3af748" />
-		<e k="sf_treat_action_n_poor" v="[EN] Apply UAN32, UREA, or ANHYDROUS." eh="ebc225b0" />
-		<e k="sf_treat_action_n_fair" v="[EN] Apply AMS or STARTER fertilizer." eh="dc8fbeba" />
-		<e k="sf_treat_action_p_poor" v="[EN] Apply MAP or DAP (Phosphorus)." eh="ec2d9afa" />
-		<e k="sf_treat_action_p_fair" v="[EN] Apply blended FERTILIZER." eh="6f802546" />
-		<e k="sf_treat_action_k_poor" v="[EN] Apply POTASH (Potassium)." eh="bb2960f3" />
-		<e k="sf_treat_action_k_fair" v="[EN] Apply blended FERTILIZER." eh="6f802546" />
-		<e k="sf_treat_action_weed" v="[EN] Apply HERBICIDE immediately." eh="625551c5" />
-		<e k="sf_treat_action_pest" v="[EN] Apply INSECTICIDE immediately." eh="f4db9a03" />
-		<e k="sf_treat_action_disease" v="[EN] Apply FUNGICIDE immediately." eh="9228323a" />
-    <e k="sf_detail_rotation_ok" v="[EN] OK" eh="e0aa021e" />
-    <e k="sf_detail_rotation_bonus" v="[EN] Legume Bonus (+N)" eh="8ab86f6a" />
-    <e k="sf_detail_rotation_fatigue" v="[EN] Fatigue (x1.15 depletion)" eh="522a6d93" />
-    <e k="sf_detail_no_field" v="[EN] No data available." eh="c6d95d5e" />
-    <e k="sf_detail_no_crop" v="[EN] None recorded" eh="a4b5a996" />
-    <e k="sf_pda_btn_help" v="[EN] Help" eh="6a26f548" />
-    <e k="sf_pda_help_github" v="A VISSZAJELZÉSED SZÁMÍT! Ha hibákat találsz, új funkciókra vonatkozó javaslataid vannak, vagy szeretnél hozzájárulni a kódhoz, látogasd meg a projektet a GitHubon. Bármikor megnyithatsz egy Issue-t vagy Pull Request-et, hogy segítsd jobbá tenni ezt a modot mindenki számára. Köszönöm a tesztelést!" eh="3a10b023" />
-		<e k="sf_pda_help_note" v="[EN] Note: The soil layers tab on the map page is NOT WORKING. Im aware of the issue and working on a fix. (which might take some time)" eh="2d8f5dc7" />
-    <e k="sf_pda_help_text" v="[EN] Hi there, it's me the developer! I've moved the soil map layers to the native PDA Map (ESC &gt; Map) for a more seamless experience. You can now select layers directly from the sidebar. The PDA page is still being polished, so stay tuned for more updates!" eh="67643ddd" />
-    <e k="sf_pda_map_jump_hint" v="Kattints egy mezőre, hogy a térképen is megjelenjen" eh="006d5371" />
-		<e k="sf_pda_map_native_hint" v="[EN] The soil layer visualization has moved! You can now access and toggle all soil layers directly from the native PDA Map sidebar (ESC &gt; Map). Look for the 'Soil Layers' category in the sidebar dots." eh="87f73b10" />
-    <e k="sf_pda_total_urgent_label" v="Összesen figyelmet igényel" eh="b3ce2db9" />
-    <e k="sf_pda_treatment_hint" v="A jobb oldalon felsorolt mezők kezelést igényelnek. Kattints egy sorra az ajánlott bemenetek és becsült mennyiségek megtekintéséhez." eh="5748d316" />
+    <e k="sf_detail_title" v="Mező részletei" eh="03b5acd7" />
+    <e k="sf_detail_close" v="Bezárás" eh="d3d2e617" />
+    <e k="sf_detail_field_label" v="Mező #" eh="228118ab" />
+    <e k="sf_detail_urgency_label" v="Sürgősség:" eh="9a83237c" />
+    <e k="sf_detail_section_nutrients" v="Talaj tápanyagok" eh="64377acf" />
+    <e k="sf_detail_section_pressure" v="Növényi nyomás" eh="a73974d0" />
+    <e k="sf_detail_section_history" v="Vetés előzmények" eh="54c27499" />
+    <e k="sf_detail_n_label" v="Nitrogén (N)" eh="25cee53b" />
+    <e k="sf_detail_p_label" v="Foszfor (P)" eh="75cb5cd6" />
+    <e k="sf_detail_k_label" v="Kálium (K)" eh="39797137" />
+    <e k="sf_detail_ph_label" v="pH szint" eh="0c85daad" />
+    <e k="sf_detail_om_label" v="Szerves anyag" eh="6305f4bb" />
+    <e k="sf_detail_weed_label" v="Gyomnyomás" eh="53f8b936" />
+    <e k="sf_detail_pest_label" v="Kártevőnyomás" eh="18a7c2be" />
+    <e k="sf_detail_disease_label" v="Betegségnyomás" eh="2b805cc9" />
+    <e k="sf_detail_last_crop_label" v="Utolsó termény" eh="ff41e5eb" />
+    <e k="sf_detail_rotation_label" v="Vetésforgó állapota" eh="83f7f522" />
+    <e k="sf_treat_title" v="Kezelési előírás" eh="0ccc3ee5" />
+    <e k="sf_treat_section_soil" v="Talajjavítás" eh="09e016e4" />
+    <e k="sf_treat_section_fert" v="Tápanyag kijuttatás" eh="76521e8e" />
+    <e k="sf_treat_section_prot" v="Növényvédelem" eh="bd3fe9cd" />
+    <e k="sf_treat_hint" v="A speciális műtrágyákért keresse a bolt 'Termékek' szekcióját." eh="540bff4d" />
+    <e k="sf_treat_action_optimal" v="Optimális - nincs szükség beavatkozásra." eh="4501a96b" />
+    <e k="sf_treat_action_lime" v="Alkalmazzon MESZET a pH emeléséhez." eh="d1420b97" />
+    <e k="sf_treat_action_gypsum" v="Alkalmazzon GIPSZET a pH csökkentéséhez / szerkezetjavításhoz." eh="4cb3f0dc" />
+    <e k="sf_treat_action_om_low" v="Szántson be TRÁGYÁT, KOMPOSZTOT vagy darált szalmát." eh="33ec544c" />
+    <e k="sf_treat_action_om_fair" v="Figyelés. Tartsa fenn a szerves bevitelt." eh="ae3af748" />
+    <e k="sf_treat_action_n_poor" v="Alkalmazzon UAN32-t, KARBAMIDOT vagy VÍZMENTES AMMÓNIÁT." eh="ebc225b0" />
+    <e k="sf_treat_action_n_fair" v="Alkalmazzon AMS-t vagy STARTER műtrágyát." eh="dc8fbeba" />
+    <e k="sf_treat_action_p_poor" v="Alkalmazzon MAP-ot vagy DAP-ot (Foszfor)." eh="ec2d9afa" />
+    <e k="sf_treat_action_p_fair" v="Alkalmazzon kevert MŰTRÁGYÁT." eh="6f802546" />
+    <e k="sf_treat_action_k_poor" v="Alkalmazzon HAMUZSÍRT (Kálium)." eh="bb2960f3" />
+    <e k="sf_treat_action_k_fair" v="Alkalmazzon kevert MŰTRÁGYÁT." eh="6f802546" />
+    <e k="sf_treat_action_weed" v="Azonnal alkalmazzon GYOMIRTÓT." eh="625551c5" />
+    <e k="sf_treat_action_pest" v="Azonnal alkalmazzon ROVARÖLŐT." eh="f4db9a03" />
+    <e k="sf_treat_action_disease" v="Azonnal alkalmazzon GOMBAÖLŐT." eh="9228323a" />
+    <e k="sf_detail_rotation_ok" v="OK" eh="e0aa021e" />
+    <e k="sf_detail_rotation_bonus" v="Pillangós bónusz (+N)" eh="8ab86f6a" />
+    <e k="sf_detail_rotation_fatigue" v="Fáradtság (x1.15 kimerülés)" eh="522a6d93" />
+    <e k="sf_detail_no_field" v="Nincs elérhető adat." eh="c6d95d5e" />
+    <e k="sf_detail_no_crop" v="Nincs rögzítve" eh="a4b5a996" />
     <!-- HUD labels -->
-    <e k="sf_hud_label_ph" v="[EN] pH" eh="397dff20" />
-    <e k="sf_hud_label_om" v="[EN] OM" eh="bfbebc07" />
-    <e k="sf_hud_unit_ppm" v="[EN] (ppm)" eh="71b18c32" />
-    <e k="sf_hud_coverage" v="[EN] Coverage: %d%% / %d%%" eh="d407bb6d" />
-    <e k="sf_hud_compaction" v="[EN] Compaction: %d%%" eh="bef3a4f5" />
+    <e k="sf_hud_label_ph" v="pH" eh="397dff20" />
+    <e k="sf_hud_label_om" v="OM" eh="bfbebc07" />
+    <e k="sf_hud_unit_ppm" v="(ppm)" eh="71b18c32" />
+    <e k="sf_hud_coverage" v="Lefedettség: %d%% / %d%%" eh="d407bb6d" />
+    <e k="sf_hud_compaction" v="Tömörödés: %d%%" eh="bef3a4f5" />
     <!-- Sprayer rate HUD -->
-    <e k="sf_sprayer_auto_on" v="[EN] APP. RATE  ( AUTO: ON )" eh="099b5dac" />
-    <e k="sf_sprayer_auto_off" v="[EN] APP. RATE  AUTO: OFF [%s]" eh="848cc106" />
-    <e k="sf_sprayer_target" v="[EN] Target: " eh="31d43504" />
-    <e k="sf_sprayer_burn_guaranteed" v="[EN] BURN RISK: GUARANTEED" eh="422601c4" />
-    <e k="sf_sprayer_burn_possible" v="[EN] BURN RISK: POSSIBLE" eh="25b251b6" />
+    <e k="sf_sprayer_auto_on" v="KIJUTT. ARÁNY  ( AUTO: BE )" eh="099b5dac" />
+    <e k="sf_sprayer_auto_off" v="KIJUTT. ARÁNY  AUTO: KI [%s]" eh="848cc106" />
+    <e k="sf_sprayer_target" v="Cél:" eh="31d43504" />
+    <e k="sf_sprayer_burn_guaranteed" v="KIÉGÉSI KOCKÁZAT: GARANTÁLT" eh="422601c4" />
+    <e k="sf_sprayer_burn_possible" v="KIÉGÉSI KOCKÁZAT: LEHETSÉGES" eh="25b251b6" />
     <!-- Notifications -->
-    <e k="sf_notify_welcome" v="[EN] Soil &amp; Fertilizer Mod Active | J = HUD | K = Soil Report | Type 'soilfertility' for commands" eh="3fde93cd" />
-    <e k="sf_startup_dialog_version" v="[EN] What's new in this version:" eh="0b25f5c2" />
-    <e k="sf_startup_dialog_footer" v="[EN] Thank you for using my mod, it means a lot to me &lt;3" eh="0f08d735" />
-    <e k="sf_startup_dialog_footer2" v="[EN] Found a bug? Please report it on github!" eh="728e2cf3" />
-    <e k="sf_startup_dialog_footer3" v="[EN] Happy farming and don't forget:" eh="aa38e511" />
-    <e k="sf_startup_dialog_footer4" v="[EN] Your soil remembers everything..." eh="1a3e5c35" />
-    <e k="sf_notify_init_delayed" v="[EN] Soil Mod: Field initialization delayed. Trying alternative method..." eh="f8bd28f8" />
-    <e k="sf_notify_init_success" v="[EN] Soil Mod: Field initialization successful!" eh="46214360" />
-    <e k="sf_notify_critical_title" v="[EN] Critical Care Alert" eh="3f981d0c" />
-    <e k="sf_notify_critical_body" v="[EN] Field %d requires immediate attention! Urgency: %d%%" eh="171246aa" />
-    <e k="sf_notify_treated_title" v="[EN] Soil Update" eh="4633156e" />
-    <e k="sf_notify_treated_body" v="[EN] Field %d fully treated with %s" eh="585aa9b7" />
-    <e k="sf_notify_burn_title" v="[EN] Fertilizer Burn" eh="ad8ed599" />
-    <e k="sf_notify_burn_body" v="[EN] Field %d: over-application damage (pH %.1f)" eh="cb731ee3" />
-    <e k="sf_notify_sync_error" v="[EN] Soil Mod: Data sync issue detected. Please report if this persists." eh="1a307946" />
+    <e k="sf_notify_welcome" v="Talaj &amp; Műtrágya Mod aktív | Shift+O a beállításokhoz | Írja be a 'soilfertility' parancsot a műveletekhez" eh="d97e4139" />
+    <e k="sf_startup_dialog_version" v="Újdonságok ebben a verzióban:" eh="0b25f5c2" />
+    <e k="sf_startup_dialog_footer" v="Köszönöm, hogy a modomat használod, sokat jelent nekem &lt;3" eh="0f08d735" />
+    <e k="sf_startup_dialog_footer2" v="Hibát találtál? Kérjük, jelentsd GitHubon!" eh="728e2cf3" />
+    <e k="sf_startup_dialog_footer3" v="Jó gazdálkodást, és ne feledd:" eh="aa38e511" />
+    <e k="sf_startup_dialog_footer4" v="A talaj mindenre emlékszik..." eh="1a3e5c35" />
+    <e k="sf_notify_init_delayed" v="Talaj Mod: Mező inicializálás késik. Alternatív módszer próbálása..." eh="f8bd28f8" />
+    <e k="sf_notify_init_success" v="Talaj Mod: Mező inicializálás sikeres!" eh="46214360" />
+    <e k="sf_notify_critical_title" v="Kritikus ellátási riasztás" eh="3f981d0c" />
+    <e k="sf_notify_critical_body" v="A %d mező azonnali figyelmet igényel! Sürgősség: %d%%" eh="171246aa" />
+    <e k="sf_notify_treated_title" v="Talaj frissítés" eh="4633156e" />
+    <e k="sf_notify_treated_body" v="A %d mező teljesen kezelve ezzel: %s" eh="585aa9b7" />
+    <e k="sf_notify_burn_title" v="Műtrágya kiégés" eh="ad8ed599" />
+    <e k="sf_notify_burn_body" v="%d mező: túladagolási kár (pH %.1f)" eh="cb731ee3" />
+    <e k="sf_notify_sync_error" v="Talaj Mod: Adatszinkronizálási hiba észlelve. Jelentsd, ha továbbra is fennáll." eh="1a307946" />
     <!-- Panel categories -->
-    <e k="sf_panel_cat_sim" v="[EN] Simulation" eh="4f502b57" />
-    <e k="sf_panel_cat_sim_desc" v="[EN] Farm mechanics, difficulty and nutrient cycles" eh="3c584cdb" />
-    <e k="sf_panel_cat_display" v="[EN] Display &amp; HUD" eh="1a553532" />
-    <e k="sf_panel_cat_display_desc" v="[EN] HUD appearance, color theme, position and font size" eh="5b91fada" />
-    <e k="sf_panel_cat_overlay" v="[EN] Map Overlay" eh="28b898b6" />
-    <e k="sf_panel_cat_overlay_desc" v="[EN] Active overlay layer shown in the PDA map" eh="a5892aef" />
-    <e k="sf_panel_hdr_core" v="[EN] Core Systems" eh="44a497a5" />
-    <e k="sf_panel_hdr_difficulty" v="[EN] Difficulty" eh="7b29ca96" />
-    <e k="sf_panel_hdr_environment" v="[EN] Environment" eh="0ba29c6a" />
-    <e k="sf_panel_hdr_crop_stress" v="[EN] Crop Stress" eh="260167bb" />
-    <e k="sf_panel_hdr_visibility" v="[EN] Visibility" eh="1729a56c" />
-    <e k="sf_panel_hdr_hud_style" v="[EN] HUD Style" eh="1d4a8cac" />
-    <e k="sf_panel_hdr_position" v="[EN] Position" eh="52f5e0bc" />
-    <e k="sf_panel_hdr_layer" v="[EN] Layer" eh="359b71e8" />
-    <e k="sf_panel_hdr_performance" v="[EN] Performance" eh="9446a98a" />
-    <e k="sf_panel_hdr_mod_ctrl" v="[EN] Mod Control &amp; Difficulty" eh="f38ed047" />
-    <e k="sf_panel_hdr_systems" v="[EN] Systems" eh="d6856404" />
-    <e k="sf_panel_hdr_actions" v="[EN] Actions &amp; Field Tools" eh="82bb7b83" />
+    <e k="sf_panel_cat_sim" v="Szimuláció" eh="4f502b57" />
+    <e k="sf_panel_cat_sim_desc" v="Gazdasági mechanika, nehézség és tápanyagciklusok" eh="3c584cdb" />
+    <e k="sf_panel_cat_display" v="Megjelenítés &amp; HUD" eh="37b17394" />
+    <e k="sf_panel_cat_display_desc" v="HUD megjelenés, színtéma, pozíció és betűméret" eh="5b91fada" />
+    <e k="sf_panel_cat_overlay" v="Térkép átfedés" eh="28b898b6" />
+    <e k="sf_panel_cat_overlay_desc" v="Aktív átfedési réteg a PDA térképen" eh="a5892aef" />
+    <e k="sf_panel_hdr_core" v="Alaprendszerek" eh="44a497a5" />
+    <e k="sf_panel_hdr_difficulty" v="Nehézség" eh="7b29ca96" />
+    <e k="sf_panel_hdr_environment" v="Környezet" eh="0ba29c6a" />
+    <e k="sf_panel_hdr_crop_stress" v="Növényi stressz" eh="260167bb" />
+    <e k="sf_panel_hdr_visibility" v="Láthatóság" eh="1729a56c" />
+    <e k="sf_panel_hdr_hud_style" v="HUD stílus" eh="1d4a8cac" />
+    <e k="sf_panel_hdr_position" v="Pozíció" eh="52f5e0bc" />
+    <e k="sf_panel_hdr_layer" v="Réteg" eh="359b71e8" />
+    <e k="sf_panel_hdr_performance" v="Teljesítmény" eh="9446a98a" />
+    <e k="sf_panel_hdr_mod_ctrl" v="Mod vezérlés &amp; Nehézség" eh="ae2e88fb" />
+    <e k="sf_panel_hdr_systems" v="Rendszerek" eh="d6856404" />
+    <e k="sf_panel_hdr_actions" v="Műveletek &amp; Mező eszközök" eh="f64ba1c9" />
     <!-- Panel chrome -->
-    <e k="sf_panel_admin_yes" v="[EN] Admin: YES" eh="4628842a" />
-    <e k="sf_panel_admin_no" v="[EN] Admin: NO" eh="a9394f7b" />
-    <e k="sf_panel_multiplayer" v="[EN] Multiplayer" eh="901a7320" />
-    <e k="sf_panel_singleplayer" v="[EN] Single Player" eh="da602601" />
-    <e k="sf_panel_btn_back" v="[EN] &lt; Back" eh="b1f1e41f" />
-    <e k="sf_panel_btn_reset_cat" v="[EN] Reset Cat." eh="b66faa88" />
-    <e k="sf_panel_btn_close_hint" v="[EN] SHIFT+O to close" eh="254406e3" />
-    <e k="sf_panel_select_category" v="[EN] Select a category to configure settings" eh="a277d257" />
-    <e k="sf_panel_btn_configure" v="[EN] Configure &gt;&gt;" eh="a2cb3902" />
-    <e k="sf_panel_btn_open" v="[EN] Open &gt;&gt;" eh="6624d17c" />
+    <e k="sf_panel_admin_yes" v="Admin: IGEN" eh="4628842a" />
+    <e k="sf_panel_admin_no" v="Admin: NEM" eh="a9394f7b" />
+    <e k="sf_panel_multiplayer" v="Többjátékos mód" eh="901a7320" />
+    <e k="sf_panel_singleplayer" v="Egyjátékos mód" eh="da602601" />
+    <e k="sf_panel_btn_back" v="&lt; Vissza" eh="36cf3e1f" />
+    <e k="sf_panel_btn_reset_cat" v="Kategória alaphelyzet" eh="b66faa88" />
+    <e k="sf_panel_btn_close_hint" v="SHIFT+O a bezáráshoz" eh="254406e3" />
+    <e k="sf_panel_select_category" v="Válasszon kategóriát a beállításokhoz" eh="a277d257" />
+    <e k="sf_panel_btn_configure" v="Konfigurálás &gt;&gt;" eh="a2cb3902" />
+    <e k="sf_panel_btn_open" v="Megnyitás &gt;&gt;" eh="6624d17c" />
     <!-- Setting descriptions -->
-    <e k="sf_desc_enabled" v="[EN] Activate / deactivate the entire mod" eh="895364cb" />
-    <e k="sf_desc_debugMode" v="[EN] Extra logging for troubleshooting" eh="de508edb" />
-    <e k="sf_desc_fertilitySystem" v="[EN] Full soil fertility modeling" eh="40efd611" />
-    <e k="sf_desc_nutrientCycles" v="[EN] Track N/P/K depletion and recovery" eh="6eff80b3" />
-    <e k="sf_desc_fertilizerCosts" v="[EN] Real in-game cost for fertilizers" eh="1c197c9f" />
-    <e k="sf_desc_showNotifications" v="[EN] In-game soil status notifications" eh="7f275b4b" />
-    <e k="sf_desc_showHUD" v="[EN] Show the soil HUD overlay" eh="fa8b9224" />
-		<e k="sf_desc_showMiniReport" v="[EN] Show the minimap cell report overlay" eh="b847f98c" />
-    <e k="sf_desc_hudPosition" v="[EN] HUD preset anchor position" eh="98c8bcea" />
-    <e k="sf_desc_hudColorTheme" v="[EN] Color palette for HUD elements" eh="97271907" />
-    <e k="sf_desc_hudFontSize" v="[EN] HUD text size" eh="48a6fc15" />
-    <e k="sf_desc_hudTransparency" v="[EN] HUD background transparency" eh="d20d72dc" />
-    <e k="sf_desc_seasonalEffects" v="[EN] Season-driven soil changes" eh="f515f484" />
-    <e k="sf_desc_rainEffects" v="[EN] Rain causes nutrient leaching" eh="82fec75d" />
-    <e k="sf_desc_plowingBonus" v="[EN] Plow bonus for soil recovery" eh="23522b97" />
-    <e k="sf_desc_residueIncorporation" v="[EN] Tillage releases residue nutrients" eh="" />
-    <e k="sf_desc_weedPressure" v="[EN] Track and penalize weed spread" eh="df20c38d" />
-    <e k="sf_desc_pestPressure" v="[EN] Track insect pest infestation" eh="12b3412e" />
-    <e k="sf_desc_diseasePressure" v="[EN] Track fungal crop diseases" eh="0858395f" />
-    <e k="sf_desc_compactionEnabled" v="[EN] Heavy vehicle soil compaction" eh="a7d3a795" />
-    <e k="sf_desc_difficulty" v="[EN] Nutrient drain intensity level" eh="54a7902e" />
-    <e k="sf_desc_replenishmentRate" v="[EN] Fertilizer nutrient restoration speed" eh="858d2b23" />
-    <e k="sf_desc_useImperialUnits" v="[EN] Use imperial units (US tons/acre)" eh="8ba3d81a" />
-    <e k="sf_desc_autoRateControl" v="[EN] Smart sprayer application rates" eh="bb4e5880" />
-    <e k="sf_desc_cropRotation" v="[EN] Rotation benefits and penalties" eh="bb79b03a" />
-    <e k="sf_desc_activeMapLayer" v="[EN] Nutrient layer shown in PDA map" eh="3c01c599" />
-    <e k="sf_desc_overlayDensity" v="[EN] Sample point budget (Low=8k, Med=20k, High=40k)" eh="42503763" />
+    <e k="sf_desc_enabled" v="A teljes mod aktiválása / deaktiválása" eh="895364cb" />
+    <e k="sf_desc_debugMode" v="További naplózás a hibaelhárításhoz" eh="de508edb" />
+    <e k="sf_desc_fertilitySystem" v="Teljes talajtermékenységi modellezés" eh="40efd611" />
+    <e k="sf_desc_nutrientCycles" v="N/P/K kimerülés és regeneráció követése" eh="6eff80b3" />
+    <e k="sf_desc_fertilizerCosts" v="Reális műtrágya költségek" eh="1c197c9f" />
+    <e k="sf_desc_showNotifications" v="Talajállapot értesítések játék közben" eh="7f275b4b" />
+    <e k="sf_desc_showHUD" v="Talaj HUD átfedés megjelenítése" eh="fa8b9224" />
+    <e k="sf_desc_showMiniReport" v="Minimap cella jelentés átfedés megjelenítése" eh="b847f98c" />
+    <e k="sf_desc_hudPosition" v="HUD rögzítési pozíciója" eh="98c8bcea" />
+    <e k="sf_desc_hudColorTheme" v="Színpaletta a HUD elemekhez" eh="97271907" />
+    <e k="sf_desc_hudFontSize" v="HUD szövegméret" eh="48a6fc15" />
+    <e k="sf_desc_hudTransparency" v="HUD háttér átlátszósága" eh="d20d72dc" />
+    <e k="sf_desc_seasonalEffects" v="Évszakokhoz kötött talajváltozások" eh="f515f484" />
+    <e k="sf_desc_rainEffects" v="Az eső tápanyag-kimosódást okoz" eh="82fec75d" />
+    <e k="sf_desc_plowingBonus" v="Szántási bónusz a talaj regenerációjához" eh="23522b97" />
+    <e k="sf_desc_residueIncorporation" v="A talajművelés felszabadítja a maradványok tápanyagait" eh="e8cd556b" />
+    <e k="sf_desc_weedPressure" v="Gyomterjedés követése és büntetése" eh="df20c38d" />
+    <e k="sf_desc_pestPressure" v="Rovarkártevő fertőzések követése" eh="12b3412e" />
+    <e k="sf_desc_diseasePressure" v="Gombás növénybetegségek követése" eh="0858395f" />
+    <e k="sf_desc_compactionEnabled" v="Nehézgépjárművek okozta talajtömörödés" eh="a7d3a795" />
+    <e k="sf_desc_difficulty" v="Tápanyag-fogyasztás intenzitása" eh="54a7902e" />
+    <e k="sf_desc_replenishmentRate" v="Műtrágya tápanyag-visszapótlási sebessége" eh="858d2b23" />
+    <e k="sf_desc_useImperialUnits" v="Angolszász mértékegységek használata" eh="8ba3d81a" />
+    <e k="sf_desc_autoRateControl" v="Okos permetező kijuttatási arányok" eh="bb4e5880" />
+    <e k="sf_desc_cropRotation" v="Vetésforgó előnyök és büntetések" eh="bb79b03a" />
+    <e k="sf_desc_activeMapLayer" v="Tápanyagréteg a PDA térképen" eh="3c01c599" />
+    <e k="sf_desc_overlayDensity" v="Mintapont keret (Alacsony=8k, Közepes=20k, Magas=40k)" eh="42503763" />
     <!-- Multi-option values -->
-    <e k="sf_rr_1" v="[EN] Very Slow (0.25x)" eh="b681a1b4" />
-    <e k="sf_rr_2" v="[EN] Slow (0.5x)" eh="db69874d" />
-    <e k="sf_rr_3" v="[EN] Normal (1.0x)" eh="930452c1" />
-    <e k="sf_rr_4" v="[EN] Fast (1.5x)" eh="4c8ebfdb" />
-    <e k="sf_rr_5" v="[EN] Very Fast (2.0x)" eh="bd682dd5" />
-    <e k="sf_layer_1" v="[EN] Off" eh="d15305d7" />
-    <e k="sf_layer_2" v="[EN] Nitrogen" eh="1e9ef3ba" />
-    <e k="sf_layer_3" v="[EN] Phosphorus" eh="eb4f2688" />
-    <e k="sf_layer_4" v="[EN] Potassium" eh="3a4edc67" />
-    <e k="sf_layer_5" v="[EN] pH" eh="397dff20" />
-    <e k="sf_layer_6" v="[EN] Org Matter" eh="d2e254bc" />
-    <e k="sf_layer_7" v="[EN] Urgency" eh="c94e3850" />
-    <e k="sf_layer_8" v="[EN] Weed" eh="2b75024d" />
-    <e k="sf_layer_9" v="[EN] Pest" eh="8f2aee79" />
-    <e k="sf_layer_10" v="[EN] Disease" eh="e7067a8c" />
-    <e k="sf_layer_11" v="[EN] Compaction" eh="19cf3ee7" />
-    <e k="sf_density_1" v="[EN] Low" eh="28d0edd0" />
-    <e k="sf_density_2" v="[EN] Medium" eh="87f8a6ab" />
-    <e k="sf_density_3" v="[EN] High" eh="655d20c1" />
+    <e k="sf_rr_1" v="Nagyon lassú (0.25x)" eh="b681a1b4" />
+    <e k="sf_rr_2" v="Lassú (0.5x)" eh="db69874d" />
+    <e k="sf_rr_3" v="Normál (1.0x)" eh="930452c1" />
+    <e k="sf_rr_4" v="Gyors (1.5x)" eh="4c8ebfdb" />
+    <e k="sf_rr_5" v="Nagyon gyors (2.0x)" eh="bd682dd5" />
+    <e k="sf_layer_1" v="Ki" eh="d15305d7" />
+    <e k="sf_layer_2" v="Nitrogén" eh="1e9ef3ba" />
+    <e k="sf_layer_3" v="Foszfor" eh="eb4f2688" />
+    <e k="sf_layer_4" v="Kálium" eh="3a4edc67" />
+    <e k="sf_layer_5" v="pH" eh="397dff20" />
+    <e k="sf_layer_6" v="Szerves anyag" eh="d2e254bc" />
+    <e k="sf_layer_7" v="Sürgősség" eh="c94e3850" />
+    <e k="sf_layer_8" v="Gyom" eh="2b75024d" />
+    <e k="sf_layer_9" v="Kártevő" eh="8f2aee79" />
+    <e k="sf_layer_10" v="Betegség" eh="e7067a8c" />
+    <e k="sf_layer_11" v="Tömörödés" eh="19cf3ee7" />
+    <e k="sf_density_1" v="Alacsony" eh="28d0edd0" />
+    <e k="sf_density_2" v="Közepes" eh="87f8a6ab" />
+    <e k="sf_density_3" v="Magas" eh="655d20c1" />
     <!-- Admin action items -->
-    <e k="sf_admin_save_label" v="[EN] Save Soil Data" eh="d4e9a279" />
-    <e k="sf_admin_save_desc" v="[EN] Force-save all soil data now" eh="f365613a" />
-    <e k="sf_admin_reset_label" v="[EN] Reset All Settings" eh="6e7d5f9f" />
-    <e k="sf_admin_reset_desc" v="[EN] Restore every setting to its default" eh="599b7454" />
-		<e k="sf_panel_hdr_field_tools" v="[EN] Field Tools" eh="2b250a56" />
-		<e k="sf_nav_field_tools_label" v="[EN] Field Tools" eh="2b250a56" />
-		<e k="sf_nav_field_tools_desc" v="[EN] Open specific tools to inspect and modify field states" eh="360db19b" />
-		<e k="sf_panel_hdr_vehicle_tools" v="[EN] Vehicle Tools" eh="9b6d6e4c" />
-		<e k="sf_nav_vehicle_tools_label" v="[EN] Vehicle Tools" eh="9b6d6e4c" />
-		<e k="sf_nav_vehicle_tools_desc" v="[EN] Open specific tools for connected vehicles and implements" eh="1a8b2100" />
-    <e k="sf_admin_drain_label" v="[EN] Drain Vehicle Tanks" eh="d216b101" />
-    <e k="sf_admin_drain_desc" v="[EN] Empty sprayer + implements (50% refund)" eh="5e048a34" />
-    <e k="sf_admin_field_info_label" v="[EN] Current Field Info" eh="5df500d6" />
-    <e k="sf_admin_field_info_desc" v="[EN] Soil data for the field at your position" eh="b7e2a72d" />
-    <e k="sf_admin_field_forecast_label" v="[EN] Field Forecast" eh="1df41470" />
-    <e k="sf_admin_field_forecast_desc" v="[EN] Yield forecast for field at position" eh="67e56b9d" />
-    <e k="sf_admin_list_fields_label" v="[EN] List All Fields" eh="efeb1b25" />
-    <e k="sf_admin_list_fields_desc" v="[EN] Dump all field soil data to game log" eh="c9fa812e" />
-		<e k="sf_admin_field_set_state_label" v="[EN] Set Field State" eh="5b0d7a31" />
-		<e k="sf_admin_field_set_state_desc" v="[EN] Manually tweak N, P, K, pH, and OM values for current field" eh="a491e190" />
-		<e k="sf_admin_field_recover_label" v="[EN] Recover Field" eh="e1c82ff0" />
-		<e k="sf_admin_field_recover_desc" v="[EN] Reset the current field to default safe values (fix mistakes)" eh="68b687a2" />
-    <e k="sf_infobox_title" v="[EN] Soil Nutrients" eh="64377acf" />
-    <e k="sf_infobox_grade" v="[EN] Soil Grade" eh="65d1be5f" />
-    <e k="sf_infobox_needs" v="[EN] Needs" eh="94d6125d" />
-    <e k="sf_infobox_fertilizer" v="[EN] Fertilizer" eh="cd248829" />
+    <e k="sf_admin_save_label" v="Talajadatok mentése" eh="d4e9a279" />
+    <e k="sf_admin_save_desc" v="Minden talajadat kényszerített mentése most" eh="f365613a" />
+    <e k="sf_admin_reset_label" v="Összes beállítás alaphelyzetbe" eh="6e7d5f9f" />
+    <e k="sf_admin_reset_desc" v="Minden beállítás visszaállítása alapértelmezettre" eh="599b7454" />
+    <e k="sf_panel_hdr_field_tools" v="Mező eszközök" eh="2b250a56" />
+    <e k="sf_nav_field_tools_label" v="Mező eszközök" eh="2b250a56" />
+    <e k="sf_nav_field_tools_desc" v="Eszközök a mezők állapotának vizsgálatához és módosításához" eh="360db19b" />
+    <e k="sf_panel_hdr_vehicle_tools" v="Jármű eszközök" eh="9b6d6e4c" />
+    <e k="sf_nav_vehicle_tools_label" v="Jármű eszközök" eh="9b6d6e4c" />
+    <e k="sf_nav_vehicle_tools_desc" v="Eszközök a csatlakoztatott járművekhez és munkaeszközökhöz" eh="1a8b2100" />
+    <e k="sf_admin_drain_label" v="Járműtartályok leeresztése" eh="d216b101" />
+    <e k="sf_admin_drain_desc" v="Permetező + eszközök ürítése (50% visszatérítés)" eh="5e048a34" />
+    <e k="sf_admin_field_info_label" v="Aktuális mező információ" eh="5df500d6" />
+    <e k="sf_admin_field_info_desc" v="Talajadatok a pozíciódnál lévő mezőről" eh="b7e2a72d" />
+    <e k="sf_admin_field_forecast_label" v="Mező előrejelzés" eh="1df41470" />
+    <e k="sf_admin_field_forecast_desc" v="Hozam előrejelzés a pozíciónál lévő mezőre" eh="67e56b9d" />
+    <e k="sf_admin_list_fields_label" v="Összes mező listázása" eh="efeb1b25" />
+    <e k="sf_admin_list_fields_desc" v="Minden mező talajadatának kiírása a logba" eh="c9fa812e" />
+    <e k="sf_admin_field_set_state_label" v="Mező állapotának beállítása" eh="5b0d7a31" />
+    <e k="sf_admin_field_set_state_desc" v="N, P, K, pH és OM értékek kézi módosítása az aktuális mezőn" eh="a491e190" />
+    <e k="sf_admin_field_recover_label" v="Mező helyreállítása" eh="e1c82ff0" />
+    <e k="sf_admin_field_recover_desc" v="Aktuális mező visszaállítása alapértelmezett értékekre" eh="68b687a2" />
+    <e k="sf_infobox_title" v="Talaj tápanyagok" eh="64377acf" />
+    <e k="sf_infobox_grade" v="Talaj minősége" eh="65d1be5f" />
+    <e k="sf_infobox_needs" v="Szükséges" eh="94d6125d" />
+    <e k="sf_infobox_fertilizer" v="Műtrágya" eh="cd248829" />
 
     <!-- ======================================================
          FIELD INFO BOX (native FS25 FIELD INFO panel extension)
          ====================================================== -->
-    <e k="sf_fieldinfo_box_title" v="[EN] Soil Nutrients" eh="64377acf" />
-    <e k="sf_fieldinfo_grade" v="[EN] Soil Grade" eh="65d1be5f" />
-    <e k="sf_fieldinfo_yield" v="[EN] Yield" eh="97345487" />
-    <e k="sf_fieldinfo_rotation" v="[EN] Rotation" eh="f1a42bd4" />
-    <e k="sf_fieldinfo_needs" v="[EN] Needs" eh="94d6125d" />
-    <e k="sf_field" v="[EN] Field" eh="6f16a5f8" />
-    <e k="sf_no_field" v="[EN] No field selected" eh="717ff56f" />
-    <e k="sf_overall_Good" v="[EN] Good" eh="0c6ad70b" />
-    <e k="sf_overall_Fair" v="[EN] Fair" eh="f7f20cf0" />
-    <e k="sf_overall_Poor" v="[EN] Poor" eh="0e94d017" />
-    <e k="sf_cell_report" v="[EN] Cell Report" eh="2a403943" />
-		<e k="sf_cell_no_data_title" v="[EN] No cell data found" eh="dc41c753" />
-    <e k="sf_cell_no_data" v="[EN] No soil data at this location" eh="5dfa58aa" />
-    <e k="sf_cell" v="[EN] Cell" eh="1a66ab62" />
-		<e k="sf_cell_dialog_title" v="[EN] Soil Cell Inspection" eh="7ce7fc03" />
-		<e k="sf_cell_sidebar_header" v="[EN] Cell Details" eh="6fc5243e" />
-		<e k="sf_cell_coord" v="[EN] Coordinates" eh="99171d3a" />
-		<e k="sf_cell_click_hint" v="[EN] Click the map to inspect a soil cell" eh="fc9d240b" />
+    <e k="sf_fieldinfo_box_title" v="Talaj tápanyagok" eh="64377acf" />
+    <e k="sf_fieldinfo_grade" v="Talaj minősége" eh="65d1be5f" />
+    <e k="sf_fieldinfo_yield" v="Hozam" eh="97345487" />
+    <e k="sf_fieldinfo_rotation" v="Vetésforgó" eh="f1a42bd4" />
+    <e k="sf_fieldinfo_needs" v="Szükséges" eh="94d6125d" />
+    <e k="sf_field" v="Mező" eh="6f16a5f8" />
+    <e k="sf_no_field" v="Nincs mező kiválasztva" eh="717ff56f" />
+    <e k="sf_overall_Good" v="Jó" eh="0c6ad70b" />
+    <e k="sf_overall_Fair" v="Közepes" eh="f7f20cf0" />
+    <e k="sf_overall_Poor" v="Gyenge" eh="0e94d017" />
+    <e k="sf_cell_report" v="Cella jelentés" eh="2a403943" />
+    <e k="sf_cell_no_data_title" v="Nem található cellaadat" eh="dc41c753" />
+    <e k="sf_cell_no_data" v="Nincs talajadat ezen a helyen" eh="5dfa58aa" />
+    <e k="sf_cell" v="Cella" eh="1a66ab62" />
+    <e k="sf_cell_dialog_title" v="Talajcella vizsgálat" eh="7ce7fc03" />
+    <e k="sf_cell_sidebar_header" v="Cella részletei" eh="6fc5243e" />
+    <e k="sf_cell_coord" v="Koordináták" eh="99171d3a" />
+    <e k="sf_cell_click_hint" v="Kattintson a térképre egy talajcella megvizsgálásához" eh="fc9d240b" />
     </elements>
 </l10n>
