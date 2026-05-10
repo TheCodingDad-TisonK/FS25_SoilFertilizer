@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <l10n>
     <elements>
-    <e k="sf_section" v="土壤與肥料" eh="d30a22a9" />
+    <e k="sf_section" v="[EN] Soil &amp; Fertilizer" eh="f31197fb" />
     <e k="sf_enabled_short" v="啟用 Mod" eh="cf7fea13" />
-    <e k="sf_enabled_long" v="啟用或禁用土壤與肥料 mod" eh="e377fd59" />
+    <e k="sf_enabled_long" v="[EN] Enable or disable the soil &amp; fertilizer mod" eh="a891399a" />
     <e k="sf_debug_short" v="DEBUG 模式" eh="2ddcdc76" />
     <e k="sf_debug_long" v="啟用/禁用除錯模式（額外日誌）" eh="f6f20240" />
     <e k="sf_seasonal_effects_short" v="季節效應" eh="c16ea608" />
@@ -39,6 +39,8 @@
     <e k="sf_notifications_long" v="啟用/禁用土壤和肥料通知" eh="9a872f8f" />
     <e k="sf_show_hud_short" v="顯示 HUD" eh="c94fd4d7" />
     <e k="sf_show_hud_long" v="顯示/隱藏土壤信息 HUD 疊層（按 F8 臨時切換）" eh="4e2e11b6" />
+		<e k="sf_show_mini_report_short" v="[EN] Show Cell Report" eh="6b14e786" />
+		<e k="sf_show_mini_report_long" v="[EN] Show/hide the minimap cell report overlay" eh="9f57fb65" />
     <e k="sf_hud_position_short" v="HUD 位置" eh="5ac371f2" />
     <e k="sf_hud_position_long" v="選擇土壤信息 HUD 在屏幕上顯示的位置" eh="d7b9c109" />
     <e k="sf_hud_pos_1" v="右上角" eh="5f9f6784" />
@@ -87,8 +89,8 @@
     <e k="sf_hud_estYield" v="預估產量" eh="32a4135e" />
     <e k="sf_hud_optimal" v="最佳" eh="cb61fef1" />
     <e k="sf_hud_post_harvest" v="[EN] Post-harvest · Fertilize" eh="634de6fe" />
-    <e k="sf_hud_hint_edit" v="拖動：移動   角落：縮放   右鍵：完成" eh="987ebf45" />
-    <e k="sf_hud_hint_normal" v="Shift+H: move/resize" eh="00000000" />
+    <e k="sf_hud_hint_edit" v="[EN] Drag: move   Corner: resize   RMB/Shift+H: done" eh="c3f1820c" />
+    <e k="sf_hud_hint_normal" v="[EN] Shift+H: move/resize" eh="f1d565b1" />
     <e k="sf_use_imperial_short" v="英制單位" eh="ff2701ad" />
     <e k="sf_use_imperial_long" v="以 gal/ac 和 lb/ac 顯示施用量（關閉則為 L/ha 和 kg/ha）" eh="17efa489" />
     <e k="sf_active_map_layer_short" v="[EN] Active Map Layer" eh="1861765f" />
@@ -100,12 +102,13 @@
     <e k="input_SF_TOGGLE_HUD" v="切換土壤 HUD" eh="f0224a10" />
     <e k="input_SF_HUD_DRAG" v="[EN] HUD Drag Mode" eh="cb2eb762" />
     <e k="input_SF_SOIL_REPORT" v="土壤報告" eh="c33180ef" />
+		<e k="input_SF_TOGGLE_CELL_MAP" v="[EN] Toggle Soil Cell Map" eh="3a7e9b9d" />
     <e k="input_SF_RATE_UP" v="增加肥料施用量" eh="6e601ef5" />
     <e k="input_SF_RATE_DOWN" v="減少肥料施用量" eh="30712026" />
     <e k="input_SF_TOGGLE_AUTO" v="切換自動施用量" eh="a8642cf0" />
         <e k="input_SF_CYCLE_MAP_LAYER" v="[EN] Cycle Soil Map Layer" eh="8e4a716c" />
         <e k="input_SF_SOIL_PDA" v="[EN] Open Soil PDA" eh="7d70f7b4" />
-    <e k="sf_report_title" v="土壤與肥料報告" eh="a76f8218" />
+    <e k="sf_report_title" v="[EN] Soil &amp; Fertilizer Report" eh="3b4e9448" />
     <e k="sf_report_fields_tracked" v="追蹤的田地：" eh="7b1e59b8" />
     <e k="sf_report_need_fert" v="需要肥料：" eh="110b60f2" />
     <e k="sf_report_farm_health" v="農場健康度：" eh="a5330ade" />
@@ -142,7 +145,7 @@
     <e k="sf_anhydrous_title" v="無水氨 (N)" eh="3fc85c02" />
     <e k="sf_starter_title" v="啟動肥 10-34-0 (P)" eh="8c1a1ddc" />
     <e k="sf_urea_title" v="尿素 46-0-0 (N)" eh="659b3097" />
-        <e k="sf_an_title" v="Ammonium Nitrate 34.5-0-0 (N)" eh="" />
+        <e k="sf_an_title" v="[EN] Ammonium Nitrate 34.5-0-0 (N)" eh="29f6ee93" />
 <e k="sf_ams_title" v="硫酸銨 21-0-0 (N)" eh="033d1845" />
     <e k="sf_map_title" v="MAP 肥料 11-52-0 (P)" eh="31aa2534" />
     <e k="sf_dap_title" v="DAP 肥料 18-46-0 (P)" eh="5030a80a" />
@@ -155,16 +158,16 @@
     <e k="sf_insecticide_title" v="殺蟲劑" eh="5650eeef" />
     <e k="sf_fungicide_title" v="殺菌劑" eh="e8512698" />
     <e k="sf_report_page_info" v="田地 %d-%d / %d  |  第 %d 頁 / 共 %d 頁" eh="8db851d1" />
-    <e k="sf_bigBag_uan32_name" v="大袋 UAN 32-0-0" eh="7bdc4d9d" />
+    <e k="sf_bigBag_uan32_name" v="[EN] IBC UAN 32-0-0" eh="574747ce" />
     <e k="sf_bigBag_uan32_function" v="氮肥（液態）" eh="27de5f41" />
-    <e k="sf_bigBag_uan28_name" v="大袋 UAN 28-0-0" eh="997781d5" />
+    <e k="sf_bigBag_uan28_name" v="[EN] IBC UAN 28-0-0" eh="7eeec815" />
     <e k="sf_bigBag_uan28_function" v="氮肥（液態）" eh="27de5f41" />
-    <e k="sf_bigBag_anhydrous_name" v="大袋無水氨 82-0-0" eh="44914201" />
+    <e k="sf_bigBag_anhydrous_name" v="[EN] IBC Anhydrous Ammonia 82-0-0" eh="fb09e6ce" />
     <e k="sf_bigBag_anhydrous_function" v="氮肥（液態）" eh="27de5f41" />
     <e k="sf_bigBag_urea_name" v="大袋尿素 46-0-0" eh="8e8cbaae" />
     <e k="sf_bigBag_urea_function" v="氮肥（乾燥）" eh="63efea20" />
-        <e k="sf_bigBag_an_name" v="Big Bag AN 34.5-0-0" eh="" />
-    <e k="sf_bigBag_an_function" v="Nitrogen Fertilizer (dry)" eh="" />
+        <e k="sf_bigBag_an_name" v="[EN] Big Bag AN 34.5-0-0" eh="45f56f60" />
+    <e k="sf_bigBag_an_function" v="[EN] Nitrogen Fertilizer (dry)" eh="63efea20" />
 <e k="sf_bigBag_ams_name" v="大袋 AMS 21-0-0-24S" eh="7f71ee68" />
     <e k="sf_bigBag_ams_function" v="氮肥（乾燥）" eh="63efea20" />
     <e k="sf_bigBag_map_name" v="大袋 MAP 11-52-0" eh="8a5a059b" />
@@ -173,20 +176,20 @@
     <e k="sf_bigBag_dap_function" v="磷肥（乾燥）" eh="0cc85c60" />
     <e k="sf_bigBag_potash_name" v="大袋氯化鉀 0-0-60" eh="eb771556" />
     <e k="sf_bigBag_potash_function" v="鉀肥（乾燥）" eh="18015099" />
-    <e k="sf_bigBag_liquid_urea_name" v="大袋液態尿素" eh="a4d4c642" />
+    <e k="sf_bigBag_liquid_urea_name" v="[EN] IBC Liquid Urea" eh="c40b906f" />
     <e k="sf_bigBag_liquid_urea_function" v="氮肥（液態）" eh="27de5f41" />
-    <e k="sf_bigBag_liquid_ams_name" v="大袋液態 AMS" eh="d57c1316" />
+    <e k="sf_bigBag_liquid_ams_name" v="[EN] IBC Liquid AMS" eh="32e6c8bb" />
     <e k="sf_bigBag_liquid_ams_function" v="氮肥（液態）" eh="27de5f41" />
-    <e k="sf_bigBag_liquid_map_name" v="大袋液態 MAP" eh="323d4972" />
+    <e k="sf_bigBag_liquid_map_name" v="[EN] IBC Liquid MAP" eh="4628addb" />
     <e k="sf_bigBag_liquid_map_function" v="磷肥（液態）" eh="eeb5ef5d" />
-    <e k="sf_bigBag_liquid_dap_name" v="大袋液態 DAP" eh="da992701" />
+    <e k="sf_bigBag_liquid_dap_name" v="[EN] IBC Liquid DAP" eh="82fb3c06" />
     <e k="sf_bigBag_liquid_dap_function" v="磷肥（液態）" eh="eeb5ef5d" />
-    <e k="sf_bigBag_liquid_potash_name" v="大袋液態鉀肥" eh="839fca36" />
+    <e k="sf_bigBag_liquid_potash_name" v="[EN] IBC Liquid Potash" eh="7176856d" />
     <e k="sf_bigBag_liquid_potash_function" v="鉀肥（液態）" eh="52169d4a" />
-    <e k="sf_bigBag_starter_name" v="大袋啟動肥 10-34-0" eh="953fd6c0" />
-    <e k="sf_bigBag_insecticide_name" v="大袋殺蟲劑" eh="fa0200a7" />
+    <e k="sf_bigBag_starter_name" v="[EN] IBC Starter 10-34-0" eh="62b13bd1" />
+    <e k="sf_bigBag_insecticide_name" v="[EN] IBC Insecticide" eh="c8f0aabb" />
     <e k="sf_bigBag_insecticide_function" v="殺蟲劑（液態）" eh="09580f6b" />
-    <e k="sf_bigBag_fungicide_name" v="大袋殺菌劑" eh="a3d4e59c" />
+    <e k="sf_bigBag_fungicide_name" v="[EN] IBC Fungicide" eh="2a1c78d4" />
     <e k="sf_bigBag_fungicide_function" v="殺菌劑（液態）" eh="745c34cb" />
     <e k="sf_bigBag_starter_function" v="啟動肥（液態）" eh="2c36ea57" />
 		<e k="sf_bigBag_gypsum_name" v="[EN] Big Bag Gypsum" eh="40fc8169" />
@@ -223,7 +226,7 @@
     <e k="helpLine_sf_cat_started" v="入門指南" eh="bf647454" />
     <e k="helpLine_sf_cat_nutrients" v="土壤養分" eh="64377acf" />
     <e k="helpLine_sf_cat_fertilizers" v="肥料" eh="754d59bd" />
-    <e k="helpLine_sf_cat_hud" v="HUD 與土壤報告" eh="9b9888b9" />
+    <e k="helpLine_sf_cat_hud" v="[EN] HUD &amp; Soil Report" eh="655b1b40" />
     <e k="helpLine_sf_cat_settings" v="設置" eh="f4f70727" />
     <e k="helpLine_sf_cat_multiplayer" v="多人遊戲" eh="901a7320" />
 
@@ -257,7 +260,7 @@
     <e k="helpLine_sf_gs_p3_levels_title" v="三種難度等級" eh="52611188" />
     <e k="helpLine_sf_gs_p3_levels_text" v="簡單 (0.7x)：耗損減少 30%% - 適合新玩家。真實 (1.0x)：平衡，根據真實農業率校準。硬核 (1.5x)：耗損增加 50%% - 需要精細的土壤管理。" eh="f4f1ea30" />
     <e k="helpLine_sf_gs_p3_access_title" v="更改設置" eh="b421c88f" />
-    <e k="helpLine_sf_gs_p3_access_text" v="通過 ESC > 設置 > 土壤與肥料打開設置。在多人遊戲中，只有服務器管理員可以更改模擬設置。所有 HUD 顯示選項均為每位玩家獨立設置，不共享。" eh="f36a5639" />
+    <e k="helpLine_sf_gs_p3_access_text" v="[EN] Open settings at ESC &gt; Settings &gt; Soil &amp; Fertilizer. In multiplayer, only the server admin can change simulation settings. All HUD display options are per-player and not shared." eh="4ba9d860" />
 
     <!-- Category 3: Soil Nutrients -->
     <e k="helpLine_sf_nu_p1_title" v="氮和磷" eh="27d37372" />
@@ -321,7 +324,7 @@
     <e k="helpLine_sf_se_p1_server_title" v="服務器設置（多人遊戲中僅管理員可用）" eh="49f37ed7" />
     <e k="helpLine_sf_se_p1_server_text" v="肥力系統、養分循環、季節效應、降雨效應、翻耕獎勵、雜草/害蟲/疾病壓力、肥料成本、通知、作物輪作和自動施用量控制。在多人遊戲中，只有服務器管理員可以更改這些。更改會立即同步到所有客戶端。" eh="abca5e43" />
     <e k="helpLine_sf_se_p1_diff_title" v="難度" eh="7b29ca96" />
-    <e k="helpLine_sf_se_p1_diff_text" v="簡單 (0.7x) 減少 30%% 耗損，提供輕鬆體驗。真實 (1.0x) 是平衡的默認設置。硬核 (1.5x) 增加 50%% 耗損，用於精細土壤管理。通過 ESC > 設置 > 土壤與肥料訪問。" eh="740a3a4e" />
+    <e k="helpLine_sf_se_p1_diff_text" v="[EN] Simple (0.7x) reduces depletion by 30% for a relaxed experience. Realistic (1.0x) is the balanced default. Hardcore (1.5x) increases depletion by 50% for intensive soil management. Access via ESC &gt; Settings &gt; Soil &amp; Fertilizer." eh="ca93ca3e" />
 
     <e k="helpLine_sf_se_p2_title" v="HUD 與施用量控制" eh="399f4910" />
     <e k="helpLine_sf_se_p2_hud_title" v="每位玩家 HUD 選項" eh="0df76500" />
@@ -343,7 +346,7 @@
     <e k="sf_report_rotation_bonus" v="輪作獎勵" eh="2831a7ac" />
     <e k="sf_report_rotation_fatigue" v="連作疲勞：相同作物" eh="46135880" />
     <e k="sf_report_rotation_ok" v="輪作：正常" eh="df66b3be" />
-    <e k="sf_gypsum_title" v="石膏 (pH-)" eh="56e6dc36" />
+    <e k="sf_gypsum_title" v="[EN] Gypsum (pH-)" eh="d66da34c" />
     <e k="sf_compost_title" v="堆肥 (有機)" eh="c3e2071a" />
     <e k="sf_biosolids_title" v="生物固形物 (N+P)" eh="f0c901dc" />
     <e k="sf_chicken_manure_title" v="雞糞 (N+P)" eh="338128e2" />
@@ -377,7 +380,7 @@
     <e k="sf_map_overlay_high" v="高" eh="655d20c1" />
 
     <!-- Soil PDA Screen (SoilPDAScreen.lua) -->
-    <e k="sf_pda_screen_title" v="土壤與肥料" eh="d30a22a9" />
+    <e k="sf_pda_screen_title" v="[EN] Soil &amp; Fertilizer" eh="f31197fb" />
     <e k="sf_pda_tab_map" v="土壤地圖" eh="59f988b2" />
     <e k="sf_pda_tab_fields" v="田地" eh="a4ca5edd" />
     <e k="sf_pda_tab_treatment" v="處理計劃" eh="4ba012e2" />
@@ -400,7 +403,7 @@
     <!-- Map Tab -->
     <e k="sf_pda_map_section_title" v="土壤地圖圖層" eh="85d63132" />
     <e k="sf_pda_map_active_layer" v="活動圖層" eh="f8a2c198" />
-    <e k="sf_pda_map_layer_off_desc" v="無活動土壤圖層。按 Shift+M 循環圖層。" eh="009d9017" />
+    <e k="sf_pda_map_layer_off_desc" v="[EN] No soil layer active. Please select a layer to display." eh="3bd7e65a" />
     <e k="sf_pda_map_layer_n_desc" v="所有田地的氮含量。綠色 = 良好，紅色 = 耗盡。" eh="60484ead" />
     <e k="sf_pda_map_layer_p_desc" v="所有田地的磷含量。綠色 = 良好，紅色 = 耗盡。" eh="9fa2e72d" />
     <e k="sf_pda_map_layer_k_desc" v="所有田地的鉀含量。綠色 = 良好，紅色 = 耗盡。" eh="a61d25b7" />
@@ -418,8 +421,8 @@
     <e k="sf_pda_map_legend_medium" v="中" eh="87f8a6ab" />
     <e k="sf_pda_map_legend_high" v="高" eh="655d20c1" />
     <e k="sf_pda_map_legend_excess" v="過量" eh="d1d25b9f" />
-    <e k="sf_pda_map_instructions" v="在遊戲中按 Shift+M 切換土壤地圖圖層。" eh="b13603aa" />
-    <e k="sf_pda_map_open_btn" v="打開土壤地圖" eh="0901ae30" />
+    <e k="sf_pda_map_instructions" v="[EN] Select a layer on the sidebar to view it on the map." eh="eee76c81" />
+    <e k="sf_pda_map_open_btn" v="[EN] DEV NOTE" eh="ef40b93f" />
     <e k="sf_pda_map_unavailable" v="[EN] Map preview unavailable" eh="43983f81" />
 		<e k="sf_map_health_overall" v="[EN] Average Soil Health" eh="5533cbe3" />
 		<e k="sf_map_btn_report" v="[EN] Open Farm Overview" eh="6f0800e8" />
@@ -515,10 +518,10 @@
     <e k="sf_detail_rotation_fatigue" v="連作疲勞 (x1.15 耗損)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="無可用數據。" eh="c6d95d5e" />
     <e k="sf_detail_no_crop" v="無記錄" eh="a4b5a996" />
-    <e k="sf_pda_btn_help" v="Nota del Dev" eh="5320d63f" />
+    <e k="sf_pda_btn_help" v="[EN] Help" eh="6a26f548" />
     <e k="sf_pda_help_github" v="EL TEU COMENTARI IMPORTA! Si trobes errors, tens suggeriments de noves funcions o vols contribuir al codi, visita el projecte a GitHub. Pots obrir un Issue o una Pull Request en qualsevol moment per ajudar a millorar aquest mod per a tothom. Gràcies per provar-lo!" eh="3a10b023" />
 		<e k="sf_pda_help_note" v="[EN] Note: The soil layers tab on the map page is NOT WORKING. Im aware of the issue and working on a fix. (which might take some time)" eh="2d8f5dc7" />
-    <e k="sf_pda_help_text" v="Hola, sóc jo, el desenvolupador! Com pots veure, aquesta pàgina encara està en construcció. Les capes del mapa ara mateix són només previsualitzacions visuals (no funcionals per a la selecció), i molts elements de la interfície encara necessiten el seu acabat final." eh="58e05bdf" />
+    <e k="sf_pda_help_text" v="[EN] Hi there, it's me the developer! I've moved the soil map layers to the native PDA Map (ESC &gt; Map) for a more seamless experience. You can now select layers directly from the sidebar. The PDA page is still being polished, so stay tuned for more updates!" eh="67643ddd" />
     <e k="sf_pda_map_jump_hint" v="Feu clic en un camp per saltar-hi al mapa" eh="006d5371" />
 		<e k="sf_pda_map_native_hint" v="[EN] The soil layer visualization has moved! You can now access and toggle all soil layers directly from the native PDA Map sidebar (ESC &gt; Map). Look for the 'Soil Layers' category in the sidebar dots." eh="87f73b10" />
     <e k="sf_pda_total_urgent_label" v="Total que necessita atenció" eh="b3ce2db9" />
@@ -537,11 +540,11 @@
     <e k="sf_sprayer_burn_possible" v="[EN] BURN RISK: POSSIBLE" eh="25b251b6" />
     <!-- Notifications -->
     <e k="sf_notify_welcome" v="[EN] Soil &amp; Fertilizer Mod Active | J = HUD | K = Soil Report | Type 'soilfertility' for commands" eh="3fde93cd" />
-    <e k="sf_startup_dialog_version" v="What's new in this version:" />
-    <e k="sf_startup_dialog_footer" v="Thank you for using my mod, it means a lot to me &lt;3" />
-    <e k="sf_startup_dialog_footer2" v="Found a bug? Please report it on github!" />
-    <e k="sf_startup_dialog_footer3" v="Happy farming and don't forget:" />
-    <e k="sf_startup_dialog_footer4" v="Your soil remembers everything..." />
+    <e k="sf_startup_dialog_version" v="[EN] What's new in this version:" eh="0b25f5c2" />
+    <e k="sf_startup_dialog_footer" v="[EN] Thank you for using my mod, it means a lot to me &lt;3" eh="0f08d735" />
+    <e k="sf_startup_dialog_footer2" v="[EN] Found a bug? Please report it on github!" eh="728e2cf3" />
+    <e k="sf_startup_dialog_footer3" v="[EN] Happy farming and don't forget:" eh="aa38e511" />
+    <e k="sf_startup_dialog_footer4" v="[EN] Your soil remembers everything..." eh="1a3e5c35" />
     <e k="sf_notify_init_delayed" v="[EN] Soil Mod: Field initialization delayed. Trying alternative method..." eh="f8bd28f8" />
     <e k="sf_notify_init_success" v="[EN] Soil Mod: Field initialization successful!" eh="46214360" />
     <e k="sf_notify_critical_title" v="[EN] Critical Care Alert" eh="3f981d0c" />
@@ -589,6 +592,7 @@
     <e k="sf_desc_fertilizerCosts" v="[EN] Real in-game cost for fertilizers" eh="1c197c9f" />
     <e k="sf_desc_showNotifications" v="[EN] In-game soil status notifications" eh="7f275b4b" />
     <e k="sf_desc_showHUD" v="[EN] Show the soil HUD overlay" eh="fa8b9224" />
+		<e k="sf_desc_showMiniReport" v="[EN] Show the minimap cell report overlay" eh="b847f98c" />
     <e k="sf_desc_hudPosition" v="[EN] HUD preset anchor position" eh="98c8bcea" />
     <e k="sf_desc_hudColorTheme" v="[EN] Color palette for HUD elements" eh="97271907" />
     <e k="sf_desc_hudFontSize" v="[EN] HUD text size" eh="48a6fc15" />
@@ -664,13 +668,18 @@
     <e k="sf_fieldinfo_yield" v="[EN] Yield" eh="97345487" />
     <e k="sf_fieldinfo_rotation" v="[EN] Rotation" eh="f1a42bd4" />
     <e k="sf_fieldinfo_needs" v="[EN] Needs" eh="94d6125d" />
-    <e k="sf_field" v="Field" eh="00000000" />
-    <e k="sf_no_field" v="No field selected" eh="00000000" />
-    <e k="sf_overall_Good" v="Good" eh="00000000" />
-    <e k="sf_overall_Fair" v="Fair" eh="00000000" />
-    <e k="sf_overall_Poor" v="Poor" eh="00000000" />
-    <e k="sf_cell_report" v="Cell Report" eh="00000000" />
-    <e k="sf_cell_no_data" v="Step on field to sample" eh="00000000" />
-    <e k="sf_cell" v="Cell" eh="00000000" />
+    <e k="sf_field" v="[EN] Field" eh="6f16a5f8" />
+    <e k="sf_no_field" v="[EN] No field selected" eh="717ff56f" />
+    <e k="sf_overall_Good" v="[EN] Good" eh="0c6ad70b" />
+    <e k="sf_overall_Fair" v="[EN] Fair" eh="f7f20cf0" />
+    <e k="sf_overall_Poor" v="[EN] Poor" eh="0e94d017" />
+    <e k="sf_cell_report" v="[EN] Cell Report" eh="2a403943" />
+		<e k="sf_cell_no_data_title" v="[EN] No cell data found" eh="dc41c753" />
+    <e k="sf_cell_no_data" v="[EN] No soil data at this location" eh="5dfa58aa" />
+    <e k="sf_cell" v="[EN] Cell" eh="1a66ab62" />
+		<e k="sf_cell_dialog_title" v="[EN] Soil Cell Inspection" eh="7ce7fc03" />
+		<e k="sf_cell_sidebar_header" v="[EN] Cell Details" eh="6fc5243e" />
+		<e k="sf_cell_coord" v="[EN] Coordinates" eh="99171d3a" />
+		<e k="sf_cell_click_hint" v="[EN] Click the map to inspect a soil cell" eh="fc9d240b" />
     </elements>
 </l10n>

@@ -110,6 +110,12 @@ CONFIG = {
     # Prefix added to untranslated entries (so translators know what needs work)
     'untranslatedPrefix': '[EN] ',
 
+    # Automatically remove orphaned keys (not in English source)
+    'removeOrphans': True,
+
+    # Automatically trim whitespace from translations
+    'trimWhitespace': True,
+
     # File naming pattern: 'auto', 'translation', 'l10n', or 'lang'
     'filePrefix': 'auto',
 
@@ -183,6 +189,15 @@ def escape_xml(s):
         .replace('<', '&lt;')
         .replace('>', '&gt;')
         .replace('"', '&quot;'))
+
+
+def unescape_xml(s):
+    """Unescape XML special characters."""
+    return (s
+        .replace('&amp;', '&')
+        .replace('&lt;', '<')
+        .replace('&gt;', '>')
+        .replace('&quot;', '"'))
 
 
 # ------------------------------------------------------------------------------
@@ -468,7 +483,7 @@ def parse_translation_file(filepath, fmt):
 
     for m in pattern.finditer(content):
         key = m.group(1)
-        value = m.group(2)
+        value = unescape_xml(m.group(2))
         attrs = m.group(3) if m.lastindex >= 3 else ''
         hash_match = re.search(r'eh="([^"]*)"', attrs)
         entry_hash = hash_match.group(1) if hash_match else None
@@ -695,16 +710,78 @@ def sync_translations():
                 lang_key_set.add(key)
                 added += 1
 
+        # Update stale entries to [EN] + English value
+        for key in stale:
+            source_data = source_entries[key]
+            source_hash = source_hashes[key]
+            placeholder_value = CONFIG['untranslatedPrefix'] + source_data['value']
+
+            if fmt == 'elements':
+                pattern = re.compile(r'<e k="' + escape_regex(key) + r'" v="([^"]*)"([^>]*)\s*/>')
+            else:
+                pattern = re.compile(r'<text name="' + escape_regex(key) + r'" text="[^"]*"\s*/>')
+
+            def make_replacer(k, v, sh):
+                def replacer(m):
+                    if fmt == 'elements':
+                        attrs = m.group(2)
+                        clean_attrs = re.sub(r'\s*eh="[^"]*"', '', attrs)
+                        has_tag = 'tag="format"' in clean_attrs
+                        if has_tag:
+                            return f'<e k="{k}" v="{escape_xml(v)}" eh="{sh}" tag="format"/>'
+                        else:
+                            return f'<e k="{k}" v="{escape_xml(v)}" eh="{sh}" />'
+                    else:
+                        return f'<text name="{k}" text="{escape_xml(v)}"/>'
+                return replacer
+
+            content = pattern.sub(make_replacer(key, placeholder_value, source_hash), content)
+
+        # Remove orphaned keys
+        if CONFIG.get('removeOrphans') and orphaned:
+            for key in orphaned:
+                if fmt == 'elements':
+                    pattern = re.compile(r'\n?\s*<e k="' + escape_regex(key) + r'" v="[^"]*"(?:[^>]*)\s*/>')
+                else:
+                    pattern = re.compile(r'\n?\s*<text name="' + escape_regex(key) + r'" text="[^"]*"\s*/>')
+                content = pattern.sub('', content)
+
+        # Remove duplicates (keep first)
+        if duplicates:
+            for key in duplicates:
+                if fmt == 'elements':
+                    pattern = re.compile(r'\n?\s*<e k="' + escape_regex(key) + r'" v="[^"]*"(?:[^>]*)\s*/>')
+                else:
+                    pattern = re.compile(r'\n?\s*<text name="' + escape_regex(key) + r'" text="[^"]*"\s*/>')
+                
+                matches = list(pattern.finditer(content))
+                if len(matches) > 1:
+                    # Remove all but the first one
+                    for m in reversed(matches[1:]):
+                        content = content[:m.start()] + content[m.end():]
+
+        # Trim whitespace
+        if CONFIG.get('trimWhitespace') and whitespace_issues:
+            for issue in whitespace_issues:
+                key = issue['key']
+                val = issue['value'].strip()
+                if fmt == 'elements':
+                    pattern = re.compile(r'(<e k="' + escape_regex(key) + r'" v=")[^"]*("([^>]*)\s*/>)')
+                    content = pattern.sub(r'\1' + escape_xml(val) + r'\2', content)
+                else:
+                    pattern = re.compile(r'(<text name="' + escape_regex(key) + r'" text=")[^"]*("\s*/>)')
+                    content = pattern.sub(r'\1' + escape_xml(val) + r'\2', content)
+
         # Update hashes for existing entries to match source (elements format only)
         if fmt == 'elements':
             for key, source_data in source_entries.items():
-                if key in lang_entries and key not in missing:
+                if key in lang_entries and key not in missing and key not in stale:
                     source_hash = source_hashes[key]
                     lang_data = lang_entries[key]
 
                     has_no_hash = not lang_data['hash']
                     is_untranslated = lang_data['value'].startswith(CONFIG['untranslatedPrefix'])
-                    should_add_hash = key not in stale or (has_no_hash and not is_untranslated)
+                    should_add_hash = (has_no_hash and not is_untranslated)
 
                     if should_add_hash:
                         pattern = re.compile(r'<e k="' + escape_regex(key) + r'" v="([^"]*)"([^>]*)\s*/>')

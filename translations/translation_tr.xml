@@ -40,7 +40,7 @@
     <e k="sf_hud_optimal" v="[EN] Optimal" eh="cb61fef1" />
     <e k="sf_hud_post_harvest" v="[EN] Post-harvest · Fertilize" eh="634de6fe" />
     <e k="sf_hud_hint_edit" v="[EN] Drag: move   Corner: resize   RMB/Shift+H: done" eh="987ebf45" />
-    <e k="sf_hud_hint_normal" v="Shift+H: move/resize" eh="afc8f13b" />
+    <e k="sf_hud_hint_normal" v="[EN] Shift+H: move/resize" eh="f1d565b1" />
 		<e k="sf_use_imperial_short" v="[EN] Imperial Units" eh="ff2701ad" />
 		<e k="sf_use_imperial_long" v="[EN] Show application rates in gal/ac and lb/ac (off = L/ha and kg/ha)" eh="17efa489" />
     <e k="sf_active_map_layer_short" v="[EN] Active Map Layer" eh="1861765f" />
@@ -52,6 +52,7 @@
 		<e k="input_SF_TOGGLE_HUD" v="[EN] Toggle Soil HUD" eh="f0224a10" />
     <e k="input_SF_HUD_DRAG" v="[EN] HUD Drag Mode" eh="cb2eb762" />
 		<e k="input_SF_SOIL_REPORT" v="[EN] Soil Report" eh="c33180ef" />
+		<e k="input_SF_TOGGLE_CELL_MAP" v="[EN] Toggle Soil Cell Map" eh="3a7e9b9d" />
 		<e k="input_SF_RATE_UP" v="[EN] Increase Fertilizer Rate" eh="6e601ef5" />
 		<e k="input_SF_RATE_DOWN" v="[EN] Decrease Fertilizer Rate" eh="30712026" />
     <e k="input_SF_TOGGLE_AUTO" v="Otomatik dozlamayı aç/kapat" eh="a8642cf0" />
@@ -94,7 +95,7 @@
 		<e k="sf_anhydrous_title" v="[EN] Anhydrous Ammonia (N)" eh="3fc85c02" />
 		<e k="sf_starter_title" v="[EN] Starter Fertilizer 10-34-0 (P)" eh="8c1a1ddc" />
 		<e k="sf_urea_title" v="[EN] Urea 46-0-0 (N)" eh="659b3097" />
-		    <e k="sf_an_title" v="Ammonium Nitrate 34.5-0-0 (N)" eh="" />
+		    <e k="sf_an_title" v="[EN] Ammonium Nitrate 34.5-0-0 (N)" eh="29f6ee93" />
 <e k="sf_ams_title" v="[EN] Ammonium Sulfate 21-0-0 (N)" eh="033d1845" />
 		<e k="sf_map_title" v="[EN] MAP Fertilizer 11-52-0 (P)" eh="31aa2534" />
 		<e k="sf_dap_title" v="[EN] DAP Fertilizer 18-46-0 (P)" eh="5030a80a" />
@@ -107,16 +108,16 @@
 		<e k="sf_insecticide_title" v="[EN] Insecticide" eh="5650eeef" />
 		<e k="sf_fungicide_title" v="[EN] Fungicide" eh="e8512698" />
 		<e k="sf_report_page_info" v="[EN] Fields %d-%d of %d  |  Page %d of %d" eh="8db851d1" />
-    <e k="sf_bigBag_uan32_name" v="Big Bag UAN 32-0-0" eh="7bdc4d9d" />
+    <e k="sf_bigBag_uan32_name" v="[EN] IBC UAN 32-0-0" eh="574747ce" />
     <e k="sf_bigBag_uan32_function" v="Azotlu gübre (sıvı)" eh="27de5f41" />
-    <e k="sf_bigBag_uan28_name" v="Big Bag UAN 28-0-0" eh="997781d5" />
+    <e k="sf_bigBag_uan28_name" v="[EN] IBC UAN 28-0-0" eh="7eeec815" />
     <e k="sf_bigBag_uan28_function" v="Azotlu gübre (sıvı)" eh="27de5f41" />
-    <e k="sf_bigBag_anhydrous_name" v="Big Bag Susuz Amonyak 82-0-0" eh="44914201" />
+    <e k="sf_bigBag_anhydrous_name" v="[EN] IBC Anhydrous Ammonia 82-0-0" eh="fb09e6ce" />
     <e k="sf_bigBag_anhydrous_function" v="Azotlu gübre (sıvı)" eh="27de5f41" />
     <e k="sf_bigBag_urea_name" v="Big Bag Üre 46-0-0" eh="8e8cbaae" />
     <e k="sf_bigBag_urea_function" v="Azotlu gübre (kuru)" eh="63efea20" />
-        <e k="sf_bigBag_an_name" v="Big Bag AN 34.5-0-0" eh="" />
-    <e k="sf_bigBag_an_function" v="Nitrogen Fertilizer (dry)" eh="" />
+        <e k="sf_bigBag_an_name" v="[EN] Big Bag AN 34.5-0-0" eh="45f56f60" />
+    <e k="sf_bigBag_an_function" v="[EN] Nitrogen Fertilizer (dry)" eh="63efea20" />
 <e k="sf_bigBag_ams_name" v="[EN] Big Bag AMS 21-0-0-24S" eh="7f71ee68" />
     <e k="sf_bigBag_ams_function" v="Azotlu gübre (kuru)" eh="63efea20" />
     <e k="sf_bigBag_map_name" v="[EN] Big Bag MAP 11-52-0" eh="8a5a059b" />
@@ -135,10 +136,10 @@
 		<e k="sf_bigBag_liquid_dap_function" v="[EN] Phosphorus Fertilizer (liquid)" eh="eeb5ef5d" />
 		<e k="sf_bigBag_liquid_potash_name" v="[EN] IBC Liquid Potash" eh="7176856d" />
 		<e k="sf_bigBag_liquid_potash_function" v="[EN] Potassium Fertilizer (liquid)" eh="52169d4a" />
-    <e k="sf_bigBag_starter_name" v="Big Bag Başlangıç Gübresi 10-34-0" eh="953fd6c0" />
-    <e k="sf_bigBag_insecticide_name" v="Big Bag Insecticide" eh="fa0200a7" />
+    <e k="sf_bigBag_starter_name" v="[EN] IBC Starter 10-34-0" eh="62b13bd1" />
+    <e k="sf_bigBag_insecticide_name" v="[EN] IBC Insecticide" eh="c8f0aabb" />
     <e k="sf_bigBag_insecticide_function" v="[EN] Insecticide (liquid)" eh="09580f6b" />
-    <e k="sf_bigBag_fungicide_name" v="Big Bag Fungicide" eh="a3d4e59c" />
+    <e k="sf_bigBag_fungicide_name" v="[EN] IBC Fungicide" eh="2a1c78d4" />
     <e k="sf_bigBag_fungicide_function" v="[EN] Fungicide (liquid)" eh="745c34cb" />
     <e k="sf_bigBag_starter_function" v="Başlangıç gübresi (sıvı)" eh="2c36ea57" />
 		<e k="sf_bigBag_gypsum_name" v="[EN] Big Bag Gypsum" eh="40fc8169" />
@@ -192,6 +193,8 @@
 		<e k="sf_notifications_long" v="[EN] Enable/disable soil and fertilizer notifications" eh="9a872f8f" />
 		<e k="sf_show_hud_short" v="[EN] Show HUD" eh="c94fd4d7" />
 		<e k="sf_show_hud_long" v="[EN] Show/hide the soil info HUD overlay (F8 to toggle temporarily)" eh="4e2e11b6" />
+		<e k="sf_show_mini_report_short" v="[EN] Show Cell Report" eh="6b14e786" />
+		<e k="sf_show_mini_report_long" v="[EN] Show/hide the minimap cell report overlay" eh="9f57fb65" />
 		<e k="sf_hud_position_short" v="[EN] HUD Position" eh="5ac371f2" />
 		<e k="sf_hud_position_long" v="[EN] Choose where the soil info HUD appears on screen" eh="d7b9c109" />
 		<e k="sf_hud_pos_1" v="[EN] Top Right" eh="5f9f6784" />
@@ -365,7 +368,7 @@
     <!-- Map Tab -->
     <e k="sf_pda_map_section_title" v="[EN] Soil Map Layers" eh="85d63132" />
     <e k="sf_pda_map_active_layer" v="[EN] Active Layer" eh="f8a2c198" />
-    <e k="sf_pda_map_layer_off_desc" v="No soil layer active. Press Shift+M to cycle layers." eh="009d9017" />
+    <e k="sf_pda_map_layer_off_desc" v="[EN] No soil layer active. Please select a layer to display." eh="3bd7e65a" />
     <e k="sf_pda_map_layer_n_desc" v="[EN] Nitrogen content across all fields. Green = good, red = depleted." eh="60484ead" />
     <e k="sf_pda_map_layer_p_desc" v="[EN] Phosphorus content across all fields. Green = good, red = depleted." eh="9fa2e72d" />
     <e k="sf_pda_map_layer_k_desc" v="[EN] Potassium content across all fields. Green = good, red = depleted." eh="a61d25b7" />
@@ -383,8 +386,8 @@
     <e k="sf_pda_map_legend_medium" v="[EN] Medium" eh="87f8a6ab" />
     <e k="sf_pda_map_legend_high" v="[EN] High" eh="655d20c1" />
     <e k="sf_pda_map_legend_excess" v="[EN] Excess" eh="d1d25b9f" />
-    <e k="sf_pda_map_instructions" v="Press Shift+M in-game to cycle soil map layers." eh="b13603aa" />
-    <e k="sf_pda_map_open_btn" v="Open Soil Map" eh="0901ae30" />
+    <e k="sf_pda_map_instructions" v="[EN] Select a layer on the sidebar to view it on the map." eh="eee76c81" />
+    <e k="sf_pda_map_open_btn" v="[EN] DEV NOTE" eh="ef40b93f" />
     <e k="sf_pda_map_unavailable" v="[EN] Map preview unavailable" eh="43983f81" />
 		<e k="sf_map_health_overall" v="[EN] Average Soil Health" eh="5533cbe3" />
 		<e k="sf_map_btn_report" v="[EN] Open Farm Overview" eh="6f0800e8" />
@@ -480,10 +483,10 @@
     <e k="sf_detail_rotation_fatigue" v="[EN] Fatigue (x1.15 depletion)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="[EN] No data available." eh="c6d95d5e" />
     <e k="sf_detail_no_crop" v="[EN] None recorded" eh="a4b5a996" />
-    <e k="sf_pda_btn_help" v="Geliştirici Notu" eh="5320d63f" />
+    <e k="sf_pda_btn_help" v="[EN] Help" eh="6a26f548" />
     <e k="sf_pda_help_github" v="GERİ BİLDİRİMİNİZ ÖNEMLİ! Hata bulursanız, yeni özellik önerileriniz varsa veya koda katkıda bulunmak istiyorsanız GitHub'daki projeyi ziyaret edin. Bu modu herkes için daha iyi hale getirmeye yardımcı olmak için istediğiniz zaman bir Issue veya Pull Request açabilirsiniz. Test ettiğiniz için teşekkürler!" eh="3a10b023" />
 		<e k="sf_pda_help_note" v="[EN] Note: The soil layers tab on the map page is NOT WORKING. Im aware of the issue and working on a fix. (which might take some time)" eh="2d8f5dc7" />
-    <e k="sf_pda_help_text" v="Merhaba, geliştirici benim! Gördüğünüz gibi bu sayfa hâlâ yapım aşamasında. Harita katmanları şu an yalnızca görsel önizlemeler (seçim için işlevsel değil) ve pek çok arayüz öğesi hâlâ son rötuşlara ihtiyaç duyuyor." eh="58e05bdf" />
+    <e k="sf_pda_help_text" v="[EN] Hi there, it's me the developer! I've moved the soil map layers to the native PDA Map (ESC &gt; Map) for a more seamless experience. You can now select layers directly from the sidebar. The PDA page is still being polished, so stay tuned for more updates!" eh="67643ddd" />
     <e k="sf_pda_map_jump_hint" v="Haritada o noktaya atlamak için bir tarlaya tıklayın" eh="006d5371" />
 		<e k="sf_pda_map_native_hint" v="[EN] The soil layer visualization has moved! You can now access and toggle all soil layers directly from the native PDA Map sidebar (ESC &gt; Map). Look for the 'Soil Layers' category in the sidebar dots." eh="87f73b10" />
     <e k="sf_pda_total_urgent_label" v="Toplam dikkat gerektiren" eh="b3ce2db9" />
@@ -502,11 +505,11 @@
     <e k="sf_sprayer_burn_possible" v="[EN] BURN RISK: POSSIBLE" eh="25b251b6" />
     <!-- Notifications -->
     <e k="sf_notify_welcome" v="[EN] Soil &amp; Fertilizer Mod Active | J = HUD | K = Soil Report | Type 'soilfertility' for commands" eh="3fde93cd" />
-    <e k="sf_startup_dialog_version" v="What's new in this version:" />
-    <e k="sf_startup_dialog_footer" v="Thank you for using my mod, it means a lot to me &lt;3" />
-    <e k="sf_startup_dialog_footer2" v="Found a bug? Please report it on github!" />
-    <e k="sf_startup_dialog_footer3" v="Happy farming and don't forget:" />
-    <e k="sf_startup_dialog_footer4" v="Your soil remembers everything..." />
+    <e k="sf_startup_dialog_version" v="[EN] What's new in this version:" eh="0b25f5c2" />
+    <e k="sf_startup_dialog_footer" v="[EN] Thank you for using my mod, it means a lot to me &lt;3" eh="0f08d735" />
+    <e k="sf_startup_dialog_footer2" v="[EN] Found a bug? Please report it on github!" eh="728e2cf3" />
+    <e k="sf_startup_dialog_footer3" v="[EN] Happy farming and don't forget:" eh="aa38e511" />
+    <e k="sf_startup_dialog_footer4" v="[EN] Your soil remembers everything..." eh="1a3e5c35" />
     <e k="sf_notify_init_delayed" v="[EN] Soil Mod: Field initialization delayed. Trying alternative method..." eh="f8bd28f8" />
     <e k="sf_notify_init_success" v="[EN] Soil Mod: Field initialization successful!" eh="46214360" />
     <e k="sf_notify_critical_title" v="[EN] Critical Care Alert" eh="3f981d0c" />
@@ -554,6 +557,7 @@
     <e k="sf_desc_fertilizerCosts" v="[EN] Real in-game cost for fertilizers" eh="1c197c9f" />
     <e k="sf_desc_showNotifications" v="[EN] In-game soil status notifications" eh="7f275b4b" />
     <e k="sf_desc_showHUD" v="[EN] Show the soil HUD overlay" eh="fa8b9224" />
+		<e k="sf_desc_showMiniReport" v="[EN] Show the minimap cell report overlay" eh="b847f98c" />
     <e k="sf_desc_hudPosition" v="[EN] HUD preset anchor position" eh="98c8bcea" />
     <e k="sf_desc_hudColorTheme" v="[EN] Color palette for HUD elements" eh="97271907" />
     <e k="sf_desc_hudFontSize" v="[EN] HUD text size" eh="48a6fc15" />
@@ -629,13 +633,18 @@
     <e k="sf_fieldinfo_yield" v="[EN] Yield" eh="97345487" />
     <e k="sf_fieldinfo_rotation" v="[EN] Rotation" eh="f1a42bd4" />
     <e k="sf_fieldinfo_needs" v="[EN] Needs" eh="94d6125d" />
-    <e k="sf_field" v="Field" eh="00000000" />
-    <e k="sf_no_field" v="No field selected" eh="00000000" />
-    <e k="sf_overall_Good" v="Good" eh="00000000" />
-    <e k="sf_overall_Fair" v="Fair" eh="00000000" />
-    <e k="sf_overall_Poor" v="Poor" eh="00000000" />
-    <e k="sf_cell_report" v="Cell Report" eh="00000000" />
-    <e k="sf_cell_no_data" v="Step on field to sample" eh="00000000" />
-    <e k="sf_cell" v="Cell" eh="00000000" />
+    <e k="sf_field" v="[EN] Field" eh="6f16a5f8" />
+    <e k="sf_no_field" v="[EN] No field selected" eh="717ff56f" />
+    <e k="sf_overall_Good" v="[EN] Good" eh="0c6ad70b" />
+    <e k="sf_overall_Fair" v="[EN] Fair" eh="f7f20cf0" />
+    <e k="sf_overall_Poor" v="[EN] Poor" eh="0e94d017" />
+    <e k="sf_cell_report" v="[EN] Cell Report" eh="2a403943" />
+		<e k="sf_cell_no_data_title" v="[EN] No cell data found" eh="dc41c753" />
+    <e k="sf_cell_no_data" v="[EN] No soil data at this location" eh="5dfa58aa" />
+    <e k="sf_cell" v="[EN] Cell" eh="1a66ab62" />
+		<e k="sf_cell_dialog_title" v="[EN] Soil Cell Inspection" eh="7ce7fc03" />
+		<e k="sf_cell_sidebar_header" v="[EN] Cell Details" eh="6fc5243e" />
+		<e k="sf_cell_coord" v="[EN] Coordinates" eh="99171d3a" />
+		<e k="sf_cell_click_hint" v="[EN] Click the map to inspect a soil cell" eh="fc9d240b" />
     </elements>
 </l10n>
