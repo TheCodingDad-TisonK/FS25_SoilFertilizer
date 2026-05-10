@@ -224,26 +224,47 @@ function SoilMapHooks:onMouseEvent(superFunc, posX, posY, isDown, isUp, button, 
         return ret
     end
 
-    -- Manual click detection for our sidebar buttons
+    -- Store down position to distinguish click from drag
+    if isDown then
+        self.soilMapClickX = posX
+        self.soilMapClickY = posY
+    end
+
+    -- Manual click detection for our sidebar buttons (handled on Down)
     if not eventUsed and isDown and (button == Input.MOUSE_BUTTON_LEFT or button == Input.MOUSE_BUTTON_RIGHT) then
         local soilOverlay = getSoilOverlay(self)
         if soilOverlay and soilOverlay:onSideBarClick(posX, posY) then
             return true -- Consume click
         end
+    end
 
-        -- Cell inspection: left-click inside the map area forwards to overlay
-        if button == Input.MOUSE_BUTTON_LEFT and soilOverlay then
-            local ingameMap = (self.ingameMapBase and self.ingameMapBase.layout and self.ingameMapBase)
-                           or (self.ingameMap     and self.ingameMap.layout     and self.ingameMap)
-            if ingameMap then
-                local mapX, mapY, mapW, mapH = soilOverlay:getMapRenderBounds(self, ingameMap)
-                if mapX and posX >= mapX and posX <= mapX + mapW
-                       and posY >= mapY and posY <= mapY + mapH then
-                    soilOverlay:onMapClick(ingameMap, posX, posY)
-                    return true
+    -- Cell inspection: left-click inside the map area
+    -- We do this on Up to avoid blocking the native drag-start on Down.
+    -- We also check the distance to ensure it was a click, not a drag.
+    if not eventUsed and isUp and button == Input.MOUSE_BUTTON_LEFT then
+        local soilOverlay = getSoilOverlay(self)
+        if soilOverlay and self.soilMapClickX and self.soilMapClickY then
+            local dx = math.abs(posX - self.soilMapClickX)
+            local dy = math.abs(posY - self.soilMapClickY)
+            -- Distance threshold (normalized screen units): 0.005 is roughly 8-10 pixels
+            if dx < 0.005 and dy < 0.005 then
+                local ingameMap = (self.ingameMapBase and self.ingameMapBase.layout and self.ingameMapBase)
+                               or (self.ingameMap     and self.ingameMap.layout     and self.ingameMap)
+                if ingameMap then
+                    local mapX, mapY, mapW, mapH = soilOverlay:getMapRenderBounds(self, ingameMap)
+                    if mapX and posX >= mapX and posX <= mapX + mapW
+                           and posY >= mapY and posY <= mapY + mapH then
+                        soilOverlay:onMapClick(ingameMap, posX, posY)
+                        -- Fall through to superFunc below
+                    end
                 end
             end
         end
+    end
+
+    if isUp then
+        self.soilMapClickX = nil
+        self.soilMapClickY = nil
     end
 
     -- Let the native handler handle movement, zooming, and map dragging
