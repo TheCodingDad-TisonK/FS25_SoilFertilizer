@@ -676,5 +676,13 @@
     <e k="sf_fieldinfo_yield" v="Rendement" eh="97345487" />
     <e k="sf_fieldinfo_rotation" v="Rotation" eh="f1a42bd4" />
     <e k="sf_fieldinfo_needs" v="Besoins" eh="94d6125d" />
+    <e k="sf_field" v="Champ" eh="00000000" />
+    <e k="sf_no_field" v="Aucun champ sélectionné" eh="00000000" />
+    <e k="sf_overall_Good" v="Bon" eh="00000000" />
+    <e k="sf_overall_Fair" v="Moyen" eh="00000000" />
+    <e k="sf_overall_Poor" v="Mauvais" eh="00000000" />
+    <e k="sf_cell_report" v="Rapport de cellule" eh="00000000" />
+    <e k="sf_cell_no_data" v="Entrez dans le champ pour mesurer" eh="00000000" />
+    <e k="sf_cell" v="Cellule" eh="00000000" />
     </elements>
 </l10n>

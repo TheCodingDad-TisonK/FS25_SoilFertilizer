@@ -265,6 +265,11 @@ function HookManager:uninstallAll()
         end
     end
 
+    -- Remove the addModEventListener client-join listener
+    if self._clientJoinListener then
+        removeModEventListener(self._clientJoinListener)
+        self._clientJoinListener = nil
+    end
     self.hooks = {}
     self.installed = false
     SoilLogger.info("All hooks uninstalled")
@@ -1009,22 +1014,27 @@ end
 -- preserve any other mod's chain rather than replacing it outright.
 ---@return boolean success True if hook installed successfully
 function HookManager:installYieldModifierHook()
-    if not Combine or type(Combine.addFillUnitFillLevel) ~= "function" then
-        SoilLogger.warning("Yield modifier hook: Combine.addFillUnitFillLevel not available — yield reduction skipped")
+    -- FillUnit.addFillUnitFillLevel is the correct FS25 hook target.
+    -- Combine does NOT register addFillUnitFillLevel as its own class method --
+    -- it inherits it from FillUnit via the vehicle specialization system.
+    -- Hooking Combine.addFillUnitFillLevel therefore always fails (nil check).
+    -- Real FS25 signature: addFillUnitFillLevel(self, farmId, fillUnitIndex, fillLevelDelta, fillTypeIndex, toolType, fillPositionData)
+    if not FillUnit or type(FillUnit.addFillUnitFillLevel) ~= "function" then
+        SoilLogger.warning("Yield modifier hook: FillUnit.addFillUnitFillLevel not available â yield reduction skipped")
         return false
     end
 
-    local original = Combine.addFillUnitFillLevel
+    local original = FillUnit.addFillUnitFillLevel
 
-    -- Factory so the same modifier logic wraps any chainFn — used for both the
-    -- class-level hook and per-vehicle instance patching (issue #284: wrapping
-    -- preserves other mods' specialization chains such as RealisticHarvesting).
+    -- Factory so the same modifier logic wraps any chainFn
     local function makeYieldWrapper(chainFn)
-        return function(combineSelf, fillUnitIndex, fillLevelDelta, fillTypeIndex, toolType, fillPositionData, extraAttributes)
-            -- Only apply modifier on the server when filling the hopper (delta > 0)
-            -- and all SF systems are ready.
+        -- Correct FS25 signature includes farmId as first arg after self
+        return function(combineSelf, farmId, fillUnitIndex, fillLevelDelta, fillTypeIndex, toolType, fillPositionData)
+            -- Only apply modifier on the server when filling the hopper (delta > 0),
+            -- only for combine spec vehicles, and only when SF systems are ready.
             local modifiedDelta = fillLevelDelta
             if combineSelf.isServer
+                and combineSelf.spec_combine ~= nil
                 and fillLevelDelta and fillLevelDelta > 0
                 and fillTypeIndex
                 and g_SoilFertilityManager
@@ -1033,15 +1043,12 @@ function HookManager:installYieldModifierHook()
                 and g_SoilFertilityManager.settings.nutrientCycles
             then
                 local ok, errMsg = pcall(function()
-                    -- Resolve the fruit type from the fill type so computeYieldModifier
-                    -- receives the fruitType index it expects (not the fillType index).
                     local fruitType = nil
                     if g_fruitTypeManager then
                         local ft = g_fruitTypeManager:getFruitTypeByFillTypeIndex(fillTypeIndex)
                         if ft then fruitType = ft.index end
                     end
-
-                    if not fruitType or fruitType <= 0 then return end  -- not a harvestable fruit
+                    if not fruitType or fruitType <= 0 then return end
 
                     local x, _, z = getWorldTranslation(combineSelf.rootNode)
                     if not x then return end
@@ -1060,25 +1067,23 @@ function HookManager:installYieldModifierHook()
                     local yieldModifier = g_SoilFertilityManager.soilSystem:computeYieldModifier(fieldId, fruitType)
                     if yieldModifier ~= 1.0 then
                         modifiedDelta = fillLevelDelta * yieldModifier
-                        SoilLogger.debug("Yield modifier hook: Field %d Fruit %d modifier=%.3f (%.1fL → %.1fL)",
+                        SoilLogger.debug("Yield modifier hook: Field %d Fruit %d modifier=%.3f (%.1fL â %.1fL)",
                             fieldId, fruitType, yieldModifier, fillLevelDelta, modifiedDelta)
                     end
                 end)
                 if not ok then
                     SoilLogger.error("Yield modifier hook failed: %s", tostring(errMsg))
-                    modifiedDelta = fillLevelDelta  -- safe fallback: no penalty
+                    modifiedDelta = fillLevelDelta
                 end
             end
-
-            return chainFn(combineSelf, fillUnitIndex, modifiedDelta, fillTypeIndex, toolType, fillPositionData, extraAttributes)
+            return chainFn(combineSelf, farmId, fillUnitIndex, modifiedDelta, fillTypeIndex, toolType, fillPositionData)
         end
     end
 
-    Combine.addFillUnitFillLevel = makeYieldWrapper(original)
-    self:register(Combine, "addFillUnitFillLevel", original, "Combine.addFillUnitFillLevel")
+    FillUnit.addFillUnitFillLevel = makeYieldWrapper(original)
+    self:register(FillUnit, "addFillUnitFillLevel", original, "FillUnit.addFillUnitFillLevel (yield modifier)")
 
-    -- Wrap existing combine instances (not replace) to preserve other mods'
-    -- specialization chains (e.g. RealisticHarvesting's addFillUnitFillLevel overwrite).
+    -- Wrap existing combine instances to preserve other mods specialization chains.
     local patched = 0
     local vehicleSystem = g_currentMission and g_currentMission.vehicleSystem
     if vehicleSystem and vehicleSystem.vehicles then
@@ -1090,7 +1095,7 @@ function HookManager:installYieldModifierHook()
         end
     end
 
-    SoilLogger.info("[OK] Yield modifier hook installed (Combine.addFillUnitFillLevel) — %d existing combines patched", patched)
+    SoilLogger.info("[OK] Yield modifier hook installed (FillUnit.addFillUnitFillLevel) â %d existing combines patched", patched)
     return true
 end
 
@@ -1663,24 +1668,24 @@ function HookManager:installPlowingHook()
             if not hasProcessed then return end
             if not g_SoilFertilityManager or
                not g_SoilFertilityManager.soilSystem or
-               not g_SoilFertilityManager.settings.enabled or
-               not g_SoilFertilityManager.settings.plowingBonus then
+               not g_SoilFertilityManager.settings.enabled then
                 return
             end
             if not cultivatorSelf.isServer then return end
 
-            -- Confirm cultivator work area actually changed terrain this tick
+            -- Confirm cultivator ACTUALLY changed terrain this tick (not just lifted/scanning).
+            -- lastChangedArea = pixels that flipped to the cultivated state this tick.
+            -- lastStatsArea   = pixels scanned by the work-area raycaster (non-zero even
+            --                   when the plow is lifted during headland turns).
+            -- Using lastStatsArea as the guard caused the daily cap to drain during turns.
             local spec = cultivatorSelf.spec_cultivator
             if not spec or not spec.workAreaParameters then return end
-            local statsArea = spec.workAreaParameters.lastStatsArea
+            local statsArea = spec.workAreaParameters.lastChangedArea
             if not statsArea or statsArea <= 0 then return end
 
             local isPlowSpec = cultivatorSelf.spec_plow ~= nil or cultivatorSelf.spec_subsoiler ~= nil
 
-            -- Convert density-map pixels → hectares (same conversion the mower hook uses).
-            -- lastStatsArea is raw pixel count, NOT metres² or hectares.
-            -- Passing pixels directly caused factor = pixels/fieldAreaHa which exploded
-            -- to thousands× the correct value at 22 ticks/sec.
+            -- Convert density-map pixels → hectares (same as mower hook).
             if not g_currentMission or type(g_currentMission.getFruitPixelsToSqm) ~= "function" then return end
             local areaHa = MathUtil.areaToHa(statsArea, g_currentMission:getFruitPixelsToSqm())
             if areaHa <= 0 then return end
@@ -1702,8 +1707,12 @@ function HookManager:installPlowingHook()
                     end
 
                     if isPlowingTool then
+                        g_SoilFertilityManager.soilSystem._lastTillageX = x
+                        g_SoilFertilityManager.soilSystem._lastTillageZ = z
                         g_SoilFertilityManager.soilSystem:onPlowing(farmlandId, areaHa)
                     else
+                        g_SoilFertilityManager.soilSystem._lastTillageX = x
+                        g_SoilFertilityManager.soilSystem._lastTillageZ = z
                         g_SoilFertilityManager.soilSystem:onCultivation(farmlandId, areaHa)
                     end
 
@@ -1768,19 +1777,19 @@ function HookManager:installDedicatedPlowHook()
             if not hasProcessed then return end
             if not g_SoilFertilityManager or
                not g_SoilFertilityManager.soilSystem or
-               not g_SoilFertilityManager.settings.enabled or
-               not g_SoilFertilityManager.settings.plowingBonus then
+               not g_SoilFertilityManager.settings.enabled then
                 return
             end
             if not plowSelf.isServer then return end
 
-            -- Confirm plow work area actually changed terrain this tick
+            -- Confirm plow ACTUALLY changed terrain (lastChangedArea, not lastStatsArea).
+            -- lastStatsArea is non-zero during headland turns with the plow lifted.
             local spec = plowSelf.spec_plow
             if not spec or not spec.workAreaParameters then return end
-            local statsArea = spec.workAreaParameters.lastStatsArea
+            local statsArea = spec.workAreaParameters.lastChangedArea
             if not statsArea or statsArea <= 0 then return end
 
-            -- Convert density-map pixels to hectares (same as mower hook).
+            -- Convert density-map pixels → hectares.
             if not g_currentMission or type(g_currentMission.getFruitPixelsToSqm) ~= "function" then return end
             local areaHa = MathUtil.areaToHa(statsArea, g_currentMission:getFruitPixelsToSqm())
             if areaHa <= 0 then return end
@@ -1793,6 +1802,8 @@ function HookManager:installDedicatedPlowHook()
                 SoilLogger.debug("[DedicatedPlowHook] pos=(%.1f,%.1f) farmlandId=%s",
                     x, z, tostring(farmlandId))
                 if farmlandId and farmlandId > 0 then
+                    g_SoilFertilityManager.soilSystem._lastTillageX = x
+                    g_SoilFertilityManager.soilSystem._lastTillageZ = z
                     g_SoilFertilityManager.soilSystem:onPlowing(farmlandId, areaHa)
 
                     -- Dedicated plows are always heavy equipment
@@ -1857,13 +1868,13 @@ function HookManager:installWeederHook()
             end
             if not weederSelf.isServer then return end
 
-            -- Confirm weeder actually changed terrain this tick
+            -- Confirm weeder ACTUALLY changed terrain (lastChangedArea).
             local spec = weederSelf.spec_weeder
             if not spec or not spec.workAreaParameters then return end
-            local statsArea = spec.workAreaParameters.lastStatsArea
+            local statsArea = spec.workAreaParameters.lastChangedArea
             if not statsArea or statsArea <= 0 then return end
 
-            -- Convert density-map pixels to hectares (same as mower hook).
+            -- Convert density-map pixels → hectares.
             if not g_currentMission or type(g_currentMission.getFruitPixelsToSqm) ~= "function" then return end
             local areaHa = MathUtil.areaToHa(statsArea, g_currentMission:getFruitPixelsToSqm())
             if areaHa <= 0 then return end
@@ -1873,6 +1884,8 @@ function HookManager:installWeederHook()
                 local farmlandId = hookMgrRef:getFieldIdAtWorldPosition(x, z)
                 SoilLogger.debug("[WeederHook] pos=(%.1f,%.1f) farmlandId=%s", x, z, tostring(farmlandId))
                 if farmlandId and farmlandId > 0 then
+                    g_SoilFertilityManager.soilSystem._lastTillageX = x
+                    g_SoilFertilityManager.soilSystem._lastTillageZ = z
                     g_SoilFertilityManager.soilSystem:onCultivation(farmlandId, areaHa)
                     SoilLogger.debug("[WeederHook] Field %d: mechanical weed removal applied", farmlandId)
                 end
@@ -1903,48 +1916,11 @@ end
 --   OM:      small boost (subsurface incorporation in tilled strips only)
 ---@return boolean success
 function HookManager:installRidgeTillerHook()
-    -- RidgeTiller may not be present on all maps/mods — fail gracefully
-    if not RidgeTiller or type(RidgeTiller.processRidgeTillerArea) ~= "function" then
-        SoilLogger.warning("[RidgeTillerHook] RidgeTiller.processRidgeTillerArea not available — strip-till integration skipped")
-        return false
-    end
-
-    local original = RidgeTiller.processRidgeTillerArea
-    RidgeTiller.processRidgeTillerArea = Utils.appendedFunction(
-        original,
-        function(ridgeSelf, workArea, dt)
-            if not g_SoilFertilityManager or
-               not g_SoilFertilityManager.soilSystem or
-               not g_SoilFertilityManager.settings.enabled then
-                return
-            end
-
-            if not workArea or type(workArea) ~= "table" then return end
-            if not workArea.start or not workArea.width or not workArea.height then return end
-
-            local sx, _, sz = getWorldTranslation(workArea.start)
-            local wx, _, wz = getWorldTranslation(workArea.width)
-            local hx, _, hz = getWorldTranslation(workArea.height)
-            local centerX = (sx + wx + hx) / 3
-            local centerZ = (sz + wz + hz) / 3
-
-            local success, errorMsg = pcall(function()
-                -- PHASE 5: use shared MapDataGrid-backed cache (self = HookManager upvalue)
-                local fieldId = self:getFieldIdAtWorldPosition(centerX, centerZ)
-                if not fieldId or fieldId <= 0 then return end
-
-                SoilLogger.debug("[RidgeTillerHook] Field %d at (%.1f, %.1f)", fieldId, centerX, centerZ)
-                g_SoilFertilityManager.soilSystem:onStripTill(fieldId)
-            end)
-
-            if not success then
-                SoilLogger.error("[RidgeTillerHook] failed: %s", tostring(errorMsg))
-            end
-        end
-    )
-
-    self:register(RidgeTiller, "processRidgeTillerArea", original, "RidgeTiller.processRidgeTillerArea")
-    SoilLogger.info("[OK] RidgeTiller hook installed — strip-till (RIDGEFORMER) events now tracked")
+    -- RidgeTiller is an FS22 class that does not exist in FS25.
+    -- FS25 uses Cultivator for all tillage work areas including strip-till.
+    -- This hook is kept as a no-op to avoid log spam; strip-till effects
+    -- are captured via the Cultivator hook (installPlowingHook) instead.
+    SoilLogger.info("RidgeTiller hook skipped (FS22 class, not present in FS25)")
     return true
 end
 
@@ -1996,6 +1972,8 @@ function HookManager:installSowingHook()
                 if not fieldId or fieldId <= 0 then return end
 
                 local statsArea = spec.workAreaParameters.lastStatsArea or spec.workAreaParameters.lastChangedArea or 0.001
+                g_SoilFertilityManager.soilSystem._lastTillageX = x
+                g_SoilFertilityManager.soilSystem._lastTillageZ = z
                 g_SoilFertilityManager.soilSystem:onSowing(fieldId, statsArea)
             end)
 
@@ -3346,34 +3324,31 @@ end
 --- Hooks FSBaseMission.onConnectionFinished to send soil data to a newly joined client
 ---@return boolean success
 function HookManager:installClientJoinHook()
-    if not FSBaseMission or type(FSBaseMission.onConnectionFinished) ~= "function" then
-        SoilLogger.warning("Could not install client join hook - FSBaseMission.onConnectionFinished not available")
-        return false
-    end
-
-    local original = FSBaseMission.onConnectionFinished
-    FSBaseMission.onConnectionFinished = Utils.appendedFunction(
-        original,
-        function(missionSelf, connection)
+    -- FSBaseMission.onConnectionFinished does not exist in FS25.
+    -- The correct FS25 pattern is addModEventListener with an onClientJoined(connection)
+    -- method, which the C++ engine calls on all registered mod event listeners
+    -- when a new client successfully connects to the server.
+    local listener = {
+        onClientJoined = function(self, connection)
             if not g_SoilFertilityManager or
                not g_SoilFertilityManager.soilSystem or
                not g_SoilFertilityManager.settings.enabled then
                 return
             end
-
-            -- Server only - send data to the connecting client
+            -- Server only - send full state to the connecting client
             if g_server ~= nil and connection then
                 local success, errorMsg = pcall(function()
                     g_SoilFertilityManager.soilSystem:onClientJoined(connection)
                 end)
-
                 if not success then
                     SoilLogger.error("Client join hook failed: %s", tostring(errorMsg))
                 end
             end
         end
-    )
-    self:register(FSBaseMission, "onConnectionFinished", original, "FSBaseMission.onConnectionFinished (Client Join)")
-    SoilLogger.info("[OK] Client join hook installed successfully")
+    }
+    addModEventListener(listener)
+    -- Store reference so uninstallAll can remove it
+    self._clientJoinListener = listener
+    SoilLogger.info("[OK] Client join hook installed (addModEventListener/onClientJoined)")
     return true
 end

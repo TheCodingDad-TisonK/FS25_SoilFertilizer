@@ -707,5 +707,13 @@
     <e k="sf_report_action_plan" v="Zalecenia" eh="0e94d020" />
     <e  k="sf_report_organic_matter" v="Materia organiczna" eh="0e94d021" />
   
+    <e k="sf_field" v="Pole" eh="00000000" />
+    <e k="sf_no_field" v="Nie wybrano pola" eh="00000000" />
+    <e k="sf_overall_Good" v="Dobry" eh="00000000" />
+    <e k="sf_overall_Fair" v="Średni" eh="00000000" />
+    <e k="sf_overall_Poor" v="Zły" eh="00000000" />
+    <e k="sf_cell_report" v="Raport komórki" eh="00000000" />
+    <e k="sf_cell_no_data" v="Wejdź na pole, aby zmierzyć" eh="00000000" />
+    <e k="sf_cell" v="Komórka" eh="00000000" />
     </elements>
 </l10n>

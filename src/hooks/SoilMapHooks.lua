@@ -224,12 +224,47 @@ function SoilMapHooks:onMouseEvent(superFunc, posX, posY, isDown, isUp, button, 
         return ret
     end
 
-    -- Manual click detection for our sidebar buttons
+    -- Store down position to distinguish click from drag
+    if isDown then
+        self.soilMapClickX = posX
+        self.soilMapClickY = posY
+    end
+
+    -- Manual click detection for our sidebar buttons (handled on Down)
     if not eventUsed and isDown and (button == Input.MOUSE_BUTTON_LEFT or button == Input.MOUSE_BUTTON_RIGHT) then
         local soilOverlay = getSoilOverlay(self)
         if soilOverlay and soilOverlay:onSideBarClick(posX, posY) then
             return true -- Consume click
         end
+    end
+
+    -- Cell inspection: left-click inside the map area
+    -- We do this on Up to avoid blocking the native drag-start on Down.
+    -- We also check the distance to ensure it was a click, not a drag.
+    if not eventUsed and isUp and button == Input.MOUSE_BUTTON_LEFT then
+        local soilOverlay = getSoilOverlay(self)
+        if soilOverlay and self.soilMapClickX and self.soilMapClickY then
+            local dx = math.abs(posX - self.soilMapClickX)
+            local dy = math.abs(posY - self.soilMapClickY)
+            -- Distance threshold (normalized screen units): 0.005 is roughly 8-10 pixels
+            if dx < 0.005 and dy < 0.005 then
+                local ingameMap = (self.ingameMapBase and self.ingameMapBase.layout and self.ingameMapBase)
+                               or (self.ingameMap     and self.ingameMap.layout     and self.ingameMap)
+                if ingameMap then
+                    local mapX, mapY, mapW, mapH = soilOverlay:getMapRenderBounds(self, ingameMap)
+                    if mapX and posX >= mapX and posX <= mapX + mapW
+                           and posY >= mapY and posY <= mapY + mapH then
+                        soilOverlay:onMapClick(ingameMap, posX, posY)
+                        -- Fall through to superFunc below
+                    end
+                end
+            end
+        end
+    end
+
+    if isUp then
+        self.soilMapClickX = nil
+        self.soilMapClickY = nil
     end
 
     -- Let the native handler handle movement, zooming, and map dragging
@@ -252,6 +287,7 @@ end
 function SoilMapHooks:onFrameClose()
     local soilOverlay = getSoilOverlay(self)
     if soilOverlay ~= nil then
+        soilOverlay.selectedCell = nil
         soilOverlay:requestRefresh()
     end
 end
@@ -298,11 +334,21 @@ if InGameMenuMapFrame ~= nil then
     SoilLogger.info("SoilMapHooks: installed on InGameMenuMapFrame (Manual UI Mode)")
 end
 
--- Hook IngameMapElement.draw at class level so we can draw overlay dots after the
--- map texture renders, regardless of whether InGameMenuMapFrame.onDrawPostIngameMap
--- exists as a callback target in the game's XML.
+-- Hook IngameMapElement.draw at class level.
+-- Use overwrittenFunction so we can guard against ingameMap being nil before
+-- the vanilla draw body runs (prevents "attempt to index nil with 'drawMapOnly'").
 if IngameMapElement ~= nil then
-    IngameMapElement.draw = Utils.appendedFunction(IngameMapElement.draw, SoilMapHooks.onDrawIngameMapElement)
+    IngameMapElement.draw = Utils.overwrittenFunction(IngameMapElement.draw, function(self, superFunc, clipX1, clipY1, clipX2, clipY2)
+        -- Guard: if ingameMap is not yet set, skip entirely (avoids vanilla crash at drawMapOnly)
+        if self.ingameMap == nil then
+            SoilLogger.warning("SoilMapHooks: IngameMapElement.draw skipped — ingameMap is nil")
+            return
+        end
+        -- Run the original vanilla draw
+        superFunc(self, clipX1, clipY1, clipX2, clipY2)
+        -- Then our overlay hook
+        SoilMapHooks.onDrawIngameMapElement(self)
+    end)
     SoilLogger.info("SoilMapHooks: IngameMapElement.draw hook installed for overlay drawing")
 else
     SoilLogger.warning("SoilMapHooks: IngameMapElement not available — map overlay dots will not draw")

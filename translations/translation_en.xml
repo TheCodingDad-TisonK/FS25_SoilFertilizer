@@ -39,6 +39,8 @@
     <e k="sf_notifications_long" v="Enable/disable soil and fertilizer notifications" eh="9a872f8f" />
     <e k="sf_show_hud_short" v="Show HUD" eh="c94fd4d7" />
     <e k="sf_show_hud_long" v="Show/hide the soil info HUD overlay (F8 to toggle temporarily)" eh="4e2e11b6" />
+    <e k="sf_show_mini_report_short" v="Show Cell Report" />
+    <e k="sf_show_mini_report_long" v="Show/hide the minimap cell report overlay" />
     <e k="sf_hud_position_short" v="HUD Position" eh="5ac371f2" />
     <e k="sf_hud_position_long" v="Choose where the soil info HUD appears on screen" eh="d7b9c109" />
     <e k="sf_hud_pos_1" v="Top Right" eh="5f9f6784" />
@@ -86,6 +88,7 @@
     <e k="input_SF_TOGGLE_HUD" v="Toggle Soil HUD" eh="f0224a10" />
     <e k="input_SF_HUD_DRAG" v="HUD Drag Mode" eh="cb2eb762" />
     <e k="input_SF_SOIL_REPORT" v="Soil Report" eh="c33180ef" />
+    <e k="input_SF_TOGGLE_CELL_MAP" v="Toggle Soil Cell Map" />
     <e k="input_SF_RATE_UP" v="Increase Fertilizer Rate" eh="6e601ef5" />
     <e k="input_SF_RATE_DOWN" v="Decrease Fertilizer Rate" eh="30712026" />
     <e k="input_SF_TOGGLE_AUTO" v="Toggle Auto Rate" eh="a8642cf0" />
@@ -608,6 +611,7 @@
     <e k="sf_desc_fertilizerCosts" v="Real in-game cost for fertilizers" eh="1c197c9f" />
     <e k="sf_desc_showNotifications" v="In-game soil status notifications" eh="7f275b4b" />
     <e k="sf_desc_showHUD" v="Show the soil HUD overlay" eh="fa8b9224" />
+    <e k="sf_desc_showMiniReport" v="Show the minimap cell report overlay" />
     <e k="sf_desc_hudPosition" v="HUD preset anchor position" eh="98c8bcea" />
     <e k="sf_desc_hudColorTheme" v="Color palette for HUD elements" eh="97271907" />
     <e k="sf_desc_hudFontSize" v="HUD text size" eh="48a6fc15" />
@@ -691,5 +695,18 @@
     <e k="sf_fieldinfo_yield" v="Yield" eh="97345487" />
     <e k="sf_fieldinfo_rotation" v="Rotation" eh="f1a42bd4" />
     <e k="sf_fieldinfo_needs" v="Needs" eh="94d6125d" />
+    <e k="sf_field" v="Field" eh="00000000" />
+    <e k="sf_no_field" v="No field selected" eh="00000000" />
+    <e k="sf_overall_Good" v="Good" eh="00000000" />
+    <e k="sf_overall_Fair" v="Fair" eh="00000000" />
+    <e k="sf_overall_Poor" v="Poor" eh="00000000" />
+    <e k="sf_cell_report" v="Cell Report" eh="00000000" />
+    <e k="sf_cell_no_data_title" v="No cell data found" eh="00000000" />
+    <e k="sf_cell_no_data" v="No soil data at this location" eh="00000000" />
+    <e k="sf_cell" v="Cell" eh="00000000" />
+    <e k="sf_cell_dialog_title" v="Soil Cell Inspection" />
+    <e k="sf_cell_sidebar_header" v="Cell Details" />
+    <e k="sf_cell_coord" v="Coordinates" />
+    <e k="sf_cell_click_hint" v="Click the map to inspect a soil cell" />
     </elements>
 </l10n>

@@ -76,6 +76,7 @@
         <action name="SF_CYCLE_MAP_LAYER" category="ONFOOT" />
         <action name="SF_OPEN_SETTINGS"   category="ONFOOT" />
         <action name="SF_HUD_DRAG"        category="ONFOOT" />
+        <action name="SF_TOGGLE_CELL_MAP" category="ONFOOT VEHICLE" />
     </actions>
 
     <l10n filenamePrefix="translations/translation" />
@@ -104,6 +105,9 @@
         </actionBinding>
         <actionBinding action="SF_HUD_DRAG">
             <binding device="KB_MOUSE_DEFAULT" input="KEY_lshift KEY_h" />
+        </actionBinding>
+        <actionBinding action="SF_TOGGLE_CELL_MAP">
+            <binding device="KB_MOUSE_DEFAULT" input="KEY_lshift KEY_s" />
         </actionBinding>
     </inputBinding>
 
