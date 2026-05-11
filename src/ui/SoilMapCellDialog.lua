@@ -123,10 +123,10 @@ function SoilMapCellDialog:onClickMap(worldX, worldZ)
             if self.valK then self.valK:setText(string.format("%.1f kg/ha", info.k or info.potassium and info.potassium.value or 0)) end
             if self.valPH then self.valPH:setText(string.format("%.2f", info.ph or info.pH or 7.0)) end
             if self.valOM then self.valOM:setText(string.format("%.2f%%", info.om or info.organicMatter or 2.0)) end
-            if self.valWeed then self.valWeed:setText("--") end
-            if self.valPest then self.valPest:setText("--") end
-            if self.valDisease then self.valDisease:setText("--") end
-            if self.valCompaction then self.valCompaction:setText("--") end
+            if self.valWeed then self.valWeed:setText(string.format("%d%%", info.weedPressure or 0)) end
+            if self.valPest then self.valPest:setText(string.format("%d%%", info.pestPressure or 0)) end
+            if self.valDisease then self.valDisease:setText(string.format("%d%%", info.diseasePressure or 0)) end
+            if self.valCompaction then self.valCompaction:setText(string.format("%d%%", info.compaction or 0)) end
         else
             if self.detailsGroup then self.detailsGroup:setVisible(false) end
             if self.hintText then

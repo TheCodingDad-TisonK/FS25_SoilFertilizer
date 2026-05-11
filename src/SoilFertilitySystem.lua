@@ -2726,8 +2726,13 @@ function SoilFertilitySystem:saveToXMLFile(xmlFile, key)
             setXMLInt(xmlFile, fieldKey .. "#fungicideDaysLeft", field.fungicideDaysLeft or 0)
             setXMLInt(xmlFile, fieldKey .. "#dryDayCount", field.dryDayCount or 0)
             setXMLInt(xmlFile, fieldKey .. "#burnDaysLeft", field.burnDaysLeft or 0)
-            setXMLInt(xmlFile, fieldKey .. "#lastAlertSeason", field.lastAlertSeason or 0)
+            setXMLFloat(xmlFile, fieldKey .. "#coverageFraction", field.coverageFraction or 0)
             setXMLFloat(xmlFile, fieldKey .. "#compaction", field.compaction or 0)
+
+            -- Save daily application throttles
+            setXMLInt(xmlFile, fieldKey .. "#herbicideAppliedDay", self.herbicideAppliedDay[fieldId] or 0)
+            setXMLInt(xmlFile, fieldKey .. "#insecticideAppliedDay", self.insecticideAppliedDay[fieldId] or 0)
+            setXMLInt(xmlFile, fieldKey .. "#fungicideAppliedDay", self.fungicideAppliedDay[fieldId] or 0)
 
             -- Save per-cell compaction data
             local compIdx = 0
@@ -2807,6 +2812,7 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
             fungicideDaysLeft = getXMLInt(xmlFile, fieldKey .. "#fungicideDaysLeft") or 0,
             dryDayCount = getXMLInt(xmlFile, fieldKey .. "#dryDayCount") or 0,
             burnDaysLeft = getXMLInt(xmlFile, fieldKey .. "#burnDaysLeft") or 0,
+            coverageFraction = getXMLFloat(xmlFile, fieldKey .. "#coverageFraction") or 0,
             lastAlertSeason = getXMLInt(xmlFile, fieldKey .. "#lastAlertSeason") or nil,
             compaction = 0,
             compactionCells = {},
@@ -2817,6 +2823,11 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
             nutrientBuffer = {},
             zoneData = {},
         }
+
+        -- Load daily application throttles
+        self.herbicideAppliedDay[fieldId] = getXMLInt(xmlFile, fieldKey .. "#herbicideAppliedDay") or 0
+        self.insecticideAppliedDay[fieldId] = getXMLInt(xmlFile, fieldKey .. "#insecticideAppliedDay") or 0
+        self.fungicideAppliedDay[fieldId] = getXMLInt(xmlFile, fieldKey .. "#fungicideAppliedDay") or 0
 
         -- Refresh fieldArea from the live farmland object — corrects stale values from saves
         -- written before the scan priority bug was fixed (where field.areaHa == 1.0 default
