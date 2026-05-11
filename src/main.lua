@@ -362,19 +362,22 @@ end
 -- =========================================================
 if DensityMapHeightManager and type(DensityMapHeightManager.loadMapData) == "function" then
     local function injectSFHeightTypes(densityMapHeightManager)
-        if densityMapHeightManager.modDensityHeightMapTypeFilenames then
-            local filename = modDirectory .. "xml/densityMapHeightTypes.xml"
-            local alreadyAdded = false
-            for _, existing in ipairs(densityMapHeightManager.modDensityHeightMapTypeFilenames) do
-                if existing == filename then
-                    alreadyAdded = true
-                    break
-                end
+        if densityMapHeightManager.modDensityHeightMapTypeFilenames == nil then
+            densityMapHeightManager.modDensityHeightMapTypeFilenames = {}
+        end
+
+        local filename = modDirectory .. "xml/densityMapHeightTypes.xml"
+        local alreadyAdded = false
+        for _, existing in ipairs(densityMapHeightManager.modDensityHeightMapTypeFilenames) do
+            if existing == filename then
+                alreadyAdded = true
+                break
             end
-            if not alreadyAdded then
-                SoilLogger.info("Tip On Ground Fix: Registering densityMapHeightTypes.xml")
-                table.insert(densityMapHeightManager.modDensityHeightMapTypeFilenames, filename)
-            end
+        end
+
+        if not alreadyAdded then
+            SoilLogger.info("Tip On Ground Fix: Registering densityMapHeightTypes.xml")
+            table.insert(densityMapHeightManager.modDensityHeightMapTypeFilenames, filename)
         end
     end
     DensityMapHeightManager.loadMapData = Utils.prependedFunction(DensityMapHeightManager.loadMapData, injectSFHeightTypes)

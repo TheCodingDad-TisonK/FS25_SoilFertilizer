@@ -751,6 +751,7 @@ SoilConstants.WEED_PRESSURE = {
     -- Crops block sunlight, slowing or stopping weed growth as they mature.
     CANOPY_SUPPRESSION_THRESHOLD = 0.5, -- Crop growth state % (0.0 to 1.0) where suppression begins
     CANOPY_SUPPRESSION_MAX       = 1.0, -- Crop growth state % where weed growth is completely stopped
+    CANOPY_DECAY_RATE            = 1.2, -- Points per day of weed reduction at full row closure (Issue #349)
 
     -- Nutrient Depletion by Weeds (Issue #327)
     -- Daily nutrient drain at 100% weed pressure (scales linearly with pressure)

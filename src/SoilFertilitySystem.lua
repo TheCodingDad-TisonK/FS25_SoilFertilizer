@@ -893,7 +893,8 @@ function SoilFertilitySystem:onHerbicideApplied(fieldId, effectiveness)
     local reduction = wp.HERBICIDE_PRESSURE_REDUCTION * (effectiveness or 1.0)
     local before = field.weedPressure or 0
     field.weedPressure = math.max(0, before - reduction)
-    field.herbicideDaysLeft = wp.HERBICIDE_DURATION_DAYS
+    local daysPerMonth = (g_currentMission and g_currentMission.environment and g_currentMission.environment.daysPerPeriod) or 1
+    field.herbicideDaysLeft = wp.HERBICIDE_DURATION_DAYS * daysPerMonth
 
     self:log("[Herbicide] Field %d: weed pressure %.0f -> %.0f, protected for %d days",
         fieldId, before, field.weedPressure, field.herbicideDaysLeft)
@@ -926,7 +927,8 @@ function SoilFertilitySystem:onInsecticideApplied(fieldId, effectiveness)
     local reduction = pp.INSECTICIDE_PRESSURE_REDUCTION * (effectiveness or 1.0)
     local before = field.pestPressure or 0
     field.pestPressure = math.max(0, before - reduction)
-    field.insecticideDaysLeft = pp.INSECTICIDE_DURATION_DAYS
+    local daysPerMonth = (g_currentMission and g_currentMission.environment and g_currentMission.environment.daysPerPeriod) or 1
+    field.insecticideDaysLeft = pp.INSECTICIDE_DURATION_DAYS * daysPerMonth
 
     self:log("[Insecticide] Field %d: pest pressure %.0f -> %.0f, protected for %d days",
         fieldId, before, field.pestPressure, field.insecticideDaysLeft)
@@ -958,7 +960,8 @@ function SoilFertilitySystem:onFungicideApplied(fieldId, effectiveness)
     local reduction = dp.FUNGICIDE_PRESSURE_REDUCTION * (effectiveness or 1.0)
     local before = field.diseasePressure or 0
     field.diseasePressure = math.max(0, before - reduction)
-    field.fungicideDaysLeft = dp.FUNGICIDE_DURATION_DAYS
+    local daysPerMonth = (g_currentMission and g_currentMission.environment and g_currentMission.environment.daysPerPeriod) or 1
+    field.fungicideDaysLeft = dp.FUNGICIDE_DURATION_DAYS * daysPerMonth
 
     self:log("[Fungicide] Field %d: disease pressure %.0f -> %.0f, protected for %d days",
         fieldId, before, field.diseasePressure, field.fungicideDaysLeft)
@@ -1551,6 +1554,12 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
     local currentDay = self._dailyBatchDay
     local season     = self._dailyBatchSeason
 
+    -- Time scaling (Issue #349): normalize daily changes based on month length.
+    -- All 'per day' rates are scaled by 1/daysPerMonth so that the total change
+    -- per month remains constant regardless of the days-per-period setting.
+    local daysPerMonth = (g_currentMission and g_currentMission.environment and g_currentMission.environment.daysPerPeriod) or 1
+    local timeFactor = 1.0 / daysPerMonth
+
     -- ── Buffer / coverage reset ──────────────────────────────────────────────
     field.nutrientBuffer          = {}
     field.coveredCells            = {}
@@ -1565,26 +1574,27 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
     if self.settings.compactionEnabled and SoilConstants.COMPACTION then
         local cp = SoilConstants.COMPACTION
         if (field.compaction or 0) > 0 then
-            field.compaction = math.max(0, field.compaction - cp.NATURAL_DECAY_PER_DAY)
+            field.compaction = math.max(0, field.compaction - cp.NATURAL_DECAY_PER_DAY * timeFactor)
         end
     end
 
     -- ── Fallow recovery ──────────────────────────────────────────────────────
+    -- Fallow threshold also scales so it represents the same 'agricultural time' (months)
     local daysSinceFallow = currentDay - (field.lastHarvest or 0)
-    if daysSinceFallow > SoilConstants.TIMING.FALLOW_THRESHOLD then
-        field.nitrogen      = math.min(limits.MAX, field.nitrogen      + recovery.nitrogen)
-        field.phosphorus    = math.min(limits.MAX, field.phosphorus    + recovery.phosphorus)
-        field.potassium     = math.min(limits.MAX, field.potassium     + recovery.potassium)
+    if daysSinceFallow > SoilConstants.TIMING.FALLOW_THRESHOLD * daysPerMonth then
+        field.nitrogen      = math.min(limits.MAX, field.nitrogen      + recovery.nitrogen * timeFactor)
+        field.phosphorus    = math.min(limits.MAX, field.phosphorus    + recovery.phosphorus * timeFactor)
+        field.potassium     = math.min(limits.MAX, field.potassium     + recovery.potassium * timeFactor)
         field.organicMatter = math.min(limits.ORGANIC_MATTER_MAX,
-                                       field.organicMatter + recovery.organicMatter)
+                                       field.organicMatter + recovery.organicMatter * timeFactor)
     end
 
     -- ── Seasonal nitrogen shift ──────────────────────────────────────────────
     if self.settings.seasonalEffects and season then
         if season == seasonal.SPRING_SEASON then
-            field.nitrogen = math.min(limits.MAX, field.nitrogen + seasonal.SPRING_NITROGEN_BOOST)
+            field.nitrogen = math.min(limits.MAX, field.nitrogen + seasonal.SPRING_NITROGEN_BOOST * timeFactor)
         elseif season == seasonal.FALL_SEASON then
-            field.nitrogen = math.max(limits.MIN, field.nitrogen - seasonal.FALL_NITROGEN_LOSS)
+            field.nitrogen = math.max(limits.MIN, field.nitrogen - seasonal.FALL_NITROGEN_LOSS * timeFactor)
         end
     end
 
@@ -1598,23 +1608,24 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
                 local c2 = string.lower(field.lastCrop2)
                 if cr.LEGUMES[c1] and not cr.LEGUMES[c2]
                    and (field.rotationBonusDaysLeft or 0) == 0 then
-                    field.rotationBonusDaysLeft = cr.LEGUME_BONUS_DAYS
+                    -- Bonus duration also scales to match month length
+                    field.rotationBonusDaysLeft = cr.LEGUME_BONUS_DAYS * daysPerMonth
                 end
             end
         end
         -- Apply daily bonus while counter > 0 during spring
         if season == seasonal.SPRING_SEASON and (field.rotationBonusDaysLeft or 0) > 0 then
             local cr = SoilConstants.CROP_ROTATION
-            field.nitrogen = math.min(limits.MAX, field.nitrogen + cr.LEGUME_BONUS_N_PER_DAY)
+            field.nitrogen = math.min(limits.MAX, field.nitrogen + cr.LEGUME_BONUS_N_PER_DAY * timeFactor)
             field.rotationBonusDaysLeft = field.rotationBonusDaysLeft - 1
         end
     end
 
     -- ── pH slow drift toward neutral ─────────────────────────────────────────
     if field.pH < limits.PH_NEUTRAL_LOW then
-        field.pH = math.min(limits.PH_NEUTRAL_LOW, field.pH + phNorm.RATE)
+        field.pH = math.min(limits.PH_NEUTRAL_LOW, field.pH + phNorm.RATE * timeFactor)
     elseif field.pH > limits.PH_NEUTRAL_HIGH then
-        field.pH = math.max(limits.PH_NEUTRAL_HIGH, field.pH - phNorm.RATE)
+        field.pH = math.max(limits.PH_NEUTRAL_HIGH, field.pH - phNorm.RATE * timeFactor)
     end
 
     -- ── Weed pressure daily growth ───────────────────────────────────────────
@@ -1659,6 +1670,7 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
                 end
 
                 local canopyFactor = 1.0
+                local rowClosure = false
                 if g_fieldManager and g_fieldManager.fields then
                     local fsField = nil
                     for _, f in ipairs(g_fieldManager.fields) do
@@ -1682,20 +1694,29 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
                                 if progress >= suppressThresh and suppressMax > suppressThresh then
                                     canopyFactor = math.max(0.0, 1.0 - (progress - suppressThresh) / (suppressMax - suppressThresh))
                                 end
+                                if progress >= suppressMax then
+                                    rowClosure = true
+                                end
                             end
                         end
                     end
                 end
 
-                field.weedPressure = math.min(100, pressure + (baseRate * seasonMult + rainBonus) * canopyFactor)
+                if rowClosure then
+                    -- Row closure reached: weeds start to decay due to lack of light (Issue #349)
+                    local decayRate = wp.CANOPY_DECAY_RATE or 1.2
+                    field.weedPressure = math.max(0, pressure - decayRate * timeFactor)
+                else
+                    field.weedPressure = math.min(100, pressure + (baseRate * seasonMult + rainBonus) * canopyFactor * timeFactor)
+                end
             end
 
             -- Weeds consume nutrients
-            if pressure > 0 then
-                local pRatio = pressure / 100
-                field.nitrogen = math.max(limits.MIN, field.nitrogen - (wp.NUTRIENT_DEPLETION_N or 0) * pRatio)
-                field.phosphorus = math.max(limits.MIN, field.phosphorus - (wp.NUTRIENT_DEPLETION_P or 0) * pRatio)
-                field.potassium = math.max(limits.MIN, field.potassium - (wp.NUTRIENT_DEPLETION_K or 0) * pRatio)
+            if (field.weedPressure or 0) > 0 then
+                local pRatio = field.weedPressure / 100
+                field.nitrogen = math.max(limits.MIN, field.nitrogen - (wp.NUTRIENT_DEPLETION_N or 0) * pRatio * timeFactor)
+                field.phosphorus = math.max(limits.MIN, field.phosphorus - (wp.NUTRIENT_DEPLETION_P or 0) * pRatio * timeFactor)
+                field.potassium = math.max(limits.MIN, field.potassium - (wp.NUTRIENT_DEPLETION_K or 0) * pRatio * timeFactor)
             end
         end
     end
@@ -1738,7 +1759,7 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
                 rainBonus = pp.RAIN_BONUS
             end
 
-            field.pestPressure = math.min(100, pressure + (baseRate * seasonMult * cropMult) + rainBonus)
+            field.pestPressure = math.min(100, pressure + ((baseRate * seasonMult * cropMult) + rainBonus) * timeFactor)
         end
     end
 
@@ -1761,11 +1782,35 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
 
         local pressure = field.diseasePressure or 0
 
-        if (field.dryDayCount or 0) >= dp.DRY_DAYS_THRESHOLD then
-            field.diseasePressure = math.max(0, pressure - dp.DRY_DECAY_RATE)
+        -- Dry days threshold also scales
+        if (field.dryDayCount or 0) >= dp.DRY_DAYS_THRESHOLD * daysPerMonth then
+            field.diseasePressure = math.max(0, pressure - dp.DRY_DECAY_RATE * timeFactor)
         elseif (field.fungicideDaysLeft or 0) <= 0 then
             local baseRate
             if     pressure < dp.LOW    then baseRate = dp.GROWTH_RATE_LOW
+            elseif pressure < dp.MEDIUM then baseRate = dp.GROWTH_RATE_MID
+            elseif pressure < dp.HIGH   then baseRate = dp.GROWTH_RATE_HIGH
+            else                             baseRate = dp.GROWTH_RATE_PEAK
+            end
+
+            local seasonMult = 1.0
+            if season then
+                if     season == 1 then seasonMult = dp.SEASONAL_SPRING
+                elseif season == 2 then seasonMult = dp.SEASONAL_SUMMER
+                elseif season == 3 then seasonMult = dp.SEASONAL_FALL
+                elseif season == 4 then seasonMult = dp.SEASONAL_WINTER
+                end
+            end
+
+            local cropMult = 1.0
+            if field.lastCrop then
+                cropMult = dp.CROP_SUSCEPTIBILITY[string.lower(field.lastCrop)] or 1.0
+            end
+
+            local rainBonus = isRaining and dp.RAIN_BONUS or 0
+            field.diseasePressure = math.min(100, pressure + ((baseRate * seasonMult * cropMult) + rainBonus) * timeFactor)
+        end
+    end
             elseif pressure < dp.MEDIUM then baseRate = dp.GROWTH_RATE_MID
             elseif pressure < dp.HIGH   then baseRate = dp.GROWTH_RATE_HIGH
             else                             baseRate = dp.GROWTH_RATE_PEAK
@@ -2212,7 +2257,8 @@ function SoilFertilitySystem:onInsecticideAppliedIncremental(fieldId, reduction)
     local pp = SoilConstants.PEST_PRESSURE
     local before = field.pestPressure or 0
     field.pestPressure = math.max(0, before - reduction)
-    field.insecticideDaysLeft = pp.INSECTICIDE_DURATION_DAYS
+    local daysPerMonth = (g_currentMission and g_currentMission.environment and g_currentMission.environment.daysPerPeriod) or 1
+    field.insecticideDaysLeft = pp.INSECTICIDE_DURATION_DAYS * daysPerMonth
 
     -- Local zoneData update
     local x, z = self._lastSprayX, self._lastSprayZ
@@ -2242,7 +2288,8 @@ function SoilFertilitySystem:onFungicideAppliedIncremental(fieldId, reduction)
     local dp = SoilConstants.DISEASE_PRESSURE
     local before = field.diseasePressure or 0
     field.diseasePressure = math.max(0, before - reduction)
-    field.fungicideDaysLeft = dp.FUNGICIDE_DURATION_DAYS
+    local daysPerMonth = (g_currentMission and g_currentMission.environment and g_currentMission.environment.daysPerPeriod) or 1
+    field.fungicideDaysLeft = dp.FUNGICIDE_DURATION_DAYS * daysPerMonth
 
     -- Local zoneData update
     local x, z = self._lastSprayX, self._lastSprayZ
@@ -2371,7 +2418,8 @@ function SoilFertilitySystem:onHerbicideAppliedDirect(fieldId, effectiveness, li
     if reduction > 0 then
         local before = field.weedPressure or 0
         field.weedPressure = math.max(0, before - reduction)
-        field.herbicideDaysLeft = SoilConstants.WEED_PRESSURE.HERBICIDE_DURATION_DAYS
+        local daysPerMonth = (g_currentMission and g_currentMission.environment and g_currentMission.environment.daysPerPeriod) or 1
+        field.herbicideDaysLeft = SoilConstants.WEED_PRESSURE.HERBICIDE_DURATION_DAYS * daysPerMonth
 
         -- Broadcast updated weed pressure to all clients (dedicated server fix — Issue #257)
         -- Previously missing, causing weed value to only update on clients when a subsequent
@@ -2461,10 +2509,11 @@ function SoilFertilitySystem:applyBurnEffect(fieldId, rateMultiplier)
     local phDrop  = 0
     local nDrain  = 0
 
+    local daysPerMonth = (g_currentMission and g_currentMission.environment and g_currentMission.environment.daysPerPeriod) or 1
     if rateMultiplier >= burnCfg.BURN_GUARANTEED_THRESHOLD then
         phDrop = burnCfg.BURN_PH_DROP_CERTAIN
         nDrain = burnCfg.BURN_N_DRAIN_CERTAIN
-        field.burnDaysLeft = 3   -- show burn warning in HUD for 3 in-game days
+        field.burnDaysLeft = 3 * daysPerMonth   -- show burn warning in HUD (Issue #349 scaling)
     else
         -- Probability scales linearly between risk threshold and guaranteed threshold
         local excess = (rateMultiplier - burnCfg.BURN_RISK_THRESHOLD) /
@@ -2472,7 +2521,7 @@ function SoilFertilitySystem:applyBurnEffect(fieldId, rateMultiplier)
         if math.random() < excess then
             phDrop = burnCfg.BURN_PH_DROP_RISK
             nDrain = burnCfg.BURN_N_DRAIN_RISK
-            field.burnDaysLeft = 3
+            field.burnDaysLeft = 3 * daysPerMonth
         end
     end
 
