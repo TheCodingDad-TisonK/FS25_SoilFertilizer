@@ -24,9 +24,9 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
-    "- Fixed: organic fill type piles no longer render black",
-    "- Fixed: pile textures now apply correctly after map load",
-    "- Fixed: pile height now uses correct density map height type",
+    "- Fixed: soil map tile color now updates promptly after spraying",
+    "- Fixed: multiplayer clients see map tile changes immediately",
+    "- Improved: fill type pile textures now use realistic base-game materials",
 }
 
 -- ── i18n helper ───────────────────────────────────────────

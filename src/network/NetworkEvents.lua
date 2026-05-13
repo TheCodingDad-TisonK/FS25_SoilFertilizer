@@ -974,6 +974,10 @@ function SoilFieldUpdateEvent:run(connection)
     if g_SoilFertilityManager and g_SoilFertilityManager.soilSystem then
         g_SoilFertilityManager.soilSystem.fieldData[self.fieldId] = self.field
 
+        -- Refresh overlay so the map tile updates on the client without waiting for the 4.5-s timer
+        local overlay = g_SoilFertilityManager.soilMapOverlay
+        if overlay then overlay:requestRefresh() end
+
         if g_SoilFertilityManager.settings.debugMode then
             SoilLogger.debug("Client: Field %d synced from server (N=%.1f, P=%.1f, K=%.1f)",
                 self.fieldId, self.field.nitrogen, self.field.phosphorus, self.field.potassium)
