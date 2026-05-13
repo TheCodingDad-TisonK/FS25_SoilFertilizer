@@ -67,6 +67,27 @@ source(modDirectory .. "src/network/NetworkEvents.lua")
 -- 6. Integrations
 source(modDirectory .. "src/integrations/SectionControlIntegration.lua")
 
+-- Register our custom density map height types with the DMHM mod file list.
+-- DensityMapHeightManager:loadMapData iterates modDensityHeightMapTypeFilenames and
+-- calls loadDensityMapHeightTypes for each, which registers C++ height types.  This
+-- must happen before loadMapData runs (i.e. at module load time, not in a hook).
+-- When C++ handles the registration, physical pile height and tipping work correctly
+-- without any Lua injection.  The Lua injection in loadedMission() remains as a
+-- fallback and is a no-op if C++ already populated fillTypeIndexToHeightType.
+do
+    local dmhm = g_densityMapHeightManager
+    if dmhm ~= nil then
+        if dmhm.modDensityHeightMapTypeFilenames == nil then
+            dmhm.modDensityHeightMapTypeFilenames = {}
+        end
+        local xmlPath = Utils.getFilename("xml/densityMapHeightTypes.xml", modDirectory)
+        table.insert(dmhm.modDensityHeightMapTypeFilenames, xmlPath)
+        SoilLogger.info("[HEIGHT] Registered xml/densityMapHeightTypes.xml with DMHM mod file list")
+    else
+        SoilLogger.warning("[HEIGHT] g_densityMapHeightManager not available at load time — height types will rely on Lua fallback")
+    end
+end
+
 -- Register helpline icon atlas as early as possible (at module load time).
 -- g_overlayManager exists from game startup, so this works before any mission loads.
 -- The loadedMission hook below retries if the manager wasn't available yet.
@@ -116,10 +137,25 @@ local function loadedMission(mission, node)
         local dmhm = g_densityMapHeightManager
         local ftm  = g_fillTypeManager
         if dmhm and ftm and dmhm.heightTypes and dmhm.fillTypeIndexToHeightType then
-            -- Use FERTILIZER as the structural template (confirmed working, granular).
-            local tmpl = nil
-            local fertIdx = ftm:getFillTypeIndexByName("FERTILIZER")
-            if fertIdx then tmpl = dmhm.fillTypeIndexToHeightType[fertIdx] end
+            -- Two templates: FERTILIZER (light granular) for mineral types,
+            -- MANURE (dark organic) for compost/biosolids/chicken manure/pelletized manure.
+            -- Using the wrong template causes black/unlit pile rendering because the
+            -- C++ material reference from the shallow copy drives the visual output.
+            local tmplFert   = nil
+            local tmplManure = nil
+            local fertIdx    = ftm:getFillTypeIndexByName("FERTILIZER")
+            local manureIdx  = ftm:getFillTypeIndexByName("MANURE")
+            if fertIdx  then tmplFert   = dmhm.fillTypeIndexToHeightType[fertIdx]   end
+            if manureIdx then tmplManure = dmhm.fillTypeIndexToHeightType[manureIdx] end
+
+            -- Fall back to the other template if one is missing
+            local tmpl = tmplFert or tmplManure
+
+            -- Which types use the organic (MANURE) template
+            local organicSet = {
+                COMPOST = true, BIOSOLIDS = true,
+                CHICKEN_MANURE = true, PELLETIZED_MANURE = true,
+            }
 
             if tmpl then
                 -- Our 11 solid fill types that need ground-tipping support.
@@ -132,13 +168,13 @@ local function loadedMission(mission, node)
                     local idx = ftm:getFillTypeIndexByName(typeName)
                     if idx and not dmhm.fillTypeIndexToHeightType[idx] then
                         local nextSlot = dmhm.numHeightTypes + 1
-                        -- Shallow-copy the FERTILIZER template so any C++ object references
-                        -- (density map channel pointer, physics layer handle) are preserved.
-                        -- Without these refs, tipToGroundAroundLine silently fails even when
-                        -- the Lua-side canBeTipped check passes.  Override only the identity
-                        -- fields that must differ per fill type.
+                        -- Shallow-copy the appropriate template so C++ object references
+                        -- (density map channel pointer, material, physics layer handle) are
+                        -- preserved. Organic types use MANURE to get the correct dark pile
+                        -- visual; mineral types use FERTILIZER for the light granular look.
+                        local srcTmpl = (organicSet[typeName] and tmplManure) or tmplFert or tmpl
                         local ht = {}
-                        for k, v in pairs(tmpl) do ht[k] = v end
+                        for k, v in pairs(srcTmpl) do ht[k] = v end
                         ht.allowsSmoothing  = false
                         ht.canBeTipped      = true
                         ht.fillTypeIndex    = idx
@@ -163,6 +199,21 @@ local function loadedMission(mission, node)
                     "getMinValidLiterValue(UREA)=%s (>0 = success)",
                     registered, tostring(ok and val or "ERROR")
                 ))
+
+                -- If C++ registered our types via modDensityHeightMapTypeFilenames (the
+                -- preferred path), registered == 0 here and nothing else is needed.
+                -- If Lua injection ran as fallback, rebuild the GPU texture array so
+                -- the newly injected types get valid textureArrayIndex slots.
+                if registered > 0 and g_terrainNode then
+                    local ctfl_ok, ctfl_err = pcall(function()
+                        ftm:constructTerrainFillLayers(dmhm.heightTypes, g_terrainNode)
+                    end)
+                    if ctfl_ok then
+                        SoilLogger.info("[TIP FIX] constructTerrainFillLayers rebuilt (Lua fallback path)")
+                    else
+                        SoilLogger.warning("[TIP FIX] constructTerrainFillLayers failed: " .. tostring(ctfl_err))
+                    end
+                end
 
                 -- Belt-and-suspenders: also hook getCanTipToGround at Lua level so the
                 -- discharge eligibility check passes even if C++ hasn't read our table.
