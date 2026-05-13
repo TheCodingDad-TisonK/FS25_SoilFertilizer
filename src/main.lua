@@ -116,10 +116,25 @@ local function loadedMission(mission, node)
         local dmhm = g_densityMapHeightManager
         local ftm  = g_fillTypeManager
         if dmhm and ftm and dmhm.heightTypes and dmhm.fillTypeIndexToHeightType then
-            -- Use FERTILIZER as the structural template (confirmed working, granular).
-            local tmpl = nil
-            local fertIdx = ftm:getFillTypeIndexByName("FERTILIZER")
-            if fertIdx then tmpl = dmhm.fillTypeIndexToHeightType[fertIdx] end
+            -- Two templates: FERTILIZER (light granular) for mineral types,
+            -- MANURE (dark organic) for compost/biosolids/chicken manure/pelletized manure.
+            -- Using the wrong template causes black/unlit pile rendering because the
+            -- C++ material reference from the shallow copy drives the visual output.
+            local tmplFert   = nil
+            local tmplManure = nil
+            local fertIdx    = ftm:getFillTypeIndexByName("FERTILIZER")
+            local manureIdx  = ftm:getFillTypeIndexByName("MANURE")
+            if fertIdx  then tmplFert   = dmhm.fillTypeIndexToHeightType[fertIdx]   end
+            if manureIdx then tmplManure = dmhm.fillTypeIndexToHeightType[manureIdx] end
+
+            -- Fall back to the other template if one is missing
+            local tmpl = tmplFert or tmplManure
+
+            -- Which types use the organic (MANURE) template
+            local organicSet = {
+                COMPOST = true, BIOSOLIDS = true,
+                CHICKEN_MANURE = true, PELLETIZED_MANURE = true,
+            }
 
             if tmpl then
                 -- Our 11 solid fill types that need ground-tipping support.
@@ -132,13 +147,13 @@ local function loadedMission(mission, node)
                     local idx = ftm:getFillTypeIndexByName(typeName)
                     if idx and not dmhm.fillTypeIndexToHeightType[idx] then
                         local nextSlot = dmhm.numHeightTypes + 1
-                        -- Shallow-copy the FERTILIZER template so any C++ object references
-                        -- (density map channel pointer, physics layer handle) are preserved.
-                        -- Without these refs, tipToGroundAroundLine silently fails even when
-                        -- the Lua-side canBeTipped check passes.  Override only the identity
-                        -- fields that must differ per fill type.
+                        -- Shallow-copy the appropriate template so C++ object references
+                        -- (density map channel pointer, material, physics layer handle) are
+                        -- preserved. Organic types use MANURE to get the correct dark pile
+                        -- visual; mineral types use FERTILIZER for the light granular look.
+                        local srcTmpl = (organicSet[typeName] and tmplManure) or tmplFert or tmpl
                         local ht = {}
-                        for k, v in pairs(tmpl) do ht[k] = v end
+                        for k, v in pairs(srcTmpl) do ht[k] = v end
                         ht.allowsSmoothing  = false
                         ht.canBeTipped      = true
                         ht.fillTypeIndex    = idx
