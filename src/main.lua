@@ -356,31 +356,39 @@ if FillTypeManager and type(FillTypeManager.loadModFillTypes) == "function" then
 end
 
 -- =========================================================
--- TIP ON GROUND FIX: Register densityMapHeightTypes
--- Enables mod fill types to be tipped on the ground (CTRL+I).
--- We inject our XML into DensityMapHeightManager's loading queue.
+-- TIP ON GROUND FIX: Register density map height types after fill types are loaded
+--
+-- Root cause: DensityMapHeightManager.loadMapData fires BEFORE FillTypeManager.loadMapData,
+-- so any XML injected into modDensityHeightMapTypeFilenames is processed while our custom
+-- fill types are still nil — every entry fails with "invalid fill type 'nil'".
+--
+-- Fix: hook FillTypeManager.loadMapData with appendedFunction so our height types are
+-- registered immediately after our fill types land in g_fillTypeManager. Terrain layer
+-- construction (constructTerrainFillLayers) requires the map i3d to be loaded, which
+-- happens after both loadMapData calls complete — so our late-registered types are
+-- included in the terrain build pass and get full visual + physics support.
 -- =========================================================
-if DensityMapHeightManager and type(DensityMapHeightManager.loadMapData) == "function" then
-    local function injectSFHeightTypes(densityMapHeightManager)
-        if densityMapHeightManager.modDensityHeightMapTypeFilenames == nil then
-            densityMapHeightManager.modDensityHeightMapTypeFilenames = {}
+if FillTypeManager and type(FillTypeManager.loadMapData) == "function" then
+    local soilHeightTypesRegistered = false
+    local function registerSFHeightTypesAfterFillTypes(self, xmlFile, missionInfo, baseDirectory)
+        if soilHeightTypesRegistered then return end
+        if g_densityMapHeightManager == nil
+        or type(g_densityMapHeightManager.loadDensityMapHeightTypes) ~= "function" then
+            SoilLogger.warning("Tip On Ground Fix: g_densityMapHeightManager not ready — tipping to ground may not work")
+            return
         end
-
         local filename = modDirectory .. "xml/densityMapHeightTypes.xml"
-        local alreadyAdded = false
-        for _, existing in ipairs(densityMapHeightManager.modDensityHeightMapTypeFilenames) do
-            if existing == filename then
-                alreadyAdded = true
-                break
-            end
-        end
-
-        if not alreadyAdded then
-            SoilLogger.info("Tip On Ground Fix: Registering densityMapHeightTypes.xml")
-            table.insert(densityMapHeightManager.modDensityHeightMapTypeFilenames, filename)
+        local heightTypesXmlFile = loadXMLFile("heightTypes", filename)
+        if heightTypesXmlFile ~= nil and heightTypesXmlFile ~= 0 then
+            g_densityMapHeightManager:loadDensityMapHeightTypes(heightTypesXmlFile, missionInfo, baseDirectory, false)
+            delete(heightTypesXmlFile)
+            soilHeightTypesRegistered = true
+            SoilLogger.info("Tip On Ground Fix: Height types registered after fill type load")
+        else
+            SoilLogger.warning("Tip On Ground Fix: Could not open densityMapHeightTypes.xml")
         end
     end
-    DensityMapHeightManager.loadMapData = Utils.prependedFunction(DensityMapHeightManager.loadMapData, injectSFHeightTypes)
+    FillTypeManager.loadMapData = Utils.appendedFunction(FillTypeManager.loadMapData, registerSFHeightTypesAfterFillTypes)
 end
 
 -- Route mouse events to SoilHUD (for drag/resize edit mode).

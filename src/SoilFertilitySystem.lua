@@ -1828,29 +1828,6 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
             field.diseasePressure = math.min(100, pressure + ((baseRate * seasonMult * cropMult) + rainBonus) * timeFactor)
         end
     end
-            elseif pressure < dp.MEDIUM then baseRate = dp.GROWTH_RATE_MID
-            elseif pressure < dp.HIGH   then baseRate = dp.GROWTH_RATE_HIGH
-            else                             baseRate = dp.GROWTH_RATE_PEAK
-            end
-
-            local seasonMult = 1.0
-            if season then
-                if     season == 1 then seasonMult = dp.SEASONAL_SPRING
-                elseif season == 2 then seasonMult = dp.SEASONAL_SUMMER
-                elseif season == 3 then seasonMult = dp.SEASONAL_FALL
-                elseif season == 4 then seasonMult = dp.SEASONAL_WINTER
-                end
-            end
-
-            local cropMult = 1.0
-            if field.lastCrop then
-                cropMult = dp.CROP_SUSCEPTIBILITY[string.lower(field.lastCrop)] or 1.0
-            end
-
-            local rainBonus = isRaining and dp.RAIN_BONUS or 0
-            field.diseasePressure = math.min(100, pressure + (baseRate * seasonMult * cropMult) + rainBonus)
-        end
-    end
 
     -- ── Burn warning countdown ───────────────────────────────────────────────
     if (field.burnDaysLeft or 0) > 0 then
