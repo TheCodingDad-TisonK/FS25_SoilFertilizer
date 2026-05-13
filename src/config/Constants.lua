@@ -213,7 +213,7 @@ SoilConstants.CROP_ROTATION = {
     LEGUME_BONUS_N_PER_DAY = 0.5,   -- N added per day during bonus window
     LEGUME_BONUS_DAYS       = 3,     -- spring bonus lasts this many days
     FATIGUE_MULTIPLIER      = 1.15,  -- nutrient extraction ×1.15 for same-crop consecutive seasons
-    LEGUMES = { soybean = true, peas = true, beans = true },
+    LEGUMES = { soybean = true, peas = true, beans = true, luzerne = true, clover = true },
 }
 
 -- ========================================
@@ -309,14 +309,14 @@ SoilConstants.FERTILIZER_PROFILES = {
     -- Phosphorus & potassium sources (Dry bulk)
     MAP               = { N=11.1, P=411.5, K=0.00 }, -- 225 kg/ha: ~45P ppm
     DAP               = { N=16.4, P=329.2, K=0.00 }, -- 225 kg/ha: ~40P ppm
-    POTASH            = { N=0.00, P=0.00, K=55.5 },  -- 225 kg/ha: ~45K ppm
+    POTASH            = { N=0.00, P=0.00, K=100.0 }, -- 225 kg/ha: ~22.5 K pts/pass; 70-90 kg/ha ≈ 7-9 pts (realistic 1-pass fix)
 
     -- Liquid equivalents (match dry profiles)
     LIQUID_UREA       = { N=154.6, P=0.00, K=0.00 },
     LIQUID_AMS        = { N=66.2,  P=0.00, K=0.00 },
     LIQUID_MAP        = { N=11.1, P=411.5, K=0.00 },
     LIQUID_DAP        = { N=16.4, P=329.2, K=0.00 },
-    LIQUID_POTASH     = { N=0.00, P=0.00, K=55.5 },
+    LIQUID_POTASH     = { N=0.00, P=0.00, K=100.0 },
 
     -- Organic / slow-release
     COMPOST           = { N=0.74, P=0.55, K=0.55, OM=0.60 }, -- 5000 kg/ha
@@ -430,6 +430,8 @@ SoilConstants.CROP_NUTRIENT_TARGETS = {
     sorghum    = { N = { min = 30, opt = 50 }, P = { min = 20, opt = 35 }, K = { min = 25, opt = 40 } },
     peas       = { N = { min = 15, opt = 30 }, P = { min = 25, opt = 45 }, K = { min = 30, opt = 50 } },
     beans      = { N = { min = 15, opt = 30 }, P = { min = 25, opt = 45 }, K = { min = 30, opt = 50 } },
+    luzerne    = { N = { min = 10, opt = 20 }, P = { min = 25, opt = 45 }, K = { min = 30, opt = 50 } },
+    clover     = { N = { min = 10, opt = 20 }, P = { min = 25, opt = 45 }, K = { min = 30, opt = 50 } },
     default    = { N = { min = 30, opt = 50 }, P = { min = 25, opt = 40 }, K = { min = 20, opt = 40 } },
 }
 
@@ -496,6 +498,8 @@ SoilConstants.YIELD_SENSITIVITY = {
         sunflower  = "tolerant",
         rye        = "tolerant",
         sorghum    = "tolerant",
+        luzerne    = "tolerant",   -- legume forage — fixes own N
+        clover     = "tolerant",   -- legume forage — fixes own N
         -- Moderate: standard response to nutrient levels
         wheat      = "moderate",
         canola     = "moderate",
@@ -514,6 +518,7 @@ SoilConstants.YIELD_SENSITIVITY = {
     -- Crops that are not row-crop harvests; skip yield forecast for these
     NON_CROP_NAMES = {
         grass = true, drygrass = true, poplar = true, oilseedradish = true,
+        luzerne = true, clover = true,
     },
 }
 
@@ -751,6 +756,7 @@ SoilConstants.WEED_PRESSURE = {
     -- Crops block sunlight, slowing or stopping weed growth as they mature.
     CANOPY_SUPPRESSION_THRESHOLD = 0.5, -- Crop growth state % (0.0 to 1.0) where suppression begins
     CANOPY_SUPPRESSION_MAX       = 1.0, -- Crop growth state % where weed growth is completely stopped
+    CANOPY_DECAY_RATE            = 1.2, -- Points per day of weed reduction at full row closure (Issue #349)
 
     -- Nutrient Depletion by Weeds (Issue #327)
     -- Daily nutrient drain at 100% weed pressure (scales linearly with pressure)

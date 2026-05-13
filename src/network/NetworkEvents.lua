@@ -389,6 +389,7 @@ function SoilFullSyncEvent:readStream(streamId, connection)
         local diseaseDays = streamReadInt32(streamId)
         local dryDays = streamReadInt32(streamId)
         local burnDays = streamReadInt32(streamId)
+        local coverageFrac = streamReadFloat32(streamId)
         local compaction = streamReadFloat32(streamId)
 
         -- Read nutrient buffer (V1.7)
@@ -450,6 +451,7 @@ function SoilFullSyncEvent:readStream(streamId, connection)
                 fungicideDaysLeft = diseaseDays,
                 dryDayCount = dryDays,
                 burnDaysLeft = burnDays,
+                coverageFraction = math.max(0, math.min(1, coverageFrac or 0)),
                 compaction = math.max(0, math.min(100, compaction or 0)),
                 initialized = true
             }
@@ -515,6 +517,7 @@ function SoilFullSyncEvent:writeStream(streamId, connection)
         streamWriteInt32(streamId, field.fungicideDaysLeft or 0)
         streamWriteInt32(streamId, field.dryDayCount or 0)
         streamWriteInt32(streamId, field.burnDaysLeft or 0)
+        streamWriteFloat32(streamId, field.coverageFraction or 0)
         streamWriteFloat32(streamId, field.compaction or 0)
 
         -- Write nutrient buffer (V1.7)
@@ -641,6 +644,25 @@ function SoilFieldBatchSyncEvent:writeStream(streamId, connection)
             streamWriteInt32(streamId,   ftIdx)
             streamWriteFloat32(streamId, amount)
         end
+
+        -- Zone cell data: per-cell soil state for the PDA cell-report overlay.
+        -- Added in v2.1.6 so dedi clients receive accumulated cell data on join.
+        local zd = field.zoneData or {}
+        local zdCount = 0
+        for _ in pairs(zd) do zdCount = zdCount + 1 end
+        streamWriteInt32(streamId, zdCount)
+        for cellKey, cell in pairs(zd) do
+            streamWriteInt32(streamId,   tonumber(cellKey) or 0)
+            streamWriteFloat32(streamId, cell.N  or 0)
+            streamWriteFloat32(streamId, cell.P  or 0)
+            streamWriteFloat32(streamId, cell.K  or 0)
+            streamWriteFloat32(streamId, cell.pH or 6.0)
+            streamWriteFloat32(streamId, cell.OM or 0)
+            streamWriteFloat32(streamId, cell.weedPressure    or 0)
+            streamWriteFloat32(streamId, cell.pestPressure    or 0)
+            streamWriteFloat32(streamId, cell.diseasePressure or 0)
+            streamWriteFloat32(streamId, cell.compaction      or 0)
+        end
     end
 end
 
@@ -682,6 +704,24 @@ function SoilFieldBatchSyncEvent:readStream(streamId, connection)
             buffer[ftIdx] = amount
         end
 
+        -- Zone cell data (added v2.1.6)
+        local zd = {}
+        local zdCount = streamReadInt32(streamId)
+        for _ = 1, zdCount do
+            local keyInt = streamReadInt32(streamId)
+            zd[tostring(keyInt)] = {
+                N               = streamReadFloat32(streamId),
+                P               = streamReadFloat32(streamId),
+                K               = streamReadFloat32(streamId),
+                pH              = streamReadFloat32(streamId),
+                OM              = streamReadFloat32(streamId),
+                weedPressure    = streamReadFloat32(streamId),
+                pestPressure    = streamReadFloat32(streamId),
+                diseasePressure = streamReadFloat32(streamId),
+                compaction      = streamReadFloat32(streamId),
+            }
+        end
+
         if type(fieldId) == "number" and fieldId >= 0 then
             self.batchFields[fieldId] = {
                 fieldArea             = math.max(0.01, fieldArea or 1.0),
@@ -709,6 +749,7 @@ function SoilFieldBatchSyncEvent:readStream(streamId, connection)
                 coveredCells          = {},
                 coveredCellCount      = 0,
                 compaction            = math.max(0, math.min(100, compaction or 0)),
+                zoneData              = zd,
                 initialized           = true,
             }
         end
@@ -804,6 +845,24 @@ function SoilFieldUpdateEvent:readStream(streamId, connection)
         buffer[ftIdx] = amount
     end
 
+    -- Zone cell data (added v2.1.6)
+    local zd = {}
+    local zdCount = streamReadInt32(streamId)
+    for _ = 1, zdCount do
+        local keyInt = streamReadInt32(streamId)
+        zd[tostring(keyInt)] = {
+            N               = streamReadFloat32(streamId),
+            P               = streamReadFloat32(streamId),
+            K               = streamReadFloat32(streamId),
+            pH              = streamReadFloat32(streamId),
+            OM              = streamReadFloat32(streamId),
+            weedPressure    = streamReadFloat32(streamId),
+            pestPressure    = streamReadFloat32(streamId),
+            diseasePressure = streamReadFloat32(streamId),
+            compaction      = streamReadFloat32(streamId),
+        }
+    end
+
     -- Clamp all values to valid ranges
     self.field = {
         fieldArea = math.max(0.01, fieldArea or 1.0),
@@ -836,6 +895,7 @@ function SoilFieldUpdateEvent:readStream(streamId, connection)
         coveredCells     = {},
         coveredCellCount = 0,
         compaction       = math.max(0, math.min(100, compaction or 0)),
+        zoneData         = zd,
         initialized      = true
     }
 
@@ -886,6 +946,24 @@ function SoilFieldUpdateEvent:writeStream(streamId, connection)
     for ftIdx, amount in pairs(buffer) do
         streamWriteInt32(streamId, ftIdx)
         streamWriteFloat32(streamId, amount)
+    end
+
+    -- Zone cell data (added v2.1.6)
+    local zd = self.field.zoneData or {}
+    local zdCount = 0
+    for _ in pairs(zd) do zdCount = zdCount + 1 end
+    streamWriteInt32(streamId, zdCount)
+    for cellKey, cell in pairs(zd) do
+        streamWriteInt32(streamId,   tonumber(cellKey) or 0)
+        streamWriteFloat32(streamId, cell.N  or 0)
+        streamWriteFloat32(streamId, cell.P  or 0)
+        streamWriteFloat32(streamId, cell.K  or 0)
+        streamWriteFloat32(streamId, cell.pH or 6.0)
+        streamWriteFloat32(streamId, cell.OM or 0)
+        streamWriteFloat32(streamId, cell.weedPressure    or 0)
+        streamWriteFloat32(streamId, cell.pestPressure    or 0)
+        streamWriteFloat32(streamId, cell.diseasePressure or 0)
+        streamWriteFloat32(streamId, cell.compaction      or 0)
     end
 end
 

@@ -65,36 +65,34 @@ function UIHelper.createBinaryOption(layout, callbackTarget, callbackName, title
     end
 
     local bitMap = BitmapElement.new()
-    local bitMapProfile = g_gui:getProfile("fs25_multiTextOptionContainer")
-    bitMap:loadProfile(bitMapProfile, true)
+    layout:addElement(bitMap)
 
     local binaryOption = BinaryOptionElement.new()
     binaryOption.useYesNoTexts = true
-    local binaryOptionProfile = g_gui:getProfile("fs25_settingsBinaryOption")
-    binaryOption:loadProfile(binaryOptionProfile, true)
+    bitMap:addElement(binaryOption)
+
+    local titleElement = TextElement.new()
+    bitMap:addElement(titleElement)
+
+    local tooltipElement = TextElement.new()
+    tooltipElement.name = "ignore"
+    binaryOption:addElement(tooltipElement)
+
+    bitMap:loadProfile(g_gui:getProfile("fs25_multiTextOptionContainer"), true)
+
+    binaryOption:loadProfile(g_gui:getProfile("fs25_settingsBinaryOption"), true)
     binaryOption.target = callbackTarget
     binaryOption:setCallback("onClickCallback", callbackName)
 
-    local titleElement = TextElement.new()
-    local titleProfile = g_gui:getProfile("fs25_settingsMultiTextOptionTitle")
-    titleElement:loadProfile(titleProfile, true)
+    titleElement:loadProfile(g_gui:getProfile("fs25_settingsMultiTextOptionTitle"), true)
     titleElement:setText(title)
 
-    local tooltipElement = TextElement.new()
-    local tooltipProfile = g_gui:getProfile("fs25_multiTextOptionTooltip")
-    tooltipElement.name = "ignore"
-    tooltipElement:loadProfile(tooltipProfile, true)
+    tooltipElement:loadProfile(g_gui:getProfile("fs25_multiTextOptionTooltip"), true)
     tooltipElement:setText(tooltip)
 
-    binaryOption:addElement(tooltipElement)
-    bitMap:addElement(binaryOption)
-    bitMap:addElement(titleElement)
-
-    binaryOption:onGuiSetupFinished()
-    titleElement:onGuiSetupFinished()
     tooltipElement:onGuiSetupFinished()
-
-    layout:addElement(bitMap)
+    titleElement:onGuiSetupFinished()
+    binaryOption:onGuiSetupFinished()
     bitMap:onGuiSetupFinished()
 
     return binaryOption
@@ -115,36 +113,34 @@ function UIHelper.createMultiOption(layout, callbackTarget, callbackName, texts,
     end
 
     local bitMap = BitmapElement.new()
-    local bitMapProfile = g_gui:getProfile("fs25_multiTextOptionContainer")
-    bitMap:loadProfile(bitMapProfile, true)
+    layout:addElement(bitMap)
 
     local multiTextOption = MultiTextOptionElement.new()
-    local multiTextOptionProfile = g_gui:getProfile("fs25_settingsMultiTextOption")
-    multiTextOption:loadProfile(multiTextOptionProfile, true)
+    bitMap:addElement(multiTextOption)
+
+    local titleElement = TextElement.new()
+    bitMap:addElement(titleElement)
+
+    local tooltipElement = TextElement.new()
+    tooltipElement.name = "ignore"
+    multiTextOption:addElement(tooltipElement)
+
+    bitMap:loadProfile(g_gui:getProfile("fs25_multiTextOptionContainer"), true)
+
+    multiTextOption:loadProfile(g_gui:getProfile("fs25_settingsMultiTextOption"), true)
     multiTextOption.target = callbackTarget
     multiTextOption:setCallback("onClickCallback", callbackName)
     multiTextOption:setTexts(texts)
 
-    local titleElement = TextElement.new()
-    local titleProfile = g_gui:getProfile("fs25_settingsMultiTextOptionTitle")
-    titleElement:loadProfile(titleProfile, true)
+    titleElement:loadProfile(g_gui:getProfile("fs25_settingsMultiTextOptionTitle"), true)
     titleElement:setText(title)
 
-    local tooltipElement = TextElement.new()
-    local tooltipProfile = g_gui:getProfile("fs25_multiTextOptionTooltip")
-    tooltipElement.name = "ignore"
-    tooltipElement:loadProfile(tooltipProfile, true)
+    tooltipElement:loadProfile(g_gui:getProfile("fs25_multiTextOptionTooltip"), true)
     tooltipElement:setText(tooltip)
 
-    multiTextOption:addElement(tooltipElement)
-    bitMap:addElement(multiTextOption)
-    bitMap:addElement(titleElement)
-
-    multiTextOption:onGuiSetupFinished()
-    titleElement:onGuiSetupFinished()
     tooltipElement:onGuiSetupFinished()
-
-    layout:addElement(bitMap)
+    titleElement:onGuiSetupFinished()
+    multiTextOption:onGuiSetupFinished()
     bitMap:onGuiSetupFinished()
 
     return multiTextOption

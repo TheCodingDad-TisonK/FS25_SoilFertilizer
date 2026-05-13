@@ -21,7 +21,7 @@ end
 ---@param x number World X coordinate
 ---@param z number World Z coordinate
 ---@return number|nil fieldId
-function HookManager:getFieldIdAtWorldPosition(x, z)
+function HookManager:getFieldIdAtWorldPosition(x, z, skipNegativeCache)
     -- Initialize the native MapDataGrid cache on first use (requires map to be loaded)
     if not self.fieldIdCache then
         local mapSize = g_currentMission and g_currentMission.terrainSize or 2048
@@ -48,8 +48,15 @@ function HookManager:getFieldIdAtWorldPosition(x, z)
     if self.fieldIdCache then
         local cachedId = self.fieldIdCache:getValueAtWorldPos(x, z)
         if cachedId ~= nil then
-            if cachedId == -1 then return nil end  -- -1 = known empty space
-            return cachedId
+            if cachedId == -1 then
+                -- Known-empty at map load. Skip the fast-path return when the caller
+                -- is a tillage hook (skipNegativeCache=true): player-created fields won't
+                -- exist in the cache yet and need a live slow-path re-query.
+                if not skipNegativeCache then return nil end
+                -- Fall through to slow path below
+            else
+                return cachedId
+            end
         end
     end
 
@@ -1320,20 +1327,10 @@ function HookManager:installSprayerAreaHook()
                 local rateMultiplier = (rm ~= nil) and rm:getMultiplier(self.id) or 1.0
                 local effectiveLiters = liters * rateMultiplier
 
-                -- Section Control: scale nutrient credit when outer boom sections are off.
+                -- Section Control double-penalty fix (Issue #345):
                 -- wap.usage already reflects section shutoff (VariableWorkWidth.getIsWorkAreaActive
-                -- gates each work area on section.isActive). We apply the fraction here so that
-                -- effectiveLiters correctly represents the nutrient dose for the active portion
-                -- of the field, especially when rateMultiplier != 1.0.
-                local coverageFraction = 1.0
-                if SoilUtils and SoilUtils.getSectionCoverageFraction then
-                    coverageFraction = SoilUtils.getSectionCoverageFraction(self)
-                    if coverageFraction < 1.0 then
-                        effectiveLiters = effectiveLiters * coverageFraction
-                        SoilLogger.debug("SectionControl: %.0f%% boom active → liters scaled to %.4fL",
-                            coverageFraction * 100, effectiveLiters)
-                    end
-                end
+                -- gates each work area on section.isActive), so 'liters' is already proportionally reduced.
+                -- Do NOT multiply by coverageFraction again, otherwise we quadratically penalize the dosage.
 
                 -- ── Coverage tracking (raw liters, before rateMultiplier) ─────────
                 -- Must run for ALL product types (fertilizer AND crop protection).
@@ -1695,7 +1692,8 @@ function HookManager:installPlowingHook()
 
             local x, _, z = getWorldTranslation(cultivatorSelf.rootNode)
             local success, errorMsg = pcall(function()
-                local farmlandId = hookMgrRef:getFieldIdAtWorldPosition(x, z)
+                -- skipNegativeCache=true: player-created fields are not in the cache yet
+                local farmlandId = hookMgrRef:getFieldIdAtWorldPosition(x, z, true)
                 SoilLogger.debug("[PlowHook] pos=(%.1f,%.1f) farmlandId=%s isPlow=%s",
                     x, z, tostring(farmlandId), tostring(isPlowSpec))
                 if farmlandId and farmlandId > 0 then
@@ -1798,7 +1796,8 @@ function HookManager:installDedicatedPlowHook()
 
             local x, _, z = getWorldTranslation(plowSelf.rootNode)
             local success, errorMsg = pcall(function()
-                local farmlandId = hookMgrRef:getFieldIdAtWorldPosition(x, z)
+                -- skipNegativeCache=true: player-created fields are not in the cache yet
+                local farmlandId = hookMgrRef:getFieldIdAtWorldPosition(x, z, true)
                 SoilLogger.debug("[DedicatedPlowHook] pos=(%.1f,%.1f) farmlandId=%s",
                     x, z, tostring(farmlandId))
                 if farmlandId and farmlandId > 0 then
