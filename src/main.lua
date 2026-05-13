@@ -132,25 +132,26 @@ local function loadedMission(mission, node)
                     local idx = ftm:getFillTypeIndexByName(typeName)
                     if idx and not dmhm.fillTypeIndexToHeightType[idx] then
                         local nextSlot = dmhm.numHeightTypes + 1
-                        -- Build a new height type object mirroring the FERTILIZER template.
-                        local ht = {
-                            allowsSmoothing    = false,
-                            canBeTipped        = true,
-                            collisionBaseOffset = 0.0,
-                            collisionScale      = 1,
-                            fillToGroundScale   = 1,
-                            fillTypeIndex       = idx,
-                            fillTypeName        = typeName,
-                            index               = nextSlot,
-                            maxCollisionOffset  = 0.0,
-                            maxSurfaceAngle     = tmpl.maxSurfaceAngle,
-                            minCollisionOffset  = 0,
-                        }
-                        dmhm.fillTypeIndexToHeightType[idx]       = ht
-                        dmhm.fillTypeNameToHeightType[typeName]   = ht
+                        -- Shallow-copy the FERTILIZER template so any C++ object references
+                        -- (density map channel pointer, physics layer handle) are preserved.
+                        -- Without these refs, tipToGroundAroundLine silently fails even when
+                        -- the Lua-side canBeTipped check passes.  Override only the identity
+                        -- fields that must differ per fill type.
+                        local ht = {}
+                        for k, v in pairs(tmpl) do ht[k] = v end
+                        ht.allowsSmoothing  = false
+                        ht.canBeTipped      = true
+                        ht.fillTypeIndex    = idx
+                        ht.fillTypeName     = typeName
+                        ht.index            = nextSlot
+
+                        dmhm.fillTypeIndexToHeightType[idx]           = ht
+                        if dmhm.fillTypeNameToHeightType then
+                            dmhm.fillTypeNameToHeightType[typeName]   = ht
+                        end
                         dmhm.heightTypeIndexToFillTypeIndex[nextSlot] = idx
-                        dmhm.heightTypes[nextSlot]                = ht
-                        dmhm.numHeightTypes                       = nextSlot
+                        dmhm.heightTypes[nextSlot]                    = ht
+                        dmhm.numHeightTypes                           = nextSlot
                         registered = registered + 1
                     end
                 end
@@ -158,10 +159,26 @@ local function loadedMission(mission, node)
                 local testIdx = ftm:getFillTypeIndexByName("UREA")
                 local ok, val = pcall(function() return dmhm:getMinValidLiterValue(testIdx) end)
                 SoilLogger.info(string.format(
-                    "[TIP FIX] Injected %d solid fill types into DMHM. " ..
+                    "[TIP FIX] Injected %d solid fill types into DMHM (shallow-copy). " ..
                     "getMinValidLiterValue(UREA)=%s (>0 = success)",
                     registered, tostring(ok and val or "ERROR")
                 ))
+
+                -- Belt-and-suspenders: also hook getCanTipToGround at Lua level so the
+                -- discharge eligibility check passes even if C++ hasn't read our table.
+                if registered > 0 and DensityMapHeightUtil and
+                   type(DensityMapHeightUtil.getCanTipToGround) == "function" then
+                    local _dmhm = dmhm
+                    local _origGetCan = DensityMapHeightUtil.getCanTipToGround
+                    DensityMapHeightUtil.getCanTipToGround = function(fillTypeIndex)
+                        if _dmhm and _dmhm.fillTypeIndexToHeightType and
+                           _dmhm.fillTypeIndexToHeightType[fillTypeIndex] then
+                            return true
+                        end
+                        return _origGetCan(fillTypeIndex)
+                    end
+                    SoilLogger.info("[TIP FIX] DensityMapHeightUtil.getCanTipToGround hooked")
+                end
             else
                 SoilLogger.warning("[TIP FIX] FERTILIZER template not found in DMHM — tip injection skipped")
             end

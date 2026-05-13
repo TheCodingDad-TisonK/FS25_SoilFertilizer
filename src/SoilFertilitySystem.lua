@@ -2387,6 +2387,43 @@ function SoilFertilitySystem:trackSprayerCoverage(fieldId, liters, fillTypeName)
     end
 end
 
+--- Stamp display-only zone cells at every position in boomPoints.
+--- No nutrient delta is applied; each new cell is initialised with the current
+--- field average so the PDA map shows which areas the boom has passed over.
+--- Called from HookManager after applySingle to fill in the full lateral sweep.
+---@param fieldId   number
+---@param boomPoints table  Array of {x=, z=} world positions
+function SoilFertilitySystem:markBoomCells(fieldId, boomPoints)
+    if not boomPoints or #boomPoints == 0 then return end
+    local field = self.fieldData and self.fieldData[fieldId]
+    if not field then return end
+
+    local zone = SoilConstants.ZONE
+    local seen = {}
+    for _, pt in ipairs(boomPoints) do
+        local cx = math.floor(pt.x / zone.CELL_SIZE)
+        local cz = math.floor(pt.z / zone.CELL_SIZE)
+        local cellKey = tostring(cx * 10000 + cz)
+        if not seen[cellKey] then
+            seen[cellKey] = true
+            if not field.zoneData then field.zoneData = {} end
+            if not field.zoneData[cellKey] then
+                field.zoneData[cellKey] = {
+                    N  = field.nitrogen       or SoilConstants.FIELD_DEFAULTS.nitrogen,
+                    P  = field.phosphorus     or SoilConstants.FIELD_DEFAULTS.phosphorus,
+                    K  = field.potassium      or SoilConstants.FIELD_DEFAULTS.potassium,
+                    pH = field.pH             or SoilConstants.FIELD_DEFAULTS.pH,
+                    OM = field.organicMatter  or SoilConstants.FIELD_DEFAULTS.organicMatter,
+                    weedPressure    = field.weedPressure    or 0,
+                    pestPressure    = field.pestPressure    or 0,
+                    diseasePressure = field.diseasePressure or 0,
+                    compaction      = field.compaction      or 0,
+                }
+            end
+        end
+    end
+end
+
 --- Direct-path buffering for non-profile products (Herbicide/Insecticide/Fungicide)
 -- NOTE: the formula (liters/targetVol)×REDUCTION depends on targetRate (from
 -- Constants, a real-world L/ha figure ~1.5) matching the actual vanilla sprayer
