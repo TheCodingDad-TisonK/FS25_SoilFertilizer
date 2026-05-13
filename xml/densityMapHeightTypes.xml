@@ -1,16 +1,43 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <map>
     <densityMapHeightTypes>
-        <densityMapHeightType fillType="UREA" maxAllowedHeight="0.8" minHeight="0.05" collisionScale="1.0" collisionBaseOffset="0.0" />
-        <densityMapHeightType fillType="AN" maxAllowedHeight="0.8" minHeight="0.05" collisionScale="1.0" collisionBaseOffset="0.0" />
-        <densityMapHeightType fillType="AMS" maxAllowedHeight="0.8" minHeight="0.05" collisionScale="1.0" collisionBaseOffset="0.0" />
-        <densityMapHeightType fillType="MAP" maxAllowedHeight="0.8" minHeight="0.05" collisionScale="1.0" collisionBaseOffset="0.0" />
-        <densityMapHeightType fillType="DAP" maxAllowedHeight="0.8" minHeight="0.05" collisionScale="1.0" collisionBaseOffset="0.0" />
-        <densityMapHeightType fillType="POTASH" maxAllowedHeight="0.8" minHeight="0.05" collisionScale="1.0" collisionBaseOffset="0.0" />
-        <densityMapHeightType fillType="GYPSUM" maxAllowedHeight="0.8" minHeight="0.05" collisionScale="1.0" collisionBaseOffset="0.0" />
-        <densityMapHeightType fillType="COMPOST" maxAllowedHeight="0.8" minHeight="0.05" collisionScale="1.0" collisionBaseOffset="0.0" />
-        <densityMapHeightType fillType="BIOSOLIDS" maxAllowedHeight="0.8" minHeight="0.05" collisionScale="1.0" collisionBaseOffset="0.0" />
-        <densityMapHeightType fillType="CHICKEN_MANURE" maxAllowedHeight="0.8" minHeight="0.05" collisionScale="1.0" collisionBaseOffset="0.0" />
-        <densityMapHeightType fillType="PELLETIZED_MANURE" maxAllowedHeight="0.8" minHeight="0.05" collisionScale="1.0" collisionBaseOffset="0.0" />
+
+        <!-- Mineral granular fertilizers — flat pile, similar to base FERTILIZER/LIME -->
+        <densityMapHeightType fillTypeName="UREA" maxSurfaceAngle="20" fillToGroundScale="1.0" allowsSmoothing="false">
+            <collision scale="1.0" baseOffset="0.05" minOffset="0.0" maxOffset="0.15" />
+        </densityMapHeightType>
+        <densityMapHeightType fillTypeName="AN" maxSurfaceAngle="20" fillToGroundScale="1.0" allowsSmoothing="false">
+            <collision scale="1.0" baseOffset="0.05" minOffset="0.0" maxOffset="0.15" />
+        </densityMapHeightType>
+        <densityMapHeightType fillTypeName="AMS" maxSurfaceAngle="20" fillToGroundScale="1.0" allowsSmoothing="false">
+            <collision scale="1.0" baseOffset="0.05" minOffset="0.0" maxOffset="0.15" />
+        </densityMapHeightType>
+        <densityMapHeightType fillTypeName="MAP" maxSurfaceAngle="20" fillToGroundScale="1.0" allowsSmoothing="false">
+            <collision scale="1.0" baseOffset="0.05" minOffset="0.0" maxOffset="0.15" />
+        </densityMapHeightType>
+        <densityMapHeightType fillTypeName="DAP" maxSurfaceAngle="20" fillToGroundScale="1.0" allowsSmoothing="false">
+            <collision scale="1.0" baseOffset="0.05" minOffset="0.0" maxOffset="0.15" />
+        </densityMapHeightType>
+        <densityMapHeightType fillTypeName="POTASH" maxSurfaceAngle="20" fillToGroundScale="1.0" allowsSmoothing="false">
+            <collision scale="1.0" baseOffset="0.05" minOffset="0.0" maxOffset="0.15" />
+        </densityMapHeightType>
+        <densityMapHeightType fillTypeName="GYPSUM" maxSurfaceAngle="25" fillToGroundScale="1.0" allowsSmoothing="false">
+            <collision scale="1.0" baseOffset="0.05" minOffset="0.0" maxOffset="0.15" />
+        </densityMapHeightType>
+
+        <!-- Organic bulk amendments — taller pile, similar to WOODCHIPS -->
+        <densityMapHeightType fillTypeName="COMPOST" maxSurfaceAngle="35" fillToGroundScale="1.0" allowsSmoothing="false">
+            <collision scale="1.0" baseOffset="0.10" minOffset="0.0" maxOffset="0.50" />
+        </densityMapHeightType>
+        <densityMapHeightType fillTypeName="BIOSOLIDS" maxSurfaceAngle="30" fillToGroundScale="1.0" allowsSmoothing="false">
+            <collision scale="1.0" baseOffset="0.10" minOffset="0.0" maxOffset="0.40" />
+        </densityMapHeightType>
+        <densityMapHeightType fillTypeName="CHICKEN_MANURE" maxSurfaceAngle="35" fillToGroundScale="1.0" allowsSmoothing="false">
+            <collision scale="1.0" baseOffset="0.10" minOffset="0.0" maxOffset="0.50" />
+        </densityMapHeightType>
+        <densityMapHeightType fillTypeName="PELLETIZED_MANURE" maxSurfaceAngle="20" fillToGroundScale="1.0" allowsSmoothing="false">
+            <collision scale="1.0" baseOffset="0.05" minOffset="0.0" maxOffset="0.20" />
+        </densityMapHeightType>
+
     </densityMapHeightTypes>
 </map>
