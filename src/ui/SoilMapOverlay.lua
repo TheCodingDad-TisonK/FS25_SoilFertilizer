@@ -22,7 +22,7 @@ SoilMapOverlay.LAYER_COUNT    = 10
 SoilMapOverlay.ALPHA          = 0.72
 
 -- Sampling constants
-SoilMapOverlay.SAMPLE_UPDATE_INTERVAL_MS = 4500
+SoilMapOverlay.SAMPLE_UPDATE_INTERVAL_MS = 2000
 SoilMapOverlay.POLYGON_STEP     = 10     -- world-unit grid spacing for polygon sampling (meters)
 -- Point budgets per density level (1=Low, 2=Medium, 3=High).
 -- These are the BASE values for a standard 2048m map. At runtime the budget is

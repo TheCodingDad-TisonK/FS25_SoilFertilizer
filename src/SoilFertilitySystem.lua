@@ -375,6 +375,16 @@ function SoilFertilitySystem:onFertilizerApplied(fieldId, fillTypeIndex, liters)
 
     SoilLogger.debug("Fertilizer: Field %d, %s, %.4fL", fieldId, fillType and fillType.name or "unknown", liters)
 
+    -- Trigger overlay refresh so the map tile color updates promptly after spraying.
+    -- Throttled to once every 2 seconds to avoid rebuilding samplePoints every frame.
+    local now = (g_currentMission and g_currentMission.time) or 0
+    if not self._fertOverlayRefreshTime then self._fertOverlayRefreshTime = 0 end
+    if (now - self._fertOverlayRefreshTime) >= 2000 then
+        self._fertOverlayRefreshTime = now
+        local overlay = g_SoilFertilityManager and g_SoilFertilityManager.soilMapOverlay
+        if overlay then overlay:requestRefresh() end
+    end
+
     -- Broadcast to clients in multiplayer, throttled to once every 5 seconds per field
     -- to avoid flooding the network with 30+ events/second while a sprayer is running.
     if g_server and g_currentMission and g_currentMission.missionDynamicInfo and g_currentMission.missionDynamicInfo.isMultiplayer then

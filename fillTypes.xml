@@ -40,11 +40,15 @@
 
         <!-- ── SOLID GRANULAR SOURCES ─────────────────────────── -->
 
+        <!-- UREA, AN, AMS: white/cream mineral prills — vanilla fertilizer texture is the correct match -->
         <fillType name="UREA" title="$l10n_sf_urea_title" showOnPriceTable="true" isBulkType="true" unitShort="$l10n_unit_literShort">
             <physics massPerLiter="0.77" maxPhysicalSurfaceAngle="15"/>
             <economy pricePerLiter="1.65"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
-            <textures diffuse="textures/fillPlanes/urea_diffuse.dds" normal="textures/fillPlanes/urea_normal.dds" height="textures/fillPlanes/urea_height.dds" displacement="textures/fillPlanes/urea_displacement.dds"/>
+            <textures diffuse="$data/fillPlanes/fertilizer_diffuse.png" unitSize="0.4" blendContrast="0.2" noiseScale="0.5" porosityAtZeroRoughness="0.9" porosityAtFullRoughness="1"
+                      normal="$data/fillPlanes/fertilizer_normal.png"
+                      height="$data/fillPlanes/fertilizer_height.png"
+                      displacement="$data/fillPlanes/fertilizer_displacement.png" displacementMaxHeight="0.2" firmness="0.3" viscosity="0.5"/>
             <sprayType sprayTypeStr="SOLID"/>
             <pallet filename="objects/bigBag/urea/bigBag_urea.xml" />
         </fillType>
@@ -53,7 +57,10 @@
             <physics massPerLiter="0.92" maxPhysicalSurfaceAngle="15"/>
             <economy pricePerLiter="1.55"/>
             <image hud="$moddir$textures/hud/fillTypes/hud_fill_AN.dds"/>
-            <textures diffuse="textures/fillPlanes/urea_diffuse.dds" normal="textures/fillPlanes/urea_normal.dds" height="textures/fillPlanes/urea_height.dds" displacement="textures/fillPlanes/urea_displacement.dds"/>
+            <textures diffuse="$data/fillPlanes/fertilizer_diffuse.png" unitSize="0.4" blendContrast="0.2" noiseScale="0.5" porosityAtZeroRoughness="0.9" porosityAtFullRoughness="1"
+                      normal="$data/fillPlanes/fertilizer_normal.png"
+                      height="$data/fillPlanes/fertilizer_height.png"
+                      displacement="$data/fillPlanes/fertilizer_displacement.png" displacementMaxHeight="0.2" firmness="0.3" viscosity="0.5"/>
             <sprayType sprayTypeStr="SOLID"/>
             <pallet filename="objects/bigBag/an/bigBag_an.xml" />
         </fillType>
@@ -62,16 +69,23 @@
             <physics massPerLiter="0.87" maxPhysicalSurfaceAngle="15"/>
             <economy pricePerLiter="1.40"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
-            <textures diffuse="textures/fillPlanes/AMS_diffuse.dds" normal="textures/fillPlanes/AMS_normal.dds" height="textures/fillPlanes/AMS_height.dds" displacement="textures/fillPlanes/AMS_displacement.dds"/>
+            <textures diffuse="$data/fillPlanes/fertilizer_diffuse.png" unitSize="0.4" blendContrast="0.2" noiseScale="0.5" porosityAtZeroRoughness="0.9" porosityAtFullRoughness="1"
+                      normal="$data/fillPlanes/fertilizer_normal.png"
+                      height="$data/fillPlanes/fertilizer_height.png"
+                      displacement="$data/fillPlanes/fertilizer_displacement.png" displacementMaxHeight="0.2" firmness="0.3" viscosity="0.5"/>
             <sprayType sprayTypeStr="SOLID"/>
             <pallet filename="objects/bigBag/ams/bigBag_ams.xml" />
         </fillType>
 
+        <!-- MAP, DAP: off-white/gray mineral granules — vanilla fertilizer texture is a close match -->
         <fillType name="MAP" title="$l10n_sf_map_title" showOnPriceTable="true" isBulkType="true" unitShort="$l10n_unit_literShort">
             <physics massPerLiter="0.90" maxPhysicalSurfaceAngle="15"/>
             <economy pricePerLiter="1.95"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
-            <textures diffuse="textures/fillPlanes/MAP_diffuse.dds" normal="textures/fillPlanes/MAP_normal.dds" height="textures/fillPlanes/MAP_height.dds" displacement="textures/fillPlanes/MAP_displacement.dds"/>
+            <textures diffuse="$data/fillPlanes/fertilizer_diffuse.png" unitSize="0.4" blendContrast="0.2" noiseScale="0.5" porosityAtZeroRoughness="0.9" porosityAtFullRoughness="1"
+                      normal="$data/fillPlanes/fertilizer_normal.png"
+                      height="$data/fillPlanes/fertilizer_height.png"
+                      displacement="$data/fillPlanes/fertilizer_displacement.png" displacementMaxHeight="0.2" firmness="0.3" viscosity="0.5"/>
             <sprayType sprayTypeStr="SOLID"/>
             <pallet filename="objects/bigBag/map/bigBag_map.xml" />
         </fillType>
@@ -80,7 +94,10 @@
             <physics massPerLiter="0.90" maxPhysicalSurfaceAngle="15"/>
             <economy pricePerLiter="1.75"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
-            <textures diffuse="textures/fillPlanes/DAP_diffuse.dds" normal="textures/fillPlanes/DAP_normal.dds" height="textures/fillPlanes/DAP_height.dds" displacement="textures/fillPlanes/DAP_displacement.dds"/>
+            <textures diffuse="$data/fillPlanes/fertilizer_diffuse.png" unitSize="0.4" blendContrast="0.2" noiseScale="0.5" porosityAtZeroRoughness="0.9" porosityAtFullRoughness="1"
+                      normal="$data/fillPlanes/fertilizer_normal.png"
+                      height="$data/fillPlanes/fertilizer_height.png"
+                      displacement="$data/fillPlanes/fertilizer_displacement.png" displacementMaxHeight="0.2" firmness="0.3" viscosity="0.5"/>
             <sprayType sprayTypeStr="SOLID"/>
             <pallet filename="objects/bigBag/dap/bigBag_dap.xml" />
         </fillType>
@@ -158,20 +175,28 @@
         <!-- and can be routed by our sprayer hook when obtained from other mods  -->
         <!-- or production lines.                                                 -->
 
+        <!-- GYPSUM: fine white powder — vanilla lime texture is the correct match -->
         <fillType name="GYPSUM" title="$l10n_sf_gypsum_title" showOnPriceTable="true" isBulkType="true" unitShort="$l10n_unit_literShort">
             <physics massPerLiter="1.10" maxPhysicalSurfaceAngle="20"/>
             <economy pricePerLiter="0.55"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
-            <textures diffuse="textures/fillPlanes/gypsum_diffuse.dds" normal="textures/fillPlanes/gypsum_normal.dds" height="textures/fillPlanes/gypsum_height.dds" displacement="textures/fillPlanes/gypsum_displacement.dds"/>
+            <textures diffuse="$data/fillPlanes/lime_diffuse.png" unitSize="0.4" blendContrast="0.15" noiseScale="0.4" porosityAtZeroRoughness="0.95" porosityAtFullRoughness="1"
+                      normal="$data/fillPlanes/lime_normal.png"
+                      height="$data/fillPlanes/lime_height.png"
+                      displacement="$data/fillPlanes/lime_displacement.png" displacementMaxHeight="0.15" firmness="0.2" viscosity="0.4"/>
             <sprayType sprayTypeStr="SOLID"/>
             <pallet filename="objects/bigBag/gypsum/bigBag_gypsum.xml" />
         </fillType>
 
+        <!-- COMPOST: dark brown organic matter — vanilla manure texture is the correct match -->
         <fillType name="COMPOST" title="$l10n_sf_compost_title" showOnPriceTable="true" isBulkType="true" unitShort="$l10n_unit_literShort">
             <physics massPerLiter="0.60" maxPhysicalSurfaceAngle="20"/>
             <economy pricePerLiter="0.35"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
-            <textures diffuse="textures/fillPlanes/compost_diffuse.dds" normal="textures/fillPlanes/compost_normal.dds" height="textures/fillPlanes/compost_height.dds" displacement="textures/fillPlanes/compost_displacement.dds"/>
+            <textures diffuse="$data/fillPlanes/manure_diffuse.png" unitSize="0.5" blendContrast="0.3" noiseScale="0.6" porosityAtZeroRoughness="0.8" porosityAtFullRoughness="1"
+                      normal="$data/fillPlanes/manure_normal.png"
+                      height="$data/fillPlanes/manure_height.png"
+                      displacement="$data/fillPlanes/manure_displacement.png" displacementMaxHeight="0.25" firmness="0.4" viscosity="0.6"/>
             <sprayType sprayTypeStr="SOLID"/>
             <pallet filename="objects/bigBag/compost/bigBag_compost.xml" />
         </fillType>
@@ -185,21 +210,29 @@
             <pallet filename="objects/bigBag/biosolids/bigBag_biosolids.xml" />
         </fillType>
 
+        <!-- CHICKEN_MANURE: dry tan/light-brown litter — vanilla fertilizer texture (lighter, granular) -->
         <!-- Fill type name is CHICKEN_MANURE; icon file is hud_fill_chickenlitter.dds -->
         <fillType name="CHICKEN_MANURE" title="$l10n_sf_chicken_manure_title" showOnPriceTable="true" isBulkType="true" unitShort="$l10n_unit_literShort">
             <physics massPerLiter="0.65" maxPhysicalSurfaceAngle="20"/>
             <economy pricePerLiter="0.45"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
-            <textures diffuse="textures/fillPlanes/chickenlitter_diffuse.dds" normal="textures/fillPlanes/chickenlitter_normal.dds" height="textures/fillPlanes/chickenlitter_height.dds" displacement="textures/fillPlanes/chickenlitter_displacement.dds"/>
+            <textures diffuse="$data/fillPlanes/fertilizer_diffuse.png" unitSize="0.5" blendContrast="0.25" noiseScale="0.6" porosityAtZeroRoughness="0.85" porosityAtFullRoughness="1"
+                      normal="$data/fillPlanes/fertilizer_normal.png"
+                      height="$data/fillPlanes/fertilizer_height.png"
+                      displacement="$data/fillPlanes/fertilizer_displacement.png" displacementMaxHeight="0.2" firmness="0.35" viscosity="0.5"/>
             <sprayType sprayTypeStr="SOLID"/>
             <pallet filename="objects/bigBag/chicken_manure/bigBag_chicken_manure.xml" />
         </fillType>
 
+        <!-- PELLETIZED_MANURE: dark brown compact pellets — vanilla manure base with tighter surface angle -->
         <fillType name="PELLETIZED_MANURE" title="$l10n_sf_pelletized_manure_title" showOnPriceTable="true" isBulkType="true" unitShort="$l10n_unit_literShort">
             <physics massPerLiter="0.75" maxPhysicalSurfaceAngle="20"/>
             <economy pricePerLiter="1.10"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
-            <textures diffuse="textures/fillPlanes/PelletizedManure_diffuse.dds" normal="textures/fillPlanes/PelletizedManure_normal.dds" height="textures/fillPlanes/PelletizedManure_height.dds" displacement="textures/fillPlanes/PelletizedManure_displacement.dds"/>
+            <textures diffuse="$data/fillPlanes/manure_diffuse.png" unitSize="0.4" blendContrast="0.25" noiseScale="0.5" porosityAtZeroRoughness="0.85" porosityAtFullRoughness="1"
+                      normal="$data/fillPlanes/manure_normal.png"
+                      height="$data/fillPlanes/manure_height.png"
+                      displacement="$data/fillPlanes/manure_displacement.png" displacementMaxHeight="0.2" firmness="0.45" viscosity="0.5"/>
             <sprayType sprayTypeStr="SOLID"/>
             <pallet filename="objects/bigBag/pelletized_manure/bigBag_pelletized_manure.xml" />
         </fillType>
