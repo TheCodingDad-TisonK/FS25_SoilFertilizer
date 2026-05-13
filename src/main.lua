@@ -179,6 +179,27 @@ local function loadedMission(mission, node)
                     registered, tostring(ok and val or "ERROR")
                 ))
 
+                -- Rebuild the terrain fill layer GPU texture array so our custom fill
+                -- types get valid textureArrayIndex slots and their DDS textures are
+                -- uploaded.  constructTerrainFillLayers already ran during initial
+                -- mission load (before our height types existed), so our fill types
+                -- have textureArrayIndex=nil and render with missing/broken textures.
+                -- Calling it again: clears the GPU array, rebuilds in the same
+                -- height-type order (base game first, our 11 appended at the end),
+                -- and sets textureArrayIndex on every FillTypeDesc that has valid
+                -- layerTextures.  At loadMission00Finished there are no tipped piles
+                -- visible yet, so the momentary GPU clear is harmless.
+                if registered > 0 and g_terrainNode then
+                    local ctfl_ok, ctfl_err = pcall(function()
+                        ftm:constructTerrainFillLayers(dmhm.heightTypes, g_terrainNode)
+                    end)
+                    if ctfl_ok then
+                        SoilLogger.info("[TIP FIX] constructTerrainFillLayers rebuilt — custom fill types now have GPU texture slots")
+                    else
+                        SoilLogger.warning("[TIP FIX] constructTerrainFillLayers failed: " .. tostring(ctfl_err))
+                    end
+                end
+
                 -- Belt-and-suspenders: also hook getCanTipToGround at Lua level so the
                 -- discharge eligibility check passes even if C++ hasn't read our table.
                 if registered > 0 and DensityMapHeightUtil and
