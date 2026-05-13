@@ -24,10 +24,10 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
-    "- Fixed potassium rates, herbicide cell updates & dedi zoneData sync",
-    "- Fixed player-created fields not detected by the mod",
-    "- Luzerne & clover now recognized as legumes (low N, spring bonus)",
-    "- Weed suppression scales with crop row closure + time-scaling",
+    "- Fixed: sowing no longer instantly maxes out NPK",
+    "- Fixed: soil map cell display now covers full boom width",
+    "- Fixed: custom fill types work correctly with ground tipping",
+    "- Fixed: density map type load order stability improvement",
 }
 
 -- ── i18n helper ───────────────────────────────────────────
