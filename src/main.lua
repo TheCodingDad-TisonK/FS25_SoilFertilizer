@@ -99,6 +99,24 @@ local function loadedMission(mission, node)
     end
     sfm:onMissionLoaded()
 
+    -- TIP ON GROUND FIX: register density map height types now that fill types are live.
+    -- At this point g_fillTypeManager resolves our fill type names correctly (confirmed by
+    -- HUD icon patching below). All earlier hook points fire before the engine finishes
+    -- its modDesc.xml <fillTypes> pass, leaving our types nil.
+    if g_densityMapHeightManager ~= nil
+    and type(g_densityMapHeightManager.loadDensityMapHeightTypes) == "function" then
+        local htFile = loadXMLFile("soilHeightTypes", modDirectory .. "xml/densityMapHeightTypes.xml")
+        if htFile ~= nil and htFile ~= 0 then
+            g_densityMapHeightManager:loadDensityMapHeightTypes(htFile, mission.missionInfo, modDirectory, false)
+            delete(htFile)
+            SoilLogger.info("Tip On Ground Fix: Height types registered in loadedMission")
+        else
+            SoilLogger.warning("Tip On Ground Fix: Could not open densityMapHeightTypes.xml")
+        end
+    else
+        SoilLogger.warning("Tip On Ground Fix: g_densityMapHeightManager not available")
+    end
+
     -- Fallback: register atlas if it was skipped at load time (g_overlayManager was nil then).
     if not _helplineAtlasRegistered then
         if g_overlayManager then
@@ -355,41 +373,16 @@ if FillTypeManager and type(FillTypeManager.loadModFillTypes) == "function" then
     FillTypeManager.loadModFillTypes = Utils.prependedFunction(FillTypeManager.loadModFillTypes, injectSFModFillTypes)
 end
 
--- =========================================================
--- TIP ON GROUND FIX: Register density map height types after fill types are loaded
+-- TIP ON GROUND FIX: registration moved into loadedMission() below.
 --
--- Root cause: DensityMapHeightManager.loadMapData fires BEFORE FillTypeManager.loadMapData,
--- so any XML injected into modDensityHeightMapTypeFilenames is processed while our custom
--- fill types are still nil — every entry fails with "invalid fill type 'nil'".
---
--- Fix: hook FillTypeManager.loadMapData with appendedFunction so our height types are
--- registered immediately after our fill types land in g_fillTypeManager. Terrain layer
--- construction (constructTerrainFillLayers) requires the map i3d to be loaded, which
--- happens after both loadMapData calls complete — so our late-registered types are
--- included in the terrain build pass and get full visual + physics support.
--- =========================================================
-if FillTypeManager and type(FillTypeManager.loadMapData) == "function" then
-    local soilHeightTypesRegistered = false
-    local function registerSFHeightTypesAfterFillTypes(self, xmlFile, missionInfo, baseDirectory)
-        if soilHeightTypesRegistered then return end
-        if g_densityMapHeightManager == nil
-        or type(g_densityMapHeightManager.loadDensityMapHeightTypes) ~= "function" then
-            SoilLogger.warning("Tip On Ground Fix: g_densityMapHeightManager not ready — tipping to ground may not work")
-            return
-        end
-        local filename = modDirectory .. "xml/densityMapHeightTypes.xml"
-        local heightTypesXmlFile = loadXMLFile("heightTypes", filename)
-        if heightTypesXmlFile ~= nil and heightTypesXmlFile ~= 0 then
-            g_densityMapHeightManager:loadDensityMapHeightTypes(heightTypesXmlFile, missionInfo, baseDirectory, false)
-            delete(heightTypesXmlFile)
-            soilHeightTypesRegistered = true
-            SoilLogger.info("Tip On Ground Fix: Height types registered after fill type load")
-        else
-            SoilLogger.warning("Tip On Ground Fix: Could not open densityMapHeightTypes.xml")
-        end
-    end
-    FillTypeManager.loadMapData = Utils.appendedFunction(FillTypeManager.loadMapData, registerSFHeightTypesAfterFillTypes)
-end
+-- Root cause (documented after three failed hook attempts):
+--   DensityMapHeightManager.loadMapData runs before fill types are available.
+--   FillTypeManager.loadMapData appended hook also fires too early — the engine
+--   processes <fillTypes> from modDesc.xml in a separate pass AFTER loadMapData
+--   returns, so our fill types are nil at every earlier hook point.
+--   The only guaranteed-safe window is Mission00.loadMission00Finished, where
+--   g_fillTypeManager already resolves our fill type names (confirmed by HUD icon
+--   patching working in the same callback).
 
 -- Route mouse events to SoilHUD (for drag/resize edit mode).
 -- Edit mode is entered via Shift+H (SF_HUD_DRAG input action) — not via RMB.
