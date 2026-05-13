@@ -1465,8 +1465,24 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing, area)
 
     local defaults = SoilConstants.FIELD_DEFAULTS
 
+    -- Attempt farmland area lookup at creation time so the correct area is used
+    -- for nutrient/herbicide calculations from the very first plow or spray pass.
+    -- Without this, area defaults to 1.0 ha and only corrects on first fertilizer spray.
+    local confirmedArea = false
+    local initialArea = area or 1.0
+    if not area and g_farmlandManager then
+        local farmlandObj = g_farmlandManager:getFarmlandById(fieldId)
+        if farmlandObj and farmlandObj.areaInHa and farmlandObj.areaInHa > 0 then
+            initialArea = farmlandObj.areaInHa
+            confirmedArea = true
+        end
+    elseif area and area > 0 then
+        confirmedArea = true
+    end
+
     self.fieldData[fieldId] = {
-        fieldArea = area or 1.0, -- default 1ha if unknown
+        fieldArea = initialArea,
+        _farmlandAreaConfirmed = confirmedArea,
         nitrogen   = math.floor(randomize(defaults.nitrogen,   defaults.nitrogen   * 0.10, 1)),
         phosphorus = math.floor(randomize(defaults.phosphorus, defaults.phosphorus * 0.10, 2)),
         potassium  = math.floor(randomize(defaults.potassium,  defaults.potassium  * 0.10, 3)),
@@ -1501,7 +1517,8 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing, area)
         lastAlertSeason = nil, -- Season when the last critical alert fired (persisted)
     }
 
-    self:log("Lazy-created field %d with area %.2f ha and natural soil variation", fieldId, self.fieldData[fieldId].fieldArea)
+    self:log("Lazy-created field %d area=%.2f ha confirmed=%s",
+        fieldId, self.fieldData[fieldId].fieldArea, tostring(confirmedArea))
     return self.fieldData[fieldId]
 end
 
