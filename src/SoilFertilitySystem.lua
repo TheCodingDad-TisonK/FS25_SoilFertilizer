@@ -2033,6 +2033,10 @@ function SoilFertilitySystem:updateFieldNutrients(fieldId, fruitTypeIndex, harve
     )
 end
 
+-- Maximum zone cells stored per field. Prevents unbounded memory growth and network
+-- packet overflow on large/intensively-farmed fields (see markBoomCells, applyFertilizer).
+local MAX_ZONE_CELLS = 1000
+
 -- Apply fertilizer
 function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
     if not self.settings.enabled then return end
@@ -2131,6 +2135,18 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
         if entry.pH then field.pH        = math.max(limits.PH_MIN, math.min(limits.PH_MAX, field.pH + entry.pH * factor)) end
         if entry.OM then field.organicMatter = math.min(limits.ORGANIC_MATTER_MAX, field.organicMatter + entry.OM * factor) end
 
+        -- Sync all existing zone cells to the updated field values so cells stamped
+        -- by previous tillage operations reflect the fertilizer that was just applied.
+        if field.zoneData then
+            for _, cell in pairs(field.zoneData) do
+                if entry.N  then cell.N  = field.nitrogen end
+                if entry.P  then cell.P  = field.phosphorus end
+                if entry.K  then cell.K  = field.potassium end
+                if entry.pH then cell.pH = field.pH end
+                if entry.OM then cell.OM = field.organicMatter end
+            end
+        end
+
         -- Throttled per-field diagnostic (debug mode, lime types always logged; nutrients every 4 s).
         -- Validates that pH shift and nutrient deltas are agronomically sensible.
         -- For LIME/LIQUIDLIME: target ~0.40 pH over a full 1-ha pass at BASE_RATES volume.
@@ -2189,17 +2205,21 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
 
             if not field.zoneData then field.zoneData = {} end
             if not field.zoneData[cellKey] then
-                field.zoneData[cellKey] = {
-                    N  = field.nitrogen,
-                    P  = field.phosphorus,
-                    K  = field.potassium,
-                    pH = field.pH,
-                    OM = field.organicMatter,
-                    weedPressure = field.weedPressure,
-                    pestPressure = field.pestPressure,
-                    diseasePressure = field.diseasePressure,
-                    compaction = field.compaction,
-                }
+                local zdCount = 0
+                for _ in pairs(field.zoneData) do zdCount = zdCount + 1 end
+                if zdCount < MAX_ZONE_CELLS then
+                    field.zoneData[cellKey] = {
+                        N  = field.nitrogen,
+                        P  = field.phosphorus,
+                        K  = field.potassium,
+                        pH = field.pH,
+                        OM = field.organicMatter,
+                        weedPressure = field.weedPressure,
+                        pestPressure = field.pestPressure,
+                        diseasePressure = field.diseasePressure,
+                        compaction = field.compaction,
+                    }
+                end
             end
             local cell = field.zoneData[cellKey]
             -- cellFactor must use areaInHa (not zone.CELL_AREA_HA) so that each cell
@@ -2417,7 +2437,18 @@ function SoilFertilitySystem:markBoomCells(fieldId, boomPoints)
         if not seen[cellKey] then
             seen[cellKey] = true
             if not field.zoneData then field.zoneData = {} end
-            if not field.zoneData[cellKey] then
+            -- Enforce cell cap: existing cells are always synced via applyFertilizer,
+            -- so skipping new ones beyond the cap only affects sub-field visual detail,
+            -- not correctness of the aggregate nutrient values.
+            local canWrite = true
+            if field.zoneData[cellKey] == nil then
+                local count = 0
+                for _ in pairs(field.zoneData) do count = count + 1 end
+                if count >= MAX_ZONE_CELLS then canWrite = false end
+            end
+            if canWrite then
+                -- Always sync to current field values so lateral boom cells reflect the
+                -- fertilizer that was just applied, not stale values from a previous pass.
                 field.zoneData[cellKey] = {
                     N  = field.nitrogen       or SoilConstants.FIELD_DEFAULTS.nitrogen,
                     P  = field.phosphorus     or SoilConstants.FIELD_DEFAULTS.phosphorus,
