@@ -1116,23 +1116,24 @@ function SoilSprayerRateEvent.emptyNew()
     return Event.new(SoilSprayerRateEvent_mt)
 end
 
-function SoilSprayerRateEvent.new(vehicleId, rateIndex)
+-- vehicleNetId is the FS25 network object ID (from NetworkUtil.getObjectId).
+-- Using the network ID on the wire avoids the streamWriteInt32(nil) crash that
+-- occurs when a local i3d node handle is passed to NetworkUtil.getObjectId.
+function SoilSprayerRateEvent.new(vehicleNetId, rateIndex)
     local self = SoilSprayerRateEvent.emptyNew()
-    self.vehicleId = vehicleId
-    self.rateIndex = rateIndex
+    self.vehicleNetId = vehicleNetId
+    self.rateIndex    = rateIndex
     return self
 end
 
 function SoilSprayerRateEvent:readStream(streamId, connection)
-    local networkId = streamReadInt32(streamId)
-    local vehicle   = NetworkUtil.getObject(networkId)
-    self.vehicleId  = vehicle and vehicle.id or nil
-    self.rateIndex = streamReadUInt8(streamId)
+    self.vehicleNetId = streamReadInt32(streamId)
+    self.rateIndex    = streamReadUInt8(streamId)
     self:run(connection)
 end
 
 function SoilSprayerRateEvent:writeStream(streamId, connection)
-    streamWriteInt32(streamId, NetworkUtil.getObjectId(self.vehicleId))
+    streamWriteInt32(streamId, self.vehicleNetId)
     streamWriteUInt8(streamId, self.rateIndex)
 end
 
@@ -1140,36 +1141,37 @@ function SoilSprayerRateEvent:run(connection)
     local rm = g_SoilFertilityManager and g_SoilFertilityManager.sprayerRateManager
     if rm == nil then return end
 
-    if self.vehicleId == nil then return end
+    local vehicle = NetworkUtil.getObject(self.vehicleNetId)
+    if not vehicle then return end
 
     local steps = SoilConstants.SPRAYER_RATE.STEPS
     if self.rateIndex < 1 or self.rateIndex > #steps then return end
 
-    rm:setIndex(self.vehicleId, self.rateIndex)
+    rm:setIndex(vehicle.id, self.rateIndex)
 
-    -- Server rebroadcasts to all other clients
     if g_server ~= nil then
         g_server:broadcastEvent(
-            SoilSprayerRateEvent.new(self.vehicleId, self.rateIndex),
-            nil,        -- send to all
-            connection  -- except original sender
+            SoilSprayerRateEvent.new(self.vehicleNetId, self.rateIndex),
+            nil,
+            connection
         )
     end
 end
 
 --- Send a sprayer rate change. Works in SP, MP client, and MP server.
----@param vehicleId number
+---@param vehicle table  The vehicle object (not vehicle.id)
 ---@param rateIndex number 1-based index into SPRAYER_RATE.STEPS
-function SoilNetworkEvents_SendSprayerRate(vehicleId, rateIndex)
+function SoilNetworkEvents_SendSprayerRate(vehicle, rateIndex)
     if g_client then
+        local vehicleNetId = NetworkUtil.getObjectId(vehicle)
+        if not vehicleNetId then return end
         g_client:getServerConnection():sendEvent(
-            SoilSprayerRateEvent.new(vehicleId, rateIndex)
+            SoilSprayerRateEvent.new(vehicleNetId, rateIndex)
         )
     else
-        -- Singleplayer or dedicated server console: apply directly
         local rm = g_SoilFertilityManager and g_SoilFertilityManager.sprayerRateManager
         if rm then
-            rm:setIndex(vehicleId, rateIndex)
+            rm:setIndex(vehicle.id, rateIndex)
         end
     end
 end
@@ -1186,23 +1188,21 @@ function SoilSprayerAutoModeEvent.emptyNew()
     return Event.new(SoilSprayerAutoModeEvent_mt)
 end
 
-function SoilSprayerAutoModeEvent.new(vehicleId, enabled)
+function SoilSprayerAutoModeEvent.new(vehicleNetId, enabled)
     local self = SoilSprayerAutoModeEvent.emptyNew()
-    self.vehicleId = vehicleId
-    self.enabled = enabled
+    self.vehicleNetId = vehicleNetId
+    self.enabled      = enabled
     return self
 end
 
 function SoilSprayerAutoModeEvent:readStream(streamId, connection)
-    local networkId = streamReadInt32(streamId)
-    local vehicle   = NetworkUtil.getObject(networkId)
-    self.vehicleId  = vehicle and vehicle.id or nil
-    self.enabled = streamReadBool(streamId)
+    self.vehicleNetId = streamReadInt32(streamId)
+    self.enabled      = streamReadBool(streamId)
     self:run(connection)
 end
 
 function SoilSprayerAutoModeEvent:writeStream(streamId, connection)
-    streamWriteInt32(streamId, NetworkUtil.getObjectId(self.vehicleId))
+    streamWriteInt32(streamId, self.vehicleNetId)
     streamWriteBool(streamId, self.enabled)
 end
 
@@ -1210,28 +1210,32 @@ function SoilSprayerAutoModeEvent:run(connection)
     local rm = g_SoilFertilityManager and g_SoilFertilityManager.sprayerRateManager
     if rm == nil then return end
 
-    if self.vehicleId == nil then return end
+    local vehicle = NetworkUtil.getObject(self.vehicleNetId)
+    if not vehicle then return end
 
-    rm:setAutoMode(self.vehicleId, self.enabled)
+    rm:setAutoMode(vehicle.id, self.enabled)
 
-    -- Server rebroadcasts
     if g_server then
         g_server:broadcastEvent(
-            SoilSprayerAutoModeEvent.new(self.vehicleId, self.enabled),
+            SoilSprayerAutoModeEvent.new(self.vehicleNetId, self.enabled),
             nil, connection
         )
     end
 end
 
-function SoilNetworkEvents_SendSprayerAutoMode(vehicleId, enabled)
+---@param vehicle table  The vehicle object (not vehicle.id)
+---@param enabled boolean
+function SoilNetworkEvents_SendSprayerAutoMode(vehicle, enabled)
     if g_client then
+        local vehicleNetId = NetworkUtil.getObjectId(vehicle)
+        if not vehicleNetId then return end
         g_client:getServerConnection():sendEvent(
-            SoilSprayerAutoModeEvent.new(vehicleId, enabled)
+            SoilSprayerAutoModeEvent.new(vehicleNetId, enabled)
         )
     else
         local rm = g_SoilFertilityManager and g_SoilFertilityManager.sprayerRateManager
         if rm then
-            rm:setAutoMode(vehicleId, enabled)
+            rm:setAutoMode(vehicle.id, enabled)
         end
     end
 end
