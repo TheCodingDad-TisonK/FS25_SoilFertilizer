@@ -1410,6 +1410,16 @@ function HookManager:installSprayerAreaHook()
                     applySingle(fieldId, effectiveLiters, rootX, rootZ)
                 end
 
+                -- Sweep all cells under the full boom width for display (#362).
+                -- Nutrients are already attributed to the field by applySingle/section loop;
+                -- markBoomCells only stamps display entries for unvisited lateral cells.
+                if soilSys and fieldId and fieldId > 0 then
+                    local boomPts = hookMgrRef:getBoomCellPositions(self, rootX, rootZ)
+                    if boomPts then
+                        soilSys:markBoomCells(fieldId, boomPts)
+                    end
+                end
+
                 -- BUY mode backup refill (issue #125).
                 -- SpecializationUtil.registerFunction may cache function references before
                 -- our FillUnit.addFillUnitFillLevel hook installs, so the class-level hook
@@ -1970,10 +1980,17 @@ function HookManager:installSowingHook()
                     tostring(spec.workAreaParameters.seedsFruitType))
                 if not fieldId or fieldId <= 0 then return end
 
-                local statsArea = spec.workAreaParameters.lastStatsArea or spec.workAreaParameters.lastChangedArea or 0.001
+                local statsArea = spec.workAreaParameters.lastStatsArea or spec.workAreaParameters.lastChangedArea or 0
+                if statsArea <= 0 then return end
+                -- Convert density-map pixels → hectares (same as plow/cultivator/mower hooks).
+                -- Passing raw pixels directly caused factor = pixels/fieldAreaHa, exploding
+                -- NPK to max in the first sowing tick (same bug fixed for plow in 51083e7).
+                if not g_currentMission or type(g_currentMission.getFruitPixelsToSqm) ~= "function" then return end
+                local areaHa = MathUtil.areaToHa(statsArea, g_currentMission:getFruitPixelsToSqm())
+                if areaHa <= 0 then return end
                 g_SoilFertilityManager.soilSystem._lastTillageX = x
                 g_SoilFertilityManager.soilSystem._lastTillageZ = z
-                g_SoilFertilityManager.soilSystem:onSowing(fieldId, statsArea)
+                g_SoilFertilityManager.soilSystem:onSowing(fieldId, areaHa)
             end)
 
             if not ok then
@@ -3350,4 +3367,76 @@ function HookManager:installClientJoinHook()
     self._clientJoinListener = listener
     SoilLogger.info("[OK] Client join hook installed (addModEventListener/onClientJoined)")
     return true
+end
+
+-- =========================================================
+-- UTILITY: Boom Cell Sweep (issue #362)
+-- =========================================================
+--- Collect world positions spanning the spray boom's lateral extent by reading
+--- work-area start/end nodes on the vehicle and all attached implements.
+--- Used to mark every 10 m cell the boom passes over — not just the rootNode cell.
+---
+--- Falls back to nil when no spanning node pair is found (caller marks only rootNode).
+---@param vehicle table  The sprayer vehicle (self in the spray hook)
+---@param rootX   number  Vehicle root-node world X
+---@param rootZ   number  Vehicle root-node world Z
+---@return table|nil  Array of {x=, z=} world positions, or nil if span < 2 nodes
+function HookManager:getBoomCellPositions(vehicle, rootX, rootZ)
+    local cellSize = SoilConstants.ZONE.CELL_SIZE
+    local xs, zs = {}, {}
+
+    local function collectFromObj(obj)
+        if not obj or not obj.spec_workArea or not obj.spec_workArea.workAreas then return end
+        for _, wa in ipairs(obj.spec_workArea.workAreas) do
+            if wa.start then
+                local ok, x, _, z = pcall(getWorldTranslation, wa.start)
+                if ok and x then table.insert(xs, x); table.insert(zs, z) end
+            end
+            local waEnd = wa["end"]  -- "end" is a Lua keyword; must use bracket access
+            if waEnd then
+                local ok, x, _, z = pcall(getWorldTranslation, waEnd)
+                if ok and x then table.insert(xs, x); table.insert(zs, z) end
+            end
+        end
+    end
+
+    collectFromObj(vehicle)
+    if vehicle.spec_attacherJoints and vehicle.spec_attacherJoints.attachedImplements then
+        for _, impl in ipairs(vehicle.spec_attacherJoints.attachedImplements or {}) do
+            collectFromObj(impl and impl.object)
+        end
+    end
+
+    if #xs < 2 then return nil end
+
+    local minX, maxX = xs[1], xs[1]
+    local minZ, maxZ = zs[1], zs[1]
+    for _, x in ipairs(xs) do minX = math.min(minX, x); maxX = math.max(maxX, x) end
+    for _, z in ipairs(zs) do minZ = math.min(minZ, z); maxZ = math.max(maxZ, z) end
+
+    local spanX = maxX - minX
+    local spanZ = maxZ - minZ
+    -- Only sweep if the detected span is meaningfully wider than one cell
+    if math.max(spanX, spanZ) < cellSize * 0.5 then return nil end
+
+    local halfCell = cellSize * 0.5
+    local pts = {}
+
+    if spanX >= spanZ then
+        -- Boom runs primarily east-west: sweep along X
+        local x = minX
+        while x <= maxX + halfCell do
+            table.insert(pts, {x = x, z = rootZ})
+            x = x + cellSize
+        end
+    else
+        -- Boom runs primarily north-south: sweep along Z
+        local z = minZ
+        while z <= maxZ + halfCell do
+            table.insert(pts, {x = rootX, z = z})
+            z = z + cellSize
+        end
+    end
+
+    return (#pts > 1) and pts or nil
 end

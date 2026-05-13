@@ -99,6 +99,94 @@ local function loadedMission(mission, node)
     end
     sfm:onMissionLoaded()
 
+    -- TIP ON GROUND FIX: directly inject our solid fill types into the
+    -- DensityMapHeightManager Lua tables so they can be tipped to the ground.
+    --
+    -- Root cause: loadDensityMapHeightTypes() is a C++ native that uses a C++
+    -- fill type registry populated only during DensityMapHeightManager.loadMapData
+    -- (before mod fill types are available). Calling it later always returns
+    -- "invalid fill type 'nil'" for all our types.
+    --
+    -- Solution: populate the Lua tables directly at loadMission00Finished time,
+    -- using the FERTILIZER entry as the structural template. Field values confirmed
+    -- from debug pass 2 (2026-05-13): allowsSmoothing, canBeTipped, collisionBaseOffset,
+    -- collisionScale, fillToGroundScale, fillTypeIndex, fillTypeName, index,
+    -- maxCollisionOffset, maxSurfaceAngle, minCollisionOffset.
+    do
+        local dmhm = g_densityMapHeightManager
+        local ftm  = g_fillTypeManager
+        if dmhm and ftm and dmhm.heightTypes and dmhm.fillTypeIndexToHeightType then
+            -- Use FERTILIZER as the structural template (confirmed working, granular).
+            local tmpl = nil
+            local fertIdx = ftm:getFillTypeIndexByName("FERTILIZER")
+            if fertIdx then tmpl = dmhm.fillTypeIndexToHeightType[fertIdx] end
+
+            if tmpl then
+                -- Our 11 solid fill types that need ground-tipping support.
+                local solidTypes = {
+                    "UREA", "AN", "AMS", "MAP", "DAP", "POTASH",
+                    "GYPSUM", "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE",
+                }
+                local registered = 0
+                for _, typeName in ipairs(solidTypes) do
+                    local idx = ftm:getFillTypeIndexByName(typeName)
+                    if idx and not dmhm.fillTypeIndexToHeightType[idx] then
+                        local nextSlot = dmhm.numHeightTypes + 1
+                        -- Shallow-copy the FERTILIZER template so any C++ object references
+                        -- (density map channel pointer, physics layer handle) are preserved.
+                        -- Without these refs, tipToGroundAroundLine silently fails even when
+                        -- the Lua-side canBeTipped check passes.  Override only the identity
+                        -- fields that must differ per fill type.
+                        local ht = {}
+                        for k, v in pairs(tmpl) do ht[k] = v end
+                        ht.allowsSmoothing  = false
+                        ht.canBeTipped      = true
+                        ht.fillTypeIndex    = idx
+                        ht.fillTypeName     = typeName
+                        ht.index            = nextSlot
+
+                        dmhm.fillTypeIndexToHeightType[idx]           = ht
+                        if dmhm.fillTypeNameToHeightType then
+                            dmhm.fillTypeNameToHeightType[typeName]   = ht
+                        end
+                        dmhm.heightTypeIndexToFillTypeIndex[nextSlot] = idx
+                        dmhm.heightTypes[nextSlot]                    = ht
+                        dmhm.numHeightTypes                           = nextSlot
+                        registered = registered + 1
+                    end
+                end
+                -- Verify at least one registration worked by checking getMinValidLiterValue.
+                local testIdx = ftm:getFillTypeIndexByName("UREA")
+                local ok, val = pcall(function() return dmhm:getMinValidLiterValue(testIdx) end)
+                SoilLogger.info(string.format(
+                    "[TIP FIX] Injected %d solid fill types into DMHM (shallow-copy). " ..
+                    "getMinValidLiterValue(UREA)=%s (>0 = success)",
+                    registered, tostring(ok and val or "ERROR")
+                ))
+
+                -- Belt-and-suspenders: also hook getCanTipToGround at Lua level so the
+                -- discharge eligibility check passes even if C++ hasn't read our table.
+                if registered > 0 and DensityMapHeightUtil and
+                   type(DensityMapHeightUtil.getCanTipToGround) == "function" then
+                    local _dmhm = dmhm
+                    local _origGetCan = DensityMapHeightUtil.getCanTipToGround
+                    DensityMapHeightUtil.getCanTipToGround = function(fillTypeIndex)
+                        if _dmhm and _dmhm.fillTypeIndexToHeightType and
+                           _dmhm.fillTypeIndexToHeightType[fillTypeIndex] then
+                            return true
+                        end
+                        return _origGetCan(fillTypeIndex)
+                    end
+                    SoilLogger.info("[TIP FIX] DensityMapHeightUtil.getCanTipToGround hooked")
+                end
+            else
+                SoilLogger.warning("[TIP FIX] FERTILIZER template not found in DMHM — tip injection skipped")
+            end
+        else
+            SoilLogger.warning("[TIP FIX] g_densityMapHeightManager not available at loadedMission — tip injection skipped")
+        end
+    end
+
     -- Fallback: register atlas if it was skipped at load time (g_overlayManager was nil then).
     if not _helplineAtlasRegistered then
         if g_overlayManager then
@@ -355,33 +443,16 @@ if FillTypeManager and type(FillTypeManager.loadModFillTypes) == "function" then
     FillTypeManager.loadModFillTypes = Utils.prependedFunction(FillTypeManager.loadModFillTypes, injectSFModFillTypes)
 end
 
--- =========================================================
--- TIP ON GROUND FIX: Register densityMapHeightTypes
--- Enables mod fill types to be tipped on the ground (CTRL+I).
--- We inject our XML into DensityMapHeightManager's loading queue.
--- =========================================================
-if DensityMapHeightManager and type(DensityMapHeightManager.loadMapData) == "function" then
-    local function injectSFHeightTypes(densityMapHeightManager)
-        if densityMapHeightManager.modDensityHeightMapTypeFilenames == nil then
-            densityMapHeightManager.modDensityHeightMapTypeFilenames = {}
-        end
-
-        local filename = modDirectory .. "xml/densityMapHeightTypes.xml"
-        local alreadyAdded = false
-        for _, existing in ipairs(densityMapHeightManager.modDensityHeightMapTypeFilenames) do
-            if existing == filename then
-                alreadyAdded = true
-                break
-            end
-        end
-
-        if not alreadyAdded then
-            SoilLogger.info("Tip On Ground Fix: Registering densityMapHeightTypes.xml")
-            table.insert(densityMapHeightManager.modDensityHeightMapTypeFilenames, filename)
-        end
-    end
-    DensityMapHeightManager.loadMapData = Utils.prependedFunction(DensityMapHeightManager.loadMapData, injectSFHeightTypes)
-end
+-- TIP ON GROUND FIX: registration moved into loadedMission() below.
+--
+-- Root cause (documented after three failed hook attempts):
+--   DensityMapHeightManager.loadMapData runs before fill types are available.
+--   FillTypeManager.loadMapData appended hook also fires too early — the engine
+--   processes <fillTypes> from modDesc.xml in a separate pass AFTER loadMapData
+--   returns, so our fill types are nil at every earlier hook point.
+--   The only guaranteed-safe window is Mission00.loadMission00Finished, where
+--   g_fillTypeManager already resolves our fill type names (confirmed by HUD icon
+--   patching working in the same callback).
 
 -- Route mouse events to SoilHUD (for drag/resize edit mode).
 -- Edit mode is entered via Shift+H (SF_HUD_DRAG input action) — not via RMB.
