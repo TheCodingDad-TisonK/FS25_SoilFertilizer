@@ -517,11 +517,26 @@
   "v2.1.6.3": {
     "published_at": "2026-05-13T17:58:39Z",
     "tag": "v2.1.6.3",
-    "peak_downloads": 16
+    "peak_downloads": 22
   },
   "v2.1.6.2": {
     "published_at": "2026-05-13T17:11:53Z",
     "tag": "v2.1.6.2",
     "peak_downloads": 17
+  },
+  "v2.1.6.5": {
+    "published_at": "2026-05-13T19:39:06Z",
+    "tag": "v2.1.6.5",
+    "peak_downloads": 22
+  },
+  "v2.1.6.6": {
+    "published_at": "2026-05-13T19:47:48Z",
+    "tag": "v2.1.6.6",
+    "peak_downloads": 0
+  },
+  "test-2": {
+    "published_at": "2026-05-13T20:37:18Z",
+    "tag": "test-2",
+    "peak_downloads": 0
   }
 }
