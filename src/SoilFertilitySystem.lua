@@ -2402,6 +2402,16 @@ function SoilFertilitySystem:onHerbicideAppliedDirect(fieldId, effectiveness, li
     local field = self:getOrCreateField(fieldId, true)
     if not field then return end
 
+    -- Confirm field area from farmland on first herbicide application (mirrors applyFertilizer).
+    -- Without this, newly-created fields default to 1.0 ha, making targetVol wrong on dedi servers.
+    if not field._farmlandAreaConfirmed and g_farmlandManager then
+        local farmlandObj = g_farmlandManager:getFarmlandById(fieldId)
+        if farmlandObj and farmlandObj.areaInHa and farmlandObj.areaInHa > 0 then
+            field.fieldArea = farmlandObj.areaInHa
+        end
+        field._farmlandAreaConfirmed = true
+    end
+
     local areaInHa = field.fieldArea or 1.0
     if areaInHa <= 0 then areaInHa = 1.0 end
     local targetRate = SoilConstants.SPRAYER_RATE.BASE_RATES.HERBICIDE.value
@@ -2421,9 +2431,26 @@ function SoilFertilitySystem:onHerbicideAppliedDirect(fieldId, effectiveness, li
         local daysPerMonth = (g_currentMission and g_currentMission.environment and g_currentMission.environment.daysPerPeriod) or 1
         field.herbicideDaysLeft = SoilConstants.WEED_PRESSURE.HERBICIDE_DURATION_DAYS * daysPerMonth
 
+        -- Update per-cell weed pressure so the PDA cell-report shows changes immediately.
+        -- onInsecticideAppliedIncremental does this for pest pressure; herbicide was missing it.
+        local x, z = self._lastSprayX, self._lastSprayZ
+        if x and z then
+            local zone = SoilConstants.ZONE
+            local cellKey = tostring(math.floor(x / zone.CELL_SIZE) * 10000 + math.floor(z / zone.CELL_SIZE))
+            if not field.zoneData then field.zoneData = {} end
+            if not field.zoneData[cellKey] then
+                field.zoneData[cellKey] = {
+                    N = field.nitrogen, P = field.phosphorus, K = field.potassium,
+                    pH = field.pH, OM = field.organicMatter,
+                    weedPressure = field.weedPressure, pestPressure = field.pestPressure,
+                    diseasePressure = field.diseasePressure, compaction = field.compaction
+                }
+            end
+            field.zoneData[cellKey].weedPressure = math.max(0,
+                (field.zoneData[cellKey].weedPressure or field.weedPressure or 0) - reduction)
+        end
+
         -- Broadcast updated weed pressure to all clients (dedicated server fix — Issue #257)
-        -- Previously missing, causing weed value to only update on clients when a subsequent
-        -- insecticide/fungicide broadcast happened to carry the stale field struct.
         if g_server and g_currentMission and g_currentMission.missionDynamicInfo
             and g_currentMission.missionDynamicInfo.isMultiplayer then
             if SoilFieldUpdateEvent then
