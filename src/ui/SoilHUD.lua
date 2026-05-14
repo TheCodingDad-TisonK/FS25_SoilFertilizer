@@ -227,7 +227,7 @@ function SoilHUD:getLayoutPath()
         if profilePath:sub(-1) ~= "/" and profilePath:sub(-1) ~= "\\" then
             profilePath = profilePath .. "/"
         end
-        local dir = profilePath .. "modsSettings"
+        local dir = profilePath .. "modSettings"
         createFolder(dir)
         return dir .. "/" .. (g_currentModName or "FS25_SoilFertilizer") .. "_hud.xml"
     end
