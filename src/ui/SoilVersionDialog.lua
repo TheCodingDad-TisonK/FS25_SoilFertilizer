@@ -26,7 +26,7 @@ SoilVersionDialog.INSTANCE = nil
 SoilVersionDialog.CHANGELOG = {
     "- Fixed: HUD & display settings (position, colorblind mode, field info box) now saved per-player",
     "- Fixed: dedicated server clients no longer lose HUD preferences on reconnect",
-    "- Fixed: mini-report cell overlay visibility now persists correctly on dedicated servers",
+    "- Fixed: mini-report cell overlay visibility now persists correctly (SP & MP)",
     "- i18n: French translation updated by native speaker (Seb/Squall39)",
 }
 
