@@ -1179,6 +1179,8 @@ end
 --- Cleanup on mod unload
 --- Saves soil data and uninstalls hooks
 function SoilFertilityManager:delete()
+    -- Flush any buffered debug messages to file before shutdown
+    SoilLogger.flushDebugLog()
     -- Save soil data before shutdown
     self:saveSoilData()
 

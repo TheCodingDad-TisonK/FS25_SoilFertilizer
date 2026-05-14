@@ -194,6 +194,10 @@ end
 function SoilSettingsGUI:consoleCommandDebug()
     if g_SoilFertilityManager and g_SoilFertilityManager.settings then
         local newVal = not g_SoilFertilityManager.settings.debugMode
+        if not newVal then
+            -- Flush buffered debug messages to Debug/debug.xml before turning off
+            SoilLogger.flushDebugLog()
+        end
         requestSettingChange("debugMode", newVal)
         return string.format("Debug mode %s", newVal and "enabled" or "disabled")
     end
@@ -203,9 +207,43 @@ end
 function SoilSettingsGUI:consoleCommandSaveData()
     if g_SoilFertilityManager then
         g_SoilFertilityManager:saveSoilData()
+        SoilSettingsGUI.writeSoilExport(g_SoilFertilityManager.soilSystem)
         return "Soil data saved"
     end
     return "Error: Soil Mod not initialized"
+end
+
+--- Write a full snapshot of all field nutrient data to Debug/soil_export.xml.
+function SoilSettingsGUI.writeSoilExport(soilSystem)
+    if not soilSystem then return end
+    local base = SettingsManager and SettingsManager.getModProfileDir and SettingsManager.getModProfileDir()
+    if not base then return end
+    local xml = XMLFile.create("sf_soilExport", base .. "/Debug/soil_export.xml", "soilExport")
+    if not xml then return end
+    local day = g_currentMission and g_currentMission.environment and g_currentMission.environment.currentDay or 0
+    xml:setInt("soilExport#day", day)
+    local idx = 0
+    for fieldId, fd in pairs(soilSystem.fieldData or {}) do
+        local key = string.format("soilExport.field(%d)", idx)
+        xml:setInt  (key .. "#id",              fieldId)
+        xml:setInt  (key .. "#nitrogen",         fd.nitrogen        or 0)
+        xml:setInt  (key .. "#phosphorus",       fd.phosphorus      or 0)
+        xml:setInt  (key .. "#potassium",        fd.potassium       or 0)
+        xml:setFloat(key .. "#organicMatter",    fd.organicMatter   or 0)
+        xml:setFloat(key .. "#pH",               fd.pH              or 7.0)
+        xml:setString(key .. "#lastCrop",        fd.lastCrop        or "")
+        xml:setInt  (key .. "#lastHarvest",      fd.lastHarvest     or 0)
+        xml:setFloat(key .. "#fertilizerApplied",fd.fertilizerApplied or 0)
+        xml:setInt  (key .. "#weedPressure",     fd.weedPressure    or 0)
+        xml:setInt  (key .. "#pestPressure",     fd.pestPressure    or 0)
+        xml:setInt  (key .. "#diseasePressure",  fd.diseasePressure or 0)
+        xml:setInt  (key .. "#compaction",       fd.compaction      or 0)
+        idx = idx + 1
+    end
+    xml:setInt("soilExport#fieldCount", idx)
+    xml:save()
+    xml:delete()
+    SoilLogger.info("Soil export written: %s/Debug/soil_export.xml (%d fields)", base, idx)
 end
 
 function SoilSettingsGUI:consoleCommandShowSettings()
@@ -253,12 +291,39 @@ function SoilSettingsGUI:consoleCommandFieldInfo(fieldId)
                 info.needsFertilization and "Yes" or "No"
             )
             print(fInfo)
+            SoilSettingsGUI.writeFieldDump(fid, info)
             return fInfo
         else
             return "Field not found or not initialized"
         end
     end
     return "Error: Soil Mod not initialized"
+end
+
+--- Write a single field's soil data to Debug/field_dump.xml.
+function SoilSettingsGUI.writeFieldDump(fid, info)
+    local base = SettingsManager and SettingsManager.getModProfileDir and SettingsManager.getModProfileDir()
+    if not base then return end
+    local xml = XMLFile.create("sf_fieldDump", base .. "/Debug/field_dump.xml", "fieldDump")
+    if not xml then return end
+    local day = g_currentMission and g_currentMission.environment and g_currentMission.environment.currentDay or 0
+    xml:setInt("fieldDump#fieldId", fid)
+    xml:setInt("fieldDump#day",     day)
+    xml:setInt  ("fieldDump.nutrients#nitrogen",      info.nitrogen.value)
+    xml:setString("fieldDump.nutrients#nitrogenStatus", info.nitrogen.status)
+    xml:setInt  ("fieldDump.nutrients#phosphorus",    info.phosphorus.value)
+    xml:setString("fieldDump.nutrients#phosphorusStatus", info.phosphorus.status)
+    xml:setInt  ("fieldDump.nutrients#potassium",     info.potassium.value)
+    xml:setString("fieldDump.nutrients#potassiumStatus", info.potassium.status)
+    xml:setFloat("fieldDump.nutrients#organicMatter", info.organicMatter)
+    xml:setFloat("fieldDump.nutrients#pH",            info.pH)
+    xml:setString("fieldDump.status#lastCrop",        info.lastCrop or "")
+    xml:setInt  ("fieldDump.status#daysSinceHarvest", info.daysSinceHarvest)
+    xml:setFloat("fieldDump.status#fertilizerApplied",info.fertilizerApplied)
+    xml:setBool ("fieldDump.status#needsFertilization", info.needsFertilization)
+    xml:save()
+    xml:delete()
+    SoilLogger.info("Field dump written: %s/Debug/field_dump.xml", base)
 end
 
 function SoilSettingsGUI:consoleCommandFieldForecast(fieldId)
