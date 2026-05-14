@@ -83,10 +83,10 @@
     <e k="sf_active_map_layer_long" v="Слой питательных веществ, отображенный в виде наложения на карте PDA" eh="d7755cc8" />
     <e k="sf_overlay_density_short" v="Детали карты" eh="a525859a" />
     <e k="sf_overlay_density_long" v="Бюджет точек выборки для наложения почвы в PDA. Низкий = лучший FPS, Высокий = более полное покрытие на больших картах." eh="89215ce5" />
-    <e k="sf_colorblind_mode_short" v="Colorblind Mode" />
-    <e k="sf_colorblind_mode_long" v="Replaces red/green status colors with orange/blue (Okabe-Ito palette) for deuteranopia and protanopia accessibility." />
-    <e k="sf_show_field_info_box_short" v="Field Info Box" />
-    <e k="sf_show_field_info_box_long" v="Show soil nutrients in the native Field Info panel when standing on a field." />
+    <e k="sf_colorblind_mode_short" v="[EN] Colorblind Mode" />
+    <e k="sf_colorblind_mode_long" v="[EN] Replaces red/green status colors with orange/blue (Okabe-Ito palette) for deuteranopia and protanopia accessibility." />
+    <e k="sf_show_field_info_box_short" v="[EN] Field Info Box" />
+    <e k="sf_show_field_info_box_long" v="[EN] Show soil nutrients in the native Field Info panel when standing on a field." />
     <e k="input_SF_OPEN_SETTINGS" v="Настройки почвы" eh="2e31c0dd" />
     <e k="sf_reset" v="Сбросить настройки почвы" eh="467bc2f5" />
     <e k="input_SF_TOGGLE_HUD" v="Переключить HUD почвы" eh="f0224a10" />
@@ -187,10 +187,13 @@
     <e k="sf_bigBag_compost_name" v="МКР Компост" eh="14322c5d" />
     <e k="sf_bigBag_compost_function" v="Органическая добавка (сухая)" eh="9dd2256a" />
     <e k="sf_bigBag_biosolids_name" v="МКР Биоотходы" eh="61a60ff3" />
+    <e k="sf_bigBag_biosolids_10k_name" v="[EN] Big Bag Biosolids (10,000L)" />
     <e k="sf_bigBag_biosolids_function" v="Органическое удобрение (сухое)" eh="374c7b1e" />
     <e k="sf_bigBag_chicken_manure_name" v="МКР Куриный помет" eh="cb60fddc" />
+    <e k="sf_bigBag_chicken_manure_10k_name" v="[EN] Big Bag Chicken Manure (10,000L)" />
     <e k="sf_bigBag_chicken_manure_function" v="Органическое удобрение (сухое)" eh="374c7b1e" />
     <e k="sf_bigBag_pelletized_manure_name" v="МКР Гранулированный навоз" eh="064be7fa" />
+    <e k="sf_bigBag_pelletized_manure_10k_name" v="[EN] Big Bag Pelletized Manure (10,000L)" />
     <e k="sf_bigBag_pelletized_manure_function" v="Органическое удобрение (сухое)" eh="374c7b1e" />
     <e k="sf_bigBag_liquidlime_name" v="Резервуар с жидкой известью" eh="4f8caca1" />
     <e k="sf_bigBag_liquidlime_function" v="Агент для повышения pH (жидкий)" eh="7a118b6d" />
@@ -591,8 +594,8 @@
     <e k="sf_desc_cropRotation" v="Бонусы/штрафы севооборота" eh="bb79b03a" />
     <e k="sf_desc_activeMapLayer" v="Слой на карте PDA" eh="3c01c599" />
     <e k="sf_desc_overlayDensity" v="Бюджет точек (Низкий=8k, Средний=20k, Высокий=40k)" eh="42503763" />
-    <e k="sf_desc_colorblindMode" v="Use orange/blue palette instead of red/green" />
-    <e k="sf_desc_showFieldInfoBox" v="Show soil data in the Field Info panel" />
+    <e k="sf_desc_colorblindMode" v="[EN] Use orange/blue palette instead of red/green" />
+    <e k="sf_desc_showFieldInfoBox" v="[EN] Show soil data in the Field Info panel" />
     <e k="sf_rr_1" v="Очень медленно (0.25x)" eh="b681a1b4" />
     <e k="sf_rr_2" v="Медленно (0.5x)" eh="db69874d" />
     <e k="sf_rr_3" v="Нормально (1.0x)" eh="930452c1" />

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.1.6.8] - 2026-05-14
+
+### Fixed
+- **Dedicated server HUD settings not persisting** (Issue [#374](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/374)) — Per-player `localOnly` settings (HUD visibility, position, colorblind mode, field info box, mini-report, etc.) were being written to and read from the savegame XML alongside server-shared settings. On dedicated servers, clients have no write access to the savegame directory, so these preferences could never persist. Fixed by excluding all `localOnly` schema entries from `saveSettings`/`loadSettings`. Those settings are now exclusively handled by `saveLocalSettings`/`loadLocalSettings`, which write to each client's user profile `modsSettings/` directory.
+- **Mini-report cell overlay missing on dedicated servers** (Issue [#375](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/375)) — `showMiniReport` is a `localOnly` setting; same root cause as #374. Now correctly saved per-player.
+
+### Translation
+- **French (fr)** — Updated by native speaker Seb/Squall39: colorblind mode, field info box, and display description keys translated.
+
+---
+
 ## [2.1.6.7] - 2026-05-14
 
 ### Fixed

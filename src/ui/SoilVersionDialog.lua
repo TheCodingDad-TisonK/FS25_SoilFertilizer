@@ -24,10 +24,10 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
-    "- Fixed: dedicated server ping spike during cultivating/plowing/mowing/seeding (throttled MP broadcasts)",
-    "- Fixed: liquid fertilizer StreamWriteInt32 nil crash — sprayer rate events now have nil-safe fallbacks",
-    "- Fixed: server crash during sprayer rate sync (nil network ID in writeStream)",
-    "- Fixed: server crash with dry fertilizer (urea spreader) — zone cell packet overflow",
+    "- Fixed: HUD & display settings (position, colorblind mode, field info box) now saved per-player",
+    "- Fixed: dedicated server clients no longer lose HUD preferences on reconnect",
+    "- Fixed: mini-report cell overlay visibility now persists correctly on dedicated servers",
+    "- i18n: French translation updated by native speaker (Seb/Squall39)",
 }
 
 -- ── i18n helper ───────────────────────────────────────────

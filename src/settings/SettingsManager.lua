@@ -45,13 +45,15 @@ function SettingsManager:loadSettings(settingsObject)
     if fileExists(xmlPath) then
         local xml = XMLFile.load("sf_Config", xmlPath)
         if xml then
-            -- Auto-load all settings from schema
+            -- Auto-load all server-shared settings from schema (skip per-player localOnly settings)
             for _, def in ipairs(SettingsSchema.definitions) do
-                local xmlKey = self.XMLTAG .. "." .. def.id
-                if def.type == "boolean" then
-                    settingsObject[def.id] = xml:getBool(xmlKey, def.default)
-                elseif def.type == "number" then
-                    settingsObject[def.id] = xml:getInt(xmlKey, def.default)
+                if not def.localOnly then
+                    local xmlKey = self.XMLTAG .. "." .. def.id
+                    if def.type == "boolean" then
+                        settingsObject[def.id] = xml:getBool(xmlKey, def.default)
+                    elseif def.type == "number" then
+                        settingsObject[def.id] = xml:getInt(xmlKey, def.default)
+                    end
                 end
             end
 
@@ -155,13 +157,15 @@ function SettingsManager:saveSettings(settingsObject)
 
     local xml = XMLFile.create("sf_Config", xmlPath, self.XMLTAG)
     if xml then
-        -- Auto-save all settings from schema
+        -- Auto-save server-shared settings from schema (skip per-player localOnly settings)
         for _, def in ipairs(SettingsSchema.definitions) do
-            local xmlKey = self.XMLTAG .. "." .. def.id
-            if def.type == "boolean" then
-                xml:setBool(xmlKey, settingsObject[def.id])
-            elseif def.type == "number" then
-                xml:setInt(xmlKey, settingsObject[def.id])
+            if not def.localOnly then
+                local xmlKey = self.XMLTAG .. "." .. def.id
+                if def.type == "boolean" then
+                    xml:setBool(xmlKey, settingsObject[def.id])
+                elseif def.type == "number" then
+                    xml:setInt(xmlKey, settingsObject[def.id])
+                end
             end
         end
 
