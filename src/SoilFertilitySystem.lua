@@ -355,11 +355,17 @@ function SoilFertilitySystem:onMow(fieldId, fruitTypeIndex, areaHa)
     SoilLogger.debug("Mow: Field %d, %s, %.5f ha — N:%.1f P:%.1f K:%.1f",
         fieldId, fruitDesc.name, areaHa, field.nitrogen, field.phosphorus, field.potassium)
 
-    -- Broadcast field update to clients in multiplayer
+    -- Broadcast field update to clients in multiplayer (throttled — mower fires every tick)
     if g_server and g_currentMission and g_currentMission.missionDynamicInfo
         and g_currentMission.missionDynamicInfo.isMultiplayer then
         if SoilFieldUpdateEvent then
-            g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
+            local now = g_currentMission.time or 0
+            if not self._tillBroadcastTime then self._tillBroadcastTime = {} end
+            local last = self._tillBroadcastTime[fieldId] or 0
+            if (now - last) >= 5000 then
+                self._tillBroadcastTime[fieldId] = now
+                g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
+            end
         end
     end
 end
@@ -506,7 +512,13 @@ function SoilFertilitySystem:onSowing(fieldId, area)
     if changed and g_server and g_currentMission and g_currentMission.missionDynamicInfo
         and g_currentMission.missionDynamicInfo.isMultiplayer then
         if SoilFieldUpdateEvent then
-            g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
+            local now = g_currentMission.time or 0
+            if not self._tillBroadcastTime then self._tillBroadcastTime = {} end
+            local last = self._tillBroadcastTime[fieldId] or 0
+            if (now - last) >= 5000 then
+                self._tillBroadcastTime[fieldId] = now
+                g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
+            end
         end
     end
 end
@@ -653,7 +665,13 @@ function SoilFertilitySystem:onPlowing(fieldId, area)
 
     if changed and g_server and g_currentMission and g_currentMission.missionDynamicInfo and g_currentMission.missionDynamicInfo.isMultiplayer then
         if SoilFieldUpdateEvent then
-            g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
+            local now = g_currentMission.time or 0
+            if not self._tillBroadcastTime then self._tillBroadcastTime = {} end
+            local last = self._tillBroadcastTime[fieldId] or 0
+            if (now - last) >= 5000 then
+                self._tillBroadcastTime[fieldId] = now
+                g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
+            end
         end
     end
 end
@@ -766,7 +784,13 @@ function SoilFertilitySystem:onCultivation(fieldId, area)
 
     if changed and g_server and g_currentMission and g_currentMission.missionDynamicInfo and g_currentMission.missionDynamicInfo.isMultiplayer then
         if SoilFieldUpdateEvent then
-            g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
+            local now = g_currentMission.time or 0
+            if not self._tillBroadcastTime then self._tillBroadcastTime = {} end
+            local last = self._tillBroadcastTime[fieldId] or 0
+            if (now - last) >= 5000 then
+                self._tillBroadcastTime[fieldId] = now
+                g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
+            end
         end
     end
 end
@@ -875,7 +899,13 @@ function SoilFertilitySystem:onStripTill(fieldId, area)
        and g_currentMission.missionDynamicInfo
        and g_currentMission.missionDynamicInfo.isMultiplayer then
         if SoilFieldUpdateEvent then
-            g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
+            local now = g_currentMission.time or 0
+            if not self._tillBroadcastTime then self._tillBroadcastTime = {} end
+            local last = self._tillBroadcastTime[fieldId] or 0
+            if (now - last) >= 5000 then
+                self._tillBroadcastTime[fieldId] = now
+                g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
+            end
         end
     end
 end

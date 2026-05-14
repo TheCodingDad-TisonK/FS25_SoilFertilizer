@@ -230,6 +230,13 @@ SettingsSchema.definitions = {
         uiId = "sf_colorblind_mode",
         localOnly = true,  -- per-player accessibility preference, not synced to server
     },
+    {
+        id = "showFieldInfoBox",
+        type = "boolean",
+        default = true,
+        uiId = "sf_show_field_info_box",
+        localOnly = true,  -- per-player display preference, not synced to server
+    },
 }
 
 -- Build lookup table by id for fast access
