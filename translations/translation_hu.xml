@@ -187,10 +187,13 @@
     <e k="sf_bigBag_compost_name" v="Big Bag Komposzt" eh="14322c5d" />
     <e k="sf_bigBag_compost_function" v="Szerves talajjavító (száraz)" eh="9dd2256a" />
     <e k="sf_bigBag_biosolids_name" v="Big Bag Bioszolárd" eh="61a60ff3" />
+    <e k="sf_bigBag_biosolids_10k_name" v="[EN] Big Bag Biosolids (10,000L)" />
     <e k="sf_bigBag_biosolids_function" v="Szerves műtrágya (száraz)" eh="374c7b1e" />
     <e k="sf_bigBag_chicken_manure_name" v="Big Bag Csirketrágya" eh="cb60fddc" />
+    <e k="sf_bigBag_chicken_manure_10k_name" v="[EN] Big Bag Chicken Manure (10,000L)" />
     <e k="sf_bigBag_chicken_manure_function" v="Szerves műtrágya (száraz)" eh="374c7b1e" />
     <e k="sf_bigBag_pelletized_manure_name" v="Big Bag Pelletált trágya" eh="064be7fa" />
+    <e k="sf_bigBag_pelletized_manure_10k_name" v="[EN] Big Bag Pelletized Manure (10,000L)" />
     <e k="sf_bigBag_pelletized_manure_function" v="Szerves műtrágya (száraz)" eh="374c7b1e" />
     <e k="sf_bigBag_liquidlime_name" v="Folyékony mész tartály" eh="4f8caca1" />
     <e k="sf_bigBag_liquidlime_function" v="pH növelő szer (folyékony)" eh="7a118b6d" />

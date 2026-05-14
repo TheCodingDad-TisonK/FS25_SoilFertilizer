@@ -187,10 +187,13 @@
     <e k="sf_bigBag_compost_name" v="ビッグバッグ 堆肥" eh="14322c5d" />
     <e k="sf_bigBag_compost_function" v="有機土壌改良材（乾燥）" eh="9dd2256a" />
     <e k="sf_bigBag_biosolids_name" v="ビッグバッグ バイオソリッド" eh="61a60ff3" />
+    <e k="sf_bigBag_biosolids_10k_name" v="[EN] Big Bag Biosolids (10,000L)" />
     <e k="sf_bigBag_biosolids_function" v="有機肥料（乾燥）" eh="374c7b1e" />
     <e k="sf_bigBag_chicken_manure_name" v="ビッグバッグ 鶏糞" eh="cb60fddc" />
+    <e k="sf_bigBag_chicken_manure_10k_name" v="[EN] Big Bag Chicken Manure (10,000L)" />
     <e k="sf_bigBag_chicken_manure_function" v="有機肥料（乾燥）" eh="374c7b1e" />
     <e k="sf_bigBag_pelletized_manure_name" v="ビッグバッグ ペレット堆肥" eh="064be7fa" />
+    <e k="sf_bigBag_pelletized_manure_10k_name" v="[EN] Big Bag Pelletized Manure (10,000L)" />
     <e k="sf_bigBag_pelletized_manure_function" v="有機肥料（乾燥）" eh="374c7b1e" />
     <e k="sf_bigBag_liquidlime_name" v="液体石灰タンク" eh="4f8caca1" />
     <e k="sf_bigBag_liquidlime_function" v="pH上昇剤（液体）" eh="7a118b6d" />

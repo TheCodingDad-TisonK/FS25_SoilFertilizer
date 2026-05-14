@@ -187,10 +187,13 @@
     <e k="sf_bigBag_compost_name" v="빅백 퇴비" eh="14322c5d" />
     <e k="sf_bigBag_compost_function" v="유기질 토양 개량제 (고체)" eh="9dd2256a" />
     <e k="sf_bigBag_biosolids_name" v="빅백 바이오솔리드" eh="61a60ff3" />
+    <e k="sf_bigBag_biosolids_10k_name" v="[EN] Big Bag Biosolids (10,000L)" />
     <e k="sf_bigBag_biosolids_function" v="유기질 비료 (고체)" eh="374c7b1e" />
     <e k="sf_bigBag_chicken_manure_name" v="빅백 계분" eh="cb60fddc" />
+    <e k="sf_bigBag_chicken_manure_10k_name" v="[EN] Big Bag Chicken Manure (10,000L)" />
     <e k="sf_bigBag_chicken_manure_function" v="유기질 비료 (고체)" eh="374c7b1e" />
     <e k="sf_bigBag_pelletized_manure_name" v="빅백 펠렛 퇴비" eh="064be7fa" />
+    <e k="sf_bigBag_pelletized_manure_10k_name" v="[EN] Big Bag Pelletized Manure (10,000L)" />
     <e k="sf_bigBag_pelletized_manure_function" v="유기질 비료 (고체)" eh="374c7b1e" />
     <e k="sf_bigBag_liquidlime_name" v="액상 석회 탱크" eh="4f8caca1" />
     <e k="sf_bigBag_liquidlime_function" v="pH 조절제 (액체)" eh="7a118b6d" />

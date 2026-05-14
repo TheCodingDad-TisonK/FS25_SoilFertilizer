@@ -187,10 +187,13 @@
     <e k="sf_bigBag_compost_name" v="Big Bag Composto" eh="14322c5d" />
     <e k="sf_bigBag_compost_function" v="Corretivo de Solo Orgânico (seco)" eh="9dd2256a" />
     <e k="sf_bigBag_biosolids_name" v="Big Bag Biossólidos" eh="61a60ff3" />
+    <e k="sf_bigBag_biosolids_10k_name" v="[EN] Big Bag Biosolids (10,000L)" />
     <e k="sf_bigBag_biosolids_function" v="Fertilizante Orgânico (seco)" eh="374c7b1e" />
     <e k="sf_bigBag_chicken_manure_name" v="Big Bag Esterco de Galinha" eh="cb60fddc" />
+    <e k="sf_bigBag_chicken_manure_10k_name" v="[EN] Big Bag Chicken Manure (10,000L)" />
     <e k="sf_bigBag_chicken_manure_function" v="Fertilizante Orgânico (seco)" eh="374c7b1e" />
     <e k="sf_bigBag_pelletized_manure_name" v="Big Bag Esterco Peletizado" eh="064be7fa" />
+    <e k="sf_bigBag_pelletized_manure_10k_name" v="[EN] Big Bag Pelletized Manure (10,000L)" />
     <e k="sf_bigBag_pelletized_manure_function" v="Fertilizante Orgânico (seco)" eh="374c7b1e" />
     <e k="sf_bigBag_liquidlime_name" v="Tanque de Calcário Líquido" eh="4f8caca1" />
     <e k="sf_bigBag_liquidlime_function" v="Agente de Aumento de pH (líquido)" eh="7a118b6d" />

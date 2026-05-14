@@ -187,10 +187,13 @@
     <e k="sf_bigBag_compost_name" v="Big Bag Compost" eh="14322c5d" />
     <e k="sf_bigBag_compost_function" v="Esmena orgànica del sòl (seca)" eh="9dd2256a" />
     <e k="sf_bigBag_biosolids_name" v="Big Bag Biosòlids" eh="61a60ff3" />
+    <e k="sf_bigBag_biosolids_10k_name" v="[EN] Big Bag Biosolids (10,000L)" />
     <e k="sf_bigBag_biosolids_function" v="Fertilitzant orgànic (sec)" eh="374c7b1e" />
     <e k="sf_bigBag_chicken_manure_name" v="Big Bag Fems de gallina" eh="cb60fddc" />
+    <e k="sf_bigBag_chicken_manure_10k_name" v="[EN] Big Bag Chicken Manure (10,000L)" />
     <e k="sf_bigBag_chicken_manure_function" v="Fertilitzant orgànic (sec)" eh="374c7b1e" />
     <e k="sf_bigBag_pelletized_manure_name" v="Big Bag Fems granulat" eh="064be7fa" />
+    <e k="sf_bigBag_pelletized_manure_10k_name" v="[EN] Big Bag Pelletized Manure (10,000L)" />
     <e k="sf_bigBag_pelletized_manure_function" v="Fertilitzant orgànic (sec)" eh="374c7b1e" />
     <e k="sf_bigBag_liquidlime_name" v="Dipòsit de calç líquida" eh="4f8caca1" />
     <e k="sf_bigBag_liquidlime_function" v="Agent per elevar el pH (líquid)" eh="7a118b6d" />

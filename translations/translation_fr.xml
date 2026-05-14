@@ -187,10 +187,13 @@
     <e k="sf_bigBag_compost_name" v="Big Bag Compost" eh="14322c5d" />
     <e k="sf_bigBag_compost_function" v="Amendement organique du sol (sec)" eh="9dd2256a" />
     <e k="sf_bigBag_biosolids_name" v="Big Bag Biosolides" eh="61a60ff3" />
+    <e k="sf_bigBag_biosolids_10k_name" v="[EN] Big Bag Biosolids (10,000L)" />
     <e k="sf_bigBag_biosolids_function" v="Engrais organique (sec)" eh="374c7b1e" />
     <e k="sf_bigBag_chicken_manure_name" v="Big Bag Fumier de poulet" eh="cb60fddc" />
+    <e k="sf_bigBag_chicken_manure_10k_name" v="[EN] Big Bag Chicken Manure (10,000L)" />
     <e k="sf_bigBag_chicken_manure_function" v="Engrais organique (sec)" eh="374c7b1e" />
     <e k="sf_bigBag_pelletized_manure_name" v="Big Bag Fumier pelletisé" eh="064be7fa" />
+    <e k="sf_bigBag_pelletized_manure_10k_name" v="[EN] Big Bag Pelletized Manure (10,000L)" />
     <e k="sf_bigBag_pelletized_manure_function" v="Engrais organique (sec)" eh="374c7b1e" />
     <e k="sf_bigBag_liquidlime_name" v="Cuve de chaux liquide" eh="4f8caca1" />
     <e k="sf_bigBag_liquidlime_function" v="Agent d'augmentation du pH (liquide)" eh="7a118b6d" />

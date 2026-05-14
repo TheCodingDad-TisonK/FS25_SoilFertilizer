@@ -187,10 +187,13 @@
     <e k="sf_bigBag_compost_name" v="Big Bag Compost" eh="14322c5d" />
     <e k="sf_bigBag_compost_function" v="Organische bodemverbeteraar (droog)" eh="9dd2256a" />
     <e k="sf_bigBag_biosolids_name" v="Big Bag Biogrondstoffen" eh="61a60ff3" />
+    <e k="sf_bigBag_biosolids_10k_name" v="[EN] Big Bag Biosolids (10,000L)" />
     <e k="sf_bigBag_biosolids_function" v="Organische meststof (droog)" eh="374c7b1e" />
     <e k="sf_bigBag_chicken_manure_name" v="Big Bag Kippenmest" eh="cb60fddc" />
+    <e k="sf_bigBag_chicken_manure_10k_name" v="[EN] Big Bag Chicken Manure (10,000L)" />
     <e k="sf_bigBag_chicken_manure_function" v="Organische meststof (droog)" eh="374c7b1e" />
     <e k="sf_bigBag_pelletized_manure_name" v="Big Bag Gekorrelde mest" eh="064be7fa" />
+    <e k="sf_bigBag_pelletized_manure_10k_name" v="[EN] Big Bag Pelletized Manure (10,000L)" />
     <e k="sf_bigBag_pelletized_manure_function" v="Organische meststof (droog)" eh="374c7b1e" />
     <e k="sf_bigBag_liquidlime_name" v="Vloeibare kalktank" eh="4f8caca1" />
     <e k="sf_bigBag_liquidlime_function" v="pH-verhogend middel (vloeibaar)" eh="7a118b6d" />

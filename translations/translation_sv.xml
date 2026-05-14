@@ -187,10 +187,13 @@
     <e k="sf_bigBag_compost_name" v="Storsäck Kompost" eh="14322c5d" />
     <e k="sf_bigBag_compost_function" v="Organiskt jordförbättringsmedel (torrt)" eh="9dd2256a" />
     <e k="sf_bigBag_biosolids_name" v="Storsäck Rötslam" eh="61a60ff3" />
+    <e k="sf_bigBag_biosolids_10k_name" v="[EN] Big Bag Biosolids (10,000L)" />
     <e k="sf_bigBag_biosolids_function" v="Organiskt gödselmedel (torrt)" eh="374c7b1e" />
     <e k="sf_bigBag_chicken_manure_name" v="Storsäck Hönsgödsel" eh="cb60fddc" />
+    <e k="sf_bigBag_chicken_manure_10k_name" v="[EN] Big Bag Chicken Manure (10,000L)" />
     <e k="sf_bigBag_chicken_manure_function" v="Organiskt gödselmedel (torrt)" eh="374c7b1e" />
     <e k="sf_bigBag_pelletized_manure_name" v="Storsäck Pelleterat gödsel" eh="064be7fa" />
+    <e k="sf_bigBag_pelletized_manure_10k_name" v="[EN] Big Bag Pelletized Manure (10,000L)" />
     <e k="sf_bigBag_pelletized_manure_function" v="Organiskt gödselmedel (torrt)" eh="374c7b1e" />
     <e k="sf_bigBag_liquidlime_name" v="Flytande kalktank" eh="4f8caca1" />
     <e k="sf_bigBag_liquidlime_function" v="pH-höjande medel (flytande)" eh="7a118b6d" />
