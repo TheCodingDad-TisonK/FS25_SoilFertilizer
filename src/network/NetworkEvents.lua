@@ -1133,8 +1133,8 @@ function SoilSprayerRateEvent:readStream(streamId, connection)
 end
 
 function SoilSprayerRateEvent:writeStream(streamId, connection)
-    streamWriteInt32(streamId, self.vehicleNetId)
-    streamWriteUInt8(streamId, self.rateIndex)
+    streamWriteInt32(streamId, self.vehicleNetId or 0)
+    streamWriteUInt8(streamId, self.rateIndex or 1)
 end
 
 function SoilSprayerRateEvent:run(connection)
@@ -1202,8 +1202,8 @@ function SoilSprayerAutoModeEvent:readStream(streamId, connection)
 end
 
 function SoilSprayerAutoModeEvent:writeStream(streamId, connection)
-    streamWriteInt32(streamId, self.vehicleNetId)
-    streamWriteBool(streamId, self.enabled)
+    streamWriteInt32(streamId, self.vehicleNetId or 0)
+    streamWriteBool(streamId, self.enabled == true)
 end
 
 function SoilSprayerAutoModeEvent:run(connection)

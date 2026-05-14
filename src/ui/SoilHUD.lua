@@ -519,6 +519,8 @@ function SoilHUD:updateFieldInfoBox()
     local box = self.fieldInfoBox
     if not box then return end
 
+    if self.settings and self.settings.showFieldInfoBox == false then return end
+
     -- Only show the native FIELD INFO style box when actually on a field.
     -- This prevents it from showing up on roads, grass, or yards (Tier 2 farmland fallback).
     if not self.isOnField then return end

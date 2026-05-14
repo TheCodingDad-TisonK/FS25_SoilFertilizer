@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.1.6.7] - 2026-05-14
+
+### Fixed
+- **Dedicated server ping spike during cultivating/plowing/mowing/seeding** (Issue [#370](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/370)) — tillage operations (`onCultivation`, `onPlowing`, `onStripTill`, `onMow`, `onSowing`) broadcast a `SoilFieldUpdateEvent` every game tick while the implement was active, with no rate limiting. On a dedicated server, cultivating a large field generated thousands of network events per minute, causing significant ping spikes. Throttled to a maximum of one broadcast per 5 seconds per field (same throttle already used for fertilizer application).
+- **Liquid Fertilizer spraying `StreamWriteInt32: nil` crash** (Issue [#371](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/371)) — `SoilSprayerRateEvent:writeStream` and `SoilSprayerAutoModeEvent:writeStream` wrote `self.vehicleNetId` directly without nil protection. Added `or 0` / `or 1` fallbacks as defense-in-depth; the receiver gracefully drops the event when vehicleNetId 0 resolves to no object.
+- **Dedicated server crash during sprayer rate sync** — `SoilSprayerRateEvent` and `SoilSprayerAutoModeEvent` were passing an i3d node handle (local integer) to `NetworkUtil.getObjectId` in `writeStream`, which always returned nil, causing a `streamWriteInt32: Argument 1 has wrong type. Expected: Int. Actual: Nil` crash. Fired every ~5 seconds during auto-rate updates, or on manual rate up/down input in multiplayer.
+- **Dedicated server crash with dry fertilizer spreaders (urea)** — wide-boom passes generated thousands of zone cells via `markBoomCells`, overflowing the FS25 network packet size limit. Per-field update events now send 0 zone cells (clients reconstruct from field aggregate); join sync capped at 500 cells; field-level zone data capped at 1000 cells.
+- **Soil map tiles not updating** after fertilizer application on dedicated server clients.
+
+### Added
+- **Colorblind Mode** — toggle in Display > Visibility settings. Replaces red/green status palette with orange/blue (Okabe-Ito) palette safe for deuteranopia and protanopia. Applies across soil map overlay, legend, HUD bars, cell tooltips, and all dialogs. Per-player setting.
+- **Field Info Box toggle** — toggle in Display > Visibility settings. Show or hide the native FS25 Field Info panel soil nutrients block when standing on a field. Per-player setting, on by default.
+
+---
+
 ## [2.1.5.7] - 2026-05-11
 
 ### Translation Update
