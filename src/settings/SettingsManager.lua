@@ -75,17 +75,29 @@ end
 
 -- ── Local-only settings (per-player, not server-shared) ──────
 -- Saved to the user profile directory so they survive reconnects on dedi servers.
+-- Folder layout: modSettings/FS25_SoilFertilizer/{Settings,HUD,Debug}/
 
-function SettingsManager:getLocalSettingsPath()
+function SettingsManager.getModProfileDir()
     local ok, profilePath = pcall(getUserProfileAppPath)
     if ok and profilePath and profilePath ~= "" then
-        -- Ensure trailing separator (some dedicated server builds omit it)
         if profilePath:sub(-1) ~= "/" and profilePath:sub(-1) ~= "\\" then
             profilePath = profilePath .. "/"
         end
-        local dir = profilePath .. "modSettings"
-        createFolder(dir)
-        return dir .. "/" .. SettingsManager.MOD_NAME .. "_local.xml"
+        local base = profilePath .. "modSettings/" .. SettingsManager.MOD_NAME
+        createFolder(profilePath .. "modSettings")
+        createFolder(base)
+        createFolder(base .. "/Settings")
+        createFolder(base .. "/HUD")
+        createFolder(base .. "/Debug")
+        return base
+    end
+    return nil
+end
+
+function SettingsManager:getLocalSettingsPath()
+    local base = SettingsManager.getModProfileDir()
+    if base then
+        return base .. "/Settings/local.xml"
     end
     -- Fallback: savegame dir with _local suffix (singleplayer / self-hosted)
     local xmlPath = self:getSavegameXmlFilePath()

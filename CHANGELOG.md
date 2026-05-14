@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.1.6.9] - 2026-05-14
+
+### Fixed
+- **HUD layout file moved to `modSettings/` (was savegame directory)** (Issue [#375](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/375)) — `_hud.xml` was written to the savegame directory, which is inaccessible to clients on dedicated servers and resolves to a non-existent `Savegame0` path before the first save. Now written to `modSettings/FS25_SoilFertilizer/HUD/hud.xml` (per-player, always writable).
+- **HUD visibility toggle now saves immediately** — Pressing J to show/hide the HUD only persisted on game close; if the save failed (e.g., dedicated server), the state was lost. Now saved immediately on toggle.
+- **`modSettings` folder name corrected** (was `modsSettings`) — Both `SettingsManager` and `SoilHUD` were writing to the wrong directory name, meaning per-player settings and HUD layout were never landing in the correct FS25 folder.
+
+### Changed
+- **`modSettings/` folder structure reorganized** — Files now grouped under `modSettings/FS25_SoilFertilizer/{Settings,HUD,Debug}/` for a cleaner per-mod layout.
+
+### Added
+- **Debug output files** — When debug mode is active, three files are written to `modSettings/FS25_SoilFertilizer/Debug/`:
+  - `debug.xml` — buffered `SoilLogger.debug()` messages (flushed when debug mode is toggled off or the game session ends)
+  - `field_dump.xml` — full nutrient snapshot for a single field (written each time `SoilFieldInfo <id>` is run)
+  - `soil_export.xml` — snapshot of all tracked field data (written each time `SoilSaveData` is run)
+
+---
+
 ## [2.1.6.8] - 2026-05-14
 
 ### Fixed
