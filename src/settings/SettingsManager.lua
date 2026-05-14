@@ -108,7 +108,16 @@ function SettingsManager:saveLocalSettings(settingsObject)
             if def.type == "boolean" then
                 xml:setBool(xmlKey, settingsObject[def.id])
             elseif def.type == "number" then
-                xml:setInt(xmlKey, settingsObject[def.id])
+                -- Use setFloat for settings that carry fractional values (position, scale).
+                -- A setting is treated as float when its default or bounds are non-integer.
+                local isFloat = (def.default ~= math.floor(def.default))
+                    or (def.min  and def.min  ~= math.floor(def.min))
+                    or (def.max  and def.max  ~= math.floor(def.max))
+                if isFloat then
+                    xml:setFloat(xmlKey, settingsObject[def.id])
+                else
+                    xml:setInt(xmlKey, settingsObject[def.id])
+                end
             end
         end
     end
@@ -132,7 +141,14 @@ function SettingsManager:loadLocalSettings(settingsObject)
             if def.type == "boolean" then
                 settingsObject[def.id] = xml:getBool(xmlKey, settingsObject[def.id])
             elseif def.type == "number" then
-                settingsObject[def.id] = xml:getInt(xmlKey, settingsObject[def.id])
+                local isFloat = (def.default ~= math.floor(def.default))
+                    or (def.min  and def.min  ~= math.floor(def.min))
+                    or (def.max  and def.max  ~= math.floor(def.max))
+                if isFloat then
+                    settingsObject[def.id] = xml:getFloat(xmlKey, settingsObject[def.id])
+                else
+                    settingsObject[def.id] = xml:getInt(xmlKey, settingsObject[def.id])
+                end
             end
         end
     end

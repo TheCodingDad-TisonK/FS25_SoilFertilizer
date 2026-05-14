@@ -233,11 +233,8 @@ function SoilHUD:saveLayout()
         xml:setFloat("hudLayout.panelY",  self.panelY)
         xml:setFloat("hudLayout.scale",   self.scale)
         xml:setBool("hudLayout.visible",  self.visible)
-
-        xml:setFloat("hudLayout.miniReportX",     self.settings.miniReportX or 0.40)
-        xml:setFloat("hudLayout.miniReportY",     self.settings.miniReportY or 0.015)
-        xml:setFloat("hudLayout.miniReportScale", self.settings.miniReportScale or 1.0)
-
+        -- miniReportX / miniReportY / miniReportScale are persisted exclusively
+        -- through SettingsManager:saveLocalSettings so they are not duplicated here.
         xml:save()
         xml:delete()
     end
@@ -252,11 +249,7 @@ function SoilHUD:loadLayout()
         self.panelY  = xml:getFloat("hudLayout.panelY",  self.panelY)
         self.scale   = xml:getFloat("hudLayout.scale",   self.scale)
         self.visible = xml:getBool("hudLayout.visible",  self.visible)
-
-        self.settings.miniReportX     = xml:getFloat("hudLayout.miniReportX",     self.settings.miniReportX)
-        self.settings.miniReportY     = xml:getFloat("hudLayout.miniReportY",     self.settings.miniReportY)
-        self.settings.miniReportScale = xml:getFloat("hudLayout.miniReportScale", self.settings.miniReportScale)
-
+        -- miniReport position/scale come from SettingsManager:loadLocalSettings, not here.
         xml:delete()
         SoilLogger.info("[SoilHUD] Layout loaded: pos=(%.3f,%.3f) scale=%.2f", self.panelX, self.panelY, self.scale)
     end
