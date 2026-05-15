@@ -1078,7 +1078,7 @@ function HookManager:installYieldModifierHook()
                     local yieldModifier = g_SoilFertilityManager.soilSystem:computeYieldModifier(fieldId, fruitType)
                     if yieldModifier ~= 1.0 then
                         modifiedDelta = fillLevelDelta * yieldModifier
-                        SoilLogger.debug("Yield modifier hook: Field %d Fruit %d modifier=%.3f (%.1fL â %.1fL)",
+                        SoilLogger.debug("Yield modifier hook: Field %d Fruit %d modifier=%.3f (%.1fL -- %.1fL)",
                             fieldId, fruitType, yieldModifier, fillLevelDelta, modifiedDelta)
                     end
                 end)
