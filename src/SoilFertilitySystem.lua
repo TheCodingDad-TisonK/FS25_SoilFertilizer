@@ -1998,6 +1998,7 @@ function SoilFertilitySystem:updateFieldNutrients(fieldId, fruitTypeIndex, harve
         if not g_currentMission or type(g_currentMission.getFruitPixelsToSqm) ~= "function" then return end
         areaHa = MathUtil.areaToHa(area, g_currentMission:getFruitPixelsToSqm())
         factor = (areaHa / fieldAreaHa) * SoilConstants.HARVEST_HA_FACTOR
+        SoilLogger.debug("Harvest factor: area=%.0fpx areaHa=%.6f fieldHa=%.2f factor=%.6f", area, areaHa, fieldAreaHa, factor)
     else
         return
     end
@@ -2063,7 +2064,7 @@ function SoilFertilitySystem:updateFieldNutrients(fieldId, fruitTypeIndex, harve
     field.lastHarvest = (g_currentMission and g_currentMission.environment and g_currentMission.environment.currentDay) or 0
 
     self:log(
-        "Harvest depletion field %d (%s): -N %.1f -P %.1f -K %.1f",
+        "Harvest depletion field %d (%s): -N %.5f -P %.5f -K %.5f",
         fieldId, fruitDesc.name,
         rates.N * factor,
         rates.P * factor,
