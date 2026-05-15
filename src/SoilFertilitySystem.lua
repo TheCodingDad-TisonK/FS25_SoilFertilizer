@@ -1958,9 +1958,8 @@ end
 ---@param fruitTypeIndex number FS25 fruit type index
 ---@param harvestedLiters number Amount harvested in liters
 ---@param strawRatio number 0.0-1.0 fraction of straw chopped back into the field (adds organic matter)
----@param area number Area harvested in m² (unused; reserved for future area-normalised depletion)
+---@param area number Area harvested in pixels (used for swath-mode estimation when liters=0)
 function SoilFertilitySystem:updateFieldNutrients(fieldId, fruitTypeIndex, harvestedLiters, strawRatio, area)
-    _ = area -- luacheck: ignore area
     if not self.settings.enabled or not self.settings.nutrientCycles then return end
 
     local field = self:getOrCreateField(fieldId, true)
@@ -1998,9 +1997,26 @@ function SoilFertilitySystem:updateFieldNutrients(fieldId, fruitTypeIndex, harve
     -- it to zero in one harvest pass. Dividing by fieldAreaHa makes depletion
     -- field-size independent: the same yield density (L/ha) always removes the
     -- same number of nutrient points regardless of field size.
-    -- Formula: factor = (harvestedLiters / 1000) / fieldAreaHa
+    --
+    -- SWATH MODE (isSwathActive=true): liters=0 because grain is deposited on the ground
+    -- rather than collected. The soil still lost nutrients growing the crop, so we estimate
+    -- biological liters from the cut area using a conservative yield density (0.6 L/m²).
+    -- Formula (normal): factor = (harvestedLiters / 1000) / fieldAreaHa
+    -- Formula (swath):  factor = (area × pixToSqm × 0.6 / 1000) / fieldAreaHa
     local fieldAreaHa = (field.fieldArea and field.fieldArea > 0) and field.fieldArea or 1.0
-    local factor = (harvestedLiters / 1000) / fieldAreaHa
+    local factor
+    if harvestedLiters and harvestedLiters > 0 then
+        factor = (harvestedLiters / 1000) / fieldAreaHa
+    elseif area and area > 0 then
+        -- Swath/windrow mode: estimate factor from cut area.
+        -- 0.6 L/m² × 10000 m²/ha / 1000 = 6.0 factor-units per ha harvested.
+        if not g_currentMission or type(g_currentMission.getFruitPixelsToSqm) ~= "function" then return end
+        local areaHa = MathUtil.areaToHa(area, g_currentMission:getFruitPixelsToSqm())
+        factor = (areaHa * 6.0) / fieldAreaHa
+        SoilLogger.debug("Harvest swath mode field %d: area=%.1fpx areaHa=%.5f factor=%.6f", fieldId, area, areaHa, factor)
+    else
+        return
+    end
 
     -- Step 2: Apply difficulty multiplier
     -- Simple (0.7x): 30% less depletion, easier for new players

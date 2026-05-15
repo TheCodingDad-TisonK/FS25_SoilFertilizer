@@ -251,7 +251,7 @@ SoilConstants.CROP_EXTRACTION = {
     sunflower  = { N=2.50, P=1.10, K=2.30 },  -- Moderate-high demand
     potato     = { N=3.80, P=1.70, K=5.40 },  -- Very high K demand (tuber crop)
     sugarbeet  = { N=3.30, P=1.50, K=5.80 },  -- Extreme K demand (root crop)
-    oats       = { N=1.80, P=0.90, K=1.60 },  -- Light feeder
+    oat        = { N=1.80, P=0.90, K=1.60 },  -- Light feeder
     rye        = { N=2.00, P=0.80, K=1.80 },  -- Moderate demand
     triticale  = { N=2.10, P=1.00, K=1.90 },  -- Hybrid characteristics
     sorghum    = { N=2.30, P=0.90, K=1.80 },  -- Efficient nutrient user

@@ -919,13 +919,17 @@ function HookManager:installHarvestHook()
             -- Yield modifier is NO LONGER applied here — see installYieldModifierHook.
             local detectedFieldId = nil
 
+            -- NOTE: liters=0 is normal in swath/windrow mode (isSwathActive=true on the combine).
+            -- The crop is deposited on the ground rather than collected in the hopper.
+            -- We still deplete nutrients (the soil grew the biomass regardless of collection method);
+            -- updateFieldNutrients handles the liters=0 case via area-based estimation.
             if combineSelf.isServer
                 and g_SoilFertilityManager
                 and g_SoilFertilityManager.soilSystem
                 and g_SoilFertilityManager.settings.enabled
                 and g_SoilFertilityManager.settings.nutrientCycles
                 and inputFruitType and inputFruitType > 0
-                and liters and liters > 0
+                and area and area > 0
             then
                 local ok, errMsg = pcall(function()
                     local x, _, z = getWorldTranslation(combineSelf.rootNode)
