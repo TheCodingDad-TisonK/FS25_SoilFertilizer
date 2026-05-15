@@ -288,7 +288,7 @@ SoilConstants.FERTILIZER_PROFILES = {
     FERTILIZER        = { N=41.1, P=164.6, K=24.7 },          -- 225 kg/ha: ~25N, ~20P, ~20K ppm
     MANURE            = { N=0.53, P=0.25,  K=0.45, OM=0.04 }, -- 14000 L/ha: ~7N, ~3.5P, ~6K pts/pass (UNL beef N:P:K ratio)
     LIQUIDMANURE      = { N=0.50, P=0.35,  K=0.65, OM=0.03 }, -- Slurry — dairy N:P:K 1:0.70:1.33 (UNL g1335)
-    DIGESTATE         = { N=0.65, P=0.40,  K=0.85, OM=0.04 }, -- Digestate — higher N availability vs raw manure
+    DIGESTATE         = { N=1.32, P=0.80,  K=0.80, OM=0.04 }, -- Digestate — 12,600 L/ha → ~50N/6P/40K ppm per pass (calibrated with real farmer input)
     LIME              = { pH=0.16 },                          -- 2500 kg/ha: +0.40 pH shift per pass (~3 passes to correct pH 5.5→6.5)
     LIQUIDLIME        = { pH=1.07 },                          -- 374  L/ha: +0.40 pH shift per pass (rate corrected from 2800→374 L/ha)
 

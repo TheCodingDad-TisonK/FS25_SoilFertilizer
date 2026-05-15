@@ -292,6 +292,14 @@ function SoilFertilitySystem:onHarvest(fieldId, fruitTypeIndex, liters, strawRat
     -- nutrients regardless of the yield modifier applied in the combine hook.
     self:updateFieldNutrients(fieldId, fruitTypeIndex, liters, strawRatio, area)
 
+    -- Reset session spray coverage so the next fertilizing pass starts fresh
+    local harvestField = self.fieldData[fieldId]
+    if harvestField then
+        harvestField.sessionCoverageHa       = 0
+        harvestField.sessionCoverageFraction = 0
+        harvestField.sessionLastProduct      = nil
+    end
+
     SoilLogger.debug("Harvest: Field %d, Crop %d, %.0fL (biological), area=%.1f", fieldId, fruitTypeIndex, liters, area or 0)
 
     -- Broadcast to clients if server in multiplayer
@@ -1549,6 +1557,9 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing, area)
         totalFieldCells = 0,  -- Legacy: kept for daily reset compat
         coveredAreaHa = 0,    -- Hectares covered today (area-based tracker, reset daily)
         coverageFraction = 0, -- Fraction of field covered today (0.0–1.0)
+        sessionCoverageHa = 0,       -- Hectares covered this game session (resets on harvest, not daily)
+        sessionCoverageFraction = 0, -- Derived 0.0–1.0 fraction for current-pass HUD display
+        sessionLastProduct = nil,    -- Fill type name of last product applied this session
         compaction = 0,            -- field-average compaction 0–100 (derived from cells)
         compactionCells = {},      -- {cellKey → 0-100} per-cell compaction (10×10 m grid)
         compactionCellDays = {},   -- {cellKey → day} per-cell once-per-day throttle (transient)
@@ -2163,7 +2174,7 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
         if entry.P then field.phosphorus = math.min(limits.MAX, field.phosphorus + entry.P * factor) end
         if entry.K then field.potassium  = math.min(limits.MAX, field.potassium  + entry.K * factor) end
         if entry.pH then field.pH        = math.max(limits.PH_MIN, math.min(limits.PH_MAX, field.pH + entry.pH * factor)) end
-        if entry.OM then field.organicMatter = math.min(limits.ORGANIC_MATTER_MAX, field.organicMatter + entry.OM * factor) end
+        if entry.OM then field.organicMatter = math.max(0, math.min(limits.ORGANIC_MATTER_MAX, field.organicMatter + entry.OM * factor)) end
 
         -- Sync all existing zone cells to the updated field values so cells stamped
         -- by previous tillage operations reflect the fertilizer that was just applied.
@@ -2263,7 +2274,7 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
             if entry.P  then cell.P  = math.min(limits.MAX,                     cell.P  + entry.P  * cellFactor) end
             if entry.K  then cell.K  = math.min(limits.MAX,                     cell.K  + entry.K  * cellFactor) end
             if entry.pH then cell.pH = math.max(limits.PH_MIN, math.min(limits.PH_MAX, cell.pH + entry.pH * cellFactor)) end
-            if entry.OM then cell.OM = math.min(limits.ORGANIC_MATTER_MAX,      cell.OM + entry.OM * cellFactor) end
+            if entry.OM then cell.OM = math.max(0, math.min(limits.ORGANIC_MATTER_MAX, cell.OM + entry.OM * cellFactor)) end
 
             -- Also update pressure in cell if entry has reductions (direct path fallback)
             if entry.pestReduction    then cell.pestPressure    = math.max(0, (cell.pestPressure or field.pestPressure or 0) - entry.pestReduction * cellFactor) end
@@ -2436,6 +2447,11 @@ function SoilFertilitySystem:trackSprayerCoverage(fieldId, liters, fillTypeName)
 
     local prevCoverage = field.coverageFraction or 0
     field.coverageFraction = math.min(1.0, field.coveredAreaHa / areaInHa)
+
+    -- Session accumulator: persists across daily resets, clears only on harvest
+    field.sessionCoverageHa       = math.min(areaInHa, (field.sessionCoverageHa or 0) + areaThisTick)
+    field.sessionCoverageFraction = math.min(1.0, field.sessionCoverageHa / areaInHa)
+    if fillTypeName then field.sessionLastProduct = fillTypeName end
 
     local milestones = { 0.10, 0.25, 0.50, 0.75, 1.0 }
     for _, m in ipairs(milestones) do
@@ -2814,8 +2830,10 @@ function SoilFertilitySystem:getFieldInfo(fieldId, x, z)
         diseasePressure = field.diseasePressure or 0,
         fungicideActive = (field.fungicideDaysLeft or 0) > 0,
         burnDaysLeft = field.burnDaysLeft or 0,
-        nutrientBuffer   = field.nutrientBuffer or {},
-        coverageFraction = field.coverageFraction or 0,
+        nutrientBuffer          = field.nutrientBuffer or {},
+        coverageFraction        = field.coverageFraction or 0,
+        sessionCoverageFraction = field.sessionCoverageFraction or 0,
+        sessionLastProduct      = field.sessionLastProduct,
         compaction = field.compaction or 0,
         needsFertilization = (
             field.nitrogen < fertThresholds.nitrogen or
@@ -2971,11 +2989,11 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
 
         self.fieldData[fieldId] = {
             fieldArea = getXMLFloat(xmlFile, fieldKey .. "#fieldArea") or 1.0,
-            nitrogen = getXMLFloat(xmlFile, fieldKey .. "#nitrogen") or defaults.nitrogen,
-            phosphorus = getXMLFloat(xmlFile, fieldKey .. "#phosphorus") or defaults.phosphorus,
-            potassium = getXMLFloat(xmlFile, fieldKey .. "#potassium") or defaults.potassium,
-            organicMatter = getXMLFloat(xmlFile, fieldKey .. "#organicMatter") or defaults.organicMatter,
-            pH = getXMLFloat(xmlFile, fieldKey .. "#pH") or defaults.pH,
+            nitrogen = math.max(0, math.min(100, getXMLFloat(xmlFile, fieldKey .. "#nitrogen") or defaults.nitrogen)),
+            phosphorus = math.max(0, math.min(100, getXMLFloat(xmlFile, fieldKey .. "#phosphorus") or defaults.phosphorus)),
+            potassium = math.max(0, math.min(100, getXMLFloat(xmlFile, fieldKey .. "#potassium") or defaults.potassium)),
+            organicMatter = math.max(0, math.min(10, getXMLFloat(xmlFile, fieldKey .. "#organicMatter") or defaults.organicMatter)),
+            pH = math.max(5.0, math.min(8.5, getXMLFloat(xmlFile, fieldKey .. "#pH") or defaults.pH)),
             lastCrop = getXMLString(xmlFile, fieldKey .. "#lastCrop"),
             lastCrop2 = getXMLString(xmlFile, fieldKey .. "#lastCrop2"),
             lastCrop3 = getXMLString(xmlFile, fieldKey .. "#lastCrop3"),

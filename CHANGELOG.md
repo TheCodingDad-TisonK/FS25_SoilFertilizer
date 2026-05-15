@@ -7,12 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.1.6.9] - 2026-05-14
+## [2.1.6.9] - 2026-05-15
 
 ### Fixed
 - **HUD layout file moved to `modSettings/` (was savegame directory)** (Issue [#375](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/375)) — `_hud.xml` was written to the savegame directory, which is inaccessible to clients on dedicated servers and resolves to a non-existent `Savegame0` path before the first save. Now written to `modSettings/FS25_SoilFertilizer/HUD/hud.xml` (per-player, always writable).
 - **HUD visibility toggle now saves immediately** — Pressing J to show/hide the HUD only persisted on game close; if the save failed (e.g., dedicated server), the state was lost. Now saved immediately on toggle.
 - **`modSettings` folder name corrected** (was `modsSettings`) — Both `SettingsManager` and `SoilHUD` were writing to the wrong directory name, meaning per-player settings and HUD layout were never landing in the correct FS25 folder.
+- **Organic Matter clamped to [0, 10] on all write paths** (Issue [#378](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/378)) — Corrupted `soilData.xml` entries (e.g. from a conflicting mod) could store negative `organicMatter` values that were loaded without validation and displayed as negative percentages in the HUD. Three paths lacked a floor clamp: `loadFromXMLFile`, `applyFertilizer` (field level and zone cells), and zone cell deserialization in both network sync events. All OM writes now enforce `math.max(0, …)`. N/P/K XML load also gains explicit bounds to match the network validation already in place.
 
 ### Changed
 - **`modSettings/` folder structure reorganized** — Files now grouped under `modSettings/FS25_SoilFertilizer/{Settings,HUD,Debug}/` for a cleaner per-mod layout.
@@ -22,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `debug.xml` — buffered `SoilLogger.debug()` messages (flushed when debug mode is toggled off or the game session ends)
   - `field_dump.xml` — full nutrient snapshot for a single field (written each time `SoilFieldInfo <id>` is run)
   - `soil_export.xml` — snapshot of all tracked field data (written each time `SoilSaveData` is run)
+- **Current-pass coverage tracker** — The HUD now shows spray-pass progress as `"Pass: 45% (Digestate)"` regardless of the native FS25 fertilizer density-map state. Farmers working a field already at 100% vanilla fertilizer state could no longer see which strips they had covered (soil doesn't darken further); the new tracker accumulates coverage area independently and displays the localized product name alongside the percentage. Turns green at the ≥70% full-coverage threshold. Resets on harvest; survives game-day rollovers mid-pass.
 
 ---
 

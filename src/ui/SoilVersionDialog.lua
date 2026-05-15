@@ -28,6 +28,8 @@ SoilVersionDialog.CHANGELOG = {
     "- Fixed HUD visibility (J key) now saves immediately on toggle",
     "- Fixed modSettings folder name corrected (was modsSettings — settings were lost)",
     "- Added debug output files in modSettings/FS25_SoilFertilizer/Debug/",
+    "- Added current-pass coverage tracker: HUD shows % covered + product name this session",
+    "- Fixed Organic Matter clamped to [0,10] on all write paths — negative OM from corrupted saves no longer shown in HUD",
 }
 
 -- ── i18n helper ───────────────────────────────────────────
