@@ -695,6 +695,7 @@
     <e k="sf_cell_report" v="Raport komórki" eh="2a403943" />
     <e k="sf_cell_no_data_title" v="Brak danych komórki" eh="dc41c753" />
     <e k="sf_cell_no_data" v="Brak danych glebowych w tej lokalizacji" eh="5dfa58aa" />
+    <e k="sf_field_avg" v="Śr. pola" />
     <e k="sf_cell" v="Komórka" eh="1a66ab62" />
     <e k="sf_cell_dialog_title" v="Inspekcja komórki gleby" eh="7ce7fc03" />
     <e k="sf_cell_sidebar_header" v="Szczegóły komórki" eh="6fc5243e" />

@@ -714,6 +714,7 @@
     <e k="sf_cell_report" v="Relatório de Célula" eh="2a403943" />
     <e k="sf_cell_no_data_title" v="Sem dados de célula" eh="dc41c753" />
     <e k="sf_cell_no_data" v="Sem dados de solo nesta localização" eh="5dfa58aa" />
+    <e k="sf_field_avg" v="Méd. campo" />
     <e k="sf_cell" v="Célula" eh="1a66ab62" />
     <e k="sf_cell_dialog_title" v="Inspeção de Célula de Solo" eh="7ce7fc03" />
     <e k="sf_cell_sidebar_header" v="Detalhes da Célula" eh="6fc5243e" />

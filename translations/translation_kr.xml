@@ -694,6 +694,7 @@
     <e k="sf_cell_report" v="셀 보고서" eh="2a403943" />
     <e k="sf_cell_no_data_title" v="셀 데이터를 찾을 수 없음" eh="dc41c753" />
     <e k="sf_cell_no_data" v="이 위치에 토양 데이터가 없습니다" eh="5dfa58aa" />
+    <e k="sf_field_avg" v="Field avg" />
     <e k="sf_cell" v="셀" eh="1a66ab62" />
     <e k="sf_cell_dialog_title" v="토양 셀 조사" eh="7ce7fc03" />
     <e k="sf_cell_sidebar_header" v="셀 상세 정보" eh="6fc5243e" />

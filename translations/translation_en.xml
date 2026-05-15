@@ -713,6 +713,7 @@
     <e k="sf_cell_report" v="Cell Report" eh="2a403943" />
     <e k="sf_cell_no_data_title" v="No cell data found" eh="dc41c753" />
     <e k="sf_cell_no_data" v="No soil data at this location" eh="5dfa58aa" />
+    <e k="sf_field_avg" v="Field avg" />
     <e k="sf_cell" v="Cell" eh="1a66ab62" />
     <e k="sf_cell_dialog_title" v="Soil Cell Inspection" eh="7ce7fc03" />
     <e k="sf_cell_sidebar_header" v="Cell Details" eh="6fc5243e" />

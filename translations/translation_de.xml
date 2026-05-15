@@ -666,6 +666,7 @@
     <e k="sf_cell_report" v="Zellenbericht" eh="2a403943" />
     <e k="sf_cell_no_data_title" v="Keine Zellendaten gefunden" eh="dc41c753" />
     <e k="sf_cell_no_data" v="Keine Bodendaten an dieser Position" eh="5dfa58aa" />
+    <e k="sf_field_avg" v="Feld Ø" />
     <e k="sf_cell" v="Zelle" eh="1a66ab62" />
     <e k="sf_cell_dialog_title" v="Bodenellen-Inspektion" eh="7ce7fc03" />
     <e k="sf_cell_sidebar_header" v="Zellendetails" eh="6fc5243e" />

@@ -666,6 +666,7 @@
     <e k="sf_cell_report" v="Informe celda" eh="2a403943" />
     <e k="sf_cell_no_data_title" v="Sin datos de celda" eh="dc41c753" />
     <e k="sf_cell_no_data" v="No hay datos de suelo aquí" eh="5dfa58aa" />
+    <e k="sf_field_avg" v="Prom. campo" />
     <e k="sf_cell" v="Celda" eh="1a66ab62" />
     <e k="sf_cell_dialog_title" v="Inspección de celda" eh="7ce7fc03" />
     <e k="sf_cell_sidebar_header" v="Detalles celda" eh="6fc5243e" />

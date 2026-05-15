@@ -666,6 +666,7 @@
     <e k="sf_cell_report" v="Rapport cellule" eh="2a403943" />
     <e k="sf_cell_no_data_title" v="Données absentes" eh="dc41c753" />
     <e k="sf_cell_no_data" v="Pas de données sol ici" eh="5dfa58aa" />
+    <e k="sf_field_avg" v="Field avg" />
     <e k="sf_cell" v="Cellule" eh="1a66ab62" />
     <e k="sf_cell_dialog_title" v="Inspection de cellule" eh="7ce7fc03" />
     <e k="sf_cell_sidebar_header" v="Détails cellule" eh="6fc5243e" />

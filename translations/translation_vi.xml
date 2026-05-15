@@ -666,6 +666,7 @@
     <e k="sf_cell_report" v="Báo cáo ô" eh="2a403943" />
     <e k="sf_cell_no_data_title" v="Không thấy dữ liệu ô" eh="dc41c753" />
     <e k="sf_cell_no_data" v="Không có dữ liệu đất tại vị trí này" eh="5dfa58aa" />
+    <e k="sf_field_avg" v="Field avg" />
     <e k="sf_cell" v="Ô" eh="1a66ab62" />
     <e k="sf_cell_dialog_title" v="Kiểm tra ô đất" eh="7ce7fc03" />
     <e k="sf_cell_sidebar_header" v="Chi tiết ô" eh="6fc5243e" />
