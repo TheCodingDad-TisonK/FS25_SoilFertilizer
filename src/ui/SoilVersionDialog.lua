@@ -24,12 +24,11 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
-    "- Fixed HUD layout now saves to modSettings/ — dedicated server clients keep preferences",
-    "- Fixed HUD visibility (J key) now saves immediately on toggle",
-    "- Fixed modSettings folder name corrected (was modsSettings — settings were lost)",
-    "- Added debug output files in modSettings/FS25_SoilFertilizer/Debug/",
-    "- Added current-pass coverage tracker: HUD shows % covered + product name this session",
-    "- Fixed Organic Matter clamped to [0,10] on all write paths — negative OM from corrupted saves no longer shown in HUD",
+    "- Fixed Harvesting now correctly drains nitrogen, phosphorus and potassium from your fields",
+    "- Fixed Swath and windrow harvesting also now properly removes soil nutrients",
+    "- Fixed New fields and new games now show soil readings in the cell report right away",
+    "- Fixed Fertilizer and amendment piles no longer cause rendering errors when viewed from a distance",
+    "- Fixed Oats now tracked as a separate crop for nutrient extraction (was grouped with wheat)",
 }
 
 -- ── i18n helper ───────────────────────────────────────────

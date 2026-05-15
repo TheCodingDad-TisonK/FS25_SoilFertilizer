@@ -251,7 +251,7 @@ SoilConstants.CROP_EXTRACTION = {
     sunflower  = { N=2.50, P=1.10, K=2.30 },  -- Moderate-high demand
     potato     = { N=3.80, P=1.70, K=5.40 },  -- Very high K demand (tuber crop)
     sugarbeet  = { N=3.30, P=1.50, K=5.80 },  -- Extreme K demand (root crop)
-    oats       = { N=1.80, P=0.90, K=1.60 },  -- Light feeder
+    oat        = { N=1.80, P=0.90, K=1.60 },  -- Light feeder
     rye        = { N=2.00, P=0.80, K=1.80 },  -- Moderate demand
     triticale  = { N=2.10, P=1.00, K=1.90 },  -- Hybrid characteristics
     sorghum    = { N=2.30, P=0.90, K=1.80 },  -- Efficient nutrient user
@@ -274,6 +274,14 @@ SoilConstants.CROP_EXTRACTION_FORAGE = { N=1.40, P=0.55, K=1.80 }
 -- At factor=6.0, grass/alfalfa: N=8.4, P=3.3, K=10.8 units depleted per ha per cut.
 -- Compare: wheat harvest 1ha at 7000L → N=14.7, P=6.3, K=11.9. Forage ~57% of grain.
 SoilConstants.MOWER_HA_FACTOR = 6.0
+
+-- Harvest area calibration factor.
+-- addCutterArea's liters parameter is a 0/1 flag, not actual yield volume.
+-- Area is used instead; this factor scales it to match extraction rate calibration.
+-- Value = typical yield in L/ha / 1000 = 8000/1000 = 8.0.
+-- Formula: factor = (areaHa / fieldAreaHa) * HARVEST_HA_FACTOR
+-- At factor=8.0, wheat 1ha: N=16, P=6.4, K=12 depleted (matches extraction rate comments).
+SoilConstants.HARVEST_HA_FACTOR = 8.0
 
 -- ========================================
 -- FERTILIZER PROFILES (per 1,000 liters applied)

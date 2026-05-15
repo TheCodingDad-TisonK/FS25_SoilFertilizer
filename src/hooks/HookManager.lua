@@ -919,13 +919,17 @@ function HookManager:installHarvestHook()
             -- Yield modifier is NO LONGER applied here — see installYieldModifierHook.
             local detectedFieldId = nil
 
+            -- NOTE: liters=0 is normal in swath/windrow mode (isSwathActive=true on the combine).
+            -- The crop is deposited on the ground rather than collected in the hopper.
+            -- We still deplete nutrients (the soil grew the biomass regardless of collection method);
+            -- updateFieldNutrients handles the liters=0 case via area-based estimation.
             if combineSelf.isServer
                 and g_SoilFertilityManager
                 and g_SoilFertilityManager.soilSystem
                 and g_SoilFertilityManager.settings.enabled
                 and g_SoilFertilityManager.settings.nutrientCycles
                 and inputFruitType and inputFruitType > 0
-                and liters and liters > 0
+                and area and area > 0
             then
                 local ok, errMsg = pcall(function()
                     local x, _, z = getWorldTranslation(combineSelf.rootNode)
@@ -1027,7 +1031,7 @@ function HookManager:installYieldModifierHook()
     -- Hooking Combine.addFillUnitFillLevel therefore always fails (nil check).
     -- Real FS25 signature: addFillUnitFillLevel(self, farmId, fillUnitIndex, fillLevelDelta, fillTypeIndex, toolType, fillPositionData)
     if not FillUnit or type(FillUnit.addFillUnitFillLevel) ~= "function" then
-        SoilLogger.warning("Yield modifier hook: FillUnit.addFillUnitFillLevel not available â yield reduction skipped")
+        SoilLogger.warning("Yield modifier hook: FillUnit.addFillUnitFillLevel not available -- yield reduction skipped")
         return false
     end
 
@@ -1074,7 +1078,7 @@ function HookManager:installYieldModifierHook()
                     local yieldModifier = g_SoilFertilityManager.soilSystem:computeYieldModifier(fieldId, fruitType)
                     if yieldModifier ~= 1.0 then
                         modifiedDelta = fillLevelDelta * yieldModifier
-                        SoilLogger.debug("Yield modifier hook: Field %d Fruit %d modifier=%.3f (%.1fL â %.1fL)",
+                        SoilLogger.debug("Yield modifier hook: Field %d Fruit %d modifier=%.3f (%.1fL -- %.1fL)",
                             fieldId, fruitType, yieldModifier, fillLevelDelta, modifiedDelta)
                     end
                 end)
@@ -1102,7 +1106,7 @@ function HookManager:installYieldModifierHook()
         end
     end
 
-    SoilLogger.info("[OK] Yield modifier hook installed (FillUnit.addFillUnitFillLevel) â %d existing combines patched", patched)
+    SoilLogger.info("[OK] Yield modifier hook installed (FillUnit.addFillUnitFillLevel) -- %d existing combines patched", patched)
     return true
 end
 
@@ -1148,9 +1152,12 @@ function HookManager:installMowerHook()
 
             -- lastStatsArea: density-map pixels processed this tick (same unit as Cutter's lastArea)
             local area = spec.workAreaParameters.lastStatsArea or 0
+            local fruitType = spec.workAreaParameters.lastInputFruitType
+
+            SoilLogger.debug("[MowerHook] fired: area=%.1f fruitType=%s", area, tostring(fruitType))
+
             if area <= 0 then return end
 
-            local fruitType = spec.workAreaParameters.lastInputFruitType
             if not fruitType or fruitType <= 0 then return end
 
             local success, errorMsg = pcall(function()

@@ -667,6 +667,7 @@
     <e k="sf_cell_report" v="Hücre Raporu" eh="2a403943" />
     <e k="sf_cell_no_data_title" v="Hücre verisi bulunamadı" eh="dc41c753" />
     <e k="sf_cell_no_data" v="Bu konumda toprak verisi yok" eh="5dfa58aa" />
+    <e k="sf_field_avg" v="Alan ort." />
     <e k="sf_cell" v="Hücre" eh="1a66ab62" />
     <e k="sf_cell_dialog_title" v="Toprak Hücresi İncelemesi" eh="7ce7fc03" />
     <e k="sf_cell_sidebar_header" v="Hücre Ayrıntıları" eh="6fc5243e" />

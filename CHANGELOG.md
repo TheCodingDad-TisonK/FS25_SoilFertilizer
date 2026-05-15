@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.1.7.0] - 2026-05-15
+
+### Fixed
+- **Harvest nutrient depletion was silently broken** — `Combine.addCutterArea` passes `liters` as a 0/1 flag (crop present/absent), not actual grain volume. The depletion formula `(liters/1000) / fieldAreaHa` was effectively zero every call, meaning harvesting removed no N/P/K whatsoever. Replaced with an area-based formula: `factor = (areaHa / fieldAreaHa) × HARVEST_HA_FACTOR`, calibrated to the existing extraction-rate scale (8 000 L/ha proxy). Nutrients now correctly deplete across a full harvest.
+- **Swath/windrow harvesting now depletes nutrients** — the swath mode path had a similar calibration mismatch (`× 6.0` factor vs. the required `× 8.0`). Both paths are now unified: area is always used, `liters` is ignored. Straw OM estimate also updated to match (6 000 → 8 000 L/ha proxy).
+- **Oats tracked as a separate crop** — the extraction key `"oats"` did not match `g_fruitTypeManager`'s name `"oat"`, so oat harvests fell through to the generic cereal default. Fixed.
+- **Cell report shows "No Data" on new games** (Issue [#383](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/383)) — `zoneData` cells are only created on fertilize/mow/plow events. On a fresh save every field showed "No cell data found". Now falls back to field-level averages (N/P/K/pH/OM) labelled **"Field avg"**. Once cell data exists from field activity, per-cell values display as normal.
+- **Distance texture errors on dedicated servers** (Issue [#384](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/384)) — All 10 solid fill types registered in `densityMapHeightTypes.xml` were missing the `distance="..."` attribute on their `<textures>` element, causing `Failed to create density height map distance texture array` errors every session. Added appropriate vanilla `$data/fillPlanes/distance/*.dds` references to each affected fill type.
+- **False warning on new careers suppressed** — `SettingsManager:getSavegameXmlFilePath()` logged a `WARNING: Savegame directory not available yet` on every new game load. This is expected behaviour (savegame directory is nil before the first save); downgraded to `DEBUG`.
+- **`SoilDebug` console command now takes effect immediately** — `debugMode` was a server-shared setting, requiring a reconnect before changes propagated to the local client. Marked `localOnly` so the toggle is instant.
+
+### Added
+- **"Field avg" i18n key** — new translation key `sf_field_avg` added across all 26 languages for the cell report fallback label.
+
+---
+
 ## [2.1.6.9] - 2026-05-15
 
 ### Fixed

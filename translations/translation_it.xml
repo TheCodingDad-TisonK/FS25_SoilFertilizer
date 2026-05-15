@@ -713,6 +713,7 @@
     <e k="sf_cell_report" v="Rapporto Cella" eh="2a403943" />
     <e k="sf_cell_no_data_title" v="Dati cella non trovati" eh="dc41c753" />
     <e k="sf_cell_no_data" v="Nessun dato del suolo in questa posizione" eh="5dfa58aa" />
+    <e k="sf_field_avg" v="Media campo" />
     <e k="sf_cell" v="Cella" eh="1a66ab62" />
     <e k="sf_cell_dialog_title" v="Ispezione Cella Suolo" eh="7ce7fc03" />
     <e k="sf_cell_sidebar_header" v="Dettagli Cella" eh="6fc5243e" />

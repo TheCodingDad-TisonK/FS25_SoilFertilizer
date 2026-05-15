@@ -1956,11 +1956,10 @@ end
 -- Update field nutrients after harvest
 ---@param fieldId number The field being harvested
 ---@param fruitTypeIndex number FS25 fruit type index
----@param harvestedLiters number Amount harvested in liters
+---@param harvestedLiters number 0/1 flag from addCutterArea (NOT actual grain volume — use area for depletion)
 ---@param strawRatio number 0.0-1.0 fraction of straw chopped back into the field (adds organic matter)
----@param area number Area harvested in m² (unused; reserved for future area-normalised depletion)
+---@param area number Area harvested in pixels — always used for depletion; liters is unreliable
 function SoilFertilitySystem:updateFieldNutrients(fieldId, fruitTypeIndex, harvestedLiters, strawRatio, area)
-    _ = area -- luacheck: ignore area
     if not self.settings.enabled or not self.settings.nutrientCycles then return end
 
     local field = self:getOrCreateField(fieldId, true)
@@ -1988,26 +1987,26 @@ function SoilFertilitySystem:updateFieldNutrients(fieldId, fruitTypeIndex, harve
     local name = string.lower(fruitDesc.name or "unknown")
     local rates = SoilConstants.CROP_EXTRACTION[name] or SoilConstants.CROP_EXTRACTION_DEFAULT
 
-    -- NUTRIENT DEPLETION CALCULATION EXPLAINED:
-    --
-    -- Step 1: Calculate depletion factor, normalized by field area.
-    -- Combine.addCutterArea fires many times during a harvest — harvestedLiters
-    -- is the yield from one small chunk, and the chunks sum to the total field yield.
-    -- Without area normalization, a 5 ha field (5× the liters of a 1 ha field)
-    -- would deplete 5× more nutrients from the same 0-100 nutrient pool, draining
-    -- it to zero in one harvest pass. Dividing by fieldAreaHa makes depletion
-    -- field-size independent: the same yield density (L/ha) always removes the
-    -- same number of nutrient points regardless of field size.
-    -- Formula: factor = (harvestedLiters / 1000) / fieldAreaHa
+    -- Step 1: Calculate depletion factor from harvested area.
+    -- addCutterArea fires many times per harvest; its liters parameter is a 0/1 flag
+    -- (1 = crop present), NOT actual grain volume. Area is always the reliable value.
+    -- factor = areaHa / fieldAreaHa  =>  proportional slice of field depleted this call.
     local fieldAreaHa = (field.fieldArea and field.fieldArea > 0) and field.fieldArea or 1.0
-    local factor = (harvestedLiters / 1000) / fieldAreaHa
+    local factor
+    local areaHa = 0
+    if area and area > 0 then
+        if not g_currentMission or type(g_currentMission.getFruitPixelsToSqm) ~= "function" then return end
+        areaHa = MathUtil.areaToHa(area, g_currentMission:getFruitPixelsToSqm())
+        factor = (areaHa / fieldAreaHa) * SoilConstants.HARVEST_HA_FACTOR
+        SoilLogger.debug("Harvest factor: area=%.0fpx areaHa=%.6f fieldHa=%.2f factor=%.6f", area, areaHa, fieldAreaHa, factor)
+    else
+        return
+    end
 
     -- Step 2: Apply difficulty multiplier
     -- Simple (0.7x): 30% less depletion, easier for new players
     -- Realistic (1.0x): Balanced depletion based on real agricultural rates
     -- Hardcore (1.5x): 50% more depletion, challenging management
-    -- Example: 8000L/ha wheat on a 5ha field → factor = (8000/1000)/5 = 1.6 per chunk
-    -- × 1.0 (Realistic) = 1.6; N removed = 2.00 × 1.6 = 3.2 pts per call
     local diffMultiplier = SoilConstants.DIFFICULTY.MULTIPLIERS[self.settings.difficulty]
     if diffMultiplier then
         factor = factor * diffMultiplier
@@ -2052,13 +2051,12 @@ function SoilFertilitySystem:updateFieldNutrients(fieldId, fruitTypeIndex, harve
         end
     end
 
-    -- Step 4: Chopped straw/chaff adds organic matter
-    -- When strawRatio > 0 the combine is chopping material back into the field.
-    -- The chopped biomass decomposes and increases soil organic matter.
-    -- Formula: OM gain = (harvestedLiters / 1000) × strawRatio × OM_RATE
+    -- Step 4: Chopped straw/chaff adds organic matter.
+    -- harvestedLiters is unreliable (0/1 flag); estimate biological yield from area instead.
     local sr = strawRatio or 0
-    if sr > 0 then
-        local omGain = (harvestedLiters / 1000) * sr * SoilConstants.CHOPPED_STRAW.OM_RATE
+    if sr > 0 and areaHa > 0 then
+        local estimatedLiters = areaHa * 8000  -- 8000 L/ha average yield density (matches HARVEST_HA_FACTOR)
+        local omGain = (estimatedLiters / 1000) * sr * SoilConstants.CHOPPED_STRAW.OM_RATE
         field.organicMatter = math.min(limits.ORGANIC_MATTER_MAX, (field.organicMatter or 0) + omGain)
     end
 
@@ -2066,7 +2064,7 @@ function SoilFertilitySystem:updateFieldNutrients(fieldId, fruitTypeIndex, harve
     field.lastHarvest = (g_currentMission and g_currentMission.environment and g_currentMission.environment.currentDay) or 0
 
     self:log(
-        "Harvest depletion field %d (%s): -N %.1f -P %.1f -K %.1f",
+        "Harvest depletion field %d (%s): -N %.5f -P %.5f -K %.5f",
         fieldId, fruitDesc.name,
         rates.N * factor,
         rates.P * factor,

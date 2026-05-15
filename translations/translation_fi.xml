@@ -667,6 +667,7 @@
     <e k="sf_cell_report" v="Soluraportti" eh="2a403943" />
     <e k="sf_cell_no_data_title" v="Solutietoja ei löytynyt" eh="dc41c753" />
     <e k="sf_cell_no_data" v="Ei maaperätietoja tässä kohdassa" eh="5dfa58aa" />
+    <e k="sf_field_avg" v="Pelto kesk." />
     <e k="sf_cell" v="Solu" eh="1a66ab62" />
     <e k="sf_cell_dialog_title" v="Maaperäsolun tarkastelu" eh="7ce7fc03" />
     <e k="sf_cell_sidebar_header" v="Solun tiedot" eh="6fc5243e" />

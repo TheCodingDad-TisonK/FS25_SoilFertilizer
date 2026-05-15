@@ -1508,33 +1508,46 @@ function SoilHUD:drawMiniReport()
     local samples = nil
     local cellLabel = nil
 
-    -- 1. Try to get internal zoneData (per-cell) first
+    -- 1. Try to get per-cell zoneData first; fall back to field-level averages.
     if wx and wz and self.cachedFieldId and self.cachedFieldId > 0 then
         local soilSys = g_SoilFertilityManager and g_SoilFertilityManager.soilSystem
         if soilSys then
             local field = soilSys:getOrCreateField(self.cachedFieldId, false)
-            if field and field.zoneData then
-                local cs = SoilConstants.ZONE.CELL_SIZE
-                local cx = math.floor(wx / cs)
-                local cz = math.floor(wz / cs)
-                local cellKey = tostring(cx * 10000 + cz)
-                local cell = field.zoneData[cellKey]
-                
+            if field then
+                local cell = nil
+                if field.zoneData then
+                    local cs = SoilConstants.ZONE.CELL_SIZE
+                    local cx = math.floor(wx / cs)
+                    local cz = math.floor(wz / cs)
+                    local cellKey = tostring(cx * 10000 + cz)
+                    cell = field.zoneData[cellKey]
+                    if cell then
+                        cellLabel = string.format("C %d\xC2\xB7%d", cx, cz)
+                    end
+                end
+
+                -- Cell uses N/P/K/OM; field uses nitrogen/phosphorus/potassium/organicMatter
+                local n, p, k, ph, om
                 if cell then
+                    n, p, k, ph, om = cell.N, cell.P, cell.K, cell.pH, cell.OM
+                elseif field.nitrogen ~= nil then
+                    n, p, k, ph, om = field.nitrogen, field.phosphorus, field.potassium, field.pH, field.organicMatter
+                    cellLabel = g_i18n:hasText("sf_field_avg") and g_i18n:getText("sf_field_avg") or "Field avg"
+                end
+                if n ~= nil then
                     samples = {
-                        { label="N",  val=cell.N,  min=0,   max=100, unit=""  },
-                        { label="P",  val=cell.P,  min=0,   max=100, unit=""  },
-                        { label="K",  val=cell.K,  min=0,   max=100, unit=""  },
-                        { label="pH", val=cell.pH, min=5.0, max=7.5, unit=""  },
-                        { label="OM", val=cell.OM, min=0,   max=10,  unit="%" },
+                        { label="N",  val=n,  min=0,   max=100, unit=""  },
+                        { label="P",  val=p,  min=0,   max=100, unit=""  },
+                        { label="K",  val=k,  min=0,   max=100, unit=""  },
+                        { label="pH", val=ph, min=5.0, max=7.5, unit=""  },
+                        { label="OM", val=om, min=0,   max=10,  unit="%" },
                     }
-                    cellLabel = string.format("C %d\xC2\xB7%d", cx, cz)
                 end
             end
         end
     end
 
-    -- 2. No fallback! If no cell data is found, samples remains nil.
+    -- 2. If still no data, samples remains nil (player off-field or system not ready).
 
     -- ── Background ───────────────────────────────────────
     local alpha = SoilConstants.HUD.TRANSPARENCY_LEVELS[self.settings.hudTransparency or 3]
