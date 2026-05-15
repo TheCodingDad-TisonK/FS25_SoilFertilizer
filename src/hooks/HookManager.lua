@@ -1031,7 +1031,7 @@ function HookManager:installYieldModifierHook()
     -- Hooking Combine.addFillUnitFillLevel therefore always fails (nil check).
     -- Real FS25 signature: addFillUnitFillLevel(self, farmId, fillUnitIndex, fillLevelDelta, fillTypeIndex, toolType, fillPositionData)
     if not FillUnit or type(FillUnit.addFillUnitFillLevel) ~= "function" then
-        SoilLogger.warning("Yield modifier hook: FillUnit.addFillUnitFillLevel not available â yield reduction skipped")
+        SoilLogger.warning("Yield modifier hook: FillUnit.addFillUnitFillLevel not available -- yield reduction skipped")
         return false
     end
 
@@ -1106,7 +1106,7 @@ function HookManager:installYieldModifierHook()
         end
     end
 
-    SoilLogger.info("[OK] Yield modifier hook installed (FillUnit.addFillUnitFillLevel) â %d existing combines patched", patched)
+    SoilLogger.info("[OK] Yield modifier hook installed (FillUnit.addFillUnitFillLevel) -- %d existing combines patched", patched)
     return true
 end
 

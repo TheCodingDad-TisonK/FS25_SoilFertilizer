@@ -29,7 +29,7 @@ function SettingsManager:getSavegameXmlFilePath()
         return path
     end
 
-    SoilLogger.warning("Savegame directory not available yet")
+    SoilLogger.debug("Savegame directory not available yet (new career or early load)")
     return nil
 end
 
