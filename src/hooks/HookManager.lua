@@ -1228,10 +1228,12 @@ function HookManager:installSprayerAreaHook()
             -- Runs once on the first spray event where a PF extendedSprayer spec is found.
             -- PF adds extendedSprayer to ALL sprayers when active, so any sprayer triggers this.
             local pfBridge = g_SoilFertilityManager.pfBridge
-            if pfBridge and pfBridge.isActive and not pfBridge.fillTypesInjected then
+            -- Fill type injection: only needed when THPF Configurator is absent.
+            -- When THPF is loaded it reads our <thPFConfig> block and handles this natively.
+            if pfBridge and pfBridge.isActive and not pfBridge.thpfActive and not pfBridge.fillTypesInjected then
                 local pfSpec = self["spec_FS25_precisionFarming.extendedSprayer"]
                 if pfSpec then
-                    SoilLogger.info("[PFBridge] Injecting SF fill types into PF nitrogen map...")
+                    SoilLogger.info("[PFBridge] Injecting SF fill types into PF nitrogen map (fallback — THPF absent)...")
                     pfBridge:injectCustomFillTypes(pfSpec.nitrogenMap)
                 end
             end
@@ -1439,10 +1441,13 @@ function HookManager:installSprayerAreaHook()
                     end
                 end
 
-                -- PF N relay: SF's hook fires before PF's (FS25_SoilFertilizer < FS25_precisionFarming
-                -- alphabetically, so SF appended first → runs first).
-                -- For SF custom N-bearing fill types, swap workAreaParameters to an equivalent
-                -- LIQUIDFERTILIZER volume so PF's hook paints the nitrogen map with the right amount.
+                -- PF N relay: fires whenever PF is active (with or without THPF).
+                -- THPF handles HUD recognition and application rate recommendations,
+                -- but PF's nitrogen density map painting is triggered by PF's own hook
+                -- checking workAreaParameters.sprayFillType against its fertilizerFillTypes
+                -- table — and our custom fill types don't pass that check natively.
+                -- By swapping to a scaled LIQUIDFERTILIZER volume we guarantee PF paints
+                -- the correct N amount regardless of THPF presence.
                 -- SF's own nutrient accounting already ran above using the real fill type.
                 do
                     local pfBridge = g_SoilFertilityManager and g_SoilFertilityManager.pfBridge

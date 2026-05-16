@@ -37,6 +37,7 @@ function PrecisionFarmingBridge:new()
     local o = setmetatable({}, PrecisionFarmingBridge_mt)
     o.isActive    = false
     o.apiVerified = false
+    o.thpfActive  = false   -- true when FS25_0_THPFConfigurator is also loaded
     o.nitrogenMap = nil
     o.phMap       = nil
     o.soilMap     = nil
@@ -108,9 +109,24 @@ function PrecisionFarmingBridge:initialize()
         end
     end
 
-    if not self.canReadMaps then
-        SoilLogger.info("[PFBridge] PF Mode active (detection only). " ..
-            "N/pH yield penalties suppressed. Map read API not available.")
+    -- Detect [TH] Precision Farming Configurator (FS25_0_THPFConfigurator).
+    -- When present, it reads our <thPFConfig> block from modDesc.xml and injects
+    -- our fill types into PF's nitrogen/pH maps directly — no relay needed.
+    if g_modManager then
+        local ok, thpfMod = pcall(function()
+            return g_modManager:getModByName("FS25_0_THPFConfigurator")
+        end)
+        if ok and thpfMod ~= nil then
+            self.thpfActive = true
+        end
+    end
+
+    if self.thpfActive then
+        SoilLogger.info("[PFBridge] Mode: PF + THPF Configurator — fill type integration via modDesc.xml declarations")
+    elseif self.canReadMaps then
+        SoilLogger.info("[PFBridge] Mode: PF standalone (map read enabled) — relay active for custom fill types")
+    else
+        SoilLogger.info("[PFBridge] Mode: PF standalone (detection only) — relay active for custom fill types")
     end
 
     -- PHASE 5 NOTE: Write-back to PF's nitrogenMap/phMap is not currently possible.
