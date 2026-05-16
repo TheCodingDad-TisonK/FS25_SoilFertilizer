@@ -2275,6 +2275,7 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
                 end
             end
             local cell = field.zoneData[cellKey]
+            if not cell then return end
             -- cellFactor must use areaInHa (not zone.CELL_AREA_HA) so that each cell
             -- absorbs nutrients at exactly the same per-frame rate as the whole-field
             -- average.  Using CELL_AREA_HA (0.01 ha) as the denominator made cells
