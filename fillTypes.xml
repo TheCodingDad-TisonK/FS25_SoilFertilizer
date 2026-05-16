@@ -184,7 +184,7 @@
             <physics massPerLiter="0.90" maxPhysicalSurfaceAngle="20"/>
             <economy pricePerLiter="0.50"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
-            <textures diffuse="$data/fillPlanes/manure_diffuse.dds" normal="$data/fillPlanes/manure_normal.dds" height="$data/fillPlanes/manure_height.dds" displacement="$data/fillPlanes/manure_displacement.dds" distance="$data/fillPlanes/distance/manureDistance_diffuse.dds"/>
+            <textures diffuse="$modDir/textures/fillPlanes/biosolids_diffuse.dds" normal="$data/fillPlanes/manure_normal.dds" height="$data/fillPlanes/manure_height.dds" displacement="$data/fillPlanes/manure_displacement.dds" distance="$modDir/textures/fillPlanes/distance/biosolidsDistance_diffuse.dds"/>
             <sprayType sprayTypeStr="SOLID"/>
             <pallet filename="objects/bigBag/biosolids/bigBag_biosolids.xml" />
         </fillType>
