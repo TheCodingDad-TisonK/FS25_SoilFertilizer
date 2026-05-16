@@ -686,14 +686,6 @@ function SoilSettingsGUI:consoleCommandPFDump()
         g_SoilFertilityManager.pfBridge:dumpApi()
         return "PF dump written — check the console output above"
     end
-    -- Bridge not yet initialised — probe directly
-    if g_precisionFarming == nil then
-        print("[SoilPFDump] g_precisionFarming = nil — Precision Farming is not active")
-        return "Precision Farming not detected"
-    end
-    print("[SoilPFDump] g_precisionFarming found but SF bridge not yet initialised")
-    for k, v in pairs(g_precisionFarming) do
-        print(string.format("[SoilPFDump]   .%s = %s", tostring(k), type(v)))
-    end
-    return "PF raw dump written (bridge not initialised yet)"
+    print("[SoilPFDump] SF bridge not yet initialised — load a savegame first, then run SoilPFDump")
+    return "Bridge not ready — load savegame first"
 end

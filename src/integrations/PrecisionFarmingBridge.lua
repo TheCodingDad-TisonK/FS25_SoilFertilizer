@@ -1,22 +1,23 @@
 -- =========================================================
 -- FS25 Realistic Soil & Fertilizer - Precision Farming Bridge
 -- =========================================================
--- Safe read-only wrapper around g_precisionFarming.
+-- Safe cross-mod wrapper around Precision Farming.
 --
 -- PF's Lua source is compiled/obfuscated. This bridge uses the
--- standard Giants global convention and wraps every call in pcall()
--- so any API change in a PF update silently falls back to SF
--- standalone mode rather than crashing.
+-- g_modManager channel (shared C++ object) for detection and wraps
+-- every API call in pcall() so any PF update silently falls back to
+-- SF standalone mode rather than crashing.
 --
 -- OPERATING MODES
 --   Standalone (PF absent or probe failed):
 --     isActive = false — SF runs exactly as before, full N/P/K/pH/OM
---   PF Mode (PF active + API verified):
---     isActive = true — caller gates N/pH behaviour on this flag
+--   PF Mode (PF active):
+--     isActive = true — SF excludes N from yield-penalty averaging
+--     (PF's ExtendedCombine already applies an N-based penalty)
+--     HookManager relays SF fill types to PF's nitrogen map via
+--     a LIQUIDFERTILIZER volume swap (Phase 3 relay).
 --
--- PHASE 1 SCOPE (detection + diagnostics only)
---   No simulation changes are made here.
---   Use SoilPFDump console command to inspect the live PF global.
+-- Use SoilPFDump console command for live API diagnostics.
 -- =========================================================
 -- Author: TisonK
 -- =========================================================
@@ -41,7 +42,7 @@ function PrecisionFarmingBridge:new()
     o.nitrogenMap = nil
     o.phMap       = nil
     o.soilMap     = nil
-    o.yieldMap    = nil
+    o.yieldMap    = nil     -- reserved: PF does not yet expose yield map via a shared C++ object
     return o
 end
 
@@ -206,9 +207,11 @@ end
 ---@param sampler function(x, z) -> number|nil
 ---@return number|nil average of non-nil samples
 function PrecisionFarmingBridge:_sampleFieldGrid(field, sampler)
-    -- Determine field centre and approximate half-extents
-    local cx = field.posX or (field.worldX) or 0
-    local cz = field.posZ or (field.worldZ) or 0
+    local cx = field.posX or field.worldX or 0
+    local cz = field.posZ or field.worldZ or 0
+    if cx == 0 and cz == 0 then
+        SoilLogger.debug("[PFBridge] _sampleFieldGrid: no position found on field object — sampling around world origin")
+    end
     -- Use a fixed half-size of 30 m; fine for diagnostic/calibration purposes
     local hw = 30
     local sum, count = 0, 0
@@ -264,7 +267,7 @@ function PrecisionFarmingBridge:injectCustomFillTypes(nitrogenMap)
     end
 
     local fillTypes = nitrogenMap.fertilizerFillTypes
-    local ok = pcall(function()
+    local ok, errMsg = pcall(function()
         local injected = 0
         for fillTypeName in pairs(self.SF_FILL_TYPE_N_AMOUNTS) do
             if g_fillTypeManager then
@@ -279,7 +282,7 @@ function PrecisionFarmingBridge:injectCustomFillTypes(nitrogenMap)
     end)
 
     if not ok then
-        SoilLogger.warning("[PFBridge] injectCustomFillTypes: pcall failed")
+        SoilLogger.warning("[PFBridge] injectCustomFillTypes: pcall failed — %s", tostring(errMsg))
     end
     self.fillTypesInjected = true
 end
@@ -309,8 +312,8 @@ end
 -- DIAGNOSTICS
 -- =========================================================
 
---- Dump the full g_precisionFarming global to the game log.
---- Also scans for the actual PF global name if the default is nil.
+--- Dump Precision Farming detection state and API discovery to the game log.
+--- Uses g_modManager and g_specializationManager (shared C++ objects, cross-mod visible).
 --- Run via SoilPFDump console command.
 function PrecisionFarmingBridge:dumpApi()
     print("[SoilPFDump] ===== Precision Farming API discovery =====")

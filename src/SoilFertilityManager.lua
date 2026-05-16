@@ -640,8 +640,8 @@ function SoilFertilityManager:deferredSoilSystemInit()
             local initSuccess, initError = pcall(function()
                 self.sfm.soilSystem:initialize()
 
-                -- Detect Precision Farming and verify its read API.
-                -- Must run after soilSystem:initialize() so g_precisionFarming is guaranteed live.
+                -- Detect Precision Farming via g_modManager (shared C++ object, cross-mod visible).
+                -- Must run after mission is fully loaded so g_modManager has all mod entries.
                 if self.sfm.pfBridge then
                     self.sfm.hasPrecisionFarming = self.sfm.pfBridge:initialize()
                     -- Give soil system a direct reference so it can gate logic without a global lookup

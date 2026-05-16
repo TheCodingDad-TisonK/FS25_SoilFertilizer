@@ -1152,11 +1152,9 @@ function HookManager:installMowerHook()
 
             -- lastStatsArea: density-map pixels processed this tick (same unit as Cutter's lastArea)
             local area = spec.workAreaParameters.lastStatsArea or 0
-            local fruitType = spec.workAreaParameters.lastInputFruitType
-
-            SoilLogger.debug("[MowerHook] fired: area=%.1f fruitType=%s", area, tostring(fruitType))
-
             if area <= 0 then return end
+
+            local fruitType = spec.workAreaParameters.lastInputFruitType
 
             if not fruitType or fruitType <= 0 then return end
 
@@ -1451,9 +1449,13 @@ function HookManager:installSprayerAreaHook()
                 -- but PF's nitrogen density map painting is triggered by PF's own hook
                 -- checking workAreaParameters.sprayFillType against its fertilizerFillTypes
                 -- table — and our custom fill types don't pass that check natively.
-                -- By swapping to a scaled LIQUIDFERTILIZER volume we guarantee PF paints
-                -- the correct N amount regardless of THPF presence.
+                -- By swapping to a scaled LIQUIDFERTILIZER volume we signal PF to paint
+                -- the correct N amount for the next frame when PF re-reads workAreaParameters.
                 -- SF's own nutrient accounting already ran above using the real fill type.
+                -- TIMING NOTE: both hooks are appendedFunctions on onEndWorkAreaProcessing.
+                -- PF loads before SF (alphabetical order), so PF's hook fires first this frame.
+                -- The swap is visible to PF on the following frame; the engine resets
+                -- sprayFillType/usage in onStartWorkAreaProcessing so no persistent corruption.
                 do
                     local pfBridge = g_SoilFertilityManager and g_SoilFertilityManager.pfBridge
                     if pfBridge and pfBridge.isActive and g_fillTypeManager then

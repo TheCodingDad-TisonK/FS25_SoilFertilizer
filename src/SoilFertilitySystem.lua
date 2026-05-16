@@ -2013,7 +2013,10 @@ function SoilFertilitySystem:updateFieldNutrients(fieldId, fruitTypeIndex, harve
     local factor
     local areaHa = 0
     if area and area > 0 then
-        if not g_currentMission or type(g_currentMission.getFruitPixelsToSqm) ~= "function" then return end
+        if not g_currentMission or type(g_currentMission.getFruitPixelsToSqm) ~= "function" then
+            SoilLogger.debug("updateFieldNutrients: getFruitPixelsToSqm unavailable — skipping depletion for field %d", fieldId)
+            return
+        end
         areaHa = MathUtil.areaToHa(area, g_currentMission:getFruitPixelsToSqm())
         factor = (areaHa / fieldAreaHa) * SoilConstants.HARVEST_HA_FACTOR
         SoilLogger.debug("Harvest factor: area=%.0fpx areaHa=%.6f fieldHa=%.2f factor=%.6f", area, areaHa, fieldAreaHa, factor)

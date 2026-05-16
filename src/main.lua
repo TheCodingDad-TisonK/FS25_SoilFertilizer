@@ -564,8 +564,7 @@ function soilStatus()
         local isClient = g_client ~= nil
 
         local pfBridge = g_SoilFertilityManager.pfBridge
-        local pfStatus = pfBridge and pfBridge.isActive and "ACTIVE (N/pH deferred to PF)"
-            or (g_precisionFarming ~= nil and "detected but bridge inactive" or "not detected")
+        local pfStatus = (pfBridge and pfBridge.isActive) and "ACTIVE (N/pH deferred to PF)" or "not detected"
         print(string.format(
             "=== Soil & Fertilizer Status ===\n" ..
             "Mode: %s\n" ..
@@ -643,24 +642,15 @@ function SoilSprayerDebug()
         tostring(spec._soilEffectsActive), tostring(spec._soilManagedFillType)))
 end
 
--- Dump Precision Farming global for API discovery
+-- Dump Precision Farming bridge status and API discovery to the log.
 function SoilPFDump()
     if g_SoilFertilityManager and g_SoilFertilityManager.pfBridge then
         g_SoilFertilityManager.pfBridge:dumpApi()
         return "PF dump written to log (check console output)"
-    else
-        -- Bridge not yet initialised — probe directly
-        if g_precisionFarming == nil then
-            print("[SoilPFDump] g_precisionFarming = nil — Precision Farming is not active")
-        else
-            print("[SoilPFDump] g_precisionFarming found but SF bridge not yet initialised")
-            print("[SoilPFDump] Top-level keys:")
-            for k, v in pairs(g_precisionFarming) do
-                print(string.format("[SoilPFDump]   .%s = %s", tostring(k), type(v)))
-            end
-        end
-        return "PF raw dump written (bridge not initialised yet)"
     end
+    -- Bridge created in SoilFertilityManager.new() so this only happens before mission load.
+    print("[SoilPFDump] SF bridge not yet initialised — load a savegame first, then run SoilPFDump")
+    return "Bridge not ready — load savegame first"
 end
 
 -- Expose global console functions
