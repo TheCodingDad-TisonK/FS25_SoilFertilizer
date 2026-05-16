@@ -1224,6 +1224,18 @@ function HookManager:installSprayerAreaHook()
                 return
             end
 
+            -- Phase 3: Inject SF's custom fill types into PF's nitrogen recognition tables.
+            -- Runs once on the first spray event where a PF extendedSprayer spec is found.
+            -- PF adds extendedSprayer to ALL sprayers when active, so any sprayer triggers this.
+            local pfBridge = g_SoilFertilityManager.pfBridge
+            if pfBridge and pfBridge.isActive and not pfBridge.fillTypesInjected then
+                local pfSpec = self["spec_FS25_precisionFarming.extendedSprayer"]
+                if pfSpec then
+                    SoilLogger.info("[PFBridge] Injecting SF fill types into PF nitrogen map...")
+                    pfBridge:injectCustomFillTypes(pfSpec.nitrogenMap)
+                end
+            end
+
             local spec = self.spec_sprayer
             if not spec or not spec.workAreaParameters then return end
 
@@ -1424,6 +1436,29 @@ function HookManager:installSprayerAreaHook()
                     local boomPts = hookMgrRef:getBoomCellPositions(self, rootX, rootZ)
                     if boomPts then
                         soilSys:markBoomCells(fieldId, boomPts)
+                    end
+                end
+
+                -- PF N relay: SF's hook fires before PF's (FS25_SoilFertilizer < FS25_precisionFarming
+                -- alphabetically, so SF appended first → runs first).
+                -- For SF custom N-bearing fill types, swap workAreaParameters to an equivalent
+                -- LIQUIDFERTILIZER volume so PF's hook paints the nitrogen map with the right amount.
+                -- SF's own nutrient accounting already ran above using the real fill type.
+                do
+                    local pfBridge = g_SoilFertilityManager and g_SoilFertilityManager.pfBridge
+                    if pfBridge and pfBridge.isActive and g_fillTypeManager then
+                        local nKgPerL = PrecisionFarmingBridge.SF_FILL_TYPE_N_AMOUNTS[fillType.name]
+                        if nKgPerL and nKgPerL > 0 then
+                            local lfFT = g_fillTypeManager:getFillTypeByName("LIQUIDFERTILIZER")
+                            if lfFT then
+                                local scaledLiters = liters * (nKgPerL / PrecisionFarmingBridge.PF_LF_N_KG_PER_L)
+                                spec.workAreaParameters.sprayFillType = lfFT.index
+                                spec.workAreaParameters.usage = scaledLiters
+                                SoilLogger.debug("[PFRelay] %s → LIQUIDFERTILIZER x%.3f (%.2fL → %.2fL)",
+                                    fillType.name, nKgPerL / PrecisionFarmingBridge.PF_LF_N_KG_PER_L,
+                                    liters, scaledLiters)
+                            end
+                        end
                     end
                 end
 

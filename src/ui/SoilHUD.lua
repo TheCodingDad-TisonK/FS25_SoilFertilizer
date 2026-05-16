@@ -995,7 +995,10 @@ function SoilHUD:drawPanel()
         local rateMultiplier = (rm and sprayer) and rm:getMultiplier(sprayer.id) or 1.0
 
         -- N / P / K rows
-        cy = self:drawNutrientRow("N", info.nitrogen,   px, cy, pw, s, fontMult, info, profile, fillType, rateMultiplier)
+        -- When PF is active, N is owned by PF's per-pixel map — label with * so players know
+        local pfBridge = g_SoilFertilityManager and g_SoilFertilityManager.pfBridge
+        local nLabel = (pfBridge and pfBridge.isActive) and "N*" or "N"
+        cy = self:drawNutrientRow(nLabel, info.nitrogen,   px, cy, pw, s, fontMult, info, profile, fillType, rateMultiplier)
         cy = self:drawNutrientRow("P", info.phosphorus,  px, cy, pw, s, fontMult, info, profile, fillType, rateMultiplier)
         cy = self:drawNutrientRow("K", info.potassium,   px, cy, pw, s, fontMult, info, profile, fillType, rateMultiplier)
 

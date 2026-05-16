@@ -112,6 +112,16 @@ function PrecisionFarmingBridge:initialize()
         SoilLogger.info("[PFBridge] PF Mode active (detection only). " ..
             "N/pH yield penalties suppressed. Map read API not available.")
     end
+
+    -- PHASE 5 NOTE: Write-back to PF's nitrogenMap/phMap is not currently possible.
+    -- FS25 mods run in isolated Lua environments; there is no cross-mod write API
+    -- on any shared C++ object. SF changes to N (rain leaching, seasonal effects,
+    -- fallow recovery) cannot propagate to PF's spatial maps in this architecture.
+    -- If a future PF version exposes a write API on g_currentMission, implement
+    -- write-back here: call setValueAtWorldPos(x, z, value) inside a pcall() guard,
+    -- converting SF's 0-100 scale back to kg/ha via (value / 100) * PF_N_MAX_KG_HA.
+    self.canWriteMaps = false
+
     return true
 end
 
@@ -196,6 +206,66 @@ function PrecisionFarmingBridge:_sampleFieldGrid(field, sampler)
         end
     end
     return count > 0 and (sum / count) or nil
+end
+
+-- =========================================================
+-- PF FILL TYPE INJECTION
+-- =========================================================
+
+-- N content (kg N per litre) for SF's custom nitrogen fill types.
+-- Used by the PF relay mechanism: when one of these is sprayed, our hook swaps
+-- workAreaParameters to an equivalent LIQUIDFERTILIZER volume before PF's hook fires,
+-- so PF paints its nitrogen map with the correct N amount.
+-- Calibrated to real-world chemistry relative to PF's baseline:
+--   FERTILIZER       = 0.27 kg N/L
+--   LIQUIDFERTILIZER = 0.39 kg N/L  ← relay reference
+PrecisionFarmingBridge.SF_FILL_TYPE_N_AMOUNTS = {
+    UAN32         = 0.42,   -- UAN 32% N solution, density ~1.32 kg/L
+    UAN28         = 0.37,   -- UAN 28% N solution, density ~1.28 kg/L
+    ANHYDROUS     = 0.50,   -- Anhydrous ammonia 82% N (volume basis)
+    AMS           = 0.21,   -- Ammonium sulfate 21% N
+    UREA          = 0.46,   -- Urea 46% N
+    AN            = 0.34,   -- Ammonium nitrate 34.5% N
+    LIQUID_UREA   = 0.32,   -- Liquid urea solution ~29% N
+    LIQUID_AMS    = 0.24,   -- AMS solution ~21% N
+    LIQUID_DAP    = 0.18,   -- DAP solution 18-46-0
+    LIQUID_MAP    = 0.11,   -- MAP solution 11-52-0
+    -- LIQUID_POTASH: 0% N — not relayed
+}
+
+-- PF's LIQUIDFERTILIZER N content (from PrecisionFarming.xml <nAmount>) used as relay baseline.
+PrecisionFarmingBridge.PF_LF_N_KG_PER_L = 0.39
+
+--- Register SF's custom fill types in PF's recognition set (fertilizerFillTypes).
+--- This makes PF's UI show the type in its sprayer panel.
+--- N map painting is handled by the relay in HookManager, not by PF's internal lookup.
+---@param nitrogenMap table PF nitrogenMap object from extendedSprayer spec
+function PrecisionFarmingBridge:injectCustomFillTypes(nitrogenMap)
+    if not nitrogenMap or not nitrogenMap.fertilizerFillTypes then
+        SoilLogger.warning("[PFBridge] injectCustomFillTypes: fertilizerFillTypes not found — skipping")
+        self.fillTypesInjected = true
+        return
+    end
+
+    local fillTypes = nitrogenMap.fertilizerFillTypes
+    local ok = pcall(function()
+        local injected = 0
+        for fillTypeName in pairs(self.SF_FILL_TYPE_N_AMOUNTS) do
+            if g_fillTypeManager then
+                local ft = g_fillTypeManager:getFillTypeByName(fillTypeName)
+                if ft and ft.index then
+                    fillTypes[ft.index] = ft.index
+                    injected = injected + 1
+                end
+            end
+        end
+        SoilLogger.info("[PFBridge] Registered %d SF fill types in PF recognition set", injected)
+    end)
+
+    if not ok then
+        SoilLogger.warning("[PFBridge] injectCustomFillTypes: pcall failed")
+    end
+    self.fillTypesInjected = true
 end
 
 -- =========================================================
