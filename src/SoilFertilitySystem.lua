@@ -2763,6 +2763,7 @@ function SoilFertilitySystem:getFieldInfo(fieldId, x, z)
     local ph = field.pH         or SoilConstants.FIELD_DEFAULTS.pH
     local om = field.organicMatter or SoilConstants.FIELD_DEFAULTS.organicMatter
 
+    local fromZoneCell = false
     if x and z and field.zoneData then
         local zone = SoilConstants.ZONE
         local cellKey = tostring(math.floor(x / zone.CELL_SIZE) * 10000 + math.floor(z / zone.CELL_SIZE))
@@ -2773,6 +2774,7 @@ function SoilFertilitySystem:getFieldInfo(fieldId, x, z)
             k  = cell.K  or k
             ph = cell.pH or ph
             om = cell.OM or om
+            fromZoneCell = true
         end
     end
 
@@ -2884,6 +2886,7 @@ function SoilFertilitySystem:getFieldInfo(fieldId, x, z)
         sessionCoverageFraction = field.sessionCoverageFraction or 0,
         sessionLastProduct      = field.sessionLastProduct,
         compaction = field.compaction or 0,
+        fromZoneCell = fromZoneCell,
         needsFertilization = (
             field.nitrogen < fertThresholds.nitrogen or
             field.phosphorus < fertThresholds.phosphorus or
