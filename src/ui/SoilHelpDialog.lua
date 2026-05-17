@@ -2,8 +2,7 @@
 -- FS25 Soil & Fertilizer — PDA Help Dialog
 -- =========================================================
 -- Opened from the PDA screen X/help button.
--- Explains nutrients, soil chemistry, crop targets, status
--- levels, crop pressure, and general tips.
+-- Two-column layout: nutrients/chemistry/targets | status/pressure/tips
 -- =========================================================
 -- Author: TisonK
 -- =========================================================
@@ -17,41 +16,61 @@ local SF_HELP_MOD_DIR  = g_currentModDirectory
 
 SoilHelpDialog.INSTANCE = nil
 
--- Content table: {t="H"|"B"|"S", v="text"}
--- H = section header (bold, green, uppercase)
--- B = body line (white, normal)
--- S = spacer (blank gap)
+-- Content table: {t="H"|"B"|"S"|"COL", v="text"}
+-- H   = section header (bold, green, uppercase)
+-- B   = body line (white, normal)
+-- S   = spacer (blank gap)
+-- COL = column break — switch from col1 to col2
 SoilHelpDialog.CONTENT = {
+    -- ── LEFT COLUMN ──────────────────────────────────────
     { t="H", v="NUTRIENTS" },
-    { t="B", v="N  (Nitrogen)     \226\128\148 Depletes every harvest. Apply UAN, Urea, AMS, or Manure." },
-    { t="B", v="P  (Phosphorus)   \226\128\148 Long-lasting. Apply MAP, DAP, Liquid MAP, or Liquid DAP." },
-    { t="B", v="K  (Potassium)    \226\128\148 Apply Potash or Liquid Potash. Critical for root crops." },
-    { t="B", v="OM (Organic Mat.) \226\128\148 Builds slowly. Incorporate Manure, Compost, or Biosolids." },
+    { t="B", v="N  (Nitrogen)    \226\128\148 Depletes every harvest." },
+    { t="B", v="   Apply UAN, Urea, AMS, or Manure." },
+    { t="B", v="P  (Phosphorus)  \226\128\148 Long-lasting." },
+    { t="B", v="   Apply MAP, DAP, Liquid MAP, or Liquid DAP." },
+    { t="B", v="K  (Potassium)   \226\128\148 Critical for root crops." },
+    { t="B", v="   Apply Potash or Liquid Potash." },
+    { t="B", v="OM (Organic Mat.) \226\128\148 Builds slowly." },
+    { t="B", v="   Incorporate Manure, Compost, or Biosolids." },
     { t="S", v=" " },
     { t="H", v="SOIL CHEMISTRY" },
-    { t="B", v="pH 6.5 - 7.0 = Ideal. Apply Lime if below 6.5. Apply Gypsum if above 7.5." },
-    { t="B", v="Lime raises pH. Gypsum lowers pH. Allow 1-2 seasons to normalize." },
+    { t="B", v="pH 6.5 - 7.0 = Ideal range." },
+    { t="B", v="Apply Lime if below 6.5 (too acidic)." },
+    { t="B", v="Apply Gypsum if above 7.5 (over-limed)." },
+    { t="B", v="Allow 1-2 seasons to normalize after treatment." },
     { t="S", v=" " },
     { t="H", v="CROP TARGETS" },
-    { t="B", v="Each crop has different N/P/K requirements. The map tooltip shows" },
-    { t="B", v="the gap between current levels and the crop's optimal target." },
-    { t="B", v="Green = at or above target. Red = deficit. Hover a cell to inspect." },
-    { t="S", v=" " },
+    { t="B", v="Each crop has unique N / P / K requirements." },
+    { t="B", v="The map tooltip shows the gap between your" },
+    { t="B", v="current level and the crop's optimal target." },
+    { t="B", v="Green = at or above target." },
+    { t="B", v="Red = deficit. Hover a map cell to inspect." },
+    -- ── COLUMN BREAK ─────────────────────────────────────
+    { t="COL", v="" },
+    -- ── RIGHT COLUMN ─────────────────────────────────────
     { t="H", v="STATUS LEVELS" },
-    { t="B", v="Good  (green)  \226\128\148 Above optimal threshold. No action needed." },
-    { t="B", v="Fair  (yellow) \226\128\148 Below optimal. Monitor or apply a preventive top-up." },
-    { t="B", v="Poor  (red)    \226\128\148 Below minimum. Immediate treatment required." },
+    { t="B", v="Good  (green)  \226\128\148 At or above optimal." },
+    { t="B", v="   No action needed." },
+    { t="B", v="Fair  (yellow) \226\128\148 Below optimal." },
+    { t="B", v="   Monitor or apply a preventive top-up." },
+    { t="B", v="Poor  (red)    \226\128\148 Below minimum." },
+    { t="B", v="   Immediate treatment required." },
     { t="S", v=" " },
     { t="H", v="CROP PRESSURE" },
-    { t="B", v="Weed    > 20% \226\128\148 Apply Herbicide or use mechanical weeder / hoe." },
+    { t="B", v="Weed    > 20% \226\128\148 Apply Herbicide or use" },
+    { t="B", v="   mechanical weeder / hoe." },
     { t="B", v="Pest    > 20% \226\128\148 Apply Insecticide." },
     { t="B", v="Disease > 20% \226\128\148 Apply Fungicide." },
     { t="S", v=" " },
     { t="H", v="TIPS" },
-    { t="B", v="* Open the Treatment Plan tab to see which fields need attention most." },
-    { t="B", v="* Use the soil map overlay (press M then Soil Layers) to see per-cell data." },
-    { t="B", v="* Season + rain affect nutrients. Avoid over-applying N in autumn." },
-    { t="B", v="* Crop rotation avoids soil fatigue and can grant a legume N bonus." },
+    { t="B", v="* Open Treatment Plan tab — fields sorted" },
+    { t="B", v="  by urgency so you treat the worst first." },
+    { t="B", v="* Soil overlay (M key, Soil Layers tab)" },
+    { t="B", v="  shows per-cell colour-coded data." },
+    { t="B", v="* Rain leaches N. Avoid heavy N application" },
+    { t="B", v="  before forecast rain or in autumn." },
+    { t="B", v="* Legume crops (soy, clover) add a free" },
+    { t="B", v="  N bonus on the next season." },
 }
 
 -- ── i18n helper ───────────────────────────────────────────
@@ -109,7 +128,8 @@ end
 
 function SoilHelpDialog:onGuiSetupFinished()
     SoilHelpDialog:superClass().onGuiSetupFinished(self)
-    self._elContentBox = self:getDescendantById("sfHelp_contentBox")
+    self._elCol1 = self:getDescendantById("sfHelp_col1")
+    self._elCol2 = self:getDescendantById("sfHelp_col2")
 end
 
 function SoilHelpDialog:onOpen()
@@ -125,39 +145,44 @@ end
 -- ── Content Builder ───────────────────────────────────────
 
 function SoilHelpDialog:_buildContent()
-    if not self._elContentBox then return end
-
-    local profileH = g_gui:getProfile("sfHelp_header")
-    local profileB = g_gui:getProfile("sfHelp_body")
-    local profileS = g_gui:getProfile("sfHelp_spacer")
+    local profileH = g_gui:getProfile("sfHelp_colHeader")
+    local profileB = g_gui:getProfile("sfHelp_colBody")
+    local profileS = g_gui:getProfile("sfHelp_colSpacer")
 
     if not profileH or not profileB then
-        SoilLogger.warning("SoilHelpDialog: required profiles not found")
+        SoilLogger.warning("SoilHelpDialog: required column profiles not found")
         return
     end
 
-    for _, row in ipairs(SoilHelpDialog.CONTENT) do
-        local profile = (row.t == "H") and profileH
-                     or (row.t == "S") and profileS
-                     or profileB
+    local currentBox = self._elCol1
 
-        if profile then
-            local el = TextElement.new()
-            el:loadProfile(profile, true)
-            el:setText(row.v)
-            self._elContentBox:addElement(el)
-            el:onGuiSetupFinished()
-            table.insert(self._contentLineEls, el)
+    for _, row in ipairs(SoilHelpDialog.CONTENT) do
+        if row.t == "COL" then
+            if self._elCol1 then self._elCol1:invalidateLayout() end
+            currentBox = self._elCol2
+        elseif currentBox then
+            local profile = (row.t == "H") and profileH
+                         or (row.t == "S") and profileS
+                         or profileB
+
+            if profile then
+                local el = TextElement.new()
+                el:loadProfile(profile, true)
+                el:setText(row.v)
+                currentBox:addElement(el)
+                el:onGuiSetupFinished()
+                table.insert(self._contentLineEls, { box = currentBox, el = el })
+            end
         end
     end
 
-    self._elContentBox:invalidateLayout()
+    if self._elCol2 then self._elCol2:invalidateLayout() end
 end
 
 function SoilHelpDialog:_clearContent()
-    for _, el in ipairs(self._contentLineEls) do
-        if self._elContentBox then
-            self._elContentBox:removeElement(el)
+    for _, entry in ipairs(self._contentLineEls) do
+        if entry.box then
+            entry.box:removeElement(entry.el)
         end
     end
     self._contentLineEls = {}

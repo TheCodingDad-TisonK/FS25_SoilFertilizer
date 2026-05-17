@@ -2,8 +2,7 @@
 -- FS25 Soil & Fertilizer — Soil Map Overlay Help Dialog
 -- =========================================================
 -- Opened from the Help button in the overlay sidebar.
--- Explains how to read the soil map, layer meanings, the
--- tooltip, the color legend, and sidebar buttons.
+-- Two-column layout: how-to-read/layers | tooltip/legend/buttons/tips
 -- =========================================================
 -- Author: TisonK
 -- =========================================================
@@ -17,45 +16,58 @@ local SF_OVHELP_MOD_DIR  = g_currentModDirectory
 
 SoilOverlayHelpDialog.INSTANCE = nil
 
--- Content table: {t="H"|"B"|"S", v="text"}
--- H = section header (bold, green, uppercase)
--- B = body line (white, normal)
--- S = spacer (blank gap)
+-- Content table: {t="H"|"B"|"S"|"COL", v="text"}
+-- H   = section header (bold, green, uppercase)
+-- B   = body line (white, normal)
+-- S   = spacer (blank gap)
+-- COL = column break — switch from col1 to col2
 SoilOverlayHelpDialog.CONTENT = {
-    { t="H", v="HOW TO READ THE SOIL MAP" },
-    { t="B", v="The overlay colours each map cell based on the selected nutrient layer." },
-    { t="B", v="  Red    = Poor  (below minimum, needs immediate attention)" },
-    { t="B", v="  Yellow = Fair  (below optimal, monitor or top-up soon)" },
-    { t="B", v="  Green  = Good  (at or above optimal, no action needed)" },
-    { t="B", v="Unsampled cells appear dim \226\128\148 walk onto the field to sample them." },
+    -- ── LEFT COLUMN ──────────────────────────────────────
+    { t="H", v="HOW TO READ THE MAP" },
+    { t="B", v="Each cell is colour-coded for the active layer:" },
+    { t="B", v="  Red    \226\128\148 Poor  (below minimum)" },
+    { t="B", v="  Yellow \226\128\148 Fair  (below optimal)" },
+    { t="B", v="  Green  \226\128\148 Good  (at or above optimal)" },
+    { t="B", v="Dim cells = unsampled. Walk onto the field" },
+    { t="B", v="to collect a soil reading for that area." },
     { t="S", v=" " },
     { t="H", v="MAP LAYERS" },
-    { t="B", v="Layer 1 \226\128\148 Nitrogen (N)      : Most volatile. Depletes on every harvest." },
-    { t="B", v="Layer 2 \226\128\148 Phosphorus (P)    : Slow-moving. Long-lasting from MAP / DAP." },
-    { t="B", v="Layer 3 \226\128\148 Potassium (K)     : Apply Potash. Important for root crops." },
-    { t="B", v="Layer 4 \226\128\148 pH                : 6.5 - 7.0 ideal. Green = optimal range." },
-    { t="B", v="Layer 5 \226\128\148 Organic Matter    : Higher = better soil structure and retention." },
+    { t="B", v="Layer 1 \226\128\148 Nitrogen (N)" },
+    { t="B", v="   Most volatile. Depletes on every harvest." },
+    { t="B", v="Layer 2 \226\128\148 Phosphorus (P)" },
+    { t="B", v="   Slow-moving. Long-lasting from MAP / DAP." },
+    { t="B", v="Layer 3 \226\128\148 Potassium (K)" },
+    { t="B", v="   Apply Potash. Critical for root crops." },
+    { t="B", v="Layer 4 \226\128\148 pH" },
+    { t="B", v="   6.5 - 7.0 ideal. Green = in optimal range." },
+    { t="B", v="Layer 5 \226\128\148 Organic Matter" },
+    { t="B", v="   Higher = better structure and water retention." },
+    -- ── COLUMN BREAK ─────────────────────────────────────
+    { t="COL", v="" },
+    -- ── RIGHT COLUMN ─────────────────────────────────────
+    { t="H", v="CELL TOOLTIP (HOVER A CELL)" },
+    { t="B", v="Shows the exact nutrient value (ppm)," },
+    { t="B", v="its Good / Fair / Poor status, and —" },
+    { t="B", v="when a crop is planted — the crop's target" },
+    { t="B", v="and the gap above or below it." },
     { t="S", v=" " },
-    { t="H", v="CELL TOOLTIP (hover a cell)" },
-    { t="B", v="Shows the exact nutrient value (ppm), its Good / Fair / Poor status," },
-    { t="B", v="and \226\128\148 when a crop is planted \226\128\148 the crop's target value and the gap" },
-    { t="B", v="(how many ppm you are above or below the crop's optimal requirement)." },
-    { t="S", v=" " },
-    { t="H", v="COLOUR LEGEND (sidebar)" },
-    { t="B", v="The gradient bar shows what colour = what status for the active layer." },
-    { t="B", v="All layers use the same Red (poor) to Yellow (fair) to Green (good) scale." },
+    { t="H", v="COLOUR LEGEND (SIDEBAR)" },
+    { t="B", v="The gradient bar shows what colour = what" },
+    { t="B", v="status for the active layer." },
+    { t="B", v="All layers: Red (poor) \226\128\148 Yellow \226\128\148 Green (good)." },
     { t="S", v=" " },
     { t="H", v="SIDEBAR BUTTONS" },
-    { t="B", v="Farm Overview  \226\128\148 Opens the PDA soil report for all your fields." },
-    { t="B", v="Treatment Plan \226\128\148 Opens a prioritised list of fields needing attention." },
-    { t="B", v="Disable Overlay \226\128\148 Turns off the soil overlay (re-enable via sidebar)." },
+    { t="B", v="Farm Overview  \226\128\148 PDA soil report." },
+    { t="B", v="Treatment Plan \226\128\148 Fields by urgency." },
+    { t="B", v="Disable Overlay \226\128\148 Turn off the overlay." },
     { t="B", v="Help           \226\128\148 You are reading it." },
     { t="S", v=" " },
     { t="H", v="TIPS" },
-    { t="B", v="* Click a map cell while the overlay is active to inspect it." },
-    { t="B", v="* The number on each field tile shows the field-average value." },
-    { t="B", v="* Zoom into a field to see per-cell variability within the field." },
-    { t="B", v="* Switch layers with the numbered buttons at the top of the sidebar." },
+    { t="B", v="* Click a cell to inspect it in detail." },
+    { t="B", v="* Number on field tile = field average." },
+    { t="B", v="* Zoom in to see per-cell variability." },
+    { t="B", v="* Layer buttons at top of sidebar switch" },
+    { t="B", v="  between N / P / K / pH / OM views." },
 }
 
 -- ── i18n helper ───────────────────────────────────────────
@@ -113,7 +125,8 @@ end
 
 function SoilOverlayHelpDialog:onGuiSetupFinished()
     SoilOverlayHelpDialog:superClass().onGuiSetupFinished(self)
-    self._elContentBox = self:getDescendantById("sfOvHelp_contentBox")
+    self._elCol1 = self:getDescendantById("sfOvHelp_col1")
+    self._elCol2 = self:getDescendantById("sfOvHelp_col2")
 end
 
 function SoilOverlayHelpDialog:onOpen()
@@ -129,39 +142,44 @@ end
 -- ── Content Builder ───────────────────────────────────────
 
 function SoilOverlayHelpDialog:_buildContent()
-    if not self._elContentBox then return end
-
-    local profileH = g_gui:getProfile("sfOvHelp_header")
-    local profileB = g_gui:getProfile("sfOvHelp_body")
-    local profileS = g_gui:getProfile("sfOvHelp_spacer")
+    local profileH = g_gui:getProfile("sfOvHelp_colHeader")
+    local profileB = g_gui:getProfile("sfOvHelp_colBody")
+    local profileS = g_gui:getProfile("sfOvHelp_colSpacer")
 
     if not profileH or not profileB then
-        SoilLogger.warning("SoilOverlayHelpDialog: required profiles not found")
+        SoilLogger.warning("SoilOverlayHelpDialog: required column profiles not found")
         return
     end
 
-    for _, row in ipairs(SoilOverlayHelpDialog.CONTENT) do
-        local profile = (row.t == "H") and profileH
-                     or (row.t == "S") and profileS
-                     or profileB
+    local currentBox = self._elCol1
 
-        if profile then
-            local el = TextElement.new()
-            el:loadProfile(profile, true)
-            el:setText(row.v)
-            self._elContentBox:addElement(el)
-            el:onGuiSetupFinished()
-            table.insert(self._contentLineEls, el)
+    for _, row in ipairs(SoilOverlayHelpDialog.CONTENT) do
+        if row.t == "COL" then
+            if self._elCol1 then self._elCol1:invalidateLayout() end
+            currentBox = self._elCol2
+        elseif currentBox then
+            local profile = (row.t == "H") and profileH
+                         or (row.t == "S") and profileS
+                         or profileB
+
+            if profile then
+                local el = TextElement.new()
+                el:loadProfile(profile, true)
+                el:setText(row.v)
+                currentBox:addElement(el)
+                el:onGuiSetupFinished()
+                table.insert(self._contentLineEls, { box = currentBox, el = el })
+            end
         end
     end
 
-    self._elContentBox:invalidateLayout()
+    if self._elCol2 then self._elCol2:invalidateLayout() end
 end
 
 function SoilOverlayHelpDialog:_clearContent()
-    for _, el in ipairs(self._contentLineEls) do
-        if self._elContentBox then
-            self._elContentBox:removeElement(el)
+    for _, entry in ipairs(self._contentLineEls) do
+        if entry.box then
+            entry.box:removeElement(entry.el)
         end
     end
     self._contentLineEls = {}
