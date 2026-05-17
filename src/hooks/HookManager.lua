@@ -1003,6 +1003,28 @@ function HookManager:installHarvestHook()
         end
     end
 
+    -- Late-patch combines spawned AFTER hook installation.
+    -- FS25's specialization system captures the Combine.addCutterArea reference at
+    -- vehicle-type registration time (before our hook). New vehicles of combine types
+    -- use that captured original as their instance method, bypassing the class-level
+    -- replacement. Hooking VehicleSystem:addVehicle ensures every combine — including
+    -- mod vehicles bought from the shop mid-session — gets the wrapper on first spawn.
+    if type(VehicleSystem) == "table" and type(VehicleSystem.addVehicle) == "function" then
+        local origAddVehicle = VehicleSystem.addVehicle
+        VehicleSystem.addVehicle = function(vsSelf, vehicle)
+            local r = origAddVehicle(vsSelf, vehicle)
+            if vehicle and vehicle.spec_combine and type(vehicle.addCutterArea) == "function" then
+                if vehicle.addCutterArea ~= Combine.addCutterArea then
+                    vehicle.addCutterArea = makeHarvestWrapper(vehicle.addCutterArea)
+                    SoilLogger.debug("[HarvestHook] Late-patched new combine: %s",
+                        tostring(vehicle.configFileName or vehicle.typeName or "?"))
+                end
+            end
+            return r
+        end
+        self:register(VehicleSystem, "addVehicle", origAddVehicle, "VehicleSystem.addVehicle (harvest late-patch)")
+    end
+
     SoilLogger.info("[OK] Harvest hook installed (Combine.addCutterArea) — %d existing combines patched", patched)
     return true
 end
@@ -1301,6 +1323,37 @@ function HookManager:installSprayerAreaHook()
                 local diseaseOnlyDirect = diseaseEffectiveness and not isFertilizer
 
                 if not isFertilizer and not herbOnlyDirect and not pestOnlyDirect and not diseaseOnlyDirect then return end
+
+                -- PF mode: validate fertilizer was actually consumed before crediting nutrients.
+                -- PF's extendedSprayer can block tank drain (when field is at target N) without
+                -- clearing wap.usage. Compare current fill level against sprayFillLevel (captured
+                -- at frame start by vanilla onStartWorkAreaProcessing) — if unchanged, PF skipped
+                -- the application and we must not credit nutrients for product that wasn't used.
+                -- External-fill (BUY) mode is exempt: the tank intentionally stays full there.
+                do
+                    local pfBridgeRef = g_SoilFertilityManager and g_SoilFertilityManager.pfBridge
+                    if pfBridgeRef and pfBridgeRef.isActive and isFertilizer then
+                        local PF_OWNED = { FERTILIZER=true, LIQUIDFERTILIZER=true, MANURE=true, LIQUIDMANURE=true, DIGESTATE=true }
+                        if PF_OWNED[fillType.name] then
+                            local wap = spec.workAreaParameters
+                            local isExternalFill = wap and (wap.sprayVehicle == nil)
+                            if not isExternalFill then
+                                local fuIdx = nil
+                                pcall(function() fuIdx = self:getSprayerFillUnitIndex() end)
+                                if fuIdx then
+                                    local curLevel = nil
+                                    pcall(function() curLevel = self:getFillUnitFillLevel(fuIdx) end)
+                                    -- 0.01 L tolerance for float rounding in fill level calculations
+                                    if curLevel and curLevel >= sprayFillLevel - 0.01 then
+                                        SoilLogger.debug("[PFBridge] fill unchanged (%.2fL >= %.2fL start) — PF blocked consumption, skipping SF update",
+                                            curLevel, sprayFillLevel)
+                                        return
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
 
                 -- Resolve field from vehicle root position.
                 -- When the tractor body straddles a field boundary (common on edge fields),
