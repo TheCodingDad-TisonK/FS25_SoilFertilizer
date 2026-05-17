@@ -398,14 +398,16 @@ function SoilMapOverlay:updateSamplePoints(force)
                         end
                     elseif layerIdx >= 1 and layerIdx <= 10 then
                         -- zoneData per-cell path: standard maps, layers 1-10.
-                        -- Cells that have been modified show their local value; unvisited cells
-                        -- fall back to the field average so the map is always fully coloured.
+                        -- Cells that have been measured (sprayer/harvester passed) show their
+                        -- real local value at full opacity. Unvisited cells fall back to the
+                        -- field-level average at half opacity so the map stays fully coloured
+                        -- but players can tell measured zones from estimated ones.
                         local fieldEntry = self.soilSystem.fieldData and self.soilSystem.fieldData[farmlandId]
                         local zoneData = fieldEntry and fieldEntry.zoneData
                         local zone = SoilConstants.ZONE
                         for _, pt in ipairs(polyPts) do
                             if totalPoints < maxPoints then
-                                local r, g, b
+                                local r, g, b, a
                                 if zoneData then
                                     local cx = math.floor(pt.x / zone.CELL_SIZE)
                                     local cz = math.floor(pt.z / zone.CELL_SIZE)
@@ -413,11 +415,17 @@ function SoilMapOverlay:updateSamplePoints(force)
                                     local cell = zoneData[cellKey]
                                     if cell then
                                         local val = getCellLayerValue(cell, layerIdx)
-                                        if val then r, g, b = self:valueToLayerColor(layerIdx, val) end
+                                        if val then
+                                            r, g, b = self:valueToLayerColor(layerIdx, val)
+                                            a = 1.0   -- measured: full opacity
+                                        end
                                     end
                                 end
-                                if not r then r, g, b = self:getLayerColor(layerIdx, info, farmlandId) end
-                                table.insert(self.samplePoints, {x = pt.x, z = pt.z, r = r, g = g, b = b})
+                                if not r then
+                                    r, g, b = self:getLayerColor(layerIdx, info, farmlandId)
+                                    a = 0.45  -- estimated (field average): dimmed
+                                end
+                                table.insert(self.samplePoints, {x = pt.x, z = pt.z, r = r, g = g, b = b, a = a})
                                 totalPoints = totalPoints + 1
                             end
                         end
@@ -496,7 +504,7 @@ function SoilMapOverlay:onDraw(frame, mapElement, ingameMap, pageIndex)
         if screenX >= mapX and screenX <= mapMaxX
            and screenY >= mapY and screenY <= mapMaxY then
             drawFilledRect(screenX - halfX, screenY - halfY, sizeX, sizeY,
-                           point.r, point.g, point.b, SoilMapOverlay.ALPHA)
+                           point.r, point.g, point.b, (point.a or 1.0) * SoilMapOverlay.ALPHA)
         end
     end
 

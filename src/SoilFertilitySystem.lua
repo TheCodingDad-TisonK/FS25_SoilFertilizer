@@ -2197,18 +2197,11 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
         if entry.pH then field.pH        = math.max(limits.PH_MIN, math.min(limits.PH_MAX, field.pH + entry.pH * factor)) end
         if entry.OM then field.organicMatter = math.max(0, math.min(limits.ORGANIC_MATTER_MAX, field.organicMatter + entry.OM * factor)) end
 
-        -- Sync N/P/K in all existing zone cells so tillage-created cells immediately
-        -- reflect subsequent fertilizer applications (these nutrients spread uniformly
-        -- and the bulk sync keeps the overlay accurate). pH and OM are excluded so
-        -- that per-zone variation is preserved — only the actual spray path cell
-        -- accumulates pH/OM changes via the cellFactor update below.
-        if field.zoneData then
-            for _, cell in pairs(field.zoneData) do
-                if entry.N then cell.N = field.nitrogen end
-                if entry.P then cell.P = field.phosphorus end
-                if entry.K then cell.K = field.potassium end
-            end
-        end
+        -- No bulk zone-cell sync. Each cell accumulates nutrients only from actual
+        -- spray passes through its position (via the cellFactor path below). This
+        -- preserves per-zone variation on the map overlay — the field-level values
+        -- (field.nitrogen, field.pH, etc.) are the aggregate for HUD and yield;
+        -- zone cells are the per-area record for the overlay.
 
         -- Throttled per-field diagnostic (debug mode, lime types always logged; nutrients every 4 s).
         -- Validates that pH shift and nutrient deltas are agronomically sensible.
