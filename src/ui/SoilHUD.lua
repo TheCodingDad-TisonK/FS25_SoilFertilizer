@@ -793,9 +793,10 @@ end
 
 function SoilHUD:pHColor(pH)
     local poor, fair, good = self:palette()
-    if pH >= 6.5 and pH <= 7.0 then return good
-    elseif pH >= 5.5 and pH <= 7.5 then return fair
-    else return poor end
+    if pH >= 6.5 and pH <= 7.0 then return good            -- optimal band
+    elseif pH > 7.0 and pH <= 7.5 then return poor         -- over-limed: treat as poor so players stop adding lime
+    elseif pH >= 5.5 then return fair                       -- slightly acidic: fair
+    else return poor end                                    -- very acidic
 end
 
 function SoilHUD:omColor(om)

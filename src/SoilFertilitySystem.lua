@@ -2197,15 +2197,16 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
         if entry.pH then field.pH        = math.max(limits.PH_MIN, math.min(limits.PH_MAX, field.pH + entry.pH * factor)) end
         if entry.OM then field.organicMatter = math.max(0, math.min(limits.ORGANIC_MATTER_MAX, field.organicMatter + entry.OM * factor)) end
 
-        -- Sync all existing zone cells to the updated field values so cells stamped
-        -- by previous tillage operations reflect the fertilizer that was just applied.
+        -- Sync N/P/K in all existing zone cells so tillage-created cells immediately
+        -- reflect subsequent fertilizer applications (these nutrients spread uniformly
+        -- and the bulk sync keeps the overlay accurate). pH and OM are excluded so
+        -- that per-zone variation is preserved — only the actual spray path cell
+        -- accumulates pH/OM changes via the cellFactor update below.
         if field.zoneData then
             for _, cell in pairs(field.zoneData) do
-                if entry.N  then cell.N  = field.nitrogen end
-                if entry.P  then cell.P  = field.phosphorus end
-                if entry.K  then cell.K  = field.potassium end
-                if entry.pH then cell.pH = field.pH end
-                if entry.OM then cell.OM = field.organicMatter end
+                if entry.N then cell.N = field.nitrogen end
+                if entry.P then cell.P = field.phosphorus end
+                if entry.K then cell.K = field.potassium end
             end
         end
 
