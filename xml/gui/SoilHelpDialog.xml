@@ -55,12 +55,13 @@
       <alignmentX value="left"/>
       <elementSpacing value="3px"/>
     </Profile>
-    <!-- Section header: bold, green, uppercase -->
+    <!-- Section header: bold, green, uppercase, left-aligned -->
     <Profile name="sfHelp_colHeader" extends="fs25_dialogText" with="anchorTopLeft">
       <textSize value="14px"/>
       <textBold value="true"/>
       <textUpperCase value="true"/>
       <textColor value="0.35 0.85 0.40 1.0"/>
+      <textAlignment value="left"/>
     </Profile>
     <!-- Body line: normal weight, white, left-aligned -->
     <Profile name="sfHelp_colBody" extends="fs25_dialogText" with="anchorTopLeft">
