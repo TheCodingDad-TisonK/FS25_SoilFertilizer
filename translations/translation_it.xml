@@ -441,7 +441,7 @@
     <e k="sf_pda_map_unavailable" v="Anteprima mappa non disponibile" eh="43983f81" />
     <e k="sf_map_health_overall" v="Salute Media del Suolo" eh="5533cbe3" />
     <e k="sf_map_btn_report" v="Apri Panoramica Fattoria" eh="6f0800e8" />
-    <e k="sf_map_btn_help" v="Nota Dev (NON ANCORA FUNZIONANTE)" eh="800e465a" />
+    <e k="sf_map_btn_help" v="Help" eh="800e465a" />
     <e k="sf_map_btn_cycle_layer" v="Cambia livello" eh="875dbf22" />
     <e k="sf_map_btn_treatment" v="Piano di trattamento" eh="4ba012e2" />
     <e k="sf_map_btn_disable" v="Disabilita overlay" eh="8e75dec5" />

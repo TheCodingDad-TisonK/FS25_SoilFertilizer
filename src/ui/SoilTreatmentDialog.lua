@@ -192,7 +192,7 @@ function SoilTreatmentDialog:_populateData()
     if info.phosphorus.value < (thresh.phosphorus.poor or 25) then
         self:_setAction(self.treatPAction, tr("sf_treat_action_p_poor", "Apply MAP or DAP (Phosphorus)."), COLOR_POOR)
     elseif info.phosphorus.value < (thresh.phosphorus.fair or 45) then
-        self:_setAction(self.treatPAction, tr("sf_treat_action_p_fair", "Apply blended FERTILIZER."), COLOR_FAIR)
+        self:_setAction(self.treatPAction, tr("sf_treat_action_p_fair", "Top-up with Liquid MAP, Liquid DAP, or DAP (P)."), COLOR_FAIR)
     else
         self:_setAction(self.treatPAction, tr("sf_treat_action_ok", "OK"), COLOR_GOOD)
     end
@@ -201,7 +201,7 @@ function SoilTreatmentDialog:_populateData()
     if info.potassium.value < (thresh.potassium.poor or 20) then
         self:_setAction(self.treatKAction, tr("sf_treat_action_k_poor", "Apply POTASH (Potassium)."), COLOR_POOR)
     elseif info.potassium.value < (thresh.potassium.fair or 40) then
-        self:_setAction(self.treatKAction, tr("sf_treat_action_k_fair", "Apply blended FERTILIZER."), COLOR_FAIR)
+        self:_setAction(self.treatKAction, tr("sf_treat_action_k_fair", "Top-up with Liquid Potash or Potash (K)."), COLOR_FAIR)
     else
         self:_setAction(self.treatKAction, tr("sf_treat_action_ok", "OK"), COLOR_GOOD)
     end

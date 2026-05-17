@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<!--
+    Soil & Fertilizer — In-Game Help Guide (PDA)
+    Opened from the PDA X/help button.
+    Content lines are built dynamically in Lua.
+    Controller: SoilHelpDialog (src/ui/SoilHelpDialog.lua)
+-->
+<GUI onOpen="onOpen" onClose="onClose" onCreate="onCreate">
+  <GuiElement profile="newLayer"/>
+  <Bitmap profile="dialogFullscreenBg" id="dialogBg"/>
+
+  <GuiElement profile="sfHelp_bg" id="dialogElement">
+
+    <ThreePartBitmap profile="fs25_dialogBgMiddle"/>
+    <ThreePartBitmap profile="fs25_dialogBgTop"/>
+    <ThreePartBitmap profile="fs25_dialogBgBottom"/>
+
+    <!-- Title -->
+    <Text profile="fs25_dialogTitle" id="sfHelp_title"
+          text="Soil &amp; Fertilizer Guide" position="0px -30px"/>
+
+    <!-- Separator -->
+    <Bitmap profile="sfHelp_sep" position="0px -66px" size="620px 2px"/>
+
+    <!-- Dynamic content box — Lua adds header/body TextElements here -->
+    <BoxLayout profile="sfHelp_contentBox" id="sfHelp_contentBox"
+               position="0px -84px"/>
+
+    <BoxLayout profile="fs25_dialogButtonBox">
+      <Button profile="buttonOK" text="Close" onClick="onClickClose"/>
+    </BoxLayout>
+
+  </GuiElement>
+
+  <GUIProfiles>
+    <Profile name="sfHelp_bg" extends="fs25_dialogBg">
+      <size value="680px 720px"/>
+    </Profile>
+    <Profile name="sfHelp_sep" extends="baseReference" with="anchorTopCenter">
+      <imageColor value="1.0 1.0 1.0 0.15"/>
+    </Profile>
+    <!-- Vertical BoxLayout — Lua adds elements at runtime -->
+    <Profile name="sfHelp_contentBox" extends="emptyPanel" with="anchorTopCenter">
+      <size value="620px 575px"/>
+      <flowDirection value="vertical"/>
+      <useFullVisibility value="false"/>
+      <alignmentX value="center"/>
+      <elementSpacing value="3px"/>
+    </Profile>
+    <!-- Section header: bold, green, uppercase -->
+    <Profile name="sfHelp_header" extends="fs25_dialogText" with="anchorTopCenter">
+      <textSize value="14px"/>
+      <textBold value="true"/>
+      <textUpperCase value="true"/>
+      <textColor value="0.35 0.85 0.40 1.0"/>
+    </Profile>
+    <!-- Body line: normal weight, white -->
+    <Profile name="sfHelp_body" extends="fs25_dialogText" with="anchorTopCenter">
+      <textSize value="12px"/>
+      <textColor value="$preset_colorWhite"/>
+    </Profile>
+    <!-- Spacer: invisible placeholder for vertical gap -->
+    <Profile name="sfHelp_spacer" extends="fs25_dialogText" with="anchorTopCenter">
+      <textSize value="6px"/>
+      <textColor value="0.0 0.0 0.0 0.0"/>
+    </Profile>
+  </GUIProfiles>
+</GUI>

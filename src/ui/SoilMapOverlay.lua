@@ -190,6 +190,9 @@ function SoilMapOverlay:onSideBarClick(posX, posY)
             elseif rect.action == "disable" then
                 self:setLayer(0)
                 return true
+            elseif rect.action == "help" then
+                if SoilOverlayHelpDialog then SoilOverlayHelpDialog.show() end
+                return true
             elseif rect.index then
                 -- Toggle: re-clicking the active layer turns the overlay off
                 local newIdx = (self.settings.activeMapLayer == rect.index) and 0 or rect.index
@@ -991,9 +994,10 @@ function SoilMapOverlay:onDrawHud(frame)
     local _, actionMargin = getNormalizedScreenValues(0, 3)
 
     local actionButtons = {
-        { key = "sf_map_btn_report",    label = "Farm Overview",  action = "report"    },
-        { key = "sf_map_btn_treatment", label = "Treatment Plan", action = "treatment" },
-        { key = "sf_map_btn_disable",   label = "Disable Overlay",action = "disable"   },
+        { key = "sf_map_btn_report",    label = "Farm Overview",   action = "report"    },
+        { key = "sf_map_btn_treatment", label = "Treatment Plan",  action = "treatment" },
+        { key = "sf_map_btn_disable",   label = "Disable Overlay", action = "disable"   },
+        { key = "sf_map_btn_help",      label = "Help",            action = "help"      },
     }
 
     for _, btn in ipairs(actionButtons) do

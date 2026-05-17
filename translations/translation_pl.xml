@@ -441,7 +441,7 @@
     <e k="sf_pda_map_unavailable" v="Podgląd mapy niedostępny" eh="43983f81" />
     <e k="sf_map_health_overall" v="Średnie zdrowie gleby" eh="5533cbe3" />
     <e k="sf_map_btn_report" v="Otwórz przegląd gospodarstwa" eh="6f0800e8" />
-    <e k="sf_map_btn_help" v="Notka dewelopera (JESZCZE NIE DZIAŁA)" eh="800e465a" />
+    <e k="sf_map_btn_help" v="Help" eh="800e465a" />
     <e k="sf_map_btn_cycle_layer" v="Przełącz warstwę" eh="875dbf22" />
     <e k="sf_map_btn_treatment" v="Plan zabiegów" eh="4ba012e2" />
     <e k="sf_map_btn_disable" v="Wyłącz nakładkę" eh="8e75dec5" />

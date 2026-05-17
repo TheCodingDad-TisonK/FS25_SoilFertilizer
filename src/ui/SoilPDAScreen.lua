@@ -467,29 +467,8 @@ end
 -- ── Map Tab button ────────────────────────────────────────
 
 function SoilPDAScreen:onClickHelp()
-    if InfoDialog then
-        local t = tr
-        local lines = {
-            t("sf_help_nutrients_header", "NUTRIENTS"),
-            t("sf_help_n",  "N  (Nitrogen)     — Depletes fast. Apply UAN, Urea, or Manure."),
-            t("sf_help_p",  "P  (Phosphorus)   — Long-lasting. Apply MAP or DAP."),
-            t("sf_help_k",  "K  (Potassium)    — Apply Potash. Important for roots."),
-            t("sf_help_om", "OM (Organic Mat.) — Builds slowly. Plow in manure/compost."),
-            "",
-            t("sf_help_soil_header", "SOIL CHEMISTRY"),
-            t("sf_help_ph", "pH  6.5 – 7.0 = Ideal.  < 6.5 apply Lime.  > 7.5 apply Gypsum."),
-            "",
-            t("sf_help_pressure_header", "CROP PRESSURE"),
-            t("sf_help_weed",    "Weed     > 20% — Apply Herbicide or use mechanical weeder/hoe."),
-            t("sf_help_pest",    "Pest     > 20% — Apply Insecticide."),
-            t("sf_help_disease", "Disease  > 20% — Apply Fungicide."),
-            "",
-            t("sf_help_status_header", "STATUS LEVELS"),
-            t("sf_help_good", "Good — No action needed."),
-            t("sf_help_fair", "Fair — Monitor / preventive top-up."),
-            t("sf_help_poor", "Poor — Immediate treatment required."),
-        }
-        InfoDialog.show(table.concat(lines, "\n"), nil, tr("sf_help_title", "Soil Quick Reference"))
+    if SoilHelpDialog then
+        SoilHelpDialog.show()
     end
 end
 
