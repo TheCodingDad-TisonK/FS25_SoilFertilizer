@@ -2214,8 +2214,16 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
         -- For LIME/LIQUIDLIME: target ~0.40 pH over a full 1-ha pass at BASE_RATES volume.
         -- For nutrients: visible delta per frame should be tiny; cumulative over full pass = profile value.
         if entry.pH then
-            -- pH types (LIME, LIQUIDLIME, GYPSUM): log every application event so you can
-            -- see the per-frame delta and verify it adds up to ~0.40 over a full field pass.
+            -- pH types (LIME, LIQUIDLIME, GYPSUM): log once per ~1000 L milestone at info
+            -- level so it appears in the log without requiring SoilDebug, making it easy to
+            -- confirm the hook is firing and the per-frame delta is accumulating correctly.
+            local phBuf = field.nutrientBuffer and field.nutrientBuffer[fillTypeIndex] or 0
+            local phBufPrev = phBuf - liters
+            if math.floor(phBuf / 1000) ~= math.floor(phBufPrev / 1000) then
+                SoilLogger.info(
+                    "FertApply pH field=%d type=%-12s buf=%.0fL factor=%.4f  pH %.3f -> %.3f (area=%.2fha)",
+                    fieldId, fillType.name, phBuf, factor, dbgPH0, field.pH, areaInHa)
+            end
             SoilLogger.debug(
                 "FertApply pH field=%d type=%-12s liters=%.4f factor=%.6f  pH %.3f -> %.3f (delta=%.4f)",
                 fieldId, fillType.name, liters, factor, dbgPH0, field.pH, field.pH - dbgPH0)

@@ -1363,8 +1363,12 @@ function HookManager:installSprayerAreaHook()
                 local x, _, z = getWorldTranslation(self.rootNode)
                 if not x then return end
 
-                -- PHASE 5: route through shared MapDataGrid-backed cache
-                local fieldId = hookMgrRef:getFieldIdAtWorldPosition(x, z)
+                -- PHASE 5: route through shared MapDataGrid-backed cache.
+                -- skipNegativeCache=true: if the cache has a stale -1 for this position
+                -- (queried before the field was registered, e.g. freshly-purchased land),
+                -- fall through to the live g_fieldManager slow-path query rather than
+                -- returning nil and silently dropping the fertilizer application.
+                local fieldId = hookMgrRef:getFieldIdAtWorldPosition(x, z, true)
 
                 -- Fallback: try the midpoints of work areas on attached implements
                 if not fieldId or fieldId <= 0 then
@@ -1375,13 +1379,13 @@ function HookManager:installSprayerAreaHook()
                             if obj then
                                 -- Try implement rootNode first
                                 local ix, _, iz = getWorldTranslation(obj.rootNode)
-                                if ix then fieldId = hookMgrRef:getFieldIdAtWorldPosition(ix, iz) end
+                                if ix then fieldId = hookMgrRef:getFieldIdAtWorldPosition(ix, iz, true) end
                                 -- Then try each work area start point
                                 if (not fieldId or fieldId <= 0) and obj.spec_workArea and obj.spec_workArea.workAreas then
                                     for _, wa in ipairs(obj.spec_workArea.workAreas) do
                                         if wa.start then
                                             local sx, _, sz = getWorldTranslation(wa.start)
-                                            if sx then fieldId = hookMgrRef:getFieldIdAtWorldPosition(sx, sz) end
+                                            if sx then fieldId = hookMgrRef:getFieldIdAtWorldPosition(sx, sz, true) end
                                         end
                                         if fieldId and fieldId > 0 then break end
                                     end
@@ -1392,7 +1396,11 @@ function HookManager:installSprayerAreaHook()
                     end
                 end
 
-                if not fieldId or fieldId <= 0 then return end
+                if not fieldId or fieldId <= 0 then
+                    SoilLogger.debug("SprayerHook: no field at rootNode (%.1f,%.1f) — skipping %s apply",
+                        x, z, fillType and fillType.name or "?")
+                    return
+                end
 
                 -- Apply rate multiplier
                 local rm = g_SoilFertilityManager.sprayerRateManager
