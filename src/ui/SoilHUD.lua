@@ -868,7 +868,14 @@ function SoilHUD:draw()
     end
 
     self:drawPanel()
-    self:drawSprayerRatePanel()
+
+    -- Suppress SF rate panel when PF compat mode is on — PF manages rate control in that case
+    local pfBridgeHud = g_SoilFertilityManager and g_SoilFertilityManager.pfBridge
+    local pfCompatActive = pfBridgeHud and pfBridgeHud.isActive and self.settings.pfCompatibilityMode
+    if not pfCompatActive then
+        self:drawSprayerRatePanel()
+    end
+
     if self.settings.showMiniReport then
         self:drawMiniReport()
     end
@@ -996,10 +1003,16 @@ function SoilHUD:drawPanel()
         local rateMultiplier = (rm and sprayer) and rm:getMultiplier(sprayer.id) or 1.0
 
         -- N / P / K rows
-        -- When PF is active, N is owned by PF's per-pixel map — label with * so players know
-        local pfBridge = g_SoilFertilityManager and g_SoilFertilityManager.pfBridge
-        local nLabel = (pfBridge and pfBridge.isActive) and "N*" or "N"
-        cy = self:drawNutrientRow(nLabel, info.nitrogen,   px, cy, pw, s, fontMult, info, profile, fillType, rateMultiplier)
+        -- When PF is active, N is owned by PF's per-pixel map — label with * so players know.
+        -- When pfCompatibilityMode is also enabled, skip the N row entirely to avoid conflicting displays.
+        local pfBridge  = g_SoilFertilityManager and g_SoilFertilityManager.pfBridge
+        local settings  = g_SoilFertilityManager and g_SoilFertilityManager.settings
+        local pfActive  = pfBridge and pfBridge.isActive
+        local hideN     = pfActive and settings and settings.pfCompatibilityMode
+        if not hideN then
+            local nLabel = pfActive and "N*" or "N"
+            cy = self:drawNutrientRow(nLabel, info.nitrogen, px, cy, pw, s, fontMult, info, profile, fillType, rateMultiplier)
+        end
         cy = self:drawNutrientRow("P", info.phosphorus,  px, cy, pw, s, fontMult, info, profile, fillType, rateMultiplier)
         cy = self:drawNutrientRow("K", info.potassium,   px, cy, pw, s, fontMult, info, profile, fillType, rateMultiplier)
 

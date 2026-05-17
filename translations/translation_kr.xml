@@ -223,6 +223,8 @@
     <e k="sf_report_pressure_high" v="높음" eh="655d20c1" />
     <e k="sf_report_yield_hint" v="최적 임계값 대비 N/P/K 기준" eh="022663e0" />
     <e k="sf_report_yield_loss" v="수확량 ~-%d%%" eh="d64d5d59" />
+    <e k="sf_pf_compat_short" v="PF Compat Mode" />
+    <e k="sf_pf_compat_long" v="Hide SF nitrogen data when Precision Farming is active — prevents conflicting N readings between the two mods" />
 
     <!-- ======================================================
          HELP LINES (ESC > Help > Realistic Soil & Fertilizer)
@@ -438,7 +440,7 @@
     <e k="sf_pda_map_unavailable" v="지도 미리보기를 사용할 수 없음" eh="43983f81" />
     <e k="sf_map_health_overall" v="평균 토양 건강도" eh="5533cbe3" />
     <e k="sf_map_btn_report" v="농장 개요 열기" eh="6f0800e8" />
-    <e k="sf_map_btn_help" v="개발자 참고 (아직 작동 안 함)" eh="800e465a" />
+    <e k="sf_map_btn_help" v="Help" eh="800e465a" />
     <e k="sf_map_btn_cycle_layer" v="레이어 전환" eh="875dbf22" />
     <e k="sf_map_btn_treatment" v="처리 계획" eh="4ba012e2" />
     <e k="sf_map_btn_disable" v="오버레이 비활성화" eh="8e75dec5" />

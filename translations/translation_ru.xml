@@ -223,6 +223,8 @@
     <e k="sf_report_pressure_high" v="Высокая" eh="655d20c1" />
     <e k="sf_report_yield_hint" v="На основе N/P/K относительно оптимума" eh="022663e0" />
     <e k="sf_report_yield_loss" v="Потеря урожая ~-%d%%" eh="d64d5d59" />
+    <e k="sf_pf_compat_short" v="PF Compat Mode" />
+    <e k="sf_pf_compat_long" v="Hide SF nitrogen data when Precision Farming is active — prevents conflicting N readings between the two mods" />
 
     <!-- Help Lines -->
     <e k="helpLine_sf_cat_overview" v="Обзор" eh="3b878279" />
@@ -424,7 +426,7 @@
     <e k="sf_pda_map_unavailable" v="Предпросмотр недоступен" eh="43983f81" />
     <e k="sf_map_health_overall" v="Среднее здоровье почвы" eh="5533cbe3" />
     <e k="sf_map_btn_report" v="Открыть обзор фермы" eh="6f0800e8" />
-    <e k="sf_map_btn_help" v="Заметка (В РАЗРАБОТКЕ)" eh="800e465a" />
+    <e k="sf_map_btn_help" v="Help" eh="800e465a" />
     <e k="sf_map_btn_cycle_layer" v="Сменить слой" eh="875dbf22" />
     <e k="sf_map_btn_treatment" v="План обработки" eh="4ba012e2" />
     <e k="sf_map_btn_disable" v="Убрать наложение" eh="8e75dec5" />

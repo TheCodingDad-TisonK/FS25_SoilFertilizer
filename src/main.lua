@@ -58,6 +58,8 @@ source(modDirectory .. "src/ui/SoilPDAScreen.lua")
 source(modDirectory .. "src/ui/SoilFieldDetailDialog.lua")
 source(modDirectory .. "src/ui/SoilTreatmentDialog.lua")
 source(modDirectory .. "src/ui/SoilVersionDialog.lua")
+source(modDirectory .. "src/ui/SoilHelpDialog.lua")
+source(modDirectory .. "src/ui/SoilOverlayHelpDialog.lua")
 source(modDirectory .. "src/ui/SoilSettingsPanel.lua")
 source(modDirectory .. "src/SoilFertilityManager.lua")
 

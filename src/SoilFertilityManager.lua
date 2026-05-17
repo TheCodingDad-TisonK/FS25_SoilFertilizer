@@ -114,6 +114,18 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
             SoilLogger.info("Soil Version dialog registered")
         end
 
+        -- PDA help dialog (X button in PDA footer)
+        if SoilHelpDialog and g_gui then
+            SoilHelpDialog.register(modDirectory)
+            SoilLogger.info("Soil Help dialog registered")
+        end
+
+        -- Overlay help dialog (4th sidebar button on soil map)
+        if SoilOverlayHelpDialog and g_gui then
+            SoilOverlayHelpDialog.register(modDirectory)
+            SoilLogger.info("Soil Overlay Help dialog registered")
+        end
+
         -- Map overlay (client only)
         if SoilMapOverlay then
             self.soilMapOverlay = SoilMapOverlay.new(self.soilSystem, self.settings)

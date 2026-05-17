@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<!--
+    Soil & Fertilizer — Soil Map Overlay Help Dialog
+    Opened from the Help button in the overlay sidebar.
+    Content lines are built dynamically in Lua.
+    Controller: SoilOverlayHelpDialog (src/ui/SoilOverlayHelpDialog.lua)
+-->
+<GUI onOpen="onOpen" onClose="onClose" onCreate="onCreate">
+  <GuiElement profile="newLayer"/>
+  <Bitmap profile="dialogFullscreenBg" id="dialogBg"/>
+
+  <GuiElement profile="sfOvHelp_bg" id="dialogElement">
+
+    <ThreePartBitmap profile="fs25_dialogBgMiddle"/>
+    <ThreePartBitmap profile="fs25_dialogBgTop"/>
+    <ThreePartBitmap profile="fs25_dialogBgBottom"/>
+
+    <!-- Title -->
+    <Text profile="fs25_dialogTitle" id="sfOvHelp_title"
+          text="Soil Map Overlay — Help" position="0px -30px"/>
+
+    <!-- Horizontal separator under title -->
+    <Bitmap profile="sfOvHelp_sep" position="0px -66px" size="900px 2px"/>
+
+    <!-- Left column — populated by Lua -->
+    <BoxLayout profile="sfOvHelp_col" id="sfOvHelp_col1" position="-230px -84px"/>
+
+    <!-- Vertical divider between columns -->
+    <Bitmap profile="sfOvHelp_vSep" position="0px -84px" size="2px 580px"/>
+
+    <!-- Right column — populated by Lua -->
+    <BoxLayout profile="sfOvHelp_col" id="sfOvHelp_col2" position="230px -84px"/>
+
+    <BoxLayout profile="fs25_dialogButtonBox">
+      <Button profile="buttonOK" text="Close" onClick="onClickClose"/>
+    </BoxLayout>
+
+  </GuiElement>
+
+  <GUIProfiles>
+    <Profile name="sfOvHelp_bg" extends="fs25_dialogBg">
+      <size value="960px 720px"/>
+    </Profile>
+    <Profile name="sfOvHelp_sep" extends="baseReference" with="anchorTopCenter">
+      <imageColor value="1.0 1.0 1.0 0.15"/>
+    </Profile>
+    <Profile name="sfOvHelp_vSep" extends="baseReference" with="anchorTopCenter">
+      <imageColor value="1.0 1.0 1.0 0.15"/>
+    </Profile>
+    <!-- Vertical column — Lua adds TextElements at runtime -->
+    <Profile name="sfOvHelp_col" extends="emptyPanel" with="anchorTopCenter">
+      <size value="440px 580px"/>
+      <flowDirection value="vertical"/>
+      <useFullVisibility value="false"/>
+      <alignmentX value="left"/>
+      <elementSpacing value="3px"/>
+    </Profile>
+    <!-- Section header: bold, green, uppercase, left-aligned -->
+    <Profile name="sfOvHelp_colHeader" extends="fs25_dialogText" with="anchorTopLeft">
+      <textSize value="14px"/>
+      <textBold value="true"/>
+      <textUpperCase value="true"/>
+      <textColor value="0.35 0.85 0.40 1.0"/>
+      <textAlignment value="left"/>
+    </Profile>
+    <!-- Body line: normal weight, white, left-aligned -->
+    <Profile name="sfOvHelp_colBody" extends="fs25_dialogText" with="anchorTopLeft">
+      <textSize value="12px"/>
+      <textColor value="$preset_colorWhite"/>
+      <textAlignment value="left"/>
+    </Profile>
+    <!-- Spacer: invisible placeholder for vertical gap -->
+    <Profile name="sfOvHelp_colSpacer" extends="fs25_dialogText" with="anchorTopLeft">
+      <textSize value="6px"/>
+      <textColor value="0.0 0.0 0.0 0.0"/>
+      <textAlignment value="left"/>
+    </Profile>
+  </GUIProfiles>
+</GUI>

@@ -223,6 +223,8 @@
     <e k="sf_report_pressure_high" v="Ridicată" eh="655d20c1" />
     <e k="sf_report_yield_hint" v="Bazat pe N/P/K vs prag optim" eh="022663e0" />
     <e k="sf_report_yield_loss" v="Recoltă ~-%d%%" eh="d64d5d59" />
+    <e k="sf_pf_compat_short" v="PF Compat Mode" />
+    <e k="sf_pf_compat_long" v="Hide SF nitrogen data when Precision Farming is active — prevents conflicting N readings between the two mods" />
 
     <!-- ======================================================
          LINII DE AJUTOR (ESC > Ajutor > Sol și Îngrășământ Realist)
@@ -440,7 +442,7 @@
     <e k="sf_pda_map_unavailable" v="Previzualizare hartă indisponibilă" eh="43983f81" />
     <e k="sf_map_health_overall" v="Sănătatea Medie a Solului" eh="5533cbe3" />
     <e k="sf_map_btn_report" v="Deschide Prezentare Fermă" eh="6f0800e8" />
-    <e k="sf_map_btn_help" v="Notă Dev (NU FUNCȚIONEAZĂ ÎNCĂ)" eh="800e465a" />
+    <e k="sf_map_btn_help" v="Help" eh="800e465a" />
     <e k="sf_map_btn_cycle_layer" v="Schimbă Stratul" eh="875dbf22" />
     <e k="sf_map_btn_treatment" v="Plan Tratament" eh="4ba012e2" />
     <e k="sf_map_btn_disable" v="Dezactivează Suprapunerea" eh="8e75dec5" />

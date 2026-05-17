@@ -223,6 +223,8 @@
     <e k="sf_report_pressure_high" v="Élevé" eh="655d20c1" />
     <e k="sf_report_yield_hint" v="Basé sur N/P/K par rapport au seuil optimal" eh="022663e0" />
     <e k="sf_report_yield_loss" v="Rendement ~-%d%%" eh="d64d5d59" />
+    <e k="sf_pf_compat_short" v="PF Compat Mode" />
+    <e k="sf_pf_compat_long" v="Hide SF nitrogen data when Precision Farming is active — prevents conflicting N readings between the two mods" />
 
     <!-- ======================================================
          LIGNES D’AIDE (ESC > Aide > Sol & Fertilisation réalistes)
@@ -441,7 +443,7 @@
     <e k="sf_pda_map_unavailable" v="Aperçu de la carte indisponible" eh="43983f81" />
     <e k="sf_map_health_overall" v="Santé moyenne du sol" eh="5533cbe3" />
     <e k="sf_map_btn_report" v="Ouvrir l'aperçu de la ferme" eh="6f0800e8" />
-    <e k="sf_map_btn_help" v="Note dev (PAS ENCORE FONCTIONNEL)" eh="800e465a" />
+    <e k="sf_map_btn_help" v="Help" eh="800e465a" />
     <e k="sf_map_btn_cycle_layer" v="Changer de couche" eh="875dbf22" />
     <e k="sf_map_btn_treatment" v="Plan de traitement" eh="4ba012e2" />
     <e k="sf_map_btn_disable" v="Désactiver la superposition" eh="8e75dec5" />
