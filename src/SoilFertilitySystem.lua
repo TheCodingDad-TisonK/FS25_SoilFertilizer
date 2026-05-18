@@ -187,7 +187,7 @@ end
 ---@param fruitTypeIndex number
 ---@return number modifier  Combined yield multiplier
 function SoilFertilitySystem:computeYieldModifier(fieldId, fruitTypeIndex)
-    if not self.settings.enabled or not self.settings.nutrientCycles then return 1.0 end
+    if not self.settings.enabled then return 1.0 end
 
     local field = self.fieldData[fieldId]
     if not field then return 1.0 end
@@ -199,8 +199,8 @@ function SoilFertilitySystem:computeYieldModifier(fieldId, fruitTypeIndex)
     local ys        = SoilConstants.YIELD_SENSITIVITY
     local isGrass   = ys and ys.NON_CROP_NAMES and ys.NON_CROP_NAMES[cropName]
 
-    -- Nutrient-based modifier (skipped for grass/non-crop)
-    if ys and not isGrass then
+    -- Nutrient-based modifier (only when nutrientCycles enabled, skipped for grass/non-crop)
+    if self.settings.nutrientCycles and ys and not isGrass then
         local tier     = ys.CROP_TIERS[cropName] or ys.DEFAULT_TIER
         local tierData = ys.TIERS[tier]
         local thresh   = ys.OPTIMAL_THRESHOLD
@@ -1679,11 +1679,14 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
                 local canopyFactor = 1.0
                 local rowClosure = false
                 if g_fieldManager and g_fieldManager.fields then
-                    local fsField = nil
-                    for _, f in ipairs(g_fieldManager.fields) do
-                        if f and f.farmland and f.farmland.id == fieldId then
-                            fsField = f
-                            break
+                    -- Direct lookup first (fields table is typically indexed by fieldId)
+                    local fsField = g_fieldManager.fields[fieldId]
+                    if not fsField then
+                        for _, f in ipairs(g_fieldManager.fields) do
+                            if f and (f.fieldId == fieldId or f.id == fieldId) then
+                                fsField = f
+                                break
+                            end
                         end
                     end
                     if fsField and fsField.posX and fsField.posZ then
