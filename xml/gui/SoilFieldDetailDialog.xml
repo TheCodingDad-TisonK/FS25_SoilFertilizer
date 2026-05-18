@@ -63,8 +63,8 @@
       </GuiElement>
 
       <!-- ─── HISTORY ─── -->
-      <GuiElement profile="sfDetail_section2" position="0px -394px">
-        <Bitmap profile="sfDetail_sectionBg5" position="0px 0px"/>
+      <GuiElement profile="sfDetail_section3history" position="0px -394px">
+        <Bitmap profile="sfDetail_sectionBg3history" position="0px 0px"/>
         <Text profile="sfDetail_sectionHeader" text="$l10n_sf_detail_section_history" position="0px -5px"/>
 
         <Text profile="sfDetail_label" text="$l10n_sf_detail_last_crop_label" position="-240px -33px"/>
@@ -72,6 +72,10 @@
 
         <Text profile="sfDetail_label" text="$l10n_sf_detail_rotation_label"  position="-240px -58px"/>
         <Text profile="sfDetail_valueWide" id="detailRotation"  text="--"     position=" 80px  -58px"/>
+
+        <Text profile="sfDetail_label" text="$l10n_sf_detail_yield_eff_label" position="-240px -83px"/>
+        <Text profile="sfDetail_value"  id="detailYieldEff"    text="--"      position="-80px  -83px"/>
+        <Text profile="sfDetail_status" id="detailYieldEffStatus" text=""     position=" 90px  -83px"/>
       </GuiElement>
 
       <!-- No data fallback -->
@@ -91,7 +95,7 @@
   <GUIProfiles>
 
     <Profile name="sfDetail_bg" extends="fs25_dialogBg">
-      <size value="760px 590px"/>
+      <size value="760px 615px"/>
     </Profile>
 
     <!-- 5-row section (nutrients) -->
@@ -112,9 +116,18 @@
       <imageColor value="0.06 0.10 0.14 0.9"/>
     </Profile>
 
-    <!-- 2-row section (history) -->
+    <!-- 2-row section (history, legacy — unused) -->
     <Profile name="sfDetail_section2" extends="emptyPanel" with="anchorTopCenter">
       <size value="700px 91px"/>
+    </Profile>
+
+    <!-- 3-row history section -->
+    <Profile name="sfDetail_section3history" extends="emptyPanel" with="anchorTopCenter">
+      <size value="700px 116px"/>
+    </Profile>
+    <Profile name="sfDetail_sectionBg3history" extends="baseReference" with="anchorTopCenter">
+      <size value="700px 116px"/>
+      <imageColor value="0.08 0.08 0.12 0.9"/>
     </Profile>
 
     <!-- Section header: gold, bold, centered -->

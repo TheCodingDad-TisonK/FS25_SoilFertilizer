@@ -149,54 +149,54 @@
     <e k="sf_fungicide_title" v="Фунгицид" eh="e8512698" />
     <e k="sf_report_page_info" v="Поля %d-%d из %d  |  Страница %d из %d" eh="8db851d1" />
     <e k="sf_bigBag_uan32_name" v="IBC КАС 32-0-0" eh="574747ce" />
-    <e k="sf_bigBag_uan32_function" v="Азотное удобрение (жидкое)" eh="27de5f41" />
+    <e k="sf_bigBag_uan32_function" v="Азотное удобрение (жидкое) — +44N ppm/ha @ 60.8 L/ha" eh="27de5f41" />
     <e k="sf_bigBag_uan28_name" v="IBC КАС 28-0-0" eh="7eeec815" />
-    <e k="sf_bigBag_uan28_function" v="Азотное удобрение (жидкое)" eh="27de5f41" />
+    <e k="sf_bigBag_uan28_function" v="Азотное удобрение (жидкое) — +38N ppm/ha @ 60.8 L/ha" eh="27de5f41" />
     <e k="sf_bigBag_anhydrous_name" v="IBC Безводный аммиак 82-0-0" eh="fb09e6ce" />
-    <e k="sf_bigBag_anhydrous_function" v="Азотное удобрение (жидкое)" eh="27de5f41" />
+    <e k="sf_bigBag_anhydrous_function" v="Азотное удобрение (жидкое) — +67N ppm/ha @ 28 L/ha" eh="27de5f41" />
     <e k="sf_bigBag_urea_name" v="МКР Карбамид 46-0-0" eh="8e8cbaae" />
-    <e k="sf_bigBag_urea_function" v="Азотное удобрение (сухое)" eh="63efea20" />
+    <e k="sf_bigBag_urea_function" v="Азотное удобрение (сухое) — +78N ppm/ha @ 168 kg/ha" eh="63efea20" />
     <e k="sf_bigBag_an_name" v="МКР Аммиачная селитра 34,5-0-0" eh="45f56f60" />
-    <e k="sf_bigBag_an_function" v="Азотное удобрение (сухое)" eh="63efea20" />
+    <e k="sf_bigBag_an_function" v="Азотное удобрение (сухое) — +68N ppm/ha @ 200 kg/ha" eh="63efea20" />
     <e k="sf_bigBag_ams_name" v="МКР Сульфат аммония 21-0-0-24S" eh="7f71ee68" />
-    <e k="sf_bigBag_ams_function" v="Азотное удобрение (сухое)" eh="63efea20" />
+    <e k="sf_bigBag_ams_function" v="Азотное удобрение (сухое) — +33N ppm/ha @ 168 kg/ha" eh="63efea20" />
     <e k="sf_bigBag_map_name" v="МКР Аммофос 11-52-0" eh="8a5a059b" />
-    <e k="sf_bigBag_map_function" v="Фосфорное удобрение (сухое)" eh="0cc85c60" />
+    <e k="sf_bigBag_map_function" v="Фосфорное удобрение (сухое) — +8N +56P ppm/ha @ 225 kg/ha" eh="0cc85c60" />
     <e k="sf_bigBag_dap_name" v="МКР Диаммофос 18-46-0" eh="fb4e9987" />
-    <e k="sf_bigBag_dap_function" v="Фосфорное удобрение (сухое)" eh="0cc85c60" />
+    <e k="sf_bigBag_dap_function" v="Фосфорное удобрение (сухое) — +11N +44P ppm/ha @ 225 kg/ha" eh="0cc85c60" />
     <e k="sf_bigBag_potash_name" v="МКР Калий хлористый 0-0-60" eh="eb771556" />
-    <e k="sf_bigBag_potash_function" v="Калийное удобрение (сухое)" eh="18015099" />
+    <e k="sf_bigBag_potash_function" v="Калийное удобрение (сухое) — +90K ppm/ha @ 225 kg/ha" eh="18015099" />
     <e k="sf_bigBag_liquid_urea_name" v="IBC Жидкий карбамид" eh="c40b906f" />
-    <e k="sf_bigBag_liquid_urea_function" v="Азотное удобрение (жидкое)" eh="27de5f41" />
+    <e k="sf_bigBag_liquid_urea_function" v="Азотное удобрение (жидкое) — +78N ppm/ha @ 168 L/ha" eh="27de5f41" />
     <e k="sf_bigBag_liquid_ams_name" v="IBC Жидкий сульфат аммония" eh="32e6c8bb" />
-    <e k="sf_bigBag_liquid_ams_function" v="Азотное удобрение (жидкое)" eh="27de5f41" />
+    <e k="sf_bigBag_liquid_ams_function" v="Азотное удобрение (жидкое) — +33N ppm/ha @ 168 L/ha" eh="27de5f41" />
     <e k="sf_bigBag_liquid_map_name" v="IBC Жидкий Аммофос" eh="4628addb" />
-    <e k="sf_bigBag_liquid_map_function" v="Фосфорное удобрение (жидкое)" eh="eeb5ef5d" />
+    <e k="sf_bigBag_liquid_map_function" v="Фосфорное удобрение (жидкое) — +8N +56P ppm/ha @ 225 L/ha" eh="eeb5ef5d" />
     <e k="sf_bigBag_liquid_dap_name" v="IBC Жидкий Диаммофос" eh="82fb3c06" />
-    <e k="sf_bigBag_liquid_dap_function" v="Фосфорное удобрение (жидкое)" eh="eeb5ef5d" />
+    <e k="sf_bigBag_liquid_dap_function" v="Фосфорное удобрение (жидкое) — +11N +44P ppm/ha @ 225 L/ha" eh="eeb5ef5d" />
     <e k="sf_bigBag_liquid_potash_name" v="IBC Жидкий калий" eh="7176856d" />
-    <e k="sf_bigBag_liquid_potash_function" v="Калийное удобрение (жидкое)" eh="52169d4a" />
+    <e k="sf_bigBag_liquid_potash_function" v="Калийное удобрение (жидкое) — +90K ppm/ha @ 225 L/ha" eh="52169d4a" />
     <e k="sf_bigBag_starter_name" v="IBC Стартер 10-34-0" eh="62b13bd1" />
     <e k="sf_bigBag_insecticide_name" v="IBC Инсектицид" eh="c8f0aabb" />
     <e k="sf_bigBag_insecticide_function" v="Инсектицид (жидкий)" eh="09580f6b" />
     <e k="sf_bigBag_fungicide_name" v="IBC Фунгицид" eh="2a1c78d4" />
     <e k="sf_bigBag_fungicide_function" v="Фунгицид (жидкий)" eh="745c34cb" />
-    <e k="sf_bigBag_starter_function" v="Стартовое удобрение (жидкое)" eh="2c36ea57" />
+    <e k="sf_bigBag_starter_function" v="Стартовое удобрение (жидкое) — +9N +17P ppm/ha @ 46.8 L/ha" eh="2c36ea57" />
     <e k="sf_bigBag_gypsum_name" v="МКР Гипс" eh="40fc8169" />
-    <e k="sf_bigBag_gypsum_function" v="Мелиорант почвы (сухой)" eh="51503c54" />
+    <e k="sf_bigBag_gypsum_function" v="Мелиорант почвы (сухой) — pH -0.15/pass @ 1500 kg/ha" eh="51503c54" />
     <e k="sf_bigBag_compost_name" v="МКР Компост" eh="14322c5d" />
-    <e k="sf_bigBag_compost_function" v="Органическая добавка (сухая)" eh="9dd2256a" />
+    <e k="sf_bigBag_compost_function" v="Органическая добавка (сухая) — +11N +2P +11K ppm, +3.0% OM @ 5t/ha" eh="9dd2256a" />
     <e k="sf_bigBag_biosolids_name" v="МКР Биоотходы" eh="61a60ff3" />
     <e k="sf_bigBag_biosolids_10k_name" v="[EN] Big Bag Biosolids (10,000L)" />
-    <e k="sf_bigBag_biosolids_function" v="Органическое удобрение (сухое)" eh="374c7b1e" />
+    <e k="sf_bigBag_biosolids_function" v="Органическое удобрение (сухое) — +28N +3P +22K ppm, +2.0% OM @ 4.5t/ha" eh="374c7b1e" />
     <e k="sf_bigBag_chicken_manure_name" v="МКР Куриный помет" eh="cb60fddc" />
     <e k="sf_bigBag_chicken_manure_10k_name" v="[EN] Big Bag Chicken Manure (10,000L)" />
-    <e k="sf_bigBag_chicken_manure_function" v="Органическое удобрение (сухое)" eh="374c7b1e" />
+    <e k="sf_bigBag_chicken_manure_function" v="Органическое удобрение (сухое) — +22N +3P +22K ppm, +1.1% OM @ 2t/ha" eh="374c7b1e" />
     <e k="sf_bigBag_pelletized_manure_name" v="МКР Гранулированный навоз" eh="064be7fa" />
     <e k="sf_bigBag_pelletized_manure_10k_name" v="[EN] Big Bag Pelletized Manure (10,000L)" />
-    <e k="sf_bigBag_pelletized_manure_function" v="Органическое удобрение (сухое)" eh="374c7b1e" />
+    <e k="sf_bigBag_pelletized_manure_function" v="Органическое удобрение (сухое) — +22N +2P +33K ppm @ 450 kg/ha" eh="374c7b1e" />
     <e k="sf_bigBag_liquidlime_name" v="Резервуар с жидкой известью" eh="4f8caca1" />
-    <e k="sf_bigBag_liquidlime_function" v="Агент для повышения pH (жидкий)" eh="7a118b6d" />
+    <e k="sf_bigBag_liquidlime_function" v="Агент для повышения pH (жидкий) — pH +0.40/pass @ 374 L/ha" eh="7a118b6d" />
     <e k="sf_hud_title" v="МОНИТОР ПОЧВЫ" eh="f8cda642" />
     <e k="sf_hud_field" v="Поле %d" eh="08988997" />
     <e k="sf_hud_noField" v="Выйдите на поле" eh="62c55e9e" />
@@ -512,6 +512,8 @@
     <e k="sf_treat_action_pest" v="Немедленно внесите ИНСЕКТИЦИД." eh="f4db9a03" />
     <e k="sf_treat_action_disease" v="Немедленно внесите ФУНГИЦИД." eh="9228323a" />
     <e k="sf_detail_rotation_ok" v="ОК" eh="e0aa021e" />
+    <e k="sf_detail_yield_eff_label" v="Yield eff." />
+    <e k="sf_detail_yield_optimal" v="Optimal" />
     <e k="sf_detail_rotation_bonus" v="Бонус бобовых (+N)" eh="8ab86f6a" />
     <e k="sf_detail_rotation_fatigue" v="Утомление (x1.15 вынос)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="Нет данных." eh="c6d95d5e" />
@@ -522,6 +524,7 @@
     <e k="sf_hud_coverage" v="Покрытие: %d%% / %d%%" eh="d407bb6d" />
     <e k="sf_hud_pass_coverage" v="Проход: %d%% (%s)" eh="00000000" />
     <e k="sf_hud_compaction" v="Уплотнение: %d%%" eh="bef3a4f5" />
+    <e k="sf_hud_yield_eff" v="Yield: %d%%" />
     <e k="sf_sprayer_auto_on" v="НОРМА ВНЕСЕНИЯ ( АВТО: ВКЛ )" eh="099b5dac" />
     <e k="sf_sprayer_auto_off" v="НОРМА ВНЕСЕНИЯ АВТО: ВЫКЛ [%s]" eh="848cc106" />
     <e k="sf_sprayer_target" v="Цель:" eh="31d43504" />

@@ -313,6 +313,7 @@ function SoilHUD:calculateHeight()
             if (info.sessionCoverageFraction or info.coverageFraction or 0) > 0 then h = h + SoilHUD.LINE_H end
             if mgr.settings.compactionEnabled and (info.compaction or 0) > 0 then h = h + SoilHUD.LINE_H end
         end
+        if info.yieldEfficiency then h = h + SoilHUD.LINE_H end
         
         h = h + SoilHUD.PAD * 1.3
     else
@@ -1213,6 +1214,24 @@ function SoilHUD:drawPanel()
                 renderText(px + pad, cy, 0.010 * fontMult * s, string.format(g_i18n:getText("sf_hud_compaction"), compPct))
                 cy = cy - SoilHUD.LINE_H * s
             end
+        end
+
+        -- Yield efficiency summary (nil when no managed crop)
+        local yieldEff = info.yieldEfficiency
+        if yieldEff then
+            local yr, yg, yb
+            if yieldEff >= 90 then
+                yr, yg, yb = 0.32, 0.88, 0.44   -- green: at or near optimal
+            elseif yieldEff >= 70 then
+                yr, yg, yb = 0.90, 0.82, 0.18   -- yellow: noticeable penalty
+            else
+                yr, yg, yb = 0.88, 0.25, 0.25   -- red: significant penalty
+            end
+            setTextAlignment(RenderText.ALIGN_LEFT)
+            setTextColor(yr, yg, yb, 1.0)
+            renderText(px + pad, cy, 0.010 * fontMult * s,
+                string.format(g_i18n:getText("sf_hud_yield_eff"), yieldEff))
+            cy = cy - SoilHUD.LINE_H * s
         end
 
         -- Divider before hint

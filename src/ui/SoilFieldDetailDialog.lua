@@ -144,9 +144,11 @@ function SoilFieldDetailDialog:onGuiSetupFinished()
     self.detailPestStatus    = self:getDescendantById("detailPestStatus")
     self.detailDisease       = self:getDescendantById("detailDisease")
     self.detailDiseaseStatus = self:getDescendantById("detailDiseaseStatus")
-    self.detailLastCrop      = self:getDescendantById("detailLastCrop")
-    self.detailRotation      = self:getDescendantById("detailRotation")
-    self.detailNoData        = self:getDescendantById("detailNoData")
+    self.detailLastCrop         = self:getDescendantById("detailLastCrop")
+    self.detailRotation         = self:getDescendantById("detailRotation")
+    self.detailYieldEff         = self:getDescendantById("detailYieldEff")
+    self.detailYieldEffStatus   = self:getDescendantById("detailYieldEffStatus")
+    self.detailNoData           = self:getDescendantById("detailNoData")
 end
 
 function SoilFieldDetailDialog:onOpen()
@@ -302,6 +304,33 @@ function SoilFieldDetailDialog:_populateData()
         self.detailRotation:setText(rotText)
         self.detailRotation:setTextColor(unpack(rotColor))
     end
+
+    -- Yield efficiency
+    local yEff = info.yieldEfficiency
+    if self.detailYieldEff then
+        if yEff then
+            local yr, yg, yb, statusText
+            if yEff >= 90 then
+                yr, yg, yb = unpack(COLOR_GOOD)
+                statusText = tr("sf_detail_yield_optimal", "Optimal")
+            elseif yEff >= 70 then
+                yr, yg, yb = unpack(COLOR_FAIR)
+                statusText = tr("sf_pda_status_fair", "Fair")
+            else
+                yr, yg, yb = unpack(COLOR_POOR)
+                statusText = tr("sf_pda_status_poor", "Poor")
+            end
+            self.detailYieldEff:setText(yEff .. "%")
+            self.detailYieldEff:setTextColor(yr, yg, yb, 1.0)
+            if self.detailYieldEffStatus then
+                self.detailYieldEffStatus:setText(statusText)
+                self.detailYieldEffStatus:setTextColor(yr, yg, yb, 1.0)
+            end
+        else
+            self.detailYieldEff:setText("--")
+            if self.detailYieldEffStatus then self.detailYieldEffStatus:setText("") end
+        end
+    end
 end
 
 ---@param valueEl    table|nil
@@ -403,4 +432,5 @@ function SoilFieldDetailDialog:_showNoData()
     clear(self.detailDisease, self.detailDiseaseStatus)
     if self.detailLastCrop then self.detailLastCrop:setText("--") end
     if self.detailRotation  then self.detailRotation:setText("--") end
+    clear(self.detailYieldEff, self.detailYieldEffStatus)
 end

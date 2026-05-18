@@ -149,54 +149,54 @@
     <e k="sf_fungicide_title" v="Svampmedel" eh="e8512698" />
     <e k="sf_report_page_info" v="Fält %d-%d av %d  |  Sida %d av %d" eh="8db851d1" />
     <e k="sf_bigBag_uan32_name" v="IBC UAN 32-0-0" eh="574747ce" />
-    <e k="sf_bigBag_uan32_function" v="Kvävegödsel (flytande)" eh="27de5f41" />
+    <e k="sf_bigBag_uan32_function" v="Kvävegödsel (flytande) — +44N ppm/ha @ 60.8 L/ha" eh="27de5f41" />
     <e k="sf_bigBag_uan28_name" v="IBC UAN 28-0-0" eh="7eeec815" />
-    <e k="sf_bigBag_uan28_function" v="Kvävegödsel (flytande)" eh="27de5f41" />
+    <e k="sf_bigBag_uan28_function" v="Kvävegödsel (flytande) — +38N ppm/ha @ 60.8 L/ha" eh="27de5f41" />
     <e k="sf_bigBag_anhydrous_name" v="IBC Vattenfritt ammoniak 82-0-0" eh="fb09e6ce" />
-    <e k="sf_bigBag_anhydrous_function" v="Kvävegödsel (flytande)" eh="27de5f41" />
+    <e k="sf_bigBag_anhydrous_function" v="Kvävegödsel (flytande) — +67N ppm/ha @ 28 L/ha" eh="27de5f41" />
     <e k="sf_bigBag_urea_name" v="Storsäck Urea 46-0-0" eh="8e8cbaae" />
-    <e k="sf_bigBag_urea_function" v="Kvävegödsel (torr)" eh="63efea20" />
+    <e k="sf_bigBag_urea_function" v="Kvävegödsel (torr) — +78N ppm/ha @ 168 kg/ha" eh="63efea20" />
     <e k="sf_bigBag_an_name" v="Storsäck AN 34.5-0-0" eh="45f56f60" />
-    <e k="sf_bigBag_an_function" v="Kvävegödsel (torr)" eh="63efea20" />
+    <e k="sf_bigBag_an_function" v="Kvävegödsel (torr) — +68N ppm/ha @ 200 kg/ha" eh="63efea20" />
     <e k="sf_bigBag_ams_name" v="Storsäck AMS 21-0-0-24S" eh="7f71ee68" />
-    <e k="sf_bigBag_ams_function" v="Kvävegödsel (torr)" eh="63efea20" />
+    <e k="sf_bigBag_ams_function" v="Kvävegödsel (torr) — +33N ppm/ha @ 168 kg/ha" eh="63efea20" />
     <e k="sf_bigBag_map_name" v="Storsäck MAP 11-52-0" eh="8a5a059b" />
-    <e k="sf_bigBag_map_function" v="Fosfatgödsel (torr)" eh="0cc85c60" />
+    <e k="sf_bigBag_map_function" v="Fosfatgödsel (torr) — +8N +56P ppm/ha @ 225 kg/ha" eh="0cc85c60" />
     <e k="sf_bigBag_dap_name" v="Storsäck DAP 18-46-0" eh="fb4e9987" />
-    <e k="sf_bigBag_dap_function" v="Fosfatgödsel (torr)" eh="0cc85c60" />
+    <e k="sf_bigBag_dap_function" v="Fosfatgödsel (torr) — +11N +44P ppm/ha @ 225 kg/ha" eh="0cc85c60" />
     <e k="sf_bigBag_potash_name" v="Storsäck Kaliumklorid 0-0-60" eh="eb771556" />
-    <e k="sf_bigBag_potash_function" v="Kaliumgödsel (torr)" eh="18015099" />
+    <e k="sf_bigBag_potash_function" v="Kaliumgödsel (torr) — +90K ppm/ha @ 225 kg/ha" eh="18015099" />
     <e k="sf_bigBag_liquid_urea_name" v="IBC Flytande urea" eh="c40b906f" />
-    <e k="sf_bigBag_liquid_urea_function" v="Kvävegödsel (flytande)" eh="27de5f41" />
+    <e k="sf_bigBag_liquid_urea_function" v="Kvävegödsel (flytande) — +78N ppm/ha @ 168 L/ha" eh="27de5f41" />
     <e k="sf_bigBag_liquid_ams_name" v="IBC Flytande AMS" eh="32e6c8bb" />
-    <e k="sf_bigBag_liquid_ams_function" v="Kvävegödsel (flytande)" eh="27de5f41" />
+    <e k="sf_bigBag_liquid_ams_function" v="Kvävegödsel (flytande) — +33N ppm/ha @ 168 L/ha" eh="27de5f41" />
     <e k="sf_bigBag_liquid_map_name" v="IBC Flytande MAP" eh="4628addb" />
-    <e k="sf_bigBag_liquid_map_function" v="Fosfatgödsel (flytande)" eh="eeb5ef5d" />
+    <e k="sf_bigBag_liquid_map_function" v="Fosfatgödsel (flytande) — +8N +56P ppm/ha @ 225 L/ha" eh="eeb5ef5d" />
     <e k="sf_bigBag_liquid_dap_name" v="IBC Flytande DAP" eh="82fb3c06" />
-    <e k="sf_bigBag_liquid_dap_function" v="Fosfatgödsel (flytande)" eh="eeb5ef5d" />
+    <e k="sf_bigBag_liquid_dap_function" v="Fosfatgödsel (flytande) — +11N +44P ppm/ha @ 225 L/ha" eh="eeb5ef5d" />
     <e k="sf_bigBag_liquid_potash_name" v="IBC Flytande kalium" eh="7176856d" />
-    <e k="sf_bigBag_liquid_potash_function" v="Kaliumgödsel (flytande)" eh="52169d4a" />
+    <e k="sf_bigBag_liquid_potash_function" v="Kaliumgödsel (flytande) — +90K ppm/ha @ 225 L/ha" eh="52169d4a" />
     <e k="sf_bigBag_starter_name" v="IBC Startgödsel 10-34-0" eh="62b13bd1" />
     <e k="sf_bigBag_insecticide_name" v="IBC Insektsmedel" eh="c8f0aabb" />
     <e k="sf_bigBag_insecticide_function" v="Insektsmedel (flytande)" eh="09580f6b" />
     <e k="sf_bigBag_fungicide_name" v="IBC Svampmedel" eh="2a1c78d4" />
     <e k="sf_bigBag_fungicide_function" v="Svampmedel (flytande)" eh="745c34cb" />
-    <e k="sf_bigBag_starter_function" v="Startgödsel (flytande)" eh="2c36ea57" />
+    <e k="sf_bigBag_starter_function" v="Startgödsel (flytande) — +9N +17P ppm/ha @ 46.8 L/ha" eh="2c36ea57" />
     <e k="sf_bigBag_gypsum_name" v="Storsäck Gips" eh="40fc8169" />
-    <e k="sf_bigBag_gypsum_function" v="Jordförbättringsmedel (torrt)" eh="51503c54" />
+    <e k="sf_bigBag_gypsum_function" v="Jordförbättringsmedel (torrt) — pH -0.15/pass @ 1500 kg/ha" eh="51503c54" />
     <e k="sf_bigBag_compost_name" v="Storsäck Kompost" eh="14322c5d" />
-    <e k="sf_bigBag_compost_function" v="Organiskt jordförbättringsmedel (torrt)" eh="9dd2256a" />
+    <e k="sf_bigBag_compost_function" v="Organiskt jordförbättringsmedel (torrt) — +11N +2P +11K ppm, +3.0% OM @ 5t/ha" eh="9dd2256a" />
     <e k="sf_bigBag_biosolids_name" v="Storsäck Rötslam" eh="61a60ff3" />
     <e k="sf_bigBag_biosolids_10k_name" v="[EN] Big Bag Biosolids (10,000L)" />
-    <e k="sf_bigBag_biosolids_function" v="Organiskt gödselmedel (torrt)" eh="374c7b1e" />
+    <e k="sf_bigBag_biosolids_function" v="Organiskt gödselmedel (torrt) — +28N +3P +22K ppm, +2.0% OM @ 4.5t/ha" eh="374c7b1e" />
     <e k="sf_bigBag_chicken_manure_name" v="Storsäck Hönsgödsel" eh="cb60fddc" />
     <e k="sf_bigBag_chicken_manure_10k_name" v="[EN] Big Bag Chicken Manure (10,000L)" />
-    <e k="sf_bigBag_chicken_manure_function" v="Organiskt gödselmedel (torrt)" eh="374c7b1e" />
+    <e k="sf_bigBag_chicken_manure_function" v="Organiskt gödselmedel (torrt) — +22N +3P +22K ppm, +1.1% OM @ 2t/ha" eh="374c7b1e" />
     <e k="sf_bigBag_pelletized_manure_name" v="Storsäck Pelleterat gödsel" eh="064be7fa" />
     <e k="sf_bigBag_pelletized_manure_10k_name" v="[EN] Big Bag Pelletized Manure (10,000L)" />
-    <e k="sf_bigBag_pelletized_manure_function" v="Organiskt gödselmedel (torrt)" eh="374c7b1e" />
+    <e k="sf_bigBag_pelletized_manure_function" v="Organiskt gödselmedel (torrt) — +22N +2P +33K ppm @ 450 kg/ha" eh="374c7b1e" />
     <e k="sf_bigBag_liquidlime_name" v="Flytande kalktank" eh="4f8caca1" />
-    <e k="sf_bigBag_liquidlime_function" v="pH-höjande medel (flytande)" eh="7a118b6d" />
+    <e k="sf_bigBag_liquidlime_function" v="pH-höjande medel (flytande) — pH +0.40/pass @ 374 L/ha" eh="7a118b6d" />
     <e k="sf_hud_title" v="MARKÖVERVAKNING" eh="f8cda642" />
     <e k="sf_hud_field" v="Fält %d" eh="08988997" />
     <e k="sf_hud_noField" v="Gå ut på ett fält" eh="62c55e9e" />
@@ -512,6 +512,8 @@
     <e k="sf_treat_action_pest" v="Sprid INSEKTSMEDEL omedelbart." eh="f4db9a03" />
     <e k="sf_treat_action_disease" v="Sprid SVAMPMEDEL omedelbart." eh="9228323a" />
     <e k="sf_detail_rotation_ok" v="OK" eh="e0aa021e" />
+    <e k="sf_detail_yield_eff_label" v="Yield eff." />
+    <e k="sf_detail_yield_optimal" v="Optimal" />
     <e k="sf_detail_rotation_bonus" v="Baljväxtbonus (+N)" eh="8ab86f6a" />
     <e k="sf_detail_rotation_fatigue" v="Utmattning (x1.15 utarmning)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="Ingen data tillgänglig." eh="c6d95d5e" />
@@ -523,6 +525,7 @@
     <e k="sf_hud_coverage" v="Täckning: %d%% / %d%%" eh="d407bb6d" />
     <e k="sf_hud_pass_coverage" v="Körning: %d%% (%s)" eh="00000000" />
     <e k="sf_hud_compaction" v="Packning: %d%%" eh="bef3a4f5" />
+    <e k="sf_hud_yield_eff" v="Yield: %d%%" />
 
     <e k="sf_sprayer_auto_on" v="SPRIDNINGSMÄNGD  ( AUTO: PÅ )" eh="099b5dac" />
     <e k="sf_sprayer_auto_off" v="SPRIDNINGSMÄNGD  AUTO: AV [%s]" eh="848cc106" />

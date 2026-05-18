@@ -149,54 +149,54 @@
     <e k="sf_fungicide_title" v="Fungicyd" eh="e8512698" />
     <e k="sf_report_page_info" v="Pola %d-%d z %d  |  Strona %d z %d" eh="8db851d1" />
     <e k="sf_bigBag_uan32_name" v="IBC UAN 32-0-0" eh="574747ce" />
-    <e k="sf_bigBag_uan32_function" v="Nawóz azotowy (płynny)" eh="27de5f41" />
+    <e k="sf_bigBag_uan32_function" v="Nawóz azotowy (płynny) — +44N ppm/ha @ 60.8 L/ha" eh="27de5f41" />
     <e k="sf_bigBag_uan28_name" v="IBC UAN 28-0-0" eh="7eeec815" />
-    <e k="sf_bigBag_uan28_function" v="Nawóz azotowy (płynny)" eh="27de5f41" />
+    <e k="sf_bigBag_uan28_function" v="Nawóz azotowy (płynny) — +38N ppm/ha @ 60.8 L/ha" eh="27de5f41" />
     <e k="sf_bigBag_anhydrous_name" v="IBC Amoniak bezwodny 82-0-0" eh="fb09e6ce" />
-    <e k="sf_bigBag_anhydrous_function" v="Nawóz azotowy (płynny)" eh="27de5f41" />
+    <e k="sf_bigBag_anhydrous_function" v="Nawóz azotowy (płynny) — +67N ppm/ha @ 28 L/ha" eh="27de5f41" />
     <e k="sf_bigBag_urea_name" v="Big Bag Mocznik 46-0-0" eh="8e8cbaae" />
-    <e k="sf_bigBag_urea_function" v="Nawóz azotowy (suchy)" eh="63efea20" />
+    <e k="sf_bigBag_urea_function" v="Nawóz azotowy (suchy) — +78N ppm/ha @ 168 kg/ha" eh="63efea20" />
     <e k="sf_bigBag_an_name" v="Big Bag AN 34.5-0-0" eh="45f56f60" />
-    <e k="sf_bigBag_an_function" v="Nawóz azotowy (suchy)" eh="63efea20" />
+    <e k="sf_bigBag_an_function" v="Nawóz azotowy (suchy) — +68N ppm/ha @ 200 kg/ha" eh="63efea20" />
     <e k="sf_bigBag_ams_name" v="Big Bag AMS 21-0-0-24S" eh="7f71ee68" />
-    <e k="sf_bigBag_ams_function" v="Nawóz azotowy (suchy)" eh="63efea20" />
+    <e k="sf_bigBag_ams_function" v="Nawóz azotowy (suchy) — +33N ppm/ha @ 168 kg/ha" eh="63efea20" />
     <e k="sf_bigBag_map_name" v="Big Bag MAP 11-52-0" eh="8a5a059b" />
-    <e k="sf_bigBag_map_function" v="Nawóz fosforowy (suchy)" eh="0cc85c60" />
+    <e k="sf_bigBag_map_function" v="Nawóz fosforowy (suchy) — +8N +56P ppm/ha @ 225 kg/ha" eh="0cc85c60" />
     <e k="sf_bigBag_dap_name" v="Big Bag DAP 18-46-0" eh="fb4e9987" />
-    <e k="sf_bigBag_dap_function" v="Nawóz fosforowy (suchy)" eh="0cc85c60" />
+    <e k="sf_bigBag_dap_function" v="Nawóz fosforowy (suchy) — +11N +44P ppm/ha @ 225 kg/ha" eh="0cc85c60" />
     <e k="sf_bigBag_potash_name" v="Big Bag Sól potasowa 0-0-60" eh="eb771556" />
-    <e k="sf_bigBag_potash_function" v="Nawóz potasowy (suchy)" eh="18015099" />
+    <e k="sf_bigBag_potash_function" v="Nawóz potasowy (suchy) — +90K ppm/ha @ 225 kg/ha" eh="18015099" />
     <e k="sf_bigBag_liquid_urea_name" v="IBC Mocznik w płynie" eh="c40b906f" />
-    <e k="sf_bigBag_liquid_urea_function" v="Nawóz azotowy (płynny)" eh="27de5f41" />
+    <e k="sf_bigBag_liquid_urea_function" v="Nawóz azotowy (płynny) — +78N ppm/ha @ 168 L/ha" eh="27de5f41" />
     <e k="sf_bigBag_liquid_ams_name" v="IBC Siarczan amonu w płynie" eh="32e6c8bb" />
-    <e k="sf_bigBag_liquid_ams_function" v="Nawóz azotowy (płynny)" eh="27de5f41" />
+    <e k="sf_bigBag_liquid_ams_function" v="Nawóz azotowy (płynny) — +33N ppm/ha @ 168 L/ha" eh="27de5f41" />
     <e k="sf_bigBag_liquid_map_name" v="IBC MAP w płynie" eh="4628addb" />
-    <e k="sf_bigBag_liquid_map_function" v="Nawóz fosforowy (płynny)" eh="eeb5ef5d" />
+    <e k="sf_bigBag_liquid_map_function" v="Nawóz fosforowy (płynny) — +8N +56P ppm/ha @ 225 L/ha" eh="eeb5ef5d" />
     <e k="sf_bigBag_liquid_dap_name" v="IBC DAP w płynie" eh="82fb3c06" />
-    <e k="sf_bigBag_liquid_dap_function" v="Nawóz fosforowy (płynny)" eh="eeb5ef5d" />
+    <e k="sf_bigBag_liquid_dap_function" v="Nawóz fosforowy (płynny) — +11N +44P ppm/ha @ 225 L/ha" eh="eeb5ef5d" />
     <e k="sf_bigBag_liquid_potash_name" v="IBC Potas w płynie" eh="7176856d" />
-    <e k="sf_bigBag_liquid_potash_function" v="Nawóz potasowy (płynny)" eh="52169d4a" />
+    <e k="sf_bigBag_liquid_potash_function" v="Nawóz potasowy (płynny) — +90K ppm/ha @ 225 L/ha" eh="52169d4a" />
     <e k="sf_bigBag_starter_name" v="IBC Startowy 10-34-0" eh="62b13bd1" />
     <e k="sf_bigBag_insecticide_name" v="IBC Insektycyd" eh="c8f0aabb" />
     <e k="sf_bigBag_insecticide_function" v="Insektycyd (płynny)" eh="09580f6b" />
     <e k="sf_bigBag_fungicide_name" v="IBC Fungicyd" eh="2a1c78d4" />
     <e k="sf_bigBag_fungicide_function" v="Fungicyd (płynny)" eh="745c34cb" />
-    <e k="sf_bigBag_starter_function" v="Nawóz startowy (płynny)" eh="2c36ea57" />
+    <e k="sf_bigBag_starter_function" v="Nawóz startowy (płynny) — +9N +17P ppm/ha @ 46.8 L/ha" eh="2c36ea57" />
     <e k="sf_bigBag_gypsum_name" v="Big Bag Gips" eh="40fc8169" />
-    <e k="sf_bigBag_gypsum_function" v="Poprawa gleby (suchy)" eh="51503c54" />
+    <e k="sf_bigBag_gypsum_function" v="Poprawa gleby (suchy) — pH -0.15/pass @ 1500 kg/ha" eh="51503c54" />
     <e k="sf_bigBag_compost_name" v="Big Bag Kompost" eh="14322c5d" />
-    <e k="sf_bigBag_compost_function" v="Organiczna poprawa gleby (suchy)" eh="9dd2256a" />
+    <e k="sf_bigBag_compost_function" v="Organiczna poprawa gleby (suchy) — +11N +2P +11K ppm, +3.0% OM @ 5t/ha" eh="9dd2256a" />
     <e k="sf_bigBag_biosolids_name" v="Big Bag Osady ściekowe" eh="61a60ff3" />
     <e k="sf_bigBag_biosolids_10k_name" v="[EN] Big Bag Biosolids (10,000L)" />
-    <e k="sf_bigBag_biosolids_function" v="Nawóz organiczny (suchy)" eh="374c7b1e" />
+    <e k="sf_bigBag_biosolids_function" v="Nawóz organiczny (suchy) — +28N +3P +22K ppm, +2.0% OM @ 4.5t/ha" eh="374c7b1e" />
     <e k="sf_bigBag_chicken_manure_name" v="Big Bag Kurzak" eh="cb60fddc" />
     <e k="sf_bigBag_chicken_manure_10k_name" v="[EN] Big Bag Chicken Manure (10,000L)" />
-    <e k="sf_bigBag_chicken_manure_function" v="Nawóz organiczny (suchy)" eh="374c7b1e" />
+    <e k="sf_bigBag_chicken_manure_function" v="Nawóz organiczny (suchy) — +22N +3P +22K ppm, +1.1% OM @ 2t/ha" eh="374c7b1e" />
     <e k="sf_bigBag_pelletized_manure_name" v="Big Bag Obornik granulowany" eh="064be7fa" />
     <e k="sf_bigBag_pelletized_manure_10k_name" v="[EN] Big Bag Pelletized Manure (10,000L)" />
-    <e k="sf_bigBag_pelletized_manure_function" v="Nawóz organiczny (suchy)" eh="374c7b1e" />
+    <e k="sf_bigBag_pelletized_manure_function" v="Nawóz organiczny (suchy) — +22N +2P +33K ppm @ 450 kg/ha" eh="374c7b1e" />
     <e k="sf_bigBag_liquidlime_name" v="Zbiornik wapna w płynie" eh="4f8caca1" />
-    <e k="sf_bigBag_liquidlime_function" v="Środek podnoszący pH (płynny)" eh="7a118b6d" />
+    <e k="sf_bigBag_liquidlime_function" v="Środek podnoszący pH (płynny) — pH +0.40/pass @ 374 L/ha" eh="7a118b6d" />
     <e k="sf_hud_title" v="MONITOR GLEBY" eh="f8cda642" />
     <e k="sf_hud_field" v="Pole %d" eh="08988997" />
     <e k="sf_hud_noField" v="Wejdź na pole" eh="62c55e9e" />
@@ -532,6 +532,8 @@
     <e k="sf_treat_action_pest" v="Zastosuj INSEKTYCYD natychmiast." eh="f4db9a03" />
     <e k="sf_treat_action_disease" v="Zastosuj FUNGICYD natychmiast." eh="9228323a" />
     <e k="sf_detail_rotation_ok" v="OK" eh="e0aa021e" />
+    <e k="sf_detail_yield_eff_label" v="Yield eff." />
+    <e k="sf_detail_yield_optimal" v="Optimal" />
     <e k="sf_detail_rotation_bonus" v="Bonus strączkowych (+N)" eh="8ab86f6a" />
     <e k="sf_detail_rotation_fatigue" v="Zmęczenie (x1.15 wyczerpanie)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="Brak danych." eh="c6d95d5e" />
@@ -544,6 +546,7 @@
     <e k="sf_hud_coverage" v="Pokrycie: %d%% / %d%%" eh="d407bb6d" />
     <e k="sf_hud_pass_coverage" v="Przejazd: %d%% (%s)" eh="00000000" />
     <e k="sf_hud_compaction" v="Zagęszczenie: %d%%" eh="bef3a4f5" />
+    <e k="sf_hud_yield_eff" v="Yield: %d%%" />
 
     <!-- Sprayer rate HUD -->
     <e k="sf_sprayer_auto_on" v="DAWKA  ( AUTO: WŁ )" eh="099b5dac" />
