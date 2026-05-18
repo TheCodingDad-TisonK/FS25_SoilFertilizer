@@ -1251,7 +1251,8 @@ function HookManager:installSprayerAreaHook()
             local pfBridge = g_SoilFertilityManager.pfBridge
             -- Fill type injection: only needed when THPF Configurator is absent.
             -- When THPF is loaded it reads our <thPFConfig> block and handles this natively.
-            if pfBridge and pfBridge.isActive and not pfBridge.thpfActive and not pfBridge.fillTypesInjected then
+            local sfSet1 = g_SoilFertilityManager and g_SoilFertilityManager.settings
+            if pfBridge and pfBridge.isActive and sfSet1 and sfSet1.pfCompatibilityMode and not pfBridge.thpfActive and not pfBridge.fillTypesInjected then
                 local pfSpec = self["spec_FS25_precisionFarming.extendedSprayer"]
                 if pfSpec then
                     SoilLogger.info("[PFBridge] Injecting SF fill types into PF nitrogen map (fallback — THPF absent)...")
@@ -1333,7 +1334,8 @@ function HookManager:installSprayerAreaHook()
                 -- External-fill (BUY) mode is exempt: the tank intentionally stays full there.
                 do
                     local pfBridgeRef = g_SoilFertilityManager and g_SoilFertilityManager.pfBridge
-                    if pfBridgeRef and pfBridgeRef.isActive and isFertilizer then
+                    local sfSet2 = g_SoilFertilityManager and g_SoilFertilityManager.settings
+                    if pfBridgeRef and pfBridgeRef.isActive and sfSet2 and sfSet2.pfCompatibilityMode and isFertilizer then
                         local PF_OWNED = { FERTILIZER=true, LIQUIDFERTILIZER=true, MANURE=true, LIQUIDMANURE=true, DIGESTATE=true }
                         if PF_OWNED[fillType.name] then
                             local wap = spec.workAreaParameters
@@ -1524,7 +1526,8 @@ function HookManager:installSprayerAreaHook()
                 -- sprayFillType/usage in onStartWorkAreaProcessing so no persistent corruption.
                 do
                     local pfBridge = g_SoilFertilityManager and g_SoilFertilityManager.pfBridge
-                    if pfBridge and pfBridge.isActive and g_fillTypeManager then
+                    local sfSet3 = g_SoilFertilityManager and g_SoilFertilityManager.settings
+                    if pfBridge and pfBridge.isActive and sfSet3 and sfSet3.pfCompatibilityMode and g_fillTypeManager then
                         local nKgPerL = PrecisionFarmingBridge.SF_FILL_TYPE_N_AMOUNTS[fillType.name]
                         if nKgPerL and nKgPerL > 0 then
                             local lfFT = g_fillTypeManager:getFillTypeByName("LIQUIDFERTILIZER")
