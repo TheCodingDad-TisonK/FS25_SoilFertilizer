@@ -1657,9 +1657,9 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
             end
 
             -- Sample FieldState.weedFactor from the game's weed density map.
-            -- weedFactor: 1.0 = clean, <1.0 = weeds present (same scale as
-            -- sprayFactor / plowFactor used in getHarvestScaleMultiplier).
-            local gameWeedFactor = 1.0
+            -- weedFactor: 0.0 = clean, 1.0 = fully weedy (matches FieldState default
+            -- and getHarvestScaleMultiplier semantics — higher = more yield penalty).
+            local gameWeedFactor = 0.0
             if g_fieldManager and g_fieldManager.fields then
                 local fsField = g_fieldManager.fields[fieldId]
                 if not fsField then
@@ -1694,7 +1694,7 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
                     end
                 end
             end
-            field.weedPressure = math.max(0, math.min(100, (1.0 - gameWeedFactor) * 100))
+            field.weedPressure = math.max(0, math.min(100, gameWeedFactor * 100))
 
             -- Weeds consume nutrients
             if field.weedPressure > 0 then
