@@ -1636,9 +1636,11 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
         field.pH = math.max(limits.PH_NEUTRAL_HIGH, field.pH - phNorm.RATE * timeFactor)
     end
 
-    -- ── Weed pressure daily growth ───────────────────────────────────────────
-    -- Grassland (grass, drygrass, poplar, etc.) is managed by mowing/grazing,
-    -- not herbicides — skip weed pressure growth for those field types.
+    -- ── Weed pressure — sourced from game's native weed density map ─────────
+    -- weedPressure is now derived from FieldState.weedFactor (the game's weed
+    -- density map) rather than a hand-rolled accumulation model. This means
+    -- plant canopy closure, herbicide, cultivation and plowing all suppress
+    -- weeds through the game's own systems; we just read the result each day.
     if self.settings.weedPressure and SoilConstants.WEED_PRESSURE then
         local cropLower = field.lastCrop and string.lower(field.lastCrop) or nil
         local isGrassland = cropLower and
@@ -1648,86 +1650,45 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
 
         if not isGrassland then
             local wp = SoilConstants.WEED_PRESSURE
-            local pressure = field.weedPressure or 0
-            local herbDays = field.herbicideDaysLeft or 0
 
-            if herbDays > 0 then field.herbicideDaysLeft = herbDays - 1 end
-
-            if (field.herbicideDaysLeft or 0) <= 0 then
-                local baseRate
-                if     pressure < wp.LOW    then baseRate = wp.GROWTH_RATE_LOW
-                elseif pressure < wp.MEDIUM then baseRate = wp.GROWTH_RATE_MID
-                elseif pressure < wp.HIGH   then baseRate = wp.GROWTH_RATE_HIGH
-                else                             baseRate = wp.GROWTH_RATE_PEAK
-                end
-
-                local seasonMult = 1.0
-                if season then
-                    if     season == 1 then seasonMult = wp.SEASONAL_SPRING
-                    elseif season == 2 then seasonMult = wp.SEASONAL_SUMMER
-                    elseif season == 3 then seasonMult = wp.SEASONAL_FALL
-                    elseif season == 4 then seasonMult = wp.SEASONAL_WINTER
-                    end
-                end
-
-                local rainBonus = 0
-                if g_currentMission and g_currentMission.environment and
-                   g_currentMission.environment.weather then
-                    local rs = g_currentMission.environment.weather:getRainFallScale()
-                    if rs and rs > SoilConstants.RAIN.MIN_RAIN_THRESHOLD then rainBonus = wp.RAIN_BONUS end
-                end
-
-                local canopyFactor = 1.0
-                local rowClosure = false
-                if g_fieldManager and g_fieldManager.fields then
-                    -- Direct lookup first (fields table is typically indexed by fieldId)
-                    local fsField = g_fieldManager.fields[fieldId]
-                    if not fsField then
-                        for _, f in ipairs(g_fieldManager.fields) do
-                            if f and (f.fieldId == fieldId or f.id == fieldId) then
-                                fsField = f
-                                break
-                            end
-                        end
-                    end
-                    if fsField and fsField.posX and fsField.posZ then
-                        local ok, fieldState = pcall(function()
-                            local fs = FieldState.new()
-                            fs:update(fsField.posX, fsField.posZ)
-                            return fs
-                        end)
-                        if ok and fieldState and fieldState.fruitTypeIndex ~= FruitType.UNKNOWN then
-                            local fruitDesc = g_fruitTypeManager and g_fruitTypeManager:getFruitTypeByIndex(fieldState.fruitTypeIndex)
-                            if fruitDesc and fruitDesc.numGrowthStates and fruitDesc.numGrowthStates > 0 then
-                                local progress = math.min(1.0, math.max(0, fieldState.growthState / fruitDesc.numGrowthStates))
-                                local suppressThresh = wp.CANOPY_SUPPRESSION_THRESHOLD or 0.5
-                                local suppressMax = wp.CANOPY_SUPPRESSION_MAX or 1.0
-                                if progress >= suppressThresh and suppressMax > suppressThresh then
-                                    canopyFactor = math.max(0.0, 1.0 - (progress - suppressThresh) / (suppressMax - suppressThresh))
-                                end
-                                if progress >= suppressMax then
-                                    rowClosure = true
-                                end
-                            end
-                        end
-                    end
-                end
-
-                if rowClosure then
-                    -- Row closure reached: weeds start to decay due to lack of light (Issue #349)
-                    local decayRate = wp.CANOPY_DECAY_RATE or 1.2
-                    field.weedPressure = math.max(0, pressure - decayRate * timeFactor)
-                else
-                    field.weedPressure = math.min(100, pressure + (baseRate * seasonMult + rainBonus) * canopyFactor * timeFactor)
-                end
+            -- Tick herbicideDaysLeft for HUD display only (game handles suppression)
+            if (field.herbicideDaysLeft or 0) > 0 then
+                field.herbicideDaysLeft = field.herbicideDaysLeft - 1
             end
 
+            -- Sample FieldState.weedFactor from the game's weed density map.
+            -- weedFactor: 1.0 = clean, <1.0 = weeds present (same scale as
+            -- sprayFactor / plowFactor used in getHarvestScaleMultiplier).
+            local gameWeedFactor = 1.0
+            if g_fieldManager and g_fieldManager.fields then
+                local fsField = g_fieldManager.fields[fieldId]
+                if not fsField then
+                    for _, f in ipairs(g_fieldManager.fields) do
+                        if f and (f.fieldId == fieldId or f.id == fieldId) then
+                            fsField = f
+                            break
+                        end
+                    end
+                end
+                if fsField and fsField.posX and fsField.posZ then
+                    local ok, fs = pcall(function()
+                        local f = FieldState.new()
+                        f:update(fsField.posX, fsField.posZ)
+                        return f
+                    end)
+                    if ok and fs and fs.isValid then
+                        gameWeedFactor = fs.weedFactor or 1.0
+                    end
+                end
+            end
+            field.weedPressure = math.max(0, math.min(100, (1.0 - gameWeedFactor) * 100))
+
             -- Weeds consume nutrients
-            if (field.weedPressure or 0) > 0 then
+            if field.weedPressure > 0 then
                 local pRatio = field.weedPressure / 100
-                field.nitrogen = math.max(limits.MIN, field.nitrogen - (wp.NUTRIENT_DEPLETION_N or 0) * pRatio * timeFactor)
+                field.nitrogen   = math.max(limits.MIN, field.nitrogen   - (wp.NUTRIENT_DEPLETION_N or 0) * pRatio * timeFactor)
                 field.phosphorus = math.max(limits.MIN, field.phosphorus - (wp.NUTRIENT_DEPLETION_P or 0) * pRatio * timeFactor)
-                field.potassium = math.max(limits.MIN, field.potassium - (wp.NUTRIENT_DEPLETION_K or 0) * pRatio * timeFactor)
+                field.potassium  = math.max(limits.MIN, field.potassium  - (wp.NUTRIENT_DEPLETION_K or 0) * pRatio * timeFactor)
             end
         end
     end
