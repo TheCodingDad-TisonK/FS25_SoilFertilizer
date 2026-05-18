@@ -351,11 +351,14 @@ function SoilMapOverlay:updateSamplePoints(force)
     -- We match fields to our soil data via farmland.id (the key fieldData uses).
     -- getFieldFillPoints() handles the grid sampling and caching; it falls back to
     -- a single centroid point for very small fields or when polygon data is absent.
+    -- Only owned fields are sampled — activeFieldIds is maintained by the ownership
+    -- hook and already represents the correct set for both SP and MP.
     local fields = g_fieldManager.fields
     if fields == nil then
         SoilLogger.debug("SoilMapOverlay: g_fieldManager.fields is nil")
         return
     end
+    local activeFieldIds = self.soilSystem and self.soilSystem.activeFieldIds or {}
 
     -- Scale sampling step proportional to terrain size so large maps
     -- (4x, 16x, 64x) get the same screen-pixel density as a standard 2048m map.
@@ -374,7 +377,7 @@ function SoilMapOverlay:updateSamplePoints(force)
     for _, fsField in ipairs(fields) do
         if fsField and fsField.farmland then
             local farmlandId = fsField.farmland.id
-            if farmlandId and farmlandId > 0 then
+            if farmlandId and farmlandId > 0 and activeFieldIds[farmlandId] then
                 local info = self.soilSystem:getFieldInfo(farmlandId)
                 if info then
                     local polyPts = self:getFieldFillPoints(fsField, scaledStep)
@@ -1310,11 +1313,12 @@ function SoilMapOverlay:updateMinimapCentroids(force)
     local fields = g_fieldManager.fields
     if not fields then return end
 
+    local activeFieldIds = self.soilSystem and self.soilSystem.activeFieldIds or {}
     local zone = SoilConstants.ZONE
     for _, fsField in ipairs(fields) do
         if fsField and fsField.farmland then
             local farmlandId = fsField.farmland.id
-            if farmlandId and farmlandId > 0 then
+            if farmlandId and farmlandId > 0 and activeFieldIds[farmlandId] then
                 local info = self.soilSystem:getFieldInfo(farmlandId)
                 if info then
                     -- 1. Restore Centroid Dot (Low-res status)
