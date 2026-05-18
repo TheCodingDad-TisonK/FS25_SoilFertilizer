@@ -213,7 +213,8 @@ function SoilFertilitySystem:computeYieldModifier(fieldId, fruitTypeIndex)
         -- yield penalty. Exclude N from SF's average to avoid stacking both penalties on
         -- the same deficiency. P and K are SF-exclusive (PF does not track them).
         local avgDef
-        if self.pfBridge and self.pfBridge.isActive then
+        local pfActive = self.pfBridge and self.pfBridge.isActive and self.settings.pfCompatibilityMode
+        if pfActive then
             avgDef = (pDef + kDef) / 2
         else
             avgDef = (nDef + pDef + kDef) / 3
@@ -222,7 +223,7 @@ function SoilFertilitySystem:computeYieldModifier(fieldId, fruitTypeIndex)
         local nutrientPenalty = math.min(ys.MAX_PENALTY, avgDef * tierData.scale)
         if nutrientPenalty > 0 then
             modifier = modifier * (1.0 - nutrientPenalty)
-            if self.pfBridge and self.pfBridge.isActive then
+            if pfActive then
                 self:log("Nutrient penalty field %d (%s/%s) [PF Mode - P/K only]: P=%.0f K=%.0f → -%.0f%%",
                     fieldId, cropName, tier, field.phosphorus, field.potassium, nutrientPenalty * 100)
             else
@@ -1635,9 +1636,11 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
         field.pH = math.max(limits.PH_NEUTRAL_HIGH, field.pH - phNorm.RATE * timeFactor)
     end
 
-    -- ── Weed pressure daily growth ───────────────────────────────────────────
-    -- Grassland (grass, drygrass, poplar, etc.) is managed by mowing/grazing,
-    -- not herbicides — skip weed pressure growth for those field types.
+    -- ── Weed pressure — sourced from game's native weed density map ─────────
+    -- weedPressure is now derived from FieldState.weedFactor (the game's weed
+    -- density map) rather than a hand-rolled accumulation model. This means
+    -- plant canopy closure, herbicide, cultivation and plowing all suppress
+    -- weeds through the game's own systems; we just read the result each day.
     if self.settings.weedPressure and SoilConstants.WEED_PRESSURE then
         local cropLower = field.lastCrop and string.lower(field.lastCrop) or nil
         local isGrassland = cropLower and
@@ -1647,86 +1650,49 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
 
         if not isGrassland then
             local wp = SoilConstants.WEED_PRESSURE
-            local pressure = field.weedPressure or 0
-            local herbDays = field.herbicideDaysLeft or 0
 
-            if herbDays > 0 then field.herbicideDaysLeft = herbDays - 1 end
-
-            if (field.herbicideDaysLeft or 0) <= 0 then
-                local baseRate
-                if     pressure < wp.LOW    then baseRate = wp.GROWTH_RATE_LOW
-                elseif pressure < wp.MEDIUM then baseRate = wp.GROWTH_RATE_MID
-                elseif pressure < wp.HIGH   then baseRate = wp.GROWTH_RATE_HIGH
-                else                             baseRate = wp.GROWTH_RATE_PEAK
-                end
-
-                local seasonMult = 1.0
-                if season then
-                    if     season == 1 then seasonMult = wp.SEASONAL_SPRING
-                    elseif season == 2 then seasonMult = wp.SEASONAL_SUMMER
-                    elseif season == 3 then seasonMult = wp.SEASONAL_FALL
-                    elseif season == 4 then seasonMult = wp.SEASONAL_WINTER
-                    end
-                end
-
-                local rainBonus = 0
-                if g_currentMission and g_currentMission.environment and
-                   g_currentMission.environment.weather then
-                    local rs = g_currentMission.environment.weather:getRainFallScale()
-                    if rs and rs > SoilConstants.RAIN.MIN_RAIN_THRESHOLD then rainBonus = wp.RAIN_BONUS end
-                end
-
-                local canopyFactor = 1.0
-                local rowClosure = false
-                if g_fieldManager and g_fieldManager.fields then
-                    -- Direct lookup first (fields table is typically indexed by fieldId)
-                    local fsField = g_fieldManager.fields[fieldId]
-                    if not fsField then
-                        for _, f in ipairs(g_fieldManager.fields) do
-                            if f and (f.fieldId == fieldId or f.id == fieldId) then
-                                fsField = f
-                                break
-                            end
-                        end
-                    end
-                    if fsField and fsField.posX and fsField.posZ then
-                        local ok, fieldState = pcall(function()
-                            local fs = FieldState.new()
-                            fs:update(fsField.posX, fsField.posZ)
-                            return fs
-                        end)
-                        if ok and fieldState and fieldState.fruitTypeIndex ~= FruitType.UNKNOWN then
-                            local fruitDesc = g_fruitTypeManager and g_fruitTypeManager:getFruitTypeByIndex(fieldState.fruitTypeIndex)
-                            if fruitDesc and fruitDesc.numGrowthStates and fruitDesc.numGrowthStates > 0 then
-                                local progress = math.min(1.0, math.max(0, fieldState.growthState / fruitDesc.numGrowthStates))
-                                local suppressThresh = wp.CANOPY_SUPPRESSION_THRESHOLD or 0.5
-                                local suppressMax = wp.CANOPY_SUPPRESSION_MAX or 1.0
-                                if progress >= suppressThresh and suppressMax > suppressThresh then
-                                    canopyFactor = math.max(0.0, 1.0 - (progress - suppressThresh) / (suppressMax - suppressThresh))
-                                end
-                                if progress >= suppressMax then
-                                    rowClosure = true
-                                end
-                            end
-                        end
-                    end
-                end
-
-                if rowClosure then
-                    -- Row closure reached: weeds start to decay due to lack of light (Issue #349)
-                    local decayRate = wp.CANOPY_DECAY_RATE or 1.2
-                    field.weedPressure = math.max(0, pressure - decayRate * timeFactor)
-                else
-                    field.weedPressure = math.min(100, pressure + (baseRate * seasonMult + rainBonus) * canopyFactor * timeFactor)
-                end
+            -- Tick herbicideDaysLeft for HUD display only (game handles suppression)
+            if (field.herbicideDaysLeft or 0) > 0 then
+                field.herbicideDaysLeft = field.herbicideDaysLeft - 1
             end
 
+            -- Sample FieldState.weedFactor from the game's weed density map.
+            -- weedFactor: 1.0 = clean, <1.0 = weeds present (same scale as
+            -- sprayFactor / plowFactor used in getHarvestScaleMultiplier).
+            local gameWeedFactor = 1.0
+            if g_fieldManager and g_fieldManager.fields then
+                local fsField = g_fieldManager.fields[fieldId]
+                if not fsField then
+                    for _, f in ipairs(g_fieldManager.fields) do
+                        if f and (f.fieldId == fieldId or f.id == fieldId) then
+                            fsField = f
+                            break
+                        end
+                    end
+                end
+                if fsField and fsField.posX and fsField.posZ then
+                    local ok, fs = pcall(function()
+                        local f = FieldState.new()
+                        f:update(fsField.posX, fsField.posZ)
+                        return f
+                    end)
+                    -- Only trust weedFactor when a crop is present.
+                    -- On bare/plowed fields FS25 leaves weedFactor=0 (its default),
+                    -- and (1-0)*100 = 100 even though there are genuinely no weeds.
+                    -- In Lua, 0 is truthy so "or 1.0" never fires — explicit guard needed.
+                    if ok and fs and fs.isValid and fs.fruitTypeIndex ~= FruitType.UNKNOWN then
+                        gameWeedFactor = fs.weedFactor
+                    end
+                end
+            end
+            field.weedPressure = math.max(0, math.min(100, (1.0 - gameWeedFactor) * 100))
+
             -- Weeds consume nutrients
-            if (field.weedPressure or 0) > 0 then
+            if field.weedPressure > 0 then
                 local pRatio = field.weedPressure / 100
-                field.nitrogen = math.max(limits.MIN, field.nitrogen - (wp.NUTRIENT_DEPLETION_N or 0) * pRatio * timeFactor)
+                field.nitrogen   = math.max(limits.MIN, field.nitrogen   - (wp.NUTRIENT_DEPLETION_N or 0) * pRatio * timeFactor)
                 field.phosphorus = math.max(limits.MIN, field.phosphorus - (wp.NUTRIENT_DEPLETION_P or 0) * pRatio * timeFactor)
-                field.potassium = math.max(limits.MIN, field.potassium - (wp.NUTRIENT_DEPLETION_K or 0) * pRatio * timeFactor)
+                field.potassium  = math.max(limits.MIN, field.potassium  - (wp.NUTRIENT_DEPLETION_K or 0) * pRatio * timeFactor)
             end
         end
     end
@@ -2123,11 +2089,19 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
         if entry.pH then field.pH        = math.max(limits.PH_MIN, math.min(limits.PH_MAX, field.pH + entry.pH * factor)) end
         if entry.OM then field.organicMatter = math.max(0, math.min(limits.ORGANIC_MATTER_MAX, field.organicMatter + entry.OM * factor)) end
 
-        -- No bulk zone-cell sync. Each cell accumulates nutrients only from actual
-        -- spray passes through its position (via the cellFactor path below). This
-        -- preserves per-zone variation on the map overlay — the field-level values
-        -- (field.nitrogen, field.pH, etc.) are the aggregate for HUD and yield;
-        -- zone cells are the per-area record for the overlay.
+        -- Sync all existing zone cells with the same delta applied to the field average.
+        -- Without this, cells created before a spray job keep their old values while the
+        -- HUD average climbs, causing the cell report panel to show values wildly out of
+        -- step with the field average (reported by Seb, May 2026 — K 39 vs avg 244).
+        if field.zoneData then
+            for _, cell in pairs(field.zoneData) do
+                if entry.N  then cell.N  = math.min(limits.MAX,                     cell.N  + entry.N  * factor) end
+                if entry.P  then cell.P  = math.min(limits.MAX,                     cell.P  + entry.P  * factor) end
+                if entry.K  then cell.K  = math.min(limits.MAX,                     cell.K  + entry.K  * factor) end
+                if entry.pH then cell.pH = math.max(limits.PH_MIN, math.min(limits.PH_MAX,  cell.pH + entry.pH * factor)) end
+                if entry.OM then cell.OM = math.max(0, math.min(limits.ORGANIC_MATTER_MAX,  cell.OM + entry.OM * factor)) end
+            end
+        end
 
         -- Throttled per-field diagnostic (debug mode, lime types always logged; nutrients every 4 s).
         -- Validates that pH shift and nutrient deltas are agronomically sensible.
@@ -2219,14 +2193,10 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
             -- gain nutrients up to 1000× faster than the field total, causing the HUD
             -- to show near-complete N saturation after less than 1% field coverage
             -- (issue #205 Bug 2).
+            -- N/P/K/pH/OM for this cell are already updated by the bulk sync above.
+            -- Only apply spatial crop-protection reductions here (pest/disease sprays
+            -- are position-specific; the bulk sync doesn't cover them).
             local cellFactor = (liters / 1000.0) / areaInHa
-            if entry.N  then cell.N  = math.min(limits.MAX,                     cell.N  + entry.N  * cellFactor) end
-            if entry.P  then cell.P  = math.min(limits.MAX,                     cell.P  + entry.P  * cellFactor) end
-            if entry.K  then cell.K  = math.min(limits.MAX,                     cell.K  + entry.K  * cellFactor) end
-            if entry.pH then cell.pH = math.max(limits.PH_MIN, math.min(limits.PH_MAX, cell.pH + entry.pH * cellFactor)) end
-            if entry.OM then cell.OM = math.max(0, math.min(limits.ORGANIC_MATTER_MAX, cell.OM + entry.OM * cellFactor)) end
-
-            -- Also update pressure in cell if entry has reductions (direct path fallback)
             if entry.pestReduction    then cell.pestPressure    = math.max(0, (cell.pestPressure or field.pestPressure or 0) - entry.pestReduction * cellFactor) end
             if entry.diseaseReduction then cell.diseasePressure = math.max(0, (cell.diseasePressure or field.diseasePressure or 0) - entry.diseaseReduction * cellFactor) end
         end

@@ -728,58 +728,34 @@ SoilConstants.SPRAYER_RATE = {
 }
 
 -- ========================================
--- WEED PRESSURE (Issue #98)
+-- WEED PRESSURE (Issue #98, updated #378)
 -- ========================================
--- Field-level 0-100 score representing weed density.
--- Grows daily with seasonal/rain multipliers.
--- Herbicide spray reduces pressure and temporarily suppresses growth.
--- Tillage (any cultivator/plow) resets pressure to 0.
+-- Field-level 0-100 score derived from FS25's native weed density map
+-- (FieldState.weedFactor). The game handles weed growth, canopy suppression,
+-- herbicide effects, and tillage resets natively; we read the result each day.
+-- Herbicide application also gives an immediate UI response (HERBICIDE_* keys).
 -- Harvest applies a yield penalty proportional to pressure tier.
 SoilConstants.WEED_PRESSURE = {
-    -- Daily base growth rate (points/day) by current pressure tier
-    -- Growth slows as pressure approaches capacity
-    GROWTH_RATE_LOW    = 1.2,   -- 0-20:  slow germination phase
-    GROWTH_RATE_MID    = 2.0,   -- 20-50: active competition phase
-    GROWTH_RATE_HIGH   = 1.2,   -- 50-75: density self-limiting
-    GROWTH_RATE_PEAK   = 0.4,   -- 75-100: near carrying capacity
-
-    -- Seasonal growth multipliers (season index matches FS25 environment.currentSeason)
-    -- Season 1=Spring, 2=Summer, 3=Fall, 4=Winter (matches SoilConstants.SEASONAL_EFFECTS)
-    SEASONAL_SPRING = 1.4,  -- peak germination
-    SEASONAL_SUMMER = 1.6,  -- maximum growth
-    SEASONAL_FALL   = 0.7,  -- slowing down
-    SEASONAL_WINTER = 0.05, -- near dormancy
-
-    -- Rain bonus added to base daily rate when it is raining
-    RAIN_BONUS = 0.5,
-
     -- Herbicide fill type names → effectiveness multiplier (0.0-1.0)
     -- Any fill type not listed here is NOT treated as herbicide
     HERBICIDE_TYPES = {
         HERBICIDE = 1.0,
         PESTICIDE = 0.8,
     },
-    -- Pressure points removed on a single herbicide application.
+    -- Pressure points removed on a single herbicide application (immediate UI response).
     -- One full-field pass at the reference rate (BASE_RATES.HERBICIDE = 1.5 L/ha) removes this
     -- many points. 50 ensures MEDIUM tier (0–50) is fully cleared in one pass, while PEAK (75–100)
-    -- still requires multiple treatments (100−50=50 → MEDIUM; 75−50=25 → below LOW).
+    -- still requires multiple treatments.
     HERBICIDE_PRESSURE_REDUCTION = 50,
-    -- Canopy Suppression (Issue #327)
-    -- Crops block sunlight, slowing or stopping weed growth as they mature.
-    CANOPY_SUPPRESSION_THRESHOLD = 0.5, -- Crop growth state % (0.0 to 1.0) where suppression begins
-    CANOPY_SUPPRESSION_MAX       = 1.0, -- Crop growth state % where weed growth is completely stopped
-    CANOPY_DECAY_RATE            = 1.2, -- Points per day of weed reduction at full row closure (Issue #349)
+
+    -- Number of in-game days the HUD "herbicide active" indicator stays lit after application
+    HERBICIDE_DURATION_DAYS = 14,
 
     -- Nutrient Depletion by Weeds (Issue #327)
     -- Daily nutrient drain at 100% weed pressure (scales linearly with pressure)
     NUTRIENT_DEPLETION_N = 0.8, -- Nitrogen loss per day at max weed pressure
     NUTRIENT_DEPLETION_P = 0.4, -- Phosphorus loss per day at max weed pressure
     NUTRIENT_DEPLETION_K = 0.6, -- Potassium loss per day at max weed pressure
-
-    -- Number of in-game days herbicide suppresses weed growth after application
-    HERBICIDE_DURATION_DAYS = 14,
-
-    -- Tillage resets pressure to 0 (handled in onPlowing)
 
     -- Harvest yield penalty at each pressure tier
     YIELD_PENALTY_LOW    = 0.00,  -- 0-20:  none
