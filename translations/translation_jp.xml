@@ -525,9 +525,9 @@
     <e k="sf_treat_action_n_poor" v="UAN32、尿素、または無水アンモニアを散布してください。" eh="ebc225b0" />
     <e k="sf_treat_action_n_fair" v="AMS またはスターター肥料を散布してください。" eh="dc8fbeba" />
     <e k="sf_treat_action_p_poor" v="MAP または DAP (リン酸) を散布してください。" eh="ec2d9afa" />
-    <e k="sf_treat_action_p_fair" v="配合肥料を散布してください。" eh="6f802546" />
+    <e k="sf_treat_action_p_fair" v="Top-up with Liquid MAP, Liquid DAP, or DAP (P)." eh="6f802546" />
     <e k="sf_treat_action_k_poor" v="塩化カリ (カリウム) を散布してください。" eh="bb2960f3" />
-    <e k="sf_treat_action_k_fair" v="配合肥料を散布してください。" eh="6f802546" />
+    <e k="sf_treat_action_k_fair" v="Top-up with Liquid Potash or Potash (K)." eh="6f802546" />
     <e k="sf_treat_action_weed" v="直ちに除草剤を散布してください。" eh="625551c5" />
     <e k="sf_treat_action_pest" v="直ちに殺虫剤を散布してください。" eh="f4db9a03" />
     <e k="sf_treat_action_disease" v="直ちに殺菌剤を散布してください。" eh="9228323a" />

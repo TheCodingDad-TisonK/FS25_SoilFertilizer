@@ -506,9 +506,9 @@
     <e k="sf_treat_action_n_poor" v="Käytä UAN32:ta, UREAA tai AMMONIAKKIA." eh="ebc225b0" />
     <e k="sf_treat_action_n_fair" v="Käytä AMS- tai STARTTERIlannoitetta." eh="dc8fbeba" />
     <e k="sf_treat_action_p_poor" v="Käytä MAPia tai DAPia (Fosfori)." eh="ec2d9afa" />
-    <e k="sf_treat_action_p_fair" v="Käytä moniravinnelannoitetta." eh="6f802546" />
+    <e k="sf_treat_action_p_fair" v="Top-up with Liquid MAP, Liquid DAP, or DAP (P)." eh="6f802546" />
     <e k="sf_treat_action_k_poor" v="Käytä KALIUMSUOLAA (Kalium)." eh="bb2960f3" />
-    <e k="sf_treat_action_k_fair" v="Käytä moniravinnelannoitetta." eh="6f802546" />
+    <e k="sf_treat_action_k_fair" v="Top-up with Liquid Potash or Potash (K)." eh="6f802546" />
     <e k="sf_treat_action_weed" v="Käytä RIKKAKASVIMYRKKYÄ välittömästi." eh="625551c5" />
     <e k="sf_treat_action_pest" v="Käytä HYÖNTEISMYRKKYÄ välittömästi." eh="f4db9a03" />
     <e k="sf_treat_action_disease" v="Käytä SIENIMYRKKYÄ välittömästi." eh="9228323a" />

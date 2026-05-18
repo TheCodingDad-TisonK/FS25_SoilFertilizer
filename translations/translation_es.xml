@@ -505,9 +505,9 @@
     <e k="sf_treat_action_n_poor" v="Aplica UAN32, UREA o ANHIDRO." eh="ebc225b0" />
     <e k="sf_treat_action_n_fair" v="Aplica AMS o fertilizante INICIADOR." eh="dc8fbeba" />
     <e k="sf_treat_action_p_poor" v="Aplica MAP o DAP (Fósforo)." eh="ec2d9afa" />
-    <e k="sf_treat_action_p_fair" v="Aplica FERTILIZANTE mezclado." eh="6f802546" />
+    <e k="sf_treat_action_p_fair" v="Top-up with Liquid MAP, Liquid DAP, or DAP (P)." eh="6f802546" />
     <e k="sf_treat_action_k_poor" v="Aplica POTASA (Potasio)." eh="bb2960f3" />
-    <e k="sf_treat_action_k_fair" v="Aplica FERTILIZANTE mezclado." eh="6f802546" />
+    <e k="sf_treat_action_k_fair" v="Top-up with Liquid Potash or Potash (K)." eh="6f802546" />
     <e k="sf_treat_action_weed" v="Aplica HERBICIDA de inmediato." eh="625551c5" />
     <e k="sf_treat_action_pest" v="Aplica INSECTICIDA de inmediato." eh="f4db9a03" />
     <e k="sf_treat_action_disease" v="Aplica FUNGICIDA de inmediato." eh="9228323a" />
