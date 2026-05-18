@@ -1048,10 +1048,11 @@ function SoilFertilitySystem:onEnvironmentUpdate(env, dt)
     end
 
     -- Rain effects
-    if self.settings.rainEffects and
-       env.weather and env.weather.rainScale and
-       env.weather.rainScale > SoilConstants.RAIN.MIN_RAIN_THRESHOLD then
-        self:applyRainEffects(dt, env.weather.rainScale)
+    if self.settings.rainEffects and env.weather then
+        local rainScale = env.weather:getRainFallScale()
+        if rainScale and rainScale > SoilConstants.RAIN.MIN_RAIN_THRESHOLD then
+            self:applyRainEffects(dt, rainScale)
+        end
     end
 end
 
@@ -1752,9 +1753,9 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
 
                 local rainBonus = 0
                 if g_currentMission and g_currentMission.environment and
-                   g_currentMission.environment.weather and
-                   (g_currentMission.environment.weather.rainScale or 0) > SoilConstants.RAIN.MIN_RAIN_THRESHOLD then
-                    rainBonus = wp.RAIN_BONUS
+                   g_currentMission.environment.weather then
+                    local rs = g_currentMission.environment.weather:getRainFallScale()
+                    if rs and rs > SoilConstants.RAIN.MIN_RAIN_THRESHOLD then rainBonus = wp.RAIN_BONUS end
                 end
 
                 local canopyFactor = 1.0
@@ -1842,9 +1843,9 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
 
             local rainBonus = 0
             if g_currentMission and g_currentMission.environment and
-               g_currentMission.environment.weather and
-               (g_currentMission.environment.weather.rainScale or 0) > SoilConstants.RAIN.MIN_RAIN_THRESHOLD then
-                rainBonus = pp.RAIN_BONUS
+               g_currentMission.environment.weather then
+                local rs = g_currentMission.environment.weather:getRainFallScale()
+                if rs and rs > SoilConstants.RAIN.MIN_RAIN_THRESHOLD then rainBonus = pp.RAIN_BONUS end
             end
 
             field.pestPressure = math.min(100, pressure + ((baseRate * seasonMult * cropMult) + rainBonus) * timeFactor)
@@ -1854,9 +1855,11 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
     -- ── Disease pressure daily growth ────────────────────────────────────────
     if self.settings.diseasePressure and SoilConstants.DISEASE_PRESSURE then
         local dp = SoilConstants.DISEASE_PRESSURE
-        local isRaining = g_currentMission and g_currentMission.environment and
-                          g_currentMission.environment.weather and
-                          (g_currentMission.environment.weather.rainScale or 0) > SoilConstants.RAIN.MIN_RAIN_THRESHOLD
+        local isRaining = false
+        if g_currentMission and g_currentMission.environment and g_currentMission.environment.weather then
+            local rs = g_currentMission.environment.weather:getRainFallScale()
+            isRaining = rs ~= nil and rs > SoilConstants.RAIN.MIN_RAIN_THRESHOLD
+        end
 
         if isRaining then
             field.dryDayCount = 0
