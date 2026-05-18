@@ -524,9 +524,9 @@
     <e k="sf_treat_action_n_poor" v="Alkalmazzon UAN32-t, KARBAMIDOT vagy VÍZMENTES AMMÓNIÁT." eh="ebc225b0" />
     <e k="sf_treat_action_n_fair" v="Alkalmazzon AMS-t vagy STARTER műtrágyát." eh="dc8fbeba" />
     <e k="sf_treat_action_p_poor" v="Alkalmazzon MAP-ot vagy DAP-ot (Foszfor)." eh="ec2d9afa" />
-    <e k="sf_treat_action_p_fair" v="Alkalmazzon kevert MŰTRÁGYÁT." eh="6f802546" />
+    <e k="sf_treat_action_p_fair" v="Top-up with Liquid MAP, Liquid DAP, or DAP (P)." eh="6f802546" />
     <e k="sf_treat_action_k_poor" v="Alkalmazzon HAMUZSÍRT (Kálium)." eh="bb2960f3" />
-    <e k="sf_treat_action_k_fair" v="Alkalmazzon kevert MŰTRÁGYÁT." eh="6f802546" />
+    <e k="sf_treat_action_k_fair" v="Top-up with Liquid Potash or Potash (K)." eh="6f802546" />
     <e k="sf_treat_action_weed" v="Azonnal alkalmazzon GYOMIRTÓT." eh="625551c5" />
     <e k="sf_treat_action_pest" v="Azonnal alkalmazzon ROVARÖLŐT." eh="f4db9a03" />
     <e k="sf_treat_action_disease" v="Azonnal alkalmazzon GOMBAÖLŐT." eh="9228323a" />

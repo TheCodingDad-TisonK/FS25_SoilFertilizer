@@ -505,9 +505,9 @@
     <e k="sf_treat_action_n_poor" v="Внесите КАС-32, КАРБАМИД или АММИАК." eh="ebc225b0" />
     <e k="sf_treat_action_n_fair" v="Внесите СУЛЬФАТ АММОНИЯ или СТАРТЕР." eh="dc8fbeba" />
     <e k="sf_treat_action_p_poor" v="Внесите АММОФОС или ДИАММОФОС (P)." eh="ec2d9afa" />
-    <e k="sf_treat_action_p_fair" v="Внесите смешанное УДОБРЕНИЕ." eh="6f802546" />
+    <e k="sf_treat_action_p_fair" v="Top-up with Liquid MAP, Liquid DAP, or DAP (P)." eh="6f802546" />
     <e k="sf_treat_action_k_poor" v="Внесите КАЛИЙ (0-0-60)." eh="bb2960f3" />
-    <e k="sf_treat_action_k_fair" v="Внесите смешанное УДОБРЕНИЕ." eh="6f802546" />
+    <e k="sf_treat_action_k_fair" v="Top-up with Liquid Potash or Potash (K)." eh="6f802546" />
     <e k="sf_treat_action_weed" v="Немедленно внесите ГЕРБИЦИД." eh="625551c5" />
     <e k="sf_treat_action_pest" v="Немедленно внесите ИНСЕКТИЦИД." eh="f4db9a03" />
     <e k="sf_treat_action_disease" v="Немедленно внесите ФУНГИЦИД." eh="9228323a" />
