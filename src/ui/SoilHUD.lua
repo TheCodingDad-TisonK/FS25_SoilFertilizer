@@ -299,12 +299,6 @@ function SoilHUD:calculateHeight()
         h = h + SoilHUD.LINE_H
         h = h + SoilHUD.PAD * 1.3
         
-        local cropLower = info.lastCrop and string.lower(info.lastCrop) or nil
-        if not cropLower or cropLower == "" or not (ys and ys.NON_CROP_NAMES and ys.NON_CROP_NAMES[cropLower]) then
-            h = h + SoilHUD.LINE_H
-            h = h + SoilHUD.PAD * 1.3
-        end
-        
         local mgr = g_SoilFertilityManager
         if mgr and mgr.settings then
             if mgr.settings.weedPressure and (info.weedPressure or 0) > 0 then h = h + SoilHUD.LINE_H end
@@ -1093,67 +1087,6 @@ function SoilHUD:drawPanel()
         cy = cy - pad * 0.5
         self:drawRect(px + pad, cy, pw - pad*2, 0.0005, SoilHUD.C_DIVIDER)
         cy = cy - pad * 0.8
-
-        -- Yield forecast row (Issue #81 interim HUD warning)
-        -- Always shown unless the crop is a NON_CROP (like grass).
-        local ys = SoilConstants.YIELD_SENSITIVITY
-        local cropLower = info.lastCrop and string.lower(info.lastCrop) or nil
-        
-        if not cropLower or cropLower == "" or not ys.NON_CROP_NAMES[cropLower] then
-            local tier     = ys.CROP_TIERS[cropLower] or ys.DEFAULT_TIER
-            local tierData = ys.TIERS[tier]
-            local thresh   = ys.OPTIMAL_THRESHOLD
-
-            -- If the field was just harvested today, show a softer post-harvest message
-            -- instead of the alarming penalty % caused by freshly depleted soil.
-            -- The forecast reflects next-season potential; nutrients drop on harvest and
-            -- the big red number before fertilizing is misleading (issue #279).
-            local currentDay = g_currentMission and g_currentMission.environment and
-                               g_currentMission.environment.currentDay
-            local justHarvested = currentDay and info.lastHarvest and
-                                  (info.lastHarvest >= currentDay)
-
-            local yieldColor, yieldText
-            if justHarvested then
-                yieldColor = SoilHUD.C_DIM
-                yieldText  = g_i18n:getText("sf_hud_post_harvest")
-            else
-                local nDef = math.max(0, thresh - info.nitrogen.value)   / thresh
-                local pDef = math.max(0, thresh - info.phosphorus.value) / thresh
-                local kDef = math.max(0, thresh - info.potassium.value)  / thresh
-                local avgDef = (nDef + pDef + kDef) / 3
-
-                local penalty    = math.min(ys.MAX_PENALTY, avgDef * tierData.scale)
-                local penaltyPct = math.floor(penalty * 100 + 0.5)
-
-                local yieldPrefix = (not cropLower or cropLower == "") and g_i18n:getText("sf_hud_estYield") or g_i18n:getText("sf_hud_yield")
-                if penaltyPct <= 0 then
-                    yieldColor = SoilHUD.C_GOOD
-                    yieldText  = string.format("%s: %s", yieldPrefix, g_i18n:getText("sf_hud_optimal"))
-                elseif penaltyPct < 15 then
-                    yieldColor = SoilHUD.C_FAIR
-                    yieldText  = string.format("%s ~-%d%%", yieldPrefix, penaltyPct)
-                else
-                    yieldColor = SoilHUD.C_POOR
-                    yieldText  = string.format("%s ~-%d%%", yieldPrefix, penaltyPct)
-                end
-            end
-
-            setTextColor(yieldColor[1], yieldColor[2], yieldColor[3], 1.0)
-            renderText(tx, cy, 0.010 * fontMult * s, yieldText)
-            if not justHarvested then
-                setTextAlignment(RenderText.ALIGN_RIGHT)
-                setTextColor(SoilHUD.C_DIM[1], SoilHUD.C_DIM[2], SoilHUD.C_DIM[3], SoilHUD.C_DIM[4])
-                renderText(px + pw - pad, cy, 0.009 * fontMult * s, tierData.label)
-                setTextAlignment(RenderText.ALIGN_LEFT)
-            end
-
-            -- Divider before weed row
-            cy = cy - SoilHUD.LINE_H * s
-            cy = cy - pad * 0.5
-            self:drawRect(px + pad, cy, pw - pad*2, 0.0005, SoilHUD.C_DIVIDER)
-            cy = cy - pad * 0.8
-        end
 
         -- Weed / pest / disease pressure rows
         local mgr = g_SoilFertilityManager
