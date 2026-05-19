@@ -7,6 +7,70 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.2.1.0] - 2026-05-19
+
+### Added
+- **Polifoska 6-20-30 compound NPK fertilizer** (Issue [#404](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/404)) — new dry bulk fill type with calibrated nutrient profile (+4N +21P +50K ppm/ha @ 250 kg/ha). Available as a 1 000 L big bag via the in-game shop. Uses the standard fertilizer spreader spray type. All 26 language files include English display names; translators can localise `sf_polifoska_title`, `sf_bigBag_polifoska_name`, and `sf_bigBag_polifoska_function`.
+- **Yield efficiency HUD indicator** — shows the current field's yield modifier as a percentage with colour-coded status (green ≥ 90 %, amber 70–89 %, red < 70 %).
+- **Treatment rates panel on HUD** — displays the recommended application rate for the active fill type alongside the current rate multiplier.
+- **Multiplayer daily broadcast** — server now broadcasts a daily nutrient-state delta to all connected clients so late joiners see up-to-date field data without a full sync.
+- **Big Bag Compost 10 000 L variant** — large-volume compost big bag for high-throughput organic matter applications.
+- **Hungarian translation** — full native translation by community contributor @MathiasHun (all 644 keys).
+
+### Fixed
+- **`isFertilizerApplicator` permanently marks implements as non-applicators on session load** (Issue [#406](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/406)) — the function cached `false` when called before a vehicle's specializations were fully initialised (early mission load). Implements that were actually sprayers were never re-evaluated and the rate-control HUD panel never appeared for them. Fixed by only caching `true` results; `false` is re-evaluated on each call until the spec is loaded.
+- **Harvest nutrient depletion misses field on large combines** (Issue [#401](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/401)) — `combineSelf.rootNode` (mid-rear body pivot) can sit outside the field polygon when the header extends far forward. Both the harvest hook (`Combine.addCutterArea`) and the yield modifier hook (`FillUnit.addFillUnitFillLevel`) now fall back to the attached cutter/header rootNode and then to each work area start point when the combine rootNode fails to resolve to a field. Mirrors the pattern already in the sprayer hook.
+- **Weed pressure formula inverted** — `weedFactor` of 0 means clean field and 1 means maximum weeds (matching the FS25 `FieldState` default), but the formula was applying `(1 - weedFactor)` as the penalty multiplier, meaning a clean field received the full weed penalty and a weedy field received no penalty. Corrected to apply the penalty when `weedFactor > 0`.
+- **Weed density model replaced with native FS25 read** — the custom weed-accumulation model diverged from the engine's density map state, causing phantom weed penalties on freshly-ploughed or bare fields. Now reads `FieldState.weedFactor` directly from the FS25 density map each game day.
+- **Weeds 100 % on bare / unfarmed fields** — when no field state was available the weed factor defaulted to 1.0 (maximum weeds), penalising fields that had never been farmed. Now defaults to 0.0 (no weeds) when field state is unavailable.
+- **Zone cell K average out of sync with field average** — K was being written to zone cells using an incorrect scale factor, making per-cell K values drift from the field-level average displayed in the HUD.
+- **`calculateHeight` omits N row when pfCompatibilityMode is active** — the height-calculation path guarded by `pfCompatibilityMode` was skipping the N bar, causing a layout gap in the HUD nutrient stack.
+- **Duplicate yield row in HUD** — the yield efficiency line was registered twice in the HUD layout, causing a blank duplicate row.
+- **pfCompatibilityMode now correctly gates PF integration at runtime** — toggling the setting previously had no effect until the next game load. The PF bridge now checks the flag on each applicable event.
+- **N* label removed; pfCompat setting hidden when PF is absent** — the asterisk label was confusing players not using Precision Farming; the compatibility-mode setting is now hidden in the UI when the PF mod is not loaded.
+- **Multiplayer overlay blank for clients** — soil map overlay tiles were not being sent during the full-sync event for late-joining clients in some network conditions.
+- **Weed/pest/disease pressure penalties bypassing `nutrientCycles` guard** — crop-protection penalties applied even when the nutrient cycles setting was disabled. Now correctly gated.
+- **Canopy field lookup for crop protection hooks** — the field lookup used for herbicide/insecticide/fungicide applications could return the wrong field when the spray position was near a border between two fields under the same farmland.
+- **Rain effects never fired** — `environment.onWeatherUpdate` was being hooked with an incorrect API call that silently failed; leaching and seasonal nitrogen effects never ran. Fixed by using the correct `appendedFunction` target.
+- **Soil initialisation timing** — moved from `Mission00.load` to `Mission00.onStartMission` to align with the FS25 EDC (Early Data Collection) pattern and avoid nil-ref errors during early load on some map types.
+- **Duplicate HUD `loadLayout` call** — the layout was being loaded twice on mission start, causing a brief flicker and unnecessary log output.
+- **`anchorTopCenter` text positions inside section panels** — incorrect Y offsets caused text to overlap section borders on non-default UI scales.
+
+### Debug
+- **Multi-boom sprayer weed pressure diagnostics** (Issue [#390](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/390)) — added `debug`-level logging in the sprayer hook for the case where `workAreaParameters.usage = 0` (no product consumed this frame) and when the VariableWorkWidth sections path is taken. Enable with `SoilDebug` in the developer console to capture the JD R4940 failure mode.
+
+---
+
+## [2.2.0.1] - 2026-05-17
+
+### Added
+- **Precision Farming integration** — Phase 1+2 bridge: custom fill types (UAN32, UAN28, ANHYDROUS, AMS, UREA, AN, MAP, DAP, POTASH, etc.) are injected into the PF nitrogen map so the PF HUD and application-rate recommendations account for SF products. A new **PF Compatibility Mode** setting gates the entire integration at runtime without a reload. Compatible with THPF Configurator when present.
+- **Styled help dialogs** — In-game help (ESC › Help › Realistic Soil & Fertilizer) rebuilt with a two-column layout at 960 px width, a 4th **Help** button on the overlay toolbar, and corrected left-aligned body text.
+- **Layer-specific map tooltip** — the overlay tooltip now adapts its label to whichever soil layer is currently selected (N / P / K / pH / OM / Weed) instead of always showing N.
+- **Treatment dialog** — accessible from the HUD; shows recommended product and rate for each nutrient action (Repair/Maintain/Push) with colour-coded status.
+
+### Fixed
+- **COMPOST fill-plane texture overriding map-defined colour** (Issue [#392](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/392)) — SF's COMPOST fill type entry was declaring a `<textures>` block that overrode the game map's ground material. Removed the erroneous block; COMPOST now displays the correct farm-map surface.
+- **N bar tick marks missing when PF is active** — the Precision Farming integration replaced the N fill-unit index, shifting the bar's expected index and hiding its tick marks. Fixed by resolving the index dynamically.
+- **Sprayer hook field ID lookup** — the primary rootNode lookup could return the wrong field near farmland boundaries. Fallback chain improved; pH application logging corrected.
+- **Per-zone pH variation preserved on map overlay** — recalculating the overlay was averaging all zone-cell pH values into a flat field pH, discarding the spatial pattern. Now reads per-cell values directly.
+- **Bulk zone-cell network sync removed; unsampled overlay tiles dimmed** — sending all zone cells on every field-update event caused packet-size overflows on dedicated servers. Full join-sync is now bounded (max 500 cells); tiles with no local data are rendered at reduced opacity.
+- **Straw chopping OM gain scaled by field size instead of concentration** — the OM bonus from straw incorporation was divided by `fieldAreaHa` instead of being a concentration value, making the bonus near-zero on large fields.
+- **Crop protection pressure reduction raised to 50** across herbicide, insecticide, and fungicide to match the designed per-application impact.
+- **Two harvest/sprayer bugs with PF active** — a nil-ref crash when PF modified the fill unit index before SF's harvest hook read it; a late-spawned combine not receiving the yield-modifier wrapper.
+- **AMS fill-plane texture quality** — texture parameters now match the AN material (correct `unitSize`, `blendContrast`, `noiseScale` values).
+- **FieldDetail colour crash** — `valueToLayerColor` returned nil for out-of-range values, causing a crash in the field detail panel renderer.
+- **pH rounding consistency** — pH was displayed to 1 dp in the HUD tooltip but compared at full float precision in condition checks and the map overlay colour lookup, causing visual mismatches (e.g. tooltip showed 6.5 "Slightly Acidic" but map tile showed "Acidic"). All pH comparisons and colour mappings now round to 1 dp.
+- **OM rounding before threshold checks** — same floating-point mismatch for OM percentage values; aligned to 1 dp.
+- **Treatment dialog showing blended FERTILIZER for P/K fair actions** — the recommendation engine resolved compound NPK profiles to the generic `FERTILIZER` fill type when P or K was the limiting nutrient. Now correctly selects DAP/MAP (P) or POTASH (K).
+- **Version dialog layout** — entries overflowed the dialog box on some font scales; box height expanded and line count corrected.
+
+### Performance
+- **Per-frame allocation reduction** — eliminated repeated `table.concat`, `string.format`, and `pairs()` calls on hot paths (sprayer hook, overlay render). Replaced with pre-allocated scratch tables and cached closures.
+- **Map overlay and minimap restricted to owned fields** — previously iterated all fields on every frame including unowned/empty ones. Now skips fields the farm does not own, cutting overlay update time by ~60 % on large maps.
+
+---
+
 ## [2.1.7.0] - 2026-05-15
 
 ### Fixed

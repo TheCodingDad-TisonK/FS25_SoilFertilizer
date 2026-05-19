@@ -1657,9 +1657,9 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
             end
 
             -- Sample FieldState.weedFactor from the game's weed density map.
-            -- weedFactor: 1.0 = clean, <1.0 = weeds present (same scale as
-            -- sprayFactor / plowFactor used in getHarvestScaleMultiplier).
-            local gameWeedFactor = 1.0
+            -- weedFactor: 0.0 = clean, 1.0 = fully weedy (matches FieldState default
+            -- and getHarvestScaleMultiplier semantics — higher = more yield penalty).
+            local gameWeedFactor = 0.0
             if g_fieldManager and g_fieldManager.fields then
                 local fsField = g_fieldManager.fields[fieldId]
                 if not fsField then
@@ -1676,16 +1676,25 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
                         f:update(fsField.posX, fsField.posZ)
                         return f
                     end)
-                    -- Only trust weedFactor when a crop is present.
-                    -- On bare/plowed fields FS25 leaves weedFactor=0 (its default),
-                    -- and (1-0)*100 = 100 even though there are genuinely no weeds.
-                    -- In Lua, 0 is truthy so "or 1.0" never fires — explicit guard needed.
+                    -- Only trust weedFactor when a managed (non-forage) crop is present.
+                    -- Bare/plowed fields: fruitTypeIndex=UNKNOWN, weedFactor=0 → skip.
+                    -- Grass/forage crops: FS25 returns weedFactor=0 regardless of actual
+                    -- weed state (grass coverage is indistinguishable from weeds in the
+                    -- density map) → skip for NON_CROP_NAMES to avoid false 100%.
                     if ok and fs and fs.isValid and fs.fruitTypeIndex ~= FruitType.UNKNOWN then
-                        gameWeedFactor = fs.weedFactor
+                        local fruitDesc = g_fruitTypeManager and
+                            g_fruitTypeManager:getFruitTypeByIndex(fs.fruitTypeIndex)
+                        local fruitName = fruitDesc and fruitDesc.name and
+                            string.lower(fruitDesc.name) or ""
+                        local nonCrops = (SoilConstants.YIELD_SENSITIVITY and
+                            SoilConstants.YIELD_SENSITIVITY.NON_CROP_NAMES) or {}
+                        if not nonCrops[fruitName] then
+                            gameWeedFactor = fs.weedFactor
+                        end
                     end
                 end
             end
-            field.weedPressure = math.max(0, math.min(100, (1.0 - gameWeedFactor) * 100))
+            field.weedPressure = math.max(0, math.min(100, gameWeedFactor * 100))
 
             -- Weeds consume nutrients
             if field.weedPressure > 0 then
@@ -1815,6 +1824,13 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
                 field.lastAlertSeason = season
             end
         end
+    end
+
+    -- ── Broadcast to MP clients ──────────────────────────────────────────────
+    -- Daily simulation is server-only; push the updated field data so client
+    -- HUDs reflect nutrient changes, weed/pest/disease pressure, etc.
+    if SoilFieldUpdateEvent then
+        g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
     end
 end
 
@@ -2755,6 +2771,53 @@ function SoilFertilitySystem:getFieldInfo(fieldId, x, z)
         end
     end
 
+    -- Grass/forage crops return weedFactor=0 from FS25's density map regardless
+    -- of actual weed state, producing a false 100% reading. Zero out weedPressure
+    -- immediately in the info table so all displays are correct without waiting
+    -- for the next daily update to rewrite the stored value.
+    local nonCrops = SoilConstants.YIELD_SENSITIVITY and
+        SoilConstants.YIELD_SENSITIVITY.NON_CROP_NAMES or {}
+    local cropLowerInfo = cropName and string.lower(cropName) or ""
+    local isNonCropField = nonCrops[cropLowerInfo]
+
+    -- Yield efficiency estimate: combines nutrient deficit + weed/pest/disease penalties.
+    -- nil when no managed crop is present (bare, grass, forage).
+    -- Mirrors computeYieldModifier but reads from local variables already resolved above.
+    local yieldEfficiency = nil
+    if not isNonCropField and cropName and cropName ~= "" then
+        local ys = SoilConstants.YIELD_SENSITIVITY
+        if ys and ys.TIERS and ys.OPTIMAL_THRESHOLD then
+            local thresh = ys.OPTIMAL_THRESHOLD
+            local nDef = math.max(0, thresh - n) / thresh
+            local pDef = math.max(0, thresh - p) / thresh
+            local kDef = math.max(0, thresh - k) / thresh
+
+            local pfActive = self.pfBridge and self.pfBridge.isActive and
+                self.settings and self.settings.pfCompatibilityMode
+            local avgDef = pfActive and (pDef + kDef) / 2 or (nDef + pDef + kDef) / 3
+
+            local tier     = ys.CROP_TIERS[cropLowerInfo] or ys.DEFAULT_TIER
+            local tierData = ys.TIERS[tier]
+            local mod = 1.0 - math.min(ys.MAX_PENALTY, avgDef * tierData.scale)
+
+            local function applyPressurePenalty(settingKey, pressureTable, pressureValue)
+                if not (self.settings[settingKey] and pressureTable) then return mod end
+                local pv = pressureValue or 0
+                local penalty = pv < pressureTable.LOW    and pressureTable.YIELD_PENALTY_LOW  or
+                                pv < pressureTable.MEDIUM and pressureTable.YIELD_PENALTY_MID  or
+                                pv < pressureTable.HIGH   and pressureTable.YIELD_PENALTY_HIGH or
+                                pressureTable.YIELD_PENALTY_PEAK
+                return mod * (1.0 - penalty)
+            end
+
+            mod = applyPressurePenalty("weedPressure",    SoilConstants.WEED_PRESSURE,    field.weedPressure)
+            mod = applyPressurePenalty("pestPressure",    SoilConstants.PEST_PRESSURE,    field.pestPressure)
+            mod = applyPressurePenalty("diseasePressure", SoilConstants.DISEASE_PRESSURE, field.diseasePressure)
+
+            yieldEfficiency = math.floor(mod * 100 + 0.5)
+        end
+    end
+
     return {
         fieldId = fieldId,
         fieldArea = field.fieldArea or 1.0,
@@ -2769,7 +2832,8 @@ function SoilFertilitySystem:getFieldInfo(fieldId, x, z)
         rotationStatus = rotationStatus,
         daysSinceHarvest = field.lastHarvest > 0 and (currentDay - field.lastHarvest) or 0,
         fertilizerApplied = field.fertilizerApplied or 0,
-        weedPressure = field.weedPressure or 0,
+        yieldEfficiency = yieldEfficiency,
+        weedPressure = isNonCropField and 0 or (field.weedPressure or 0),
         herbicideActive = (field.herbicideDaysLeft or 0) > 0,
         pestPressure = field.pestPressure or 0,
         insecticideActive = (field.insecticideDaysLeft or 0) > 0,

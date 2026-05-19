@@ -140,6 +140,7 @@
     <e k="sf_map_title" v="Engrais MAP 11-52-0 (P)" eh="31aa2534" />
     <e k="sf_dap_title" v="Engrais DAP 18-46-0 (P)" eh="5030a80a" />
     <e k="sf_potash_title" v="Potasse 0-0-60 (K)" eh="8db6c54c" />
+    <e k="sf_polifoska_title" v="Polifoska 6-20-30 (NPK)" />
     <e k="sf_liquid_urea_title" v="Urée liquide (N)" eh="7fee4f12" />
     <e k="sf_liquid_ams_title" v="Sulfate d'ammonium liquide (N)" eh="0daf3a6f" />
     <e k="sf_liquid_map_title" v="MAP liquide (P)" eh="3ce7c8c9" />
@@ -149,54 +150,57 @@
     <e k="sf_fungicide_title" v="Fongicide" eh="e8512698" />
     <e k="sf_report_page_info" v="Champs %d-%d sur %d  |  Page %d sur %d" eh="8db851d1" />
     <e k="sf_bigBag_uan32_name" v="IBC UAN 32-0-0" eh="574747ce" />
-    <e k="sf_bigBag_uan32_function" v="Engrais azoté (liquide)" eh="27de5f41" />
+    <e k="sf_bigBag_uan32_function" v="Engrais azoté (liquide) — +44N ppm/ha @ 60.8 L/ha" eh="27de5f41" />
     <e k="sf_bigBag_uan28_name" v="IBC UAN 28-0-0" eh="7eeec815" />
-    <e k="sf_bigBag_uan28_function" v="Engrais azoté (liquide)" eh="27de5f41" />
+    <e k="sf_bigBag_uan28_function" v="Engrais azoté (liquide) — +38N ppm/ha @ 60.8 L/ha" eh="27de5f41" />
     <e k="sf_bigBag_anhydrous_name" v="IBC Ammoniac anhydre 82-0-0" eh="fb09e6ce" />
-    <e k="sf_bigBag_anhydrous_function" v="Engrais azoté (liquide)" eh="27de5f41" />
+    <e k="sf_bigBag_anhydrous_function" v="Engrais azoté (liquide) — +67N ppm/ha @ 28 L/ha" eh="27de5f41" />
     <e k="sf_bigBag_urea_name" v="Big Bag Urée 46-0-0" eh="8e8cbaae" />
-    <e k="sf_bigBag_urea_function" v="Engrais azoté (sec)" eh="63efea20" />
+    <e k="sf_bigBag_urea_function" v="Engrais azoté (sec) — +78N ppm/ha @ 168 kg/ha" eh="63efea20" />
     <e k="sf_bigBag_an_name" v="Big Bag AN 34.5-0-0" eh="45f56f60" />
-    <e k="sf_bigBag_an_function" v="Engrais azoté (sec)" eh="63efea20" />
+    <e k="sf_bigBag_an_function" v="Engrais azoté (sec) — +68N ppm/ha @ 200 kg/ha" eh="63efea20" />
     <e k="sf_bigBag_ams_name" v="Big Bag AMS 21-0-0-24S" eh="7f71ee68" />
-    <e k="sf_bigBag_ams_function" v="Engrais azoté (sec)" eh="63efea20" />
+    <e k="sf_bigBag_ams_function" v="Engrais azoté (sec) — +33N ppm/ha @ 168 kg/ha" eh="63efea20" />
     <e k="sf_bigBag_map_name" v="Big Bag MAP 11-52-0" eh="8a5a059b" />
-    <e k="sf_bigBag_map_function" v="Engrais phosphaté (sec)" eh="0cc85c60" />
+    <e k="sf_bigBag_map_function" v="Engrais phosphaté (sec) — +8N +56P ppm/ha @ 225 kg/ha" eh="0cc85c60" />
     <e k="sf_bigBag_dap_name" v="Big Bag DAP 18-46-0" eh="fb4e9987" />
-    <e k="sf_bigBag_dap_function" v="Engrais phosphaté (sec)" eh="0cc85c60" />
+    <e k="sf_bigBag_dap_function" v="Engrais phosphaté (sec) — +11N +44P ppm/ha @ 225 kg/ha" eh="0cc85c60" />
     <e k="sf_bigBag_potash_name" v="Big Bag Potasse 0-0-60" eh="eb771556" />
-    <e k="sf_bigBag_potash_function" v="Engrais potassique (sec)" eh="18015099" />
+    <e k="sf_bigBag_potash_function" v="Engrais potassique (sec) — +90K ppm/ha @ 225 kg/ha" eh="18015099" />
+    <e k="sf_bigBag_polifoska_name" v="Big Bag Polifoska 6-20-30" />
+    <e k="sf_bigBag_polifoska_function" v="NPK Fertilizer (dry) — +4N +21P +50K ppm/ha @ 250 kg/ha" />
     <e k="sf_bigBag_liquid_urea_name" v="IBC Urée liquide" eh="c40b906f" />
-    <e k="sf_bigBag_liquid_urea_function" v="Engrais azoté (liquide)" eh="27de5f41" />
+    <e k="sf_bigBag_liquid_urea_function" v="Engrais azoté (liquide) — +78N ppm/ha @ 168 L/ha" eh="27de5f41" />
     <e k="sf_bigBag_liquid_ams_name" v="IBC Sulfate d'ammonium liquide" eh="32e6c8bb" />
-    <e k="sf_bigBag_liquid_ams_function" v="Engrais azoté (liquide)" eh="27de5f41" />
+    <e k="sf_bigBag_liquid_ams_function" v="Engrais azoté (liquide) — +33N ppm/ha @ 168 L/ha" eh="27de5f41" />
     <e k="sf_bigBag_liquid_map_name" v="IBC MAP liquide" eh="4628addb" />
-    <e k="sf_bigBag_liquid_map_function" v="Engrais phosphaté (liquide)" eh="eeb5ef5d" />
+    <e k="sf_bigBag_liquid_map_function" v="Engrais phosphaté (liquide) — +8N +56P ppm/ha @ 225 L/ha" eh="eeb5ef5d" />
     <e k="sf_bigBag_liquid_dap_name" v="IBC DAP liquide" eh="82fb3c06" />
-    <e k="sf_bigBag_liquid_dap_function" v="Engrais phosphaté (liquide)" eh="eeb5ef5d" />
+    <e k="sf_bigBag_liquid_dap_function" v="Engrais phosphaté (liquide) — +11N +44P ppm/ha @ 225 L/ha" eh="eeb5ef5d" />
     <e k="sf_bigBag_liquid_potash_name" v="IBC Potasse liquide" eh="7176856d" />
-    <e k="sf_bigBag_liquid_potash_function" v="Engrais potassique (liquide)" eh="52169d4a" />
+    <e k="sf_bigBag_liquid_potash_function" v="Engrais potassique (liquide) — +90K ppm/ha @ 225 L/ha" eh="52169d4a" />
     <e k="sf_bigBag_starter_name" v="IBC Starter 10-34-0" eh="62b13bd1" />
     <e k="sf_bigBag_insecticide_name" v="IBC Insecticide" eh="c8f0aabb" />
     <e k="sf_bigBag_insecticide_function" v="Insecticide (liquide)" eh="09580f6b" />
     <e k="sf_bigBag_fungicide_name" v="IBC Fongicide" eh="2a1c78d4" />
     <e k="sf_bigBag_fungicide_function" v="Fongicide (liquide)" eh="745c34cb" />
-    <e k="sf_bigBag_starter_function" v="Engrais de démarrage (liquide)" eh="2c36ea57" />
+    <e k="sf_bigBag_starter_function" v="Engrais de démarrage (liquide) — +9N +17P ppm/ha @ 46.8 L/ha" eh="2c36ea57" />
     <e k="sf_bigBag_gypsum_name" v="Big Bag Gypse" eh="40fc8169" />
-    <e k="sf_bigBag_gypsum_function" v="Amendement du sol (sec)" eh="51503c54" />
+    <e k="sf_bigBag_gypsum_function" v="Amendement du sol (sec) — pH -0.15/pass @ 1500 kg/ha" eh="51503c54" />
     <e k="sf_bigBag_compost_name" v="Big Bag Compost" eh="14322c5d" />
-    <e k="sf_bigBag_compost_function" v="Amendement organique du sol (sec)" eh="9dd2256a" />
+    <e k="sf_bigBag_compost_10k_name" v="Big Bag Compost 10000L" />
+    <e k="sf_bigBag_compost_function" v="Amendement organique du sol (sec) — +11N +2P +11K ppm, +3.0% OM @ 5t/ha" eh="9dd2256a" />
     <e k="sf_bigBag_biosolids_name" v="Big Bag Biosolides" eh="61a60ff3" />
     <e k="sf_bigBag_biosolids_10k_name" v="[EN] Big Bag Biosolids (10,000L)" />
-    <e k="sf_bigBag_biosolids_function" v="Engrais organique (sec)" eh="374c7b1e" />
+    <e k="sf_bigBag_biosolids_function" v="Engrais organique (sec) — +28N +3P +22K ppm, +2.0% OM @ 4.5t/ha" eh="374c7b1e" />
     <e k="sf_bigBag_chicken_manure_name" v="Big Bag Fumier de poulet" eh="cb60fddc" />
     <e k="sf_bigBag_chicken_manure_10k_name" v="[EN] Big Bag Chicken Manure (10,000L)" />
-    <e k="sf_bigBag_chicken_manure_function" v="Engrais organique (sec)" eh="374c7b1e" />
+    <e k="sf_bigBag_chicken_manure_function" v="Engrais organique (sec) — +22N +3P +22K ppm, +1.1% OM @ 2t/ha" eh="374c7b1e" />
     <e k="sf_bigBag_pelletized_manure_name" v="Big Bag Fumier pelletisé" eh="064be7fa" />
     <e k="sf_bigBag_pelletized_manure_10k_name" v="[EN] Big Bag Pelletized Manure (10,000L)" />
-    <e k="sf_bigBag_pelletized_manure_function" v="Engrais organique (sec)" eh="374c7b1e" />
+    <e k="sf_bigBag_pelletized_manure_function" v="Engrais organique (sec) — +22N +2P +33K ppm @ 450 kg/ha" eh="374c7b1e" />
     <e k="sf_bigBag_liquidlime_name" v="Cuve de chaux liquide" eh="4f8caca1" />
-    <e k="sf_bigBag_liquidlime_function" v="Agent d'augmentation du pH (liquide)" eh="7a118b6d" />
+    <e k="sf_bigBag_liquidlime_function" v="Agent d'augmentation du pH (liquide) — pH +0.40/pass @ 374 L/ha" eh="7a118b6d" />
     <e k="sf_hud_title" v="MONITEUR DE SOL" eh="f8cda642" />
     <e k="sf_hud_field" v="Champ %d" eh="08988997" />
     <e k="sf_hud_noField" v="Marchez sur un champ" eh="62c55e9e" />
@@ -537,6 +541,8 @@
     <e k="sf_treat_action_pest" v="Appliquer INSECTICIDE immédiatement." eh="f4db9a03" />
     <e k="sf_treat_action_disease" v="Appliquer FONGICIDE immédiatement." eh="9228323a" />
     <e k="sf_detail_rotation_ok" v="OK" eh="e0aa021e" />
+    <e k="sf_detail_yield_eff_label" v="Yield eff." />
+    <e k="sf_detail_yield_optimal" v="Optimal" />
     <e k="sf_detail_rotation_bonus" v="Bonus légumineuse (+N)" eh="8ab86f6a" />
     <e k="sf_detail_rotation_fatigue" v="Fatigue (x1.15 épuisement)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="Aucune donnée disponible." eh="c6d95d5e" />
@@ -547,6 +553,7 @@
     <e k="sf_hud_coverage" v="Couverture : %d%% / %d%%" eh="d407bb6d" />
     <e k="sf_hud_pass_coverage" v="Passage : %d%% (%s)" eh="00000000" />
     <e k="sf_hud_compaction" v="Compaction : %d%%" eh="bef3a4f5" />
+    <e k="sf_hud_yield_eff" v="Yield: %d%%" />
     
     <!-- HUD débit pulvérisateur -->
     <e k="sf_sprayer_auto_on" v="DOSE APPL.  ( AUTO : ON )" eh="099b5dac" />

@@ -134,6 +134,39 @@ function SoilTreatmentDialog:onClickClose()
     g_gui:closeDialogByName("SoilTreatmentDialog")
 end
 
+-- ── Rate Calculation ──────────────────────────────────────
+
+-- Returns "PRODUCTNAME 220 kg/ha (1056 kg)" or nil if profile missing / no deficit.
+local function _rateString(profileKey, nutrientKey, deficit, rrMult, fieldArea)
+    if deficit <= 0 then return nil end
+    local profile  = SoilConstants.FERTILIZER_PROFILES[profileKey]
+    local baseRate = SoilConstants.SPRAYER_RATE.BASE_RATES[profileKey]
+    if not profile or not profile[nutrientKey] or profile[nutrientKey] == 0 then return nil end
+
+    local coeff    = profile[nutrientKey]
+    local ratePerHa = deficit * 1000 / (coeff * rrMult)
+    local total     = ratePerHa * fieldArea
+    local unit      = (baseRate and baseRate.unit == "dry") and "kg/ha" or "L/ha"
+
+    return string.format("%s %d %s (%d %s)",
+        profileKey, math.ceil(ratePerHa), unit,
+        math.ceil(total), (unit == "kg/ha") and "kg" or "L")
+end
+
+-- Builds a two-product action string for a nutrient, e.g.:
+--   "UREA 220 kg/ha (1056 kg)  ·  UAN32 139 L/ha (667 L)"
+-- Falls back to a static hint when rates cannot be computed.
+local function _nutrientActionText(currentVal, targetVal, rrMult, fieldArea, products, staticFallback)
+    local deficit = math.max(0, targetVal - currentVal)
+    local parts = {}
+    for _, prod in ipairs(products) do
+        local s = _rateString(prod[1], prod[2], deficit, rrMult, fieldArea)
+        if s then parts[#parts + 1] = s end
+    end
+    if #parts == 0 then return staticFallback end
+    return table.concat(parts, "  ·  ")
+end
+
 -- ── Data Population ───────────────────────────────────────
 
 function SoilTreatmentDialog:_populateData()
@@ -176,39 +209,69 @@ function SoilTreatmentDialog:_populateData()
         self:_setAction(self.treatOMAction, tr("sf_treat_action_ok", "OK"), COLOR_GOOD)
     end
 
-    -- 3. Nutrient Actions (N, P, K)
-    local thresh = SoilConstants.STATUS_THRESHOLDS
-    
+    -- 3. Nutrient Actions (N, P, K) with per-product application rates
+    local thresh  = SoilConstants.STATUS_THRESHOLDS
+    local targets = SoilConstants.CROP_NUTRIENT_TARGETS
+    local fieldArea = info.fieldArea or 1.0
+
+    -- Replenishment multiplier from settings (index 1-5, default Normal = 3 = 1.00×)
+    local rrIdx = (sfm.settings and sfm.settings.replenishmentRate) or 3
+    local rrMult = SoilConstants.DIFFICULTY.REPLENISHMENT_MULTIPLIERS[rrIdx] or 1.0
+
+    -- Crop-specific targets or status-threshold fallbacks
+    local ct = info.cropTargets
+    local targetN = (ct and ct.N and ct.N.opt) or (thresh.nitrogen.fair or 50)
+    local targetP = (ct and ct.P and ct.P.opt) or (thresh.phosphorus.fair or 45)
+    local targetK = (ct and ct.K and ct.K.opt) or (thresh.potassium.fair or 40)
+
     -- N
     if info.nitrogen.value < (thresh.nitrogen.poor or 30) then
-        self:_setAction(self.treatNAction, tr("sf_treat_action_n_poor", "Apply UAN32, UREA, or ANHYDROUS."), COLOR_POOR)
+        local text = _nutrientActionText(info.nitrogen.value, targetN, rrMult, fieldArea,
+            { {"UREA","N"}, {"UAN32","N"} },
+            "Apply UREA or UAN32")
+        self:_setAction(self.treatNAction, text, COLOR_POOR)
     elseif info.nitrogen.value < (thresh.nitrogen.fair or 50) then
-        self:_setAction(self.treatNAction, tr("sf_treat_action_n_fair", "Apply AMS or STARTER fertilizer."), COLOR_FAIR)
+        local text = _nutrientActionText(info.nitrogen.value, targetN, rrMult, fieldArea,
+            { {"AMS","N"}, {"AN","N"} },
+            "Apply AMS or AN")
+        self:_setAction(self.treatNAction, text, COLOR_FAIR)
     else
         self:_setAction(self.treatNAction, tr("sf_treat_action_ok", "OK"), COLOR_GOOD)
     end
 
     -- P
     if info.phosphorus.value < (thresh.phosphorus.poor or 25) then
-        self:_setAction(self.treatPAction, tr("sf_treat_action_p_poor", "Apply MAP or DAP (Phosphorus)."), COLOR_POOR)
+        local text = _nutrientActionText(info.phosphorus.value, targetP, rrMult, fieldArea,
+            { {"MAP","P"}, {"DAP","P"} },
+            "Apply MAP or DAP")
+        self:_setAction(self.treatPAction, text, COLOR_POOR)
     elseif info.phosphorus.value < (thresh.phosphorus.fair or 45) then
-        self:_setAction(self.treatPAction, tr("sf_treat_action_p_fair", "Top-up with Liquid MAP, Liquid DAP, or DAP (P)."), COLOR_FAIR)
+        local text = _nutrientActionText(info.phosphorus.value, targetP, rrMult, fieldArea,
+            { {"LIQUID_MAP","P"}, {"LIQUID_DAP","P"} },
+            "Top-up with Liquid MAP or Liquid DAP")
+        self:_setAction(self.treatPAction, text, COLOR_FAIR)
     else
         self:_setAction(self.treatPAction, tr("sf_treat_action_ok", "OK"), COLOR_GOOD)
     end
 
     -- K
     if info.potassium.value < (thresh.potassium.poor or 20) then
-        self:_setAction(self.treatKAction, tr("sf_treat_action_k_poor", "Apply POTASH (Potassium)."), COLOR_POOR)
+        local text = _nutrientActionText(info.potassium.value, targetK, rrMult, fieldArea,
+            { {"POTASH","K"}, {"LIQUID_POTASH","K"} },
+            "Apply POTASH")
+        self:_setAction(self.treatKAction, text, COLOR_POOR)
     elseif info.potassium.value < (thresh.potassium.fair or 40) then
-        self:_setAction(self.treatKAction, tr("sf_treat_action_k_fair", "Top-up with Liquid Potash or Potash (K)."), COLOR_FAIR)
+        local text = _nutrientActionText(info.potassium.value, targetK, rrMult, fieldArea,
+            { {"POTASH","K"}, {"LIQUID_POTASH","K"} },
+            "Top-up with POTASH or Liquid POTASH")
+        self:_setAction(self.treatKAction, text, COLOR_FAIR)
     else
         self:_setAction(self.treatKAction, tr("sf_treat_action_ok", "OK"), COLOR_GOOD)
     end
 
     -- 4. Protection Actions
     local pThresh = 20
-    
+
     -- Weed
     if (info.weedPressure or 0) >= pThresh then
         self:_setAction(self.treatWeedAction, tr("sf_treat_action_weed", "Apply HERBICIDE or use mechanical WEEDER/HOE."), COLOR_POOR)

@@ -950,6 +950,48 @@ function HookManager:installHarvestHook()
                         local farmland = g_farmlandManager:getFarmlandAtWorldPosition(x, z)
                         if farmland then fieldId = farmland.id end
                     end
+                    -- Fallback: combine rootNode (mid-rear body) can exit the field polygon
+                    -- on large headers. Try attached cutter/header positions instead.
+                    if not fieldId or fieldId <= 0 then
+                        local attachedImpls = combineSelf.spec_attacherJoints and combineSelf.spec_attacherJoints.attachedImplements
+                        if attachedImpls then
+                            for _, impl in ipairs(attachedImpls) do
+                                local obj = impl and impl.object
+                                if obj then
+                                    local ix, _, iz = getWorldTranslation(obj.rootNode)
+                                    if ix then
+                                        if g_fieldManager and type(g_fieldManager.getFieldAtWorldPosition) == "function" then
+                                            local f = g_fieldManager:getFieldAtWorldPosition(ix, iz)
+                                            if f and f.farmland then fieldId = f.farmland.id end
+                                        end
+                                        if not fieldId and g_farmlandManager then
+                                            local fl = g_farmlandManager:getFarmlandAtWorldPosition(ix, iz)
+                                            if fl then fieldId = fl.id end
+                                        end
+                                    end
+                                    if (not fieldId or fieldId <= 0) and obj.spec_workArea and obj.spec_workArea.workAreas then
+                                        for _, wa in ipairs(obj.spec_workArea.workAreas) do
+                                            if wa.start then
+                                                local sx, _, sz = getWorldTranslation(wa.start)
+                                                if sx then
+                                                    if g_fieldManager and type(g_fieldManager.getFieldAtWorldPosition) == "function" then
+                                                        local f = g_fieldManager:getFieldAtWorldPosition(sx, sz)
+                                                        if f and f.farmland then fieldId = f.farmland.id end
+                                                    end
+                                                    if not fieldId and g_farmlandManager then
+                                                        local fl = g_farmlandManager:getFarmlandAtWorldPosition(sx, sz)
+                                                        if fl then fieldId = fl.id end
+                                                    end
+                                                end
+                                            end
+                                            if fieldId and fieldId > 0 then break end
+                                        end
+                                    end
+                                end
+                                if fieldId and fieldId > 0 then break end
+                            end
+                        end
+                    end
                     if not fieldId or fieldId <= 0 then
                         SoilLogger.debug("Harvest hook: skipped (no field at pos x=%.1f z=%.1f)", x, z)
                         return
@@ -1095,6 +1137,47 @@ function HookManager:installYieldModifierHook()
                     if not fieldId and g_farmlandManager then
                         local farmland = g_farmlandManager:getFarmlandAtWorldPosition(x, z)
                         if farmland then fieldId = farmland.id end
+                    end
+                    -- Fallback: rootNode may sit outside field polygon on large combines
+                    if not fieldId or fieldId <= 0 then
+                        local attachedImpls = combineSelf.spec_attacherJoints and combineSelf.spec_attacherJoints.attachedImplements
+                        if attachedImpls then
+                            for _, impl in ipairs(attachedImpls) do
+                                local obj = impl and impl.object
+                                if obj then
+                                    local ix, _, iz = getWorldTranslation(obj.rootNode)
+                                    if ix then
+                                        if g_fieldManager and type(g_fieldManager.getFieldAtWorldPosition) == "function" then
+                                            local f = g_fieldManager:getFieldAtWorldPosition(ix, iz)
+                                            if f and f.farmland then fieldId = f.farmland.id end
+                                        end
+                                        if not fieldId and g_farmlandManager then
+                                            local fl = g_farmlandManager:getFarmlandAtWorldPosition(ix, iz)
+                                            if fl then fieldId = fl.id end
+                                        end
+                                    end
+                                    if (not fieldId or fieldId <= 0) and obj.spec_workArea and obj.spec_workArea.workAreas then
+                                        for _, wa in ipairs(obj.spec_workArea.workAreas) do
+                                            if wa.start then
+                                                local sx, _, sz = getWorldTranslation(wa.start)
+                                                if sx then
+                                                    if g_fieldManager and type(g_fieldManager.getFieldAtWorldPosition) == "function" then
+                                                        local f = g_fieldManager:getFieldAtWorldPosition(sx, sz)
+                                                        if f and f.farmland then fieldId = f.farmland.id end
+                                                    end
+                                                    if not fieldId and g_farmlandManager then
+                                                        local fl = g_farmlandManager:getFarmlandAtWorldPosition(sx, sz)
+                                                        if fl then fieldId = fl.id end
+                                                    end
+                                                end
+                                            end
+                                            if fieldId and fieldId > 0 then break end
+                                        end
+                                    end
+                                end
+                                if fieldId and fieldId > 0 then break end
+                            end
+                        end
                     end
                     if not fieldId or fieldId <= 0 then return end
 
@@ -1294,7 +1377,11 @@ function HookManager:installSprayerAreaHook()
                 end
             end
 
-            if not liters or liters <= 0 then return end
+            if not liters or liters <= 0 then
+                SoilLogger.debug("SprayerHook: usage=0 for fillType=%d fillLevel=%.1f — no product consumed this frame (multi-boom or section-control gate?)",
+                    fillTypeIndex or -1, sprayFillLevel or 0)
+                return
+            end
             if not sprayFillLevel or sprayFillLevel <= 0 then return end
             local success, errorMsg = pcall(function()
                 local fillType = g_fillTypeManager:getFillTypeByIndex(fillTypeIndex)
@@ -1463,6 +1550,7 @@ function HookManager:installSprayerAreaHook()
                 end
 
                 if vww and vww.sections and #vww.sections > 0 then
+                    SoilLogger.debug("SprayerHook: VWW path — %d total sections for %s", #vww.sections, fillType.name)
                     -- Collect active sections into pre-allocated scratch table (avoids per-tick allocation)
                     local scratch = hookMgrRef._sectionScratch
                     local scratchN = 0

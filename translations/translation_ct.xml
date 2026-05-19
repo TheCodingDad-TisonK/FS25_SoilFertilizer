@@ -140,6 +140,7 @@
     <e k="sf_map_title" v="Fertilitzant MAP 11-52-0 (P)" eh="31aa2534" />
     <e k="sf_dap_title" v="Fertilitzant DAP 18-46-0 (P)" eh="5030a80a" />
     <e k="sf_potash_title" v="Potassa 0-0-60 (K)" eh="8db6c54c" />
+    <e k="sf_polifoska_title" v="Polifoska 6-20-30 (NPK)" />
     <e k="sf_liquid_urea_title" v="Urea líquida (N)" eh="7fee4f12" />
     <e k="sf_liquid_ams_title" v="Sulfat d'amoni líquid (N)" eh="0daf3a6f" />
     <e k="sf_liquid_map_title" v="MAP líquid (P)" eh="3ce7c8c9" />
@@ -149,54 +150,57 @@
     <e k="sf_fungicide_title" v="Fungicida" eh="e8512698" />
     <e k="sf_report_page_info" v="Camps %d-%d de %d  |  Pàgina %d de %d" eh="8db851d1" />
     <e k="sf_bigBag_uan32_name" v="IBC UAN 32-0-0" eh="574747ce" />
-    <e k="sf_bigBag_uan32_function" v="Fertilitzant nitrogenat (líquid)" eh="27de5f41" />
+    <e k="sf_bigBag_uan32_function" v="Fertilitzant nitrogenat (líquid) — +44N ppm/ha @ 60.8 L/ha" eh="27de5f41" />
     <e k="sf_bigBag_uan28_name" v="IBC UAN 28-0-0" eh="7eeec815" />
-    <e k="sf_bigBag_uan28_function" v="Fertilitzant nitrogenat (líquid)" eh="27de5f41" />
+    <e k="sf_bigBag_uan28_function" v="Fertilitzant nitrogenat (líquid) — +38N ppm/ha @ 60.8 L/ha" eh="27de5f41" />
     <e k="sf_bigBag_anhydrous_name" v="IBC Amoníac anhidre 82-0-0" eh="fb09e6ce" />
-    <e k="sf_bigBag_anhydrous_function" v="Fertilitzant nitrogenat (líquid)" eh="27de5f41" />
+    <e k="sf_bigBag_anhydrous_function" v="Fertilitzant nitrogenat (líquid) — +67N ppm/ha @ 28 L/ha" eh="27de5f41" />
     <e k="sf_bigBag_urea_name" v="Big Bag Urea 46-0-0" eh="8e8cbaae" />
-    <e k="sf_bigBag_urea_function" v="Fertilitzant nitrogenat (sec)" eh="63efea20" />
+    <e k="sf_bigBag_urea_function" v="Fertilitzant nitrogenat (sec) — +78N ppm/ha @ 168 kg/ha" eh="63efea20" />
     <e k="sf_bigBag_an_name" v="Big Bag AN 34.5-0-0" eh="45f56f60" />
-    <e k="sf_bigBag_an_function" v="Fertilitzant nitrogenat (sec)" eh="63efea20" />
+    <e k="sf_bigBag_an_function" v="Fertilitzant nitrogenat (sec) — +68N ppm/ha @ 200 kg/ha" eh="63efea20" />
     <e k="sf_bigBag_ams_name" v="Big Bag AMS 21-0-0-24S" eh="7f71ee68" />
-    <e k="sf_bigBag_ams_function" v="Fertilitzant nitrogenat (sec)" eh="63efea20" />
+    <e k="sf_bigBag_ams_function" v="Fertilitzant nitrogenat (sec) — +33N ppm/ha @ 168 kg/ha" eh="63efea20" />
     <e k="sf_bigBag_map_name" v="Big Bag MAP 11-52-0" eh="8a5a059b" />
-    <e k="sf_bigBag_map_function" v="Fertilitzant fosfòric (sec)" eh="0cc85c60" />
+    <e k="sf_bigBag_map_function" v="Fertilitzant fosfòric (sec) — +8N +56P ppm/ha @ 225 kg/ha" eh="0cc85c60" />
     <e k="sf_bigBag_dap_name" v="Big Bag DAP 18-46-0" eh="fb4e9987" />
-    <e k="sf_bigBag_dap_function" v="Fertilitzant fosfòric (sec)" eh="0cc85c60" />
+    <e k="sf_bigBag_dap_function" v="Fertilitzant fosfòric (sec) — +11N +44P ppm/ha @ 225 kg/ha" eh="0cc85c60" />
     <e k="sf_bigBag_potash_name" v="Big Bag Potassa 0-0-60" eh="eb771556" />
-    <e k="sf_bigBag_potash_function" v="Fertilitzant potàssic (sec)" eh="18015099" />
+    <e k="sf_bigBag_potash_function" v="Fertilitzant potàssic (sec) — +90K ppm/ha @ 225 kg/ha" eh="18015099" />
+    <e k="sf_bigBag_polifoska_name" v="Big Bag Polifoska 6-20-30" />
+    <e k="sf_bigBag_polifoska_function" v="NPK Fertilizer (dry) — +4N +21P +50K ppm/ha @ 250 kg/ha" />
     <e k="sf_bigBag_liquid_urea_name" v="IBC Urea líquida" eh="c40b906f" />
-    <e k="sf_bigBag_liquid_urea_function" v="Fertilitzant nitrogenat (líquid)" eh="27de5f41" />
+    <e k="sf_bigBag_liquid_urea_function" v="Fertilitzant nitrogenat (líquid) — +78N ppm/ha @ 168 L/ha" eh="27de5f41" />
     <e k="sf_bigBag_liquid_ams_name" v="IBC AMS líquid" eh="32e6c8bb" />
-    <e k="sf_bigBag_liquid_ams_function" v="Fertilitzant nitrogenat (líquid)" eh="27de5f41" />
+    <e k="sf_bigBag_liquid_ams_function" v="Fertilitzant nitrogenat (líquid) — +33N ppm/ha @ 168 L/ha" eh="27de5f41" />
     <e k="sf_bigBag_liquid_map_name" v="IBC MAP líquid" eh="4628addb" />
-    <e k="sf_bigBag_liquid_map_function" v="Fertilitzant fosfòric (líquid)" eh="eeb5ef5d" />
+    <e k="sf_bigBag_liquid_map_function" v="Fertilitzant fosfòric (líquid) — +8N +56P ppm/ha @ 225 L/ha" eh="eeb5ef5d" />
     <e k="sf_bigBag_liquid_dap_name" v="IBC DAP líquid" eh="82fb3c06" />
-    <e k="sf_bigBag_liquid_dap_function" v="Fertilitzant fosfòric (líquid)" eh="eeb5ef5d" />
+    <e k="sf_bigBag_liquid_dap_function" v="Fertilitzant fosfòric (líquid) — +11N +44P ppm/ha @ 225 L/ha" eh="eeb5ef5d" />
     <e k="sf_bigBag_liquid_potash_name" v="IBC Potassa líquida" eh="7176856d" />
-    <e k="sf_bigBag_liquid_potash_function" v="Fertilitzant potàssic (líquid)" eh="52169d4a" />
+    <e k="sf_bigBag_liquid_potash_function" v="Fertilitzant potàssic (líquid) — +90K ppm/ha @ 225 L/ha" eh="52169d4a" />
     <e k="sf_bigBag_starter_name" v="IBC Starter 10-34-0" eh="62b13bd1" />
     <e k="sf_bigBag_insecticide_name" v="IBC Insecticida" eh="c8f0aabb" />
     <e k="sf_bigBag_insecticide_function" v="Insecticida (líquid)" eh="09580f6b" />
     <e k="sf_bigBag_fungicide_name" v="IBC Fungicida" eh="2a1c78d4" />
     <e k="sf_bigBag_fungicide_function" v="Fungicida (líquid)" eh="745c34cb" />
-    <e k="sf_bigBag_starter_function" v="Fertilitzant d'arrencada (líquid)" eh="2c36ea57" />
+    <e k="sf_bigBag_starter_function" v="Fertilitzant d'arrencada (líquid) — +9N +17P ppm/ha @ 46.8 L/ha" eh="2c36ea57" />
     <e k="sf_bigBag_gypsum_name" v="Big Bag Guix" eh="40fc8169" />
-    <e k="sf_bigBag_gypsum_function" v="Esmena del sòl (seca)" eh="51503c54" />
+    <e k="sf_bigBag_gypsum_function" v="Esmena del sòl (seca) — pH -0.15/pass @ 1500 kg/ha" eh="51503c54" />
     <e k="sf_bigBag_compost_name" v="Big Bag Compost" eh="14322c5d" />
-    <e k="sf_bigBag_compost_function" v="Esmena orgànica del sòl (seca)" eh="9dd2256a" />
+    <e k="sf_bigBag_compost_10k_name" v="Big Bag Compost 10000L" />
+    <e k="sf_bigBag_compost_function" v="Esmena orgànica del sòl (seca) — +11N +2P +11K ppm, +3.0% OM @ 5t/ha" eh="9dd2256a" />
     <e k="sf_bigBag_biosolids_name" v="Big Bag Biosòlids" eh="61a60ff3" />
     <e k="sf_bigBag_biosolids_10k_name" v="[EN] Big Bag Biosolids (10,000L)" />
-    <e k="sf_bigBag_biosolids_function" v="Fertilitzant orgànic (sec)" eh="374c7b1e" />
+    <e k="sf_bigBag_biosolids_function" v="Fertilitzant orgànic (sec) — +28N +3P +22K ppm, +2.0% OM @ 4.5t/ha" eh="374c7b1e" />
     <e k="sf_bigBag_chicken_manure_name" v="Big Bag Fems de gallina" eh="cb60fddc" />
     <e k="sf_bigBag_chicken_manure_10k_name" v="[EN] Big Bag Chicken Manure (10,000L)" />
-    <e k="sf_bigBag_chicken_manure_function" v="Fertilitzant orgànic (sec)" eh="374c7b1e" />
+    <e k="sf_bigBag_chicken_manure_function" v="Fertilitzant orgànic (sec) — +22N +3P +22K ppm, +1.1% OM @ 2t/ha" eh="374c7b1e" />
     <e k="sf_bigBag_pelletized_manure_name" v="Big Bag Fems granulat" eh="064be7fa" />
     <e k="sf_bigBag_pelletized_manure_10k_name" v="[EN] Big Bag Pelletized Manure (10,000L)" />
-    <e k="sf_bigBag_pelletized_manure_function" v="Fertilitzant orgànic (sec)" eh="374c7b1e" />
+    <e k="sf_bigBag_pelletized_manure_function" v="Fertilitzant orgànic (sec) — +22N +2P +33K ppm @ 450 kg/ha" eh="374c7b1e" />
     <e k="sf_bigBag_liquidlime_name" v="Dipòsit de calç líquida" eh="4f8caca1" />
-    <e k="sf_bigBag_liquidlime_function" v="Agent per elevar el pH (líquid)" eh="7a118b6d" />
+    <e k="sf_bigBag_liquidlime_function" v="Agent per elevar el pH (líquid) — pH +0.40/pass @ 374 L/ha" eh="7a118b6d" />
     <e k="sf_hud_title" v="MONITOR DEL SÒL" eh="f8cda642" />
     <e k="sf_hud_field" v="Camp %d" eh="08988997" />
     <e k="sf_hud_noField" v="Camineu sobre un camp" eh="62c55e9e" />
@@ -532,6 +536,8 @@
     <e k="sf_treat_action_pest" v="Apliqueu INSECTICIDA immediatament." eh="f4db9a03" />
     <e k="sf_treat_action_disease" v="Apliqueu FUNGICIDA immediatament." eh="9228323a" />
     <e k="sf_detail_rotation_ok" v="OK" eh="e0aa021e" />
+    <e k="sf_detail_yield_eff_label" v="Yield eff." />
+    <e k="sf_detail_yield_optimal" v="Optimal" />
     <e k="sf_detail_rotation_bonus" v="Bonus de lleguminoses (+N)" eh="8ab86f6a" />
     <e k="sf_detail_rotation_fatigue" v="Fatiga (x1.15 esgotament)" eh="522a6d93" />
     <e k="sf_detail_no_field" v="No hi ha dades disponibles." eh="c6d95d5e" />
@@ -546,6 +552,7 @@
     <e k="sf_hud_coverage" v="Cobertura: %d%% / %d%%" eh="d407bb6d" />
     <e k="sf_hud_pass_coverage" v="噴施: %d%% (%s)" eh="00000000" />
     <e k="sf_hud_compaction" v="Compactació: %d%%" eh="bef3a4f5" />
+    <e k="sf_hud_yield_eff" v="Yield: %d%%" />
 
     <!-- ======================================================
          SPRAYER RATE HUD

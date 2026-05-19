@@ -319,6 +319,7 @@ SoilConstants.FERTILIZER_PROFILES = {
     MAP               = { N=11.1, P=411.5, K=0.00 }, -- 225 kg/ha: ~45P ppm
     DAP               = { N=16.4, P=329.2, K=0.00 }, -- 225 kg/ha: ~40P ppm
     POTASH            = { N=0.00, P=0.00, K=100.0 }, -- 225 kg/ha: ~22.5 K pts/pass; 70-90 kg/ha ≈ 7-9 pts (realistic 1-pass fix)
+    POLIFOSKA         = { N=5.4, P=143.0, K=50.0 },  -- 6-20-30 NPK compound; 250 kg/ha: ~1.4N +36P +12.5K ppm
 
     -- Liquid equivalents (match dry profiles)
     LIQUID_UREA       = { N=154.6, P=0.00, K=0.00 },
@@ -349,7 +350,7 @@ SoilConstants.FERTILIZER_TYPES = {
     -- Gypsum
     "GYPSUM",
     -- P&K sources
-    "MAP", "DAP", "POTASH",
+    "MAP", "DAP", "POTASH", "POLIFOSKA",
     -- Liquid equivalents
     "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH",
     -- Organic
@@ -694,6 +695,7 @@ SoilConstants.SPRAYER_RATE = {
         MAP               = { value =   225.0, unit = "dry"    },
         DAP               = { value =   225.0, unit = "dry"    },
         POTASH            = { value =   225.0, unit = "dry"    },
+        POLIFOSKA         = { value =   250.0, unit = "dry"    },
         LIQUID_MAP        = { value =   225.0, unit = "liquid" },
         LIQUID_DAP        = { value =   225.0, unit = "liquid" },
         LIQUID_POTASH     = { value =   225.0, unit = "liquid" },
