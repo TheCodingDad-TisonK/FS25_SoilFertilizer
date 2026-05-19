@@ -140,6 +140,7 @@
     <e k="sf_map_title" v="Nawóz MAP 11-52-0 (P)" eh="31aa2534" />
     <e k="sf_dap_title" v="Nawóz DAP 18-46-0 (P)" eh="5030a80a" />
     <e k="sf_potash_title" v="Sól potasowa 0-0-60 (K)" eh="8db6c54c" />
+    <e k="sf_polifoska_title" v="Polifoska 6-20-30 (NPK)" />
     <e k="sf_liquid_urea_title" v="Mocznik w płynie (N)" eh="7fee4f12" />
     <e k="sf_liquid_ams_title" v="Siarczan amonu w płynie (N)" eh="0daf3a6f" />
     <e k="sf_liquid_map_title" v="MAP w płynie (P)" eh="3ce7c8c9" />
@@ -166,6 +167,8 @@
     <e k="sf_bigBag_dap_function" v="Nawóz fosforowy (suchy) — +11N +44P ppm/ha @ 225 kg/ha" eh="0cc85c60" />
     <e k="sf_bigBag_potash_name" v="Big Bag Sól potasowa 0-0-60" eh="eb771556" />
     <e k="sf_bigBag_potash_function" v="Nawóz potasowy (suchy) — +90K ppm/ha @ 225 kg/ha" eh="18015099" />
+    <e k="sf_bigBag_polifoska_name" v="Big Bag Polifoska 6-20-30" />
+    <e k="sf_bigBag_polifoska_function" v="NPK Fertilizer (dry) — +4N +21P +50K ppm/ha @ 250 kg/ha" />
     <e k="sf_bigBag_liquid_urea_name" v="IBC Mocznik w płynie" eh="c40b906f" />
     <e k="sf_bigBag_liquid_urea_function" v="Nawóz azotowy (płynny) — +78N ppm/ha @ 168 L/ha" eh="27de5f41" />
     <e k="sf_bigBag_liquid_ams_name" v="IBC Siarczan amonu w płynie" eh="32e6c8bb" />

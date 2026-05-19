@@ -102,6 +102,15 @@
             <pallet filename="objects/bigBag/potash/bigBag_potash.xml" />
         </fillType>
 
+        <fillType name="POLIFOSKA" title="$l10n_sf_polifoska_title" showOnPriceTable="true" isBulkType="true" unitShort="$l10n_unit_literShort">
+            <physics massPerLiter="0.92" maxPhysicalSurfaceAngle="15"/>
+            <economy pricePerLiter="1.90"/>
+            <image hud="$dataS/menu/hud/fillTypes/hud_fill_fertilizer.png"/>
+            <textures diffuse="$data/fillPlanes/fertilizer_diffuse.dds" normal="$data/fillPlanes/fertilizer_normal.dds" height="$data/fillPlanes/fertilizer_height.dds" displacement="$data/fillPlanes/fertilizer_displacement.dds" distance="$data/fillPlanes/distance/fertilizerDistance_diffuse.dds"/>
+            <sprayType sprayTypeStr="FERTILIZER"/>
+            <pallet filename="objects/bigBag/polifoska/bigBag_polifoska.xml" />
+        </fillType>
+
         <!-- ── CROP PROTECTION ────────────────────────────────── -->
 
         <fillType name="INSECTICIDE" title="$l10n_sf_insecticide_title" showOnPriceTable="true" isBulkType="false" unitShort="$l10n_unit_literShort">

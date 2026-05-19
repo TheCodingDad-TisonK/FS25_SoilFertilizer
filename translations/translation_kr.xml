@@ -140,6 +140,7 @@
     <e k="sf_map_title" v="MAP 비료 11-52-0 (인산)" eh="31aa2534" />
     <e k="sf_dap_title" v="DAP 비료 18-46-0 (인산)" eh="5030a80a" />
     <e k="sf_potash_title" v="칼리 0-0-60 (칼륨)" eh="8db6c54c" />
+    <e k="sf_polifoska_title" v="Polifoska 6-20-30 (NPK)" />
     <e k="sf_liquid_urea_title" v="액상 요소 (질소)" eh="7fee4f12" />
     <e k="sf_liquid_ams_title" v="액상 황산 암모늄 (질소)" eh="0daf3a6f" />
     <e k="sf_liquid_map_title" v="액상 MAP (인산)" eh="3ce7c8c9" />
@@ -166,6 +167,8 @@
     <e k="sf_bigBag_dap_function" v="인산 비료 (고체) — +11N +44P ppm/ha @ 225 kg/ha" eh="0cc85c60" />
     <e k="sf_bigBag_potash_name" v="빅백 칼리 0-0-60" eh="eb771556" />
     <e k="sf_bigBag_potash_function" v="칼륨 비료 (고체) — +90K ppm/ha @ 225 kg/ha" eh="18015099" />
+    <e k="sf_bigBag_polifoska_name" v="Big Bag Polifoska 6-20-30" />
+    <e k="sf_bigBag_polifoska_function" v="NPK Fertilizer (dry) — +4N +21P +50K ppm/ha @ 250 kg/ha" />
     <e k="sf_bigBag_liquid_urea_name" v="IBC 액상 요소" eh="c40b906f" />
     <e k="sf_bigBag_liquid_urea_function" v="질소 비료 (액체) — +78N ppm/ha @ 168 L/ha" eh="27de5f41" />
     <e k="sf_bigBag_liquid_ams_name" v="IBC 액상 AMS" eh="32e6c8bb" />

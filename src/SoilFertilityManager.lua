@@ -772,9 +772,11 @@ function SoilFertilityManager.isFertilizerApplicator(vehicle)
         return false
     end
 
-    -- Return cached result if we've already checked this vehicle
-    if vehicle._sfIsApplicator ~= nil then
-        return vehicle._sfIsApplicator
+    -- Only cache positive results. Caching false during mission load (before
+    -- specializations initialize) permanently marks implements as non-applicators
+    -- for the entire session. Re-evaluate until we get a confirmed true.
+    if vehicle._sfIsApplicator == true then
+        return true
     end
 
     local isApplicator = false

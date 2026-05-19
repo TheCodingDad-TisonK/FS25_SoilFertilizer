@@ -24,17 +24,21 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
-    "- NEW  In-game help guide: press the ? button in the PDA soil screen for a full reference",
-    "- NEW  Soil map overlay Help button: explains layers, colours, tooltip, and tips in-context",
-    "- Fixed Field Detail dialog crash — all nutrient and pressure rows now show correct colors",
-    "- Fixed Treatment plan no longer says 'blended FERTILIZER' — now names the actual product",
-    "  (P deficit → Liquid MAP / Liquid DAP / DAP;  K deficit → Liquid Potash / Potash)",
-    "- Fixed Compost fill plane no longer overrides map-defined custom visuals",
-    "- Fixed pH display rounding — tooltip and map tile colors now always match",
-    "- Soil map overlay only draws your owned fields — big FPS boost on large maps",
-    "- Spraying large fields is smoother — less stuttering while the boom is running",
-    "- HUD nutrient display is lighter on your CPU, especially on lower-end machines",
-    "- Multiplayer join is faster — less data when connecting to a busy server",
+    "v2.2.1.0",
+    "- NEW  Polifoska 6-20-30 compound NPK fertilizer — buy as a 1 000 L big bag",
+    "- NEW  Yield efficiency indicator on the HUD — see your field's harvest modifier",
+    "- NEW  Treatment rate panel — recommended application rate shown for active product",
+    "- NEW  Hungarian translation — full native translation by @MathiasHun",
+    "- Fixed Sprayer implements permanently showing 'not a fertilizer applicator' after load",
+    "  (rate-control HUD panel now appears correctly on first use without restarting)",
+    "- Fixed Large combine headers missing field detection — nutrient depletion now",
+    "  uses the cutter/header position when the combine body is outside the polygon",
+    "- Fixed Weed pressure formula was inverted — clean fields had full penalty applied,",
+    "  weedy fields had none. Corrected; weed penalties now match actual field state",
+    "- Fixed Weeds showing 100% on bare / never-farmed fields",
+    "- Fixed Rain effects (leaching, seasonal N) were silently not running",
+    "- Fixed Weed/pest/disease penalties applied even when nutrient cycles disabled",
+    "- Fixed pfCompatibilityMode toggle now takes effect immediately without reload",
 }
 
 -- ── i18n helper ───────────────────────────────────────────

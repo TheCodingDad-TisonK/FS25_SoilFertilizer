@@ -140,6 +140,7 @@
     <e k="sf_map_title" v="Fertilizante MAP 11-52-0 (P)" eh="31aa2534" />
     <e k="sf_dap_title" v="Fertilizante DAP 18-46-0 (P)" eh="5030a80a" />
     <e k="sf_potash_title" v="Potassa 0-0-60 (K)" eh="8db6c54c" />
+    <e k="sf_polifoska_title" v="Polifoska 6-20-30 (NPK)" />
     <e k="sf_liquid_urea_title" v="Ureia Líquida (N)" eh="7fee4f12" />
     <e k="sf_liquid_ams_title" v="Sulfato de Amônio Líquido (N)" eh="0daf3a6f" />
     <e k="sf_liquid_map_title" v="MAP Líquido (P)" eh="3ce7c8c9" />
@@ -166,6 +167,8 @@
     <e k="sf_bigBag_dap_function" v="Fertilizante fosfórico (seco) — +11N +44P ppm/ha @ 225 kg/ha" eh="0cc85c60" />
     <e k="sf_bigBag_potash_name" v="Big Bag Potassa 0-0-60" eh="eb771556" />
     <e k="sf_bigBag_potash_function" v="Fertilizante potássico (seco) — +90K ppm/ha @ 225 kg/ha" eh="18015099" />
+    <e k="sf_bigBag_polifoska_name" v="Big Bag Polifoska 6-20-30" />
+    <e k="sf_bigBag_polifoska_function" v="NPK Fertilizer (dry) — +4N +21P +50K ppm/ha @ 250 kg/ha" />
     <e k="sf_bigBag_liquid_urea_name" v="IBC Ureia Líquida" eh="c40b906f" />
     <e k="sf_bigBag_liquid_urea_function" v="Fertilizante nitrogenado (líquido) — +78N ppm/ha @ 168 L/ha" eh="27de5f41" />
     <e k="sf_bigBag_liquid_ams_name" v="IBC AMS Líquido" eh="32e6c8bb" />
