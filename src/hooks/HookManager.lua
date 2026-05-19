@@ -895,6 +895,10 @@ function HookManager:installHarvestHook()
         SoilLogger.warning("Could not install harvest hook - Cutter.onEndWorkAreaProcessing not available")
         return false
     end
+    if not Combine or type(Combine.addCutterArea) ~= "function" then
+        SoilLogger.warning("Could not install harvest hook - Combine.addCutterArea not available")
+        return false
+    end
 
     local original = Combine.addCutterArea
     -- NOTE: We CANNOT use Utils.appendedFunction here because it discards the
@@ -1006,7 +1010,11 @@ function HookManager:installHarvestHook()
                     SoilLogger.error("Harvest hook (field detection) failed: %s", tostring(errMsg))
                 end
             else
-                SoilLogger.debug("Harvest hook: skipped (not server or manager/settings not ready or invalid args)")
+                SoilLogger.debug("Harvest hook: skipped (isServer=%s enabled=%s nutrientCycles=%s fruit=%s area=%s)",
+                    tostring(combineSelf.isServer),
+                    tostring(g_SoilFertilityManager and g_SoilFertilityManager.settings.enabled),
+                    tostring(g_SoilFertilityManager and g_SoilFertilityManager.settings.nutrientCycles),
+                    tostring(inputFruitType), tostring(area))
             end
 
             -- Pass arguments completely untouched — we no longer modify liters here.
