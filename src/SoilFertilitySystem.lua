@@ -1696,6 +1696,16 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
             end
             field.weedPressure = math.max(0, math.min(100, gameWeedFactor * 100))
 
+            -- Sync zone cells so overlay map matches field-level weed pressure.
+            -- Zone WP is only written during event-driven paths (spray/plow/cultivate),
+            -- so without this propagation the overlay always shows stale 0 while the
+            -- HUD shows the live FieldState-derived value.
+            if field.zoneData then
+                for _, cell in pairs(field.zoneData) do
+                    cell.weedPressure = field.weedPressure
+                end
+            end
+
             -- Weeds consume nutrients
             if field.weedPressure > 0 then
                 local pRatio = field.weedPressure / 100
