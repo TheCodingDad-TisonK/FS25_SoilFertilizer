@@ -59,6 +59,12 @@
     <e k="sf_diff_long" v="Sværhedsgrad for jordstyring" eh="d6f4560c" />
     <e k="sf_rr_short" v="Genopfyldningshastighed" eh="b363b336" />
     <e k="sf_rr_long" v="Hvor hurtigt gødning genopretter næringsstoffer i marken (0,25x meget langsomt til 2,0x meget hurtigt)" eh="afe78a6d" />
+    <e k="sf_dm_short" v="[EN] Disease Climate" />
+    <e k="sf_dm_long" v="[EN] Climate moisture level — controls how quickly fungal diseases build up and how long fungicide protection lasts" />
+    <e k="sf_dm_1" v="[EN] Arid" />
+    <e k="sf_dm_2" v="[EN] Temperate" />
+    <e k="sf_dm_3" v="[EN] Humid" />
+    <e k="sf_dm_4" v="[EN] Wet" />
     <e k="sf_auto_rate_short" v="Automatisk hastighedskontrol" eh="6f99137d" />
     <e k="sf_auto_rate_long" v="Justerer automatisk gødningsraten baseret på markens behov" eh="a9ca9f6b" />
     <e k="sf_hud_theme_1" v="Grøn" eh="d382816a" />
@@ -602,6 +608,7 @@
     <e k="sf_desc_weedPressure" v="Spor og straf ukrudtsspredning" eh="df20c38d" />
     <e k="sf_desc_pestPressure" v="Spor insektangreb" eh="12b3412e" />
     <e k="sf_desc_diseasePressure" v="Spor svampesygdomme" eh="0858395f" />
+    <e k="sf_desc_diseaseMoisture" v="[EN] Climate moisture level affecting disease spread and fungicide duration" />
     <e k="sf_desc_compactionEnabled" v="Jordpakning fra tunge køretøjer" eh="a7d3a795" />
     <e k="sf_desc_difficulty" v="Intensitet af næringsstofdræn" eh="54a7902e" />
     <e k="sf_desc_replenishmentRate" v="Hastighed for gødningsgenopbygning" eh="858d2b23" />

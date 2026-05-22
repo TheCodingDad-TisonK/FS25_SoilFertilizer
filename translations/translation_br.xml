@@ -59,6 +59,12 @@
     <e k="sf_diff_long" v="Nível de dificuldade de gestão do solo" eh="d6f4560c" />
     <e k="sf_rr_short" v="Taxa de Reposição" eh="b363b336" />
     <e k="sf_rr_long" v="Quão rapidamente o fertilizante restaura os nutrientes do campo (0,25x Muito Lento a 2,0x Muito Rápido)" eh="afe78a6d" />
+    <e k="sf_dm_short" v="[EN] Disease Climate" />
+    <e k="sf_dm_long" v="[EN] Climate moisture level — controls how quickly fungal diseases build up and how long fungicide protection lasts" />
+    <e k="sf_dm_1" v="[EN] Arid" />
+    <e k="sf_dm_2" v="[EN] Temperate" />
+    <e k="sf_dm_3" v="[EN] Humid" />
+    <e k="sf_dm_4" v="[EN] Wet" />
     <e k="sf_auto_rate_short" v="Controle automático de taxa" eh="6f99137d" />
     <e k="sf_auto_rate_long" v="Ajusta automaticamente a taxa de aplicação com base nas necessidades do campo" eh="a9ca9f6b" />
     <e k="sf_hud_theme_1" v="Verde" eh="d382816a" />
@@ -641,6 +647,7 @@
     <e k="sf_desc_weedPressure" v="Rastrear e penalizar a propagação de ervas daninhas" eh="df20c38d" />
     <e k="sf_desc_pestPressure" v="Rastrear infestação de pragas de insetos" eh="12b3412e" />
     <e k="sf_desc_diseasePressure" v="Rastrear doenças fúngicas de culturas" eh="0858395f" />
+    <e k="sf_desc_diseaseMoisture" v="[EN] Climate moisture level affecting disease spread and fungicide duration" />
     <e k="sf_desc_compactionEnabled" v="Compactação do solo por veículos pesados" eh="a7d3a795" />
     <e k="sf_desc_difficulty" v="Nível de intensidade de drenagem de nutrientes" eh="54a7902e" />
     <e k="sf_desc_replenishmentRate" v="Velocidade de restauração de nutrientes do fertilizante" eh="858d2b23" />

@@ -59,6 +59,12 @@
     <e k="sf_diff_long" v="Soil management difficulty level" eh="d6f4560c" />
     <e k="sf_rr_short" v="Replenishment Rate" eh="b363b336" />
     <e k="sf_rr_long" v="How quickly fertilizer restores field nutrients (0.25x Very Slow to 2.0x Very Fast)" eh="afe78a6d" />
+    <e k="sf_dm_short" v="Disease Climate" />
+    <e k="sf_dm_long" v="Climate moisture level — controls how quickly fungal diseases build up and how long fungicide protection lasts" />
+    <e k="sf_dm_1" v="Arid" />
+    <e k="sf_dm_2" v="Temperate" />
+    <e k="sf_dm_3" v="Humid" />
+    <e k="sf_dm_4" v="Wet" />
     <e k="sf_auto_rate_short" v="Auto Rate Control" eh="6f99137d" />
     <e k="sf_auto_rate_long" v="Automatically adjusts fertilizer application rate based on field needs" eh="a9ca9f6b" />
     <e k="sf_hud_theme_1" v="Green" eh="d382816a" />
@@ -640,6 +646,7 @@
     <e k="sf_desc_weedPressure" v="Track and penalize weed spread" eh="df20c38d" />
     <e k="sf_desc_pestPressure" v="Track insect pest infestation" eh="12b3412e" />
     <e k="sf_desc_diseasePressure" v="Track fungal crop diseases" eh="0858395f" />
+    <e k="sf_desc_diseaseMoisture" v="Climate moisture level affecting disease spread and fungicide duration" />
     <e k="sf_desc_compactionEnabled" v="Heavy vehicle soil compaction" eh="a7d3a795" />
     <e k="sf_desc_difficulty" v="Nutrient drain intensity level" eh="54a7902e" />
     <e k="sf_desc_replenishmentRate" v="Fertilizer nutrient restoration speed" eh="858d2b23" />

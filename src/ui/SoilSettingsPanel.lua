@@ -118,7 +118,7 @@ local CATEGORIES = {
             },
             {
                 headerKey = "sf_panel_hdr_crop_stress",
-                items     = { "weedPressure", "pestPressure", "diseasePressure", "compactionEnabled" }
+                items     = { "weedPressure", "pestPressure", "diseasePressure", "diseaseMoisture", "compactionEnabled" }
             },
         }
     },
@@ -164,6 +164,7 @@ local CATEGORIES = {
 local MULTI_OPTS = {
     difficulty        = {"sf_diff_1", "sf_diff_2", "sf_diff_3"},
     replenishmentRate = {"sf_rr_1", "sf_rr_2", "sf_rr_3", "sf_rr_4", "sf_rr_5"},
+    diseaseMoisture   = {"sf_dm_1", "sf_dm_2", "sf_dm_3", "sf_dm_4"},
     hudPosition       = {"sf_hud_pos_1", "sf_hud_pos_2", "sf_hud_pos_3",
                          "sf_hud_pos_4", "sf_hud_pos_5", "sf_hud_pos_6"},
     hudColorTheme     = {"sf_hud_color_1", "sf_hud_color_2", "sf_hud_color_3", "sf_hud_color_4"},
@@ -192,6 +193,7 @@ local SETTING_DESCS = {
     weedPressure      = "sf_desc_weedPressure",
     pestPressure      = "sf_desc_pestPressure",
     diseasePressure   = "sf_desc_diseasePressure",
+    diseaseMoisture   = "sf_desc_diseaseMoisture",
     compactionEnabled = "sf_desc_compactionEnabled",
     showHUD           = "sf_desc_showHUD",
     showMiniReport    = "sf_desc_showMiniReport",
@@ -242,6 +244,7 @@ local ADMIN_SECTIONS = {
             { stype = "setting", id = "seasonalEffects" },
             { stype = "setting", id = "rainEffects" },
             { stype = "setting", id = "plowingBonus" },
+            { stype = "setting", id = "diseaseMoisture" },
             { stype = "setting", id = "compactionEnabled" },
         },
     },

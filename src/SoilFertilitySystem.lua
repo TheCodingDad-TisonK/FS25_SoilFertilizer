@@ -1011,11 +1011,14 @@ function SoilFertilitySystem:onFungicideApplied(fieldId, effectiveness)
     self.fungicideAppliedDay[fieldId] = today
 
     local dp = SoilConstants.DISEASE_PRESSURE
+    local cm = SoilConstants.DISEASE_CLIMATE_MOISTURE[self.settings.diseaseMoisture or 2]
+        or SoilConstants.DISEASE_CLIMATE_MOISTURE[2]
+
     local reduction = dp.FUNGICIDE_PRESSURE_REDUCTION * (effectiveness or 1.0)
     local before = field.diseasePressure or 0
     field.diseasePressure = math.max(0, before - reduction)
     local daysPerMonth = (g_currentMission and g_currentMission.environment and g_currentMission.environment.daysPerPeriod) or 1
-    field.fungicideDaysLeft = dp.FUNGICIDE_DURATION_DAYS * daysPerMonth
+    field.fungicideDaysLeft = math.floor(dp.FUNGICIDE_DURATION_DAYS * cm.fungicideMult * daysPerMonth)
 
     self:log("[Fungicide] Field %d: disease pressure %.0f -> %.0f, protected for %d days",
         fieldId, before, field.diseasePressure, field.fungicideDaysLeft)
@@ -1761,6 +1764,9 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
     -- ── Disease pressure daily growth ────────────────────────────────────────
     if self.settings.diseasePressure and SoilConstants.DISEASE_PRESSURE then
         local dp = SoilConstants.DISEASE_PRESSURE
+        local cm = SoilConstants.DISEASE_CLIMATE_MOISTURE[self.settings.diseaseMoisture or 2]
+            or SoilConstants.DISEASE_CLIMATE_MOISTURE[2]
+
         local isRaining = false
         if g_currentMission and g_currentMission.environment and g_currentMission.environment.weather then
             local rs = g_currentMission.environment.weather:getRainFallScale()
@@ -1778,10 +1784,10 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
         end
 
         local pressure = field.diseasePressure or 0
+        local dryThreshold = cm.dryThreshold * daysPerMonth
 
-        -- Dry days threshold also scales
-        if (field.dryDayCount or 0) >= dp.DRY_DAYS_THRESHOLD * daysPerMonth then
-            field.diseasePressure = math.max(0, pressure - dp.DRY_DECAY_RATE * timeFactor)
+        if (field.dryDayCount or 0) >= dryThreshold then
+            field.diseasePressure = math.max(0, pressure - dp.DRY_DECAY_RATE * cm.dryDecayMult * timeFactor)
         elseif (field.fungicideDaysLeft or 0) <= 0 then
             local baseRate
             if     pressure < dp.LOW    then baseRate = dp.GROWTH_RATE_LOW
@@ -1804,8 +1810,8 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
                 cropMult = dp.CROP_SUSCEPTIBILITY[string.lower(field.lastCrop)] or 1.0
             end
 
-            local rainBonus = isRaining and dp.RAIN_BONUS or 0
-            field.diseasePressure = math.min(100, pressure + ((baseRate * seasonMult * cropMult) + rainBonus) * timeFactor)
+            local rainBonus = isRaining and (dp.RAIN_BONUS * cm.rainBonusMult) or 0
+            field.diseasePressure = math.min(100, pressure + ((baseRate * cm.growthMult * seasonMult * cropMult) + rainBonus) * timeFactor)
         end
     end
 

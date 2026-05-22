@@ -59,6 +59,12 @@
     <e k="sf_diff_long" v="토양 관리 난이도 수준" eh="d6f4560c" />
     <e k="sf_rr_short" v="보충 속도" eh="b363b336" />
     <e k="sf_rr_long" v="비료가 필드 영양분을 복구하는 속도 (0.25x 매우 느림 ~ 2.0x 매우 빠름)" eh="afe78a6d" />
+    <e k="sf_dm_short" v="[EN] Disease Climate" />
+    <e k="sf_dm_long" v="[EN] Climate moisture level — controls how quickly fungal diseases build up and how long fungicide protection lasts" />
+    <e k="sf_dm_1" v="[EN] Arid" />
+    <e k="sf_dm_2" v="[EN] Temperate" />
+    <e k="sf_dm_3" v="[EN] Humid" />
+    <e k="sf_dm_4" v="[EN] Wet" />
     <e k="sf_auto_rate_short" v="자동 살포량 제어" eh="6f99137d" />
     <e k="sf_auto_rate_long" v="필드 필요량에 따라 비료 살포량을 자동으로 조절합니다" eh="a9ca9f6b" />
     <e k="sf_hud_theme_1" v="초록" eh="d382816a" />
@@ -627,6 +633,7 @@
     <e k="sf_desc_weedPressure" v="잡초 확산 추적 및 불이익 부여" eh="df20c38d" />
     <e k="sf_desc_pestPressure" v="곤충 해충 발생 추적" eh="12b3412e" />
     <e k="sf_desc_diseasePressure" v="균류 작물 병해 추적" eh="0858395f" />
+    <e k="sf_desc_diseaseMoisture" v="[EN] Climate moisture level affecting disease spread and fungicide duration" />
     <e k="sf_desc_compactionEnabled" v="대형 차량에 의한 토양 압축" eh="a7d3a795" />
     <e k="sf_desc_difficulty" v="영양분 소모 강도 수준" eh="54a7902e" />
     <e k="sf_desc_replenishmentRate" v="비료 영양분 복구 속도" eh="858d2b23" />

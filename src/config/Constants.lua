@@ -901,6 +901,22 @@ SoilConstants.DISEASE_PRESSURE = {
 }
 
 -- ========================================
+-- DISEASE CLIMATE MOISTURE (1=Arid … 4=Wet)
+-- ========================================
+-- Each entry multiplies the disease-pressure constants at runtime.
+-- growthMult     : scales all four GROWTH_RATE_* tiers
+-- rainBonusMult  : scales RAIN_BONUS added per rainy day
+-- dryThreshold   : overrides DRY_DAYS_THRESHOLD (consecutive dry days before decay)
+-- dryDecayMult   : scales DRY_DECAY_RATE (pts/day removed during dry stretch)
+-- fungicideMult  : scales FUNGICIDE_DURATION_DAYS (shorter in wet climates)
+SoilConstants.DISEASE_CLIMATE_MOISTURE = {
+    [1] = { growthMult = 0.5,  rainBonusMult = 0.5,  dryThreshold = 2,  dryDecayMult = 1.5,  fungicideMult = 1.3  }, -- Arid
+    [2] = { growthMult = 1.0,  rainBonusMult = 1.0,  dryThreshold = 3,  dryDecayMult = 1.0,  fungicideMult = 1.0  }, -- Temperate (baseline)
+    [3] = { growthMult = 1.5,  rainBonusMult = 1.6,  dryThreshold = 6,  dryDecayMult = 0.5,  fungicideMult = 0.75 }, -- Humid
+    [4] = { growthMult = 2.0,  rainBonusMult = 2.5,  dryThreshold = 14, dryDecayMult = 0.2,  fungicideMult = 0.6  }, -- Wet
+}
+
+-- ========================================
 -- SOIL MAP OVERLAY (SoilMapOverlay.lua)
 -- ========================================
 -- Legend panel geometry expressed as fractions of the map render area.

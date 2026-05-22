@@ -59,6 +59,12 @@
 		<e k="sf_diff_long" v="土壌管理の難易度レベル" eh="d6f4560c" />
     <e k="sf_rr_short" v="補充率" eh="b363b336" />
     <e k="sf_rr_long" v="肥料がフィールドの養分を回復する速さ（0.25x 極めて遅い 〜 2.0x 極めて速い）" eh="afe78a6d" />
+    <e k="sf_dm_short" v="[EN] Disease Climate" />
+    <e k="sf_dm_long" v="[EN] Climate moisture level — controls how quickly fungal diseases build up and how long fungicide protection lasts" />
+    <e k="sf_dm_1" v="[EN] Arid" />
+    <e k="sf_dm_2" v="[EN] Temperate" />
+    <e k="sf_dm_3" v="[EN] Humid" />
+    <e k="sf_dm_4" v="[EN] Wet" />
     <e k="sf_auto_rate_short" v="自動レート制御" eh="6f99137d" />
     <e k="sf_auto_rate_long" v="圃場の状態に基づいて肥料散布量を自動調整します" eh="a9ca9f6b" />
     <e k="sf_hud_theme_1" v="グリーン" eh="d382816a" />
@@ -626,6 +632,7 @@
     <e k="sf_desc_weedPressure" v="雑草の広がりを追跡し、収量に反映させます" eh="df20c38d" />
     <e k="sf_desc_pestPressure" v="害虫の発生を追跡します" eh="12b3412e" />
     <e k="sf_desc_diseasePressure" v="菌類による作物の病害を追跡します" eh="0858395f" />
+    <e k="sf_desc_diseaseMoisture" v="[EN] Climate moisture level affecting disease spread and fungicide duration" />
     <e k="sf_desc_compactionEnabled" v="重量車両による土壌の踏み固め" eh="a7d3a795" />
     <e k="sf_desc_difficulty" v="養分消耗の激しさのレベル" eh="54a7902e" />
     <e k="sf_desc_replenishmentRate" v="肥料による養分回復の速さ" eh="858d2b23" />
