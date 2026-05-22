@@ -166,6 +166,14 @@ SettingsSchema.definitions = {
         uiId = "sf_disease_pressure",
     },
     {
+        id = "diseaseMoisture",
+        type = "number",
+        default = 2,  -- 1=Arid, 2=Temperate, 3=Humid, 4=Wet
+        min = 1,
+        max = 4,
+        uiId = "sf_disease_moisture",
+    },
+    {
         id = "compactionEnabled",
         type = "boolean",
         default = true,

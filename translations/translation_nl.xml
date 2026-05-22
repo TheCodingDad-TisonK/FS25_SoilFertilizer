@@ -59,6 +59,12 @@
     <e k="sf_diff_long" v="Moeilijkheidsgraad bodembeheer" eh="d6f4560c" />
     <e k="sf_rr_short" v="Aanvullingssnelheid" eh="b363b336" />
     <e k="sf_rr_long" v="Hoe snel meststof de veldvoedingsstoffen herstelt (0,25x Zeer langzaam tot 2,0x Zeer snel)" eh="afe78a6d" />
+    <e k="sf_dm_short" v="[EN] Disease Climate" />
+    <e k="sf_dm_long" v="[EN] Climate moisture level — controls how quickly fungal diseases build up and how long fungicide protection lasts" />
+    <e k="sf_dm_1" v="[EN] Arid" />
+    <e k="sf_dm_2" v="[EN] Temperate" />
+    <e k="sf_dm_3" v="[EN] Humid" />
+    <e k="sf_dm_4" v="[EN] Wet" />
     <e k="sf_auto_rate_short" v="Automatische snelheidscontrole" eh="6f99137d" />
     <e k="sf_auto_rate_long" v="Past automatisch de bemestingssnelheid aan op basis van veldbehoeften" eh="a9ca9f6b" />
     <e k="sf_hud_theme_1" v="Groen" eh="d382816a" />
@@ -628,6 +634,7 @@
     <e k="sf_desc_weedPressure" v="Onkruidverspreiding bijhouden en bestraffen" eh="df20c38d" />
     <e k="sf_desc_pestPressure" v="Insectenplagen bijhouden" eh="12b3412e" />
     <e k="sf_desc_diseasePressure" v="Schimmelziekten bijhouden" eh="0858395f" />
+    <e k="sf_desc_diseaseMoisture" v="[EN] Climate moisture level affecting disease spread and fungicide duration" />
     <e k="sf_desc_compactionEnabled" v="Bodemverdichting door zware voertuigen" eh="a7d3a795" />
     <e k="sf_desc_difficulty" v="Intensiteitsniveau van nutriëntenafvoer" eh="54a7902e" />
     <e k="sf_desc_replenishmentRate" v="Snelheid van nutriëntenherstel door meststof" eh="858d2b23" />
