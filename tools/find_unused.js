@@ -11,7 +11,7 @@
  *   node find_unused.js [--verbose] [--check-functions]
  *
  * Author: Claude & Samantha
- * Version: 1.3.0 - Added vanilla hooks, event subscriptions, vehicle metrics, malfunctions
+ * Version: 1.4.0 - Removed stale UsedPlus vehicle maintenance sections; updated for SoilFertilizer
  */
 
 const fs = require('fs');
@@ -135,16 +135,18 @@ function findAllDialogs(modRoot) {
         }
     }
 
-    // Find XML dialog files in xml/gui/
-    const xmlDir = path.join(modRoot, 'xml', 'gui');
-    if (fs.existsSync(xmlDir)) {
-        const xmlFiles = findFiles(xmlDir, /Dialog\.xml$/);
-        for (const file of xmlFiles) {
-            const name = path.basename(file, '.xml');
-            if (dialogs[name]) {
-                dialogs[name].xml = file;
-            } else {
-                dialogs[name] = { lua: null, xml: file };
+    // Find XML dialog files in xml/gui/ and gui/ (SoilFertilizer uses both paths)
+    const xmlDirs = [path.join(modRoot, 'xml', 'gui'), path.join(modRoot, 'gui')];
+    for (const xmlDir of xmlDirs) {
+        if (fs.existsSync(xmlDir)) {
+            const xmlFiles = findFiles(xmlDir, /Dialog\.xml$/);
+            for (const file of xmlFiles) {
+                const name = path.basename(file, '.xml');
+                if (dialogs[name]) {
+                    dialogs[name].xml = file;
+                } else {
+                    dialogs[name] = { lua: null, xml: file };
+                }
             }
         }
     }
@@ -629,87 +631,6 @@ function gatherModInfo(modRoot) {
         }
     }
 
-    // Scan for vehicle metrics tracked (maintenance system)
-    modInfo.vehicleMetrics = [];
-    modInfo.malfunctions = [];
-
-    // Gather all maintenance-related content from main spec and modules
-    let maintContent = '';
-    const maintenancePath = path.join(modRoot, 'src', 'specializations', 'UsedPlusMaintenance.lua');
-    if (fs.existsSync(maintenancePath)) {
-        maintContent += fs.readFileSync(maintenancePath, 'utf8');
-    }
-
-    // Also scan maintenance modules
-    const maintModulesDir = path.join(modRoot, 'src', 'specializations', 'maintenance');
-    if (fs.existsSync(maintModulesDir)) {
-        const moduleFiles = fs.readdirSync(maintModulesDir).filter(f => f.endsWith('.lua'));
-        for (const file of moduleFiles) {
-            try {
-                maintContent += '\n' + fs.readFileSync(path.join(maintModulesDir, file), 'utf8');
-            } catch (e) {}
-        }
-    }
-
-    if (maintContent.length > 0) {
-
-        // Detect tracked metrics
-        const metricsPatterns = [
-            { pattern: /spec\.oilLevel/g, metric: 'Engine Oil Level', icon: '🛢️', unit: '0-100%' },
-            { pattern: /spec\.hydraulicFluidLevel/g, metric: 'Hydraulic Fluid Level', icon: '💧', unit: '0-100%' },
-            { pattern: /spec\.tireQuality/g, metric: 'Tire Quality Grade', icon: '⚙️', unit: '1-3' },
-            { pattern: /spec\.tireCondition/g, metric: 'Tire Condition', icon: '🔄', unit: '0-100%' },
-            { pattern: /spec\.operatingHours/g, metric: 'Operating Hours', icon: '⏱️', unit: 'hours' },
-            { pattern: /spec\.lastOilChange/g, metric: 'Last Oil Change', icon: '📅', unit: 'hours ago' },
-            { pattern: /spec\.lastHydraulicService/g, metric: 'Last Hydraulic Service', icon: '🔧', unit: 'hours ago' },
-            { pattern: /spec\.reliabilityScore/g, metric: 'Reliability Score', icon: '📊', unit: '0-100' },
-            { pattern: /spec\.engineTemperature/g, metric: 'Engine Temperature', icon: '🌡️', unit: '°C' },
-            { pattern: /spec\.engineHealth/g, metric: 'Engine Health', icon: '❤️', unit: '0-100%' },
-            { pattern: /spec\.steeringPlay/g, metric: 'Steering Play', icon: '🎯', unit: '0-100%' },
-            { pattern: /spec\.hasInspectionCache/g, metric: 'Inspection Cache', icon: '📋', unit: 'bool' },
-            { pattern: /spec\.purchaseAge/g, metric: 'Purchase Age', icon: '📆', unit: 'hours' },
-            { pattern: /spec\.oilServiceInterval/g, metric: 'Oil Service Interval', icon: '⏰', unit: 'hours' },
-            { pattern: /spec\.hydraulicServiceInterval/g, metric: 'Hydraulic Service Interval', icon: '⏰', unit: 'hours' }
-        ];
-
-        for (const mp of metricsPatterns) {
-            if (mp.pattern.test(maintContent)) {
-                modInfo.vehicleMetrics.push({ name: mp.metric, icon: mp.icon, unit: mp.unit });
-            }
-            mp.pattern.lastIndex = 0;
-        }
-
-        // Detect malfunctions (based on actual spec variables in UsedPlusMaintenance)
-        const malfunctionPatterns = [
-            { pattern: /spec\.isStalled/g, malf: 'Engine Stall', icon: '🛑', desc: 'Engine stops unexpectedly' },
-            { pattern: /spec\.isCutout/g, malf: 'Electrical Cutout', icon: '⚡', desc: 'Electrical system failure' },
-            { pattern: /spec\.isOverheated/g, malf: 'Overheating', icon: '🔥', desc: 'Engine runs too hot' },
-            { pattern: /spec\.isDrifting/g, malf: 'Steering Drift', icon: '↔️', desc: 'Vehicle pulls to one side' },
-            { pattern: /spec\.hasFlatTire/g, malf: 'Flat Tire', icon: '🎈', desc: 'Tire puncture/blowout' },
-            { pattern: /spec\.hasOilLeak/g, malf: 'Oil Leak', icon: '🛢️', desc: 'Losing engine oil' },
-            { pattern: /spec\.hasHydraulicLeak/g, malf: 'Hydraulic Leak', icon: '💧', desc: 'Losing hydraulic fluid' },
-            { pattern: /spec\.hasFuelLeak/g, malf: 'Fuel Leak', icon: '⛽', desc: 'Losing fuel' },
-            { pattern: /spec\.engineSeized/g, malf: 'Engine Seizure', icon: '💀', desc: 'Permanent engine damage' }
-        ];
-
-        for (const mf of malfunctionPatterns) {
-            if (mf.pattern.test(maintContent)) {
-                modInfo.malfunctions.push({ name: mf.malf, icon: mf.icon, description: mf.desc });
-            }
-            mf.pattern.lastIndex = 0;
-        }
-    }
-
-    // Get maintenance module names
-    const maintModulesDirForNames = path.join(modRoot, 'src', 'specializations', 'maintenance');
-    if (fs.existsSync(maintModulesDirForNames)) {
-        modInfo.maintenanceModules = fs.readdirSync(maintModulesDirForNames)
-            .filter(f => f.endsWith('.lua'))
-            .map(f => f.replace('.lua', '').replace('Maintenance', ''));
-    } else {
-        modInfo.maintenanceModules = [];
-    }
-
     // Scan for vanilla hooks (Utils.appendedFunction / prependedFunction)
     modInfo.vanillaHooks = [];
     modInfo.eventSubscriptions = [];
@@ -831,7 +752,7 @@ function printModInfo(modInfo, stats) {
         console.log(`${colors.bold}Keyboard Shortcuts (${modInfo.inputActions.length}):${colors.reset}`);
         for (const action of modInfo.inputActions) {
             // Clean up action name for display
-            const displayName = action.replace('USEDPLUS_', '').replace(/_/g, ' ');
+            const displayName = action.replace(/^SF_|^SOIL_/, '').replace(/_/g, ' ');
             console.log(`  ⌨️  ${displayName}`);
         }
         console.log('');
@@ -918,37 +839,6 @@ function printModInfo(modInfo, stats) {
             for (const [event, sources] of Object.entries(eventGroups).sort()) {
                 console.log(`  📡 MessageType.${event}`);
                 console.log(`      → ${sources.join(', ')}`);
-            }
-            console.log('');
-        }
-    }
-
-    // Vehicle Maintenance System
-    if ((modInfo.vehicleMetrics && modInfo.vehicleMetrics.length > 0) ||
-        (modInfo.malfunctions && modInfo.malfunctions.length > 0)) {
-        console.log(`${colors.bold}${colors.yellow}=== Vehicle Maintenance System ===${colors.reset}\n`);
-
-        // Maintenance modules
-        if (modInfo.maintenanceModules && modInfo.maintenanceModules.length > 0) {
-            console.log(`${colors.bold}Maintenance Modules (${modInfo.maintenanceModules.length}):${colors.reset}`);
-            console.log(`  ${modInfo.maintenanceModules.join(', ')}`);
-            console.log('');
-        }
-
-        // Vehicle metrics
-        if (modInfo.vehicleMetrics && modInfo.vehicleMetrics.length > 0) {
-            console.log(`${colors.bold}Vehicle Metrics Tracked (${modInfo.vehicleMetrics.length}):${colors.reset}`);
-            for (const m of modInfo.vehicleMetrics) {
-                console.log(`  ${m.icon} ${m.name.padEnd(28)} (${m.unit})`);
-            }
-            console.log('');
-        }
-
-        // Malfunctions
-        if (modInfo.malfunctions && modInfo.malfunctions.length > 0) {
-            console.log(`${colors.bold}Malfunction Events (${modInfo.malfunctions.length}):${colors.reset}`);
-            for (const mf of modInfo.malfunctions) {
-                console.log(`  ${mf.icon} ${mf.name.padEnd(20)} - ${mf.description}`);
             }
             console.log('');
         }
