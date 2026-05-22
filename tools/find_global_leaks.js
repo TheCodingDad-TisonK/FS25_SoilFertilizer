@@ -123,7 +123,7 @@ function generateReport() {
     const medium = issues.filter(i => categorizeIssue(i) === 'MEDIUM');
     const low = issues.filter(i => categorizeIssue(i) === 'LOW');
 
-    let report = `# GLOBAL VARIABLE LEAK AUDIT - FS25_UsedPlus\n\n`;
+    let report = `# GLOBAL VARIABLE LEAK AUDIT - FS25_SoilFertilizer\n\n`;
     report += `**Generated:** ${new Date().toISOString()}\n`;
     report += `**Total Lua files scanned:** ${totalFiles}\n`;
     report += `**Potential leaks found:** ${issues.length}\n\n`;

@@ -384,7 +384,7 @@ function printMarkdown(data, features) {
     out.push(`- **${features.utilities.length} utility/helper modules** for shared logic`);
     out.push(`- **${features.toolFiles.length} development tools** for build, validation & stats`);
     out.push(`- **${formatNum(features.translationKeys)} localization keys** translated to ${features.translationFiles.length} languages`);
-    out.push(`- **5 months development** (November 2025 - present)`);
+    out.push(`- **7 months development** (November 2025 - present)`);
     out.push('');
 
     // Detailed breakdown
