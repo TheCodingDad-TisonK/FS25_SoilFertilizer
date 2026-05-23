@@ -149,6 +149,7 @@ function SoilSeeAndSprayPanel:draw()
     if sfm.settingsPanel and sfm.settingsPanel.isVisible then return end
 
     local hud = sfm.soilHUD
+    if hud and not hud.visible then return end
     local inEditMode = hud and hud.editMode
     local indMode    = sfm.settings and sfm.settings.independentPanels
 
@@ -216,8 +217,12 @@ function SoilSeeAndSprayPanel:drawPanel(sprayer, sfm)
     local ratePanelY = mainPanelY - rateGap - ratePanelH
     local ssPanelY   = ratePanelY - ssGap - ssActualH
 
+    -- Effective height (title bar only when collapsed)
+    local collapsed = self.collapsed
+    local panelH    = collapsed and titleH or fullPanelH
+
     local stackedX = hud.panelX
-    local stackedY = ssPanelY - SoilSeeAndSprayPanel.GAP * s - fullPanelH
+    local stackedY = ssPanelY - SoilSeeAndSprayPanel.GAP * s - panelH
 
     -- Free position or stacked
     local panelX, panelY
@@ -226,10 +231,6 @@ function SoilSeeAndSprayPanel:drawPanel(sprayer, sfm)
     else
         panelX, panelY = stackedX, stackedY
     end
-
-    -- Effective height (title bar only when collapsed)
-    local collapsed = self.collapsed
-    local panelH    = collapsed and titleH or fullPanelH
 
     self.lastPanelH   = panelH
     self.lastDrawRect = { x = panelX, y = panelY, w = pw, h = panelH }

@@ -24,12 +24,11 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
-    "- Fix: Smart Sensor panel now correctly tracked as smartSensorPanel (drag now works)",
-    "- Fix: Admin page nav buttons (Smart Systems, Vehicle Tools) visible at top of page",
-    "- Fix: Disabled system panels no longer leave gaps — lastPanelH resets to 0",
-    "- Fix: System panels visible and draggable in Shift+H edit mode without a sprayer",
-    "- Fix: System panels now hidden when the Settings panel (Shift+O) is open",
-    "- Guide, README and mod description updated to cover all smart systems features",
+    "- Fix: System panels (Smart Sensor, See & Spray, Variable Rate) now collapse cleanly",
+    "- Fix: Stacked panels no longer overlap when a panel above them is collapsed",
+    "- Fix: System panels now hide when the main HUD is toggled off (H key)",
+    "- Fix: Third-party fertilizers in the 'fertilizer' fill category (e.g. POLIFOSKA)",
+    "  now load into and refill from spreaders correctly",
 }
 
 -- ── i18n helper ───────────────────────────────────────────

@@ -162,6 +162,7 @@ function SoilSmartSensorPanel:draw()
     if sfm.settingsPanel and sfm.settingsPanel.isVisible then return end
 
     local hud = sfm.soilHUD
+    if hud and not hud.visible then return end
     local inEditMode = hud and hud.editMode
     local indMode    = sfm.settings and sfm.settings.independentPanels
 
@@ -218,8 +219,12 @@ function SoilSmartSensorPanel:drawPanel(sprayer, sfm)
     local titleH       = SoilSmartSensorPanel.TITLE_H * s
     local fullPanelH   = titleH + pad + numRows * rowH + pad
 
+    -- Effective panel height (title bar only when collapsed)
+    local collapsed = self.collapsed
+    local panelH    = collapsed and titleH or fullPanelH
+
     local stackedX = hud.panelX
-    local stackedY = (hud.panelY - gap - ratePanelH) - SoilSmartSensorPanel.GAP * s - fullPanelH
+    local stackedY = (hud.panelY - gap - ratePanelH) - SoilSmartSensorPanel.GAP * s - panelH
 
     -- Free position when independent mode is on
     local panelX, panelY
@@ -228,10 +233,6 @@ function SoilSmartSensorPanel:drawPanel(sprayer, sfm)
     else
         panelX, panelY = stackedX, stackedY
     end
-
-    -- Effective panel height (title bar only when collapsed)
-    local collapsed = self.collapsed
-    local panelH    = collapsed and titleH or fullPanelH
 
     -- Store for stacking / hit-testing (read by panels below)
     self.lastPanelH  = panelH

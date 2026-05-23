@@ -2718,6 +2718,28 @@ function HookManager:installFillUnitHookEarly()
                         if idx then fu.supportedFillTypes[idx] = true end
                     end
                 end
+                -- Category-based expansion: also accept third-party fill types registered in
+                -- the "fertilizer" / "liquidFertilizer" categories by map mods (e.g. POLIFOSKA)
+                if addSolid then
+                    local ok, catTypes = pcall(function()
+                        return fm:getFillTypesByCategoryNames("fertilizer")
+                    end)
+                    if ok and catTypes then
+                        for _, ft in pairs(catTypes) do
+                            if ft and ft.index then fu.supportedFillTypes[ft.index] = true end
+                        end
+                    end
+                end
+                if addLiquid then
+                    local ok, catTypes = pcall(function()
+                        return fm:getFillTypesByCategoryNames("liquidFertilizer")
+                    end)
+                    if ok and catTypes then
+                        for _, ft in pairs(catTypes) do
+                            if ft and ft.index then fu.supportedFillTypes[ft.index] = true end
+                        end
+                    end
+                end
             end
         end
     end)
@@ -2796,6 +2818,26 @@ function HookManager:installFillUnitHook()
         if idx then table.insert(manureCompatIndices, idx) end
     end
 
+    -- Category-based indices: third-party fill types registered by map mods (e.g. POLIFOSKA)
+    local categoryFertIndices    = {}
+    local categoryLiqFertIndices = {}
+    local ok1, catFert = pcall(function() return fm:getFillTypesByCategoryNames("fertilizer") end)
+    if ok1 and catFert then
+        for _, ft in pairs(catFert) do
+            if ft and ft.index then table.insert(categoryFertIndices, ft.index) end
+        end
+    end
+    local ok2, catLiq = pcall(function() return fm:getFillTypesByCategoryNames("liquidFertilizer") end)
+    if ok2 and catLiq then
+        for _, ft in pairs(catLiq) do
+            if ft and ft.index then table.insert(categoryLiqFertIndices, ft.index) end
+        end
+    end
+    if #categoryFertIndices > 0 or #categoryLiqFertIndices > 0 then
+        SoilLogger.info("FillUnit hook: detected %d solid + %d liquid category fill types (third-party support)",
+            #categoryFertIndices, #categoryLiqFertIndices)
+    end
+
     -- Shared helper: inject custom fill type indices into one vehicle's fill units
     local function patchVehicleFillUnits(vehicleSelf)
         local spec = vehicleSelf.spec_fillUnit
@@ -2818,6 +2860,17 @@ function HookManager:installFillUnitHook()
                 end
                 if addManure then
                     for _, idx in ipairs(manureCompatIndices) do
+                        fillUnit.supportedFillTypes[idx] = true
+                    end
+                end
+                -- Category-based expansion: also accept third-party types (e.g. POLIFOSKA)
+                if addSolid then
+                    for _, idx in ipairs(categoryFertIndices) do
+                        fillUnit.supportedFillTypes[idx] = true
+                    end
+                end
+                if addLiquid then
+                    for _, idx in ipairs(categoryLiqFertIndices) do
                         fillUnit.supportedFillTypes[idx] = true
                     end
                 end
@@ -2888,6 +2941,21 @@ function HookManager:installFillUnitHook()
             local manureBase = customToManure[fillType]
             if manureBase and origGetSupports(vehicleSelf, fillUnitIndex, manureBase) then
                 return true
+            end
+            -- Category-based fallback: support any fill type in the "fertilizer" /
+            -- "liquidFertilizer" category for vehicles that already accept the vanilla
+            -- base type. Catches third-party map fill types like POLIFOSKA (issue #423).
+            if fertIndex and origGetSupports(vehicleSelf, fillUnitIndex, fertIndex) then
+                local ok, inCat = pcall(function()
+                    return fm:getIsFillTypeInCategory(fillType, "fertilizer")
+                end)
+                if ok and inCat then return true end
+            end
+            if liqFertIndex and origGetSupports(vehicleSelf, fillUnitIndex, liqFertIndex) then
+                local ok, inCat = pcall(function()
+                    return fm:getIsFillTypeInCategory(fillType, "liquidFertilizer")
+                end)
+                if ok and inCat then return true end
             end
             return false
         end

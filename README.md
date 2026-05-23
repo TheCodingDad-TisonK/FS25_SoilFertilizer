@@ -43,6 +43,11 @@ A third vehicle panel shows per-section rate bars (green → yellow → red) and
 ### Free Panel Layout
 Enable **Free Panel Layout** in Settings → Display → Position to unlock independent positioning for all three smart system panels. Enter Shift+H edit mode and drag each panel to wherever you want it. Press **[−]** in any panel's title bar to collapse it to just the title bar — state is saved to `hud.xml` and restored on load.
 
+### v2.2.3.2 — Hotfix
+- System panels now collapse cleanly — stacked panels below no longer overlap when a panel above them is collapsed
+- System panels now hide when the main HUD is toggled off with the H key
+- Third-party fertilizers registered in the `fertilizer` fill category by map mods (e.g. POLIFOSKA on Etruria) now load into and refill from spreaders correctly
+
 ### v2.2.3.1 — Hotfix
 - Fixed `sensorPanel` naming mismatch that prevented Smart Sensor panel from being dragged independently
 - Admin page Smart Systems / Vehicle Tools nav buttons moved to the top — they were previously cut off below the visible area
@@ -419,7 +424,7 @@ This mod is licensed under **[CC BY-NC-ND 4.0](https://creativecommons.org/licen
 
 You may share it in its original form with attribution. You may not sell it, modify and redistribute it, or reupload it under a different name or authorship. Contributions via pull request are explicitly permitted and encouraged.
 
-**Author:** TisonK &nbsp;·&nbsp; **Version:** 2.2.3.1
+**Author:** TisonK &nbsp;·&nbsp; **Version:** 2.2.3.2
 
 © 2026 TisonK — See [LICENSE](LICENSE) for full terms.
 
