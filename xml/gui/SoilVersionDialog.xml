@@ -25,29 +25,29 @@
 
       <!-- Author -->
       <Text profile="sfVer_author"
-            text="Author: TisonK" position="0px -60px"/>
+            text="Author: TisonK" position="0px -62px"/>
 
       <!-- ─── CHANGELOG section ─── -->
-      <GuiElement profile="sfVer_changelogSection" position="0px -85px">
+      <GuiElement profile="sfVer_changelogSection" position="0px -90px">
         <Bitmap profile="sfVer_changelogBg" position="0px 0px"/>
 
         <!-- "What's new" header (set at runtime via i18n) -->
         <Text profile="sfVer_sectionHeader" id="sfVer_changelogHeader"
-              text="" position="0px -8px"/>
+              text="" position="0px -10px"/>
 
         <!-- Dynamic changelog lines added here by Lua at onOpen() -->
         <BoxLayout profile="sfVer_changelogBox" id="sfVer_changelogBox"
-                   position="0px -36px"/>
+                   position="0px -40px"/>
       </GuiElement>
 
-      <!-- ─── FOOTER section ─── -->
-      <GuiElement profile="sfVer_footerSection" position="0px -390px">
+      <!-- ─── FOOTER section — anchored below changelog ─── -->
+      <GuiElement profile="sfVer_footerSection" position="0px -420px">
         <Bitmap profile="sfVer_footerBg" position="0px 0px"/>
 
-        <Text profile="sfVer_footer" id="sfVer_footer1" text="" position="0px -10px"/>
-        <Text profile="sfVer_footer" id="sfVer_footer2" text="" position="0px -28px"/>
-        <Text profile="sfVer_tagline1" id="sfVer_footer3" text="" position="0px -52px"/>
-        <Text profile="sfVer_tagline2" id="sfVer_footer4" text="" position="0px -70px"/>
+        <Text profile="sfVer_footer"   id="sfVer_footer1" text="" position="0px -12px"/>
+        <Text profile="sfVer_footer"   id="sfVer_footer2" text="" position="0px -30px"/>
+        <Text profile="sfVer_tagline1" id="sfVer_footer3" text="" position="0px -56px"/>
+        <Text profile="sfVer_tagline2" id="sfVer_footer4" text="" position="0px -74px"/>
       </GuiElement>
 
     </GuiElement>
@@ -55,6 +55,8 @@
     <BoxLayout profile="fs25_dialogButtonBox">
       <Button profile="buttonOK" id="sfVer_dontShowBtn"
               text="Don't show again" onClick="onClickDontShowAgain"/>
+      <Button profile="buttonOK" id="sfVer_guideBtn"
+              text="Field Guide" onClick="onClickGuide"/>
       <Button profile="buttonOK" id="sfVer_okBtn"
               text="OK" onClick="onClickOk"/>
     </BoxLayout>
@@ -64,30 +66,30 @@
   <GUIProfiles>
 
     <Profile name="sfVer_bg" extends="fs25_dialogBg">
-      <size value="640px 600px"/>
+      <size value="720px 640px"/>
     </Profile>
 
-    <!-- Changelog section container (dynamic height ~295px for up to ~8 lines) -->
+    <!-- Changelog section container -->
     <Profile name="sfVer_changelogSection" extends="emptyPanel" with="anchorTopCenter">
-      <size value="580px 295px"/>
+      <size value="660px 310px"/>
     </Profile>
     <Profile name="sfVer_changelogBg" extends="baseReference" with="anchorTopCenter">
-      <size value="580px 295px"/>
+      <size value="660px 310px"/>
       <imageColor value="0.08 0.08 0.12 0.9"/>
     </Profile>
 
     <!-- Footer section -->
     <Profile name="sfVer_footerSection" extends="emptyPanel" with="anchorTopCenter">
-      <size value="580px 95px"/>
+      <size value="660px 100px"/>
     </Profile>
     <Profile name="sfVer_footerBg" extends="baseReference" with="anchorTopCenter">
-      <size value="580px 95px"/>
+      <size value="660px 100px"/>
       <imageColor value="0.06 0.08 0.10 0.9"/>
     </Profile>
 
     <!-- Section header: gold, bold -->
     <Profile name="sfVer_sectionHeader" extends="fs25_textDefault" with="anchorTopCenter">
-      <size value="540px 22px"/>
+      <size value="620px 22px"/>
       <textSize value="13px"/>
       <textBold value="true"/>
       <textUpperCase value="true"/>
@@ -97,15 +99,16 @@
 
     <!-- Vertical BoxLayout — Lua adds TextElements here dynamically -->
     <Profile name="sfVer_changelogBox" extends="emptyPanel" with="anchorTopCenter">
-      <size value="540px 250px"/>
+      <size value="620px 260px"/>
       <flowDirection value="vertical"/>
       <useFullVisibility value="false"/>
       <alignmentX value="center"/>
-      <elementSpacing value="4px"/>
+      <elementSpacing value="5px"/>
     </Profile>
 
-    <!-- Used by Lua when creating each changelog TextElement -->
-    <Profile name="sfVer_changelogLine" extends="fs25_textDefault" with="anchorTopCenter">
+    <!-- Each changelog line: fixed width enables word wrap -->
+    <Profile name="sfVer_changelogLine" extends="fs25_textDefault" with="anchorTopLeft">
+      <size value="620px 18px"/>
       <textSize value="13px"/>
       <textColor value="1 1 1 1"/>
     </Profile>
@@ -116,19 +119,25 @@
     </Profile>
 
     <Profile name="sfVer_footer" extends="fs25_textDefault" with="anchorTopCenter">
+      <size value="620px 18px"/>
       <textSize value="13px"/>
       <textColor value="0.65 0.65 0.65 1"/>
+      <textAlignment value="center"/>
     </Profile>
 
     <Profile name="sfVer_tagline1" extends="fs25_textDefault" with="anchorTopCenter">
+      <size value="620px 18px"/>
       <textSize value="12px"/>
       <textColor value="0.65 0.65 0.65 1"/>
+      <textAlignment value="center"/>
     </Profile>
 
     <Profile name="sfVer_tagline2" extends="fs25_textDefault" with="anchorTopCenter">
+      <size value="620px 20px"/>
       <textSize value="13px"/>
       <textBold value="true"/>
       <textColor value="0.35 0.85 0.40 1.0"/>
+      <textAlignment value="center"/>
     </Profile>
 
   </GUIProfiles>

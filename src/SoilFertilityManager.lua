@@ -114,10 +114,16 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
             SoilLogger.info("Soil Version dialog registered")
         end
 
-        -- PDA help dialog (X button in PDA footer)
+        -- PDA help dialog (legacy — kept for backward compat)
         if SoilHelpDialog and g_gui then
             SoilHelpDialog.register(modDirectory)
             SoilLogger.info("Soil Help dialog registered")
+        end
+
+        -- Multi-page field guide (opened from PDA Help button)
+        if SoilGuideDialog and g_gui then
+            SoilGuideDialog.register(modDirectory)
+            SoilLogger.info("Soil Guide dialog registered")
         end
 
         -- Overlay help dialog (4th sidebar button on soil map)
@@ -593,11 +599,18 @@ function SoilFertilityManager:onMissionStarted()
 
         self:loadSoilData()
 
-        if self.settings.showNotifications and SoilVersionDialog and SoilVersionDialog.INSTANCE ~= nil then
+        -- Show version dialog whenever the mod version doesn't match lastSeenVersion.
+        -- We do NOT save the version here — that's done only by "Don't Show Again".
+        -- "OK" just closes the dialog; the player will see it again next boot until
+        -- they explicitly dismiss it with "Don't Show Again".
+        if SoilVersionDialog and SoilVersionDialog.INSTANCE ~= nil then
             local modInfo = g_modManager and g_modManager:getModByName(self.modName)
             local version = (modInfo and modInfo.version) or "?"
+            SoilLogger.info("Version check: save=%s mod=%s", tostring(self.lastSeenVersion), tostring(version))
             if self.lastSeenVersion ~= version then
-                SoilVersionDialog.show(version)
+                SoilLogger.info("New version detected — dialog queued (3s delay)")
+                self._pendingVersionDialog      = version
+                self._pendingVersionDialogDelay = 3000
             end
         end
     end)
@@ -938,6 +951,18 @@ function SoilFertilityManager:update(dt)
     -- Settings panel camera-lock and cursor keepalive
     if self.settingsPanel then
         self.settingsPanel:update()
+    end
+
+    -- Deferred version dialog — fired 3s after mission start so the GUI is stable
+    if self._pendingVersionDialog then
+        self._pendingVersionDialogDelay = (self._pendingVersionDialogDelay or 0) - dt
+        if self._pendingVersionDialogDelay <= 0 then
+            local ver = self._pendingVersionDialog
+            self._pendingVersionDialog      = nil
+            self._pendingVersionDialogDelay = nil
+            SoilLogger.info("Showing version dialog for %s", ver)
+            SoilVersionDialog.show(ver)
+        end
     end
 
     -- Auto-rate control: adjust sprayer rate based on current field soil data
