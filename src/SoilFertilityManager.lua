@@ -608,8 +608,9 @@ function SoilFertilityManager:onMissionStarted()
             local version = (modInfo and modInfo.version) or "?"
             SoilLogger.info("Version check: save=%s mod=%s", tostring(self.lastSeenVersion), tostring(version))
             if self.lastSeenVersion ~= version then
-                SoilLogger.info("New version detected — showing changelog dialog")
-                SoilVersionDialog.show(version)
+                SoilLogger.info("New version detected — dialog queued (3s delay)")
+                self._pendingVersionDialog      = version
+                self._pendingVersionDialogDelay = 3000
             end
         end
     end)
@@ -950,6 +951,18 @@ function SoilFertilityManager:update(dt)
     -- Settings panel camera-lock and cursor keepalive
     if self.settingsPanel then
         self.settingsPanel:update()
+    end
+
+    -- Deferred version dialog — fired 3s after mission start so the GUI is stable
+    if self._pendingVersionDialog then
+        self._pendingVersionDialogDelay = (self._pendingVersionDialogDelay or 0) - dt
+        if self._pendingVersionDialogDelay <= 0 then
+            local ver = self._pendingVersionDialog
+            self._pendingVersionDialog      = nil
+            self._pendingVersionDialogDelay = nil
+            SoilLogger.info("Showing version dialog for %s", ver)
+            SoilVersionDialog.show(ver)
+        end
     end
 
     -- Auto-rate control: adjust sprayer rate based on current field soil data
