@@ -24,12 +24,13 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
-    "v2.2.2.0",
-    "- Fixed Section control overlap prevention not working while moving with Precision",
-    "  Farming active — sections now correctly close over already-fertilized areas",
-    "  inside the field, not just at headland/field boundaries (#415)",
-    "- Fixed SoilMapCellDialog class not loaded on mod startup — no-op guard meant",
-    "  the Shift+S map cell popup silently never registered (#tools)",
+    "v2.2.2.3",
+    "- All keybindings now ship UNBOUND by default",
+    "  Go to Controls > Mods and assign your preferred keys.",
+    "  This eliminates hard-locks caused when multiple mods share the same",
+    "  default key (e.g. Shift+S, Shift+O, Shift+H were all conflicting).",
+    "- Soil Cell Map dialog now auto-shows data for your current position on open",
+    "  instead of always starting blank — click the map to inspect any other cell",
 }
 
 -- ── i18n helper ───────────────────────────────────────────
