@@ -133,6 +133,10 @@ end
 -- ── Main draw ────────────────────────────────────────────
 
 function SoilSeeAndSprayPanel:draw()
+    -- Reset stacking state; drawPanel will set if we actually render
+    self.lastPanelH  = 0
+    self.lastDrawRect = nil
+
     if not self.initialized then return end
     if not self.settings or not self.settings.enabled then return end
     if not g_currentMission then return end
@@ -141,8 +145,12 @@ function SoilSeeAndSprayPanel:draw()
     if not sfm or not sfm.sensorManager then return end
     if sfm.settings and sfm.settings.seeAndSprayEnabled == false then return end
 
+    -- SF custom settings panel open → hide system panels
+    if sfm.settingsPanel and sfm.settingsPanel.isVisible then return end
+
     local hud = sfm.soilHUD
     local inEditMode = hud and hud.editMode
+    local indMode    = sfm.settings and sfm.settings.independentPanels
 
     if not inEditMode then
         if g_gui and (g_gui:getIsGuiVisible() or g_gui:getIsDialogVisible()) then return end
@@ -152,6 +160,13 @@ function SoilSeeAndSprayPanel:draw()
     end
 
     local sprayer = self:getActiveSprayer()
+
+    -- In edit+independent mode, draw frame for hit-testing even without a sprayer
+    if inEditMode and indMode then
+        self:drawPanel(sprayer, sfm)
+        return
+    end
+
     if not sprayer then return end
     local vww = sprayer.spec_variableWorkWidth
     if not vww or not vww.sections or #vww.sections == 0 then return end
@@ -276,6 +291,13 @@ function SoilSeeAndSprayPanel:drawPanel(sprayer, sfm)
 
     -- When collapsed, skip body content
     if collapsed then
+        setTextColor(1, 1, 1, 1)
+        setTextAlignment(RenderText.ALIGN_LEFT)
+        return
+    end
+
+    -- No sprayer: frame drawn for hit-testing only (edit+independent mode without vehicle)
+    if not sprayer then
         setTextColor(1, 1, 1, 1)
         setTextAlignment(RenderText.ALIGN_LEFT)
         return

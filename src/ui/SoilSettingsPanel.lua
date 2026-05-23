@@ -231,6 +231,16 @@ local ADMIN_ACCENT = {0.88, 0.25, 0.25}   -- red accent for admin
 
 local ADMIN_SECTIONS = {
     {
+        headerKey = "sf_panel_hdr_actions",
+        items     = {
+            { stype = "action", id = "admin_save" },
+            { stype = "danger", id = "admin_reset" },
+            { stype = "action", id = "nav_field_tools" },
+            { stype = "action", id = "nav_vehicle_tools" },
+            { stype = "action", id = "nav_smart_systems" },
+        },
+    },
+    {
         headerKey = "sf_panel_hdr_mod_ctrl",
         items     = {
             { stype = "setting", id = "enabled" },
@@ -251,16 +261,6 @@ local ADMIN_SECTIONS = {
             { stype = "setting", id = "plowingBonus" },
             { stype = "setting", id = "diseaseMoisture" },
             { stype = "setting", id = "compactionEnabled" },
-        },
-    },
-    {
-        headerKey = "sf_panel_hdr_actions",
-        items     = {
-            { stype = "action", id = "admin_save" },
-            { stype = "danger", id = "admin_reset" },
-            { stype = "action", id = "nav_field_tools" },
-            { stype = "action", id = "nav_vehicle_tools" },
-            { stype = "action", id = "nav_smart_systems" },
         },
     },
 }

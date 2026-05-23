@@ -472,8 +472,8 @@ FSBaseMission.draw = Utils.appendedFunction(FSBaseMission.draw, function(mission
     if sfm and sfm.settingsPanel then
         sfm.settingsPanel:draw()
     end
-    if sfm and sfm.sensorPanel then
-        sfm.sensorPanel:draw()
+    if sfm and sfm.smartSensorPanel then
+        sfm.smartSensorPanel:draw()
     end
     if sfm and sfm.seeAndSprayPanel then
         sfm.seeAndSprayPanel:draw()

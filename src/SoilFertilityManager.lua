@@ -150,7 +150,7 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
 
         -- Smart Sensor panel (System 1)
         if SoilSmartSensorPanel then
-            self.sensorPanel = SoilSmartSensorPanel.new(self.soilSystem, self.settings)
+            self.smartSensorPanel = SoilSmartSensorPanel.new(self.soilSystem, self.settings)
             SoilLogger.info("Smart Sensor panel created")
         end
         -- See & Spray panel (System 2)
@@ -583,8 +583,8 @@ function SoilFertilityManager:onMissionLoaded()
             self.settingsPanel:initialize()
         end
 
-        if self.sensorPanel then
-            self.sensorPanel:initialize()
+        if self.smartSensorPanel then
+            self.smartSensorPanel:initialize()
         end
         if self.seeAndSprayPanel then
             self.seeAndSprayPanel:initialize()
@@ -1282,9 +1282,9 @@ function SoilFertilityManager:delete()
         self.sensorManager:delete()
         self.sensorManager = nil
     end
-    if self.sensorPanel then
-        self.sensorPanel:delete()
-        self.sensorPanel = nil
+    if self.smartSensorPanel then
+        self.smartSensorPanel:delete()
+        self.smartSensorPanel = nil
     end
     if self.seeAndSprayPanel then
         self.seeAndSprayPanel:delete()
