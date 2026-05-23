@@ -944,4 +944,26 @@ SoilConstants.COMPACTION = {
     NUTRIENT_PENALTY_MAX      = 0.20,  -- max 20% extra nutrient extraction at max compaction
 }
 
+-- ========================================
+-- SEE & SPRAY (System 2)
+-- ========================================
+-- Per-cell pressure thresholds (0-100 scale, same as PEST/DISEASE/WEED_PRESSURE tiers).
+-- Sections are suppressed when the cell value is BELOW the threshold.
+SoilConstants.SEE_AND_SPRAY = {
+    PEST_THRESHOLD    = 10,   -- suppress if cell pestPressure    < 10
+    DISEASE_THRESHOLD = 10,   -- suppress if cell diseasePressure < 10
+    WEED_THRESHOLD    = 15,   -- suppress if cell weedPressure    < 15 (weeds need more to justify spraying)
+}
+
+-- ========================================
+-- VARIABLE RATE APPLICATION (System 3)
+-- ========================================
+-- Per-section rate multiplier derived from the nutrient deficit at each section's soil cell.
+-- The manual rate setting acts as a ceiling; variable rate cannot exceed it.
+SoilConstants.VARIABLE_RATE = {
+    NUTRIENT_TARGET = 70,     -- "well stocked" level — same as Smart Sensor NUTRIENT_TARGET
+    MIN_RATE        = 0.30,   -- minimum multiplier (field at or above target → light top-up pass)
+    MAX_RATE        = 1.50,   -- maximum multiplier (completely depleted cell)
+}
+
 SoilLogger.info("Constants loaded")

@@ -205,10 +205,13 @@ local SETTING_DESCS = {
     activeMapLayer    = "sf_desc_activeMapLayer",
     overlayDensity    = "sf_desc_overlayDensity",
     colorblindMode    = "sf_desc_colorblindMode",
-    showFieldInfoBox  = "sf_desc_showFieldInfoBox",
-    enabled           = "sf_desc_enabled",
-    debugMode         = "sf_desc_debugMode",
-    showNotifications = "sf_desc_showNotifications",
+    showFieldInfoBox      = "sf_desc_showFieldInfoBox",
+    enabled               = "sf_desc_enabled",
+    debugMode             = "sf_desc_debugMode",
+    showNotifications     = "sf_desc_showNotifications",
+    smartSensorEnabled    = "sf_desc_smartSensorEnabled",
+    seeAndSprayEnabled    = "sf_desc_seeAndSprayEnabled",
+    variableRateEnabled   = "sf_desc_variableRateEnabled",
 }
 
 -- Page states
@@ -218,6 +221,7 @@ local PAGE_ADMIN    = "admin"
 local PAGE_SET_STATE = "set_state"
 local PAGE_FIELD_TOOLS = "field_tools"
 local PAGE_VEHICLE_TOOLS = "vehicle_tools"
+local PAGE_SMART_SYSTEMS = "smart_systems"
 
 -- ── Admin page layout ─────────────────────────────────────
 local ADMIN_ROW_H = 0.033   -- setting rows (toggle/multi)
@@ -255,6 +259,7 @@ local ADMIN_SECTIONS = {
             { stype = "danger", id = "admin_reset" },
             { stype = "action", id = "nav_field_tools" },
             { stype = "action", id = "nav_vehicle_tools" },
+            { stype = "action", id = "nav_smart_systems" },
         },
     },
 }
@@ -277,6 +282,27 @@ local VEHICLE_TOOLS_SECTIONS = {
         headerKey = "sf_panel_hdr_vehicle_tools",
         items     = {
             { stype = "action", id = "admin_drain" },
+        },
+    },
+}
+
+local SMART_SYSTEMS_SECTIONS = {
+    {
+        headerKey = "sf_panel_hdr_smart_sensor_sys",
+        items     = {
+            { stype = "setting", id = "smartSensorEnabled" },
+        },
+    },
+    {
+        headerKey = "sf_panel_hdr_see_spray_sys",
+        items     = {
+            { stype = "setting", id = "seeAndSprayEnabled" },
+        },
+    },
+    {
+        headerKey = "sf_panel_hdr_var_rate_sys",
+        items     = {
+            { stype = "setting", id = "variableRateEnabled" },
         },
     },
 }
@@ -477,7 +503,8 @@ function SoilSettingsPanel:draw()
             self:drawLandingPage()
         elseif self.page == PAGE_CATEGORY then
             self:drawCategoryPage()
-        elseif self.page == PAGE_ADMIN or self.page == PAGE_FIELD_TOOLS or self.page == PAGE_VEHICLE_TOOLS then
+        elseif self.page == PAGE_ADMIN or self.page == PAGE_FIELD_TOOLS
+            or self.page == PAGE_VEHICLE_TOOLS or self.page == PAGE_SMART_SYSTEMS then
             self:drawAdminPage()
         elseif self.page == PAGE_SET_STATE then
             if self.drawSetStatePage then self:drawSetStatePage() end
@@ -509,7 +536,13 @@ function SoilSettingsPanel:drawTitleBar()
 
     -- Title text
     local title = "SOIL & FERTILIZER SETTINGS"
-    if self.page == PAGE_ADMIN then
+    if self.page == PAGE_SMART_SYSTEMS then
+        title = title .. "  /  ADMIN PANEL  /  SMART SYSTEMS"
+    elseif self.page == PAGE_FIELD_TOOLS then
+        title = title .. "  /  ADMIN PANEL  /  FIELD TOOLS"
+    elseif self.page == PAGE_VEHICLE_TOOLS then
+        title = title .. "  /  ADMIN PANEL  /  VEHICLE TOOLS"
+    elseif self.page == PAGE_ADMIN then
         title = title .. "  /  ADMIN PANEL"
     elseif self.activeCatIdx then
         local cat = CATEGORIES[self.activeCatIdx]
@@ -553,7 +586,8 @@ function SoilSettingsPanel:drawInfoBar()
     self:drawText(PX + PAD + 0.10, textY, TS_SMALL, "·  " .. modeText, C.info_mode, RenderText.ALIGN_LEFT, false)
 
     if self.page == PAGE_CATEGORY or self.page == PAGE_ADMIN or self.page == PAGE_SET_STATE
-       or self.page == PAGE_FIELD_TOOLS or self.page == PAGE_VEHICLE_TOOLS then
+       or self.page == PAGE_FIELD_TOOLS or self.page == PAGE_VEHICLE_TOOLS
+       or self.page == PAGE_SMART_SYSTEMS then
         -- Back button
         local bbW = 0.085
         local bbH = IB_H * 0.62
@@ -880,6 +914,8 @@ function SoilSettingsPanel:drawAdminPage()
         sections = FIELD_TOOLS_SECTIONS
     elseif self.page == PAGE_VEHICLE_TOOLS then
         sections = VEHICLE_TOOLS_SECTIONS
+    elseif self.page == PAGE_SMART_SYSTEMS then
+        sections = SMART_SYSTEMS_SECTIONS
     end
 
     for _, sec in ipairs(sections) do
@@ -1257,7 +1293,8 @@ function SoilSettingsPanel:handleClick(id, data)
         self:close()
 
     elseif id == "back" then
-        if self.page == PAGE_FIELD_TOOLS or self.page == PAGE_VEHICLE_TOOLS or self.page == PAGE_SET_STATE then
+        if self.page == PAGE_FIELD_TOOLS or self.page == PAGE_VEHICLE_TOOLS
+           or self.page == PAGE_SET_STATE or self.page == PAGE_SMART_SYSTEMS then
             self.page = PAGE_ADMIN
         else
             self.page = PAGE_LANDING
@@ -1355,6 +1392,10 @@ function SoilSettingsPanel:handleClick(id, data)
             return
         elseif actionId == "nav_vehicle_tools" then
             self.page = PAGE_VEHICLE_TOOLS
+            self.pageScrollIdx = 0
+            return
+        elseif actionId == "nav_smart_systems" then
+            self.page = PAGE_SMART_SYSTEMS
             self.pageScrollIdx = 0
             return
         end

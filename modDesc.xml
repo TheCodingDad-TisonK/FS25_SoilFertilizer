@@ -73,9 +73,16 @@
         <action name="SF_RATE_UP"     category="VEHICLE" />
         <action name="SF_RATE_DOWN"   category="VEHICLE" />
         <action name="SF_TOGGLE_AUTO" category="VEHICLE" />
-        <action name="SF_CYCLE_MAP_LAYER" category="ONFOOT" />
-        <action name="SF_OPEN_SETTINGS"   category="ONFOOT" />
-        <action name="SF_HUD_DRAG"        category="ONFOOT" />
+        <action name="SF_CYCLE_MAP_LAYER"   category="ONFOOT" />
+        <action name="SF_OPEN_SETTINGS"     category="ONFOOT" />
+        <action name="SF_HUD_DRAG"          category="ONFOOT" />
+        <action name="SF_SENSOR_PEST"       category="VEHICLE" />
+        <action name="SF_SENSOR_DISEASE"    category="VEHICLE" />
+        <action name="SF_SENSOR_NUTRIENT"   category="VEHICLE" />
+        <action name="SF_SEE_SPRAY_PEST"    category="VEHICLE" />
+        <action name="SF_SEE_SPRAY_DISEASE" category="VEHICLE" />
+        <action name="SF_SEE_SPRAY_WEED"    category="VEHICLE" />
+        <action name="SF_VARIABLE_RATE"     category="VEHICLE" />
     </actions>
 
     <l10n filenamePrefix="translations/translation" />
@@ -89,6 +96,13 @@
         <actionBinding action="SF_CYCLE_MAP_LAYER" />
         <actionBinding action="SF_OPEN_SETTINGS" />
         <actionBinding action="SF_HUD_DRAG" />
+        <actionBinding action="SF_SENSOR_PEST" />
+        <actionBinding action="SF_SENSOR_DISEASE" />
+        <actionBinding action="SF_SENSOR_NUTRIENT" />
+        <actionBinding action="SF_SEE_SPRAY_PEST" />
+        <actionBinding action="SF_SEE_SPRAY_DISEASE" />
+        <actionBinding action="SF_SEE_SPRAY_WEED" />
+        <actionBinding action="SF_VARIABLE_RATE" />
     </inputBinding>
 
     <!-- Custom fill types declared in external file (FS25 requires filename= attribute) -->

@@ -27,6 +27,11 @@ SoilVersionDialog.CHANGELOG = {
     "- Version dialog layout improved: wider dialog, text no longer clipped",
     "- All keybindings now ship UNBOUND by default",
     "- Removed the Cell Report Dialog and all its functions",
+    "- NEW: Smart Sensor System — blocks spraying on sections with no pest/disease/nutrient need",
+    "- NEW: See & Spray System — per-cell pressure overlay with live suppression indicators",
+    "- NEW: Variable Rate Application — adjusts boom rate per section based on soil deficits",
+    "- Admin panel: Smart Systems page with per-system toggles (Smart Sensor, See&Spray, Var. Rate)",
+    "- Fixed createImageOverlay null-check for invalid overlay handle (entity id 0 flood)",
 }
 
 -- ── i18n helper ───────────────────────────────────────────
