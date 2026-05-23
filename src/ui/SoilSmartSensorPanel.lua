@@ -47,10 +47,14 @@ SoilSmartSensorPanel.C_DIVIDER  = {0.25, 0.25, 0.25, 0.45}
 
 function SoilSmartSensorPanel.new(soilSystem, settings)
     local self = setmetatable({}, SoilSmartSensorPanel_mt)
-    self.soilSystem   = soilSystem
-    self.settings     = settings
-    self.fillOverlay  = nil
-    self.initialized  = false
+    self.soilSystem          = soilSystem
+    self.settings            = settings
+    self.fillOverlay         = nil
+    self.initialized         = false
+    self.collapsed           = false
+    self.lastPanelH          = nil   -- actual rendered height; read by panels below for stacking
+    self.lastDrawRect        = nil   -- {x,y,w,h} for hit-testing in independent drag mode
+    self.collapseButtonRect  = nil   -- {x,y,w,h} for collapse toggle in edit mode
     return self
 end
 
@@ -173,14 +177,21 @@ end
 function SoilSmartSensorPanel:drawPanel(sprayer, sfm)
     local sensorMgr  = sfm.sensorManager
     local pfActive   = sfm.settings and sfm.settings.pfCompatibilityMode
+    local indMode    = sfm.settings and sfm.settings.independentPanels
 
     local hud = sfm.soilHUD
     if not hud then return end
 
+    -- Apply saved collapsed state on first draw (loaded from hud.xml)
+    if hud.savedCollapsed and hud.savedCollapsed.smartSensor ~= nil then
+        self.collapsed = hud.savedCollapsed.smartSensor
+        hud.savedCollapsed.smartSensor = nil
+    end
+
     local s  = hud.scale or 1.0
     local pw = SoilHUD and (SoilHUD.BASE_W * s) or (0.190 * s)
 
-    -- Rate panel geometry (mirrors SoilHUD:drawSprayerRatePanel)
+    -- Compute stacked position (used as freePos default on first enable)
     local padV    = (5  / 1080) * s
     local barH    = (4  / 1080) * s
     local scrollH = (22 / 1080) * s
@@ -188,19 +199,32 @@ function SoilSmartSensorPanel:drawPanel(sprayer, sfm)
     local ratePanelH = padV + barH + padV + scrollH + padV + headerH
     local gap     = (6  / 1080) * s
 
-    local panelX       = hud.panelX
-    local mainPanelY   = hud.panelY
-    local ratePanelY   = mainPanelY - gap - ratePanelH
+    local numRows      = pfActive and 1 or 3
+    local rowH         = SoilSmartSensorPanel.ROW_H   * s
+    local pad          = SoilSmartSensorPanel.PAD     * s
+    local titleH       = SoilSmartSensorPanel.TITLE_H * s
+    local fullPanelH   = titleH + pad + numRows * rowH + pad
 
-    -- Sensor panel sits below the rate panel
-    local numRows       = pfActive and 1 or 3
-    local rowH          = SoilSmartSensorPanel.ROW_H   * s
-    local pad           = SoilSmartSensorPanel.PAD     * s
-    local titleH        = SoilSmartSensorPanel.TITLE_H * s
-    local sensorPanelH  = titleH + pad + numRows * rowH + pad
-    local sensorPanelY  = ratePanelY - SoilSmartSensorPanel.GAP * s - sensorPanelH
+    local stackedX = hud.panelX
+    local stackedY = (hud.panelY - gap - ratePanelH) - SoilSmartSensorPanel.GAP * s - fullPanelH
 
-    -- Match rate panel background: color-theme tint + transparency from settings
+    -- Free position when independent mode is on
+    local panelX, panelY
+    if indMode then
+        panelX, panelY = hud:getFreePos("smartSensor", stackedX, stackedY)
+    else
+        panelX, panelY = stackedX, stackedY
+    end
+
+    -- Effective panel height (title bar only when collapsed)
+    local collapsed = self.collapsed
+    local panelH    = collapsed and titleH or fullPanelH
+
+    -- Store for stacking / hit-testing (read by panels below)
+    self.lastPanelH  = panelH
+    self.lastDrawRect = { x = panelX, y = panelY, w = pw, h = panelH }
+
+    -- Colors
     local rTheme = SoilConstants.HUD and SoilConstants.HUD.COLOR_THEMES
         and SoilConstants.HUD.COLOR_THEMES[self.settings.hudColorTheme or 1]
         or { r = 0.4, g = 1.0, b = 0.4 }
@@ -210,46 +234,66 @@ function SoilSmartSensorPanel:drawPanel(sprayer, sfm)
     local alpha = SoilConstants.HUD and SoilConstants.HUD.TRANSPARENCY_LEVELS
         and SoilConstants.HUD.TRANSPARENCY_LEVELS[self.settings.hudTransparency or 3] or 0.70
 
-    -- Shadow
-    self:drawRect(panelX + 0.002*s, sensorPanelY - 0.002*s, pw, sensorPanelH, SoilSmartSensorPanel.C_SHADOW)
-    -- Background (color-themed, same as rate panel)
-    self:drawRect(panelX, sensorPanelY, pw, sensorPanelH, {bgR, bgG, bgB, 1}, alpha)
-    -- Title bar (slightly lighter)
-    self:drawRect(panelX, sensorPanelY + sensorPanelH - titleH, pw, titleH, SoilSmartSensorPanel.C_TITLE_BG)
-    -- Border
-    local bw = 0.001
-    self:drawRect(panelX,          sensorPanelY,                pw, bw, SoilSmartSensorPanel.C_BORDER)
-    self:drawRect(panelX,          sensorPanelY + sensorPanelH - bw, pw, bw, SoilSmartSensorPanel.C_BORDER)
-    self:drawRect(panelX,          sensorPanelY,                bw, sensorPanelH, SoilSmartSensorPanel.C_BORDER)
-    self:drawRect(panelX + pw - bw, sensorPanelY,               bw, sensorPanelH, SoilSmartSensorPanel.C_BORDER)
+    self:drawRect(panelX + 0.002*s, panelY - 0.002*s, pw, panelH, SoilSmartSensorPanel.C_SHADOW)
+    self:drawRect(panelX, panelY, pw, panelH, {bgR, bgG, bgB, 1}, alpha)
+    self:drawRect(panelX, panelY + panelH - titleH, pw, titleH, SoilSmartSensorPanel.C_TITLE_BG)
 
-    -- Edit mode: orange pulse border (mirrors SoilHUD and rate panel behaviour)
+    local bw = 0.001
+    self:drawRect(panelX,          panelY,               pw, bw, SoilSmartSensorPanel.C_BORDER)
+    self:drawRect(panelX,          panelY + panelH - bw,  pw, bw, SoilSmartSensorPanel.C_BORDER)
+    self:drawRect(panelX,          panelY,               bw, panelH, SoilSmartSensorPanel.C_BORDER)
+    self:drawRect(panelX + pw - bw, panelY,              bw, panelH, SoilSmartSensorPanel.C_BORDER)
+
     if hud.editMode then
         local pulse = 0.55 + 0.45 * math.sin((hud.animTimer or 0) * 0.004)
         local ebw = 0.0015
-        self:drawRect(panelX,               sensorPanelY,                        pw, ebw, {1.0, 0.55, 0.10, pulse})
-        self:drawRect(panelX,               sensorPanelY + sensorPanelH - ebw,   pw, ebw, {1.0, 0.55, 0.10, pulse})
-        self:drawRect(panelX,               sensorPanelY,                        ebw, sensorPanelH, {1.0, 0.55, 0.10, pulse})
-        self:drawRect(panelX + pw - ebw,    sensorPanelY,                        ebw, sensorPanelH, {1.0, 0.55, 0.10, pulse})
+        self:drawRect(panelX,            panelY,                pw, ebw, {1.0, 0.55, 0.10, pulse})
+        self:drawRect(panelX,            panelY + panelH - ebw,  pw, ebw, {1.0, 0.55, 0.10, pulse})
+        self:drawRect(panelX,            panelY,                ebw, panelH, {1.0, 0.55, 0.10, pulse})
+        self:drawRect(panelX + pw - ebw, panelY,                ebw, panelH, {1.0, 0.55, 0.10, pulse})
     end
 
-    -- Title text
-    local cx = panelX + pw * 0.5
+    -- Title text (shifted left in edit mode to leave room for collapse button)
+    local titleFs  = 0.009 * s
+    local titleCX  = hud.editMode and (panelX + pw * 0.42) or (panelX + pw * 0.5)
+    local titleBarY = panelY + panelH - titleH * 0.5 - titleFs * 0.3
     setTextBold(true)
     setTextAlignment(RenderText.ALIGN_CENTER)
     setTextColor(1, 1, 1, 0.90)
-    local titleFs = 0.009 * s
-    renderText(cx, sensorPanelY + sensorPanelH - titleH * 0.5 - titleFs * 0.3, titleFs,
-        g_i18n:getText("sf_sensor_panel_title"))
+    renderText(titleCX, titleBarY, titleFs, g_i18n:getText("sf_sensor_panel_title"))
     setTextBold(false)
 
-    -- PF compat mode: show a single disabled notice
+    -- Collapse / expand button (edit mode only)
+    self.collapseButtonRect = nil
+    if hud.editMode then
+        local cbSz = titleH * 0.72
+        local cbX  = panelX + pw - cbSz - 0.003*s
+        local cbY  = panelY + panelH - titleH + (titleH - cbSz) * 0.5
+        self:drawRect(cbX, cbY, cbSz, cbSz, {0.18, 0.28, 0.38, 0.85})
+        setTextBold(true)
+        setTextAlignment(RenderText.ALIGN_CENTER)
+        setTextColor(1, 1, 1, 0.90)
+        renderText(cbX + cbSz * 0.5, cbY + cbSz * 0.18, titleFs, collapsed and "+" or "-")
+        setTextBold(false)
+        self.collapseButtonRect = { x = cbX, y = cbY, w = cbSz, h = cbSz }
+    end
+
+    -- When collapsed, skip body content
+    if collapsed then
+        setTextColor(1, 1, 1, 1)
+        setTextAlignment(RenderText.ALIGN_LEFT)
+        return
+    end
+
+    local cx = panelX + pw * 0.5
+
+    -- PF compat mode notice
     if pfActive then
         setTextAlignment(RenderText.ALIGN_CENTER)
         setTextColor(SoilSmartSensorPanel.C_WARN[1], SoilSmartSensorPanel.C_WARN[2],
             SoilSmartSensorPanel.C_WARN[3], 1.0)
         local fs = 0.008 * s
-        renderText(cx, sensorPanelY + pad + rowH * 0.5 - fs * 0.45, fs,
+        renderText(cx, panelY + pad + rowH * 0.5 - fs * 0.45, fs,
             g_i18n:getText("sf_sensor_pf_mode"))
         setTextColor(1, 1, 1, 1)
         setTextAlignment(RenderText.ALIGN_LEFT)
@@ -292,7 +336,7 @@ function SoilSmartSensorPanel:drawPanel(sprayer, sfm)
     local fsDim  = 0.0065 * s
     local tx     = panelX + pad
     local valX   = panelX + pw - pad
-    local rowY   = sensorPanelY + pad
+    local rowY   = panelY + pad
 
     setTextAlignment(RenderText.ALIGN_LEFT)
 

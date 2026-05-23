@@ -271,6 +271,13 @@ SettingsSchema.definitions = {
         default = true,
         uiId = "sf_variable_rate",
     },
+    {
+        id = "independentPanels",
+        type = "boolean",
+        default = false,
+        uiId = "sf_independent_panels",
+        localOnly = true,  -- per-player layout preference, not synced
+    },
 }
 
 -- Build lookup table by id for fast access

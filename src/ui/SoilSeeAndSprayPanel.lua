@@ -37,10 +37,14 @@ SoilSeeAndSprayPanel.C_CELL_LOW  = {0.40, 0.40, 0.40, 0.85}  -- gray: below thre
 
 function SoilSeeAndSprayPanel.new(soilSystem, settings)
     local self = setmetatable({}, SoilSeeAndSprayPanel_mt)
-    self.soilSystem  = soilSystem
-    self.settings    = settings
-    self.fillOverlay = nil
-    self.initialized = false
+    self.soilSystem          = soilSystem
+    self.settings            = settings
+    self.fillOverlay         = nil
+    self.initialized         = false
+    self.collapsed           = false
+    self.lastPanelH          = nil   -- actual rendered height; read by panels below for stacking
+    self.lastDrawRect        = nil   -- {x,y,w,h} for hit-testing in independent drag mode
+    self.collapseButtonRect  = nil   -- {x,y,w,h} for collapse toggle in edit mode
     return self
 end
 
@@ -158,9 +162,16 @@ end
 function SoilSeeAndSprayPanel:drawPanel(sprayer, sfm)
     local sensorMgr  = sfm.sensorManager
     local pfActive   = sfm.settings and sfm.settings.pfCompatibilityMode
+    local indMode    = sfm.settings and sfm.settings.independentPanels
 
     local hud = sfm.soilHUD
     if not hud then return end
+
+    -- Apply saved collapsed state on first draw (loaded from hud.xml)
+    if hud.savedCollapsed and hud.savedCollapsed.seeAndSpray ~= nil then
+        self.collapsed = hud.savedCollapsed.seeAndSpray
+        hud.savedCollapsed.seeAndSpray = nil
+    end
 
     local s  = hud.scale or 1.0
     local pw = SoilHUD and (SoilHUD.BASE_W * s) or (0.190 * s)
@@ -173,26 +184,40 @@ function SoilSeeAndSprayPanel:drawPanel(sprayer, sfm)
     local ratePanelH = padV + barH + padV + scrollH + padV + headerH
     local rateGap    = (6  / 1080) * s
 
-    -- Smart Sensor panel geometry (to position below it)
-    local ssPanelRows = 3
-    local ssRowH   = 0.024 * s
-    local ssPad    = 0.006 * s
-    local ssTitleH = 0.022 * s
-    local ssGap    = 0.007 * s
-    local ssPanelH = ssTitleH + ssPad + ssPanelRows * ssRowH + ssPad
+    -- Smart Sensor panel height (use actual rendered height to handle collapse)
+    local ssPanelRows  = pfActive and 1 or 3
+    local ssFallbackH  = 0.022*s + 0.006*s + ssPanelRows * 0.024*s + 0.006*s
+    local ssActualH    = (sfm.smartSensorPanel and sfm.smartSensorPanel.lastPanelH) or ssFallbackH
+    local ssGap        = 0.007 * s
 
-    local panelX     = hud.panelX
+    -- Stacked anchor position (below Smart Sensor panel)
+    local numRows      = pfActive and 1 or 3
+    local rowH         = SoilSeeAndSprayPanel.ROW_H   * s
+    local pad          = SoilSeeAndSprayPanel.PAD     * s
+    local titleH       = SoilSeeAndSprayPanel.TITLE_H * s
+    local fullPanelH   = titleH + pad + numRows * rowH + pad
+
     local mainPanelY = hud.panelY
     local ratePanelY = mainPanelY - rateGap - ratePanelH
-    local ssPanelY   = ratePanelY - ssGap - ssPanelH
+    local ssPanelY   = ratePanelY - ssGap - ssActualH
 
-    -- This panel sits below the Smart Sensor panel
-    local numRows       = pfActive and 1 or 3
-    local rowH          = SoilSeeAndSprayPanel.ROW_H   * s
-    local pad           = SoilSeeAndSprayPanel.PAD     * s
-    local titleH        = SoilSeeAndSprayPanel.TITLE_H * s
-    local panelH        = titleH + pad + numRows * rowH + pad
-    local panelY        = ssPanelY - SoilSeeAndSprayPanel.GAP * s - panelH
+    local stackedX = hud.panelX
+    local stackedY = ssPanelY - SoilSeeAndSprayPanel.GAP * s - fullPanelH
+
+    -- Free position or stacked
+    local panelX, panelY
+    if indMode then
+        panelX, panelY = hud:getFreePos("seeAndSpray", stackedX, stackedY)
+    else
+        panelX, panelY = stackedX, stackedY
+    end
+
+    -- Effective height (title bar only when collapsed)
+    local collapsed = self.collapsed
+    local panelH    = collapsed and titleH or fullPanelH
+
+    self.lastPanelH   = panelH
+    self.lastDrawRect = { x = panelX, y = panelY, w = pw, h = panelH }
 
     -- Background: color-theme tinted + transparency (match rate panel)
     local rTheme = SoilConstants.HUD and SoilConstants.HUD.COLOR_THEMES
@@ -224,15 +249,39 @@ function SoilSeeAndSprayPanel:drawPanel(sprayer, sfm)
         self:drawRect(panelX + pw - ebw, panelY,             ebw, panelH, {1.0, 0.55, 0.10, pulse})
     end
 
-    -- Title
-    local cx = panelX + pw * 0.5
+    -- Title text (shifted left in edit mode for collapse button)
+    local titleFs  = 0.009 * s
+    local titleCX  = hud.editMode and (panelX + pw * 0.42) or (panelX + pw * 0.5)
+    local titleBarY = panelY + panelH - titleH * 0.5 - titleFs * 0.3
     setTextBold(true)
     setTextAlignment(RenderText.ALIGN_CENTER)
     setTextColor(1, 1, 1, 0.90)
-    local titleFs = 0.009 * s
-    renderText(cx, panelY + panelH - titleH * 0.5 - titleFs * 0.3, titleFs,
-        g_i18n:getText("sf_see_spray_panel_title"))
+    renderText(titleCX, titleBarY, titleFs, g_i18n:getText("sf_see_spray_panel_title"))
     setTextBold(false)
+
+    -- Collapse / expand button (edit mode only)
+    self.collapseButtonRect = nil
+    if hud.editMode then
+        local cbSz = titleH * 0.72
+        local cbX  = panelX + pw - cbSz - 0.003*s
+        local cbY  = panelY + panelH - titleH + (titleH - cbSz) * 0.5
+        self:drawRect(cbX, cbY, cbSz, cbSz, {0.18, 0.28, 0.38, 0.85})
+        setTextBold(true)
+        setTextAlignment(RenderText.ALIGN_CENTER)
+        setTextColor(1, 1, 1, 0.90)
+        renderText(cbX + cbSz * 0.5, cbY + cbSz * 0.18, titleFs, collapsed and "+" or "-")
+        setTextBold(false)
+        self.collapseButtonRect = { x = cbX, y = cbY, w = cbSz, h = cbSz }
+    end
+
+    -- When collapsed, skip body content
+    if collapsed then
+        setTextColor(1, 1, 1, 1)
+        setTextAlignment(RenderText.ALIGN_LEFT)
+        return
+    end
+
+    local cx = panelX + pw * 0.5
 
     if pfActive then
         setTextAlignment(RenderText.ALIGN_CENTER)
@@ -294,10 +343,10 @@ function SoilSeeAndSprayPanel:drawPanel(sprayer, sfm)
 
     for i = #rows, 1, -1 do
         local row  = rows[i]
-        local midY = rowY + (i - 1) * rowH + rowH * 0.5
+        local midY = rowY + (i-1) * rowH + rowH * 0.5
 
         if i < #rows then
-            self:drawRect(tx, rowY + (i - 1) * rowH + rowH - 0.0003, pw - pad*2, 0.0003, SoilSeeAndSprayPanel.C_DIVIDER)
+            self:drawRect(tx, rowY + (i-1) * rowH + rowH - 0.0003, pw - pad*2, 0.0003, SoilSeeAndSprayPanel.C_DIVIDER)
         end
 
         -- Dot: green=on, gray=off; when on: red=above threshold (would spray), dim gray=below (would skip)

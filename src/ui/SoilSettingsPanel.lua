@@ -138,11 +138,7 @@ local CATEGORIES = {
             },
             {
                 headerKey = "sf_panel_hdr_position",
-                items     = { "hudPosition" }
-            },
-            {
-                headerKey = "sf_panel_hdr_hud_layout",
-                items     = { { stype = "action", id = "hud_enter_drag" } }
+                items     = { "hudPosition", "independentPanels" }
             },
         }
     },
@@ -216,6 +212,7 @@ local SETTING_DESCS = {
     smartSensorEnabled    = "sf_desc_smartSensorEnabled",
     seeAndSprayEnabled    = "sf_desc_seeAndSprayEnabled",
     variableRateEnabled   = "sf_desc_variableRateEnabled",
+    independentPanels     = "sf_desc_independentPanels",
 }
 
 -- Page states
@@ -1395,15 +1392,6 @@ function SoilSettingsPanel:handleClick(id, data)
         local maxScroll = math.max(0, total - MAX_LINES)
         if self.popupScroll < maxScroll then
             self.popupScroll = self.popupScroll + 1
-        end
-
-    elseif id:sub(1, 11) == "cat_action_" then
-        local actionId = id:sub(12)
-        if actionId == "hud_enter_drag" then
-            self:close()
-            if g_SoilFertilityManager and g_SoilFertilityManager.soilHUD then
-                g_SoilFertilityManager.soilHUD:enterEditMode()
-            end
         end
 
     elseif id == "open_admin" then

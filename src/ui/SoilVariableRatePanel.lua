@@ -35,10 +35,14 @@ SoilVariableRatePanel.C_OFF      = {0.52, 0.52, 0.52, 0.85}
 
 function SoilVariableRatePanel.new(soilSystem, settings)
     local self = setmetatable({}, SoilVariableRatePanel_mt)
-    self.soilSystem  = soilSystem
-    self.settings    = settings
-    self.fillOverlay = nil
-    self.initialized = false
+    self.soilSystem          = soilSystem
+    self.settings            = settings
+    self.fillOverlay         = nil
+    self.initialized         = false
+    self.collapsed           = false
+    self.lastPanelH          = nil   -- actual rendered height; read by panels below for stacking
+    self.lastDrawRect        = nil   -- {x,y,w,h} for hit-testing in independent drag mode
+    self.collapseButtonRect  = nil   -- {x,y,w,h} for collapse toggle in edit mode
     return self
 end
 
@@ -133,44 +137,74 @@ end
 function SoilVariableRatePanel:drawPanel(sprayer, sfm)
     local sensorMgr = sfm.sensorManager
     local pfActive  = sfm.settings and sfm.settings.pfCompatibilityMode
+    local indMode   = sfm.settings and sfm.settings.independentPanels
 
     local hud = sfm.soilHUD
     if not hud then return end
 
+    -- Apply saved collapsed state on first draw (loaded from hud.xml)
+    if hud.savedCollapsed and hud.savedCollapsed.varRate ~= nil then
+        self.collapsed = hud.savedCollapsed.varRate
+        hud.savedCollapsed.varRate = nil
+    end
+
     local s  = hud.scale or 1.0
     local pw = SoilHUD and (SoilHUD.BASE_W * s) or (0.190 * s)
 
-    -- Build the Y position below the full stack above us
+    -- Rate panel geometry
     local padV    = (5  / 1080) * s
-    local barH    = (4  / 1080) * s
+    local barH_rp = (4  / 1080) * s
     local scrollH = (22 / 1080) * s
     local headerH = (16 / 1080) * s
-    local ratePanelH = padV + barH + padV + scrollH + padV + headerH
+    local ratePanelH = padV + barH_rp + padV + scrollH + padV + headerH
     local rateGap    = (6  / 1080) * s
 
-    local ssPanelH = 0.022*s + 0.006*s + 3*0.024*s + 0.006*s  -- Smart Sensor panel height
-    local ssPanelGap = 0.007*s
+    -- Smart Sensor panel height (use actual rendered height to handle collapse)
+    local ssPanelRows = pfActive and 1 or 3
+    local ssFallbackH = 0.022*s + 0.006*s + ssPanelRows * 0.024*s + 0.006*s
+    local ssActualH   = (sfm.smartSensorPanel and sfm.smartSensorPanel.lastPanelH) or ssFallbackH
+    local ssGap       = 0.007 * s
 
-    local sasPanelH  = 0.022*s + 0.006*s + 3*0.024*s + 0.006*s  -- See & Spray panel height
-    local sasPanelGap = 0.005*s
+    -- See & Spray panel height (use actual rendered height to handle collapse)
+    local sasFallbackRows = pfActive and 1 or 3
+    local sasFallbackH    = 0.022*s + 0.006*s + sasFallbackRows * 0.024*s + 0.006*s
+    local sasActualH      = (sfm.seeAndSprayPanel and sfm.seeAndSprayPanel.lastPanelH) or sasFallbackH
+    local sasGap          = 0.005 * s
 
     local seeAndSprayActive = sfm.settings and sfm.settings.seeAndSprayEnabled ~= false
 
-    local panelX     = hud.panelX
+    -- Stacked anchor
     local mainPanelY = hud.panelY
     local ratePanelY = mainPanelY - rateGap - ratePanelH
-    local ssPanelY   = ratePanelY - ssPanelGap - ssPanelH
+    local ssPanelY   = ratePanelY - ssGap - ssActualH
     local baseY      = ssPanelY
     if seeAndSprayActive then
-        baseY = ssPanelY - sasPanelGap - sasPanelH
+        baseY = ssPanelY - sasGap - sasActualH
     end
 
-    local titleH  = SoilVariableRatePanel.TITLE_H * s
-    local pad     = SoilVariableRatePanel.PAD     * s
-    local barsH   = SoilVariableRatePanel.BAR_H   * s
-    local infoH   = SoilVariableRatePanel.INFO_H  * s
-    local panelH  = titleH + pad + barsH + pad + infoH + pad
-    local panelY  = baseY - SoilVariableRatePanel.GAP * s - panelH
+    local titleH     = SoilVariableRatePanel.TITLE_H * s
+    local pad        = SoilVariableRatePanel.PAD     * s
+    local barsH      = SoilVariableRatePanel.BAR_H   * s
+    local infoH      = SoilVariableRatePanel.INFO_H  * s
+    local fullPanelH = titleH + pad + barsH + pad + infoH + pad
+
+    local stackedX = hud.panelX
+    local stackedY = baseY - SoilVariableRatePanel.GAP * s - fullPanelH
+
+    -- Free position or stacked
+    local panelX, panelY
+    if indMode then
+        panelX, panelY = hud:getFreePos("varRate", stackedX, stackedY)
+    else
+        panelX, panelY = stackedX, stackedY
+    end
+
+    -- Effective height (title bar only when collapsed)
+    local collapsed = self.collapsed
+    local panelH    = collapsed and titleH or fullPanelH
+
+    self.lastPanelH   = panelH
+    self.lastDrawRect = { x = panelX, y = panelY, w = pw, h = panelH }
 
     -- Background
     local rTheme = SoilConstants.HUD and SoilConstants.HUD.COLOR_THEMES
@@ -196,21 +230,45 @@ function SoilVariableRatePanel:drawPanel(sprayer, sfm)
     if hud.editMode then
         local pulse = 0.55 + 0.45 * math.sin((hud.animTimer or 0) * 0.004)
         local ebw = 0.0015
-        self:drawRect(panelX,           panelY,            pw, ebw, {1.0, 0.55, 0.10, pulse})
-        self:drawRect(panelX,           panelY+panelH-ebw, pw, ebw, {1.0, 0.55, 0.10, pulse})
-        self:drawRect(panelX,           panelY,            ebw, panelH, {1.0, 0.55, 0.10, pulse})
-        self:drawRect(panelX+pw-ebw,    panelY,            ebw, panelH, {1.0, 0.55, 0.10, pulse})
+        self:drawRect(panelX,         panelY,            pw, ebw, {1.0, 0.55, 0.10, pulse})
+        self:drawRect(panelX,         panelY+panelH-ebw, pw, ebw, {1.0, 0.55, 0.10, pulse})
+        self:drawRect(panelX,         panelY,            ebw, panelH, {1.0, 0.55, 0.10, pulse})
+        self:drawRect(panelX+pw-ebw,  panelY,            ebw, panelH, {1.0, 0.55, 0.10, pulse})
     end
 
-    -- Title
-    local cx = panelX + pw * 0.5
+    -- Title text (shifted left in edit mode for collapse button)
+    local titleFs  = 0.009 * s
+    local titleCX  = hud.editMode and (panelX + pw * 0.42) or (panelX + pw * 0.5)
+    local titleBarY = panelY + panelH - titleH * 0.5 - titleFs * 0.3
     setTextBold(true)
     setTextAlignment(RenderText.ALIGN_CENTER)
     setTextColor(1, 1, 1, 0.90)
-    local titleFs = 0.009 * s
-    renderText(cx, panelY + panelH - titleH * 0.5 - titleFs * 0.3, titleFs,
-        g_i18n:getText("sf_var_rate_panel_title"))
+    renderText(titleCX, titleBarY, titleFs, g_i18n:getText("sf_var_rate_panel_title"))
     setTextBold(false)
+
+    -- Collapse / expand button (edit mode only)
+    self.collapseButtonRect = nil
+    if hud.editMode then
+        local cbSz = titleH * 0.72
+        local cbX  = panelX + pw - cbSz - 0.003*s
+        local cbY  = panelY + panelH - titleH + (titleH - cbSz) * 0.5
+        self:drawRect(cbX, cbY, cbSz, cbSz, {0.18, 0.28, 0.38, 0.85})
+        setTextBold(true)
+        setTextAlignment(RenderText.ALIGN_CENTER)
+        setTextColor(1, 1, 1, 0.90)
+        renderText(cbX + cbSz * 0.5, cbY + cbSz * 0.18, titleFs, collapsed and "+" or "-")
+        setTextBold(false)
+        self.collapseButtonRect = { x = cbX, y = cbY, w = cbSz, h = cbSz }
+    end
+
+    -- When collapsed, skip body content
+    if collapsed then
+        setTextColor(1, 1, 1, 1)
+        setTextAlignment(RenderText.ALIGN_LEFT)
+        return
+    end
+
+    local cx = panelX + pw * 0.5
 
     if pfActive then
         setTextAlignment(RenderText.ALIGN_CENTER)

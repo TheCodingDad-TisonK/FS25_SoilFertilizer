@@ -32,6 +32,9 @@ SoilVersionDialog.CHANGELOG = {
     "- NEW: Variable Rate Application — adjusts boom rate per section based on soil deficits",
     "- Admin panel: Smart Systems page with per-system toggles (Smart Sensor, See&Spray, Var. Rate)",
     "- Fixed createImageOverlay null-check for invalid overlay handle (entity id 0 flood)",
+    "- NEW: Free Panel Layout — toggle in Display settings to drag each system panel independently",
+    "- System panels can be collapsed to title bar in edit mode via the − button",
+    "- Panel positions and collapse state saved to hud.xml and restored on next load",
 }
 
 -- ── i18n helper ───────────────────────────────────────────

@@ -794,7 +794,9 @@
     <e k="action_SF_VARIABLE_RATE"     v="SF: Toggle Variable Rate" />
         <!-- HUD LAYOUT DRAG BUTTON -->
     <e k="sf_panel_hdr_hud_layout"   v="HUD Layout" />
-    <e k="sf_hud_enter_drag_label"   v="Move &amp; Resize Panels" />
+    <e k="sf_independent_panels_short" v="Free Panel Layout" />
+    <e k="sf_independent_panels_long" v="Allow smart system panels to be positioned independently in edit mode" />
+    <e k="sf_desc_independentPanels" v="Drag each panel freely using Shift+H edit mode. Collapse panels with the - button in their title bar." />    <e k="sf_hud_enter_drag_label"   v="Move &amp; Resize Panels" />
     <e k="sf_hud_enter_drag_desc"    v="Drag HUD to reposition — drag corner to resize — RMB or Esc to finish" />
     </elements>
 
