@@ -24,13 +24,13 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
-    "v2.2.2.2",
-    "- Changed Soil Cell Map keybinding from Shift+S to F7",
-    "  Shift+S conflicts with sprint-backwards; using the same key as another",
-    "  soil mod caused a hard-lock (GUI corruption). F7 has no vanilla conflicts.",
-    "  Existing saves: rebind F7 in Controls > Other if you prefer a different key.",
-    "- Cell map dialog now auto-shows soil data for your current position on open",
-    "  instead of starting blank — click anywhere on the map to inspect other cells",
+    "v2.2.2.3",
+    "- All keybindings now ship UNBOUND by default",
+    "  Go to Controls > Mods and assign your preferred keys.",
+    "  This eliminates hard-locks caused when multiple mods share the same",
+    "  default key (e.g. Shift+S, Shift+O, Shift+H were all conflicting).",
+    "- Soil Cell Map dialog now auto-shows data for your current position on open",
+    "  instead of always starting blank — click the map to inspect any other cell",
 }
 
 -- ── i18n helper ───────────────────────────────────────────
