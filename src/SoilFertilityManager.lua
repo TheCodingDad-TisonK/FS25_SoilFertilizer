@@ -599,16 +599,15 @@ function SoilFertilityManager:onMissionStarted()
 
         self:loadSoilData()
 
-        -- Show version dialog whenever the mod version changes, regardless of notification settings.
-        -- Update lastSeenVersion immediately so soilData.xml reflects the new version on first load
-        -- and the dialog never repeats on subsequent loads of the same save.
+        -- Show version dialog whenever the mod version doesn't match lastSeenVersion.
+        -- We do NOT save the version here — that's done only by "Don't Show Again".
+        -- "OK" just closes the dialog; the player will see it again next boot until
+        -- they explicitly dismiss it with "Don't Show Again".
         if SoilVersionDialog and SoilVersionDialog.INSTANCE ~= nil then
             local modInfo = g_modManager and g_modManager:getModByName(self.modName)
             local version = (modInfo and modInfo.version) or "?"
             SoilLogger.info("Version check: save=%s mod=%s", tostring(self.lastSeenVersion), tostring(version))
             if self.lastSeenVersion ~= version then
-                self.lastSeenVersion = version
-                self:saveSoilData()
                 SoilLogger.info("New version detected — showing changelog dialog")
                 SoilVersionDialog.show(version)
             end
