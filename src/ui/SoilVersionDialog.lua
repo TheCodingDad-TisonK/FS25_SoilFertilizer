@@ -24,13 +24,11 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
-    "v2.2.2.3",
+    "v2.2.2.4",
+    "- Version dialog layout improved: wider dialog, text no longer clipped",
     "- All keybindings now ship UNBOUND by default",
     "  Go to Controls > Mods and assign your preferred keys.",
-    "  This eliminates hard-locks caused when multiple mods share the same",
-    "  default key (e.g. Shift+S, Shift+O, Shift+H were all conflicting).",
     "- Soil Cell Map dialog now auto-shows data for your current position on open",
-    "  instead of always starting blank — click the map to inspect any other cell",
 }
 
 -- ── i18n helper ───────────────────────────────────────────
