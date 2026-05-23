@@ -771,6 +771,11 @@
     <e k="action_SF_SEE_SPRAY_DISEASE" v="SF: Toggle See &amp; Spray Disease" />
     <e k="action_SF_SEE_SPRAY_WEED"    v="SF: Toggle See &amp; Spray Weed" />
     <e k="action_SF_VARIABLE_RATE"     v="SF: Toggle Variable Rate" />
+        <!-- HUD LAYOUT DRAG BUTTON -->
+    <e k="sf_panel_hdr_hud_layout"   v="HUD Layout" />
+    <e k="sf_hud_enter_drag_label"   v="Move &amp; Resize Panels" />
+    <e k="sf_hud_enter_drag_desc"    v="Drag HUD to reposition — drag corner to resize — RMB or Esc to finish" />
     </elements>
+
 
 </l10n>

@@ -609,6 +609,9 @@
     <e k="sf_panel_hdr_mod_ctrl" v="Mod Control &amp; Difficulty" eh="ae2e88fb" />
     <e k="sf_panel_hdr_systems" v="Systems" eh="d6856404" />
     <e k="sf_panel_hdr_actions" v="Actions &amp; Field Tools" eh="f64ba1c9" />
+    <e k="sf_panel_hdr_hud_layout" v="HUD Layout" />
+    <e k="sf_hud_enter_drag_label" v="Move &amp; Resize Panels" />
+    <e k="sf_hud_enter_drag_desc" v="Drag HUD to reposition — drag corner to resize — RMB or Esc to finish" />
 
     <!-- ======================================================
          SETTINGS PANEL — CHROME
