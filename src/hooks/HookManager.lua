@@ -2679,7 +2679,7 @@ function HookManager:installFillUnitHookEarly()
         return false
     end
 
-    local solidNames         = {"UREA", "AMS", "MAP", "DAP", "POTASH",
+    local solidNames         = {"UREA", "AMS", "MAP", "DAP", "POTASH", "POLIFOSKA",
                                  "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM"}
     local liquidNames        = {"UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME", "INSECTICIDE", "FUNGICIDE",
                                 "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH"}
@@ -2718,8 +2718,8 @@ function HookManager:installFillUnitHookEarly()
                         if idx then fu.supportedFillTypes[idx] = true end
                     end
                 end
-                -- Category-based expansion: also accept third-party fill types registered in
-                -- the "fertilizer" / "liquidFertilizer" categories by map mods (e.g. POLIFOSKA)
+                -- Category-based expansion: also accept any fill type in the fertilizer/liquid
+                -- categories (safety net for fill types added to fillTypes.xml but not solidNames)
                 if addSolid then
                     local ok, catTypes = pcall(function()
                         return fm:getFillTypesByCategoryNames("fertilizer")
@@ -2795,7 +2795,7 @@ function HookManager:installFillUnitHook()
     -- support both) but rejected by dedicated spreaders (MANURE-only fill unit).
     local manureIndex = fm:getFillTypeIndexByName("MANURE")
 
-    local solidNames  = {"UREA", "AMS", "MAP", "DAP", "POTASH",
+    local solidNames  = {"UREA", "AMS", "MAP", "DAP", "POTASH", "POLIFOSKA",
                           "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM"}
     local liquidNames = {"UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME", "INSECTICIDE", "FUNGICIDE",
                          "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH"}
@@ -2818,7 +2818,7 @@ function HookManager:installFillUnitHook()
         if idx then table.insert(manureCompatIndices, idx) end
     end
 
-    -- Category-based indices: third-party fill types registered by map mods (e.g. POLIFOSKA)
+    -- Category-based indices: safety net for fill types in our fillTypes.xml not yet in solidNames
     local categoryFertIndices    = {}
     local categoryLiqFertIndices = {}
     local ok1, catFert = pcall(function() return fm:getFillTypesByCategoryNames("fertilizer") end)
@@ -2863,7 +2863,7 @@ function HookManager:installFillUnitHook()
                         fillUnit.supportedFillTypes[idx] = true
                     end
                 end
-                -- Category-based expansion: also accept third-party types (e.g. POLIFOSKA)
+                -- Category-based expansion: safety net for our own fill types not in solidNames
                 if addSolid then
                     for _, idx in ipairs(categoryFertIndices) do
                         fillUnit.supportedFillTypes[idx] = true
@@ -2944,7 +2944,7 @@ function HookManager:installFillUnitHook()
             end
             -- Category-based fallback: support any fill type in the "fertilizer" /
             -- "liquidFertilizer" category for vehicles that already accept the vanilla
-            -- base type. Catches third-party map fill types like POLIFOSKA (issue #423).
+            -- base type. Safety net for our own fill types not in the hardcoded lists.
             if fertIndex and origGetSupports(vehicleSelf, fillUnitIndex, fertIndex) then
                 local ok, inCat = pcall(function()
                     return fm:getIsFillTypeInCategory(fillType, "fertilizer")
