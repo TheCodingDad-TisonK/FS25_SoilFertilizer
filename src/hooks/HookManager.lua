@@ -1396,8 +1396,13 @@ function HookManager:installSprayerAreaHook()
             end
 
             if not liters or liters <= 0 then
-                SoilLogger.debug("SprayerHook: usage=0 for fillType=%d fillLevel=%.1f — no product consumed this frame (multi-boom or section-control gate?)",
-                    fillTypeIndex or -1, sprayFillLevel or 0)
+                -- Throttle: log at most once per 3 s per vehicle to avoid headland-turn spam
+                local _now = g_currentMission and g_currentMission.time or 0
+                if not self._sfZeroUsageLogAt or (_now - self._sfZeroUsageLogAt) > 3000 then
+                    self._sfZeroUsageLogAt = _now
+                    SoilLogger.debug("SprayerHook: usage=0 for fillType=%d fillLevel=%.1f — no product consumed (multi-boom or section-control gate?)",
+                        fillTypeIndex or -1, sprayFillLevel or 0)
+                end
                 return
             end
             if not sprayFillLevel or sprayFillLevel <= 0 then return end
