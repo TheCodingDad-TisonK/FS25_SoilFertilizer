@@ -1111,7 +1111,10 @@ function HookManager:installSeeAndSprayHook()
                     end
 
                     local fieldId = hookMgrRef:getFieldIdAtWorldPosition(sx, sz)
-                    if fieldId and fieldId > 0 then
+                    if not fieldId or fieldId <= 0 then
+                        -- Section is off-field — nothing to treat, suppress it.
+                        section.isActive = false
+                    else
                         local fd = soilSys.fieldData[fieldId]
                         if fd then
                             local cellKey = tostring(
