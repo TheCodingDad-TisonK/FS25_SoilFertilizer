@@ -966,4 +966,20 @@ SoilConstants.VARIABLE_RATE = {
     MAX_RATE        = 1.50,   -- maximum multiplier (completely depleted cell)
 }
 
+-- ========================================
+-- TUNING EDITOR LOOK-UP TABLES
+-- ========================================
+-- 5-step sliders for the Constants Tuning Editor.
+-- Index 3 = default (×1.0 or base value).  Admin-only panel maps
+-- settings integer 1-5 → actual simulation value via these tables.
+SoilConstants.TUNING = {
+    DEFAULT_N  = {50, 75, 100, 125, 150},       -- Starting nitrogen  (points)
+    DEFAULT_P  = {15, 25,  35,  50,  70},        -- Starting phosphorus (points)
+    DEFAULT_K  = {50, 75, 100, 125, 150},        -- Starting potassium  (points)
+    DEFAULT_PH = {5.5, 6.0, 6.5, 7.0, 7.5},     -- Starting pH
+    DEFAULT_OM = {2.0, 4.0, 6.0, 8.0, 10.0},    -- Starting organic matter (%)
+    RATE_MULT  = {0.25, 0.50, 1.0, 1.50, 2.0},  -- Depletion / efficiency multiplier
+    ZERO_MULT  = {0.0,  0.50, 1.0, 1.50, 2.0},  -- Stress/effect multiplier (0 = disabled)
+}
+
 SoilLogger.info("Constants loaded")

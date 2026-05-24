@@ -24,10 +24,9 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
-    "- Settings panel now scrolls when category content exceeds the visible area",
-    "- POLIFOSKA fully wired: drain rate, spreader effects, visual texture,",
-    "  PF/THPF recognition, and refill pricing all now work correctly",
-    "- French translation updated by Seb/Squall39 (native speaker) — merci Seb!",
+    "- Fixed: HUD layout/move mode now exits cleanly when on foot (outside a vehicle).",
+    "  Second press of the drag key correctly releases the mouse cursor and restores",
+    "  camera control. (Previously the cursor stayed locked on foot only.)",
 }
 
 -- ── i18n helper ───────────────────────────────────────────

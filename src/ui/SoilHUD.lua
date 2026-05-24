@@ -611,9 +611,6 @@ function SoilHUD:update(dt)
 
 
     if self.editMode then
-        if g_inputBinding and g_inputBinding.setShowMouseCursor then
-            g_inputBinding:setShowMouseCursor(true, true)
-        end
         if self.savedCamRotX ~= nil and getCamera and setRotation then
             local ok, cam = pcall(getCamera)
             if ok and cam and cam ~= 0 then
