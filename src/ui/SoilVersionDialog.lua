@@ -27,6 +27,7 @@ SoilVersionDialog.CHANGELOG = {
     "- Settings panel now scrolls when category content exceeds the visible area",
     "- POLIFOSKA fully wired: drain rate, spreader effects, visual texture,",
     "  PF/THPF recognition, and refill pricing all now work correctly",
+    "- French translation updated by Seb/Squall39 (native speaker) — merci Seb!",
 }
 
 -- ── i18n helper ───────────────────────────────────────────

@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - **POLIFOSKA fully wired** — Drain rate, spreader effects, visual texture, PF/THPF recognition, and refill pricing now all work correctly (6-20-30 compound, 250 kg/ha calibrated rate, 1.35 $/L refill price).
 
+### Translations
+- **French (fr)** — Full native translation update by Seb/Squall39, covering all new strings: Disease Climate, Smart Systems, See & Spray, Variable Rate, HUD Layout, Big Bag names, and more.
+
 ---
 
 ## [2.2.3.2] - 2026-05-24
