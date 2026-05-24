@@ -3039,7 +3039,7 @@ function HookManager:installPurchaseRefillHook()
         "INSECTICIDE", "FUNGICIDE",
         "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH",
         -- Solid
-        "UREA", "AMS", "MAP", "DAP", "POTASH",
+        "UREA", "AMS", "MAP", "DAP", "POTASH", "POLIFOSKA",
         "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM",
     }
 
@@ -3057,7 +3057,7 @@ function HookManager:installPurchaseRefillHook()
         UAN32 = 1.60, UAN28 = 1.50, ANHYDROUS = 1.85, STARTER = 1.70,
         LIQUIDLIME = 1.20, INSECTICIDE = 1.20, FUNGICIDE = 1.30,
         LIQUID_UREA = 1.70, LIQUID_AMS = 1.45, LIQUID_MAP = 2.00, LIQUID_DAP = 1.80, LIQUID_POTASH = 1.85,
-        UREA = 1.65, AMS = 1.40, MAP = 1.95, DAP = 1.75, POTASH = 1.80,
+        UREA = 1.65, AMS = 1.40, MAP = 1.95, DAP = 1.75, POTASH = 1.80, POLIFOSKA = 1.35,
         COMPOST = 0.60, BIOSOLIDS = 0.55, CHICKEN_MANURE = 0.50,
         PELLETIZED_MANURE = 0.70, GYPSUM = 0.35,  -- reduced: amendment, not plant food ($525/ha vs $1200)
     }
@@ -3854,8 +3854,9 @@ function HookManager:installFillTypeMaterialHook()
         AMS      = { "FERTILIZER", "LIME" },            -- AMS is off-white/light grey granular
         MAP      = { "FERTILIZER", "LIME" },            -- MAP is off-white/light brown granular
         DAP      = { "FERTILIZER", "LIME" },            -- DAP is off-white/grey-brown granular
-        POTASH   = { "FERTILIZER", "LIME" },            -- Potassium chloride — pinkish but granular
-        GYPSUM   = { "LIME", "FERTILIZER" },            -- Gypsum is bright white powder → LIME first
+        POTASH    = { "FERTILIZER", "LIME" },           -- Potassium chloride — pinkish but granular
+        POLIFOSKA = { "FERTILIZER", "LIME" },           -- Compound 6-20-30 granular — off-white/pinkish
+        GYPSUM    = { "LIME", "FERTILIZER" },            -- Gypsum is bright white powder → LIME first
 
         -- ── ORGANIC / COMPOST TYPES ────────────────────────────────────────
         -- Dark brown to black matte organic material
@@ -3968,7 +3969,7 @@ function HookManager:installSprayerVisualEffectHook()
     -- Build remap: custom fill type index → vanilla fill type index (cosmetic only)
     local remap = {}
     if fertIdx then
-        for _, name in ipairs({ "UREA", "AMS", "MAP", "DAP", "POTASH",
+        for _, name in ipairs({ "UREA", "AMS", "MAP", "DAP", "POTASH", "POLIFOSKA",
                                  "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM" }) do
             local idx = fm:getFillTypeIndexByName(name)
             if idx then remap[idx] = fertIdx end
