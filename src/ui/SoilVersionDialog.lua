@@ -29,6 +29,8 @@ SoilVersionDialog.CHANGELOG = {
     "- System panels now hide when the main HUD is toggled off (H key)",
     "- POLIFOSKA (and any other SF fill type missing from the spreader allow-list) now",
     " loads into and refills from spreaders correctly",
+    "- POLIFOSKA tank drain rate, spreader effects, and PF/THPF recognition now work",
+    " correctly (6-20-30 compound, 250 kg/ha calibrated rate)",
 }
 
 -- ── i18n helper ───────────────────────────────────────────
