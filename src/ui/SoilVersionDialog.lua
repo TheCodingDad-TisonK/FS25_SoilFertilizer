@@ -28,6 +28,10 @@ SoilVersionDialog.CHANGELOG = {
     "- POLIFOSKA fully wired: drain rate, spreader effects, visual texture,",
     "  PF/THPF recognition, and refill pricing all now work correctly",
     "- French translation updated by Seb/Squall39 (native speaker) — merci Seb!",
+    "- Constants Tuning Editor added (Admin page → Constants Tuning Editor button):",
+    "  adjust depletion rates, fertilizer efficiency, rain leaching, seasonal effects,",
+    "  pest/disease growth, fallow recovery, compaction decay, and starting soil values.",
+    "  Includes Easy / Balanced / Hardcore / No Stress presets + Reset All to Defaults.",
 }
 
 -- ── i18n helper ───────────────────────────────────────────

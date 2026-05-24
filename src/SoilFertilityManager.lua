@@ -148,6 +148,12 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
             SoilLogger.info("Settings panel created")
         end
 
+        -- Constants Tuning Editor (opened from admin settings page)
+        if SoilTuningPanel then
+            self.tuningPanel = SoilTuningPanel.new(self.settings)
+            SoilLogger.info("Tuning panel created")
+        end
+
         -- Smart Sensor panel (System 1)
         if SoilSmartSensorPanel then
             self.smartSensorPanel = SoilSmartSensorPanel.new(self.soilSystem, self.settings)
@@ -581,6 +587,10 @@ function SoilFertilityManager:onMissionLoaded()
 
         if self.settingsPanel then
             self.settingsPanel:initialize()
+        end
+
+        if self.tuningPanel then
+            self.tuningPanel:initialize()
         end
 
         if self.smartSensorPanel then
@@ -1064,6 +1074,11 @@ function SoilFertilityManager:update(dt)
         self.settingsPanel:update()
     end
 
+    -- Tuning panel camera-lock and cursor keepalive
+    if self.tuningPanel then
+        self.tuningPanel:update()
+    end
+
     -- Deferred version dialog — fired 3s after mission start so the GUI is stable
     if self._pendingVersionDialog then
         self._pendingVersionDialogDelay = (self._pendingVersionDialogDelay or 0) - dt
@@ -1402,6 +1417,11 @@ function SoilFertilityManager:delete()
         self.soilHUD:saveLayout()
         self.soilHUD:delete()
         self.soilHUD = nil
+    end
+
+    if self.tuningPanel then
+        self.tuningPanel:delete()
+        self.tuningPanel = nil
     end
 
     if self.settingsPanel then

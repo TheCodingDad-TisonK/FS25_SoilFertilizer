@@ -238,6 +238,7 @@ local ADMIN_SECTIONS = {
             { stype = "action", id = "nav_field_tools" },
             { stype = "action", id = "nav_vehicle_tools" },
             { stype = "action", id = "nav_smart_systems" },
+            { stype = "action", id = "nav_tuning" },
         },
     },
     {
@@ -1560,6 +1561,13 @@ function SoilSettingsPanel:handleClick(id, data)
         elseif actionId == "nav_smart_systems" then
             self.page = PAGE_SMART_SYSTEMS
             self.pageScrollPx = 0
+            return
+        elseif actionId == "nav_tuning" then
+            -- Open Constants Tuning Editor (separate panel)
+            if g_SoilFertilityManager and g_SoilFertilityManager.tuningPanel then
+                self:close()
+                g_SoilFertilityManager.tuningPanel:open()
+            end
             return
         end
 

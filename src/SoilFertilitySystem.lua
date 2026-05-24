@@ -14,6 +14,15 @@ local SoilFertilitySystem_mt = Class(SoilFertilitySystem)
 
 local COVERAGE_MILESTONES = { 0.10, 0.25, 0.50, 0.75, 1.0 }
 
+-- Resolve a 1-5 setting index to its TUNING LUT value.
+-- Falls back to the index-3 value (the baseline) if the LUT is missing.
+local function getTuningMult(settings, settingId, lutKey)
+    local idx = (settings and settings[settingId]) or 3
+    local lut = SoilConstants.TUNING and SoilConstants.TUNING[lutKey]
+    if lut then return lut[idx] or lut[3] or 1.0 end
+    return 1.0
+end
+
 function SoilFertilitySystem.new(settings)
     local self = setmetatable({}, SoilFertilitySystem_mt)
     self.settings = settings
@@ -1468,14 +1477,20 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing, area)
         confirmedArea = true
     end
 
+    local tunN  = getTuningMult(self.settings, "tuningDefaultN",  "DEFAULT_N")
+    local tunP  = getTuningMult(self.settings, "tuningDefaultP",  "DEFAULT_P")
+    local tunK  = getTuningMult(self.settings, "tuningDefaultK",  "DEFAULT_K")
+    local tunPH = getTuningMult(self.settings, "tuningDefaultPH", "DEFAULT_PH")
+    local tunOM = getTuningMult(self.settings, "tuningDefaultOM", "DEFAULT_OM")
+
     self.fieldData[fieldId] = {
         fieldArea = initialArea,
         _farmlandAreaConfirmed = confirmedArea,
-        nitrogen   = math.floor(randomize(defaults.nitrogen,   defaults.nitrogen   * 0.10, 1)),
-        phosphorus = math.floor(randomize(defaults.phosphorus, defaults.phosphorus * 0.10, 2)),
-        potassium  = math.floor(randomize(defaults.potassium,  defaults.potassium  * 0.10, 3)),
-        organicMatter = math.max(1.0, math.min(10.0, randomize(defaults.organicMatter, 0.5, 4))),
-        pH            = math.max(5.0, math.min(8.5,  randomize(defaults.pH,            0.5, 5))),
+        nitrogen   = math.floor(randomize(tunN,  tunN  * 0.10, 1)),
+        phosphorus = math.floor(randomize(tunP,  tunP  * 0.10, 2)),
+        potassium  = math.floor(randomize(tunK,  tunK  * 0.10, 3)),
+        organicMatter = math.max(1.0, math.min(10.0, randomize(tunOM, 0.5, 4))),
+        pH            = math.max(5.0, math.min(8.5,  randomize(tunPH, 0.5, 5))),
         lastCrop = nil,
         lastCrop2 = nil,
         lastCrop3 = nil,
@@ -1585,7 +1600,8 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
     if self.settings.compactionEnabled and SoilConstants.COMPACTION then
         local cp = SoilConstants.COMPACTION
         if (field.compaction or 0) > 0 then
-            field.compaction = math.max(0, field.compaction - cp.NATURAL_DECAY_PER_DAY * timeFactor)
+            local tunComp = getTuningMult(self.settings, "tuningCompactionDecay", "ZERO_MULT")
+            field.compaction = math.max(0, field.compaction - cp.NATURAL_DECAY_PER_DAY * timeFactor * tunComp)
         end
     end
 
@@ -1593,19 +1609,21 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
     -- Fallow threshold also scales so it represents the same 'agricultural time' (months)
     local daysSinceFallow = currentDay - (field.lastHarvest or 0)
     if daysSinceFallow > SoilConstants.TIMING.FALLOW_THRESHOLD * daysPerMonth then
-        field.nitrogen      = math.min(limits.MAX, field.nitrogen      + recovery.nitrogen * timeFactor)
-        field.phosphorus    = math.min(limits.MAX, field.phosphorus    + recovery.phosphorus * timeFactor)
-        field.potassium     = math.min(limits.MAX, field.potassium     + recovery.potassium * timeFactor)
+        local tunFallow = getTuningMult(self.settings, "tuningFallowRecovery", "ZERO_MULT")
+        field.nitrogen      = math.min(limits.MAX, field.nitrogen      + recovery.nitrogen * timeFactor * tunFallow)
+        field.phosphorus    = math.min(limits.MAX, field.phosphorus    + recovery.phosphorus * timeFactor * tunFallow)
+        field.potassium     = math.min(limits.MAX, field.potassium     + recovery.potassium * timeFactor * tunFallow)
         field.organicMatter = math.min(limits.ORGANIC_MATTER_MAX,
-                                       field.organicMatter + recovery.organicMatter * timeFactor)
+                                       field.organicMatter + recovery.organicMatter * timeFactor * tunFallow)
     end
 
     -- ── Seasonal nitrogen shift ──────────────────────────────────────────────
     if self.settings.seasonalEffects and season then
+        local tunSeas = getTuningMult(self.settings, "tuningSeasonalStrength", "ZERO_MULT")
         if season == seasonal.SPRING_SEASON then
-            field.nitrogen = math.min(limits.MAX, field.nitrogen + seasonal.SPRING_NITROGEN_BOOST * timeFactor)
+            field.nitrogen = math.min(limits.MAX, field.nitrogen + seasonal.SPRING_NITROGEN_BOOST * timeFactor * tunSeas)
         elseif season == seasonal.FALL_SEASON then
-            field.nitrogen = math.max(limits.MIN, field.nitrogen - seasonal.FALL_NITROGEN_LOSS * timeFactor)
+            field.nitrogen = math.max(limits.MIN, field.nitrogen - seasonal.FALL_NITROGEN_LOSS * timeFactor * tunSeas)
         end
     end
 
@@ -1757,7 +1775,8 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
                 if rs and rs > SoilConstants.RAIN.MIN_RAIN_THRESHOLD then rainBonus = pp.RAIN_BONUS end
             end
 
-            field.pestPressure = math.min(100, pressure + ((baseRate * seasonMult * cropMult) + rainBonus) * timeFactor)
+            local tunPest = getTuningMult(self.settings, "tuningPestGrowth", "ZERO_MULT")
+            field.pestPressure = math.min(100, pressure + ((baseRate * seasonMult * cropMult * tunPest) + rainBonus) * timeFactor)
         end
     end
 
@@ -1811,7 +1830,8 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
             end
 
             local rainBonus = isRaining and (dp.RAIN_BONUS * cm.rainBonusMult) or 0
-            field.diseasePressure = math.min(100, pressure + ((baseRate * cm.growthMult * seasonMult * cropMult) + rainBonus) * timeFactor)
+            local tunDis = getTuningMult(self.settings, "tuningDiseaseGrowth", "ZERO_MULT")
+            field.diseasePressure = math.min(100, pressure + ((baseRate * cm.growthMult * seasonMult * cropMult * tunDis) + rainBonus) * timeFactor)
         end
     end
 
@@ -1877,7 +1897,8 @@ function SoilFertilitySystem:applyRainEffects(dt, rainScale)
         rweMultiplier = RWE_LEACH_MULTIPLIERS[rwe.EVENT_STATE.activeEvent] or 1.0
     end
 
-    local leachFactor = rainScale * dt * rain.LEACH_BASE_FACTOR * rweMultiplier
+    local tunRain = getTuningMult(self.settings, "tuningRainLeaching", "ZERO_MULT")
+    local leachFactor = rainScale * dt * rain.LEACH_BASE_FACTOR * rweMultiplier * tunRain
     local count = 0
 
     -- Iterate only owned fields (activeFieldIds set, Phase 1)
@@ -1982,9 +2003,10 @@ function SoilFertilitySystem:updateFieldNutrients(fieldId, fruitTypeIndex, harve
     --          → 50 - (0.20 × 80) = 50 - 16 = 34 nitrogen remaining (~32% depletion)
     -- Only N/P/K deplete from harvest; pH and organic matter change through other means
     local limits = SoilConstants.NUTRIENT_LIMITS
-    field.nitrogen   = math.max(limits.MIN, field.nitrogen   - rates.N * factor)
-    field.phosphorus = math.max(limits.MIN, field.phosphorus - rates.P * factor)
-    field.potassium  = math.max(limits.MIN, field.potassium  - rates.K * factor)
+    local tunDepl = getTuningMult(self.settings, "tuningNutrientDepletion", "RATE_MULT")
+    field.nitrogen   = math.max(limits.MIN, field.nitrogen   - rates.N * factor * tunDepl)
+    field.phosphorus = math.max(limits.MIN, field.phosphorus - rates.P * factor * tunDepl)
+    field.potassium  = math.max(limits.MIN, field.potassium  - rates.K * factor * tunDepl)
 
     -- Deplete zone cells by the same absolute amount (harvest extracts uniformly across field)
     if field.zoneData then
@@ -2115,11 +2137,12 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
         -- Capture before-values for diagnostic logging (debug mode only).
         local dbgN0, dbgP0, dbgK0, dbgPH0 = field.nitrogen, field.phosphorus, field.potassium, field.pH
 
-        if entry.N then field.nitrogen   = math.min(limits.MAX, field.nitrogen   + entry.N * factor) end
-        if entry.P then field.phosphorus = math.min(limits.MAX, field.phosphorus + entry.P * factor) end
-        if entry.K then field.potassium  = math.min(limits.MAX, field.potassium  + entry.K * factor) end
-        if entry.pH then field.pH        = math.max(limits.PH_MIN, math.min(limits.PH_MAX, field.pH + entry.pH * factor)) end
-        if entry.OM then field.organicMatter = math.max(0, math.min(limits.ORGANIC_MATTER_MAX, field.organicMatter + entry.OM * factor)) end
+        local tunFert = getTuningMult(self.settings, "tuningFertilizerEfficiency", "RATE_MULT")
+        if entry.N then field.nitrogen   = math.min(limits.MAX, field.nitrogen   + entry.N * factor * tunFert) end
+        if entry.P then field.phosphorus = math.min(limits.MAX, field.phosphorus + entry.P * factor * tunFert) end
+        if entry.K then field.potassium  = math.min(limits.MAX, field.potassium  + entry.K * factor * tunFert) end
+        if entry.pH then field.pH        = math.max(limits.PH_MIN, math.min(limits.PH_MAX, field.pH + entry.pH * factor * tunFert)) end
+        if entry.OM then field.organicMatter = math.max(0, math.min(limits.ORGANIC_MATTER_MAX, field.organicMatter + entry.OM * factor * tunFert)) end
 
         -- Sync all existing zone cells with the same delta applied to the field average.
         -- Without this, cells created before a spray job keep their old values while the

@@ -65,6 +65,7 @@ source(modDirectory .. "src/ui/SoilVersionDialog.lua")
 source(modDirectory .. "src/ui/SoilHelpDialog.lua")
 source(modDirectory .. "src/ui/SoilGuideDialog.lua")
 source(modDirectory .. "src/ui/SoilOverlayHelpDialog.lua")
+source(modDirectory .. "src/ui/SoilTuningPanel.lua")
 source(modDirectory .. "src/ui/SoilSettingsPanel.lua")
 source(modDirectory .. "src/SoilFertilityManager.lua")
 
@@ -472,6 +473,9 @@ FSBaseMission.draw = Utils.appendedFunction(FSBaseMission.draw, function(mission
     if sfm and sfm.settingsPanel then
         sfm.settingsPanel:draw()
     end
+    if sfm and sfm.tuningPanel then
+        sfm.tuningPanel:draw()
+    end
     if sfm and sfm.smartSensorPanel then
         sfm.smartSensorPanel:draw()
     end
@@ -537,6 +541,12 @@ end
 -- CoursePlay, AutoDrive, and other mods that rely on RMB.
 local soilMouseHandler = {}
 function soilMouseHandler:mouseEvent(posX, posY, isDown, isUp, button, eventUsed)
+    -- Tuning panel eats input when open (checked before settings panel — both can't be open simultaneously)
+    if sfm and sfm.tuningPanel and sfm.tuningPanel:isOpen() then
+        local consumed = sfm.tuningPanel:onMouseEvent(posX, posY, isDown, isUp, button, eventUsed)
+        eventUsed = consumed or eventUsed
+        return eventUsed
+    end
     -- Settings panel eats input first when open
     if sfm and sfm.settingsPanel and sfm.settingsPanel:isOpen() then
         local consumed = sfm.settingsPanel:onMouseEvent(posX, posY, isDown, isUp, button, eventUsed)

@@ -717,6 +717,8 @@
     <e k="sf_panel_hdr_smart_systems" v="Systèmes intelligents" />
     <e k="sf_nav_smart_systems_label" v="Systèmes intelligents" />
     <e k="sf_nav_smart_systems_desc" v="Configurer les systèmes Smart Sensor, See &amp; Spray et application à dose variable" />
+    <e k="sf_nav_tuning_label"            v="Constants Tuning Editor" />
+    <e k="sf_nav_tuning_desc"             v="Fine-tune simulation constants: depletion rates, stress growth, starting soil values" />
     <e k="sf_panel_hdr_smart_sensor_sys" v="Système Smart Sensor" />
     <e k="sf_panel_hdr_see_spray_sys" v="Système See &amp; Spray" />
     <e k="sf_panel_hdr_var_rate_sys" v="Système d’application à dose variable" />
