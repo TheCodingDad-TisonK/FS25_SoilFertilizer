@@ -323,7 +323,7 @@ function SoilSettingsPanel.new(settings)
     self.popupMsg     = nil   -- full output text shown in the popup
     self.popupLines   = nil   -- split lines of popupMsg
     self.popupScroll  = 0     -- first visible line index (0-based)
-    self.pageScrollIdx = 0    -- index for scrolling settings lists
+    self.pageScrollPx = 0    -- index for scrolling settings lists
     self.setStateFieldId = nil
     self.setStateData = {N=50, P=50, K=50, pH=6.5, OM=5.0}
     self.mouseX       = 0
@@ -360,7 +360,7 @@ function SoilSettingsPanel:open()
     self.popupMsg     = nil
     self.popupLines   = nil
     self.popupScroll  = 0
-    self.pageScrollIdx = 0
+    self.pageScrollPx = 0
     -- Save camera rotation so update() can freeze it every frame (SoilHUD edit-mode pattern)
     self.savedCamRotX, self.savedCamRotY, self.savedCamRotZ = nil, nil, nil
     if getCamera and getRotation then
@@ -709,13 +709,115 @@ function SoilSettingsPanel:drawCategoryCard(x, y, w, h, cat, idx)
     self:registerClick("cat_" .. idx, x, y, w, h)
 end
 
+-- ── Scroll helpers ────────────────────────────────────────
+
+--- Total rendered height of all sections + items in a category (for scrollbar).
+function SoilSettingsPanel:_catContentHeight(cat)
+    local h = 0
+    for _, sec in ipairs(cat.sections) do
+        h = h + SEC_H + 0.005
+        for _, item in ipairs(sec.items) do
+            if type(item) == "string" then
+                if item == "pfCompatibilityMode" then
+                    local pfBridge = g_SoilFertilityManager and g_SoilFertilityManager.pfBridge
+                    if pfBridge and pfBridge.isActive then h = h + ROW_H end
+                else
+                    h = h + ROW_H
+                end
+            elseif type(item) == "table" then
+                h = h + ADMIN_ACT_H
+            end
+        end
+    end
+    return h
+end
+
+--- Total rendered height of the active admin sub-page (for scrollbar).
+function SoilSettingsPanel:_adminContentHeight()
+    local sections = ADMIN_SECTIONS
+    if self.page == PAGE_FIELD_TOOLS     then sections = FIELD_TOOLS_SECTIONS
+    elseif self.page == PAGE_VEHICLE_TOOLS then sections = VEHICLE_TOOLS_SECTIONS
+    elseif self.page == PAGE_SMART_SYSTEMS then sections = SMART_SYSTEMS_SECTIONS
+    end
+    local h = 0
+    for _, sec in ipairs(sections) do
+        h = h + SEC_H + 0.005
+        for _, item in ipairs(sec.items) do
+            h = h + ((item.stype == "action" or item.stype == "danger") and ADMIN_ACT_H or ADMIN_ROW_H)
+        end
+    end
+    return h
+end
+
+--- Draw a scrollbar track + thumb + up/down arrow buttons in the right gutter.
+---@param sbX number  left X of the strip (placed in the right padding area)
+---@param sbY number  bottom Y (= CY_BOT)
+---@param sbW number  strip width
+---@param sbH number  strip height (= CH)
+---@param scrollPx number  current scroll offset (0 = top)
+---@param maxScroll number  maximum scroll offset (> 0)
+---@param accent table  {r,g,b} accent colour for thumb and arrows
+function SoilSettingsPanel:_drawPageScrollBar(sbX, sbY, sbW, sbH, scrollPx, maxScroll, accent)
+    local ac = accent or C.green
+
+    -- Track background
+    self:drawRect(sbX, sbY, sbW, sbH, {0.07, 0.08, 0.12, 0.92})
+    self:drawRect(sbX, sbY, 0.001, sbH, {ac[1]*0.22, ac[2]*0.22, ac[3]*0.22, 0.70})
+
+    -- Arrow buttons (top = scroll up, bottom = scroll down)
+    local arrowH = 0.026
+    local upY    = sbY + sbH - arrowH
+    local dnY    = sbY
+
+    local upHov  = self:hitTest(sbX, upY, sbW, arrowH, self.mouseX, self.mouseY)
+    local dnHov  = self:hitTest(sbX, dnY, sbW, arrowH, self.mouseX, self.mouseY)
+    local canUp  = scrollPx > 0
+    local canDn  = scrollPx < maxScroll
+
+    self:drawRect(sbX, upY, sbW, arrowH,
+        upHov and {ac[1]*0.55, ac[2]*0.55, ac[3]*0.55, 0.95} or {0.10, 0.12, 0.18, 0.90})
+    self:drawText(sbX + sbW * 0.5, upY + arrowH * 0.22, TS_TINY, "^",
+        canUp and (upHov and {1,1,1,1} or {ac[1], ac[2], ac[3], 0.80}) or C.hint,
+        RenderText.ALIGN_CENTER, true)
+
+    self:drawRect(sbX, dnY, sbW, arrowH,
+        dnHov and {ac[1]*0.55, ac[2]*0.55, ac[3]*0.55, 0.95} or {0.10, 0.12, 0.18, 0.90})
+    self:drawText(sbX + sbW * 0.5, dnY + arrowH * 0.22, TS_TINY, "v",
+        canDn and (dnHov and {1,1,1,1} or {ac[1], ac[2], ac[3], 0.80}) or C.hint,
+        RenderText.ALIGN_CENTER, true)
+
+    self:registerClick("page_scroll_up", sbX, upY, sbW, arrowH)
+    self:registerClick("page_scroll_dn", sbX, dnY, sbW, arrowH)
+
+    -- Thumb (in track between arrows)
+    local trackY = sbY + arrowH
+    local trackH = sbH - arrowH * 2
+    if trackH > 0.010 then
+        local ratio  = scrollPx / maxScroll
+        local visRatio = math.min(1, CH / (CH + maxScroll))
+        local thumbH = math.max(0.030, trackH * visRatio)
+        local thumbY = trackY + (trackH - thumbH) * (1 - ratio)
+        self:drawRect(sbX, thumbY, sbW, thumbH,
+            {ac[1]*0.42, ac[2]*0.42, ac[3]*0.42, 0.92})
+        -- Top highlight line on thumb
+        self:drawRect(sbX, thumbY + thumbH - 0.0012, sbW, 0.0012,
+            {ac[1]*0.80, ac[2]*0.80, ac[3]*0.80, 0.85})
+    end
+end
+
 -- ── Category page ─────────────────────────────────────────
 function SoilSettingsPanel:drawCategoryPage()
     if not self.activeCatIdx then return end
     local cat = CATEGORIES[self.activeCatIdx]
     if not cat then return end
 
-    local curY = CY_TOP
+    -- Scrolling: clamp offset to valid range
+    local totalH    = self:_catContentHeight(cat)
+    local maxScroll = math.max(0, totalH - CH)
+    if self.pageScrollPx > maxScroll then self.pageScrollPx = maxScroll end
+    local scrollPx = self.pageScrollPx
+
+    local curY    = CY_TOP + scrollPx
     local isAdmin = self:isAdmin()
     local rowIdx  = 0
 
@@ -724,70 +826,75 @@ function SoilSettingsPanel:drawCategoryPage()
         curY = curY - SEC_H
         if curY < CY_BOT then break end
 
-        self:drawRect(CX, curY, CW, SEC_H, C.title_bg, 0.60)
-        self:drawRect(CX, curY, 0.003, SEC_H, cat.accent)
-        self:drawText(CX + 0.012, curY + SEC_H * 0.25, TS_SMALL,
-            string.upper(tr(sec.headerKey) or ""), cat.accent, RenderText.ALIGN_LEFT, true)
+        if curY <= CY_TOP then
+            self:drawRect(CX, curY, CW, SEC_H, C.title_bg, 0.60)
+            self:drawRect(CX, curY, 0.003, SEC_H, cat.accent)
+            self:drawText(CX + 0.012, curY + SEC_H * 0.25, TS_SMALL,
+                string.upper(tr(sec.headerKey) or ""), cat.accent, RenderText.ALIGN_LEFT, true)
+        end
 
         for _, item in ipairs(sec.items) do
             local settingId = type(item) == "string" and item or nil
             local itemDef   = type(item) == "table"  and item or nil
 
             if settingId == "pfCompatibilityMode" then
-                -- Hide pfCompatibilityMode when PF is not installed
                 local pfBridge = g_SoilFertilityManager and g_SoilFertilityManager.pfBridge
-                if not (pfBridge and pfBridge.isActive) then
-                    -- skip
-                else
+                if pfBridge and pfBridge.isActive then
                     curY = curY - ROW_H
                     if curY < CY_BOT then break end
                     rowIdx = rowIdx + 1
-                    self:drawSettingRow(CX, curY, CW, settingId, rowIdx, isAdmin)
+                    if curY <= CY_TOP then
+                        self:drawSettingRow(CX, curY, CW, settingId, rowIdx, isAdmin)
+                    end
                 end
             elseif settingId then
                 curY = curY - ROW_H
                 if curY < CY_BOT then break end
                 rowIdx = rowIdx + 1
-                self:drawSettingRow(CX, curY, CW, settingId, rowIdx, isAdmin)
+                if curY <= CY_TOP then
+                    self:drawSettingRow(CX, curY, CW, settingId, rowIdx, isAdmin)
+                end
             elseif itemDef and (itemDef.stype == "action" or itemDef.stype == "danger") then
                 local rh = ADMIN_ACT_H
                 curY = curY - rh
                 if curY < CY_BOT then break end
                 rowIdx = rowIdx + 1
-                if rowIdx % 2 == 0 then self:drawRect(CX, curY, CW, rh, C.row_alt) end
-
-                local isDanger = (itemDef.stype == "danger")
-                local btnW = 0.130
-                local btnH = rh * 0.72
-                local btnX = CX + CW - btnW - 0.012
-                local btnY = curY + (rh - btnH) * 0.5
-                local hov  = self:hitTest(btnX, btnY, btnW, btnH, self.mouseX, self.mouseY)
-
-                local aLabel = tr("sf_" .. itemDef.id .. "_label", itemDef.id)
-                local aDesc  = tr("sf_" .. itemDef.id .. "_desc",  "")
-                self:drawText(CX + 0.008, curY + rh * 0.55, TS_BODY, aLabel, C.white, RenderText.ALIGN_LEFT, true)
-                self:drawText(CX + 0.008, curY + rh * 0.15, TS_TINY, aDesc,  C.dim,   RenderText.ALIGN_LEFT, false)
-
-                local acCol = isDanger and ADMIN_ACCENT or cat.accent
-                local bgCol = isDanger
-                    and (hov and {0.65, 0.10, 0.10, 0.95} or {0.30, 0.06, 0.06, 0.85})
-                    or  (hov and {acCol[1]*0.4, acCol[2]*0.4, acCol[3]*0.4, 0.95}
-                              or {acCol[1]*0.15, acCol[2]*0.15, acCol[3]*0.15, 0.85})
-                self:drawRect(btnX, btnY, btnW, btnH, bgCol)
-                self:drawRect(btnX, btnY, 0.002, btnH, acCol)
-                self:drawText(btnX + btnW * 0.5, btnY + btnH * 0.20, TS_TINY,
-                    ">  " .. aLabel,
-                    hov and {1,1,1,1} or {0.75,0.75,0.75,1},
-                    RenderText.ALIGN_CENTER, false)
-                self:registerClick("cat_action_" .. itemDef.id, btnX, btnY, btnW, btnH,
-                    { actionId = itemDef.id })
-
-                self:drawRect(CX, curY, CW, 0.0005, C.divider, 0.35)
+                if curY <= CY_TOP then
+                    if rowIdx % 2 == 0 then self:drawRect(CX, curY, CW, rh, C.row_alt) end
+                    local isDanger = (itemDef.stype == "danger")
+                    local btnW = 0.130
+                    local btnH = rh * 0.72
+                    local btnX = CX + CW - btnW - 0.012
+                    local btnY = curY + (rh - btnH) * 0.5
+                    local hov  = self:hitTest(btnX, btnY, btnW, btnH, self.mouseX, self.mouseY)
+                    local aLabel = tr("sf_" .. itemDef.id .. "_label", itemDef.id)
+                    local aDesc  = tr("sf_" .. itemDef.id .. "_desc",  "")
+                    self:drawText(CX + 0.008, curY + rh * 0.55, TS_BODY, aLabel, C.white, RenderText.ALIGN_LEFT, true)
+                    self:drawText(CX + 0.008, curY + rh * 0.15, TS_TINY, aDesc,  C.dim,   RenderText.ALIGN_LEFT, false)
+                    local acCol = isDanger and ADMIN_ACCENT or cat.accent
+                    local bgCol = isDanger
+                        and (hov and {0.65, 0.10, 0.10, 0.95} or {0.30, 0.06, 0.06, 0.85})
+                        or  (hov and {acCol[1]*0.4, acCol[2]*0.4, acCol[3]*0.4, 0.95}
+                                  or {acCol[1]*0.15, acCol[2]*0.15, acCol[3]*0.15, 0.85})
+                    self:drawRect(btnX, btnY, btnW, btnH, bgCol)
+                    self:drawRect(btnX, btnY, 0.002, btnH, acCol)
+                    self:drawText(btnX + btnW * 0.5, btnY + btnH * 0.20, TS_TINY,
+                        ">  " .. aLabel,
+                        hov and {1,1,1,1} or {0.75,0.75,0.75,1},
+                        RenderText.ALIGN_CENTER, false)
+                    self:registerClick("cat_action_" .. itemDef.id, btnX, btnY, btnW, btnH,
+                        { actionId = itemDef.id })
+                    self:drawRect(CX, curY, CW, 0.0005, C.divider, 0.35)
+                end
             end
         end
 
-        -- Small gap between sections
         curY = curY - 0.005
+    end
+
+    -- Scrollbar in right gutter (only when content overflows)
+    if maxScroll > 0 then
+        self:_drawPageScrollBar(CX + CW + 0.004, CY_BOT, 0.009, CH, scrollPx, maxScroll, cat.accent)
     end
 
     -- Thin top divider under title bar
@@ -944,7 +1051,12 @@ end
 function SoilSettingsPanel:drawAdminPage()
     local gui = g_SoilFertilityManager and g_SoilFertilityManager.settingsGUI
     local isAdmin = self:isAdmin()
-    local curY = CY_TOP + (self.pageScrollIdx * ADMIN_ROW_H)
+
+    local totalH    = self:_adminContentHeight()
+    local maxScroll = math.max(0, totalH - CH)
+    if self.pageScrollPx > maxScroll then self.pageScrollPx = maxScroll end
+
+    local curY = CY_TOP + self.pageScrollPx
     local rowIdx = 0
 
     local sections = ADMIN_SECTIONS
@@ -1044,6 +1156,12 @@ function SoilSettingsPanel:drawAdminPage()
                 "Last: " .. self.adminMsg:sub(1, 90),
                 {0.55, 0.80, 0.55, 0.85}, RenderText.ALIGN_LEFT, false)
         end
+    end
+
+    -- Scrollbar in right gutter (only when content overflows)
+    if maxScroll > 0 then
+        self:_drawPageScrollBar(CX + CW + 0.004, CY_BOT, 0.009, CH,
+            self.pageScrollPx, maxScroll, ADMIN_ACCENT)
     end
 
     -- Thin top divider
@@ -1338,7 +1456,7 @@ function SoilSettingsPanel:handleClick(id, data)
             self.page = PAGE_LANDING
             self.activeCatIdx = nil
         end
-        self.pageScrollIdx = 0
+        self.pageScrollPx = 0
 
     elseif id == "reset_cat" then
         self:resetCurrentCategory()
@@ -1348,7 +1466,7 @@ function SoilSettingsPanel:handleClick(id, data)
         if idx and CATEGORIES[idx] then
             self.activeCatIdx = idx
             self.page = PAGE_CATEGORY
-            self.pageScrollIdx = 0
+            self.pageScrollPx = 0
         end
 
     elseif id:sub(1, 11) == "toggle_off_" then
@@ -1372,6 +1490,13 @@ function SoilSettingsPanel:handleClick(id, data)
             if nxt > #data.opts then nxt = 1 end
             self:requestChange(data.id, nxt)
         end
+
+    elseif id == "page_scroll_up" then
+        self.pageScrollPx = math.max(0, self.pageScrollPx - ROW_H)
+
+    elseif id == "page_scroll_dn" then
+        self.pageScrollPx = self.pageScrollPx + ROW_H
+        -- Upper clamp happens in draw functions on next frame
 
     elseif id == "popup_close" then
         self.popupVisible = false
@@ -1397,7 +1522,7 @@ function SoilSettingsPanel:handleClick(id, data)
     elseif id == "open_admin" then
         self.page = PAGE_ADMIN
         self.adminMsg = nil
-        self.pageScrollIdx = 0
+        self.pageScrollPx = 0
 
     elseif id:sub(1, 10) == "set_state_" then
         if id == "set_state_save" then
@@ -1426,15 +1551,15 @@ function SoilSettingsPanel:handleClick(id, data)
         -- Handle navigation actions first
         if actionId == "nav_field_tools" then
             self.page = PAGE_FIELD_TOOLS
-            self.pageScrollIdx = 0
+            self.pageScrollPx = 0
             return
         elseif actionId == "nav_vehicle_tools" then
             self.page = PAGE_VEHICLE_TOOLS
-            self.pageScrollIdx = 0
+            self.pageScrollPx = 0
             return
         elseif actionId == "nav_smart_systems" then
             self.page = PAGE_SMART_SYSTEMS
-            self.pageScrollIdx = 0
+            self.pageScrollPx = 0
             return
         end
 

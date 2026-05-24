@@ -351,6 +351,63 @@ If a file exceeds 1500 lines, refactor it into smaller modules with clear single
 
 ---
 
+## Adding a New Custom Fill Type — Checklist
+
+Every new fill type (liquid or solid) must be registered in **all** of the locations below or it will have bugs (wrong drain rate, no effects, no BUY mode, etc.). Check every item — the POLIFOSKA incident is the canonical example of what happens when even one is missed.
+
+### Constants.lua
+| # | Location | What to add |
+|---|----------|-------------|
+| 1 | `FERTILIZER_PROFILES` | N/P/K/OM/pH coefficients |
+| 2 | `BASE_RATES` | `{ value = X, unit = "dry"\|"liquid" }` |
+| 3 | `FERTILIZER_TYPES` list | Add name string |
+
+### HookManager.lua — solid and liquid name lists (7 functions)
+| # | Function | List |
+|---|----------|------|
+| 4 | `registerCustomSprayTypes()` | `solidNames` or `liquidNames` |
+| 5 | `installEffectTypeHook()` | inline solid or liquid table |
+| 6 | `installSprayTypeEffectsHook()` | `solidNames` or `liquidNames` |
+| 7 | `installDensityMapSprayHook()` | `solidNames` or `liquidNames` |
+| 8 | `installFillUnitHookEarly()` | `solidNames` or `liquidNames` |
+| 9 | `installFillUnitHook()` | `solidNames` or `liquidNames` |
+| 10 | `installSprayerVisualEffectHook()` | inline solid or liquid table |
+| 11 | `installFillTypeMaterialHook()` | `PER_TYPE_PRIORITIES` (solid only) — visual texture priority |
+| 12 | `installPurchaseRefillHook()` | `ALL_CUSTOM_NAMES` + `FALLBACK_PRICES` |
+
+### modDesc.xml — thPFConfig (2 entries)
+| # | Section | What to add |
+|---|---------|-------------|
+| 13 | `<thPFConfig><sprayTypes>` | Full `<sprayType>` block with rates and `<fertilizerUsage>` |
+| 14 | `<thPFConfig><sprayTypeMapping>` | `<sprayType name="..." group="FERTILIZER" isLiquid="..."/>` |
+
+### PrecisionFarmingBridge.lua (high-N products only)
+| # | Location | What to add |
+|---|----------|-------------|
+| 15 | `SF_FILL_TYPE_N_AMOUNTS` | kg N per litre — only for primary-N products (≥20% N); skip P/K compounds |
+
+### Objects & UI
+| # | Location | What to add |
+|---|----------|-------------|
+| 16 | `objects/bigBag/<type>/` | BigBag + multiPurchase XML files if purchasable |
+| 17 | `src/ui/SoilVersionDialog.lua` | Add CHANGELOG bullet |
+
+---
+
+## Adding a New Setting — Checklist
+
+| # | File | What to add |
+|---|------|-------------|
+| 1 | `src/config/SettingsSchema.lua` | New entry: `{ id, type, default, uiId }` |
+| 2 | `modDesc.xml` `<l10n>` | Keys `<uiId>_short`, `<uiId>_label`, `<uiId>_desc` in all 26 languages |
+| 3 | `src/ui/SoilSettingsPanel.lua` `CATEGORIES` | Add `settingId` to the correct category + section `items` list |
+| 4 | `src/ui/SoilSettingsPanel.lua` `SETTING_DESCS` | Map `settingId → "sf_desc_<id>"` l10n key |
+| 5 | `src/ui/SoilSettingsPanel.lua` `MULTI_OPTS` | If `type = "number"`, add option labels array |
+| 6 | Implementation code | Read via `self.settings.<id>` where needed |
+| 7 | `src/ui/SoilVersionDialog.lua` | Add CHANGELOG bullet |
+
+---
+
 ## Release Checklist
 
 Every release must include ALL of the following before tagging:
