@@ -567,7 +567,7 @@
   "v2.2.0.0": {
     "published_at": "2026-05-17T12:36:37Z",
     "tag": "v2.2.0.0",
-    "peak_downloads": 209
+    "peak_downloads": 212
   },
   "v2.2.0.1": {
     "published_at": "2026-05-18T07:27:39Z",
@@ -592,7 +592,7 @@
   "v2.2.2.4": {
     "published_at": "2026-05-23T08:13:17Z",
     "tag": "v2.2.2.4",
-    "peak_downloads": 36
+    "peak_downloads": 37
   },
   "v2.2.2.3": {
     "published_at": "2026-05-23T06:59:21Z",
@@ -617,6 +617,6 @@
   "v2.2.3.3": {
     "published_at": "2026-05-24T09:02:22Z",
     "tag": "v2.2.3.3",
-    "peak_downloads": 166
+    "peak_downloads": 187
   }
 }
