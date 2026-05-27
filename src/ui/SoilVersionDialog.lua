@@ -24,13 +24,14 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
-    "NOTE FROM THE AUTHOR:",
-    "From this release onward, we are NO longer integrating with Precision Farming. I wont give support if you try to run both :)",
-    "",
-    "- Added a detection mechanism that will disable our mod if Precision Farming is detected, to prevent conflicts and data corruption",
-    "- Fixed a issue where our injection failed on load due to loading order issues",
-    "",
-    "Upcoming releases will be focused on clearing all the remaining bugs. If you find any, please report them on github!",
+    "- Fixed multi-purchase pricing: buying 2+ big bags charged double the correct price",
+    "- Fixed spray rates for herbicide/insecticide/fungicide: 1.5 L/ha → 100 L/ha realistic carrier rate",
+    "- Fixed AN 34.5 Dry not loadable into spreaders on some setups",
+    "- Fixed dedicated server fill type registration failure (retry mechanism for late-loading fill types)",
+    "- Fixed issue where only the mid section of the boom would spray",
+    "- Fixed field pass % counter resetting incorrectly when switching products mid-field",
+    "- Fixed auto spray rate using generic N/P/K targets instead of per-crop optimal targets",
+    "- Fixed herbicide/insecticide/fungicide granting field protection before 80% coverage reached",
 }
 
 -- ── i18n helper ───────────────────────────────────────────

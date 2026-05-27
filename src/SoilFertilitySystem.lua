@@ -35,7 +35,8 @@ function SoilFertilitySystem.new(settings)
     -- Install early so custom fill types are in supportedFillTypes before Mission00.load
     -- restores vehicle fill levels from the savegame (fixes fertilizer disappearing on reload).
     self.hookManager:installFillUnitHookEarly()
-    self.layerSystem = SoilLayerSystem and SoilLayerSystem.new() or nil
+    self.layerSystem  = SoilLayerSystem  and SoilLayerSystem.new()  or nil
+    self.bundledMaps  = SoilBundledMaps  and SoilBundledMaps.new()  or nil
 
     -- Per-day flag table for fertilizer application notifications (fieldId → game day last shown)
     -- Prevents notification spam since the sprayer hook fires every frame while active.
@@ -124,6 +125,11 @@ function SoilFertilitySystem:initialize()
         self.layerSystem:initialize()
     end
 
+    -- Initialize bundled GRLE maps (spatially-aware defaults for vanilla maps)
+    if self.bundledMaps then
+        self.bundledMaps:initialize()
+    end
+
     self.isInitialized = true
     self:info("Soil Fertility System initialized successfully")
     self:info("Fertility System: %s, Nutrient Cycles: %s",
@@ -177,6 +183,10 @@ function SoilFertilitySystem:delete()
     if self.layerSystem then
         self.layerSystem:delete()
         self.layerSystem = nil
+    end
+    if self.bundledMaps then
+        self.bundledMaps:delete()
+        self.bundledMaps = nil
     end
     self.fieldData = {}
     self.isInitialized = false
@@ -976,7 +986,10 @@ function SoilFertilitySystem:onInsecticideApplied(fieldId, effectiveness)
     local before = field.pestPressure or 0
     field.pestPressure = math.max(0, before - reduction)
     local daysPerMonth = (g_currentMission and g_currentMission.environment and g_currentMission.environment.daysPerPeriod) or 1
-    field.insecticideDaysLeft = pp.INSECTICIDE_DURATION_DAYS * daysPerMonth
+    local protThreshold = SoilConstants.COVERAGE and SoilConstants.COVERAGE.PROTECTION_THRESHOLD or 0.80
+    if (field.sessionCoverageFraction or 0) >= protThreshold then
+        field.insecticideDaysLeft = pp.INSECTICIDE_DURATION_DAYS * daysPerMonth
+    end
 
     self:log("[Insecticide] Field %d: pest pressure %.0f -> %.0f, protected for %d days",
         fieldId, before, field.pestPressure, field.insecticideDaysLeft)
@@ -1012,7 +1025,10 @@ function SoilFertilitySystem:onFungicideApplied(fieldId, effectiveness)
     local before = field.diseasePressure or 0
     field.diseasePressure = math.max(0, before - reduction)
     local daysPerMonth = (g_currentMission and g_currentMission.environment and g_currentMission.environment.daysPerPeriod) or 1
-    field.fungicideDaysLeft = math.floor(dp.FUNGICIDE_DURATION_DAYS * cm.fungicideMult * daysPerMonth)
+    local protThreshold = SoilConstants.COVERAGE and SoilConstants.COVERAGE.PROTECTION_THRESHOLD or 0.80
+    if (field.sessionCoverageFraction or 0) >= protThreshold then
+        field.fungicideDaysLeft = math.floor(dp.FUNGICIDE_DURATION_DAYS * cm.fungicideMult * daysPerMonth)
+    end
 
     self:log("[Fungicide] Field %d: disease pressure %.0f -> %.0f, protected for %d days",
         fieldId, before, field.diseasePressure, field.fungicideDaysLeft)
@@ -1509,6 +1525,25 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing, area)
         compactionTotalCells = 0,  -- total estimated field cells (set lazily from fieldArea)
         lastAlertSeason = nil, -- Season when the last critical alert fired (persisted)
     }
+
+    -- Bundled GRLE override: replace randomized pH with spatially-aware value
+    -- from the pre-baked regional map. Only fires when terrain info layers are
+    -- absent (SoilLayerSystem.available = false), so prepared maps are unaffected.
+    if not (self.layerSystem and self.layerSystem.available) then
+        if self.bundledMaps and self.bundledMaps.available and g_farmlandManager then
+            local farmlandObj = g_farmlandManager:getFarmlandById(fieldId)
+            if farmlandObj then
+                local cx, cz = self.bundledMaps:getFarmlandCenter(farmlandObj)
+                if cx ~= nil then
+                    local sampledPH = self.bundledMaps:sampleAtWorldPos(cx, cz)
+                    if sampledPH ~= nil then
+                        self.fieldData[fieldId].pH = sampledPH
+                        SoilLogger.debug("BundledMaps: field %d pH set to %.2f from GRLE (world %.0f,%.0f)", fieldId, sampledPH, cx, cz)
+                    end
+                end
+            end
+        end
+    end
 
     self:log("Lazy-created field %d area=%.2f ha confirmed=%s",
         fieldId, self.fieldData[fieldId].fieldArea, tostring(confirmedArea))
@@ -2283,7 +2318,10 @@ function SoilFertilitySystem:onInsecticideAppliedIncremental(fieldId, reduction)
     local before = field.pestPressure or 0
     field.pestPressure = math.max(0, before - reduction)
     local daysPerMonth = (g_currentMission and g_currentMission.environment and g_currentMission.environment.daysPerPeriod) or 1
-    field.insecticideDaysLeft = pp.INSECTICIDE_DURATION_DAYS * daysPerMonth
+    local protThreshold = SoilConstants.COVERAGE and SoilConstants.COVERAGE.PROTECTION_THRESHOLD or 0.80
+    if (field.sessionCoverageFraction or 0) >= protThreshold then
+        field.insecticideDaysLeft = pp.INSECTICIDE_DURATION_DAYS * daysPerMonth
+    end
 
     -- Local zoneData update
     local x, z = self._lastSprayX, self._lastSprayZ
@@ -2314,7 +2352,10 @@ function SoilFertilitySystem:onFungicideAppliedIncremental(fieldId, reduction)
     local before = field.diseasePressure or 0
     field.diseasePressure = math.max(0, before - reduction)
     local daysPerMonth = (g_currentMission and g_currentMission.environment and g_currentMission.environment.daysPerPeriod) or 1
-    field.fungicideDaysLeft = dp.FUNGICIDE_DURATION_DAYS * daysPerMonth
+    local protThreshold = SoilConstants.COVERAGE and SoilConstants.COVERAGE.PROTECTION_THRESHOLD or 0.80
+    if (field.sessionCoverageFraction or 0) >= protThreshold then
+        field.fungicideDaysLeft = dp.FUNGICIDE_DURATION_DAYS * daysPerMonth
+    end
 
     -- Local zoneData update
     local x, z = self._lastSprayX, self._lastSprayZ
@@ -2397,6 +2438,13 @@ function SoilFertilitySystem:trackSprayerCoverage(fieldId, liters, fillTypeName,
     if not liters or liters <= 0 then return end
     local field = self.fieldData[fieldId]
     if not field then return end
+
+    -- Reset session coverage when the product changes (issue #442)
+    if fillTypeName and field.sessionLastProduct and fillTypeName ~= field.sessionLastProduct then
+        field.sessionCoverageHa       = 0
+        field.sessionCoverageFraction = 0
+        field.sessionCoverageCells    = {}
+    end
 
     if fillTypeName then field.sessionLastProduct = fillTypeName end
 
@@ -2531,7 +2579,11 @@ function SoilFertilitySystem:onHerbicideAppliedDirect(fieldId, effectiveness, li
         local before = field.weedPressure or 0
         field.weedPressure = math.max(0, before - reduction)
         local daysPerMonth = (g_currentMission and g_currentMission.environment and g_currentMission.environment.daysPerPeriod) or 1
-        field.herbicideDaysLeft = SoilConstants.WEED_PRESSURE.HERBICIDE_DURATION_DAYS * daysPerMonth
+        -- Only grant protected status once 80% of the field has been covered (issue #441)
+        local protThreshold = SoilConstants.COVERAGE and SoilConstants.COVERAGE.PROTECTION_THRESHOLD or 0.80
+        if (field.sessionCoverageFraction or 0) >= protThreshold then
+            field.herbicideDaysLeft = SoilConstants.WEED_PRESSURE.HERBICIDE_DURATION_DAYS * daysPerMonth
+        end
 
         -- Update per-cell weed pressure so the PDA cell-report shows changes immediately.
         -- onInsecticideAppliedIncremental does this for pest pressure; herbicide was missing it.

@@ -23,7 +23,9 @@ SoilMapOverlay.ALPHA          = 0.72
 
 -- Sampling constants
 SoilMapOverlay.SAMPLE_UPDATE_INTERVAL_MS = 2000
-SoilMapOverlay.POLYGON_STEP     = 10     -- world-unit grid spacing for polygon sampling (meters)
+SoilMapOverlay.POLYGON_STEP        = 10  -- world-unit grid spacing for polygon sampling (meters)
+SoilMapOverlay.MINIMAP_POLYGON_STEP = 12  -- world-unit step for minimap polygon fill — denser for solid-fill look
+SoilMapOverlay.MINIMAP_DOT_SIZE     = 4   -- screen pixels per fill point (overlapping dots = solid field fill)
 -- Point budgets per density level (1=Low, 2=Medium, 3=High).
 -- These are the BASE values for a standard 2048m map. At runtime the budget is
 -- scaled up proportionally with terrain size so large maps (4x, 16x, 64x) get the
@@ -1304,19 +1306,31 @@ function SoilMapOverlay:updateMinimapCentroids(force)
 
     local activeFieldIds = self.soilSystem and self.soilSystem.activeFieldIds or {}
     local zone = SoilConstants.ZONE
+    local mmStep = SoilMapOverlay.MINIMAP_POLYGON_STEP
+
     for _, fsField in ipairs(fields) do
         if fsField and fsField.farmland then
             local farmlandId = fsField.farmland.id
             if farmlandId and farmlandId > 0 and activeFieldIds[farmlandId] then
                 local info = self.soilSystem:getFieldInfo(farmlandId)
                 if info then
-                    -- 1. Restore Centroid Dot (Low-res status)
-                    local x = fsField.posX or 0
-                    local z = fsField.posZ or 0
                     local r, g, b = self:getLayerColor(layerIdx, info, farmlandId)
-                    table.insert(self.minimapCentroids, {x = x, z = z, r = r, g = g, b = b, isCell = false})
 
-                    -- 2. Add High-res pixels for worked areas (if data exists)
+                    -- 1. Polygon fill — use grid-sampled field polygon instead of single centroid dot
+                    -- Cached after first call; fieldPolyCache key includes step so minimap and PDA don't collide
+                    local fillPoints = self:getFieldFillPoints(fsField, mmStep)
+                    if #fillPoints > 0 then
+                        for _, pt in ipairs(fillPoints) do
+                            table.insert(self.minimapCentroids, {x = pt.x, z = pt.z, r = r, g = g, b = b, isCell = false})
+                        end
+                    else
+                        -- Fallback: if polygon data unavailable, use centroid dot
+                        local x = fsField.posX or 0
+                        local z = fsField.posZ or 0
+                        table.insert(self.minimapCentroids, {x = x, z = z, r = r, g = g, b = b, isCell = false})
+                    end
+
+                    -- 2. Zone data overlay — per-cell sub-field resolution for worked areas
                     local fieldEntry = self.soilSystem.fieldData and self.soilSystem.fieldData[farmlandId]
                     if fieldEntry and fieldEntry.zoneData then
                         for cellKey, cell in pairs(fieldEntry.zoneData) do
@@ -1358,6 +1372,15 @@ function SoilMapOverlay:onDrawMinimap(ingameMap)
 
     if g_client == nil then return end  -- server-only mode has no HUD
 
+    -- When the DMV heatmap overlay is active and rendering per-pixel NPK data,
+    -- skip the polygon dot loop — the overlay already paints every pixel correctly.
+    -- Still draw the live mini-report panel (drawMiniReport is called below).
+    local sml = g_SoilFertilityManager and g_SoilFertilityManager.soilMinimapLayer
+    if sml and sml._initialized and sml._hasShownOnce and sml._usingDensityLayers then
+        self:drawMiniReport(ingameMap)
+        return
+    end
+
     self:updateMinimapCentroids()
     if #self.minimapCentroids == 0 then return end
 
@@ -1378,7 +1401,7 @@ function SoilMapOverlay:onDrawMinimap(ingameMap)
         local objectZ = (centroid.z + offZ) / wSizeZ * scale + extZ
         local ok, screenX, screenY, _, visible = pcall(layout.getMapObjectPosition, layout, objectX, objectZ, 0, 0, 0, false)
         if ok and visible and screenX and screenY then
-            local size = centroid.isCell and 3 or 7
+            local size = centroid.isCell and 3 or SoilMapOverlay.MINIMAP_DOT_SIZE
             local dotSz = getNormalizedScreenValues(size, size)
             local halfDot = dotSz * 0.5
             drawFilledRect(screenX - halfDot, screenY - halfDot, dotSz, dotSz,

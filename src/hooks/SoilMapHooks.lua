@@ -350,3 +350,19 @@ if IngameMapElement ~= nil then
 else
     SoilLogger.warning("SoilMapHooks: IngameMapElement not available — map overlay dots will not draw")
 end
+
+-- Hook IngameMap.drawFields at class level for DMV minimap heatmap rendering.
+-- This fires per-IngameMap instance (HUD minimap AND PDA fullscreen).
+-- SoilMinimapLayer.draw() guards against drawing on the PDA map internally.
+if IngameMap ~= nil and IngameMap.drawFields ~= nil then
+    IngameMap.drawFields = Utils.appendedFunction(IngameMap.drawFields, function(mapSelf)
+        local sfm = g_SoilFertilityManager
+        if sfm and sfm.soilMinimapLayer and sfm.settings and sfm.settings.enabled then
+            sfm.soilMinimapLayer:draw(mapSelf)
+        end
+    end)
+    SoilLogger.info("SoilMapHooks: IngameMap.drawFields hook installed for DMV minimap heatmap")
+else
+    SoilLogger.warning("SoilMapHooks: IngameMap.drawFields not available — DMV minimap heatmap will not render")
+end
+

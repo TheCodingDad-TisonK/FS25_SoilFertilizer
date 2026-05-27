@@ -624,6 +624,7 @@ SoilConstants.ZONE = {
 -- Coverage is tracked per-field daily via the cell grid shared with ZONE.
 SoilConstants.COVERAGE = {
     MIN_FULL_CREDIT = 0.70,  -- 70% of field cells must be visited for full-treated notification
+    PROTECTION_THRESHOLD = 0.80,  -- 80% session coverage required before crop-protection "active" status is granted (issue #441)
 }
 
 -- ========================================
@@ -708,10 +709,11 @@ SoilConstants.SPRAYER_RATE = {
         BIOSOLIDS         = { value =  4500.0, unit = "dry"    },
         CHICKEN_MANURE    = { value =  2000.0, unit = "dry"    },
         GYPSUM            = { value =  1500.0, unit = "dry"    },
-        -- Crop protection
-        INSECTICIDE = { value = 1.5, unit = "liquid" },  -- ~0.16 gal/ac
-        FUNGICIDE   = { value = 1.5, unit = "liquid" },  -- ~0.16 gal/ac
-        HERBICIDE   = { value = 1.5, unit = "liquid" },
+        -- Crop protection — 100 L/ha = realistic water+product carrier mixture
+        -- (1.5 L/ha was pure active ingredient dose; 100-150 L/ha is field-realistic)
+        INSECTICIDE = { value = 100.0, unit = "liquid" },
+        FUNGICIDE   = { value = 100.0, unit = "liquid" },
+        HERBICIDE   = { value = 100.0, unit = "liquid" },
         -- Fallback for unrecognized fill types
         DEFAULT           = { value =    93.5, unit = "liquid" },
     },
@@ -750,7 +752,7 @@ SoilConstants.WEED_PRESSURE = {
         HERBICIDE = 1.0,
     },
     -- Pressure points removed on a single full-field herbicide application.
-    -- 100 = one full-field pass at the reference rate (1.5 L/ha) fully clears any pressure tier.
+    -- 100 = one full-field pass at the reference rate (100 L/ha) fully clears any pressure tier.
     -- Partial tank coverage scales proportionally: 50% field covered → 50 pts removed.
     -- Matches cultivation weed clearing (WEED_PRESSURE_REDUCTION = 100 already).
     HERBICIDE_PRESSURE_REDUCTION = 100,

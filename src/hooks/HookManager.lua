@@ -270,6 +270,13 @@ function HookManager:installAll(soilSystem)
     -- System 3: Variable Rate — per-section rate pre-computation (appended after See & Spray).
     self:installVariableRateHook()
 
+    -- Section state preserver: saves VWW section.isActive before suppression hooks run and
+    -- restores it after work areas are processed. Installed LAST so the prepend executes FIRST,
+    -- and cleanup unwinds FIRST in reverse order. Without this, SmartSensor/SeeAndSpray set
+    -- section.isActive=false permanently (VWW only resets it via setSectionsActive/CTRL+Z),
+    -- causing the boom to lock at minimum width until the player manually cycles the width.
+    self:installSectionStatePreserver()
+
     self.installed = true
 end
 
@@ -374,12 +381,12 @@ function HookManager:registerCustomSprayTypes()
     local liqBase   = baseRates.LIQUIDFERTILIZER.value  -- used as fallback default only
 
     -- Liquid nitrogen / starter types → inherit visual from LIQUIDFERTILIZER
-    -- NOTE: HERBICIDE must be here so it gets a custom LPS of 1.5/36000 L/s, matching
+    -- NOTE: HERBICIDE must be here so it gets a custom LPS of 100/36000 L/s, matching
     -- INSECTICIDE and FUNGICIDE. Without it, vanilla's native HERBICIDE spray type is
-    -- used (~291 L/ha effective rate vs the intended 1.5 L/ha), causing weed pressure
+    -- used (~291 L/ha effective rate vs the intended 100 L/ha), causing weed pressure
     -- to drain far too fast even with the daily cap in onHerbicideAppliedDirect (the
-    -- cap drains its full 30-point budget in the very first metre of a pass, then
-    -- repeats on subsequent game-day passes — issue #276 follow-up bug).
+    -- cap drains its full budget in the very first metre of a pass, then repeats on
+    -- subsequent game-day passes — issue #276 follow-up bug).
     -- LIQUIDMANURE, MANURE, DIGESTATE were previously omitted from this list, causing them to fall
     -- through to whatever vanilla spray type LPS the game uses (often very low or undefined).
     -- The result: wap.usage was tiny → nutrient gain and coverage nearly zero (issue #311).
@@ -428,6 +435,11 @@ function HookManager:registerCustomSprayTypes()
         registered, liquidLPS, solidLPS, skipped
     )
     SoilLogger.info("     Enable SoilDebug to see per-type LPS and rate values")
+    -- Track whether all expected custom types registered (nil on dedi if fill types loaded late)
+    self._sprayTypesComplete = (skipped == 0)
+    if not self._sprayTypesComplete then
+        SoilLogger.warning("[DeferredInit] %d fill types were nil — scheduling retry for dedi server timing", skipped)
+    end
 end
 
 -- =========================================================
@@ -465,19 +477,28 @@ function HookManager:installEffectTypeHook()
     local fertIdx = fm:getFillTypeIndexByName("FERTILIZER")
     local liqIdx  = fm:getFillTypeIndexByName("LIQUIDFERTILIZER")
 
+    -- Store name lists so reapplyEffectTypeRemap() can populate missing entries after dedi retry.
+    self._effectSolidNames  = { "UREA", "AMS", "AN", "MAP", "DAP", "POTASH", "POLIFOSKA",
+                                "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM" }
+    self._effectLiquidNames = { "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME",
+                                "INSECTICIDE", "FUNGICIDE",
+                                "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH" }
+    self._effectFertIdx = fertIdx
+    self._effectLiqIdx  = liqIdx
+
     -- Build remap: customFillTypeIndex → vanillaFillTypeIndex
+    -- Stored on self so reapplyEffectTypeRemap() can add entries to the same table
+    -- that the closures below capture — no hook reinstall needed.
     local remap = {}
+    self._effectTypeRemap = remap
     if fertIdx then
-        for _, name in ipairs({ "UREA", "AMS", "AN", "MAP", "DAP", "POTASH", "POLIFOSKA",
-                                 "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM" }) do
+        for _, name in ipairs(self._effectSolidNames) do
             local idx = fm:getFillTypeIndexByName(name)
             if idx then remap[idx] = fertIdx end
         end
     end
     if liqIdx then
-        for _, name in ipairs({ "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME",
-                                 "INSECTICIDE", "FUNGICIDE",
-                                 "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH" }) do
+        for _, name in ipairs(self._effectLiquidNames) do
             local idx = fm:getFillTypeIndexByName(name)
             if idx then remap[idx] = liqIdx end
         end
@@ -976,8 +997,9 @@ function HookManager:installSectionControlHook()
             local soilSys = sfm.soilSystem
 
             for _, section in ipairs(vww.sections) do
-                -- Only consider sections that VWW has already decided are active.
-                -- isCenter sections: VWW never touches their isActive — always leave them on.
+                -- Only suppress sections VWW has activated. isCenter sections are never
+                -- added to sectionsLeft/Right so VWW never touches them — leave them alone.
+                -- installSectionStatePreserver() restores isActive after work areas process.
                 if section.isActive and not section.isCenter then
                     -- Estimate section world position (midpoint between root and outer edge)
                     local sx, sz = rootX, rootZ
@@ -1279,6 +1301,76 @@ function HookManager:installVariableRateHook()
     self:register(Sprayer, "onStartWorkAreaProcessing", origStart,
         "Sprayer.onStartWorkAreaProcessing (SF variable rate)")
     SoilLogger.info("[OK] SF Variable Rate hook installed — per-section NPK rate control active")
+    return true
+end
+
+-- =========================================================
+-- SECTION STATE PRESERVER: save/restore VWW section states
+-- =========================================================
+-- Fixes the "boom locks at minimum width" bug caused by SmartSensor
+-- and SeeAndSpray hooks setting section.isActive=false without ever
+-- restoring it. VWW only resets isActive via setSectionsActive()
+-- (CTRL+Z), so the suppression was permanent until the player manually
+-- cycled width.
+--
+-- This function:
+--   PREPENDS to onStartWorkAreaProcessing — saves VWW section states
+--     before any suppression hook runs (prependedFunction executes first
+--     even though this hook is installed last).
+--   APPENDS to onEndWorkAreaProcessing — restores saved states after
+--     work areas are processed, so VWW width control is unaffected.
+function HookManager:installSectionStatePreserver()
+    if not Sprayer or type(Sprayer.onStartWorkAreaProcessing) ~= "function" then
+        SoilLogger.warning("[SectionPreserver] Sprayer.onStartWorkAreaProcessing not found — skipping")
+        return false
+    end
+
+    -- PREPEND: save section states before suppression hooks modify them.
+    -- prependedFunction guarantees this runs BEFORE the existing chain
+    -- (which includes the appended SmartSensor/SeeAndSpray/VariableRate hooks).
+    local origStart = Sprayer.onStartWorkAreaProcessing
+    Sprayer.onStartWorkAreaProcessing = Utils.prependedFunction(
+        Sprayer.onStartWorkAreaProcessing,
+        function(sprayerSelf, dt)
+            local vww = sprayerSelf.spec_variableWorkWidth
+            if not vww or not vww.sections or #vww.sections == 0 then return end
+            local saved = {}
+            for i, section in ipairs(vww.sections) do
+                saved[i] = section.isActive
+            end
+            sprayerSelf._sfSavedSectionStates = saved
+        end
+    )
+    self:register(Sprayer, "onStartWorkAreaProcessing", origStart,
+        "Sprayer.onStartWorkAreaProcessing (SF section state saver)")
+
+    -- APPEND to onEndWorkAreaProcessing: restore section states after
+    -- work areas have been processed for this tick.
+    if type(Sprayer.onEndWorkAreaProcessing) == "function" then
+        local origEnd = Sprayer.onEndWorkAreaProcessing
+        Sprayer.onEndWorkAreaProcessing = Utils.appendedFunction(
+            Sprayer.onEndWorkAreaProcessing,
+            function(sprayerSelf, dt, hasProcessed)
+                local saved = sprayerSelf._sfSavedSectionStates
+                if not saved then return end
+                local vww = sprayerSelf.spec_variableWorkWidth
+                if vww and vww.sections then
+                    for i, section in ipairs(vww.sections) do
+                        if saved[i] ~= nil then
+                            section.isActive = saved[i]
+                        end
+                    end
+                end
+                sprayerSelf._sfSavedSectionStates = nil
+            end
+        )
+        self:register(Sprayer, "onEndWorkAreaProcessing", origEnd,
+            "Sprayer.onEndWorkAreaProcessing (SF section state restorer)")
+    else
+        SoilLogger.warning("[SectionPreserver] Sprayer.onEndWorkAreaProcessing not found — restore hook skipped")
+    end
+
+    SoilLogger.info("[OK] SF section state preserver installed — VWW width control (CTRL+Z) protected from suppression hooks")
     return true
 end
 
@@ -2601,7 +2693,7 @@ function HookManager:installFillUnitHookEarly()
         return false
     end
 
-    local solidNames         = {"UREA", "AMS", "MAP", "DAP", "POTASH", "POLIFOSKA",
+    local solidNames         = {"UREA", "AN", "AMS", "MAP", "DAP", "POTASH", "POLIFOSKA",
                                  "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM"}
     local liquidNames        = {"UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME", "INSECTICIDE", "FUNGICIDE",
                                 "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH"}
@@ -2717,12 +2809,20 @@ function HookManager:installFillUnitHook()
     -- support both) but rejected by dedicated spreaders (MANURE-only fill unit).
     local manureIndex = fm:getFillTypeIndexByName("MANURE")
 
-    local solidNames  = {"UREA", "AMS", "MAP", "DAP", "POTASH", "POLIFOSKA",
+    local solidNames  = {"UREA", "AN", "AMS", "MAP", "DAP", "POTASH", "POLIFOSKA",
                           "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM"}
     local liquidNames = {"UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME", "INSECTICIDE", "FUNGICIDE",
                          "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH"}
     -- These organic dry types also work in manure spreaders (MANURE fill-unit base).
     local manureCompatNames = {"BIOSOLIDS", "CHICKEN_MANURE"}
+    -- Store for deferred re-patch (dedi server timing fix)
+    self._fuSolidNames  = solidNames
+    self._fuLiquidNames = liquidNames
+    self._fuManureCompatNames = manureCompatNames
+    self._fuFertIndex    = fertIndex
+    self._fuLiqFertIndex = liqFertIndex
+    self._fuManureIndex  = manureIndex
+    self._fuFm           = fm
 
     local solidIndices       = {}
     local liquidIndices      = {}
@@ -2907,6 +3007,109 @@ function HookManager:installFillUnitHook()
 
     return true
 end
+
+-- =========================================================
+-- DEFERRED FILL UNIT RE-PATCH (dedicated server timing fix)
+-- =========================================================
+-- On dedicated servers, fill types from fillTypes.xml may not be registered in
+-- g_fillTypeManager at the time installFillUnitHook runs (inside loadMission00Finished).
+-- This results in empty solidIndices/liquidIndices and a no-op retroactive patch.
+-- SoilFertilityManager:update() calls this once _sprayTypesComplete is false, after
+-- a small delay, to re-resolve indices and re-patch vehicles once fill types are available.
+function HookManager:reapplyFillUnitPatch()
+    local fm = self._fuFm or g_fillTypeManager
+    if not fm then return false end
+
+    local fertIdx    = self._fuFertIndex    or fm:getFillTypeIndexByName("FERTILIZER")
+    local liqFertIdx = self._fuLiqFertIndex or fm:getFillTypeIndexByName("LIQUIDFERTILIZER")
+    local manureIdx  = self._fuManureIndex  or fm:getFillTypeIndexByName("MANURE")
+
+    local solidIdxs, liquidIdxs, manureIdxs = {}, {}, {}
+    local found, missing = 0, 0
+    for _, name in ipairs(self._fuSolidNames or {}) do
+        local idx = fm:getFillTypeIndexByName(name)
+        if idx then table.insert(solidIdxs, idx); found = found + 1
+        else missing = missing + 1 end
+    end
+    for _, name in ipairs(self._fuLiquidNames or {}) do
+        local idx = fm:getFillTypeIndexByName(name)
+        if idx then table.insert(liquidIdxs, idx) end
+    end
+    for _, name in ipairs(self._fuManureCompatNames or {}) do
+        local idx = fm:getFillTypeIndexByName(name)
+        if idx then table.insert(manureIdxs, idx) end
+    end
+
+    if found == 0 then return false end  -- still not available
+
+    local vehicleSystem = g_currentMission and g_currentMission.vehicleSystem
+    if not vehicleSystem or not vehicleSystem.vehicles then return false end
+
+    local patched = 0
+    for _, vehicle in pairs(vehicleSystem.vehicles) do
+        local spec = vehicle.spec_fillUnit
+        if spec and spec.fillUnits then
+            for _, fillUnit in pairs(spec.fillUnits) do
+                if fillUnit.supportedFillTypes then
+                    local addSolid  = fertIdx    and fillUnit.supportedFillTypes[fertIdx]
+                    local addLiquid = liqFertIdx and fillUnit.supportedFillTypes[liqFertIdx]
+                    local addManure = manureIdx  and fillUnit.supportedFillTypes[manureIdx]
+                    if addSolid  then for _, idx in ipairs(solidIdxs)  do fillUnit.supportedFillTypes[idx] = true end end
+                    if addLiquid then for _, idx in ipairs(liquidIdxs) do fillUnit.supportedFillTypes[idx] = true end end
+                    if addManure then for _, idx in ipairs(manureIdxs) do fillUnit.supportedFillTypes[idx] = true end end
+                end
+            end
+        end
+        patched = patched + 1
+    end
+
+    SoilLogger.info("[DeferredInit] Deferred fill unit re-patch complete: %d vehicles re-patched (%d types found)", patched, found)
+    return true
+end
+
+-- =========================================================
+-- DEFERRED EFFECT TYPE REMAP REBUILD (dedi server timing fix)
+-- =========================================================
+-- The effect type hook captures its remap table by reference in a closure.
+-- If fill types weren't in g_fillTypeManager at install time (dedi server),
+-- the remap table is sparsely populated. Since it's a Lua table reference,
+-- we can add missing entries directly — the closures automatically see them.
+-- Called by SoilFertilityManager:update() alongside reapplyFillUnitPatch().
+function HookManager:reapplyEffectTypeRemap()
+    local remap = self._effectTypeRemap
+    if not remap then return end
+
+    local fm = g_fillTypeManager
+    if not fm then return end
+
+    local fertIdx = self._effectFertIdx or fm:getFillTypeIndexByName("FERTILIZER")
+    local liqIdx  = self._effectLiqIdx  or fm:getFillTypeIndexByName("LIQUIDFERTILIZER")
+
+    local added = 0
+    if fertIdx and self._effectSolidNames then
+        for _, name in ipairs(self._effectSolidNames) do
+            local idx = fm:getFillTypeIndexByName(name)
+            if idx and not remap[idx] then
+                remap[idx] = fertIdx
+                added = added + 1
+            end
+        end
+    end
+    if liqIdx and self._effectLiquidNames then
+        for _, name in ipairs(self._effectLiquidNames) do
+            local idx = fm:getFillTypeIndexByName(name)
+            if idx and not remap[idx] then
+                remap[idx] = liqIdx
+                added = added + 1
+            end
+        end
+    end
+
+    if added > 0 then
+        SoilLogger.info("[DeferredInit] Effect type remap rebuilt: %d fill types added (total entries: %d)", added, (function() local n=0; for _ in pairs(remap) do n=n+1 end; return n end)())
+    end
+end
+
 -- =========================================================
 -- HOOK 8: "BUY" refill mode for custom fill types (issue #125)
 -- =========================================================
@@ -2961,7 +3164,7 @@ function HookManager:installPurchaseRefillHook()
         "INSECTICIDE", "FUNGICIDE",
         "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH",
         -- Solid
-        "UREA", "AMS", "MAP", "DAP", "POTASH", "POLIFOSKA",
+        "UREA", "AN", "AMS", "MAP", "DAP", "POTASH", "POLIFOSKA",
         "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM",
     }
 
@@ -2979,7 +3182,7 @@ function HookManager:installPurchaseRefillHook()
         UAN32 = 1.60, UAN28 = 1.50, ANHYDROUS = 1.85, STARTER = 1.70,
         LIQUIDLIME = 1.20, INSECTICIDE = 1.20, FUNGICIDE = 1.30,
         LIQUID_UREA = 1.70, LIQUID_AMS = 1.45, LIQUID_MAP = 2.00, LIQUID_DAP = 1.80, LIQUID_POTASH = 1.85,
-        UREA = 1.65, AMS = 1.40, MAP = 1.95, DAP = 1.75, POTASH = 1.80, POLIFOSKA = 1.35,
+        UREA = 1.65, AN = 1.55, AMS = 1.40, MAP = 1.95, DAP = 1.75, POTASH = 1.80, POLIFOSKA = 1.35,
         COMPOST = 0.60, BIOSOLIDS = 0.55, CHICKEN_MANURE = 0.50,
         PELLETIZED_MANURE = 0.70, GYPSUM = 0.35,  -- reduced: amendment, not plant food ($525/ha vs $1200)
     }
