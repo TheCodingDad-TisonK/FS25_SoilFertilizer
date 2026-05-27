@@ -1370,39 +1370,40 @@ function SoilMapOverlay:updateMinimapCentroids(force)
             if farmlandId and farmlandId > 0 and activeFieldIds[farmlandId] then
                 local info = self.soilSystem:getFieldInfo(farmlandId)
                 if info then
-                    local r, g, b = self:getLayerColor(layerIdx, info, farmlandId)
+                    -- Field-average color: fallback for polygon points with no zone data
+                    local avgR, avgG, avgB = self:getLayerColor(layerIdx, info, farmlandId)
 
-                    -- 1. Polygon fill — use grid-sampled field polygon instead of single centroid dot
-                    -- Cached after first call; fieldPolyCache key includes step so minimap and PDA don't collide
+                    -- Per-cell zone data (nil when field has never been worked)
+                    local fieldEntry = self.soilSystem.fieldData and self.soilSystem.fieldData[farmlandId]
+                    local zoneData   = fieldEntry and fieldEntry.zoneData
+
+                    -- Single pass: for each polygon fill point look up its zone cell.
+                    -- If zone data exists there, show the cell's individual value so
+                    -- sprayed vs unsprayed areas paint different colors. Otherwise fall
+                    -- back to the field average. Eliminates the old two-pass approach
+                    -- (polygon fill + separate zone overlay) which suffered from a 10m
+                    -- vs 12m grid mismatch and 3px vs 4px dot-size bleed-through.
                     local fillPoints = self:getFieldFillPoints(fsField, mmStep)
                     if #fillPoints > 0 then
                         for _, pt in ipairs(fillPoints) do
-                            table.insert(self.minimapCentroids, {x = pt.x, z = pt.z, r = r, g = g, b = b, isCell = false})
-                        end
-                    else
-                        -- Fallback: if polygon data unavailable, use centroid dot
-                        local x = fsField.posX or 0
-                        local z = fsField.posZ or 0
-                        table.insert(self.minimapCentroids, {x = x, z = z, r = r, g = g, b = b, isCell = false})
-                    end
-
-                    -- 2. Zone data overlay — per-cell sub-field resolution for worked areas
-                    local fieldEntry = self.soilSystem.fieldData and self.soilSystem.fieldData[farmlandId]
-                    if fieldEntry and fieldEntry.zoneData then
-                        for cellKey, cell in pairs(fieldEntry.zoneData) do
-                            local keyNum = tonumber(cellKey)
-                            if keyNum then
-                                local cx = math.floor(keyNum / 10000)
-                                local cz = keyNum % 10000
-                                local cellX = cx * zone.CELL_SIZE + zone.CELL_SIZE/2
-                                local cellZ = cz * zone.CELL_SIZE + zone.CELL_SIZE/2
-                                local val = getCellLayerValue(cell, layerIdx)
-                                if val then
-                                    local cr, cg, cb = self:valueToLayerColor(layerIdx, val)
-                                    table.insert(self.minimapCentroids, {x = cellX, z = cellZ, r = cr, g = cg, b = cb, isCell = true})
+                            local pr, pg, pb = avgR, avgG, avgB
+                            if zoneData then
+                                local cx   = math.floor(pt.x / zone.CELL_SIZE)
+                                local cz   = math.floor(pt.z / zone.CELL_SIZE)
+                                local cell = zoneData[tostring(cx * 10000 + cz)]
+                                if cell then
+                                    local val = getCellLayerValue(cell, layerIdx)
+                                    if val then
+                                        pr, pg, pb = self:valueToLayerColor(layerIdx, val)
+                                    end
                                 end
                             end
+                            table.insert(self.minimapCentroids, {x = pt.x, z = pt.z, r = pr, g = pg, b = pb})
                         end
+                    else
+                        local x = fsField.posX or 0
+                        local z = fsField.posZ or 0
+                        table.insert(self.minimapCentroids, {x = x, z = z, r = avgR, g = avgG, b = avgB})
                     end
                 end
             end
@@ -1457,8 +1458,7 @@ function SoilMapOverlay:onDrawMinimap(ingameMap)
         local objectZ = (centroid.z + offZ) / wSizeZ * scale + extZ
         local ok, screenX, screenY, _, visible = pcall(layout.getMapObjectPosition, layout, objectX, objectZ, 0, 0, 0, false)
         if ok and visible and screenX and screenY then
-            local size = centroid.isCell and 3 or SoilMapOverlay.MINIMAP_DOT_SIZE
-            local dotSz = getNormalizedScreenValues(size, size)
+            local dotSz  = getNormalizedScreenValues(SoilMapOverlay.MINIMAP_DOT_SIZE, SoilMapOverlay.MINIMAP_DOT_SIZE)
             local halfDot = dotSz * 0.5
             drawFilledRect(screenX - halfDot, screenY - halfDot, dotSz, dotSz,
                            centroid.r, centroid.g, centroid.b, alpha)
