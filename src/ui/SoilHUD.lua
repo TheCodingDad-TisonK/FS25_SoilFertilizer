@@ -1889,8 +1889,16 @@ function SoilHUD:drawSprayerRatePanel()
         local profile = SoilConstants.FERTILIZER_PROFILES[fillType.name]
         if profile then
             local targetText = g_i18n:getText("sf_sprayer_target")
-            local targets = SoilConstants.SPRAYER_RATE.AUTO_RATE_TARGETS
-            if not targets then return end
+            local defaults = SoilConstants.SPRAYER_RATE.AUTO_RATE_TARGETS
+            if not defaults then return end
+            local ct = self.cachedFieldInfo and self.cachedFieldInfo.cropTargets
+            local targets = ct and {
+                N  = ct.N and ct.N.opt or defaults.N,
+                P  = ct.P and ct.P.opt or defaults.P,
+                K  = ct.K and ct.K.opt or defaults.K,
+                pH = defaults.pH,
+                OM = defaults.OM,
+            } or defaults
             if profile.N and profile.N > 0 then targetText = targetText .. targets.N .. "N " end
             if profile.P and profile.P > 0 then targetText = targetText .. targets.P .. "P " end
             if profile.K and profile.K > 0 then targetText = targetText .. targets.K .. "K " end

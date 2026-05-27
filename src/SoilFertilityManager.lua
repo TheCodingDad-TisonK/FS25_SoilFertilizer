@@ -136,6 +136,13 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
             SoilLogger.info("Soil Map Overlay created")
         end
 
+        -- DMV minimap heatmap layer (client only)
+        if SoilMinimapLayer then
+            self.soilMinimapLayer = SoilMinimapLayer.new(self.soilSystem, self.settings)
+            SoilLogger.info("Soil Minimap Layer created (init deferred to onMissionStarted)")
+        end
+
+
         -- Settings panel (SHIFT+O)
         if SoilSettingsPanel then
             self.settingsPanel = SoilSettingsPanel.new(self.settings)
@@ -655,6 +662,11 @@ function SoilFertilityManager:onMissionStarted()
         SoilLogger.info("Initializing soil system (fields guaranteed populated)...")
         self.soilSystem:initialize()
 
+        -- DMV minimap heatmap — must init AFTER soilSystem so layerSystem is ready
+        if self.soilMinimapLayer then
+            self.soilMinimapLayer:initialize()
+        end
+
         self:loadSoilData()
 
         -- Show version dialog whenever the mod version doesn't match lastSeenVersion.
@@ -1070,6 +1082,25 @@ end
 --- Update loop called every frame
 ---@param dt number Delta time in milliseconds
 function SoilFertilityManager:update(dt)
+    -- Deferred fill type registration retry (dedicated server timing fix: #431)
+    -- On dedi servers, fill types may not be in g_fillTypeManager at loadMission00Finished.
+    -- Retry for up to 3 seconds (90 frames) until they appear.
+    if self.soilSystem and self.soilSystem.hookManager
+       and self.soilSystem.hookManager._sprayTypesComplete == false then
+        self._deferredRetryCount = (self._deferredRetryCount or 0) + 1
+        if self._deferredRetryCount <= 90 then
+            local hm = self.soilSystem.hookManager
+            hm:registerCustomSprayTypes()
+            if hm._sprayTypesComplete then
+                hm:reapplyFillUnitPatch()
+                SoilLogger.info("[DeferredInit] Fill type registration succeeded on retry #%d", self._deferredRetryCount)
+            end
+        elseif self._deferredRetryCount == 91 then
+            SoilLogger.warning("[DeferredInit] Fill types still unavailable after 90 retries — dedicated server may have incomplete fill type loading")
+            self.soilSystem.hookManager._sprayTypesComplete = true  -- stop retrying
+        end
+    end
+
     -- Deferred incompatibility dialog (Precision Farming)
     if self._pendingIncompatDialog then
         self._pendingIncompatDelay = (self._pendingIncompatDelay or 0) - dt
@@ -1091,6 +1122,11 @@ function SoilFertilityManager:update(dt)
     -- Always update soil system (server side)
     if self.soilSystem then
         self.soilSystem:update(dt)
+    end
+
+    -- DMV minimap heatmap async build cycle (client only)
+    if self.soilMinimapLayer and self.soilMapOverlay then
+        self.soilMinimapLayer:update(dt, self.soilMapOverlay)
     end
 
     if self.soilReportDialog then
@@ -1208,8 +1244,16 @@ end
 ---@param fillType  table  FillType object (has .name string)
 ---@return number          1-based index into SoilConstants.SPRAYER_RATE.STEPS
 function SoilFertilityManager:calculateAutoRateIndex(fieldData, fillType)
-    local steps   = SoilConstants.SPRAYER_RATE.STEPS
-    local targets = SoilConstants.SPRAYER_RATE.AUTO_RATE_TARGETS
+    local steps    = SoilConstants.SPRAYER_RATE.STEPS
+    local defaults = SoilConstants.SPRAYER_RATE.AUTO_RATE_TARGETS
+    local ct       = fieldData.cropTargets
+    local targets  = ct and {
+        N  = ct.N and ct.N.opt or defaults.N,
+        P  = ct.P and ct.P.opt or defaults.P,
+        K  = ct.K and ct.K.opt or defaults.K,
+        pH = defaults.pH,
+        OM = defaults.OM,
+    } or defaults
     local limits  = SoilConstants.NUTRIENT_LIMITS
     local phMin   = limits and limits.PH_MIN or 5.0
 
@@ -1445,6 +1489,11 @@ function SoilFertilityManager:delete()
         if g_gui then g_gui:closeDialogByName("SoilReportDialog") end
         self.soilReportDialog = nil
         SoilReportDialog.instance = nil
+    end
+
+    if self.soilMinimapLayer then
+        self.soilMinimapLayer:delete()
+        self.soilMinimapLayer = nil
     end
 
     if self.soilMapOverlay then
