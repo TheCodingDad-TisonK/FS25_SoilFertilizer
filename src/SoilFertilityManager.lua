@@ -1093,6 +1093,7 @@ function SoilFertilityManager:update(dt)
             hm:registerCustomSprayTypes()
             if hm._sprayTypesComplete then
                 hm:reapplyFillUnitPatch()
+                hm:reapplyEffectTypeRemap()
                 SoilLogger.info("[DeferredInit] Fill type registration succeeded on retry #%d", self._deferredRetryCount)
             end
         elseif self._deferredRetryCount == 91 then

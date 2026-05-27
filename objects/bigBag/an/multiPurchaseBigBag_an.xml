@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <vehicle type="multipleItemPurchase" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../shared/xml/schema/vehicle.xsd">
 
     <storeData>
@@ -65,13 +65,13 @@
 
     <multipleItemPurchaseAmountConfigurations>
         <multipleItemPurchaseAmountConfiguration name="1" price="0"/>
-        <multipleItemPurchaseAmountConfiguration name="2" price="3700"/>
-        <multipleItemPurchaseAmountConfiguration name="3" price="5550"/>
-        <multipleItemPurchaseAmountConfiguration name="4" price="7400"/>
-        <multipleItemPurchaseAmountConfiguration name="5" price="9250"/>
-        <multipleItemPurchaseAmountConfiguration name="6" price="11100"/>
-        <multipleItemPurchaseAmountConfiguration name="7" price="12950"/>
-        <multipleItemPurchaseAmountConfiguration name="8" price="14800"/>
+        <multipleItemPurchaseAmountConfiguration name="2" price="1850"/>
+        <multipleItemPurchaseAmountConfiguration name="3" price="3700"/>
+        <multipleItemPurchaseAmountConfiguration name="4" price="5550"/>
+        <multipleItemPurchaseAmountConfiguration name="5" price="7400"/>
+        <multipleItemPurchaseAmountConfiguration name="6" price="9250"/>
+        <multipleItemPurchaseAmountConfiguration name="7" price="11100"/>
+        <multipleItemPurchaseAmountConfiguration name="8" price="12950"/>
     </multipleItemPurchaseAmountConfigurations>
 
 </vehicle>

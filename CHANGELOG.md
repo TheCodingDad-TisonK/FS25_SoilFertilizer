@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.2.3.6]
+
+### Fixed
+- Fixed multi-purchase pricing: buying 2+ big bags charged double the correct price
+- Fixed spray rates for herbicide/insecticide/fungicide: 1.5 L/ha → 100 L/ha realistic carrier rate
+- Fixed AN 34.5 Dry not loadable into spreaders on some setups
+- Fixed dedicated server fill type registration failure (retry mechanism for late-loading fill types)
+- Fixed issue where only the mid section of the boom would spray
+
+
+---
+
 ## [2.2.3.5]
 
 ### Fixed
