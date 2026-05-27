@@ -32,6 +32,7 @@ SoilVersionDialog.CHANGELOG = {
     "- Fixed field pass % counter resetting incorrectly when switching products mid-field",
     "- Fixed auto spray rate using generic N/P/K targets instead of per-crop optimal targets",
     "- Fixed herbicide/insecticide/fungicide granting field protection before 80% coverage reached",
+    "- Added Field Boundary Control setting: automatically shuts off boom sections that extend outside field boundaries",
 }
 
 -- ── i18n helper ───────────────────────────────────────────
