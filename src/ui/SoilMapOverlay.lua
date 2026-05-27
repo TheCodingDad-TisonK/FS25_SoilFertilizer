@@ -1465,7 +1465,7 @@ function SoilMapOverlay:onDrawMinimap(ingameMap)
         local objectZ = (centroid.z + offZ) / wSizeZ * scale + extZ
         local ok, screenX, screenY, _, visible = pcall(layout.getMapObjectPosition, layout, objectX, objectZ, 0, 0, 0, false)
         if ok and visible and screenX and screenY then
-            local dotSz  = getNormalizedScreenValues(SoilMapOverlay.MINIMAP_DOT_SIZE, SoilMapOverlay.MINIMAP_DOT_SIZE)
+            local dotSz  = getNormalizedScreenValues(SoilMapOverlay.MINIMAP_DOT_SIZE * SoilMapOverlay.minimapZoomSmoothed, SoilMapOverlay.MINIMAP_DOT_SIZE * SoilMapOverlay.minimapZoomSmoothed)
             local halfDot = dotSz * 0.5
             drawFilledRect(screenX - halfDot, screenY - halfDot, dotSz, dotSz,
                            centroid.r, centroid.g, centroid.b, alpha)
