@@ -18572,103 +18572,103 @@
     "watchers": 9
   },
   {
-    "timestamp": "2026-05-27T00:12:42Z",
+    "timestamp": "2026-05-27T18:01:39Z",
     "date": "2026-05-27",
     "views": {
-      "count": 7761,
-      "uniques": 1110
+      "count": 7900,
+      "uniques": 1112
     },
     "clones": {
-      "count": 3372,
-      "uniques": 1051
+      "count": 3386,
+      "uniques": 1039
     },
     "referrers": [
       {
         "referrer": "github.com",
-        "count": 1659,
-        "uniques": 197
-      },
-      {
-        "referrer": "kingmods.net",
-        "count": 672,
-        "uniques": 213
+        "count": 1686,
+        "uniques": 199
       },
       {
         "referrer": "Google",
-        "count": 671,
-        "uniques": 218
+        "count": 698,
+        "uniques": 220
+      },
+      {
+        "referrer": "kingmods.net",
+        "count": 680,
+        "uniques": 219
       },
       {
         "referrer": "youtube.com",
-        "count": 159,
-        "uniques": 98
+        "count": 168,
+        "uniques": 105
       },
       {
         "referrer": "Bing",
-        "count": 139,
-        "uniques": 25
+        "count": 138,
+        "uniques": 26
       },
       {
         "referrer": "reddit.com",
-        "count": 24,
-        "uniques": 15
+        "count": 25,
+        "uniques": 16
       },
       {
         "referrer": "Yahoo",
-        "count": 16,
-        "uniques": 2
+        "count": 17,
+        "uniques": 3
       },
       {
         "referrer": "yandex.ru",
-        "count": 12,
+        "count": 14,
         "uniques": 3
       },
       {
         "referrer": "DuckDuckGo",
-        "count": 8,
-        "uniques": 6
+        "count": 7,
+        "uniques": 5
       },
       {
         "referrer": "forbidden-mods.de",
-        "count": 5,
-        "uniques": 3
+        "count": 6,
+        "uniques": 4
       }
     ],
     "popular_paths": [
       {
         "path": "/TheCodingDad-TisonK/FS25_SoilFertilizer",
         "title": "Overview",
-        "count": 3164,
-        "uniques": 854
+        "count": 3223,
+        "uniques": 858
       },
       {
         "path": "/TheCodingDad-TisonK/FS25_SoilFertilizer/releases",
         "title": "/releases",
-        "count": 928,
-        "uniques": 245
+        "count": 934,
+        "uniques": 248
       },
       {
         "path": "/TheCodingDad-TisonK/FS25_SoilFertilizer/issues",
         "title": "/issues",
-        "count": 516,
-        "uniques": 151
+        "count": 520,
+        "uniques": 155
       },
       {
         "path": "/TheCodingDad-TisonK/FS25_SoilFertilizer/releases/tag/v2.2.0.0",
         "title": "/releases/tag/v2.2.0.0",
-        "count": 276,
-        "uniques": 191
+        "count": 285,
+        "uniques": 198
       },
       {
         "path": "/TheCodingDad-TisonK/FS25_SoilFertilizer/releases/tag/v2.2.3.3",
         "title": "/releases/tag/v2.2.3.3",
-        "count": 217,
-        "uniques": 144
+        "count": 238,
+        "uniques": 158
       },
       {
         "path": "/TheCodingDad-TisonK/FS25_SoilFertilizer/releases/tag/v2.2.1.0",
         "title": "/releases/tag/v2.2.1.0",
-        "count": 185,
+        "count": 186,
         "uniques": 127
       },
       {
@@ -18686,21 +18686,21 @@
       {
         "path": "/TheCodingDad-TisonK/FS25_SoilFertilizer/discussions",
         "title": "/discussions",
-        "count": 83,
-        "uniques": 40
+        "count": 84,
+        "uniques": 42
       },
       {
-        "path": "/TheCodingDad-TisonK/FS25_SoilFertilizer/releases/tag/v2.2.0.1",
-        "title": "/releases/tag/v2.2.0.1",
-        "count": 80,
-        "uniques": 66
+        "path": "/TheCodingDad-TisonK/FS25_SoilFertilizer/releases/tag/v2.1.6.8",
+        "title": "/releases/tag/v2.1.6.8",
+        "count": 82,
+        "uniques": 61
       }
     ],
     "releases": [
       {
         "assets": [
           {
-            "downloads": 28,
+            "downloads": 74,
             "name": "FS25_SoilFertilizer.zip"
           }
         ],
@@ -18709,7 +18709,7 @@
       {
         "assets": [
           {
-            "downloads": 255,
+            "downloads": 258,
             "name": "FS25_SoilFertilizer.zip"
           }
         ],
@@ -18808,7 +18808,7 @@
       {
         "assets": [
           {
-            "downloads": 222,
+            "downloads": 224,
             "name": "FS25_SoilFertilizer.zip"
           }
         ],
