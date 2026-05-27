@@ -32,7 +32,7 @@ SoilMapOverlay.MINIMAP_DOT_SIZE     = 4   -- screen pixels per fill point (overl
 -- same visual coverage density without hitting the cap mid-field-list.
 SoilMapOverlay.DENSITY_POINTS   = {8000, 20000, 40000}
 
--- Status colors (match SoilHUD palette)
+-- Status colors kept for colorblind fallback and any legacy uses
 SoilMapOverlay.C_POOR = {0.88, 0.25, 0.25}
 SoilMapOverlay.C_FAIR = {0.90, 0.82, 0.18}
 SoilMapOverlay.C_GOOD = {0.25, 0.85, 0.25}
@@ -40,6 +40,38 @@ SoilMapOverlay.C_GOOD = {0.25, 0.85, 0.25}
 SoilMapOverlay.CB_POOR = {0.90, 0.37, 0.00}
 SoilMapOverlay.CB_FAIR = {0.94, 0.86, 0.00}
 SoilMapOverlay.CB_GOOD = {0.00, 0.45, 0.70}
+
+-- ── Gradient helpers ──────────────────────────────────────
+-- Shared red→amber→green gradient.  t=0 is worst (red), t=1 is best (green).
+-- These are the same three stop-colors used in drawHealthGradientBar.
+local function healthGradient(t)
+    t = math.max(0, math.min(1, t))
+    local r, g, b
+    if t <= 0.5 then
+        local a = t / 0.5
+        r = 0.88 + (0.90 - 0.88) * a
+        g = 0.25 + (0.82 - 0.25) * a
+        b = 0.25 + (0.18 - 0.25) * a
+    else
+        local a = (t - 0.5) / 0.5
+        r = 0.90 + (0.25 - 0.90) * a
+        g = 0.82 + (0.85 - 0.82) * a
+        b = 0.18 + (0.25 - 0.18) * a
+    end
+    return r, g, b
+end
+
+-- Normalises a raw per-layer value to a 0-1 health fraction (0=worst, 1=best).
+-- layerIdx: 1=N, 2=P, 3=K, 4=pH, 5=OM, 6=Urgency, 7=Weed, 8=Pest, 9=Disease, 10=Compaction
+local function layerValueToT(layerIdx, val)
+    if     layerIdx == 1 then return math.max(0, math.min(1, val / 100))        -- N   0-100
+    elseif layerIdx == 2 then return math.max(0, math.min(1, val / 100))        -- P   0-100
+    elseif layerIdx == 3 then return math.max(0, math.min(1, val / 100))        -- K   0-100
+    elseif layerIdx == 4 then                                                    -- pH  5.0-7.5, bell around 6.75
+        return math.max(0, math.min(1, 1 - math.abs(val - 6.75) / 1.75))
+    elseif layerIdx == 5 then return math.max(0, math.min(1, val / 4.0))        -- OM  0-10, green at 4+
+    else   return math.max(0, math.min(1, 1 - val / 100)) end                   -- pressure/urgency layers: inverted
+end
 
 -- Per-layer accent color
 SoilMapOverlay.LAYER_ACCENT = {
@@ -1097,39 +1129,61 @@ end
 -- ── Color Legend ─────────────────────────────────────────
 
 function SoilMapOverlay:drawLegend(panelX, bottomY, panelWidth)
-    local _, legendH   = getNormalizedScreenValues(0, 24)
-    local padX, _      = getNormalizedScreenValues(10, 0)
-    local dotSzX, dotSzY = getNormalizedScreenValues(9, 9)
-    local _, textSz    = getNormalizedScreenValues(0, 11)
-    local dotGapX, _   = getNormalizedScreenValues(4, 0)
+    local _, legendH = getNormalizedScreenValues(0, 24)
+    local padX, _    = getNormalizedScreenValues(10, 0)
+    local _, barH    = getNormalizedScreenValues(0, 7)
+    local _, textSz  = getNormalizedScreenValues(0, 11)
 
-    local legendY = bottomY - legendH
+    local legendY  = bottomY - legendH
+    local barY     = legendY + (legendH - barH) * 0.5
+    local barX     = panelX + padX
+    local barW     = panelWidth - padX * 2
 
     drawFilledRect(panelX, legendY, panelWidth, legendH, 0.04, 0.04, 0.04, 0.80)
     self:drawThinBorder(panelX, legendY, panelWidth, legendH, 0.35, 0.35, 0.35, 0.5)
 
-    local lPOOR, lFAIR, lGOOD = self:statusColors()
-    local items = {
-        { r = lPOOR[1], g = lPOOR[2], b = lPOOR[3],
-          key = "sf_pda_map_legend_poor", label = "Poor" },
-        { r = lFAIR[1], g = lFAIR[2], b = lFAIR[3],
-          key = "sf_pda_map_legend_fair", label = "Fair" },
-        { r = lGOOD[1], g = lGOOD[2], b = lGOOD[3],
-          key = "sf_pda_map_legend_good", label = "Good" },
-    }
+    if self.settings and self.settings.colorblindMode then
+        -- Colorblind: keep 3 discrete swatches
+        local POOR, FAIR, GOOD = self:statusColors()
+        local _, dotSz = getNormalizedScreenValues(0, 9)
+        local dotGapX, _ = getNormalizedScreenValues(4, 0)
+        local items = {
+            { c = POOR, key = "sf_pda_map_legend_poor", label = "Poor" },
+            { c = FAIR, key = "sf_pda_map_legend_fair", label = "Fair" },
+            { c = GOOD, key = "sf_pda_map_legend_good", label = "Good" },
+        }
+        local colW   = barW / #items
+        local dotCY  = legendY + (legendH - dotSz) * 0.5
+        for i, item in ipairs(items) do
+            local ix = barX + (i - 1) * colW
+            drawFilledRect(ix, dotCY, dotSz, dotSz, item.c[1], item.c[2], item.c[3], 0.92)
+            self:drawThinBorder(ix, dotCY, dotSz, dotSz, 0, 0, 0, 0.5)
+            setTextBold(false)
+            setTextColor(0.72, 0.72, 0.72, 1)
+            setTextAlignment(RenderText.ALIGN_LEFT)
+            renderText(ix + dotSz + dotGapX, dotCY, textSz, tr(item.key, item.label))
+        end
+    else
+        -- Gradient bar with "Poor" / "Good" end labels
+        local steps = 40
+        local stepW = barW / steps
+        for i = 0, steps - 1 do
+            local r, g, b = healthGradient(i / (steps - 1))
+            drawFilledRect(barX + i * stepW, barY, stepW + 0.00001, barH, r, g, b, 0.92)
+        end
+        self:drawThinBorder(barX, barY, barW, barH, 0.25, 0.25, 0.25, 0.5)
 
-    local colWidth = (panelWidth - padX * 2) / #items
-    local dotCenterY = legendY + (legendH - dotSzY) * 0.5
-
-    for i, item in ipairs(items) do
-        local itemX = panelX + padX + (i - 1) * colWidth
-        drawFilledRect(itemX, dotCenterY, dotSzX, dotSzY, item.r, item.g, item.b, 0.92)
-        self:drawThinBorder(itemX, dotCenterY, dotSzX, dotSzY, 0, 0, 0, 0.5)
+        local labelY = legendY + (legendH - barH) * 0.5 - textSz * 1.1
         setTextBold(false)
         setTextColor(0.72, 0.72, 0.72, 1)
         setTextAlignment(RenderText.ALIGN_LEFT)
-        renderText(itemX + dotSzX + dotGapX, dotCenterY, textSz, tr(item.key, item.label))
+        renderText(barX, labelY, textSz, tr("sf_pda_map_legend_poor", "Poor"))
+        setTextAlignment(RenderText.ALIGN_RIGHT)
+        renderText(barX + barW, labelY, textSz, tr("sf_pda_map_legend_good", "Good"))
     end
+
+    setTextColor(1, 1, 1, 1)
+    setTextAlignment(RenderText.ALIGN_LEFT)
 end
 
 function SoilMapOverlay:drawThinBorder(x, y, width, height, r, g, b, a)
@@ -1144,19 +1198,7 @@ function SoilMapOverlay:drawHealthGradientBar(x, y, width, height)
     local steps = 34
     local stepWidth = width / steps
     for i = 0, steps - 1 do
-        local t = (i + 0.5) / steps
-        local r, g, b
-        if t <= 0.5 then
-            local alpha = t / 0.5
-            r = 0.88 + (0.90 - 0.88) * alpha
-            g = 0.25 + (0.82 - 0.25) * alpha
-            b = 0.25 + (0.18 - 0.25) * alpha
-        else
-            local alpha = (t - 0.5) / 0.5
-            r = 0.90 + (0.25 - 0.90) * alpha
-            g = 0.82 + (0.85 - 0.82) * alpha
-            b = 0.18 + (0.25 - 0.18) * alpha
-        end
+        local r, g, b = healthGradient((i + 0.5) / steps)
         drawFilledRect(x + i * stepWidth, y, stepWidth + 0.00001, height, r, g, b, 0.94)
     end
 end
@@ -1186,102 +1228,116 @@ function SoilMapOverlay:statusColors()
     return SoilMapOverlay.C_POOR, SoilMapOverlay.C_FAIR, SoilMapOverlay.C_GOOD
 end
 
--- Convert a raw decoded value (from the density map layer) to a colour.
--- Mirrors the same thresholds used in getLayerColor so the per-pixel path
--- matches the per-field fallback path exactly.
----@param layerIdx integer  1-5 (soil nutrient layers)
----@param val      number   Decoded semantic float from readValueAtWorld
+-- Convert a raw decoded value (from the density map layer) to a gradient colour.
+---@param layerIdx integer
+---@param val      number
 function SoilMapOverlay:valueToLayerColor(layerIdx, val)
-    local POOR, FAIR, GOOD = self:statusColors()
-    local T    = SoilConstants.STATUS_THRESHOLDS
-
-    if layerIdx == 1 then
-        if val < T.nitrogen.poor     then return POOR[1], POOR[2], POOR[3]
-        elseif val < T.nitrogen.fair then return FAIR[1], FAIR[2], FAIR[3]
-        else                              return GOOD[1], GOOD[2], GOOD[3] end
-    elseif layerIdx == 2 then
-        if val < T.phosphorus.poor     then return POOR[1], POOR[2], POOR[3]
-        elseif val < T.phosphorus.fair then return FAIR[1], FAIR[2], FAIR[3]
-        else                                return GOOD[1], GOOD[2], GOOD[3] end
-    elseif layerIdx == 3 then
-        if val < T.potassium.poor     then return POOR[1], POOR[2], POOR[3]
-        elseif val < T.potassium.fair then return FAIR[1], FAIR[2], FAIR[3]
-        else                               return GOOD[1], GOOD[2], GOOD[3] end
-    elseif layerIdx == 4 then
-        val = math.floor((val * 10) + 0.5) / 10
-        if val >= 6.5 and val <= 7.0   then return GOOD[1], GOOD[2], GOOD[3]   -- optimal
-        elseif val > 7.0 and val <= 7.5 then return POOR[1], POOR[2], POOR[3]  -- over-limed: same as poor so the map signals "stop adding lime"
-        elseif val >= 5.5              then return FAIR[1], FAIR[2], FAIR[3]    -- slightly acidic
-        else                                return POOR[1], POOR[2], POOR[3] end
-    elseif layerIdx == 5 then
-        if val >= 4.0     then return GOOD[1], GOOD[2], GOOD[3]
-        elseif val >= 2.5 then return FAIR[1], FAIR[2], FAIR[3]
-        else                   return POOR[1], POOR[2], POOR[3] end
+    if self.settings and self.settings.colorblindMode then
+        local POOR, FAIR, GOOD = self:statusColors()
+        local T = SoilConstants.STATUS_THRESHOLDS
+        if layerIdx == 1 then
+            if val < T.nitrogen.poor     then return POOR[1], POOR[2], POOR[3]
+            elseif val < T.nitrogen.fair then return FAIR[1], FAIR[2], FAIR[3]
+            else                              return GOOD[1], GOOD[2], GOOD[3] end
+        elseif layerIdx == 2 then
+            if val < T.phosphorus.poor     then return POOR[1], POOR[2], POOR[3]
+            elseif val < T.phosphorus.fair then return FAIR[1], FAIR[2], FAIR[3]
+            else                                return GOOD[1], GOOD[2], GOOD[3] end
+        elseif layerIdx == 3 then
+            if val < T.potassium.poor     then return POOR[1], POOR[2], POOR[3]
+            elseif val < T.potassium.fair then return FAIR[1], FAIR[2], FAIR[3]
+            else                               return GOOD[1], GOOD[2], GOOD[3] end
+        elseif layerIdx == 4 then
+            local pH = math.floor((val * 10) + 0.5) / 10
+            if pH >= 6.5 and pH <= 7.0 then return GOOD[1], GOOD[2], GOOD[3]
+            elseif pH >= 5.5           then return FAIR[1], FAIR[2], FAIR[3]
+            else                            return POOR[1], POOR[2], POOR[3] end
+        elseif layerIdx == 5 then
+            if val >= 4.0     then return GOOD[1], GOOD[2], GOOD[3]
+            elseif val >= 2.5 then return FAIR[1], FAIR[2], FAIR[3]
+            else                   return POOR[1], POOR[2], POOR[3] end
+        end
+        return GOOD[1], GOOD[2], GOOD[3]
     end
-
-    return GOOD[1], GOOD[2], GOOD[3]
+    return healthGradient(layerValueToT(layerIdx, val))
 end
 
 -- ── Layer color logic ─────────────────────────────────────
 
 function SoilMapOverlay:getLayerColor(layerIdx, info, farmlandId)
-    local POOR, FAIR, GOOD = self:statusColors()
-    local T    = SoilConstants.STATUS_THRESHOLDS
-
-    if layerIdx == 1 then
-        local v = info.nitrogen and info.nitrogen.value or 0
-        if v < T.nitrogen.poor     then return POOR[1], POOR[2], POOR[3]
-        elseif v < T.nitrogen.fair then return FAIR[1], FAIR[2], FAIR[3]
-        else                            return GOOD[1], GOOD[2], GOOD[3] end
-    elseif layerIdx == 2 then
-        local v = info.phosphorus and info.phosphorus.value or 0
-        if v < T.phosphorus.poor     then return POOR[1], POOR[2], POOR[3]
-        elseif v < T.phosphorus.fair then return FAIR[1], FAIR[2], FAIR[3]
-        else                              return GOOD[1], GOOD[2], GOOD[3] end
-    elseif layerIdx == 3 then
-        local v = info.potassium and info.potassium.value or 0
-        if v < T.potassium.poor     then return POOR[1], POOR[2], POOR[3]
-        elseif v < T.potassium.fair then return FAIR[1], FAIR[2], FAIR[3]
-        else                             return GOOD[1], GOOD[2], GOOD[3] end
-    elseif layerIdx == 4 then
-        local pH = math.floor(((info.pH or 7.0) * 10) + 0.5) / 10
-        if pH >= 6.5 and pH <= 7.0 then     return GOOD[1], GOOD[2], GOOD[3]    -- optimal
-        elseif pH > 7.0 and pH <= 7.5 then  return POOR[1], POOR[2], POOR[3]   -- over-limed
-        elseif pH >= 5.5 then               return FAIR[1], FAIR[2], FAIR[3]    -- slightly acidic
-        else                                return POOR[1], POOR[2], POOR[3] end -- very acidic
-    elseif layerIdx == 5 then
-        local om = math.floor(((info.organicMatter or 0) * 10) + 0.5) / 10
-        if om >= 4.0     then return GOOD[1], GOOD[2], GOOD[3]
-        elseif om >= 2.5 then return FAIR[1], FAIR[2], FAIR[3]
-        else                  return POOR[1], POOR[2], POOR[3] end
-    elseif layerIdx == 6 then
-        local u = self.soilSystem:getFieldUrgency(farmlandId)
-        if u > 66     then return POOR[1], POOR[2], POOR[3]
-        elseif u > 33 then return FAIR[1], FAIR[2], FAIR[3]
-        else               return GOOD[1], GOOD[2], GOOD[3] end
-    elseif layerIdx == 7 then
-        local v = info.weedPressure or 0
-        if v > 50     then return POOR[1], POOR[2], POOR[3]
-        elseif v > 20 then return FAIR[1], FAIR[2], FAIR[3]
-        else               return GOOD[1], GOOD[2], GOOD[3] end
-    elseif layerIdx == 8 then
-        local v = info.pestPressure or 0
-        if v > 50     then return POOR[1], POOR[2], POOR[3]
-        elseif v > 20 then return FAIR[1], FAIR[2], FAIR[3]
-        else               return GOOD[1], GOOD[2], GOOD[3] end
-    elseif layerIdx == 9 then
-        local v = info.diseasePressure or 0
-        if v > 50     then return POOR[1], POOR[2], POOR[3]
-        elseif v > 20 then return FAIR[1], FAIR[2], FAIR[3]
-        else               return GOOD[1], GOOD[2], GOOD[3] end
-    elseif layerIdx == 10 then
-        local v = info.compaction or 0
-        if v > 60     then return POOR[1], POOR[2], POOR[3]
-        elseif v > 20 then return FAIR[1], FAIR[2], FAIR[3]
-        else               return GOOD[1], GOOD[2], GOOD[3] end
+    -- Colorblind mode: keep 3-step discrete palette
+    if self.settings and self.settings.colorblindMode then
+        local POOR, FAIR, GOOD = self:statusColors()
+        local T = SoilConstants.STATUS_THRESHOLDS
+        if layerIdx == 1 then
+            local v = info.nitrogen and info.nitrogen.value or 0
+            if v < T.nitrogen.poor     then return POOR[1], POOR[2], POOR[3]
+            elseif v < T.nitrogen.fair then return FAIR[1], FAIR[2], FAIR[3]
+            else                            return GOOD[1], GOOD[2], GOOD[3] end
+        elseif layerIdx == 2 then
+            local v = info.phosphorus and info.phosphorus.value or 0
+            if v < T.phosphorus.poor     then return POOR[1], POOR[2], POOR[3]
+            elseif v < T.phosphorus.fair then return FAIR[1], FAIR[2], FAIR[3]
+            else                              return GOOD[1], GOOD[2], GOOD[3] end
+        elseif layerIdx == 3 then
+            local v = info.potassium and info.potassium.value or 0
+            if v < T.potassium.poor     then return POOR[1], POOR[2], POOR[3]
+            elseif v < T.potassium.fair then return FAIR[1], FAIR[2], FAIR[3]
+            else                             return GOOD[1], GOOD[2], GOOD[3] end
+        elseif layerIdx == 4 then
+            local pH = math.floor(((info.pH or 7.0) * 10) + 0.5) / 10
+            if pH >= 6.5 and pH <= 7.0 then    return GOOD[1], GOOD[2], GOOD[3]
+            elseif pH >= 5.5           then    return FAIR[1], FAIR[2], FAIR[3]
+            else                               return POOR[1], POOR[2], POOR[3] end
+        elseif layerIdx == 5 then
+            local om = info.organicMatter or 0
+            if om >= 4.0     then return GOOD[1], GOOD[2], GOOD[3]
+            elseif om >= 2.5 then return FAIR[1], FAIR[2], FAIR[3]
+            else                  return POOR[1], POOR[2], POOR[3] end
+        elseif layerIdx == 6 then
+            local u = self.soilSystem:getFieldUrgency(farmlandId)
+            if u > 66     then return POOR[1], POOR[2], POOR[3]
+            elseif u > 33 then return FAIR[1], FAIR[2], FAIR[3]
+            else               return GOOD[1], GOOD[2], GOOD[3] end
+        elseif layerIdx == 7 then
+            local v = info.weedPressure or 0
+            if v > 50 then return POOR[1], POOR[2], POOR[3]
+            elseif v > 20 then return FAIR[1], FAIR[2], FAIR[3]
+            else return GOOD[1], GOOD[2], GOOD[3] end
+        elseif layerIdx == 8 then
+            local v = info.pestPressure or 0
+            if v > 50 then return POOR[1], POOR[2], POOR[3]
+            elseif v > 20 then return FAIR[1], FAIR[2], FAIR[3]
+            else return GOOD[1], GOOD[2], GOOD[3] end
+        elseif layerIdx == 9 then
+            local v = info.diseasePressure or 0
+            if v > 50 then return POOR[1], POOR[2], POOR[3]
+            elseif v > 20 then return FAIR[1], FAIR[2], FAIR[3]
+            else return GOOD[1], GOOD[2], GOOD[3] end
+        elseif layerIdx == 10 then
+            local v = info.compaction or 0
+            if v > 60 then return POOR[1], POOR[2], POOR[3]
+            elseif v > 20 then return FAIR[1], FAIR[2], FAIR[3]
+            else return GOOD[1], GOOD[2], GOOD[3] end
+        end
+        return GOOD[1], GOOD[2], GOOD[3]
     end
 
-    return GOOD[1], GOOD[2], GOOD[3]
+    -- Gradient mode: map field-level value to continuous color
+    local val
+    if     layerIdx == 1 then val = info.nitrogen     and info.nitrogen.value     or 0
+    elseif layerIdx == 2 then val = info.phosphorus   and info.phosphorus.value   or 0
+    elseif layerIdx == 3 then val = info.potassium    and info.potassium.value    or 0
+    elseif layerIdx == 4 then val = info.pH           or 7.0
+    elseif layerIdx == 5 then val = info.organicMatter or 0
+    elseif layerIdx == 6 then val = self.soilSystem:getFieldUrgency(farmlandId)
+    elseif layerIdx == 7 then val = info.weedPressure  or 0
+    elseif layerIdx == 8 then val = info.pestPressure  or 0
+    elseif layerIdx == 9 then val = info.diseasePressure or 0
+    elseif layerIdx == 10 then val = info.compaction   or 0
+    else   val = 100 end
+
+    return healthGradient(layerValueToT(layerIdx, val))
 end
 
 -- ── Minimap Overlay ───────────────────────────────────────
