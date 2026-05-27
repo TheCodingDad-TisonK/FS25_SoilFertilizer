@@ -83,6 +83,7 @@
         <action name="SF_SEE_SPRAY_DISEASE" category="VEHICLE" />
         <action name="SF_SEE_SPRAY_WEED"    category="VEHICLE" />
         <action name="SF_VARIABLE_RATE"     category="VEHICLE" />
+        <action name="SF_MINIMAP_ZOOM"      category="ONFOOT" />
     </actions>
 
     <l10n filenamePrefix="translations/translation" />
@@ -103,6 +104,7 @@
         <actionBinding action="SF_SEE_SPRAY_DISEASE" />
         <actionBinding action="SF_SEE_SPRAY_WEED" />
         <actionBinding action="SF_VARIABLE_RATE" />
+        <actionBinding action="SF_MINIMAP_ZOOM" />
     </inputBinding>
 
     <!-- Custom fill types declared in external file (FS25 requires filename= attribute) -->

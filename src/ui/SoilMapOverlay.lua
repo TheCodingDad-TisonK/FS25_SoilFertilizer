@@ -106,6 +106,12 @@ SoilMapOverlay.LAYER_KEYS = {
 -- Inverted layers: high value = bad (urgency / pressures)
 SoilMapOverlay.INVERTED_LAYERS = {[6]=true,[7]=true,[8]=true,[9]=true,[10]=true}
 
+-- Minimap zoom: class-level so layout hooks (which have no self) can read it.
+-- Levels: 1=default, 2=2× zoom in, 4=4× zoom in.
+SoilMapOverlay.minimapZoomLevels   = {1, 2, 4}
+SoilMapOverlay.minimapZoomFactor   = 1   -- target zoom level
+SoilMapOverlay.minimapZoomSmoothed = 1   -- smooth-interpolated value
+
 -- ── Constructor ───────────────────────────────────────────
 
 ---@param soilSystem SoilFertilitySystem
@@ -143,6 +149,7 @@ end
 
 function SoilMapOverlay:initialize()
     SoilLogger.info("SoilMapOverlay: initialized (DMF Heatmap Mode)")
+    self:installMinimapZoomHooks()
 end
 
 -- ── Delete ────────────────────────────────────────────────
@@ -1566,6 +1573,69 @@ function SoilMapOverlay:drawMiniReport(ingameMap)
         setTextColor(0.9, 0.9, 0.9, 1)
         setTextAlignment(RenderText.ALIGN_LEFT)
         renderText(innerX + subBarW + 0.002*s, cy + 0.005*s, textSize, labels[#labels - i + 1])
+    end
+end
+
+-- ── Minimap Zoom ──────────────────────────────────────────
+
+-- Hooks IngameMapLayoutCircle and IngameMapLayoutSquare at the class level.
+-- Called once from initialize(). Guards against double-hooking on level reload.
+function SoilMapOverlay:installMinimapZoomHooks()
+    local function hookLayout(layoutClass, name)
+        if not layoutClass or layoutClass._sfZoomHooked then return end
+
+        local origSet = layoutClass.setWorldSize
+        layoutClass.setWorldSize = function(layout, ...)
+            origSet(layout, ...)
+            layout._sfOrigWorldSizeFactor = layout.worldSizeFactor
+        end
+
+        local origUpdate = layoutClass.updateScreenValues
+        layoutClass.updateScreenValues = function(layout, ...)
+            if layout._sfOrigWorldSizeFactor ~= nil then
+                layout.worldSizeFactor = layout._sfOrigWorldSizeFactor * SoilMapOverlay.minimapZoomSmoothed
+            end
+            origUpdate(layout, ...)
+        end
+
+        layoutClass._sfZoomHooked = true
+        SoilLogger.info("SoilMapOverlay: minimap zoom hooks installed (%s)", name)
+    end
+
+    hookLayout(IngameMapLayoutCircle, "Circle")
+    hookLayout(IngameMapLayoutSquare, "Square")
+end
+
+-- Cycles through minimapZoomLevels: 1x → 2x → 4x → 1x → …
+function SoilMapOverlay:cycleMinimapZoom()
+    local levels = SoilMapOverlay.minimapZoomLevels
+    for i, level in ipairs(levels) do
+        if level == SoilMapOverlay.minimapZoomFactor then
+            SoilMapOverlay.minimapZoomFactor = levels[i % #levels + 1]
+            return
+        end
+    end
+    SoilMapOverlay.minimapZoomFactor = levels[1]
+end
+
+-- Smoothly interpolates minimapZoomSmoothed toward minimapZoomFactor and
+-- calls layout:updateScreenValues() when a change is in progress.
+function SoilMapOverlay:updateMinimapZoom(dt)
+    local target  = SoilMapOverlay.minimapZoomFactor
+    local current = SoilMapOverlay.minimapZoomSmoothed
+    if current == target then return end
+
+    local speed = 0.005 * math.abs(target - current)
+    if current < target then
+        SoilMapOverlay.minimapZoomSmoothed = math.min(current + speed * dt, target)
+    else
+        SoilMapOverlay.minimapZoomSmoothed = math.max(current - speed * dt, target)
+    end
+
+    local hud = g_currentMission and g_currentMission.hud
+    local ingameMap = hud and hud.ingameMap
+    if ingameMap and ingameMap.layout then
+        ingameMap.layout:updateScreenValues()
     end
 end
 
