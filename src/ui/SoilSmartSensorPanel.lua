@@ -327,9 +327,17 @@ function SoilSmartSensorPanel:drawPanel(sprayer, sfm)
         local dis  = fd.diseasePressure or 0
         local k    = fd.potassium  or 0
         local p    = fd.phosphorus or 0
-        pestVal    = string.format("%.0f (%.0f%%)", pest, pest * 100)
-        diseaseVal = string.format("%.0f (%.0f%%)", dis,  dis  * 100)
-        nutVal     = string.format("K=%d  P=%d",    math.floor(k), math.floor(p))
+        if pest <= 0 then
+            pestVal = "No pressure - field is clean"
+        else
+            pestVal = string.format("%.0f%%", pest)
+        end
+        if dis <= 0 then
+            diseaseVal = "No pressure - field is clean"
+        else
+            diseaseVal = string.format("%.0f%%", dis)
+        end
+        nutVal = string.format("K=%d  P=%d", math.floor(k), math.floor(p))
     end
 
     local rows = {

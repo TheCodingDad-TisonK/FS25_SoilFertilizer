@@ -32,7 +32,7 @@ SoilMapOverlay.MINIMAP_DOT_SIZE     = 4   -- screen pixels per fill point (overl
 -- same visual coverage density without hitting the cap mid-field-list.
 SoilMapOverlay.DENSITY_POINTS   = {8000, 20000, 40000}
 
--- Status colors (match SoilHUD palette)
+-- Status colors kept for colorblind fallback and any legacy uses
 SoilMapOverlay.C_POOR = {0.88, 0.25, 0.25}
 SoilMapOverlay.C_FAIR = {0.90, 0.82, 0.18}
 SoilMapOverlay.C_GOOD = {0.25, 0.85, 0.25}
@@ -40,6 +40,38 @@ SoilMapOverlay.C_GOOD = {0.25, 0.85, 0.25}
 SoilMapOverlay.CB_POOR = {0.90, 0.37, 0.00}
 SoilMapOverlay.CB_FAIR = {0.94, 0.86, 0.00}
 SoilMapOverlay.CB_GOOD = {0.00, 0.45, 0.70}
+
+-- ── Gradient helpers ──────────────────────────────────────
+-- Shared red→amber→green gradient.  t=0 is worst (red), t=1 is best (green).
+-- These are the same three stop-colors used in drawHealthGradientBar.
+local function healthGradient(t)
+    t = math.max(0, math.min(1, t))
+    local r, g, b
+    if t <= 0.5 then
+        local a = t / 0.5
+        r = 0.88 + (0.90 - 0.88) * a
+        g = 0.25 + (0.82 - 0.25) * a
+        b = 0.25 + (0.18 - 0.25) * a
+    else
+        local a = (t - 0.5) / 0.5
+        r = 0.90 + (0.25 - 0.90) * a
+        g = 0.82 + (0.85 - 0.82) * a
+        b = 0.18 + (0.25 - 0.18) * a
+    end
+    return r, g, b
+end
+
+-- Normalises a raw per-layer value to a 0-1 health fraction (0=worst, 1=best).
+-- layerIdx: 1=N, 2=P, 3=K, 4=pH, 5=OM, 6=Urgency, 7=Weed, 8=Pest, 9=Disease, 10=Compaction
+local function layerValueToT(layerIdx, val)
+    if     layerIdx == 1 then return math.max(0, math.min(1, val / 100))        -- N   0-100
+    elseif layerIdx == 2 then return math.max(0, math.min(1, val / 100))        -- P   0-100
+    elseif layerIdx == 3 then return math.max(0, math.min(1, val / 100))        -- K   0-100
+    elseif layerIdx == 4 then                                                    -- pH  5.0-7.5, bell around 6.75
+        return math.max(0, math.min(1, 1 - math.abs(val - 6.75) / 1.75))
+    elseif layerIdx == 5 then return math.max(0, math.min(1, val / 4.0))        -- OM  0-10, green at 4+
+    else   return math.max(0, math.min(1, 1 - val / 100)) end                   -- pressure/urgency layers: inverted
+end
 
 -- Per-layer accent color
 SoilMapOverlay.LAYER_ACCENT = {
@@ -73,6 +105,12 @@ SoilMapOverlay.LAYER_KEYS = {
 
 -- Inverted layers: high value = bad (urgency / pressures)
 SoilMapOverlay.INVERTED_LAYERS = {[6]=true,[7]=true,[8]=true,[9]=true,[10]=true}
+
+-- Minimap zoom: class-level so layout hooks (which have no self) can read it.
+-- Levels: 1=default, 2=2× zoom in, 4=4× zoom in.
+SoilMapOverlay.minimapZoomLevels   = {1, 2, 4}
+SoilMapOverlay.minimapZoomFactor   = 1   -- target zoom level
+SoilMapOverlay.minimapZoomSmoothed = 1   -- smooth-interpolated value
 
 -- ── Constructor ───────────────────────────────────────────
 
@@ -111,6 +149,7 @@ end
 
 function SoilMapOverlay:initialize()
     SoilLogger.info("SoilMapOverlay: initialized (DMF Heatmap Mode)")
+    self:installMinimapZoomHooks()
 end
 
 -- ── Delete ────────────────────────────────────────────────
@@ -373,15 +412,17 @@ function SoilMapOverlay:updateSamplePoints(force)
     end
     local activeFieldIds = self.soilSystem and self.soilSystem.activeFieldIds or {}
 
-    -- Scale sampling step proportional to terrain size so large maps
-    -- (4x, 16x, 64x) get the same screen-pixel density as a standard 2048m map.
+    -- Sample step = zone cell size so every cell is sampled exactly once.
+    -- POLYGON_STEP * mapScale was wrong for large maps: on a 4096m map it gave
+    -- 20m step while CELL_SIZE stayed 10m, so every other row/column of zone
+    -- cells was skipped and each visible tile was 4× the actual data resolution.
+    local cellSz    = SoilConstants.ZONE.CELL_SIZE  -- 10m on 2048-4096m maps, scales on larger maps
+    local scaledStep = cellSz
+
+    -- Point budget: base × (mapArea / baseArea) so coverage density is consistent
+    -- regardless of map size. CELL_SIZE already scales with map so the ratio stays right.
     local terrainSize = (g_currentMission and g_currentMission.terrainSize) or 2048
     local mapScale    = math.max(1.0, terrainSize / 2048.0)
-    local scaledStep  = SoilMapOverlay.POLYGON_STEP * mapScale
-
-    -- Resolve point budget from the player's density setting (localOnly, default Medium).
-    -- Scale the budget proportionally with map area (mapScale²) so large maps don't exhaust
-    -- the cap before all fields are drawn — a 4x map needs ~16x the points of a standard map.
     local densityLevel = (self.settings and self.settings.overlayDensity) or 2
     local basePoints   = SoilMapOverlay.DENSITY_POINTS[densityLevel] or SoilMapOverlay.DENSITY_POINTS[2]
     local maxPoints    = math.floor(basePoints * mapScale * mapScale)
@@ -494,10 +535,8 @@ function SoilMapOverlay:onDraw(frame, mapElement, ingameMap, pageIndex)
     local mapMaxX = mapX + mapWidth
     local mapMaxY = mapY + mapHeight
 
-    -- Compute tile size from world-to-screen scale so tiles fill edge-to-edge at any zoom level.
-    -- Use the same terrain-scaled step as the sampler so tiles match sample density exactly.
-    local terrainSz = (g_currentMission and g_currentMission.terrainSize) or 2048
-    local drawStep  = SoilMapOverlay.POLYGON_STEP * math.max(1.0, terrainSz / 2048.0)
+    -- Tile draw size = zone cell size so each rendered tile covers exactly one data cell.
+    local drawStep = SoilConstants.ZONE.CELL_SIZE
     local sizeX, sizeY
     local probeX, probeZ = 0, 0
     local ax, ay = self:worldToScreenPosition(ingameMap, probeX, probeZ)
@@ -1097,39 +1136,61 @@ end
 -- ── Color Legend ─────────────────────────────────────────
 
 function SoilMapOverlay:drawLegend(panelX, bottomY, panelWidth)
-    local _, legendH   = getNormalizedScreenValues(0, 24)
-    local padX, _      = getNormalizedScreenValues(10, 0)
-    local dotSzX, dotSzY = getNormalizedScreenValues(9, 9)
-    local _, textSz    = getNormalizedScreenValues(0, 11)
-    local dotGapX, _   = getNormalizedScreenValues(4, 0)
+    local _, legendH = getNormalizedScreenValues(0, 24)
+    local padX, _    = getNormalizedScreenValues(10, 0)
+    local _, barH    = getNormalizedScreenValues(0, 7)
+    local _, textSz  = getNormalizedScreenValues(0, 11)
 
-    local legendY = bottomY - legendH
+    local legendY  = bottomY - legendH
+    local barY     = legendY + (legendH - barH) * 0.5
+    local barX     = panelX + padX
+    local barW     = panelWidth - padX * 2
 
     drawFilledRect(panelX, legendY, panelWidth, legendH, 0.04, 0.04, 0.04, 0.80)
     self:drawThinBorder(panelX, legendY, panelWidth, legendH, 0.35, 0.35, 0.35, 0.5)
 
-    local lPOOR, lFAIR, lGOOD = self:statusColors()
-    local items = {
-        { r = lPOOR[1], g = lPOOR[2], b = lPOOR[3],
-          key = "sf_pda_map_legend_poor", label = "Poor" },
-        { r = lFAIR[1], g = lFAIR[2], b = lFAIR[3],
-          key = "sf_pda_map_legend_fair", label = "Fair" },
-        { r = lGOOD[1], g = lGOOD[2], b = lGOOD[3],
-          key = "sf_pda_map_legend_good", label = "Good" },
-    }
+    if self.settings and self.settings.colorblindMode then
+        -- Colorblind: keep 3 discrete swatches
+        local POOR, FAIR, GOOD = self:statusColors()
+        local _, dotSz = getNormalizedScreenValues(0, 9)
+        local dotGapX, _ = getNormalizedScreenValues(4, 0)
+        local items = {
+            { c = POOR, key = "sf_pda_map_legend_poor", label = "Poor" },
+            { c = FAIR, key = "sf_pda_map_legend_fair", label = "Fair" },
+            { c = GOOD, key = "sf_pda_map_legend_good", label = "Good" },
+        }
+        local colW   = barW / #items
+        local dotCY  = legendY + (legendH - dotSz) * 0.5
+        for i, item in ipairs(items) do
+            local ix = barX + (i - 1) * colW
+            drawFilledRect(ix, dotCY, dotSz, dotSz, item.c[1], item.c[2], item.c[3], 0.92)
+            self:drawThinBorder(ix, dotCY, dotSz, dotSz, 0, 0, 0, 0.5)
+            setTextBold(false)
+            setTextColor(0.72, 0.72, 0.72, 1)
+            setTextAlignment(RenderText.ALIGN_LEFT)
+            renderText(ix + dotSz + dotGapX, dotCY, textSz, tr(item.key, item.label))
+        end
+    else
+        -- Gradient bar with "Poor" / "Good" end labels
+        local steps = 40
+        local stepW = barW / steps
+        for i = 0, steps - 1 do
+            local r, g, b = healthGradient(i / (steps - 1))
+            drawFilledRect(barX + i * stepW, barY, stepW + 0.00001, barH, r, g, b, 0.92)
+        end
+        self:drawThinBorder(barX, barY, barW, barH, 0.25, 0.25, 0.25, 0.5)
 
-    local colWidth = (panelWidth - padX * 2) / #items
-    local dotCenterY = legendY + (legendH - dotSzY) * 0.5
-
-    for i, item in ipairs(items) do
-        local itemX = panelX + padX + (i - 1) * colWidth
-        drawFilledRect(itemX, dotCenterY, dotSzX, dotSzY, item.r, item.g, item.b, 0.92)
-        self:drawThinBorder(itemX, dotCenterY, dotSzX, dotSzY, 0, 0, 0, 0.5)
+        local labelY = legendY + (legendH - barH) * 0.5 - textSz * 1.1
         setTextBold(false)
         setTextColor(0.72, 0.72, 0.72, 1)
         setTextAlignment(RenderText.ALIGN_LEFT)
-        renderText(itemX + dotSzX + dotGapX, dotCenterY, textSz, tr(item.key, item.label))
+        renderText(barX, labelY, textSz, tr("sf_pda_map_legend_poor", "Poor"))
+        setTextAlignment(RenderText.ALIGN_RIGHT)
+        renderText(barX + barW, labelY, textSz, tr("sf_pda_map_legend_good", "Good"))
     end
+
+    setTextColor(1, 1, 1, 1)
+    setTextAlignment(RenderText.ALIGN_LEFT)
 end
 
 function SoilMapOverlay:drawThinBorder(x, y, width, height, r, g, b, a)
@@ -1144,19 +1205,7 @@ function SoilMapOverlay:drawHealthGradientBar(x, y, width, height)
     local steps = 34
     local stepWidth = width / steps
     for i = 0, steps - 1 do
-        local t = (i + 0.5) / steps
-        local r, g, b
-        if t <= 0.5 then
-            local alpha = t / 0.5
-            r = 0.88 + (0.90 - 0.88) * alpha
-            g = 0.25 + (0.82 - 0.25) * alpha
-            b = 0.25 + (0.18 - 0.25) * alpha
-        else
-            local alpha = (t - 0.5) / 0.5
-            r = 0.90 + (0.25 - 0.90) * alpha
-            g = 0.82 + (0.85 - 0.82) * alpha
-            b = 0.18 + (0.25 - 0.18) * alpha
-        end
+        local r, g, b = healthGradient((i + 0.5) / steps)
         drawFilledRect(x + i * stepWidth, y, stepWidth + 0.00001, height, r, g, b, 0.94)
     end
 end
@@ -1186,102 +1235,116 @@ function SoilMapOverlay:statusColors()
     return SoilMapOverlay.C_POOR, SoilMapOverlay.C_FAIR, SoilMapOverlay.C_GOOD
 end
 
--- Convert a raw decoded value (from the density map layer) to a colour.
--- Mirrors the same thresholds used in getLayerColor so the per-pixel path
--- matches the per-field fallback path exactly.
----@param layerIdx integer  1-5 (soil nutrient layers)
----@param val      number   Decoded semantic float from readValueAtWorld
+-- Convert a raw decoded value (from the density map layer) to a gradient colour.
+---@param layerIdx integer
+---@param val      number
 function SoilMapOverlay:valueToLayerColor(layerIdx, val)
-    local POOR, FAIR, GOOD = self:statusColors()
-    local T    = SoilConstants.STATUS_THRESHOLDS
-
-    if layerIdx == 1 then
-        if val < T.nitrogen.poor     then return POOR[1], POOR[2], POOR[3]
-        elseif val < T.nitrogen.fair then return FAIR[1], FAIR[2], FAIR[3]
-        else                              return GOOD[1], GOOD[2], GOOD[3] end
-    elseif layerIdx == 2 then
-        if val < T.phosphorus.poor     then return POOR[1], POOR[2], POOR[3]
-        elseif val < T.phosphorus.fair then return FAIR[1], FAIR[2], FAIR[3]
-        else                                return GOOD[1], GOOD[2], GOOD[3] end
-    elseif layerIdx == 3 then
-        if val < T.potassium.poor     then return POOR[1], POOR[2], POOR[3]
-        elseif val < T.potassium.fair then return FAIR[1], FAIR[2], FAIR[3]
-        else                               return GOOD[1], GOOD[2], GOOD[3] end
-    elseif layerIdx == 4 then
-        val = math.floor((val * 10) + 0.5) / 10
-        if val >= 6.5 and val <= 7.0   then return GOOD[1], GOOD[2], GOOD[3]   -- optimal
-        elseif val > 7.0 and val <= 7.5 then return POOR[1], POOR[2], POOR[3]  -- over-limed: same as poor so the map signals "stop adding lime"
-        elseif val >= 5.5              then return FAIR[1], FAIR[2], FAIR[3]    -- slightly acidic
-        else                                return POOR[1], POOR[2], POOR[3] end
-    elseif layerIdx == 5 then
-        if val >= 4.0     then return GOOD[1], GOOD[2], GOOD[3]
-        elseif val >= 2.5 then return FAIR[1], FAIR[2], FAIR[3]
-        else                   return POOR[1], POOR[2], POOR[3] end
+    if self.settings and self.settings.colorblindMode then
+        local POOR, FAIR, GOOD = self:statusColors()
+        local T = SoilConstants.STATUS_THRESHOLDS
+        if layerIdx == 1 then
+            if val < T.nitrogen.poor     then return POOR[1], POOR[2], POOR[3]
+            elseif val < T.nitrogen.fair then return FAIR[1], FAIR[2], FAIR[3]
+            else                              return GOOD[1], GOOD[2], GOOD[3] end
+        elseif layerIdx == 2 then
+            if val < T.phosphorus.poor     then return POOR[1], POOR[2], POOR[3]
+            elseif val < T.phosphorus.fair then return FAIR[1], FAIR[2], FAIR[3]
+            else                                return GOOD[1], GOOD[2], GOOD[3] end
+        elseif layerIdx == 3 then
+            if val < T.potassium.poor     then return POOR[1], POOR[2], POOR[3]
+            elseif val < T.potassium.fair then return FAIR[1], FAIR[2], FAIR[3]
+            else                               return GOOD[1], GOOD[2], GOOD[3] end
+        elseif layerIdx == 4 then
+            local pH = math.floor((val * 10) + 0.5) / 10
+            if pH >= 6.5 and pH <= 7.0 then return GOOD[1], GOOD[2], GOOD[3]
+            elseif pH >= 5.5           then return FAIR[1], FAIR[2], FAIR[3]
+            else                            return POOR[1], POOR[2], POOR[3] end
+        elseif layerIdx == 5 then
+            if val >= 4.0     then return GOOD[1], GOOD[2], GOOD[3]
+            elseif val >= 2.5 then return FAIR[1], FAIR[2], FAIR[3]
+            else                   return POOR[1], POOR[2], POOR[3] end
+        end
+        return GOOD[1], GOOD[2], GOOD[3]
     end
-
-    return GOOD[1], GOOD[2], GOOD[3]
+    return healthGradient(layerValueToT(layerIdx, val))
 end
 
 -- ── Layer color logic ─────────────────────────────────────
 
 function SoilMapOverlay:getLayerColor(layerIdx, info, farmlandId)
-    local POOR, FAIR, GOOD = self:statusColors()
-    local T    = SoilConstants.STATUS_THRESHOLDS
-
-    if layerIdx == 1 then
-        local v = info.nitrogen and info.nitrogen.value or 0
-        if v < T.nitrogen.poor     then return POOR[1], POOR[2], POOR[3]
-        elseif v < T.nitrogen.fair then return FAIR[1], FAIR[2], FAIR[3]
-        else                            return GOOD[1], GOOD[2], GOOD[3] end
-    elseif layerIdx == 2 then
-        local v = info.phosphorus and info.phosphorus.value or 0
-        if v < T.phosphorus.poor     then return POOR[1], POOR[2], POOR[3]
-        elseif v < T.phosphorus.fair then return FAIR[1], FAIR[2], FAIR[3]
-        else                              return GOOD[1], GOOD[2], GOOD[3] end
-    elseif layerIdx == 3 then
-        local v = info.potassium and info.potassium.value or 0
-        if v < T.potassium.poor     then return POOR[1], POOR[2], POOR[3]
-        elseif v < T.potassium.fair then return FAIR[1], FAIR[2], FAIR[3]
-        else                             return GOOD[1], GOOD[2], GOOD[3] end
-    elseif layerIdx == 4 then
-        local pH = math.floor(((info.pH or 7.0) * 10) + 0.5) / 10
-        if pH >= 6.5 and pH <= 7.0 then     return GOOD[1], GOOD[2], GOOD[3]    -- optimal
-        elseif pH > 7.0 and pH <= 7.5 then  return POOR[1], POOR[2], POOR[3]   -- over-limed
-        elseif pH >= 5.5 then               return FAIR[1], FAIR[2], FAIR[3]    -- slightly acidic
-        else                                return POOR[1], POOR[2], POOR[3] end -- very acidic
-    elseif layerIdx == 5 then
-        local om = math.floor(((info.organicMatter or 0) * 10) + 0.5) / 10
-        if om >= 4.0     then return GOOD[1], GOOD[2], GOOD[3]
-        elseif om >= 2.5 then return FAIR[1], FAIR[2], FAIR[3]
-        else                  return POOR[1], POOR[2], POOR[3] end
-    elseif layerIdx == 6 then
-        local u = self.soilSystem:getFieldUrgency(farmlandId)
-        if u > 66     then return POOR[1], POOR[2], POOR[3]
-        elseif u > 33 then return FAIR[1], FAIR[2], FAIR[3]
-        else               return GOOD[1], GOOD[2], GOOD[3] end
-    elseif layerIdx == 7 then
-        local v = info.weedPressure or 0
-        if v > 50     then return POOR[1], POOR[2], POOR[3]
-        elseif v > 20 then return FAIR[1], FAIR[2], FAIR[3]
-        else               return GOOD[1], GOOD[2], GOOD[3] end
-    elseif layerIdx == 8 then
-        local v = info.pestPressure or 0
-        if v > 50     then return POOR[1], POOR[2], POOR[3]
-        elseif v > 20 then return FAIR[1], FAIR[2], FAIR[3]
-        else               return GOOD[1], GOOD[2], GOOD[3] end
-    elseif layerIdx == 9 then
-        local v = info.diseasePressure or 0
-        if v > 50     then return POOR[1], POOR[2], POOR[3]
-        elseif v > 20 then return FAIR[1], FAIR[2], FAIR[3]
-        else               return GOOD[1], GOOD[2], GOOD[3] end
-    elseif layerIdx == 10 then
-        local v = info.compaction or 0
-        if v > 60     then return POOR[1], POOR[2], POOR[3]
-        elseif v > 20 then return FAIR[1], FAIR[2], FAIR[3]
-        else               return GOOD[1], GOOD[2], GOOD[3] end
+    -- Colorblind mode: keep 3-step discrete palette
+    if self.settings and self.settings.colorblindMode then
+        local POOR, FAIR, GOOD = self:statusColors()
+        local T = SoilConstants.STATUS_THRESHOLDS
+        if layerIdx == 1 then
+            local v = info.nitrogen and info.nitrogen.value or 0
+            if v < T.nitrogen.poor     then return POOR[1], POOR[2], POOR[3]
+            elseif v < T.nitrogen.fair then return FAIR[1], FAIR[2], FAIR[3]
+            else                            return GOOD[1], GOOD[2], GOOD[3] end
+        elseif layerIdx == 2 then
+            local v = info.phosphorus and info.phosphorus.value or 0
+            if v < T.phosphorus.poor     then return POOR[1], POOR[2], POOR[3]
+            elseif v < T.phosphorus.fair then return FAIR[1], FAIR[2], FAIR[3]
+            else                              return GOOD[1], GOOD[2], GOOD[3] end
+        elseif layerIdx == 3 then
+            local v = info.potassium and info.potassium.value or 0
+            if v < T.potassium.poor     then return POOR[1], POOR[2], POOR[3]
+            elseif v < T.potassium.fair then return FAIR[1], FAIR[2], FAIR[3]
+            else                             return GOOD[1], GOOD[2], GOOD[3] end
+        elseif layerIdx == 4 then
+            local pH = math.floor(((info.pH or 7.0) * 10) + 0.5) / 10
+            if pH >= 6.5 and pH <= 7.0 then    return GOOD[1], GOOD[2], GOOD[3]
+            elseif pH >= 5.5           then    return FAIR[1], FAIR[2], FAIR[3]
+            else                               return POOR[1], POOR[2], POOR[3] end
+        elseif layerIdx == 5 then
+            local om = info.organicMatter or 0
+            if om >= 4.0     then return GOOD[1], GOOD[2], GOOD[3]
+            elseif om >= 2.5 then return FAIR[1], FAIR[2], FAIR[3]
+            else                  return POOR[1], POOR[2], POOR[3] end
+        elseif layerIdx == 6 then
+            local u = self.soilSystem:getFieldUrgency(farmlandId)
+            if u > 66     then return POOR[1], POOR[2], POOR[3]
+            elseif u > 33 then return FAIR[1], FAIR[2], FAIR[3]
+            else               return GOOD[1], GOOD[2], GOOD[3] end
+        elseif layerIdx == 7 then
+            local v = info.weedPressure or 0
+            if v > 50 then return POOR[1], POOR[2], POOR[3]
+            elseif v > 20 then return FAIR[1], FAIR[2], FAIR[3]
+            else return GOOD[1], GOOD[2], GOOD[3] end
+        elseif layerIdx == 8 then
+            local v = info.pestPressure or 0
+            if v > 50 then return POOR[1], POOR[2], POOR[3]
+            elseif v > 20 then return FAIR[1], FAIR[2], FAIR[3]
+            else return GOOD[1], GOOD[2], GOOD[3] end
+        elseif layerIdx == 9 then
+            local v = info.diseasePressure or 0
+            if v > 50 then return POOR[1], POOR[2], POOR[3]
+            elseif v > 20 then return FAIR[1], FAIR[2], FAIR[3]
+            else return GOOD[1], GOOD[2], GOOD[3] end
+        elseif layerIdx == 10 then
+            local v = info.compaction or 0
+            if v > 60 then return POOR[1], POOR[2], POOR[3]
+            elseif v > 20 then return FAIR[1], FAIR[2], FAIR[3]
+            else return GOOD[1], GOOD[2], GOOD[3] end
+        end
+        return GOOD[1], GOOD[2], GOOD[3]
     end
 
-    return GOOD[1], GOOD[2], GOOD[3]
+    -- Gradient mode: map field-level value to continuous color
+    local val
+    if     layerIdx == 1 then val = info.nitrogen     and info.nitrogen.value     or 0
+    elseif layerIdx == 2 then val = info.phosphorus   and info.phosphorus.value   or 0
+    elseif layerIdx == 3 then val = info.potassium    and info.potassium.value    or 0
+    elseif layerIdx == 4 then val = info.pH           or 7.0
+    elseif layerIdx == 5 then val = info.organicMatter or 0
+    elseif layerIdx == 6 then val = self.soilSystem:getFieldUrgency(farmlandId)
+    elseif layerIdx == 7 then val = info.weedPressure  or 0
+    elseif layerIdx == 8 then val = info.pestPressure  or 0
+    elseif layerIdx == 9 then val = info.diseasePressure or 0
+    elseif layerIdx == 10 then val = info.compaction   or 0
+    else   val = 100 end
+
+    return healthGradient(layerValueToT(layerIdx, val))
 end
 
 -- ── Minimap Overlay ───────────────────────────────────────
@@ -1306,7 +1369,7 @@ function SoilMapOverlay:updateMinimapCentroids(force)
 
     local activeFieldIds = self.soilSystem and self.soilSystem.activeFieldIds or {}
     local zone = SoilConstants.ZONE
-    local mmStep = SoilMapOverlay.MINIMAP_POLYGON_STEP
+    local mmStep = zone.CELL_SIZE  -- match zone data resolution exactly
 
     for _, fsField in ipairs(fields) do
         if fsField and fsField.farmland then
@@ -1314,39 +1377,40 @@ function SoilMapOverlay:updateMinimapCentroids(force)
             if farmlandId and farmlandId > 0 and activeFieldIds[farmlandId] then
                 local info = self.soilSystem:getFieldInfo(farmlandId)
                 if info then
-                    local r, g, b = self:getLayerColor(layerIdx, info, farmlandId)
+                    -- Field-average color: fallback for polygon points with no zone data
+                    local avgR, avgG, avgB = self:getLayerColor(layerIdx, info, farmlandId)
 
-                    -- 1. Polygon fill — use grid-sampled field polygon instead of single centroid dot
-                    -- Cached after first call; fieldPolyCache key includes step so minimap and PDA don't collide
+                    -- Per-cell zone data (nil when field has never been worked)
+                    local fieldEntry = self.soilSystem.fieldData and self.soilSystem.fieldData[farmlandId]
+                    local zoneData   = fieldEntry and fieldEntry.zoneData
+
+                    -- Single pass: for each polygon fill point look up its zone cell.
+                    -- If zone data exists there, show the cell's individual value so
+                    -- sprayed vs unsprayed areas paint different colors. Otherwise fall
+                    -- back to the field average. Eliminates the old two-pass approach
+                    -- (polygon fill + separate zone overlay) which suffered from a 10m
+                    -- vs 12m grid mismatch and 3px vs 4px dot-size bleed-through.
                     local fillPoints = self:getFieldFillPoints(fsField, mmStep)
                     if #fillPoints > 0 then
                         for _, pt in ipairs(fillPoints) do
-                            table.insert(self.minimapCentroids, {x = pt.x, z = pt.z, r = r, g = g, b = b, isCell = false})
-                        end
-                    else
-                        -- Fallback: if polygon data unavailable, use centroid dot
-                        local x = fsField.posX or 0
-                        local z = fsField.posZ or 0
-                        table.insert(self.minimapCentroids, {x = x, z = z, r = r, g = g, b = b, isCell = false})
-                    end
-
-                    -- 2. Zone data overlay — per-cell sub-field resolution for worked areas
-                    local fieldEntry = self.soilSystem.fieldData and self.soilSystem.fieldData[farmlandId]
-                    if fieldEntry and fieldEntry.zoneData then
-                        for cellKey, cell in pairs(fieldEntry.zoneData) do
-                            local keyNum = tonumber(cellKey)
-                            if keyNum then
-                                local cx = math.floor(keyNum / 10000)
-                                local cz = keyNum % 10000
-                                local cellX = cx * zone.CELL_SIZE + zone.CELL_SIZE/2
-                                local cellZ = cz * zone.CELL_SIZE + zone.CELL_SIZE/2
-                                local val = getCellLayerValue(cell, layerIdx)
-                                if val then
-                                    local cr, cg, cb = self:valueToLayerColor(layerIdx, val)
-                                    table.insert(self.minimapCentroids, {x = cellX, z = cellZ, r = cr, g = cg, b = cb, isCell = true})
+                            local pr, pg, pb = avgR, avgG, avgB
+                            if zoneData then
+                                local cx   = math.floor(pt.x / zone.CELL_SIZE)
+                                local cz   = math.floor(pt.z / zone.CELL_SIZE)
+                                local cell = zoneData[tostring(cx * 10000 + cz)]
+                                if cell then
+                                    local val = getCellLayerValue(cell, layerIdx)
+                                    if val then
+                                        pr, pg, pb = self:valueToLayerColor(layerIdx, val)
+                                    end
                                 end
                             end
+                            table.insert(self.minimapCentroids, {x = pt.x, z = pt.z, r = pr, g = pg, b = pb})
                         end
+                    else
+                        local x = fsField.posX or 0
+                        local z = fsField.posZ or 0
+                        table.insert(self.minimapCentroids, {x = x, z = z, r = avgR, g = avgG, b = avgB})
                     end
                 end
             end
@@ -1401,8 +1465,7 @@ function SoilMapOverlay:onDrawMinimap(ingameMap)
         local objectZ = (centroid.z + offZ) / wSizeZ * scale + extZ
         local ok, screenX, screenY, _, visible = pcall(layout.getMapObjectPosition, layout, objectX, objectZ, 0, 0, 0, false)
         if ok and visible and screenX and screenY then
-            local size = centroid.isCell and 3 or SoilMapOverlay.MINIMAP_DOT_SIZE
-            local dotSz = getNormalizedScreenValues(size, size)
+            local dotSz  = getNormalizedScreenValues(SoilMapOverlay.MINIMAP_DOT_SIZE * SoilMapOverlay.minimapZoomSmoothed, SoilMapOverlay.MINIMAP_DOT_SIZE * SoilMapOverlay.minimapZoomSmoothed)
             local halfDot = dotSz * 0.5
             drawFilledRect(screenX - halfDot, screenY - halfDot, dotSz, dotSz,
                            centroid.r, centroid.g, centroid.b, alpha)
@@ -1510,6 +1573,70 @@ function SoilMapOverlay:drawMiniReport(ingameMap)
         setTextColor(0.9, 0.9, 0.9, 1)
         setTextAlignment(RenderText.ALIGN_LEFT)
         renderText(innerX + subBarW + 0.002*s, cy + 0.005*s, textSize, labels[#labels - i + 1])
+    end
+end
+
+-- ── Minimap Zoom ──────────────────────────────────────────
+
+-- Hooks IngameMapLayoutCircle and IngameMapLayoutSquare at the class level.
+-- Called once from initialize(). Guards against double-hooking on level reload.
+function SoilMapOverlay:installMinimapZoomHooks()
+    local function hookLayout(layoutClass, name)
+        if not layoutClass or layoutClass._sfZoomHooked then return end
+
+        local origSet = layoutClass.setWorldSize
+        layoutClass.setWorldSize = function(layout, ...)
+            origSet(layout, ...)
+            layout._sfOrigWorldSizeFactor = layout.worldSizeFactor
+        end
+
+        local origUpdate = layoutClass.updateScreenValues
+        layoutClass.updateScreenValues = function(layout, ...)
+            if layout._sfOrigWorldSizeFactor ~= nil then
+                layout.worldSizeFactor = layout._sfOrigWorldSizeFactor * SoilMapOverlay.minimapZoomSmoothed
+            end
+            origUpdate(layout, ...)
+        end
+
+        layoutClass._sfZoomHooked = true
+        SoilLogger.info("SoilMapOverlay: minimap zoom hooks installed (%s)", name)
+    end
+
+    hookLayout(IngameMapLayoutCircle, "Circle")
+    hookLayout(IngameMapLayoutSquare, "Square")
+    hookLayout(IngameMapLayoutSquareLarge, "SquareLarge")
+end
+
+-- Cycles through minimapZoomLevels: 1x → 2x → 4x → 1x → …
+function SoilMapOverlay:cycleMinimapZoom()
+    local levels = SoilMapOverlay.minimapZoomLevels
+    for i, level in ipairs(levels) do
+        if level == SoilMapOverlay.minimapZoomFactor then
+            SoilMapOverlay.minimapZoomFactor = levels[i % #levels + 1]
+            return
+        end
+    end
+    SoilMapOverlay.minimapZoomFactor = levels[1]
+end
+
+-- Smoothly interpolates minimapZoomSmoothed toward minimapZoomFactor and
+-- calls layout:updateScreenValues() when a change is in progress.
+function SoilMapOverlay:updateMinimapZoom(dt)
+    local target  = SoilMapOverlay.minimapZoomFactor
+    local current = SoilMapOverlay.minimapZoomSmoothed
+    if current == target then return end
+
+    local speed = 0.005 * math.abs(target - current)
+    if current < target then
+        SoilMapOverlay.minimapZoomSmoothed = math.min(current + speed * dt, target)
+    else
+        SoilMapOverlay.minimapZoomSmoothed = math.max(current - speed * dt, target)
+    end
+
+    local hud = g_currentMission and g_currentMission.hud
+    local ingameMap = hud and hud.ingameMap
+    if ingameMap and ingameMap.layout and ingameMap.layout.updateScreenValues then
+        ingameMap.layout:updateScreenValues()
     end
 end
 

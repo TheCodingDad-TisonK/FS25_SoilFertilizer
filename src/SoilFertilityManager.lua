@@ -261,6 +261,20 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
                     end
                 end
 
+                -- Minimap zoom cycle — PLAYER context
+                if g_SoilFertilityManager.soilMapOverlay then
+                    local zoomOk, zoomId = g_inputBinding:registerActionEvent(
+                        InputAction.SF_MINIMAP_ZOOM, g_SoilFertilityManager,
+                        g_SoilFertilityManager.onMinimapZoomInput,
+                        false, true, false, true
+                    )
+                    if zoomOk and zoomId then
+                        g_SoilFertilityManager.minimapZoomEventId = zoomId
+                        g_inputBinding:setActionEventTextVisibility(zoomId, false)
+                        SoilLogger.info("Minimap zoom registered in PLAYER context")
+                    end
+                end
+
                 g_inputBinding:endActionEventsModification()
                 SoilLogger.info("PLAYER context input registration complete")
             end
@@ -318,10 +332,11 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
                     "vehicleHUDEventId", "vehicleReportEventId",
                     "rateUpEventId",     "rateDownEventId",
                     "toggleAutoEventId", "vehicleSettingsPanelEventId",
-                    "vehicleHudDragEventId",
+                    "vehicleHudDragEventId", "vehicleMinimapZoomEventId",
                     -- PLAYER context IDs (invalidated as a side-effect of the above removes)
                     "toggleHUDEventId", "soilReportEventId",
                     "cycleMapLayerEventId", "settingsPanelEventId", "hudDragEventId",
+                    "minimapZoomEventId",
                 }
                 for _, field in ipairs(staleIds) do
                     local oldId = mgr[field]
@@ -470,6 +485,20 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
                     end
                 end
 
+                -- Minimap zoom cycle — VEHICLE context (minimap is visible while driving)
+                if g_SoilFertilityManager.soilMapOverlay then
+                    local vZoomOk, vZoomId = binding:registerActionEvent(
+                        InputAction.SF_MINIMAP_ZOOM, g_SoilFertilityManager,
+                        g_SoilFertilityManager.onMinimapZoomInput,
+                        false, true, false, true
+                    )
+                    if vZoomOk and vZoomId then
+                        g_SoilFertilityManager.vehicleMinimapZoomEventId = vZoomId
+                        binding:setActionEventTextVisibility(vZoomId, false)
+                        SoilLogger.debug("Minimap zoom registered in VEHICLE context")
+                    end
+                end
+
                 binding:endActionEventsModification()
 
                 -- Re-register PLAYER context events. These were invalidated above when we
@@ -536,6 +565,19 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
                         g_SoilFertilityManager.hudDragEventId = pDragId
                         binding:setActionEventTextVisibility(pDragId, false)
                         SoilLogger.debug("HUD drag (Shift+H) re-registered in PLAYER context after vehicle exit")
+                    end
+                end
+
+                if g_SoilFertilityManager.soilMapOverlay then
+                    local pZoomOk, pZoomId = binding:registerActionEvent(
+                        InputAction.SF_MINIMAP_ZOOM, g_SoilFertilityManager,
+                        g_SoilFertilityManager.onMinimapZoomInput,
+                        false, true, false, true
+                    )
+                    if pZoomOk and pZoomId then
+                        g_SoilFertilityManager.minimapZoomEventId = pZoomId
+                        binding:setActionEventTextVisibility(pZoomId, false)
+                        SoilLogger.debug("Minimap zoom re-registered in PLAYER context after vehicle exit")
                     end
                 end
 
@@ -821,6 +863,12 @@ end
 function SoilFertilityManager:onCycleMapLayerInput()
     if self.soilMapOverlay then
         self.soilMapOverlay:cycleLayer()
+    end
+end
+
+function SoilFertilityManager:onMinimapZoomInput()
+    if self.soilMapOverlay then
+        self.soilMapOverlay:cycleMinimapZoom()
     end
 end
 
@@ -1128,6 +1176,11 @@ function SoilFertilityManager:update(dt)
     -- DMV minimap heatmap async build cycle (client only)
     if self.soilMinimapLayer and self.soilMapOverlay then
         self.soilMinimapLayer:update(dt, self.soilMapOverlay)
+    end
+
+    -- Minimap zoom smooth interpolation
+    if self.soilMapOverlay then
+        self.soilMapOverlay:updateMinimapZoom(dt)
     end
 
     if self.soilReportDialog then
