@@ -24,21 +24,14 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
-    "- Fixed several bugs that are not written down here (PR#444)",
-    "- Fixed multi-purchase pricing: buying 2+ big bags charged double the correct price",
-    "- Fixed spray rates for herbicide/insecticide/fungicide: 1.5 L/ha → 100 L/ha realistic carrier rate",
-    "- Fixed AN 34.5 Dry not loadable into spreaders on some setups",
-    "- Fixed dedicated server fill type registration failure (retry mechanism for late-loading fill types)",
-    "- Fixed issue where only the mid section of the boom would spray",
     "- Fixed field pass % counter resetting incorrectly when switching products mid-field",
     "- Fixed auto spray rate using generic N/P/K targets instead of per-crop optimal targets",
     "- Fixed herbicide/insecticide/fungicide granting field protection before 80% coverage reached",
     "- Fixed Smart Sensor status showing blank when pest/disease pressure is zero",
     "- Fixed minimap tile size mismatch on large maps (dots now align to 10m soil cells)",
-    "- Added Field Boundary Control setting: automatically shuts off boom sections that extend outside field boundaries",
-    "- Added minimap soil layer gradient: each tile now shows the actual per-cell soil color (not just field average)",
+    "- Added minimap soil layer gradient: each tile now shows the actual per-cell soil color (not just average)",
     "- Added minimap zoom: bind a key to SF_MINIMAP_ZOOM to cycle 1x / 2x / 4x zoom",
-    "- Added pH bar in soil HUD: center-anchored bar shows acidic/alkaline deviation with threshold ticks and ghost bar",
+    "- Added pH bar in soil HUD (im aware its placed awkwardly will fix in next release)",
     "- Added lime/OM crop burn: applying lime to growing crops triggers -80% yield penalty at harvest (OM: -20%)",
 }
 
