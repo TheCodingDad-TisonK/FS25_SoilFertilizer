@@ -1604,6 +1604,7 @@ function SoilMapOverlay:installMinimapZoomHooks()
 
     hookLayout(IngameMapLayoutCircle, "Circle")
     hookLayout(IngameMapLayoutSquare, "Square")
+    hookLayout(IngameMapLayoutSquareLarge, "SquareLarge")
 end
 
 -- Cycles through minimapZoomLevels: 1x → 2x → 4x → 1x → …
@@ -1634,7 +1635,7 @@ function SoilMapOverlay:updateMinimapZoom(dt)
 
     local hud = g_currentMission and g_currentMission.hud
     local ingameMap = hud and hud.ingameMap
-    if ingameMap and ingameMap.layout then
+    if ingameMap and ingameMap.layout and ingameMap.layout.updateScreenValues then
         ingameMap.layout:updateScreenValues()
     end
 end
