@@ -267,7 +267,7 @@ SettingsSchema.definitions = {
     {
         id = "fieldBoundaryControl",
         type = "boolean",
-        default = false,
+        default = true,
         uiId = "sf_field_boundary",
     },
     {

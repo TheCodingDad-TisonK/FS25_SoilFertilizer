@@ -24,6 +24,7 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
+    "- Fixed several bugs that are not written down here (PR#444)",
     "- Fixed multi-purchase pricing: buying 2+ big bags charged double the correct price",
     "- Fixed spray rates for herbicide/insecticide/fungicide: 1.5 L/ha → 100 L/ha realistic carrier rate",
     "- Fixed AN 34.5 Dry not loadable into spreaders on some setups",
