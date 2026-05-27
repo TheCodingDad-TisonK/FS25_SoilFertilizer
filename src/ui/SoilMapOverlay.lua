@@ -405,15 +405,17 @@ function SoilMapOverlay:updateSamplePoints(force)
     end
     local activeFieldIds = self.soilSystem and self.soilSystem.activeFieldIds or {}
 
-    -- Scale sampling step proportional to terrain size so large maps
-    -- (4x, 16x, 64x) get the same screen-pixel density as a standard 2048m map.
+    -- Sample step = zone cell size so every cell is sampled exactly once.
+    -- POLYGON_STEP * mapScale was wrong for large maps: on a 4096m map it gave
+    -- 20m step while CELL_SIZE stayed 10m, so every other row/column of zone
+    -- cells was skipped and each visible tile was 4× the actual data resolution.
+    local cellSz    = SoilConstants.ZONE.CELL_SIZE  -- 10m on 2048-4096m maps, scales on larger maps
+    local scaledStep = cellSz
+
+    -- Point budget: base × (mapArea / baseArea) so coverage density is consistent
+    -- regardless of map size. CELL_SIZE already scales with map so the ratio stays right.
     local terrainSize = (g_currentMission and g_currentMission.terrainSize) or 2048
     local mapScale    = math.max(1.0, terrainSize / 2048.0)
-    local scaledStep  = SoilMapOverlay.POLYGON_STEP * mapScale
-
-    -- Resolve point budget from the player's density setting (localOnly, default Medium).
-    -- Scale the budget proportionally with map area (mapScale²) so large maps don't exhaust
-    -- the cap before all fields are drawn — a 4x map needs ~16x the points of a standard map.
     local densityLevel = (self.settings and self.settings.overlayDensity) or 2
     local basePoints   = SoilMapOverlay.DENSITY_POINTS[densityLevel] or SoilMapOverlay.DENSITY_POINTS[2]
     local maxPoints    = math.floor(basePoints * mapScale * mapScale)
@@ -526,10 +528,8 @@ function SoilMapOverlay:onDraw(frame, mapElement, ingameMap, pageIndex)
     local mapMaxX = mapX + mapWidth
     local mapMaxY = mapY + mapHeight
 
-    -- Compute tile size from world-to-screen scale so tiles fill edge-to-edge at any zoom level.
-    -- Use the same terrain-scaled step as the sampler so tiles match sample density exactly.
-    local terrainSz = (g_currentMission and g_currentMission.terrainSize) or 2048
-    local drawStep  = SoilMapOverlay.POLYGON_STEP * math.max(1.0, terrainSz / 2048.0)
+    -- Tile draw size = zone cell size so each rendered tile covers exactly one data cell.
+    local drawStep = SoilConstants.ZONE.CELL_SIZE
     local sizeX, sizeY
     local probeX, probeZ = 0, 0
     local ax, ay = self:worldToScreenPosition(ingameMap, probeX, probeZ)
@@ -1362,7 +1362,7 @@ function SoilMapOverlay:updateMinimapCentroids(force)
 
     local activeFieldIds = self.soilSystem and self.soilSystem.activeFieldIds or {}
     local zone = SoilConstants.ZONE
-    local mmStep = SoilMapOverlay.MINIMAP_POLYGON_STEP
+    local mmStep = zone.CELL_SIZE  -- match zone data resolution exactly
 
     for _, fsField in ipairs(fields) do
         if fsField and fsField.farmland then
