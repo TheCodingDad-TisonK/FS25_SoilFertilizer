@@ -481,7 +481,7 @@ function HookManager:installEffectTypeHook()
     self._effectSolidNames  = { "UREA", "AMS", "AN", "MAP", "DAP", "POTASH", "POLIFOSKA",
                                 "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM" }
     self._effectLiquidNames = { "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME",
-                                "INSECTICIDE", "FUNGICIDE",
+                                "HERBICIDE", "INSECTICIDE", "FUNGICIDE",
                                 "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH" }
     self._effectFertIdx = fertIdx
     self._effectLiqIdx  = liqIdx
@@ -652,7 +652,7 @@ function HookManager:installSprayTypeEffectsHook()
                           "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM" }
     -- Liquid custom types visually match LIQUIDFERTILIZER spraying
     local liquidNames = { "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME",
-                          "INSECTICIDE", "FUNGICIDE",
+                          "HERBICIDE", "INSECTICIDE", "FUNGICIDE",
                           "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH" }
 
     -- Shared helper: walk a vehicle's sprayType entries and inject our names
@@ -828,7 +828,7 @@ function HookManager:installDensityMapSprayHook()
 
     -- Build remap: customSprayTypeIndex → vanillaSprayTypeIndex
     local liquidNames = { "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME",
-                          "INSECTICIDE", "FUNGICIDE",
+                          "HERBICIDE", "INSECTICIDE", "FUNGICIDE",
                           "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH" }
     local solidNames  = { "UREA", "AMS", "AN", "MAP", "DAP", "POTASH", "POLIFOSKA",
                           "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM" }
@@ -2114,10 +2114,14 @@ function HookManager:installSprayerAreaHook()
                 -- Sweep all cells under the full boom width for display (#362).
                 -- Nutrients are already attributed to the field by applySingle/section loop;
                 -- markBoomCells only stamps display entries for unvisited lateral cells.
+                -- For solid/map spreaders getBoomCellPositions returns nil (no spanning boom);
+                -- fall back to liter-based coverage so pass counter still updates (#454).
                 if soilSys and fieldId and fieldId > 0 then
                     local boomPts = hookMgrRef:getBoomCellPositions(self, rootX, rootZ)
                     if boomPts then
                         soilSys:markBoomCells(fieldId, boomPts)
+                    elseif liters > 0 then
+                        soilSys:trackSprayerCoverage(fieldId, liters, fillType.name, true)
                     end
                 end
 

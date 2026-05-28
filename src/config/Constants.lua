@@ -729,6 +729,17 @@ SoilConstants.SPRAYER_RATE = {
         OM = 5.0
     },
 
+    -- Fill types whose auto-rate is driven by OM deficit (not NPK)
+    OM_PRIMARY_PRODUCTS = {
+        MANURE          = true,
+        LIQUIDMANURE    = true,
+        DIGESTATE       = true,
+        COMPOST         = true,
+        BIOSOLIDS       = true,
+        CHICKEN_MANURE  = true,
+        PELLETIZED_MANURE = true,
+    },
+
     -- Unit conversions for display
     L_PER_HA_TO_GAL_PER_AC = 0.10694,  -- multiply L/ha by this for gal/ac
     KG_PER_HA_TO_LB_PER_AC = 0.89218,  -- multiply kg/ha by this for lb/ac

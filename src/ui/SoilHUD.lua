@@ -101,6 +101,9 @@ function SoilHUD.new(soilSystem, settings)
     self.savedCamRotX = nil
     self.savedCamRotY = nil
     self.savedCamRotZ = nil
+    -- Vehicle camera freeze (spec_cameraSystem path)
+    self.savedVehicleCamRotX = nil
+    self.savedVehicleCamRotY = nil
 
     -- Field detection cache (throttled)
     self.cachedFieldId    = nil
@@ -218,6 +221,17 @@ function SoilHUD:enterEditMode()
             end
         end
     end
+    -- Also freeze vehicle camera via spec_cameraSystem (handles in-vehicle camera orbit)
+    self.savedVehicleCamRotX = nil
+    self.savedVehicleCamRotY = nil
+    local cv = g_currentMission and g_currentMission.controlledVehicle
+    if cv and cv.spec_cameraSystem then
+        local ac = cv.spec_cameraSystem.activeCamera
+        if ac then
+            self.savedVehicleCamRotX = ac.rotX
+            self.savedVehicleCamRotY = ac.rotY
+        end
+    end
     SoilLogger.debug("[SoilHUD] Edit mode ON")
 end
 
@@ -228,6 +242,8 @@ function SoilHUD:exitEditMode()
     self.hoverCorner    = nil
     self.draggingSubKey = nil
     self.savedCamRotX, self.savedCamRotY, self.savedCamRotZ = nil, nil, nil
+    self.savedVehicleCamRotX = nil
+    self.savedVehicleCamRotY = nil
     if g_inputBinding and g_inputBinding.setShowMouseCursor then
         g_inputBinding:setShowMouseCursor(false)
     end
@@ -340,8 +356,9 @@ function SoilHUD:calculateHeight()
         
         h = h + SoilHUD.ROW_H * 3
         h = h + SoilHUD.PAD * 1.3
-        
-        h = h + SoilHUD.LINE_H
+
+        h = h + SoilHUD.ROW_H   -- pH bar row
+        h = h + SoilHUD.LINE_H  -- OM text row
         h = h + SoilHUD.PAD * 1.3
         
         local mgr = g_SoilFertilityManager
@@ -611,6 +628,17 @@ function SoilHUD:update(dt)
             local ok, cam = pcall(getCamera)
             if ok and cam and cam ~= 0 then
                 pcall(setRotation, cam, self.savedCamRotX, self.savedCamRotY, self.savedCamRotZ)
+            end
+        end
+        -- Vehicle camera freeze: restore spec_cameraSystem rotX/rotY each frame
+        if self.savedVehicleCamRotX ~= nil then
+            local cv = g_currentMission and g_currentMission.controlledVehicle
+            if cv and cv.spec_cameraSystem then
+                local ac = cv.spec_cameraSystem.activeCamera
+                if ac then
+                    ac.rotX = self.savedVehicleCamRotX
+                    ac.rotY = self.savedVehicleCamRotY
+                end
             end
         end
         if g_gui and (g_gui:getIsGuiVisible() or g_gui:getIsDialogVisible()) then
@@ -1160,7 +1188,7 @@ function SoilHUD:drawPanel()
         cy = cy - pad * 0.8
 
         -- pH bar row (issue #438: center-anchored bar with ghost bar)
-        cy = self:drawPHRow(info, px, cy + SoilHUD.ROW_H * s, pw, s, fontMult, fillType)
+        cy = self:drawPHRow(info, px, cy, pw, s, fontMult, fillType)
 
         -- OM text row (compact, alongside divider)
         local omCol = self:omColor(info.organicMatter)
@@ -1993,9 +2021,10 @@ function SoilHUD:drawSprayerRatePanel()
                     pH = defaults.pH,
                     OM = defaults.OM,
                 } or defaults
-                if profile.N and profile.N > 0 then targetText = targetText .. targets.N .. "N " end
-                if profile.P and profile.P > 0 then targetText = targetText .. targets.P .. "P " end
-                if profile.K and profile.K > 0 then targetText = targetText .. targets.K .. "K " end
+                local ppm = SoilConstants.PPM_DISPLAY or { N=1, P=1, K=1 }
+                if profile.N and profile.N > 0 then targetText = targetText .. math.floor(targets.N * (ppm.N or 1) + 0.5) .. "N " end
+                if profile.P and profile.P > 0 then targetText = targetText .. math.floor(targets.P * (ppm.P or 1) + 0.5) .. "P " end
+                if profile.K and profile.K > 0 then targetText = targetText .. math.floor(targets.K * (ppm.K or 1) + 0.5) .. "K " end
                 if profile.pH and profile.pH > 0 then targetText = targetText .. targets.pH .. "pH " end
                 setTextColor(0.7, 0.9, 0.7, 0.8)
                 renderText(cx, scrollY - self:py(6)*s, 0.008 * fontMult * s, targetText)

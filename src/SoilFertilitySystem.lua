@@ -2651,7 +2651,7 @@ function SoilFertilitySystem:onHerbicideAppliedDirect(fieldId, effectiveness, li
 
     if not field.nutrientBuffer then field.nutrientBuffer = {} end
     field.nutrientBuffer[99991] = (field.nutrientBuffer[99991] or 0) + liters
-    self:trackSprayerCoverage(fieldId, liters, "HERBICIDE")
+    self:trackSprayerCoverage(fieldId, liters, "HERBICIDE", false)
 end
 
 function SoilFertilitySystem:onInsecticideAppliedDirect(fieldId, effectiveness, liters)
