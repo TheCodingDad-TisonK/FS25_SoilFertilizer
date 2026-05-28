@@ -1438,8 +1438,9 @@ function SoilHUD:drawNutrientRow(label, baseLabel, nutrient, px, cy, pw, s, font
 end
 
 -- ── pH bar row ───────────────────────────────────────────
--- Center-anchored bar: left = acidic, right = alkaline, center = optimal (6.75).
--- Ghost bar shows the direction lime/gypsum will push pH.
+-- Left-fill bar: fills from left edge to current pH position, colored by status.
+-- Optimal tick mark at pH 6.75 so the player can see how far they are from target.
+-- Ghost bar shows directional preview when a pH-modifying product is loaded.
 -- Returns updated cy.
 function SoilHUD:drawPHRow(info, px, cy, pw, s, fontMult, fillType)
     local pad  = SoilHUD.PAD * s
@@ -1462,58 +1463,39 @@ function SoilHUD:drawPHRow(info, px, cy, pw, s, fontMult, fillType)
 
     local pH = info.pH or PH_OPT
     local phNorm  = (math.max(PH_MIN, math.min(PH_MAX, pH)) - PH_MIN) / phRange
-    local optNorm = (PH_OPT - PH_MIN) / phRange  -- 0.5
+    local optNorm = (PH_OPT - PH_MIN) / phRange
+
+    local pHCol = self:pHColor(pH)
 
     -- Background
     self:drawRect(barX, barY, barW, barH, SoilHUD.C_BAR_BG)
 
-    -- Colored fill from optimal toward current pH
-    local pHCol = self:pHColor(pH)
-    if phNorm < optNorm then
-        local fillW = (optNorm - phNorm) * barW
-        self:drawRect(barX + phNorm * barW, barY, fillW, barH, pHCol)
-    elseif phNorm > optNorm then
-        local fillW = (phNorm - optNorm) * barW
-        self:drawRect(barX + optNorm * barW, barY, fillW, barH, pHCol)
+    -- Left-fill: from left edge to current pH position
+    if phNorm > 0 then
+        self:drawRect(barX, barY, phNorm * barW, barH, pHCol)
     end
 
     -- Ghost bar: directional preview if a pH-modifying product is loaded
     if fillType then
         local profile = SoilConstants.FERTILIZER_PROFILES and SoilConstants.FERTILIZER_PROFILES[fillType.name]
         if profile and profile.pH then
-            -- Typical full-pass delta is ~0.4 for LIME; scale visually to ~15% of bar width
             local ghostW = barW * 0.15 * (math.abs(profile.pH) / 0.16)
             ghostW = math.max(barW * 0.04, math.min(barW * 0.25, ghostW))
             if profile.pH > 0 then
-                -- Raises pH: ghost extends right from current position
-                local gx = barX + phNorm * barW
-                self:drawRect(gx, barY, ghostW, barH, pHCol, 0.30)
+                -- Raises pH: ghost extends right from current fill edge
+                self:drawRect(barX + phNorm * barW, barY, ghostW, barH, pHCol, 0.35)
             else
-                -- Lowers pH: ghost extends left from current position
+                -- Lowers pH: ghost extends left from current fill edge
                 local gx = barX + phNorm * barW - ghostW
-                self:drawRect(gx, barY, ghostW, barH, pHCol, 0.30)
+                self:drawRect(math.max(barX, gx), barY, ghostW, barH, pHCol, 0.35)
             end
         end
     end
 
-    -- Center optimal line
+    -- Optimal tick mark at pH 6.75
     local divW = 0.0005 * s
     local optX = barX + optNorm * barW
-    self:drawRect(optX - divW*0.5, barY - 0.001*s, divW, barH + 0.002*s, {0.85, 0.85, 0.85, 0.6})
-
-    -- Threshold tick marks: 5.5=poor, 6.0=fair, 7.0=fair, 7.5=poor
-    local ticks = {
-        {pH=5.5, col={0.90, 0.35, 0.20, 0.75}},
-        {pH=6.0, col={0.90, 0.80, 0.20, 0.75}},
-        {pH=7.0, col={0.90, 0.80, 0.20, 0.75}},
-        {pH=7.5, col={0.90, 0.35, 0.20, 0.75}},
-    }
-    local tickW = 0.0005 * s
-    local tickH = barH + 0.002 * s
-    for _, tk in ipairs(ticks) do
-        local tNorm = (tk.pH - PH_MIN) / phRange
-        self:drawRect(barX + tNorm*barW - tickW*0.5, barY - 0.001*s, tickW, tickH, tk.col)
-    end
+    self:drawRect(optX - divW*0.5, barY - 0.001*s, divW, barH + 0.002*s, {0.85, 0.85, 0.85, 0.70})
 
     -- Numeric value
     local valX = barX + barW + 0.006*s
