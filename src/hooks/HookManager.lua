@@ -655,24 +655,41 @@ function HookManager:installSprayTypeEffectsHook()
                           "HERBICIDE", "INSECTICIDE", "FUNGICIDE",
                           "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH" }
 
-    -- Shared helper: walk a vehicle's sprayType entries and inject our names
+    -- Build name-lookup sets for fast membership tests
+    local liquidNameSet = {}
+    local solidNameSet  = {}
+    for _, n in ipairs(liquidNames) do liquidNameSet[string.upper(n)] = true end
+    for _, n in ipairs(solidNames)  do solidNameSet[string.upper(n)]  = true end
+
+    -- Shared helper: walk a vehicle's sprayType entries and inject our names.
+    --
+    -- getIsSprayTypeActive is name-based (iterates sprayType.fillTypes, compares by
+    -- getFillTypeIndexByName). getActiveSprayType returns the FIRST matching slot.
+    -- For vanilla fill types like HERBICIDE that have their own dedicated slot
+    -- (center-nozzle-only), that slot is found before the LIQUIDFERTILIZER slot →
+    -- only center nozzle sprays.
+    --
+    -- Fix (two passes):
+    --   Pass 1 — add custom names to LIQUIDFERTILIZER / FERTILIZER slots (existing logic).
+    --   Pass 2 — remove those same names from any slot that does NOT have LIQUIDFERTILIZER
+    --            or FERTILIZER as its base. This leaves only the full-boom slot as a
+    --            valid match, so getActiveSprayType finds the correct slot first.
     local function patchVehicleSprayTypes(vehicle)
         local spec = vehicle.spec_sprayer
         if not spec or not spec.sprayTypes then return end
 
+        -- Pass 1: inject our custom names into the base fertilizer slots
         for _, st in ipairs(spec.sprayTypes) do
             if st.fillTypes then
                 local hasFert    = false
                 local hasLiqFert = false
 
-                -- Check what vanilla base types this sprayType slot already covers
                 for _, name in ipairs(st.fillTypes) do
                     local upper = string.upper(name)
                     if upper == "FERTILIZER"        then hasFert    = true end
                     if upper == "LIQUIDFERTILIZER"  then hasLiqFert = true end
                 end
 
-                -- Build a lookup of names already present to avoid duplicates
                 local existing = {}
                 for _, name in ipairs(st.fillTypes) do
                     existing[string.upper(name)] = true
@@ -692,6 +709,30 @@ function HookManager:installSprayTypeEffectsHook()
                         if not existing[name] then
                             table.insert(st.fillTypes, name)
                             existing[name] = true
+                        end
+                    end
+                end
+            end
+        end
+
+        -- Pass 2: strip our names from any slot that lacks a base fertilizer type.
+        -- Without this, vanilla HERBICIDE/INSECTICIDE/FUNGICIDE slots (center-only
+        -- nozzle config) are found first by getActiveSprayType and override the
+        -- full-boom LIQUIDFERTILIZER slot we patched in Pass 1.
+        for _, st in ipairs(spec.sprayTypes) do
+            if st.fillTypes then
+                local hasFert    = false
+                local hasLiqFert = false
+                for _, name in ipairs(st.fillTypes) do
+                    local upper = string.upper(name)
+                    if upper == "FERTILIZER"       then hasFert    = true end
+                    if upper == "LIQUIDFERTILIZER" then hasLiqFert = true end
+                end
+                if not hasFert and not hasLiqFert then
+                    for i = #st.fillTypes, 1, -1 do
+                        local upper = string.upper(st.fillTypes[i])
+                        if liquidNameSet[upper] or solidNameSet[upper] then
+                            table.remove(st.fillTypes, i)
                         end
                     end
                 end

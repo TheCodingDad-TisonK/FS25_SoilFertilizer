@@ -611,6 +611,15 @@ end
 -- ── Update ───────────────────────────────────────────────
 function SoilHUD:update(dt)
     self.animTimer = self.animTimer + dt
+
+    -- Field detection runs BEFORE calculateHeight so the panel is always
+    -- sized with the freshest data (avoids rows appearing outside the box).
+    self.fieldDetectTimer = self.fieldDetectTimer + dt * 0.001
+    if self.fieldDetectTimer >= SoilHUD.FIELD_DETECT_INTERVAL then
+        self.fieldDetectTimer = 0
+        self:refreshFieldData()
+    end
+
     if self._heightDirty then
         self:calculateHeight()
         self._heightDirty = false
@@ -652,13 +661,6 @@ function SoilHUD:update(dt)
         end
     else
         self.hoverCorner = nil
-    end
-
-    -- Throttled field detection (every 0.5s)
-    self.fieldDetectTimer = self.fieldDetectTimer + dt * 0.001
-    if self.fieldDetectTimer >= SoilHUD.FIELD_DETECT_INTERVAL then
-        self.fieldDetectTimer = 0
-        self:refreshFieldData()
     end
 
     -- Cache sprayer state once per frame here so draw() never traverses vehicle tables
