@@ -205,12 +205,33 @@ function SoilSeeAndSprayPanel:drawPanel(sprayer, sfm)
     local ssActualH    = (sfm.smartSensorPanel and sfm.smartSensorPanel.lastPanelH) or ssFallbackH
     local ssGap        = 0.007 * s
 
+    -- Detect all-suppressed state early so it can influence panel height
+    local allSuppressed = false
+    if sprayer and sensorMgr then
+        local vid = sprayer.id
+        local pOn = sensorMgr:isSeeSprayPestEnabled(vid)
+        local dOn = sensorMgr:isSeeSprayDiseaseEnabled(vid)
+        local wOn = sensorMgr:isSeeSprayWeedEnabled(vid)
+        if pOn or dOn or wOn then
+            local _, fdE, cellE = self:getCellData(sprayer)
+            local ssCfgE = SoilConstants.SEE_AND_SPRAY
+            local pVal = fdE and ((cellE and cellE.pestPressure)    or (fdE.pestPressure    or 0)) or 0
+            local dVal = fdE and ((cellE and cellE.diseasePressure) or (fdE.diseasePressure or 0)) or 0
+            local wVal = fdE and ((cellE and cellE.weedPressure)    or (fdE.weedPressure    or 0)) or 0
+            local anyAbove = (pOn and pVal >= ssCfgE.PEST_THRESHOLD)
+                          or (dOn and dVal >= ssCfgE.DISEASE_THRESHOLD)
+                          or (wOn and wVal >= ssCfgE.WEED_THRESHOLD)
+            allSuppressed = not anyAbove
+        end
+    end
+
     -- Stacked anchor position (below Smart Sensor panel)
     local numRows      = 3
     local rowH         = SoilSeeAndSprayPanel.ROW_H   * s
     local pad          = SoilSeeAndSprayPanel.PAD     * s
     local titleH       = SoilSeeAndSprayPanel.TITLE_H * s
-    local fullPanelH   = titleH + pad + numRows * rowH + pad
+    local statusRowH   = 0.016 * s   -- compact status line shown when all sections suppressed
+    local fullPanelH   = titleH + pad + numRows * rowH + pad + (allSuppressed and statusRowH or 0)
 
     local mainPanelY = hud.panelY
     local ratePanelY = mainPanelY - rateGap - ratePanelH
@@ -386,6 +407,17 @@ function SoilSeeAndSprayPanel:drawPanel(sprayer, sfm)
                 SoilSeeAndSprayPanel.C_LABEL[3], 1.0)
             renderText(tx + 0.010*s, midY - fsDim * 0.45 - fsDim * 1.1, fsDim, row.val)
         end
+    end
+
+    -- All-suppressed notice: shown when every enabled sensor is below its threshold
+    if allSuppressed then
+        local statusY = panelY + pad * 0.5
+        local fsStatus = 0.0060 * s
+        setTextAlignment(RenderText.ALIGN_CENTER)
+        setTextColor(SoilSeeAndSprayPanel.C_WARN[1], SoilSeeAndSprayPanel.C_WARN[2],
+            SoilSeeAndSprayPanel.C_WARN[3], 0.90)
+        renderText(panelX + pw * 0.5, statusY + statusRowH * 0.25, fsStatus,
+            g_i18n:getText("sf_see_spray_suppressed"))
     end
 
     setTextColor(1, 1, 1, 1)

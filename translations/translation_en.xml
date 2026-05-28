@@ -796,6 +796,7 @@
     <e k="sf_see_spray_pest"        v="Pest" />
     <e k="sf_see_spray_disease"     v="Disease" />
     <e k="sf_see_spray_weed"        v="Weed" />
+    <e k="sf_see_spray_suppressed"  v="All sections suppressed: no pressure detected" />
 
     <!-- ======================================================
          VARIABLE RATE PANEL

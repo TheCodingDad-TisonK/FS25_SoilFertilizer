@@ -770,6 +770,7 @@
     <e k="sf_see_spray_pest"        v="Pest" />
     <e k="sf_see_spray_disease"     v="Disease" />
     <e k="sf_see_spray_weed"        v="Weed" />
+    <e k="sf_see_spray_suppressed"  v="All sections suppressed: no pressure detected" />
     <!-- VARIABLE RATE PANEL -->
     <e k="sf_var_rate_panel_title" v="[EN] VARIABLE RATE" eh="799c3bf7" />
     <e k="sf_var_rate_label"       v="Var. Rate" />
