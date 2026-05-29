@@ -617,7 +617,7 @@
   "v2.2.3.3": {
     "published_at": "2026-05-24T09:02:22Z",
     "tag": "v2.2.3.3",
-    "peak_downloads": 265
+    "peak_downloads": 268
   },
   "v2.2.3.4-beta": {
     "published_at": "2026-05-25T22:26:53Z",
@@ -637,11 +637,11 @@
   "v2.2.3.8": {
     "published_at": "2026-05-29T08:22:25Z",
     "tag": "v2.2.3.8",
-    "peak_downloads": 85
+    "peak_downloads": 86
   },
   "v2.2.3.9": {
     "published_at": "2026-05-29T16:51:59Z",
     "tag": "v2.2.3.9",
-    "peak_downloads": 38
+    "peak_downloads": 73
   }
 }
