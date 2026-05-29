@@ -1321,57 +1321,66 @@ function SoilFertilityManager:calculateAutoRateIndex(fieldData, fillType)
 
     if profile then
         if profile.pestReduction then
-            -- Insecticide: scale with pest pressure (full pressure → 1.0x, no pressure → 0.20x)
-            local pressure = fieldData.pestPressure or 0
-            multiplier = math.max(MULT_MIN, math.min(1.0, pressure / 100))
+            -- Insecticide: always apply at full rate (preventive/curative — not pressure-scaled)
+            multiplier = 1.0
 
         elseif profile.diseaseReduction then
-            -- Fungicide: scale with disease pressure
-            local pressure = fieldData.diseasePressure or 0
-            multiplier = math.max(MULT_MIN, math.min(1.0, pressure / 100))
+            -- Fungicide: always apply at full rate (preventive/curative — not pressure-scaled)
+            multiplier = 1.0
 
         else
-            -- Nutrient fertilizer: weighted deficit across profile nutrients
-            local totalWeight     = 0
-            local weightedDeficit = 0
-
-            if profile.N and profile.N > 0 then
-                local deficit = math.max(0, targets.N - fieldData.nitrogen.value) / targets.N
-                weightedDeficit = weightedDeficit + deficit * profile.N
-                totalWeight     = totalWeight     + profile.N
-            end
-            if profile.P and profile.P > 0 then
-                local deficit = math.max(0, targets.P - fieldData.phosphorus.value) / targets.P
-                weightedDeficit = weightedDeficit + deficit * profile.P
-                totalWeight     = totalWeight     + profile.P
-            end
-            if profile.K and profile.K > 0 then
-                local deficit = math.max(0, targets.K - fieldData.potassium.value) / targets.K
-                weightedDeficit = weightedDeficit + deficit * profile.K
-                totalWeight     = totalWeight     + profile.K
-            end
-            if profile.pH and profile.pH > 0 then
-                -- pH: how far below target (7.0) normalised to the possible range [5.0, 7.0]
-                local phRange = targets.pH - phMin
-                if phRange > 0 then
-                    local deficit = math.max(0, targets.pH - fieldData.pH) / phRange
-                    weightedDeficit = weightedDeficit + deficit * profile.pH
-                    totalWeight     = totalWeight     + profile.pH
-                end
-            end
-            if profile.OM and profile.OM > 0 then
-                local deficit = math.max(0, targets.OM - fieldData.organicMatter) / targets.OM
-                weightedDeficit = weightedDeficit + deficit * profile.OM
-                totalWeight     = totalWeight     + profile.OM
-            end
-
-            if totalWeight > 0 then
-                -- Map [0, 1] deficit fraction → [0.20, 1.20] multiplier
-                local deficitFraction = weightedDeficit / totalWeight
-                multiplier = MULT_MIN + deficitFraction * (MULT_MAX - MULT_MIN)
+            -- Check if this is an OM-primary product (manure, compost, digestate, etc.)
+            local omPrimary = SoilConstants.SPRAYER_RATE.OM_PRIMARY_PRODUCTS
+            if omPrimary and omPrimary[fillType.name] and profile.OM and profile.OM > 0 then
+                -- Drive rate from OM deficit only — NPK is secondary for organics
+                local omDeficit = math.max(0, targets.OM - fieldData.organicMatter) / math.max(0.01, targets.OM)
+                multiplier = MULT_MIN + omDeficit * (MULT_MAX - MULT_MIN)
                 SoilLogger.debug(
-                    "Auto-rate calc: %s | deficit=%.3f | target multiplier=%.3f",
-                    fillType.name, deficitFraction, multiplier)
+                    "Auto-rate calc (OM-primary): %s | omDeficit=%.3f | target multiplier=%.3f",
+                    fillType.name, omDeficit, multiplier)
+            else
+                -- Nutrient fertilizer: weighted deficit across profile nutrients
+                local totalWeight     = 0
+                local weightedDeficit = 0
+
+                if profile.N and profile.N > 0 then
+                    local deficit = math.max(0, targets.N - fieldData.nitrogen.value) / targets.N
+                    weightedDeficit = weightedDeficit + deficit * profile.N
+                    totalWeight     = totalWeight     + profile.N
+                end
+                if profile.P and profile.P > 0 then
+                    local deficit = math.max(0, targets.P - fieldData.phosphorus.value) / targets.P
+                    weightedDeficit = weightedDeficit + deficit * profile.P
+                    totalWeight     = totalWeight     + profile.P
+                end
+                if profile.K and profile.K > 0 then
+                    local deficit = math.max(0, targets.K - fieldData.potassium.value) / targets.K
+                    weightedDeficit = weightedDeficit + deficit * profile.K
+                    totalWeight     = totalWeight     + profile.K
+                end
+                if profile.pH and profile.pH > 0 then
+                    -- pH: how far below target (7.0) normalised to the possible range [5.0, 7.0]
+                    local phRange = targets.pH - phMin
+                    if phRange > 0 then
+                        local deficit = math.max(0, targets.pH - fieldData.pH) / phRange
+                        weightedDeficit = weightedDeficit + deficit * profile.pH
+                        totalWeight     = totalWeight     + profile.pH
+                    end
+                end
+                if profile.OM and profile.OM > 0 then
+                    local deficit = math.max(0, targets.OM - fieldData.organicMatter) / targets.OM
+                    weightedDeficit = weightedDeficit + deficit * profile.OM
+                    totalWeight     = totalWeight     + profile.OM
+                end
+
+                if totalWeight > 0 then
+                    -- Map [0, 1] deficit fraction → [0.20, 1.20] multiplier
+                    local deficitFraction = weightedDeficit / totalWeight
+                    multiplier = MULT_MIN + deficitFraction * (MULT_MAX - MULT_MIN)
+                    SoilLogger.debug(
+                        "Auto-rate calc: %s | deficit=%.3f | target multiplier=%.3f",
+                        fillType.name, deficitFraction, multiplier)
+                end
             end
         end
 
@@ -1379,8 +1388,8 @@ function SoilFertilityManager:calculateAutoRateIndex(fieldData, fillType)
         -- Not in FERTILIZER_PROFILES — check if it is a herbicide type
         local herbTypes = SoilConstants.WEED_PRESSURE and SoilConstants.WEED_PRESSURE.HERBICIDE_TYPES
         if herbTypes and herbTypes[fillType.name] then
-            local pressure = fieldData.weedPressure or 0
-            multiplier = math.max(MULT_MIN, math.min(1.0, pressure / 100))
+            -- Herbicide: always apply at full rate (preventive/knockdown — not weed-pressure-scaled)
+            multiplier = 1.0
         end
         -- Unknown product type: leave at 1.0 (no adjustment)
     end

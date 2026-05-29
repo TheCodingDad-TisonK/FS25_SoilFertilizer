@@ -24,22 +24,14 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
-    "- Fixed several bugs that are not written down here (PR#444)",
-    "- Fixed multi-purchase pricing: buying 2+ big bags charged double the correct price",
-    "- Fixed spray rates for herbicide/insecticide/fungicide: 1.5 L/ha → 100 L/ha realistic carrier rate",
-    "- Fixed AN 34.5 Dry not loadable into spreaders on some setups",
-    "- Fixed dedicated server fill type registration failure (retry mechanism for late-loading fill types)",
-    "- Fixed issue where only the mid section of the boom would spray",
-    "- Fixed field pass % counter resetting incorrectly when switching products mid-field",
-    "- Fixed auto spray rate using generic N/P/K targets instead of per-crop optimal targets",
-    "- Fixed herbicide/insecticide/fungicide granting field protection before 80% coverage reached",
-    "- Fixed Smart Sensor status showing blank when pest/disease pressure is zero",
-    "- Fixed minimap tile size mismatch on large maps (dots now align to 10m soil cells)",
-    "- Added Field Boundary Control setting: automatically shuts off boom sections that extend outside field boundaries",
-    "- Added minimap soil layer gradient: each tile now shows the actual per-cell soil color (not just field average)",
-    "- Added minimap zoom: bind a key to SF_MINIMAP_ZOOM to cycle 1x / 2x / 4x zoom",
-    "- Added pH bar in soil HUD: center-anchored bar shows acidic/alkaline deviation with threshold ticks and ghost bar",
-    "- Added lime/OM crop burn: applying lime to growing crops triggers -80% yield penalty at harvest (OM: -20%)",
+    "- Fixed sprayer effects persisting after Courseplay folds the implement",
+    "- Fixed Field Detail dialog content clipping (dialog height increased)",
+    "- Fixed N/P/K/pH/Status column headers now right-aligned to match data cells",
+    "- Fixed FAIR status text line wrap in Soil Guide overview page",
+    "- Fixed tick mark label inconsistency in Soil Guide HUD page",
+    "- Fixed Soil Guide HUD page right column overflow (trimmed Smart Systems section)",
+    "- Fixed Soil Guide dialog height to prevent column content clipping",
+    "- Updated Soil Guide FAQ: replaced settings/admin entry with yield penalty explanation",
 }
 
 -- ── i18n helper ───────────────────────────────────────────

@@ -481,7 +481,7 @@ function HookManager:installEffectTypeHook()
     self._effectSolidNames  = { "UREA", "AMS", "AN", "MAP", "DAP", "POTASH", "POLIFOSKA",
                                 "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM" }
     self._effectLiquidNames = { "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME",
-                                "INSECTICIDE", "FUNGICIDE",
+                                "HERBICIDE", "INSECTICIDE", "FUNGICIDE",
                                 "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH" }
     self._effectFertIdx = fertIdx
     self._effectLiqIdx  = liqIdx
@@ -652,27 +652,44 @@ function HookManager:installSprayTypeEffectsHook()
                           "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM" }
     -- Liquid custom types visually match LIQUIDFERTILIZER spraying
     local liquidNames = { "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME",
-                          "INSECTICIDE", "FUNGICIDE",
+                          "HERBICIDE", "INSECTICIDE", "FUNGICIDE",
                           "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH" }
 
-    -- Shared helper: walk a vehicle's sprayType entries and inject our names
+    -- Build name-lookup sets for fast membership tests
+    local liquidNameSet = {}
+    local solidNameSet  = {}
+    for _, n in ipairs(liquidNames) do liquidNameSet[string.upper(n)] = true end
+    for _, n in ipairs(solidNames)  do solidNameSet[string.upper(n)]  = true end
+
+    -- Shared helper: walk a vehicle's sprayType entries and inject our names.
+    --
+    -- getIsSprayTypeActive is name-based (iterates sprayType.fillTypes, compares by
+    -- getFillTypeIndexByName). getActiveSprayType returns the FIRST matching slot.
+    -- For vanilla fill types like HERBICIDE that have their own dedicated slot
+    -- (center-nozzle-only), that slot is found before the LIQUIDFERTILIZER slot →
+    -- only center nozzle sprays.
+    --
+    -- Fix (two passes):
+    --   Pass 1 — add custom names to LIQUIDFERTILIZER / FERTILIZER slots (existing logic).
+    --   Pass 2 — remove those same names from any slot that does NOT have LIQUIDFERTILIZER
+    --            or FERTILIZER as its base. This leaves only the full-boom slot as a
+    --            valid match, so getActiveSprayType finds the correct slot first.
     local function patchVehicleSprayTypes(vehicle)
         local spec = vehicle.spec_sprayer
         if not spec or not spec.sprayTypes then return end
 
+        -- Pass 1: inject our custom names into the base fertilizer slots
         for _, st in ipairs(spec.sprayTypes) do
             if st.fillTypes then
                 local hasFert    = false
                 local hasLiqFert = false
 
-                -- Check what vanilla base types this sprayType slot already covers
                 for _, name in ipairs(st.fillTypes) do
                     local upper = string.upper(name)
                     if upper == "FERTILIZER"        then hasFert    = true end
                     if upper == "LIQUIDFERTILIZER"  then hasLiqFert = true end
                 end
 
-                -- Build a lookup of names already present to avoid duplicates
                 local existing = {}
                 for _, name in ipairs(st.fillTypes) do
                     existing[string.upper(name)] = true
@@ -692,6 +709,30 @@ function HookManager:installSprayTypeEffectsHook()
                         if not existing[name] then
                             table.insert(st.fillTypes, name)
                             existing[name] = true
+                        end
+                    end
+                end
+            end
+        end
+
+        -- Pass 2: strip our names from any slot that lacks a base fertilizer type.
+        -- Without this, vanilla HERBICIDE/INSECTICIDE/FUNGICIDE slots (center-only
+        -- nozzle config) are found first by getActiveSprayType and override the
+        -- full-boom LIQUIDFERTILIZER slot we patched in Pass 1.
+        for _, st in ipairs(spec.sprayTypes) do
+            if st.fillTypes then
+                local hasFert    = false
+                local hasLiqFert = false
+                for _, name in ipairs(st.fillTypes) do
+                    local upper = string.upper(name)
+                    if upper == "FERTILIZER"       then hasFert    = true end
+                    if upper == "LIQUIDFERTILIZER" then hasLiqFert = true end
+                end
+                if not hasFert and not hasLiqFert then
+                    for i = #st.fillTypes, 1, -1 do
+                        local upper = string.upper(st.fillTypes[i])
+                        if liquidNameSet[upper] or solidNameSet[upper] then
+                            table.remove(st.fillTypes, i)
                         end
                     end
                 end
@@ -828,7 +869,7 @@ function HookManager:installDensityMapSprayHook()
 
     -- Build remap: customSprayTypeIndex → vanillaSprayTypeIndex
     local liquidNames = { "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME",
-                          "INSECTICIDE", "FUNGICIDE",
+                          "HERBICIDE", "INSECTICIDE", "FUNGICIDE",
                           "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH" }
     local solidNames  = { "UREA", "AMS", "AN", "MAP", "DAP", "POTASH", "POLIFOSKA",
                           "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM" }
@@ -2114,10 +2155,14 @@ function HookManager:installSprayerAreaHook()
                 -- Sweep all cells under the full boom width for display (#362).
                 -- Nutrients are already attributed to the field by applySingle/section loop;
                 -- markBoomCells only stamps display entries for unvisited lateral cells.
+                -- For solid/map spreaders getBoomCellPositions returns nil (no spanning boom);
+                -- fall back to liter-based coverage so pass counter still updates (#454).
                 if soilSys and fieldId and fieldId > 0 then
                     local boomPts = hookMgrRef:getBoomCellPositions(self, rootX, rootZ)
                     if boomPts then
                         soilSys:markBoomCells(fieldId, boomPts)
+                    elseif liters > 0 then
+                        soilSys:trackSprayerCoverage(fieldId, liters, fillType.name, true)
                     end
                 end
 
@@ -4191,6 +4236,15 @@ function HookManager:installSprayerVisualEffectHook()
             if not vanillaFillType then return end  -- not our custom type, nothing to manage
 
             local effectsVisible = sprayerSelf:getAreEffectsVisible()
+
+            -- If sprayer is folded or mid-fold, suppress effects regardless of getAreEffectsVisible()
+            -- Courseplay folds the implement before filling completes, leaving effects stuck on.
+            if sprayerSelf.spec_foldable then
+                local fa = sprayerSelf.spec_foldable.foldAnimTime
+                if fa ~= nil and fa < 0.9 then
+                    effectsVisible = false
+                end
+            end
 
             -- Only act on state change to avoid per-tick overhead
             if effectsVisible == spec._soilEffectsActive then return end

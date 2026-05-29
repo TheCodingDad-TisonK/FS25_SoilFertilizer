@@ -101,6 +101,9 @@ function SoilHUD.new(soilSystem, settings)
     self.savedCamRotX = nil
     self.savedCamRotY = nil
     self.savedCamRotZ = nil
+    -- Vehicle camera freeze (spec_cameraSystem path)
+    self.savedVehicleCamRotX = nil
+    self.savedVehicleCamRotY = nil
 
     -- Field detection cache (throttled)
     self.cachedFieldId    = nil
@@ -218,6 +221,17 @@ function SoilHUD:enterEditMode()
             end
         end
     end
+    -- Also freeze vehicle camera via spec_cameraSystem (handles in-vehicle camera orbit)
+    self.savedVehicleCamRotX = nil
+    self.savedVehicleCamRotY = nil
+    local cv = g_currentMission and g_currentMission.controlledVehicle
+    if cv and cv.spec_cameraSystem then
+        local ac = cv.spec_cameraSystem.activeCamera
+        if ac then
+            self.savedVehicleCamRotX = ac.rotX
+            self.savedVehicleCamRotY = ac.rotY
+        end
+    end
     SoilLogger.debug("[SoilHUD] Edit mode ON")
 end
 
@@ -228,6 +242,8 @@ function SoilHUD:exitEditMode()
     self.hoverCorner    = nil
     self.draggingSubKey = nil
     self.savedCamRotX, self.savedCamRotY, self.savedCamRotZ = nil, nil, nil
+    self.savedVehicleCamRotX = nil
+    self.savedVehicleCamRotY = nil
     if g_inputBinding and g_inputBinding.setShowMouseCursor then
         g_inputBinding:setShowMouseCursor(false)
     end
@@ -340,8 +356,9 @@ function SoilHUD:calculateHeight()
         
         h = h + SoilHUD.ROW_H * 3
         h = h + SoilHUD.PAD * 1.3
-        
-        h = h + SoilHUD.LINE_H
+
+        h = h + SoilHUD.ROW_H   -- pH bar row
+        h = h + SoilHUD.LINE_H  -- OM text row
         h = h + SoilHUD.PAD * 1.3
         
         local mgr = g_SoilFertilityManager
@@ -594,6 +611,15 @@ end
 -- ── Update ───────────────────────────────────────────────
 function SoilHUD:update(dt)
     self.animTimer = self.animTimer + dt
+
+    -- Field detection runs BEFORE calculateHeight so the panel is always
+    -- sized with the freshest data (avoids rows appearing outside the box).
+    self.fieldDetectTimer = self.fieldDetectTimer + dt * 0.001
+    if self.fieldDetectTimer >= SoilHUD.FIELD_DETECT_INTERVAL then
+        self.fieldDetectTimer = 0
+        self:refreshFieldData()
+    end
+
     if self._heightDirty then
         self:calculateHeight()
         self._heightDirty = false
@@ -613,6 +639,17 @@ function SoilHUD:update(dt)
                 pcall(setRotation, cam, self.savedCamRotX, self.savedCamRotY, self.savedCamRotZ)
             end
         end
+        -- Vehicle camera freeze: restore spec_cameraSystem rotX/rotY each frame
+        if self.savedVehicleCamRotX ~= nil then
+            local cv = g_currentMission and g_currentMission.controlledVehicle
+            if cv and cv.spec_cameraSystem then
+                local ac = cv.spec_cameraSystem.activeCamera
+                if ac then
+                    ac.rotX = self.savedVehicleCamRotX
+                    ac.rotY = self.savedVehicleCamRotY
+                end
+            end
+        end
         if g_gui and (g_gui:getIsGuiVisible() or g_gui:getIsDialogVisible()) then
             self:exitEditMode()
         end
@@ -624,13 +661,6 @@ function SoilHUD:update(dt)
         end
     else
         self.hoverCorner = nil
-    end
-
-    -- Throttled field detection (every 0.5s)
-    self.fieldDetectTimer = self.fieldDetectTimer + dt * 0.001
-    if self.fieldDetectTimer >= SoilHUD.FIELD_DETECT_INTERVAL then
-        self.fieldDetectTimer = 0
-        self:refreshFieldData()
     end
 
     -- Cache sprayer state once per frame here so draw() never traverses vehicle tables
@@ -1160,9 +1190,10 @@ function SoilHUD:drawPanel()
         cy = cy - pad * 0.8
 
         -- pH bar row (issue #438: center-anchored bar with ghost bar)
-        cy = self:drawPHRow(info, px, cy + SoilHUD.ROW_H * s, pw, s, fontMult, fillType)
+        cy = self:drawPHRow(info, px, cy, pw, s, fontMult, fillType)
 
         -- OM text row (compact, alongside divider)
+        cy = cy - SoilHUD.LINE_H * s
         local omCol = self:omColor(info.organicMatter)
         local omLabelX = tx
         local omValX   = tx + 0.018*s
@@ -1409,8 +1440,9 @@ function SoilHUD:drawNutrientRow(label, baseLabel, nutrient, px, cy, pw, s, font
 end
 
 -- ── pH bar row ───────────────────────────────────────────
--- Center-anchored bar: left = acidic, right = alkaline, center = optimal (6.75).
--- Ghost bar shows the direction lime/gypsum will push pH.
+-- Left-fill bar: fills from left edge to current pH position, colored by status.
+-- Optimal tick mark at pH 6.75 so the player can see how far they are from target.
+-- Ghost bar shows directional preview when a pH-modifying product is loaded.
 -- Returns updated cy.
 function SoilHUD:drawPHRow(info, px, cy, pw, s, fontMult, fillType)
     local pad  = SoilHUD.PAD * s
@@ -1433,58 +1465,39 @@ function SoilHUD:drawPHRow(info, px, cy, pw, s, fontMult, fillType)
 
     local pH = info.pH or PH_OPT
     local phNorm  = (math.max(PH_MIN, math.min(PH_MAX, pH)) - PH_MIN) / phRange
-    local optNorm = (PH_OPT - PH_MIN) / phRange  -- 0.5
+    local optNorm = (PH_OPT - PH_MIN) / phRange
+
+    local pHCol = self:pHColor(pH)
 
     -- Background
     self:drawRect(barX, barY, barW, barH, SoilHUD.C_BAR_BG)
 
-    -- Colored fill from optimal toward current pH
-    local pHCol = self:pHColor(pH)
-    if phNorm < optNorm then
-        local fillW = (optNorm - phNorm) * barW
-        self:drawRect(barX + phNorm * barW, barY, fillW, barH, pHCol)
-    elseif phNorm > optNorm then
-        local fillW = (phNorm - optNorm) * barW
-        self:drawRect(barX + optNorm * barW, barY, fillW, barH, pHCol)
+    -- Left-fill: from left edge to current pH position
+    if phNorm > 0 then
+        self:drawRect(barX, barY, phNorm * barW, barH, pHCol)
     end
 
     -- Ghost bar: directional preview if a pH-modifying product is loaded
     if fillType then
         local profile = SoilConstants.FERTILIZER_PROFILES and SoilConstants.FERTILIZER_PROFILES[fillType.name]
         if profile and profile.pH then
-            -- Typical full-pass delta is ~0.4 for LIME; scale visually to ~15% of bar width
             local ghostW = barW * 0.15 * (math.abs(profile.pH) / 0.16)
             ghostW = math.max(barW * 0.04, math.min(barW * 0.25, ghostW))
             if profile.pH > 0 then
-                -- Raises pH: ghost extends right from current position
-                local gx = barX + phNorm * barW
-                self:drawRect(gx, barY, ghostW, barH, pHCol, 0.30)
+                -- Raises pH: ghost extends right from current fill edge
+                self:drawRect(barX + phNorm * barW, barY, ghostW, barH, pHCol, 0.35)
             else
-                -- Lowers pH: ghost extends left from current position
+                -- Lowers pH: ghost extends left from current fill edge
                 local gx = barX + phNorm * barW - ghostW
-                self:drawRect(gx, barY, ghostW, barH, pHCol, 0.30)
+                self:drawRect(math.max(barX, gx), barY, ghostW, barH, pHCol, 0.35)
             end
         end
     end
 
-    -- Center optimal line
+    -- Optimal tick mark at pH 6.75
     local divW = 0.0005 * s
     local optX = barX + optNorm * barW
-    self:drawRect(optX - divW*0.5, barY - 0.001*s, divW, barH + 0.002*s, {0.85, 0.85, 0.85, 0.6})
-
-    -- Threshold tick marks: 5.5=poor, 6.0=fair, 7.0=fair, 7.5=poor
-    local ticks = {
-        {pH=5.5, col={0.90, 0.35, 0.20, 0.75}},
-        {pH=6.0, col={0.90, 0.80, 0.20, 0.75}},
-        {pH=7.0, col={0.90, 0.80, 0.20, 0.75}},
-        {pH=7.5, col={0.90, 0.35, 0.20, 0.75}},
-    }
-    local tickW = 0.0005 * s
-    local tickH = barH + 0.002 * s
-    for _, tk in ipairs(ticks) do
-        local tNorm = (tk.pH - PH_MIN) / phRange
-        self:drawRect(barX + tNorm*barW - tickW*0.5, barY - 0.001*s, tickW, tickH, tk.col)
-    end
+    self:drawRect(optX - divW*0.5, barY - 0.001*s, divW, barH + 0.002*s, {0.85, 0.85, 0.85, 0.70})
 
     -- Numeric value
     local valX = barX + barW + 0.006*s
@@ -1993,9 +2006,10 @@ function SoilHUD:drawSprayerRatePanel()
                     pH = defaults.pH,
                     OM = defaults.OM,
                 } or defaults
-                if profile.N and profile.N > 0 then targetText = targetText .. targets.N .. "N " end
-                if profile.P and profile.P > 0 then targetText = targetText .. targets.P .. "P " end
-                if profile.K and profile.K > 0 then targetText = targetText .. targets.K .. "K " end
+                local ppm = SoilConstants.PPM_DISPLAY or { N=1, P=1, K=1 }
+                if profile.N and profile.N > 0 then targetText = targetText .. math.floor(targets.N * (ppm.N or 1) + 0.5) .. "N " end
+                if profile.P and profile.P > 0 then targetText = targetText .. math.floor(targets.P * (ppm.P or 1) + 0.5) .. "P " end
+                if profile.K and profile.K > 0 then targetText = targetText .. math.floor(targets.K * (ppm.K or 1) + 0.5) .. "K " end
                 if profile.pH and profile.pH > 0 then targetText = targetText .. targets.pH .. "pH " end
                 setTextColor(0.7, 0.9, 0.7, 0.8)
                 renderText(cx, scrollY - self:py(6)*s, 0.008 * fontMult * s, targetText)

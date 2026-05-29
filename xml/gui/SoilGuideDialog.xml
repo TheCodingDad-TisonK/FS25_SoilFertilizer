@@ -56,7 +56,7 @@
   <GUIProfiles>
 
     <Profile name="sfGuide_bg" extends="fs25_dialogBg">
-      <size value="1120px 900px"/>
+      <size value="1120px 930px"/>
     </Profile>
 
     <!-- Horizontal tab button row -->
@@ -82,22 +82,22 @@
 
     <!-- Column panel container -->
     <Profile name="sfGuide_colPanel" extends="emptyPanel" with="anchorTopCenter">
-      <size value="510px 600px"/>
+      <size value="510px 630px"/>
     </Profile>
 
     <!-- Column backgrounds -->
     <Profile name="sfGuide_colBg" extends="baseReference" with="anchorTopCenter">
-      <size value="510px 600px"/>
+      <size value="510px 630px"/>
       <imageColor value="0.08 0.08 0.12 0.90"/>
     </Profile>
     <Profile name="sfGuide_colBgAlt" extends="baseReference" with="anchorTopCenter">
-      <size value="510px 600px"/>
+      <size value="510px 630px"/>
       <imageColor value="0.06 0.10 0.14 0.90"/>
     </Profile>
 
     <!-- Vertical content BoxLayout — Lua adds TextElements at runtime -->
     <Profile name="sfGuide_col" extends="emptyPanel" with="anchorTopCenter">
-      <size value="494px 584px"/>
+      <size value="494px 614px"/>
       <flowDirection value="vertical"/>
       <useFullVisibility value="false"/>
       <alignmentX value="left"/>
