@@ -23,54 +23,54 @@
       <Text   profile="sfDetail_sectionHeader"  text="$l10n_sf_detail_section_nutrients" position="0px -100px"/>
 
       <Text profile="sfDetail_label"  text="$l10n_sf_detail_n_label"  position="-240px -128px"/>
-      <Text profile="sfDetail_value"  id="detailN"        text="--"   position="-80px  -128px"/>
-      <Text profile="sfDetail_status" id="detailNStatus"  text=""      position=" 90px  -128px"/>
+      <Text profile="sfDetail_value"  id="detailN"       text="--"    position="-80px -128px"/>
+      <Text profile="sfDetail_status" id="detailNStatus" text=""       position="90px -128px"/>
 
       <Text profile="sfDetail_label"  text="$l10n_sf_detail_p_label"  position="-240px -153px"/>
-      <Text profile="sfDetail_value"  id="detailP"        text="--"   position="-80px  -153px"/>
-      <Text profile="sfDetail_status" id="detailPStatus"  text=""      position=" 90px  -153px"/>
+      <Text profile="sfDetail_value"  id="detailP"       text="--"    position="-80px -153px"/>
+      <Text profile="sfDetail_status" id="detailPStatus" text=""       position="90px -153px"/>
 
       <Text profile="sfDetail_label"  text="$l10n_sf_detail_k_label"  position="-240px -178px"/>
-      <Text profile="sfDetail_value"  id="detailK"        text="--"   position="-80px  -178px"/>
-      <Text profile="sfDetail_status" id="detailKStatus"  text=""      position=" 90px  -178px"/>
+      <Text profile="sfDetail_value"  id="detailK"       text="--"    position="-80px -178px"/>
+      <Text profile="sfDetail_status" id="detailKStatus" text=""       position="90px -178px"/>
 
       <Text profile="sfDetail_label"  text="$l10n_sf_detail_ph_label" position="-240px -203px"/>
-      <Text profile="sfDetail_value"  id="detailPH"       text="--"   position="-80px  -203px"/>
-      <Text profile="sfDetail_status" id="detailPHStatus" text=""      position=" 90px  -203px"/>
+      <Text profile="sfDetail_value"  id="detailPH"      text="--"    position="-80px -203px"/>
+      <Text profile="sfDetail_status" id="detailPHStatus" text=""      position="90px -203px"/>
 
       <Text profile="sfDetail_label"  text="$l10n_sf_detail_om_label" position="-240px -228px"/>
-      <Text profile="sfDetail_value"  id="detailOM"       text="--"   position="-80px  -228px"/>
-      <Text profile="sfDetail_status" id="detailOMStatus" text=""      position=" 90px  -228px"/>
+      <Text profile="sfDetail_value"  id="detailOM"      text="--"    position="-80px -228px"/>
+      <Text profile="sfDetail_status" id="detailOMStatus" text=""      position="90px -228px"/>
 
       <!-- ─── CROP PRESSURE ─── -->
       <Bitmap profile="sfDetail_sectionBg3alt"  position="0px -270px"/>
       <Text   profile="sfDetail_sectionHeader"  text="$l10n_sf_detail_section_pressure" position="0px -275px"/>
 
       <Text profile="sfDetail_label"  text="$l10n_sf_detail_weed_label"    position="-240px -303px"/>
-      <Text profile="sfDetail_value"  id="detailWeed"       text="--"      position="-80px  -303px"/>
-      <Text profile="sfDetail_status" id="detailWeedStatus" text=""        position=" 90px  -303px"/>
+      <Text profile="sfDetail_value"  id="detailWeed"          text="--"  position="-80px -303px"/>
+      <Text profile="sfDetail_status" id="detailWeedStatus"    text=""    position="90px -303px"/>
 
       <Text profile="sfDetail_label"  text="$l10n_sf_detail_pest_label"    position="-240px -328px"/>
-      <Text profile="sfDetail_value"  id="detailPest"       text="--"      position="-80px  -328px"/>
-      <Text profile="sfDetail_status" id="detailPestStatus" text=""        position=" 90px  -328px"/>
+      <Text profile="sfDetail_value"  id="detailPest"          text="--"  position="-80px -328px"/>
+      <Text profile="sfDetail_status" id="detailPestStatus"    text=""    position="90px -328px"/>
 
       <Text profile="sfDetail_label"  text="$l10n_sf_detail_disease_label" position="-240px -353px"/>
-      <Text profile="sfDetail_value"  id="detailDisease"    text="--"      position="-80px  -353px"/>
-      <Text profile="sfDetail_status" id="detailDiseaseStatus" text=""     position=" 90px  -353px"/>
+      <Text profile="sfDetail_value"  id="detailDisease"       text="--"  position="-80px -353px"/>
+      <Text profile="sfDetail_status" id="detailDiseaseStatus" text=""    position="90px -353px"/>
 
       <!-- ─── HISTORY ─── -->
       <Bitmap profile="sfDetail_sectionBg3history" position="0px -394px"/>
       <Text   profile="sfDetail_sectionHeader"     text="$l10n_sf_detail_section_history" position="0px -399px"/>
 
       <Text profile="sfDetail_label"     text="$l10n_sf_detail_last_crop_label" position="-240px -427px"/>
-      <Text profile="sfDetail_valueWide" id="detailLastCrop" text="--"           position=" 80px  -427px"/>
+      <Text profile="sfDetail_valueWide" id="detailLastCrop"   text="--"         position="80px -427px"/>
 
       <Text profile="sfDetail_label"     text="$l10n_sf_detail_rotation_label"  position="-240px -452px"/>
-      <Text profile="sfDetail_valueWide" id="detailRotation"  text="--"         position=" 80px  -452px"/>
+      <Text profile="sfDetail_valueWide" id="detailRotation"   text="--"         position="80px -452px"/>
 
       <Text profile="sfDetail_label"  text="$l10n_sf_detail_yield_eff_label" position="-240px -477px"/>
-      <Text profile="sfDetail_value"  id="detailYieldEff"      text="--"      position="-80px  -477px"/>
-      <Text profile="sfDetail_status" id="detailYieldEffStatus" text=""       position=" 90px  -477px"/>
+      <Text profile="sfDetail_value"  id="detailYieldEff"       text="--"     position="-80px -477px"/>
+      <Text profile="sfDetail_status" id="detailYieldEffStatus" text=""       position="90px -477px"/>
 
       <!-- No data fallback -->
       <Text profile="sfDetail_noData" id="detailNoData"
