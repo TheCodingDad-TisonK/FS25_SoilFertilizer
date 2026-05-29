@@ -13,70 +13,64 @@
       <Text profile="fs25_dialogTitle" id="detailTitle"
             text="$l10n_sf_detail_title" position="0px -30px"/>
 
-      <!-- Field ID (left) + Urgency (right) — outside sections -->
-      <Text profile="sfDetail_fieldId"      id="detailFieldId"       text="" position="-160px -63px"/>
+      <!-- Field ID (left) + Urgency (right) -->
+      <Text profile="sfDetail_fieldId"      id="detailFieldId"       text=""                            position="-160px -63px"/>
       <Text profile="sfDetail_urgencyLabel" id="detailUrgencyLabel"  text="$l10n_sf_detail_urgency_label" position="150px -63px"/>
-      <Text profile="sfDetail_urgencyValue" id="detailUrgency"       text="--" position="290px -63px"/>
+      <Text profile="sfDetail_urgencyValue" id="detailUrgency"       text="--"                          position="290px -63px"/>
 
-      <!-- ─── SOIL NUTRIENTS ─── -->
-      <GuiElement profile="sfDetail_section5" position="0px -95px">
-        <Bitmap profile="sfDetail_sectionBg5" position="0px 0px"/>
-        <Text profile="sfDetail_sectionHeader" text="$l10n_sf_detail_section_nutrients" position="0px -5px"/>
+      <!-- ─── SOIL NUTRIENTS — background + rows at absolute dialog Y ─── -->
+      <Bitmap profile="sfDetail_sectionBg5"     position="0px -95px"/>
+      <Text   profile="sfDetail_sectionHeader"  text="$l10n_sf_detail_section_nutrients" position="0px -100px"/>
 
-        <Text profile="sfDetail_label" text="$l10n_sf_detail_n_label"  position="-240px -33px"/>
-        <Text profile="sfDetail_value" id="detailN"        text="--"   position="-80px  -33px"/>
-        <Text profile="sfDetail_status" id="detailNStatus" text=""      position=" 90px  -33px"/>
+      <Text profile="sfDetail_label"  text="$l10n_sf_detail_n_label"  position="-240px -128px"/>
+      <Text profile="sfDetail_value"  id="detailN"       text="--"    position="-80px -128px"/>
+      <Text profile="sfDetail_status" id="detailNStatus" text=""       position="90px -128px"/>
 
-        <Text profile="sfDetail_label" text="$l10n_sf_detail_p_label"  position="-240px -58px"/>
-        <Text profile="sfDetail_value" id="detailP"        text="--"   position="-80px  -58px"/>
-        <Text profile="sfDetail_status" id="detailPStatus" text=""      position=" 90px  -58px"/>
+      <Text profile="sfDetail_label"  text="$l10n_sf_detail_p_label"  position="-240px -153px"/>
+      <Text profile="sfDetail_value"  id="detailP"       text="--"    position="-80px -153px"/>
+      <Text profile="sfDetail_status" id="detailPStatus" text=""       position="90px -153px"/>
 
-        <Text profile="sfDetail_label" text="$l10n_sf_detail_k_label"  position="-240px -83px"/>
-        <Text profile="sfDetail_value" id="detailK"        text="--"   position="-80px  -83px"/>
-        <Text profile="sfDetail_status" id="detailKStatus" text=""      position=" 90px  -83px"/>
+      <Text profile="sfDetail_label"  text="$l10n_sf_detail_k_label"  position="-240px -178px"/>
+      <Text profile="sfDetail_value"  id="detailK"       text="--"    position="-80px -178px"/>
+      <Text profile="sfDetail_status" id="detailKStatus" text=""       position="90px -178px"/>
 
-        <Text profile="sfDetail_label" text="$l10n_sf_detail_ph_label" position="-240px -108px"/>
-        <Text profile="sfDetail_value" id="detailPH"       text="--"   position="-80px  -108px"/>
-        <Text profile="sfDetail_status" id="detailPHStatus" text=""     position=" 90px  -108px"/>
+      <Text profile="sfDetail_label"  text="$l10n_sf_detail_ph_label" position="-240px -203px"/>
+      <Text profile="sfDetail_value"  id="detailPH"      text="--"    position="-80px -203px"/>
+      <Text profile="sfDetail_status" id="detailPHStatus" text=""      position="90px -203px"/>
 
-        <Text profile="sfDetail_label" text="$l10n_sf_detail_om_label" position="-240px -133px"/>
-        <Text profile="sfDetail_value" id="detailOM"       text="--"   position="-80px  -133px"/>
-        <Text profile="sfDetail_status" id="detailOMStatus" text=""     position=" 90px  -133px"/>
-      </GuiElement>
+      <Text profile="sfDetail_label"  text="$l10n_sf_detail_om_label" position="-240px -228px"/>
+      <Text profile="sfDetail_value"  id="detailOM"      text="--"    position="-80px -228px"/>
+      <Text profile="sfDetail_status" id="detailOMStatus" text=""      position="90px -228px"/>
 
       <!-- ─── CROP PRESSURE ─── -->
-      <GuiElement profile="sfDetail_section3" position="0px -270px">
-        <Bitmap profile="sfDetail_sectionBg3alt" position="0px 0px"/>
-        <Text profile="sfDetail_sectionHeader" text="$l10n_sf_detail_section_pressure" position="0px -5px"/>
+      <Bitmap profile="sfDetail_sectionBg3alt"  position="0px -270px"/>
+      <Text   profile="sfDetail_sectionHeader"  text="$l10n_sf_detail_section_pressure" position="0px -275px"/>
 
-        <Text profile="sfDetail_label" text="$l10n_sf_detail_weed_label"    position="-240px -33px"/>
-        <Text profile="sfDetail_value" id="detailWeed"     text="--"        position="-80px  -33px"/>
-        <Text profile="sfDetail_status" id="detailWeedStatus" text=""        position=" 90px  -33px"/>
+      <Text profile="sfDetail_label"  text="$l10n_sf_detail_weed_label"    position="-240px -303px"/>
+      <Text profile="sfDetail_value"  id="detailWeed"          text="--"  position="-80px -303px"/>
+      <Text profile="sfDetail_status" id="detailWeedStatus"    text=""    position="90px -303px"/>
 
-        <Text profile="sfDetail_label" text="$l10n_sf_detail_pest_label"    position="-240px -58px"/>
-        <Text profile="sfDetail_value" id="detailPest"     text="--"        position="-80px  -58px"/>
-        <Text profile="sfDetail_status" id="detailPestStatus" text=""        position=" 90px  -58px"/>
+      <Text profile="sfDetail_label"  text="$l10n_sf_detail_pest_label"    position="-240px -328px"/>
+      <Text profile="sfDetail_value"  id="detailPest"          text="--"  position="-80px -328px"/>
+      <Text profile="sfDetail_status" id="detailPestStatus"    text=""    position="90px -328px"/>
 
-        <Text profile="sfDetail_label" text="$l10n_sf_detail_disease_label" position="-240px -83px"/>
-        <Text profile="sfDetail_value" id="detailDisease"  text="--"        position="-80px  -83px"/>
-        <Text profile="sfDetail_status" id="detailDiseaseStatus" text=""     position=" 90px  -83px"/>
-      </GuiElement>
+      <Text profile="sfDetail_label"  text="$l10n_sf_detail_disease_label" position="-240px -353px"/>
+      <Text profile="sfDetail_value"  id="detailDisease"       text="--"  position="-80px -353px"/>
+      <Text profile="sfDetail_status" id="detailDiseaseStatus" text=""    position="90px -353px"/>
 
       <!-- ─── HISTORY ─── -->
-      <GuiElement profile="sfDetail_section3history" position="0px -394px">
-        <Bitmap profile="sfDetail_sectionBg3history" position="0px 0px"/>
-        <Text profile="sfDetail_sectionHeader" text="$l10n_sf_detail_section_history" position="0px -5px"/>
+      <Bitmap profile="sfDetail_sectionBg3history" position="0px -394px"/>
+      <Text   profile="sfDetail_sectionHeader"     text="$l10n_sf_detail_section_history" position="0px -399px"/>
 
-        <Text profile="sfDetail_label" text="$l10n_sf_detail_last_crop_label" position="-240px -33px"/>
-        <Text profile="sfDetail_valueWide" id="detailLastCrop" text="--"      position=" 80px  -33px"/>
+      <Text profile="sfDetail_label"     text="$l10n_sf_detail_last_crop_label" position="-240px -427px"/>
+      <Text profile="sfDetail_valueWide" id="detailLastCrop"   text="--"         position="80px -427px"/>
 
-        <Text profile="sfDetail_label" text="$l10n_sf_detail_rotation_label"  position="-240px -58px"/>
-        <Text profile="sfDetail_valueWide" id="detailRotation"  text="--"     position=" 80px  -58px"/>
+      <Text profile="sfDetail_label"     text="$l10n_sf_detail_rotation_label"  position="-240px -452px"/>
+      <Text profile="sfDetail_valueWide" id="detailRotation"   text="--"         position="80px -452px"/>
 
-        <Text profile="sfDetail_label" text="$l10n_sf_detail_yield_eff_label" position="-240px -83px"/>
-        <Text profile="sfDetail_value"  id="detailYieldEff"    text="--"      position="-80px  -83px"/>
-        <Text profile="sfDetail_status" id="detailYieldEffStatus" text=""     position=" 90px  -83px"/>
-      </GuiElement>
+      <Text profile="sfDetail_label"  text="$l10n_sf_detail_yield_eff_label" position="-240px -477px"/>
+      <Text profile="sfDetail_value"  id="detailYieldEff"       text="--"     position="-80px -477px"/>
+      <Text profile="sfDetail_status" id="detailYieldEffStatus" text=""       position="90px -477px"/>
 
       <!-- No data fallback -->
       <Text profile="sfDetail_noData" id="detailNoData"
@@ -98,38 +92,6 @@
       <size value="760px 700px"/>
     </Profile>
 
-    <!-- 5-row section (nutrients) -->
-    <Profile name="sfDetail_section5" extends="emptyPanel" with="anchorTopCenter">
-      <size value="700px 166px"/>
-    </Profile>
-    <Profile name="sfDetail_sectionBg5" extends="baseReference" with="anchorTopCenter">
-      <size value="700px 166px"/>
-      <imageColor value="0.08 0.08 0.12 0.9"/>
-    </Profile>
-
-    <!-- 3-row section (crop pressure, alt color) -->
-    <Profile name="sfDetail_section3" extends="emptyPanel" with="anchorTopCenter">
-      <size value="700px 116px"/>
-    </Profile>
-    <Profile name="sfDetail_sectionBg3alt" extends="baseReference" with="anchorTopCenter">
-      <size value="700px 116px"/>
-      <imageColor value="0.06 0.10 0.14 0.9"/>
-    </Profile>
-
-    <!-- 2-row section (history, legacy — unused) -->
-    <Profile name="sfDetail_section2" extends="emptyPanel" with="anchorTopCenter">
-      <size value="700px 91px"/>
-    </Profile>
-
-    <!-- 3-row history section -->
-    <Profile name="sfDetail_section3history" extends="emptyPanel" with="anchorTopCenter">
-      <size value="700px 116px"/>
-    </Profile>
-    <Profile name="sfDetail_sectionBg3history" extends="baseReference" with="anchorTopCenter">
-      <size value="700px 116px"/>
-      <imageColor value="0.08 0.08 0.12 0.9"/>
-    </Profile>
-
     <!-- Section header: gold, bold, centered -->
     <Profile name="sfDetail_sectionHeader" extends="fs25_textDefault" with="anchorTopCenter">
       <size value="660px 22px"/>
@@ -139,7 +101,7 @@
       <textAlignment value="center"/>
     </Profile>
 
-    <!-- Row label — gray, left-aligned, anchorTopCenter -->
+    <!-- Row label — gray, left-aligned -->
     <Profile name="sfDetail_label" extends="fs25_textDefault" with="anchorTopCenter">
       <size value="180px 22px"/>
       <textSize value="12px"/>
@@ -156,7 +118,7 @@
       <textAlignment value="left"/>
     </Profile>
 
-    <!-- Wide value for history rows (crop name, rotation) -->
+    <!-- Wide value for history rows -->
     <Profile name="sfDetail_valueWide" extends="fs25_textDefault" with="anchorTopCenter">
       <size value="400px 22px"/>
       <textSize value="13px"/>
@@ -173,7 +135,21 @@
       <textAlignment value="left"/>
     </Profile>
 
-    <!-- Field ID sub-title (outside sections) -->
+    <!-- Section backgrounds -->
+    <Profile name="sfDetail_sectionBg5" extends="baseReference" with="anchorTopCenter">
+      <size value="700px 166px"/>
+      <imageColor value="0.08 0.08 0.12 0.9"/>
+    </Profile>
+    <Profile name="sfDetail_sectionBg3alt" extends="baseReference" with="anchorTopCenter">
+      <size value="700px 116px"/>
+      <imageColor value="0.06 0.10 0.14 0.9"/>
+    </Profile>
+    <Profile name="sfDetail_sectionBg3history" extends="baseReference" with="anchorTopCenter">
+      <size value="700px 116px"/>
+      <imageColor value="0.08 0.08 0.12 0.9"/>
+    </Profile>
+
+    <!-- Field ID sub-title -->
     <Profile name="sfDetail_fieldId" extends="fs25_textDefault" with="anchorTopCenter">
       <size value="340px 24px"/>
       <textSize value="18px"/>

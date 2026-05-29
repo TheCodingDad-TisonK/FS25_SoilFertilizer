@@ -75,6 +75,7 @@
 
     <!-- Page subtitle (italic gold, centered) -->
     <Profile name="sfGuide_subtitle" extends="fs25_textDefault" with="anchorTopCenter">
+      <size value="960px 22px"/>
       <textSize value="11px"/>
       <textColor value="0.85 0.75 0.30 0.90"/>
       <textAlignment value="center"/>

@@ -4237,11 +4237,15 @@ function HookManager:installSprayerVisualEffectHook()
 
             local effectsVisible = sprayerSelf:getAreEffectsVisible()
 
-            -- If sprayer is folded or mid-fold, suppress effects regardless of getAreEffectsVisible()
+            -- Suppress effects while the fold animation is actively running mid-travel.
             -- Courseplay folds the implement before filling completes, leaving effects stuck on.
+            -- In FS25, foldAnimTime=0 and foldAnimTime=1 are both stable end-states (fully folded
+            -- or fully deployed depending on the vehicle). Suppressing at any value below 0.9 breaks
+            -- all sprayers whose deployed/working state is foldAnimTime=0 (the default base state).
+            -- Only suppress when strictly between 0 and 1 (actively animating).
             if sprayerSelf.spec_foldable then
                 local fa = sprayerSelf.spec_foldable.foldAnimTime
-                if fa ~= nil and fa < 0.9 then
+                if fa ~= nil and fa > 0 and fa < 1 then
                     effectsVisible = false
                 end
             end
