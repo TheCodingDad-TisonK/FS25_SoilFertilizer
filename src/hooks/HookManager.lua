@@ -4237,6 +4237,15 @@ function HookManager:installSprayerVisualEffectHook()
 
             local effectsVisible = sprayerSelf:getAreEffectsVisible()
 
+            -- If sprayer is folded or mid-fold, suppress effects regardless of getAreEffectsVisible()
+            -- Courseplay folds the implement before filling completes, leaving effects stuck on.
+            if sprayerSelf.spec_foldable then
+                local fa = sprayerSelf.spec_foldable.foldAnimTime
+                if fa ~= nil and fa < 0.9 then
+                    effectsVisible = false
+                end
+            end
+
             -- Only act on state change to avoid per-tick overhead
             if effectsVisible == spec._soilEffectsActive then return end
 
