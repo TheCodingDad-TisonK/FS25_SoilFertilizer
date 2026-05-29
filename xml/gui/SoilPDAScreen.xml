@@ -31,11 +31,11 @@
         <GuiElement id="sidebarOverview" position="0px 0px" width="420px" height="640px">
           <Text profile="sf_sectionHeader" text="$l10n_sf_pda_tab_fields" position="10px -10px"/>
           <Text profile="sf_colHeader"      text="$l10n_sf_pda_col_field"  position="10px -50px" size="60px 24px"/>
-          <Text profile="sf_colHeader"      text="N"                        position="76px -50px" size="58px 24px"/>
-          <Text profile="sf_colHeader"      text="P"                        position="138px -50px" size="58px 24px"/>
-          <Text profile="sf_colHeader"      text="K"                        position="200px -50px" size="58px 24px"/>
-          <Text profile="sf_colHeader"      text="pH"                       position="262px -50px" size="48px 24px"/>
-          <Text profile="sf_colHeader"      text="$l10n_sf_pda_col_status" position="314px -50px" size="96px 24px"/>
+          <Text profile="sf_colHeaderRight"  text="N"                        position="76px -50px" size="58px 24px"/>
+          <Text profile="sf_colHeaderRight"  text="P"                        position="138px -50px" size="58px 24px"/>
+          <Text profile="sf_colHeaderRight"  text="K"                        position="200px -50px" size="58px 24px"/>
+          <Text profile="sf_colHeaderRight"  text="pH"                       position="262px -50px" size="48px 24px"/>
+          <Text profile="sf_colHeaderRight"  text="$l10n_sf_pda_col_status" position="314px -50px" size="96px 24px"/>
           <GuiElement position="0px -78px" width="420px" height="552px">
             <SmoothList id="sidebarFieldList" profile="sf_smoothList"
                         startClipperElementName="sideListStart"
@@ -88,7 +88,7 @@
       <!-- TAB 1: FARM OVERVIEW -->
       <GuiElement id="overviewContent" position="0px 0px" width="1000px" height="668px">
         <Text profile="sf_sectionHeader" text="$l10n_sf_pda_section_farm_overview" position="0px 648px"/>
-        <ThreePartBitmap width="960px" height="600px" position="0px 40px">
+        <ThreePartBitmap width="960px" height="600px" position="0px 60px">
           <GuiElement profile="fs25_subCategoryContainer" width="920px">
             <Text profile="sf_statLabel" text="$l10n_sf_report_fields_tracked"   position="10px -30px"  size="300px 24px"/>
             <Text profile="sf_statValue" id="statsFieldsTracked" text="0"        position="320px -30px"/>
