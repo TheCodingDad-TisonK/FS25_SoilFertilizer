@@ -991,9 +991,9 @@ SoilConstants.VARIABLE_RATE = {
 -- Index 3 = default (×1.0 or base value).  Admin-only panel maps
 -- settings integer 1-5 → actual simulation value via these tables.
 SoilConstants.TUNING = {
-    DEFAULT_N  = {50, 75, 100, 125, 150},       -- Starting nitrogen  (points)
+    DEFAULT_N  = {15, 30,  50,  75, 100},       -- Starting nitrogen  (points); idx 3 = fair (~FIELD_DEFAULTS)
     DEFAULT_P  = {15, 25,  35,  50,  70},        -- Starting phosphorus (points)
-    DEFAULT_K  = {50, 75, 100, 125, 150},        -- Starting potassium  (points)
+    DEFAULT_K  = {10, 20,  40,  65, 100},        -- Starting potassium  (points); idx 3 = fair (~FIELD_DEFAULTS)
     DEFAULT_PH = {5.5, 6.0, 6.5, 7.0, 7.5},     -- Starting pH
     DEFAULT_OM = {2.0, 4.0, 6.0, 8.0, 10.0},    -- Starting organic matter (%)
     RATE_MULT  = {0.25, 0.50, 1.0, 1.50, 2.0},  -- Depletion / efficiency multiplier

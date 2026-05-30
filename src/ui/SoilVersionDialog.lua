@@ -24,18 +24,14 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
-    "- Fixed soil monitor HUD layout: compaction, coverage and hint rows overflowed the panel",
-    "- Fixed coverage % (Pass%) hidden when not in a fertilizer applicator",
-    "- Fixed liquid lime not writing lime ground layer to field (white overlay missing)",
-    "- Fixed OM-spreading products (COMPOST, MANURE, etc.) showing N/P/K targets in auto rate display",
-    "- Fixed edit mode camera orbit no longer drifts (scene node rotation now frozen)",
-    "- Fixed vanilla HERBICIDE spray type inadvertently stripped from HERBICIDE-only sprayer slots",
-    "- Fixed all custom solid fertilizers (UREA, MAP, etc.) unable to fill spreaders via big bag",
-    "- Organic dry types (COMPOST, PELLETIZED MANURE) now also accepted by dedicated manure spreaders",
-    "- Fixed herbicide: weed pressure and yield penalty now correctly respect active protection window",
-    "- Fixed herbicide: weeds now visually wither (turn brown) when protection threshold is reached",
-    "- Fixed boom sprayer coverage tracking now uses VWW section positions (no more instant full-pass)",
-    "- Fixed vanilla HERBICIDE spray visual effects no longer display when vehicle is stationary",
+    "- Fixed N and K starting at 90%+ on new saves (tuning defaults now start at fair range)",
+    "- Fixed Pass% capping at ~50% after a full-field spray (crop polygon area used as denominator)",
+    "- Fixed Partial Width mode crediting inactive boom sections toward Pass% coverage",
+    "- Fixed variable rate display oscillating rapidly with MAP / P-type fertilizers (smoothed)",
+    "- Fixed liquid lime draining entire tank in seconds (spray type index corrected)",
+    "- Updated Danish (da) guide translation — Guide dialog now fully in Danish",
+    "- Fixed herbicide session coverage reset (second spray no longer instant-triggers on first tick)",
+    "- Fixed Weeds/Pests/Disease HUD bars rendering one row above their labels",
 }
 
 -- ── i18n helper ───────────────────────────────────────────

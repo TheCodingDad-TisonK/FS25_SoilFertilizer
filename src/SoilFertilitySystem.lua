@@ -1325,13 +1325,20 @@ function SoilFertilitySystem:scanFields()
             local actualFieldId = field.farmland and field.farmland.id
 
             if actualFieldId and actualFieldId > 0 then
-                -- Farmland.areaInHa is loaded from XML and always populated (default 2.5 ha).
-                -- Field.areaHa is computed from polygon geometry but defaults to 1.0 in Field.new()
-                -- before the polygon loads — 1.0 is truthy in Lua, so using field.areaHa first
-                -- means the farmland fallback would NEVER fire for un-loaded polygons, causing
-                -- every field to be recorded as exactly 1 ha regardless of actual size.
-                -- Use farmland.areaInHa as the primary source; field.areaHa only as fallback.
-                local area = (field.farmland and field.farmland.areaInHa) or field.areaHa or 1.0
+                -- Prefer the actual crop polygon area (field.areaHa) over farmland.areaInHa.
+                -- Farmlands include roads, hedges, and uncultivable land — typically ~2× the
+                -- actual sprayed area — which causes Pass% to cap at ~50% after a full field pass.
+                -- field.areaHa defaults to 1.0 before the polygon loads; skip it when it is
+                -- suspiciously close to that sentinel value so we don't record tiny false areas.
+                -- initialize() runs after loadMission00Finished so polygons are loaded by now.
+                local farmlandArea = (field.farmland and field.farmland.areaInHa) or 1.0
+                local cropArea     = field.areaHa
+                local area
+                if cropArea and math.abs(cropArea - 1.0) > 0.05 and cropArea <= farmlandArea + 0.1 then
+                    area = cropArea
+                else
+                    area = farmlandArea
+                end
 
                 SoilLogger.debug("Found field %d (%.2f ha)", actualFieldId, area)
 
@@ -2253,14 +2260,20 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
     local limits = SoilConstants.NUTRIENT_LIMITS
 
     -- AREA NORMALIZATION: Calculate hectares for this field.
-    -- Confirm area from farmland on first spray — fixes dedicated-server first-frame spike
-    -- where fields are lazy-created with default 1.0 ha before the farmland manager is
-    -- queried.  Without this, factor = liters/1.0 instead of liters/realArea, causing
-    -- nutrients to jump by (realArea)× too much on the opening spray frame (issue #290).
+    -- Confirm area on first spray — prefer the actual crop polygon area (field.areaHa)
+    -- because farmland.areaInHa includes roads/hedges (~2× crop area), which causes
+    -- Pass% to cap at ~50% after a full field pass (issue #475/#476).
     if not field._farmlandAreaConfirmed and g_farmlandManager then
         local farmlandObj = g_farmlandManager:getFarmlandById(fieldId)
         if farmlandObj and farmlandObj.areaInHa and farmlandObj.areaInHa > 0 then
-            field.fieldArea = farmlandObj.areaInHa
+            -- Try crop polygon area first via world-position lookup
+            local cropField = g_fieldManager and g_fieldManager:getFieldAtWorldPosition(rootX, rootZ)
+            local cropArea  = cropField and cropField.areaHa
+            if cropArea and math.abs(cropArea - 1.0) > 0.05 then
+                field.fieldArea = cropArea
+            else
+                field.fieldArea = farmlandObj.areaInHa
+            end
         end
         field._farmlandAreaConfirmed = true
     end
@@ -3283,14 +3296,26 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
         self.insecticideAppliedDay[fieldId] = getXMLInt(xmlFile, fieldKey .. "#insecticideAppliedDay") or 0
         self.fungicideAppliedDay[fieldId] = getXMLInt(xmlFile, fieldKey .. "#fungicideAppliedDay") or 0
 
-        -- Refresh fieldArea from the live farmland object — corrects stale values from saves
-        -- written before the scan priority bug was fixed (where field.areaHa == 1.0 default
-        -- was recorded as the real area because it's truthy and blocked the farmland fallback).
-        -- g_farmlandManager.farmlands[id].areaInHa comes from map XML and is always reliable.
+        -- Refresh fieldArea — prefer the actual crop polygon area (field.areaHa) so that
+        -- Pass% uses the correct denominator. Farmland.areaInHa includes roads/hedges
+        -- (~2× crop area), causing Pass% to cap at ~50% on a full-field spray (#475/#476).
+        -- Use farmland area as fallback when crop polygon area is the unloaded default (1.0).
         if g_farmlandManager then
             local farmlandObj = g_farmlandManager:getFarmlandById(fieldId)
             if farmlandObj and farmlandObj.areaInHa and farmlandObj.areaInHa > 0 then
-                self.fieldData[fieldId].fieldArea = farmlandObj.areaInHa
+                local bestArea = farmlandObj.areaInHa
+                if g_fieldManager and g_fieldManager.fields then
+                    for _, fld in ipairs(g_fieldManager.fields) do
+                        if fld and fld.farmland and fld.farmland.id == fieldId then
+                            local ca = fld.areaHa
+                            if ca and math.abs(ca - 1.0) > 0.05 and ca <= farmlandObj.areaInHa + 0.1 then
+                                bestArea = ca
+                                break
+                            end
+                        end
+                    end
+                end
+                self.fieldData[fieldId].fieldArea = bestArea
             end
         end
 

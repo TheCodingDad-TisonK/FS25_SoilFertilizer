@@ -1392,6 +1392,10 @@ function HookManager:installVariableRateHook()
                         end
                     end
 
+                    -- Smooth rate to prevent tick-to-tick flickering as the boom crosses
+                    -- zone boundaries (#479). 40% blend toward target per tick gives ~0.5s lag.
+                    local prevRate = sensorMgr:getSectionRate(vehicleId, section) or rate
+                    rate = prevRate * 0.6 + rate * 0.4
                     -- Never exceed the player's manual rate ceiling
                     rate = math.min(rate, manualMult)
                     sensorMgr:setSectionRate(vehicleId, section, rate)
@@ -4428,7 +4432,10 @@ function HookManager:getBoomCellPositions(vehicle, rootX, rootZ)
         local vww = obj.spec_variableWorkWidth
         if vww and vww.sections then
             for _, section in ipairs(vww.sections) do
-                if section.maxWidthNode then
+                -- Skip inactive sections (Partial Width mode): their maxWidthNodes are still
+                -- physically at the boom tip position, which would incorrectly inflate the
+                -- detected boom span and credit cells that were never sprayed (#475/#476).
+                if section.isActive ~= false and section.maxWidthNode then
                     local ok, x, _, z = pcall(getWorldTranslation, section.maxWidthNode)
                     if ok and x then table.insert(xs, x); table.insert(zs, z) end
                 end
