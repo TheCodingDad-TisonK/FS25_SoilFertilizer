@@ -32,6 +32,7 @@ SoilVersionDialog.CHANGELOG = {
     "- Fixed vanilla HERBICIDE spray type inadvertently stripped from HERBICIDE-only sprayer slots",
     "- Fixed all custom solid fertilizers (UREA, MAP, etc.) unable to fill spreaders via big bag",
     "- Organic dry types (COMPOST, PELLETIZED MANURE) now also accepted by dedicated manure spreaders",
+    "- Fixed herbicide: weed pressure and yield penalty now correctly respect active protection window",
 }
 
 -- ── i18n helper ───────────────────────────────────────────

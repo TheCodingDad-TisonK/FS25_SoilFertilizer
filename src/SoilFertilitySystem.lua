@@ -238,18 +238,21 @@ function SoilFertilitySystem:computeYieldModifier(fieldId, fruitTypeIndex)
         end
     end
 
-    -- Weed pressure modifier (skip for grassland)
+    -- Weed pressure modifier (skip for grassland; skip when herbicide is active)
     if self.settings.weedPressure and SoilConstants.WEED_PRESSURE and not isGrass then
-        local wp       = SoilConstants.WEED_PRESSURE
-        local pressure = field.weedPressure or 0
-        local penalty
-        if pressure < wp.LOW then         penalty = wp.YIELD_PENALTY_LOW
-        elseif pressure < wp.MEDIUM then  penalty = wp.YIELD_PENALTY_MID
-        elseif pressure < wp.HIGH then    penalty = wp.YIELD_PENALTY_HIGH
-        else                              penalty = wp.YIELD_PENALTY_PEAK end
-        if penalty > 0 then
-            modifier = modifier * (1.0 - penalty)
-            self:log("Weed penalty field %d: pressure=%.0f → -%.0f%%", fieldId, pressure, penalty * 100)
+        local isProtected = (field.herbicideDaysLeft or 0) > 0
+        if not isProtected then
+            local wp       = SoilConstants.WEED_PRESSURE
+            local pressure = field.weedPressure or 0
+            local penalty
+            if pressure < wp.LOW then         penalty = wp.YIELD_PENALTY_LOW
+            elseif pressure < wp.MEDIUM then  penalty = wp.YIELD_PENALTY_MID
+            elseif pressure < wp.HIGH then    penalty = wp.YIELD_PENALTY_HIGH
+            else                              penalty = wp.YIELD_PENALTY_PEAK end
+            if penalty > 0 then
+                modifier = modifier * (1.0 - penalty)
+                self:log("Weed penalty field %d: pressure=%.0f → -%.0f%%", fieldId, pressure, penalty * 100)
+            end
         end
     end
 
@@ -966,11 +969,67 @@ function SoilFertilitySystem:onHerbicideApplied(fieldId, effectiveness)
     self:log("[Herbicide] Field %d: weed pressure %.0f -> %.0f, protected for %d days",
         fieldId, before, field.weedPressure, field.herbicideDaysLeft)
 
+    -- Transition weeds to withered (brown) visual state in the game's density map.
+    -- The game's FieldState.weedFactor stays high until the density map is updated, so
+    -- we drive it ourselves: withered now so weeds turn brown, cleared on next daily tick.
+    self:applyWeedMapState(fieldId, SoilConstants.WEED_PRESSURE.WEED_STATE_WITHERED)
+
     -- Broadcast in multiplayer
     if g_server and g_currentMission and g_currentMission.missionDynamicInfo and g_currentMission.missionDynamicInfo.isMultiplayer then
         if SoilFieldUpdateEvent then
             g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
         end
+    end
+end
+
+--- Writes a weed state to the game's density map for the given field.
+--- When targetState is WEED_STATE_WITHERED, reads the field's current weed state and
+--- looks up its herbicide replacement via weedSystem:getHerbicideReplacements() so we
+--- transition to the correct withered equivalent rather than hardcoding state 7.
+--- When targetState is WEED_STATE_CLEAR (0), unconditionally clears all weeds.
+--- Uses FieldUpdateTask — same API as EasyDevControls, server-side only.
+---@param fieldId number
+---@param targetState number  WEED_STATE_WITHERED or WEED_STATE_CLEAR
+function SoilFertilitySystem:applyWeedMapState(fieldId, targetState)
+    if not g_server then return end
+    local weedSystem = g_currentMission and g_currentMission.weedSystem
+    if not weedSystem or not weedSystem:getMapHasWeed() then return end
+
+    local fsField = g_fieldManager and g_fieldManager:getFieldById(fieldId)
+    if not fsField then return end
+
+    local weedState = targetState
+
+    -- For withered transitions: look up the correct target state from the game's
+    -- own herbicide replacement table instead of hardcoding state 7.
+    if targetState == SoilConstants.WEED_PRESSURE.WEED_STATE_WITHERED then
+        local repOk, repData = pcall(function() return weedSystem:getHerbicideReplacements() end)
+        if repOk and repData and repData.weed and repData.weed.replacements then
+            -- Read the field's current weed state to pick the right replacement
+            local fieldState = fsField:getFieldState()
+            local posX, posZ = fsField:getIndicatorPosition()
+            fieldState:update(posX, posZ)
+            local currentState = fieldState.weedState or 0
+            local replacement = repData.weed.replacements[currentState]
+            if replacement and replacement ~= 0 then
+                weedState = replacement
+                self:log("[Herbicide] Field %d: weed state %d → withered %d (from replacements)",
+                    fieldId, currentState, weedState)
+            elseif currentState == 0 then
+                return  -- no weeds present — nothing to wither
+            end
+        end
+    end
+
+    local ok, err = pcall(function()
+        local task = FieldUpdateTask.new()
+        task:setField(fsField)
+        task:setArea(fsField:getDensityMapPolygon())
+        task:setWeedState(weedState)
+        task:enqueue(true)
+    end)
+    if not ok then
+        self:log("[Herbicide] applyWeedMapState field %d state %d failed: %s", fieldId, weedState, tostring(err))
     end
 end
 
@@ -1701,9 +1760,13 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
         if not isGrassland then
             local wp = SoilConstants.WEED_PRESSURE
 
-            -- Tick herbicideDaysLeft for HUD display only (game handles suppression)
+            -- Tick herbicideDaysLeft counter; clear the density map when protection expires
             if (field.herbicideDaysLeft or 0) > 0 then
                 field.herbicideDaysLeft = field.herbicideDaysLeft - 1
+                if field.herbicideDaysLeft == 0 then
+                    -- Withered weeds have been brown for one day — now erase them entirely
+                    self:applyWeedMapState(fieldId, SoilConstants.WEED_PRESSURE.WEED_STATE_CLEAR)
+                end
             end
 
             -- Sample FieldState.weedFactor from the game's weed density map.
@@ -1744,7 +1807,14 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
                     end
                 end
             end
-            field.weedPressure = math.max(0, math.min(100, gameWeedFactor * 100))
+            -- When herbicide is active the game's density map still shows dying weeds for
+            -- 1-2 days — reading it would overwrite the pressure reduction from onHerbicideApplied.
+            -- Under protection, only allow pressure to decrease (weeds dying), never increase.
+            if (field.herbicideDaysLeft or 0) > 0 then
+                field.weedPressure = math.min(field.weedPressure or 0, math.max(0, gameWeedFactor * 100))
+            else
+                field.weedPressure = math.max(0, math.min(100, gameWeedFactor * 100))
+            end
 
             -- Sync zone cells so overlay map matches field-level weed pressure.
             -- Zone WP is only written during event-driven paths (spray/plow/cultivate),
