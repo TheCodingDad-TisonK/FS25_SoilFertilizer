@@ -1674,7 +1674,162 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing, area)
 
     self:log("Lazy-created field %d area=%.2f ha confirmed=%s",
         fieldId, self.fieldData[fieldId].fieldArea, tostring(confirmedArea))
+
+    -- Pre-populate zone tiles immediately so the overlay shows at full opacity
+    -- as soon as a new field is created (e.g. on farmland purchase).
+    self:_prePopulateZoneData(fieldId)
+
     return self.fieldData[fieldId]
+end
+
+-- ── Zone Data Pre-Population ──────────────────────────────────────────────────
+
+-- Ray-casting point-in-polygon (XZ plane). verts: array of {x, z}.
+local function _isPointInPoly(px, pz, verts)
+    local n = #verts
+    if n < 3 then return false end
+    local inside = false
+    local j = n
+    for i = 1, n do
+        local xi, zi = verts[i].x, verts[i].z
+        local xj, zj = verts[j].x, verts[j].z
+        if ((zi > pz) ~= (zj > pz)) and
+           (px < (xj - xi) * (pz - zi) / (zj - zi) + xi) then
+            inside = not inside
+        end
+        j = i
+    end
+    return inside
+end
+
+-- Pre-populate zoneData for a single field so overlay tiles show at full opacity on load.
+-- Samples the field polygon at CELL_SIZE step, clamps total cells to MAX_ZONE_CELLS.
+function SoilFertilitySystem:_prePopulateZoneData(fieldId)
+    local field = self.fieldData[fieldId]
+    if not field then return end
+    -- Skip if already populated (sprayer has already been active this session)
+    if next(field.zoneData) ~= nil then return end
+
+    -- Find the FS25 field object (farmland-keyed) from g_fieldManager
+    local fsField = nil
+    if g_fieldManager and g_fieldManager.fields then
+        for _, f in ipairs(g_fieldManager.fields) do
+            if f and f.farmland and f.farmland.id == fieldId then
+                fsField = f
+                break
+            end
+        end
+    end
+    if not fsField then return end
+
+    -- Collect polygon vertices
+    local polyNodes = fsField.polygonPoints
+    local verts = {}
+    if polyNodes and #polyNodes > 0 then
+        for i = 1, #polyNodes do
+            local nodeId = polyNodes[i]
+            if nodeId and nodeId ~= 0 then
+                local ok, wx, _, wz = pcall(getWorldTranslation, nodeId)
+                if ok and wx then
+                    table.insert(verts, {x = wx, z = wz})
+                end
+            end
+        end
+    end
+
+    -- Fallback to centroid only if polygon unavailable
+    if #verts < 3 then
+        if fsField.posX and fsField.posZ then
+            local zone = SoilConstants.ZONE
+            local cx = math.floor(fsField.posX / zone.CELL_SIZE)
+            local cz = math.floor(fsField.posZ / zone.CELL_SIZE)
+            local cellKey = tostring(cx * 10000 + cz)
+            field.zoneData[cellKey] = {
+                N = field.nitrogen, P = field.phosphorus, K = field.potassium,
+                pH = field.pH, OM = field.organicMatter,
+                weedPressure = field.weedPressure or 0,
+                pestPressure = field.pestPressure or 0,
+                diseasePressure = field.diseasePressure or 0,
+                compaction = field.compaction or 0,
+            }
+        end
+        return
+    end
+
+    -- Bounding box
+    local minX, maxX = verts[1].x, verts[1].x
+    local minZ, maxZ = verts[1].z, verts[1].z
+    for i = 2, #verts do
+        if verts[i].x < minX then minX = verts[i].x end
+        if verts[i].x > maxX then maxX = verts[i].x end
+        if verts[i].z < minZ then minZ = verts[i].z end
+        if verts[i].z > maxZ then maxZ = verts[i].z end
+    end
+
+    local zone = SoilConstants.ZONE
+    local step = zone.CELL_SIZE  -- 10 m baseline
+
+    -- Adaptive coarsening: if estimated cell count exceeds MAX_ZONE_CELLS, widen step
+    local bboxW = maxX - minX
+    local bboxH = maxZ - minZ
+    local estCells = math.ceil(bboxW / step) * math.ceil(bboxH / step)
+    if estCells > MAX_ZONE_CELLS then
+        -- Scale step up so total fits, with a generous multiplier
+        step = step * math.ceil(math.sqrt(estCells / MAX_ZONE_CELLS))
+    end
+
+    -- Snapshot current field-average values once (avoids repeated table lookups)
+    local fN  = field.nitrogen
+    local fP  = field.phosphorus
+    local fK  = field.potassium
+    local fPH = field.pH
+    local fOM = field.organicMatter
+    local fW  = field.weedPressure or 0
+    local fPe = field.pestPressure or 0
+    local fD  = field.diseasePressure or 0
+    local fC  = field.compaction or 0
+
+    local count = 0
+    local startX = minX + step * 0.5
+    local startZ = minZ + step * 0.5
+    local x = startX
+    while x <= maxX and count < MAX_ZONE_CELLS do
+        local z = startZ
+        while z <= maxZ and count < MAX_ZONE_CELLS do
+            if _isPointInPoly(x, z, verts) then
+                local cx2 = math.floor(x / zone.CELL_SIZE)
+                local cz2 = math.floor(z / zone.CELL_SIZE)
+                local cellKey = tostring(cx2 * 10000 + cz2)
+                if not field.zoneData[cellKey] then
+                    field.zoneData[cellKey] = {
+                        N = fN, P = fP, K = fK,
+                        pH = fPH, OM = fOM,
+                        weedPressure = fW,
+                        pestPressure = fPe,
+                        diseasePressure = fD,
+                        compaction = fC,
+                    }
+                    count = count + 1
+                end
+            end
+            z = z + step
+        end
+        x = x + step
+    end
+
+    SoilLogger.debug("Pre-populated zone data: field %d, %d cells (step=%.0fm)", fieldId, count, step)
+end
+
+-- Pre-populate zone data for ALL loaded fields that have empty zoneData.
+-- Called once after loadSoilData() so overlay tiles are visible from session start.
+function SoilFertilitySystem:prePopulateAllZoneData()
+    if not (g_fieldManager and g_fieldManager.fields) then return end
+    local count = 0
+    for fieldId in pairs(self.fieldData) do
+        self:_prePopulateZoneData(fieldId)
+        count = count + 1
+    end
+    SoilLogger.info("Zone data pre-population complete: %d field(s) processed", count)
 end
 
 -- Daily soil update — PHASE 4: converted to batch scheduler.
