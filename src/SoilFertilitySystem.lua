@@ -2399,9 +2399,11 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
     local isOMAmendment   = entry.OM and not (entry.pH and entry.pH > 0)
     if (isLimeAmendment or isOMAmendment) and not field._amendBurnNotified then
         local spx, spz = self._lastSprayX, self._lastSprayZ
-        if spx and spz and g_fieldManager then
-            local ok, fsField = pcall(g_fieldManager.getFieldAtWorldPosition, g_fieldManager, spx, spz)
-            if ok and fsField and (fsField.fruitType or 0) > 0 then
+        if spx and spz and g_farmlandManager then
+            local farmlandTmp = g_farmlandManager:getFarmlandAtWorldPosition(spx, spz)
+            local fsField = farmlandTmp and g_fieldManager and g_fieldManager.farmlandIdFieldMapping and g_fieldManager.farmlandIdFieldMapping[farmlandTmp.id]
+            local hasCrop = fsField and fsField.fieldState and fsField.fieldState.fruitTypeIndex and fsField.fieldState.fruitTypeIndex ~= FruitType.UNKNOWN
+            if hasCrop then
                 if isLimeAmendment then
                     field.amendBurnPenalty = 0.80
                     field._amendBurnNotified = true
@@ -2428,8 +2430,14 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
     if not field._farmlandAreaConfirmed and g_farmlandManager then
         local farmlandObj = g_farmlandManager:getFarmlandById(fieldId)
         if farmlandObj and farmlandObj.areaInHa and farmlandObj.areaInHa > 0 then
-            -- Try crop polygon area first via world-position lookup
-            local cropField = g_fieldManager and g_fieldManager:getFieldAtWorldPosition(rootX, rootZ)
+            -- Try crop polygon area via farmland mapping (g_fieldManager has no getFieldAtWorldPosition)
+            local cropField = nil
+            if g_farmlandManager and self._lastSprayX and self._lastSprayZ then
+                local _fl = g_farmlandManager:getFarmlandAtWorldPosition(self._lastSprayX, self._lastSprayZ)
+                if _fl and g_fieldManager and g_fieldManager.farmlandIdFieldMapping then
+                    cropField = g_fieldManager.farmlandIdFieldMapping[_fl.id]
+                end
+            end
             local cropArea  = cropField and cropField.areaHa
             if cropArea and math.abs(cropArea - 1.0) > 0.05 then
                 field.fieldArea = cropArea
@@ -2547,10 +2555,7 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
 
         -- Write updated values to density map layers (per-pixel, at sprayer position)
         if self.layerSystem and self.layerSystem.available then
-            local x, _, z = getWorldTranslation(0)  -- fallback; sprayer hook sets vehicle pos via soilSystem
-            if self._lastSprayX and self._lastSprayZ then
-                x, z = self._lastSprayX, self._lastSprayZ
-            end
+            local x, z = self._lastSprayX, self._lastSprayZ
             if x and z then
                 if entry.N then self.layerSystem:updatePixelForField("nitrogen",      x, z, field.nitrogen,      2.0) end
                 if entry.P then self.layerSystem:updatePixelForField("phosphorus",    x, z, field.phosphorus,    2.0) end
@@ -3553,6 +3558,7 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
         end
         if pushed > 0 then
             self:info("Pushed %d fields to density map layers after load", pushed)
+            self.layerSystem.hasData = true
         end
     end
 
