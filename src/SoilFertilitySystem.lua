@@ -1809,12 +1809,19 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
         if not isGrassland then
             local wp = SoilConstants.WEED_PRESSURE
 
-            -- Tick herbicideDaysLeft counter; clear the density map when protection expires
+            -- Tick herbicideDaysLeft counter.
+            -- When protection expires: reset session coverage so the next application
+            -- requires a full field pass again rather than triggering on the first tick.
+            -- Do NOT force WEED_STATE_CLEAR — state 7 (withered) transitions to 0
+            -- naturally via the vanilla WeedSystem; forcing it here causes an abrupt
+            -- "weeds vanish instantly" when time is fast-forwarded.
             if (field.herbicideDaysLeft or 0) > 0 then
                 field.herbicideDaysLeft = field.herbicideDaysLeft - 1
                 if field.herbicideDaysLeft == 0 then
-                    -- Withered weeds have been brown for one day — now erase them entirely
-                    self:applyWeedMapState(fieldId, SoilConstants.WEED_PRESSURE.WEED_STATE_CLEAR)
+                    field.sessionCoverageHa       = 0
+                    field.sessionCoverageFraction = 0
+                    field.sessionCoverageCells    = {}
+                    field.sessionLastProduct      = nil
                 end
             end
 

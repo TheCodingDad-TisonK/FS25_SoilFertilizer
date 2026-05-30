@@ -224,7 +224,7 @@
             <physics massPerLiter="1.40" maxPhysicalSurfaceAngle="0"/>
             <economy pricePerLiter="0.28"/>
             <image hud="$dataS/menu/hud/fillTypes/hud_fill_liquidFertilizer.png"/>
-            <sprayType sprayTypeStr="LIME"/>
+            <sprayType sprayTypeStr="LIQUIDFERTILIZER"/>
             <pallet filename="objects/liquidTank/liquidlime/liquidTank_liquidlime.xml" />
         </fillType>
 
