@@ -651,6 +651,8 @@ function HookManager:installSprayTypeEffectsHook()
     local solidNames  = { "UREA", "AMS", "AN", "MAP", "DAP", "POTASH", "POLIFOSKA",
                           "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM" }
     -- Liquid custom types visually match LIQUIDFERTILIZER spraying
+    -- HERBICIDE is included so it gets added to LIQUIDFERTILIZER slots (full-boom spray),
+    -- but it is a vanilla fill type and must NOT be stripped from HERBICIDE-only slots in Pass 2.
     local liquidNames = { "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME",
                           "HERBICIDE", "INSECTICIDE", "FUNGICIDE",
                           "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH" }
@@ -660,6 +662,11 @@ function HookManager:installSprayTypeEffectsHook()
     local solidNameSet  = {}
     for _, n in ipairs(liquidNames) do liquidNameSet[string.upper(n)] = true end
     for _, n in ipairs(solidNames)  do solidNameSet[string.upper(n)]  = true end
+
+    -- Pass 2 must NOT strip vanilla fill type names from their native slots.
+    -- HERBICIDE is a vanilla type that lives in HERBICIDE-only slots — removing it would
+    -- break herbicide application. Only strip our own custom types.
+    local vanillaNames = { HERBICIDE = true }  -- extend if more vanilla types added to liquidNames
 
     -- Shared helper: walk a vehicle's sprayType entries and inject our names.
     --
@@ -731,7 +738,8 @@ function HookManager:installSprayTypeEffectsHook()
                 if not hasFert and not hasLiqFert then
                     for i = #st.fillTypes, 1, -1 do
                         local upper = string.upper(st.fillTypes[i])
-                        if liquidNameSet[upper] or solidNameSet[upper] then
+                        -- Don't strip vanilla fill type names — only strip our custom injected names
+                        if not vanillaNames[upper] and (liquidNameSet[upper] or solidNameSet[upper]) then
                             table.remove(st.fillTypes, i)
                         end
                     end
@@ -856,23 +864,30 @@ function HookManager:installDensityMapSprayHook()
         return false
     end
 
-    local liqST = g_sprayTypeManager:getSprayTypeByName("LIQUIDFERTILIZER")
-    local dryST = g_sprayTypeManager:getSprayTypeByName("FERTILIZER")
+    local liqST  = g_sprayTypeManager:getSprayTypeByName("LIQUIDFERTILIZER")
+    local dryST  = g_sprayTypeManager:getSprayTypeByName("FERTILIZER")
+    local limeST = g_sprayTypeManager:getSprayTypeByName("LIME")
 
     if not liqST and not dryST then
         SoilLogger.warning("DensityMap spray hook: vanilla spray types not found - skipping")
         return false
     end
 
-    local liqIdx = liqST and liqST.index
-    local dryIdx = dryST and dryST.index
+    local liqIdx  = liqST  and liqST.index
+    local dryIdx  = dryST  and dryST.index
+    local limeIdx = limeST and limeST.index
 
     -- Build remap: customSprayTypeIndex → vanillaSprayTypeIndex
-    local liquidNames = { "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME",
-                          "HERBICIDE", "INSECTICIDE", "FUNGICIDE",
+    -- LIQUIDLIME is excluded from liquidNames here — it must remap to LIME (not LIQUIDFERTILIZER)
+    -- so FSDensityMapUtil.updateSprayArea writes the lime ground state, not the fertilizer state.
+    -- HERBICIDE is excluded — it must keep its native HERBICIDE spray type for weed density map.
+    local liquidNames = { "UAN32", "UAN28", "ANHYDROUS", "STARTER",
+                          "INSECTICIDE", "FUNGICIDE",
                           "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH" }
     local solidNames  = { "UREA", "AMS", "AN", "MAP", "DAP", "POTASH", "POLIFOSKA",
                           "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM" }
+    -- LIQUIDLIME must remap to LIME so FSDensityMapUtil writes the lime ground state
+    local limeNames   = { "LIQUIDLIME" }
 
     local remap = {}
     if liqIdx then
@@ -885,6 +900,12 @@ function HookManager:installDensityMapSprayHook()
         for _, name in ipairs(solidNames) do
             local st = g_sprayTypeManager:getSprayTypeByName(name)
             if st then remap[st.index] = dryIdx end
+        end
+    end
+    if limeIdx then
+        for _, name in ipairs(limeNames) do
+            local st = g_sprayTypeManager:getSprayTypeByName(name)
+            if st then remap[st.index] = limeIdx end
         end
     end
 
@@ -1967,6 +1988,12 @@ function HookManager:installSprayerAreaHook()
                 return
             end
             if not sprayFillLevel or sprayFillLevel <= 0 then return end
+
+            -- Require minimum forward speed (matches WeedSpotSpray.onEndWorkAreaProcessing).
+            -- A stationary sprayer drains the tank and consumes liters but covers no ground —
+            -- without this guard coverage climbs to 100% without moving.
+            if (self.getLastSpeed and self:getLastSpeed() or 0) < 0.5 then return end
+
             local success, errorMsg = pcall(function()
                 local fillType = g_fillTypeManager:getFillTypeByIndex(fillTypeIndex)
                 if not fillType then return end
@@ -2768,7 +2795,7 @@ function HookManager:installFillUnitHookEarly()
     local liquidNames        = {"UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME", "INSECTICIDE", "FUNGICIDE",
                                 "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH"}
     -- Organic dry types also work in manure spreaders (MANURE fill-unit base)
-    local manureCompatNames  = {"BIOSOLIDS", "CHICKEN_MANURE"}
+    local manureCompatNames  = {"COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE"}
 
     local original = FillUnit.onPostLoad
     FillUnit.onPostLoad = Utils.prependedFunction(original, function(vehicleSelf)
@@ -2810,7 +2837,7 @@ function HookManager:installFillUnitHookEarly()
                     end)
                     if ok and catTypes then
                         for _, ft in pairs(catTypes) do
-                            if ft and ft.index then fu.supportedFillTypes[ft.index] = true end
+                            if ft then fu.supportedFillTypes[ft] = true end
                         end
                     end
                 end
@@ -2820,7 +2847,7 @@ function HookManager:installFillUnitHookEarly()
                     end)
                     if ok and catTypes then
                         for _, ft in pairs(catTypes) do
-                            if ft and ft.index then fu.supportedFillTypes[ft.index] = true end
+                            if ft then fu.supportedFillTypes[ft] = true end
                         end
                     end
                 end
@@ -2883,8 +2910,8 @@ function HookManager:installFillUnitHook()
                           "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM"}
     local liquidNames = {"UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME", "INSECTICIDE", "FUNGICIDE",
                          "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH"}
-    -- These organic dry types also work in manure spreaders (MANURE fill-unit base).
-    local manureCompatNames = {"BIOSOLIDS", "CHICKEN_MANURE"}
+    -- Organic dry types also work in manure spreaders (MANURE fill-unit base).
+    local manureCompatNames = {"COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE"}
     -- Store for deferred re-patch (dedi server timing fix)
     self._fuSolidNames  = solidNames
     self._fuLiquidNames = liquidNames
@@ -4233,9 +4260,21 @@ function HookManager:installSprayerVisualEffectHook()
                 spec._soilEffectsActive   = nil
             end
 
-            if not vanillaFillType then return end  -- not our custom type, nothing to manage
+            if not vanillaFillType then
+                -- Vanilla fill type (e.g. HERBICIDE): stop effects every tick when stationary.
+                -- We run AFTER the vanilla onUpdateTick (appendedFunction), so vanilla may restart
+                -- effects each tick. State-change guards don't work here — must suppress every tick.
+                -- g_effectManager:stopEffects is a no-op when effects are already stopped.
+                local speed = (sprayerSelf.getLastSpeed and sprayerSelf:getLastSpeed()) or 0
+                if speed < 0.5 then
+                    stopSprayerEffects(sprayerSelf)
+                end
+                return
+            end
 
-            local effectsVisible = sprayerSelf:getAreEffectsVisible()
+            -- Gate on speed: no visual spray when standing still (matches our nutrient hook guard)
+            local speed = (sprayerSelf.getLastSpeed and sprayerSelf:getLastSpeed()) or 0
+            local effectsVisible = sprayerSelf:getAreEffectsVisible() and speed >= 0.5
 
             -- Suppress effects while the fold animation is actively running mid-travel.
             -- Courseplay folds the implement before filling completes, leaving effects stuck on.
@@ -4353,16 +4392,31 @@ function HookManager:getBoomCellPositions(vehicle, rootX, rootZ)
     local xs, zs = {}, {}
 
     local function collectFromObj(obj)
-        if not obj or not obj.spec_workArea or not obj.spec_workArea.workAreas then return end
-        for _, wa in ipairs(obj.spec_workArea.workAreas) do
-            if wa.start then
-                local ok, x, _, z = pcall(getWorldTranslation, wa.start)
-                if ok and x then table.insert(xs, x); table.insert(zs, z) end
+        if not obj then return end
+        -- WorkArea start/end nodes
+        if obj.spec_workArea and obj.spec_workArea.workAreas then
+            for _, wa in ipairs(obj.spec_workArea.workAreas) do
+                if wa.start then
+                    local ok, x, _, z = pcall(getWorldTranslation, wa.start)
+                    if ok and x then table.insert(xs, x); table.insert(zs, z) end
+                end
+                local waEnd = wa["end"]  -- "end" is a Lua keyword; must use bracket access
+                if waEnd then
+                    local ok, x, _, z = pcall(getWorldTranslation, waEnd)
+                    if ok and x then table.insert(xs, x); table.insert(zs, z) end
+                end
             end
-            local waEnd = wa["end"]  -- "end" is a Lua keyword; must use bracket access
-            if waEnd then
-                local ok, x, _, z = pcall(getWorldTranslation, waEnd)
-                if ok and x then table.insert(xs, x); table.insert(zs, z) end
+        end
+        -- VWW section maxWidthNodes capture the outer boom edge of each section —
+        -- workArea start/end nodes are often co-located at the centre, giving a
+        -- near-zero span and causing the function to return nil for boom sprayers.
+        local vww = obj.spec_variableWorkWidth
+        if vww and vww.sections then
+            for _, section in ipairs(vww.sections) do
+                if section.maxWidthNode then
+                    local ok, x, _, z = pcall(getWorldTranslation, section.maxWidthNode)
+                    if ok and x then table.insert(xs, x); table.insert(zs, z) end
+                end
             end
         end
     end

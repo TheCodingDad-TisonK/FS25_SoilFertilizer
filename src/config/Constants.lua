@@ -787,6 +787,11 @@ SoilConstants.WEED_PRESSURE = {
     LOW    = 20,
     MEDIUM = 50,
     HIGH   = 75,
+
+    -- FS25 density-map weed state integers (matches EasyDevControls / LUADOC)
+    -- 0 = no weeds, 1-6 = living stages, 7-9 = withered (dying/brown visual)
+    WEED_STATE_CLEAR     = 0,
+    WEED_STATE_WITHERED  = 7,   -- small withered — visible brown weeds
 }
 
 -- ========================================
