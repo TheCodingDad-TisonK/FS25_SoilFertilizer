@@ -52,7 +52,8 @@ end
 --- Must be called after mission is fully ready (deferred init phase).
 ---@return boolean isActive
 function PrecisionFarmingBridge:initialize()
-    -- Primary: check g_modManager for the PF mod entry
+    -- Detection: check g_modManager for the PF mod entry.
+    -- getModByName returns non-nil only when the mod is present and loaded.
     local pfMod = nil
     if g_modManager then
         local ok, result = pcall(function()
@@ -62,27 +63,13 @@ function PrecisionFarmingBridge:initialize()
     end
 
     if pfMod == nil then
-        -- Secondary: check if PF's specializations were registered (vehicle spec check)
-        -- g_specializationManager is shared and populated by all mods at load time
-        local hasPFSpec = false
-        if g_specializationManager then
-            local ok, spec = pcall(function()
-                return g_specializationManager:getSpecializationByName("extendedSprayer")
-            end)
-            hasPFSpec = ok and spec ~= nil
-        end
-
-        if not hasPFSpec then
-            SoilLogger.info("[PFBridge] Precision Farming not detected — standalone mode")
-            return false
-        end
-
-        SoilLogger.info("[PFBridge] PF detected via specialization registry (g_modManager miss)")
-    else
-        SoilLogger.info("[PFBridge] PF detected via g_modManager: %s v%s",
-            tostring(pfMod.modName or pfMod.name or "?"),
-            tostring(pfMod.version or "?"))
+        SoilLogger.info("[PFBridge] Precision Farming not detected — standalone mode")
+        return false
     end
+
+    SoilLogger.info("[PFBridge] Precision Farming detected: %s v%s",
+        tostring(pfMod.modName or pfMod.name or "?"),
+        tostring(pfMod.version or "?"))
 
     -- PF is confirmed active. Map API is not cross-mod accessible (PF uses its
     -- own env). We set isActive for simulation gating; canReadMaps stays false

@@ -2962,13 +2962,13 @@ function HookManager:installFillUnitHook()
     local ok1, catFert = pcall(function() return fm:getFillTypesByCategoryNames("fertilizer") end)
     if ok1 and catFert then
         for _, ft in pairs(catFert) do
-            if ft and ft.index then table.insert(categoryFertIndices, ft.index) end
+            if ft then table.insert(categoryFertIndices, type(ft) == "table" and ft.index or ft) end
         end
     end
     local ok2, catLiq = pcall(function() return fm:getFillTypesByCategoryNames("liquidFertilizer") end)
     if ok2 and catLiq then
         for _, ft in pairs(catLiq) do
-            if ft and ft.index then table.insert(categoryLiqFertIndices, ft.index) end
+            if ft then table.insert(categoryLiqFertIndices, type(ft) == "table" and ft.index or ft) end
         end
     end
     if #categoryFertIndices > 0 or #categoryLiqFertIndices > 0 then
