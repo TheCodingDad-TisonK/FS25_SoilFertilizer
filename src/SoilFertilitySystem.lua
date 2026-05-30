@@ -421,14 +421,17 @@ function SoilFertilitySystem:onFertilizerApplied(fieldId, fillTypeIndex, liters)
         if overlay then overlay:requestRefresh() end
     end
 
-    -- Broadcast to clients in multiplayer, throttled to once every 5 seconds per field
-    -- to avoid flooding the network with 30+ events/second while a sprayer is running.
+    -- Broadcast to clients in multiplayer, throttled to once every 5 seconds per
+    -- field+product combination. Keying on fillTypeIndex means switching fertilizer
+    -- types (e.g. N → K) triggers an immediate first broadcast for the new product,
+    -- rather than inheriting the cooldown from the previous product's last broadcast.
     if g_server and g_currentMission and g_currentMission.missionDynamicInfo and g_currentMission.missionDynamicInfo.isMultiplayer then
         local now = g_currentMission.time or 0
         if not self._fertBroadcastTime then self._fertBroadcastTime = {} end
-        local last = self._fertBroadcastTime[fieldId] or 0
+        local bKey = fieldId .. "_" .. tostring(fillTypeIndex)
+        local last = self._fertBroadcastTime[bKey] or 0
         if (now - last) >= 5000 then
-            self._fertBroadcastTime[fieldId] = now
+            self._fertBroadcastTime[bKey] = now
             local field = self.fieldData[fieldId]
             if field and SoilFieldUpdateEvent then
                 g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
