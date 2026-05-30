@@ -995,7 +995,20 @@ function SoilFertilitySystem:applyWeedMapState(fieldId, targetState)
     local weedSystem = g_currentMission and g_currentMission.weedSystem
     if not weedSystem or not weedSystem:getMapHasWeed() then return end
 
-    local fsField = g_fieldManager and g_fieldManager:getFieldById(fieldId)
+    -- fieldId is the farmland ID — getFieldById uses field's own internal ID (different).
+    -- Search by farmland.id instead, matching the pattern used in the daily update.
+    local fsField = nil
+    if g_fieldManager and g_fieldManager.fields then
+        fsField = g_fieldManager.fields[fieldId]
+        if not fsField or not fsField.farmland then
+            for _, f in pairs(g_fieldManager.fields) do
+                if f and f.farmland and f.farmland.id == fieldId then
+                    fsField = f
+                    break
+                end
+            end
+        end
+    end
     if not fsField then return end
 
     local weedState = targetState
@@ -1015,9 +1028,9 @@ function SoilFertilitySystem:applyWeedMapState(fieldId, targetState)
                 weedState = replacement
                 self:log("[Herbicide] Field %d: weed state %d → withered %d (from replacements)",
                     fieldId, currentState, weedState)
-            elseif currentState == 0 then
-                return  -- no weeds present — nothing to wither
             end
+            -- If currentState==0 at the indicator position, the rest of the field may still
+            -- have weeds — fall through and apply state 7 (withered) field-wide.
         end
     end
 
