@@ -32,6 +32,12 @@ SoilVersionDialog.CHANGELOG = {
     "- Updated Danish (da) guide translation — Guide dialog now fully in Danish",
     "- Fixed herbicide session coverage reset (second spray no longer instant-triggers on first tick)",
     "- Fixed Weeds/Pests/Disease HUD bars rendering one row above their labels",
+    "- Fixed weed pressure bar oscillating after partial herbicide spray (same-day application now sticky)",
+    "- Fixed Weeds/Pests/Disease % values misaligned — now left-aligned after their bar",
+    "- Updated French (fr) translation — contributed by community member",
+    "- Fixed version dialog not appearing on load when mod was previously disabled",
+    "- Fixed Precision Farming detection incorrectly triggering when PF is installed but disabled",
+    "- Fixed startup crash when fill type categories return indices instead of descriptors",
 }
 
 -- ── i18n helper ───────────────────────────────────────────
