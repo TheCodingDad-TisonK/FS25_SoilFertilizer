@@ -1530,40 +1530,46 @@ end
 -- pressure is 0-100.  isProtected shows "(protected)" suffix when true.
 -- Returns updated cy after the row.
 function SoilHUD:drawPressureRow(labelKey, pressure, isProtected, px, cy, pw, s, fontMult)
-    local pad  = SoilHUD.PAD * s
-    local barH = SoilHUD.BAR_H * s
-    local barW = SoilHUD.BAR_W * s
-    local tx   = px + pad
+    local pad      = SoilHUD.PAD * s
+    local rowH     = SoilHUD.LINE_H * s
+    local barH     = SoilHUD.BAR_H * s
+    local barW     = SoilHUD.BAR_W * s
+    local textSize = 0.010 * fontMult * s
+    local tx       = px + pad
+
+    -- Pre-decrement so the row occupies [cy, cy+rowH] — same pattern as drawNutrientRow,
+    -- which ensures bars are centred within their own row and not in the row above (#HUD).
+    cy = cy - rowH
 
     -- 3-level color (matches getPressureColor in SoilReportDialog — aligned with Constants thresholds)
     local wp = SoilConstants.WEED_PRESSURE  -- LOW=20, MEDIUM=50 (shared by weed/pest/disease)
     local col
-    if pressure < wp.LOW    then col = SoilHUD.C_GOOD
+    if pressure < wp.LOW        then col = SoilHUD.C_GOOD
     elseif pressure < wp.MEDIUM then col = SoilHUD.C_FAIR
-    else                         col = SoilHUD.C_POOR end
+    else                             col = SoilHUD.C_POOR end
 
-    -- Label
+    -- Label — vertically centred in row
     setTextColor(SoilHUD.C_LABEL[1], SoilHUD.C_LABEL[2], SoilHUD.C_LABEL[3], SoilHUD.C_LABEL[4])
-    renderText(tx, cy, 0.010 * fontMult * s, g_i18n:getText(labelKey))
+    renderText(tx, cy + (rowH - textSize) * 0.5, textSize, g_i18n:getText(labelKey))
 
-    -- Bar
+    -- Bar — centred in row, horizontally aligned with nutrient bars
     local barX = tx + 0.038*s
-    local barY = cy + (SoilHUD.LINE_H * s - barH) * 0.5
+    local barY = cy + (rowH - barH) * 0.5
     self:drawRect(barX, barY, barW, barH, SoilHUD.C_BAR_BG)
     local fill = math.max(0, math.min(1, pressure / 100))
     if fill > 0 then
         self:drawRect(barX, barY, barW * fill, barH, col)
     end
 
-    -- Value + protection tag
+    -- Value + protection tag — vertically centred in row
     local label = string.format("%.0f%%", pressure)
     if isProtected then label = label .. " " .. g_i18n:getText("sf_hud_protected") end
     setTextAlignment(RenderText.ALIGN_RIGHT)
     setTextColor(col[1], col[2], col[3], 1.0)
-    renderText(px + pw - pad, cy, 0.010 * fontMult * s, label)
+    renderText(px + pw - pad, cy + (rowH - textSize) * 0.5, textSize, label)
     setTextAlignment(RenderText.ALIGN_LEFT)
 
-    return cy - SoilHUD.LINE_H * s
+    return cy
 end
 
 -- ── Sprayer fill-type helpers ─────────────────────────────

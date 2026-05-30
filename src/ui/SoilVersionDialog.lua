@@ -31,6 +31,7 @@ SoilVersionDialog.CHANGELOG = {
     "- Fixed liquid lime draining entire tank in seconds (spray type index corrected)",
     "- Updated Danish (da) guide translation — Guide dialog now fully in Danish",
     "- Fixed herbicide session coverage reset (second spray no longer instant-triggers on first tick)",
+    "- Fixed Weeds/Pests/Disease HUD bars rendering one row above their labels",
 }
 
 -- ── i18n helper ───────────────────────────────────────────
