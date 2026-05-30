@@ -59,13 +59,15 @@ function PrecisionFarmingBridge:initialize()
         local ok, pfMod = pcall(function()
             return g_modManager:getModByName("FS25_precisionFarming")
         end)
-        if ok and pfMod and pfMod.isLoaded == true then
+        if ok and pfMod and pfMod.isLoaded then
             pfEnabled = true
-            SoilLogger.info("[PFBridge] PF enabled via mod manager: %s v%s",
+            SoilLogger.info("[PFBridge] PF enabled via mod manager: %s v%s isLoaded=%s",
                 tostring(pfMod.modName or pfMod.name or "?"),
-                tostring(pfMod.version or "?"))
+                tostring(pfMod.version or "?"),
+                tostring(pfMod.isLoaded))
         elseif ok and pfMod then
-            SoilLogger.info("[PFBridge] Precision Farming in mods folder but disabled — standalone mode")
+            SoilLogger.info("[PFBridge] Precision Farming in mods folder but disabled (isLoaded=%s) — standalone mode",
+                tostring(pfMod.isLoaded))
             return false
         end
     end
