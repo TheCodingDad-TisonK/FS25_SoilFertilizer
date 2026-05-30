@@ -430,6 +430,21 @@ function HookManager:registerCustomSprayTypes()
         end
     end
 
+    -- LIQUIDLIME: fillTypes.xml uses sprayTypeStr="LIQUIDFERTILIZER" as a safe XML-load-time fallback,
+    -- but that sets fillType.sprayTypeIndex to LIQUIDFERTILIZER's index (291.6 L/ha).
+    -- Override it now so the vanilla sprayer uses our calibrated LIQUIDLIME spray type (374 L/ha,
+    -- LIME ground state). addSprayType already wrote fillTypeIndexToSprayType[LIQUIDLIME] = ours,
+    -- but the drain uses fillType.sprayTypeIndex, so we must patch that field too.
+    local llFT = g_fillTypeManager:getFillTypeByName("LIQUIDLIME")
+    local llST = g_sprayTypeManager:getSprayTypeByName("LIQUIDLIME")
+    if llFT and llST then
+        llFT.sprayTypeIndex = llST.index
+        SoilLogger.debug("LIQUIDLIME: overrode sprayTypeIndex → %d (LPS=%.5f, ~%.0f L/ha)",
+            llST.index, llST.litersPerSecond or 0, (llST.litersPerSecond or 0) * 36000)
+    else
+        SoilLogger.warning("LIQUIDLIME spray type override failed: ft=%s st=%s", tostring(llFT), tostring(llST))
+    end
+
     SoilLogger.info(
         "[OK] Custom spray types registered: %d types (direct LPS: vanilla ref liq=%.5f dry=%.5f, %d skipped)",
         registered, liquidLPS, solidLPS, skipped
