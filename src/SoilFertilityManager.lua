@@ -1163,6 +1163,19 @@ function SoilFertilityManager:update(dt)
         end
     end
 
+    -- Deferred version dialog — fired 3s after mission start so the GUI is stable.
+    -- Must run BEFORE the settings.enabled guard so it shows even when mod is disabled.
+    if self._pendingVersionDialog then
+        self._pendingVersionDialogDelay = (self._pendingVersionDialogDelay or 0) - dt
+        if self._pendingVersionDialogDelay <= 0 then
+            local ver = self._pendingVersionDialog
+            self._pendingVersionDialog      = nil
+            self._pendingVersionDialogDelay = nil
+            SoilLogger.info("Showing version dialog for %s", ver)
+            SoilVersionDialog.show(ver)
+        end
+    end
+
     -- ── MANDATORY GUARD: Mod must be enabled ──────────────────
     if not (self.settings and self.settings.enabled) then
         return
@@ -1206,18 +1219,6 @@ function SoilFertilityManager:update(dt)
     -- Tuning panel camera-lock and cursor keepalive
     if self.tuningPanel then
         self.tuningPanel:update()
-    end
-
-    -- Deferred version dialog — fired 3s after mission start so the GUI is stable
-    if self._pendingVersionDialog then
-        self._pendingVersionDialogDelay = (self._pendingVersionDialogDelay or 0) - dt
-        if self._pendingVersionDialogDelay <= 0 then
-            local ver = self._pendingVersionDialog
-            self._pendingVersionDialog      = nil
-            self._pendingVersionDialogDelay = nil
-            SoilLogger.info("Showing version dialog for %s", ver)
-            SoilVersionDialog.show(ver)
-        end
     end
 
     -- Auto-rate control: adjust sprayer rate based on current field soil data
