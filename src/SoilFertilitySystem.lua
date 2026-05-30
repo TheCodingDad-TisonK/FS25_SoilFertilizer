@@ -945,18 +945,26 @@ end
 ---@param fieldId number
 ---@param effectiveness number 0.0-1.0 herbicide effectiveness multiplier
 function SoilFertilitySystem:onHerbicideApplied(fieldId, effectiveness)
+    self:log("[Herbicide] onHerbicideApplied called: fieldId=%s effectiveness=%s weedPressureSetting=%s",
+        tostring(fieldId), tostring(effectiveness), tostring(self.settings.weedPressure))
     if not self.settings.weedPressure then return end
     if not SoilConstants.WEED_PRESSURE then return end
 
     local field = self:getOrCreateField(fieldId, false)
-    if not field then return end
+    if not field then
+        self:log("[Herbicide] SKIP: no field data for fieldId=%s", tostring(fieldId))
+        return
+    end
 
     -- Throttle: apply pressure reduction at most once per field per in-game day.
     -- The sprayer hook fires every frame (~60x/sec). Without this guard, a single
     -- pass applies the full reduction hundreds of times, instantly zeroing pressure.
     local today = (g_currentMission and g_currentMission.environment and
                    g_currentMission.environment.currentDay) or 0
-    if self.herbicideAppliedDay[fieldId] == today then return end
+    if self.herbicideAppliedDay[fieldId] == today then
+        self:log("[Herbicide] SKIP: already applied today (day=%s) for fieldId=%s", tostring(today), tostring(fieldId))
+        return
+    end
     self.herbicideAppliedDay[fieldId] = today
 
     local wp = SoilConstants.WEED_PRESSURE
@@ -991,9 +999,27 @@ end
 ---@param fieldId number
 ---@param targetState number  WEED_STATE_WITHERED or WEED_STATE_CLEAR
 function SoilFertilitySystem:applyWeedMapState(fieldId, targetState)
-    if not g_server then return end
+    self:log("[WeedMap] applyWeedMapState called: fieldId=%s targetState=%s isServer=%s",
+        tostring(fieldId), tostring(targetState), tostring(g_server ~= nil))
+
+    if not g_server then
+        self:log("[WeedMap] SKIP: not server")
+        return
+    end
+
     local weedSystem = g_currentMission and g_currentMission.weedSystem
-    if not weedSystem or not weedSystem:getMapHasWeed() then return end
+    if not weedSystem then
+        self:log("[WeedMap] SKIP: no weedSystem")
+        return
+    end
+    local mapHasWeed = false
+    local hwOk, hwResult = pcall(function() return weedSystem:getMapHasWeed() end)
+    if hwOk then mapHasWeed = hwResult end
+    self:log("[WeedMap] weedSystem:getMapHasWeed() = %s (pcallOk=%s)", tostring(mapHasWeed), tostring(hwOk))
+    if not mapHasWeed then
+        self:log("[WeedMap] SKIP: map has no weed system")
+        return
+    end
 
     -- fieldId is the farmland ID — getFieldById uses field's own internal ID (different).
     -- Search by farmland.id instead, matching the pattern used in the daily update.
@@ -1009,7 +1035,13 @@ function SoilFertilitySystem:applyWeedMapState(fieldId, targetState)
             end
         end
     end
-    if not fsField then return end
+    if not fsField then
+        self:log("[WeedMap] SKIP: could not find field object for farmlandId=%s (fields count=%s)",
+            tostring(fieldId), tostring(g_fieldManager and g_fieldManager.fields and #g_fieldManager.fields or "nil"))
+        return
+    end
+    self:log("[WeedMap] Found field: farmlandId=%s fieldId=%s name=%s",
+        tostring(fieldId), tostring(fsField.fieldId or fsField.id or "?"), tostring(fsField.fieldName or "?"))
 
     local weedState = targetState
 
@@ -1017,23 +1049,29 @@ function SoilFertilitySystem:applyWeedMapState(fieldId, targetState)
     -- own herbicide replacement table instead of hardcoding state 7.
     if targetState == SoilConstants.WEED_PRESSURE.WEED_STATE_WITHERED then
         local repOk, repData = pcall(function() return weedSystem:getHerbicideReplacements() end)
+        self:log("[WeedMap] getHerbicideReplacements: ok=%s hasWeed=%s hasReplacements=%s",
+            tostring(repOk),
+            tostring(repOk and repData and repData.weed ~= nil),
+            tostring(repOk and repData and repData.weed and repData.weed.replacements ~= nil))
+
         if repOk and repData and repData.weed and repData.weed.replacements then
-            -- Read the field's current weed state to pick the right replacement
             local fieldState = fsField:getFieldState()
             local posX, posZ = fsField:getIndicatorPosition()
             fieldState:update(posX, posZ)
             local currentState = fieldState.weedState or 0
             local replacement = repData.weed.replacements[currentState]
+            self:log("[WeedMap] Field %d: indicatorPos=(%.1f,%.1f) currentWeedState=%s replacement=%s",
+                fieldId, posX or 0, posZ or 0, tostring(currentState), tostring(replacement))
             if replacement and replacement ~= 0 then
                 weedState = replacement
-                self:log("[Herbicide] Field %d: weed state %d → withered %d (from replacements)",
-                    fieldId, currentState, weedState)
+                self:log("[WeedMap] Using replacement state %d", weedState)
+            else
+                self:log("[WeedMap] No replacement for state %d — using fallback state %d", currentState, weedState)
             end
-            -- If currentState==0 at the indicator position, the rest of the field may still
-            -- have weeds — fall through and apply state 7 (withered) field-wide.
         end
     end
 
+    self:log("[WeedMap] Enqueuing FieldUpdateTask: fieldId=%s weedState=%s", tostring(fieldId), tostring(weedState))
     local ok, err = pcall(function()
         local task = FieldUpdateTask.new()
         task:setField(fsField)
@@ -1041,9 +1079,7 @@ function SoilFertilitySystem:applyWeedMapState(fieldId, targetState)
         task:setWeedState(weedState)
         task:enqueue(true)
     end)
-    if not ok then
-        self:log("[Herbicide] applyWeedMapState field %d state %d failed: %s", fieldId, weedState, tostring(err))
-    end
+    self:log("[WeedMap] FieldUpdateTask result: ok=%s err=%s", tostring(ok), tostring(err))
 end
 
 --- Called when insecticide is applied to a field.
