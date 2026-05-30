@@ -52,43 +52,24 @@ end
 --- Must be called after mission is fully ready (deferred init phase).
 ---@return boolean isActive
 function PrecisionFarmingBridge:initialize()
-    -- Primary: specialization registry check.
-    -- Disabled mods never run their Lua so extendedSprayer is only registered
-    -- when PF is actually enabled and loaded — this is the correct enabled/disabled signal.
-    local hasPFSpec = false
-    if g_specializationManager then
-        local ok, spec = pcall(function()
-            return g_specializationManager:getSpecializationByName("extendedSprayer")
+    -- Detection: check g_modManager for the PF mod entry.
+    -- getModByName returns non-nil only when the mod is present and loaded.
+    local pfMod = nil
+    if g_modManager then
+        local ok, result = pcall(function()
+            return g_modManager:getModByName("FS25_precisionFarming")
         end)
-        hasPFSpec = ok and spec ~= nil
+        if ok then pfMod = result end
     end
 
-    if not hasPFSpec then
-        -- PF not running. Check if it's merely installed (in mods folder) for a better log message.
-        if g_modManager then
-            local ok, pfMod = pcall(function()
-                return g_modManager:getModByName("FS25_precisionFarming")
-            end)
-            if ok and pfMod then
-                SoilLogger.info("[PFBridge] Precision Farming installed but disabled — standalone mode")
-            else
-                SoilLogger.info("[PFBridge] Precision Farming not detected — standalone mode")
-            end
-        else
-            SoilLogger.info("[PFBridge] Precision Farming not detected — standalone mode")
-        end
+    if pfMod == nil then
+        SoilLogger.info("[PFBridge] Precision Farming not detected — standalone mode")
         return false
     end
 
-    -- PF spec found — it is enabled and running.
-    local pfVersion = "?"
-    if g_modManager then
-        local ok, pfMod = pcall(function()
-            return g_modManager:getModByName("FS25_precisionFarming")
-        end)
-        if ok and pfMod then pfVersion = tostring(pfMod.version or "?") end
-    end
-    SoilLogger.info("[PFBridge] Precision Farming detected and enabled (v%s)", pfVersion)
+    SoilLogger.info("[PFBridge] Precision Farming detected: %s v%s",
+        tostring(pfMod.modName or pfMod.name or "?"),
+        tostring(pfMod.version or "?"))
 
     -- PF is confirmed active. Map API is not cross-mod accessible (PF uses its
     -- own env). We set isActive for simulation gating; canReadMaps stays false
