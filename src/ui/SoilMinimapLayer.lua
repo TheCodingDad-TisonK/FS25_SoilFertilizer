@@ -172,7 +172,7 @@ function SoilMinimapLayer:_startBuild(soilMapOverlay)
             for state = 1, maxState do
                 local ci  = math.min(state, #weedColors)
                 local r, g, b = weedColors[ci][1], weedColors[ci][2], weedColors[ci][3]
-                setDensityMapVisualizationOverlayStateColor(ov, mapId, firstCh or 0, 0, numCh or 4, state, r, g, b, 0.85)
+                setDensityMapVisualizationOverlayStateColor(ov, mapId, 0, firstCh or 0, numCh or 4, state, r, g, b, 0.85)
             end
             self._usingDensityLayers = true
             generateDensityMapVisualizationOverlay(ov)
@@ -188,15 +188,15 @@ function SoilMinimapLayer:_startBuild(soilMapOverlay)
         if entry then
             local handle = entry.handle
             local def    = entry.def
-            -- Engine limit: 16 state color sets max. Read top 4 bits of the 8-bit value
-            -- (firstChannel=4, numChannels=4 → states 0-15 = top nibble).
-            -- State 0 = raw value 0-15 (unwritten or near-zero) → transparent.
-            -- States 1-15 = monotonically increasing semantic value → gradient.
-            setDensityMapVisualizationOverlayStateColor(ov, handle, 4, 0, 4, 0, 0, 0, 0, 0)
+            -- Engine limit: 16 state color sets. Read top 4 bits of the 8-bit value.
+            -- Signature: (overlay, mapId, maskMapId, firstChannel, numChannels, state, r, g, b, a)
+            -- maskMapId=0 (no mask), firstChannel=4 reads bits 4-7 → 16 states (top nibble).
+            -- State 0 = raw 0-15 (unwritten/near-zero) → transparent.
+            setDensityMapVisualizationOverlayStateColor(ov, handle, 0, 4, 4, 0, 0, 0, 0, 0)
             for i = 1, 15 do
                 local semanticVal = def.minVal + (i / 15.0) * (def.maxVal - def.minVal)
                 local r, g, b = soilMapOverlay:valueToLayerColor(layerIdx, semanticVal)
-                setDensityMapVisualizationOverlayStateColor(ov, handle, 4, 0, 4, i, r, g, b, 1.0)
+                setDensityMapVisualizationOverlayStateColor(ov, handle, 0, 4, 4, i, r, g, b, 1.0)
             end
             self._usingDensityLayers = true
             generateDensityMapVisualizationOverlay(ov)
