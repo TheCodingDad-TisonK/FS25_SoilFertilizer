@@ -24,21 +24,20 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
-    "- Fixed herbicide session coverage reset (second spray no longer instant-triggers on first tick)",
-    "- Fixed Weeds/Pests/Disease HUD bars rendering one row above their labels",
-    "- Fixed weed pressure bar oscillating after partial herbicide spray (same-day application now sticky)",
-    "- Fixed Weeds/Pests/Disease % values misaligned — now left-aligned after their bar",
-    "- Updated French (fr) translation — contributed by community member",
-    "- Fixed version dialog not appearing on load when mod was previously disabled",
-    "- Fixed Precision Farming detection incorrectly triggering when PF is installed but disabled",
-    "- Fixed startup crash when fill type categories return indices instead of descriptors",
-    "- Fixed See & Spray weed detection now uses game density map as ground truth (no more stale pressure reads)",
-    "- Fixed dedicated server fertilizer broadcast throttle — switching N→K now immediately updates client bars",
-    "- Fixed overlay tiles pre-populated on session load — N/P/K/OM/pH map tiles show at full opacity from start",
-    "- Fixed field boundary control now also suppresses boom sections that cross into adjacent fields",
-    "- Fixed nil comparison crash: zone cell pre-population constants now defined before use",
-    "- Fixed overlay zones now reflect true spatial differences — removed erroneous bulk N/P/K/OM sync",
+    "- Fixed soil map layer names to match engine convention (soilN, soilP, soilK, soilPH, soilOM)",
+    "- Fixed density map coordinate type across all read/write calls — values now land correctly",
+    "- Fixed overlay zones showing identical values — bulk zone sync removed, each zone is now spatial",
+    "- Fixed nil crash: zone cell constants now defined before pre-population runs",
+    "- Fixed overlay tiles pre-populated for all fields on load — map is fully visible from the start",
     "- Fixed FarmlandManager crash from nil world coordinates in sprayer boundary check",
+    "- Fixed boom sections crossing into adjacent fields are now correctly suppressed",
+    "- Fixed dedicated server fertilizer broadcast keyed per field+product — N→K switch now immediate",
+    "- Fixed See & Spray weed detection now reads from the game density map, not stale cell data",
+    "- Fixed HUD row overlap — Weeds/Pests/Disease bars now render at the correct position",
+    "- Fixed HUD edit mode camera orbit — cursor re-locked every frame during pan",
+    "- Fixed Weed/Pest/Disease HUD rows hidden when pressure is zero (no more empty bars)",
+    "- Fixed admin settings panel missing translation label (sf_dm uiId mismatch resolved)",
+    "- Fixed minimap layer build now guarded until soil layer data is actually available",
 }
 
 -- ── i18n helper ───────────────────────────────────────────
