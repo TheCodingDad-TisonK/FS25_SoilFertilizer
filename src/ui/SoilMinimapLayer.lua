@@ -172,7 +172,8 @@ function SoilMinimapLayer:_startBuild(soilMapOverlay)
             for state = 1, maxState do
                 local ci  = math.min(state, #weedColors)
                 local r, g, b = weedColors[ci][1], weedColors[ci][2], weedColors[ci][3]
-                setDensityMapVisualizationOverlayStateColor(ov, mapId, firstCh or 0, 0, numCh or 4, state, r, g, b, 0.85)
+                -- Signature: (overlay, mapId, maskMapId, fieldMask, firstChannel, numChannels, state, r, g, b, a)
+                setDensityMapVisualizationOverlayStateColor(ov, mapId, 0, 0, firstCh or 0, numCh or 4, state, r, g, b, 0.85)
             end
             self._usingDensityLayers = true
             generateDensityMapVisualizationOverlay(ov)
@@ -183,17 +184,24 @@ function SoilMinimapLayer:_startBuild(soilMapOverlay)
     end
 
     -- ── Per-pixel path (nutrients + pest/disease/compaction GRLE layers) ──────
+    -- layerSystem.hasData is set true only after writeFieldToLayers has pushed real
+    -- soil values into the GRLE.  Without this guard the overlay generates but shows
+    -- nothing (all pixels state 0 = transparent) and the polygon-dot fallback is
+    -- suppressed, leaving the minimap blank for new or not-yet-loaded games.
     if layerSystem and layerSystem.available and layerSystem.hasData and fieldKey and fieldKey ~= "weed" then
         local entry = layerSystem:getLayerEntryForField(fieldKey)
         if entry then
             local handle = entry.handle
             local def    = entry.def
-            -- Value 0 = unwritten pixel → transparent.
-            -- Values 1-255 → decode to semantic float → status color.
-            for i = 1, 255 do
-                local semanticVal = def.minVal + (i / 255.0) * (def.maxVal - def.minVal)
+            -- Engine limit: 16 state color sets. Read top 4 bits of the 8-bit value.
+            -- Signature: (overlay, mapId, maskMapId, fieldMask, firstChannel, numChannels, state, r, g, b, a)
+            -- maskMapId=0, fieldMask=0 (no mask), firstChannel=4 reads bits 4-7 → 16 states.
+            -- State 0 = raw 0-15 (unwritten/near-zero) → transparent.
+            setDensityMapVisualizationOverlayStateColor(ov, handle, 0, 0, 4, 4, 0, 0, 0, 0, 0)
+            for i = 1, 15 do
+                local semanticVal = def.minVal + (i / 15.0) * (def.maxVal - def.minVal)
                 local r, g, b = soilMapOverlay:valueToLayerColor(layerIdx, semanticVal)
-                setDensityMapVisualizationOverlayStateColor(ov, handle, 0, 0, 8, i, r, g, b, 1.0)
+                setDensityMapVisualizationOverlayStateColor(ov, handle, 0, 0, 4, 4, i, r, g, b, 1.0)
             end
             self._usingDensityLayers = true
             generateDensityMapVisualizationOverlay(ov)
@@ -209,16 +217,18 @@ end
 
 -- ── Rendering ─────────────────────────────────────────────
 
--- Called from IngameMap.drawFields (or FSBaseMission.draw as fallback).
--- mapSelf is the IngameMap instance.
+-- Called from IngameMap.drawFields with the actual IngameMap instance being drawn.
+-- Fires for both the HUD minimap and the PDA fullscreen map — guards handle each.
 function SoilMinimapLayer:draw(mapSelf)
     if not self._initialized then return end
-    if not self._hasShownOnce then return end
-    if not self._usingDensityLayers then return end
     if not mapSelf then return end
 
-    -- Only render on the HUD minimap, never on the PDA fullscreen map.
-    -- g_currentMission.hud.ingameMap is the authoritative HUD minimap instance.
+    -- PDA fullscreen map has isFullscreen as a truthy integer (1) while the HUD minimap has nil.
+    -- Using a truthy check (not == true) correctly blocks PDA without blocking HUD.
+    if mapSelf.isFullscreen then return end
+    if g_gui ~= nil and g_gui:getIsGuiVisible() then return end
+
+    -- Secondary identity guard: when the HUD minimap ref is resolvable, only draw on that instance.
     local hudMap = nil
     if g_currentMission and g_currentMission.hud then
         local hud = g_currentMission.hud
@@ -226,8 +236,18 @@ function SoilMinimapLayer:draw(mapSelf)
     end
     if hudMap ~= nil and mapSelf ~= hudMap then return end
 
-    if mapSelf.isFullscreen == true then return end
-    if g_gui ~= nil and g_gui:getIsGuiVisible() then return end
+    if not self._usingDensityLayers then
+        -- No GRLE density-map layers on this terrain — hand off to polygon centroid dots.
+        -- mapSelf is the correct HUD minimap instance here (from drawFields hook),
+        -- unlike the PDA ref stored in ingameMapRef which would hit the isFullscreen guard.
+        local sfm = g_SoilFertilityManager
+        if sfm and sfm.soilMapOverlay then
+            sfm.soilMapOverlay:onDrawMinimap(mapSelf)
+        end
+        return
+    end
+
+    if not self._hasShownOnce then return end
 
     local layerIdx = self.settings and (self.settings.activeMapLayer or 0) or 0
     if layerIdx <= 0 then return end
