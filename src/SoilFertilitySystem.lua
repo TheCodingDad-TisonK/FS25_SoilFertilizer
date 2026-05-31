@@ -2190,9 +2190,31 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
         end
     end
 
+    -- ── Sync weed pressure from game's native weed density map ──────────────
+    -- If the WeedSystem is present, derive weed pressure from actual terrain
+    -- weed coverage rather than our internal simulation value.
+    local layerSys = self.layerSystem
+    if layerSys and layerSys.hasWeedLayer then
+        local farmland = g_farmlandManager and g_farmlandManager:getFarmlandById(fieldId)
+        if farmland then
+            local coverage = layerSys:readWeedCoverageForFarmland(farmland)
+            if coverage ~= nil then
+                field.weedPressure = math.min(100, coverage * 100)
+            end
+        end
+    end
+
+    -- ── Sync pest/disease/compaction to density map layers ───────────────────
+    -- Paint the field AABB with the current daily values so the minimap and
+    -- PDA overlay stay in sync without needing per-setter hooks everywhere.
+    if layerSys and layerSys.available then
+        local farmland = farmland or (g_farmlandManager and g_farmlandManager:getFarmlandById(fieldId))
+        if farmland then
+            layerSys:writeFieldToLayers(fieldId, field, farmland)
+        end
+    end
+
     -- ── Broadcast to MP clients ──────────────────────────────────────────────
-    -- Daily simulation is server-only; push the updated field data so client
-    -- HUDs reflect nutrient changes, weed/pest/disease pressure, etc.
     if SoilFieldUpdateEvent then
         g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
     end
@@ -3646,6 +3668,11 @@ function SoilFertilitySystem:onCompaction(farmlandId, worldX, worldZ)
     end
     field.compaction = field.compactionSum / field.compactionTotalCells
 
+    -- 3. Write per-pixel to compaction density map layer
+    if self.layerSystem and self.layerSystem.available then
+        self.layerSystem:updatePixelForField("compaction", worldX, worldZ, newVal, zone.CELL_SIZE * 0.5)
+    end
+
     SoilLogger.debug("Compaction: field=%d cell=%s  %.0f→%.0f%%  avg=%.1f%%",
         farmlandId, cellKey, prev, newVal, field.compaction)
 end
@@ -3685,6 +3712,11 @@ function SoilFertilitySystem:onSubsoilerPass(farmlandId, worldX, worldZ)
     field.compactionSum = math.max(0, (field.compactionSum or 0) - (prev - newVal))
     local tc = field.compactionTotalCells or 0
     field.compaction = tc > 0 and (field.compactionSum / tc) or 0
+
+    -- Write per-pixel to compaction density map layer
+    if self.layerSystem and self.layerSystem.available then
+        self.layerSystem:updatePixelForField("compaction", worldX, worldZ, newVal, zone.CELL_SIZE * 0.5)
+    end
 
     SoilLogger.debug("Subsoiler: field=%d cell=%s  %.0f→%.0f%%  avg=%.1f%%",
         farmlandId, cellKey, prev, newVal, field.compaction)
