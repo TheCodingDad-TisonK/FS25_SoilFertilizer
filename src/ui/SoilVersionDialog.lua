@@ -24,11 +24,10 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
-    "v2.3.0.0",
-    "- New: PDA fullscreen map now uses per-pixel density map rendering (same quality as minimap)",
-    "- New: soilPest, soilDisease, soilCompaction density map layers — true per-pixel precision",
-    "- New: Weed pressure synced live from the game's native WeedSystem density map",
-    "- Fixed: Minimap layer indices for pest/disease/compaction now match correctly",
+    "v2.3.2.0",
+    "- Fixed: HUD minimap soil overlay now renders correctly again",
+    "- Fixed: PDA map reverted to reliable field-polygon tile rendering",
+    "- Fixed: PDA no longer shows minimap content at wrong scale",
 }
 
 -- ── i18n helper ───────────────────────────────────────────

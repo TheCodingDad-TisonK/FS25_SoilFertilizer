@@ -299,7 +299,8 @@ function SoilMapOverlay:_pdaKickBuild(layerIdx)
             for state = 1, maxState do
                 local ci = math.min(state, #weedColors)
                 local r, g, b = weedColors[ci][1], weedColors[ci][2], weedColors[ci][3]
-                setDensityMapVisualizationOverlayStateColor(ov, mapId, 0, firstCh or 0, numCh or 4, state, r, g, b, 0.85)
+                -- Signature: (overlay, mapId, maskMapId, fieldMask, firstChannel, numChannels, state, r, g, b, a)
+                setDensityMapVisualizationOverlayStateColor(ov, mapId, 0, 0, firstCh or 0, numCh or 4, state, r, g, b, 0.85)
             end
             self._pdaUsingDMV = true
             generateDensityMapVisualizationOverlay(ov)
@@ -310,21 +311,23 @@ function SoilMapOverlay:_pdaKickBuild(layerIdx)
     end
 
     -- GRLE-backed layers (N/P/K/pH/OM/Pest/Disease/Compaction)
+    -- Require hasData so we don't generate a fully-transparent overlay before
+    -- writeFieldToLayers has run — that would suppress the polygon-dot fallback.
     local fieldKey = PDA_LAYER_GRLE[layerIdx]
-    if fieldKey and layerSystem and layerSystem.available then
+    if fieldKey and layerSystem and layerSystem.available and layerSystem.hasData then
         local entry = layerSystem:getLayerEntryForField(fieldKey)
         if entry then
             local handle = entry.handle
             local def    = entry.def
             -- Engine limit: 16 state color sets. Read top 4 bits of the 8-bit value.
-            -- Signature: (overlay, mapId, maskMapId, firstChannel, numChannels, state, r, g, b, a)
-            -- maskMapId=0 (no mask), firstChannel=4 reads bits 4-7 → 16 states (top nibble).
+            -- Signature: (overlay, mapId, maskMapId, fieldMask, firstChannel, numChannels, state, r, g, b, a)
+            -- maskMapId=0, fieldMask=0 (no mask), firstChannel=4 reads bits 4-7 → 16 states.
             -- State 0 = raw 0-15 (unwritten/near-zero) → transparent.
-            setDensityMapVisualizationOverlayStateColor(ov, handle, 0, 4, 4, 0, 0, 0, 0, 0)
+            setDensityMapVisualizationOverlayStateColor(ov, handle, 0, 0, 4, 4, 0, 0, 0, 0, 0)
             for i = 1, 15 do
                 local semanticVal = def.minVal + (i / 15.0) * (def.maxVal - def.minVal)
                 local r, g, b = self:valueToLayerColor(layerIdx, semanticVal)
-                setDensityMapVisualizationOverlayStateColor(ov, handle, 0, 4, 4, i, r, g, b, 1.0)
+                setDensityMapVisualizationOverlayStateColor(ov, handle, 0, 0, 4, 4, i, r, g, b, 1.0)
             end
             self._pdaUsingDMV = true
             generateDensityMapVisualizationOverlay(ov)
@@ -645,62 +648,41 @@ function SoilMapOverlay:onDraw(frame, mapElement, ingameMap, pageIndex)
     local layerIdx = self.settings.activeMapLayer or 0
     if layerIdx <= 0 then return end
 
-    -- Poll async DMV build
-    self:_pdaPollBuildFinished()
-
     local mapX, mapY, mapWidth, mapHeight = self:getMapRenderBounds(frame, ingameMap)
     if mapX == nil or mapWidth == nil or mapHeight == nil then return end
 
-    -- Kick a new DMV build when layer changed or refresh interval elapsed
-    local now = (g_currentMission and g_currentMission.time) or 0
-    if self._pdaDMVAvailable and not self._pdaBuildInFlight
-       and (self._pdaActiveLayer ~= layerIdx or now >= self._pdaNextBuildMs) then
-        self._pdaNextBuildMs  = now + SoilMapOverlay.SAMPLE_UPDATE_INTERVAL_MS
-        self._pdaActiveLayer  = layerIdx
-        self:_pdaKickBuild(layerIdx)
-    end
+    -- PDA always uses polygon tiles (field-clamped, works without GRLE data)
+    self:updateSamplePoints(false)
 
-    if self._pdaHasShownOnce and self._pdaUsingDMV then
-        -- ── Per-pixel DMV path ────────────────────────────────────
-        local ov = self._pdaOverlays[self._pdaShowIdx]
-        if ov then
-            setOverlayColor(ov, 1, 1, 1, SoilMapOverlay.ALPHA)
-            renderOverlay(ov, mapX, mapY, mapWidth, mapHeight)
+    if #self.samplePoints > 0 then
+        local mapMaxX = mapX + mapWidth
+        local mapMaxY = mapY + mapHeight
+
+        local drawStep = SoilConstants.ZONE.CELL_SIZE
+        local ax, ay = self:worldToScreenPosition(ingameMap, 0, 0)
+        local bx, by = self:worldToScreenPosition(ingameMap, drawStep, 0)
+        local cx, cy = self:worldToScreenPosition(ingameMap, 0, drawStep)
+        local sizeX, sizeY
+        if ax and bx and cx then
+            sizeX = math.max(math.abs(bx - ax) * 1.15, 0.0005)
+            sizeY = math.max(math.abs(cy - ay) * 1.15, 0.0005)
+        else
+            sizeX, sizeY = getNormalizedScreenValues(10, 10)
         end
-    else
-        -- ── Polygon dot fallback (urgency layer, or DMV not yet ready) ──
-        self:updateSamplePoints(false)
+        local halfX, halfY = sizeX * 0.5, sizeY * 0.5
 
-        if #self.samplePoints > 0 then
-            local mapMaxX = mapX + mapWidth
-            local mapMaxY = mapY + mapHeight
+        local scaleXX = (bx - ax) / drawStep
+        local scaleYX = (by - ay) / drawStep
+        local scaleXZ = (cx - ax) / drawStep
+        local scaleYZ = (cy - ay) / drawStep
 
-            local drawStep = SoilConstants.ZONE.CELL_SIZE
-            local ax, ay = self:worldToScreenPosition(ingameMap, 0, 0)
-            local bx, by = self:worldToScreenPosition(ingameMap, drawStep, 0)
-            local cx, cy = self:worldToScreenPosition(ingameMap, 0, drawStep)
-            local sizeX, sizeY
-            if ax and bx and cx then
-                sizeX = math.max(math.abs(bx - ax) * 1.15, 0.0005)
-                sizeY = math.max(math.abs(cy - ay) * 1.15, 0.0005)
-            else
-                sizeX, sizeY = getNormalizedScreenValues(10, 10)
-            end
-            local halfX, halfY = sizeX * 0.5, sizeY * 0.5
-
-            local scaleXX = (bx - ax) / drawStep
-            local scaleYX = (by - ay) / drawStep
-            local scaleXZ = (cx - ax) / drawStep
-            local scaleYZ = (cy - ay) / drawStep
-
-            for _, point in ipairs(self.samplePoints) do
-                local screenX = ax + point.x * scaleXX + point.z * scaleXZ
-                local screenY = ay + point.x * scaleYX + point.z * scaleYZ
-                if screenX >= mapX and screenX <= mapMaxX
-                   and screenY >= mapY and screenY <= mapMaxY then
-                    drawFilledRect(screenX - halfX, screenY - halfY, sizeX, sizeY,
-                                   point.r, point.g, point.b, (point.a or 1.0) * SoilMapOverlay.ALPHA)
-                end
+        for _, point in ipairs(self.samplePoints) do
+            local screenX = ax + point.x * scaleXX + point.z * scaleXZ
+            local screenY = ay + point.x * scaleYX + point.z * scaleYZ
+            if screenX >= mapX and screenX <= mapMaxX
+               and screenY >= mapY and screenY <= mapMaxY then
+                drawFilledRect(screenX - halfX, screenY - halfY, sizeX, sizeY,
+                               point.r, point.g, point.b, (point.a or 1.0) * SoilMapOverlay.ALPHA)
             end
         end
     end
