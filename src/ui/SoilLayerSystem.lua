@@ -39,6 +39,7 @@ local SoilLayerSystem_mt = Class(SoilLayerSystem)
 -- the semantic float value used by the rest of the mod.
 -- ─────────────────────────────────────────────────────────
 local LAYER_DEFS = {
+    -- ── Nutrients ────────────────────────────────────────────
     {
         name        = "soilN",          -- i3d short name; engine saves as infoLayer_soilN.grle
         field       = "nitrogen",       -- key in fieldData
@@ -66,7 +67,7 @@ local LAYER_DEFS = {
     {
         name        = "soilPH",
         field       = "pH",
-        minVal      = 5.0,              -- FS25 soil pH never goes below 5
+        minVal      = 5.0,
         maxVal      = 7.5,
         numBits     = 8,
         numChannels = 8,
@@ -79,6 +80,33 @@ local LAYER_DEFS = {
         numBits     = 8,
         numChannels = 8,
     },
+    -- ── Biotic / physical pressure ───────────────────────────
+    {
+        name        = "soilPest",
+        field       = "pestPressure",
+        minVal      = 0,
+        maxVal      = 100,
+        numBits     = 8,
+        numChannels = 8,
+    },
+    {
+        name        = "soilDisease",
+        field       = "diseasePressure",
+        minVal      = 0,
+        maxVal      = 100,
+        numBits     = 8,
+        numChannels = 8,
+    },
+    {
+        name        = "soilCompaction",
+        field       = "compaction",
+        minVal      = 0,
+        maxVal      = 100,
+        numBits     = 8,
+        numChannels = 8,
+    },
+    -- Note: weed is NOT in LAYER_DEFS — it is read from the game's
+    -- native WeedSystem foliage density map (see weed* fields below).
 }
 
 local MAX_ENCODED = 255  -- (2^8) - 1
@@ -90,9 +118,14 @@ local MAX_ENCODED = 255  -- (2^8) - 1
 function SoilLayerSystem.new()
     local self = setmetatable({}, SoilLayerSystem_mt)
     -- layerHandles[layerDef.name] = { handle, modifier, def }
-    self.layerHandles = {}
-    self.initialized  = false
-    self.available    = false   -- true when ≥1 layer successfully registered
+    self.layerHandles    = {}
+    self.initialized     = false
+    self.available       = false   -- true when ≥1 layer successfully registered
+    -- Weed layer (game-native foliage density map — read-only)
+    self.hasWeedLayer    = false
+    self.weedMapId       = nil     -- raw density map id from weedSystem:getDensityMapData()
+    self.weedFirstCh     = nil
+    self.weedNumCh       = nil
     return self
 end
 
@@ -170,6 +203,103 @@ function SoilLayerSystem:initialize()
     else
         SoilLogger.info("SoilLayerSystem: No terrain layers — using fieldData storage (normal for most maps)")
     end
+
+    -- ── Weed layer (game-native, read-only) ───────────────────────────────────
+    -- FS25 tracks weed presence via WeedSystem which owns a foliage density map.
+    -- We sample it to derive per-field weed pressure rather than simulating it.
+    local weedSystem = g_currentMission and g_currentMission.weedSystem
+    if weedSystem ~= nil then
+        local ok, mapId, firstCh, numCh = pcall(function()
+            return weedSystem:getDensityMapData()
+        end)
+        if ok and mapId and mapId ~= 0 then
+            self.hasWeedLayer = true
+            self.weedMapId    = mapId
+            self.weedFirstCh  = firstCh or 0
+            self.weedNumCh    = numCh   or 4
+            SoilLogger.info("[OK] Weed density map found (mapId=%s, ch=%d+%d)",
+                tostring(mapId), self.weedFirstCh, self.weedNumCh)
+        else
+            SoilLogger.debug("SoilLayerSystem: WeedSystem present but getDensityMapData failed — weed pressure uses simulation")
+        end
+    else
+        SoilLogger.debug("SoilLayerSystem: No WeedSystem — weed pressure uses simulation fallback")
+    end
+end
+
+-- ─────────────────────────────────────────────────────────
+-- Sample the game's native weed density map across a farmland
+-- bounding box and return the fraction of pixels that have any
+-- weed present (non-zero state), as a value 0.0–1.0.
+-- Returns nil if the weed layer is not available.
+-- ─────────────────────────────────────────────────────────
+
+---@param farmland table  FS25 farmland object
+---@return number|nil  0.0–1.0 weed coverage fraction, or nil
+function SoilLayerSystem:readWeedCoverageForFarmland(farmland)
+    if not self.hasWeedLayer or not self.weedMapId then return nil end
+
+    local cx, cz, hw, hh
+    if farmland.x and farmland.z then
+        cx = farmland.x
+        cz = farmland.z
+        hw = (farmland.width  and farmland.width  / 2) or 50
+        hh = (farmland.height and farmland.height / 2) or 50
+    elseif farmland.polygon and #farmland.polygon >= 2 then
+        local minX, maxX, minZ, maxZ = math.huge, -math.huge, math.huge, -math.huge
+        for i = 1, #farmland.polygon, 2 do
+            local px = farmland.polygon[i]
+            local pz = farmland.polygon[i + 1]
+            if px and pz then
+                if px < minX then minX = px end
+                if px > maxX then maxX = px end
+                if pz < minZ then minZ = pz end
+                if pz > maxZ then maxZ = pz end
+            end
+        end
+        if minX == math.huge then return nil end
+        cx = (minX + maxX) / 2
+        cz = (minZ + maxZ) / 2
+        hw = (maxX - minX) / 2
+        hh = (maxZ - minZ) / 2
+    else
+        return nil
+    end
+
+    local ok, modifier = pcall(function()
+        return DensityMapModifier.new(self.weedMapId, self.weedFirstCh, self.weedNumCh, g_terrainNode)
+    end)
+    if not ok or not modifier then return nil end
+
+    local STEPS  = 8
+    local weedCount = 0
+    local total     = 0
+
+    for xi = 0, STEPS - 1 do
+        for zi = 0, STEPS - 1 do
+            local wx = (cx - hw) + (xi / (STEPS - 1)) * (hw * 2)
+            local wz = (cz - hh) + (zi / (STEPS - 1)) * (hh * 2)
+            modifier:setParallelogramWorldCoords(wx, wz, wx + 0.1, wz, wx, wz + 0.1, DensityCoordType.POINT_POINT_POINT)
+            local val, _, _ = modifier:executeGet(DensityMapFilter.new(modifier), nil)
+            if val ~= nil then
+                total = total + 1
+                if val > 0 then weedCount = weedCount + 1 end
+            end
+        end
+    end
+
+    if total == 0 then return 0 end
+    return weedCount / total
+end
+
+-- ─────────────────────────────────────────────────────────
+-- Expose weed map data for minimap/PDA overlay rendering.
+-- Returns (mapId, firstChannel, numChannels) or nil.
+-- ─────────────────────────────────────────────────────────
+
+function SoilLayerSystem:getWeedMapData()
+    if not self.hasWeedLayer then return nil end
+    return self.weedMapId, self.weedFirstCh, self.weedNumCh
 end
 
 -- ─────────────────────────────────────────────────────────

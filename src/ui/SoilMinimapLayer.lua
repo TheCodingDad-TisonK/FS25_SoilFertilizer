@@ -125,14 +125,20 @@ function SoilMinimapLayer:_pollBuildFinished()
     end
 end
 
--- Maps PDA layer index to the SoilLayerSystem field key and GRLE layer name.
--- Layers 1-5 have per-pixel GRLE density maps; layers 6+ fall back to farmland coloring.
+-- Maps settings.activeMapLayer index → SoilLayerSystem field key.
+-- Indices must match SoilMapOverlay.LAYER_KEYS exactly.
+-- [6] urgency is computed (no GRLE); [7] weed uses the game WeedSystem foliage map.
 local LAYER_FIELD_KEYS = {
-    [1] = "nitrogen",
-    [2] = "phosphorus",
-    [3] = "potassium",
-    [4] = "pH",
-    [5] = "organicMatter",
+    [1]  = "nitrogen",
+    [2]  = "phosphorus",
+    [3]  = "potassium",
+    [4]  = "pH",
+    [5]  = "organicMatter",
+    -- [6] = urgency: computed from N/P/K — no density map layer
+    [7]  = "weed",              -- WeedSystem foliage density map (read-only)
+    [8]  = "pestPressure",      -- soilPest GRLE
+    [9]  = "diseasePressure",   -- soilDisease GRLE
+    [10] = "compaction",        -- soilCompaction GRLE
 }
 
 function SoilMinimapLayer:_startBuild(soilMapOverlay)
@@ -142,27 +148,31 @@ function SoilMinimapLayer:_startBuild(soilMapOverlay)
     local ov = self._overlays[self._buildIdx]
     if not ov then return end
 
-    -- Clear previously-painted state colors so old data doesn't bleed through.
     if resetDensityMapVisualizationOverlay then
         resetDensityMapVisualizationOverlay(ov)
     end
 
-    -- ── Per-pixel path (layers 1-5 with GRLE density maps) ───────────────────
     local layerSystem = self.soilSystem and self.soilSystem.layerSystem
     local fieldKey    = LAYER_FIELD_KEYS[layerIdx]
 
-    if layerSystem and layerSystem.available and layerSystem.hasData and fieldKey then
-        local entry = layerSystem:getLayerEntryForField(fieldKey)
-        if entry then
-            local handle = entry.handle
-            local def    = entry.def
-            -- Assign a color to every possible encoded value 0-255.
-            -- Encoded value 0 means "no data written to this pixel" — keep transparent.
-            -- Values 1-255 map to a decoded semantic float which gets a status color.
-            for i = 1, 255 do
-                local semanticVal = def.minVal + (i / 255.0) * (def.maxVal - def.minVal)
-                local r, g, b = soilMapOverlay:valueToLayerColor(layerIdx, semanticVal)
-                setDensityMapVisualizationOverlayStateColor(ov, handle, 0, 0, 0, 8, i, r, g, b, 1.0)
+    -- ── Weed layer (game-native foliage density map) ──────────────────────────
+    if fieldKey == "weed" and layerSystem and layerSystem.hasWeedLayer then
+        local mapId, firstCh, numCh = layerSystem:getWeedMapData()
+        if mapId then
+            -- State 0 = no weed → transparent.
+            -- States 1-N = weed present → yellow → orange-red by growth stage.
+            local weedColors = {
+                {0.95, 0.85, 0.20},  -- state 1: seedling — yellow
+                {0.95, 0.70, 0.10},  -- state 2
+                {0.90, 0.55, 0.05},  -- state 3
+                {0.85, 0.35, 0.05},  -- state 4
+                {0.80, 0.20, 0.05},  -- state 5+: mature — deep red-orange
+            }
+            local maxState = math.max(1, (2 ^ (numCh or 4)) - 1)
+            for state = 1, maxState do
+                local ci  = math.min(state, #weedColors)
+                local r, g, b = weedColors[ci][1], weedColors[ci][2], weedColors[ci][3]
+                setDensityMapVisualizationOverlayStateColor(ov, mapId, firstCh or 0, 0, numCh or 4, state, r, g, b, 0.85)
             end
             self._usingDensityLayers = true
             generateDensityMapVisualizationOverlay(ov)
@@ -172,11 +182,28 @@ function SoilMinimapLayer:_startBuild(soilMapOverlay)
         end
     end
 
-    -- ── Farmland-map fallback (layers 6-10, or maps without GRLE files) ───────
-    -- SoilMapOverlay.onDrawMinimap already renders field polygon fill dots for
-    -- this case (it skips only when _usingDensityLayers = true). We intentionally
-    -- do NOT generate a DMV overlay here because the farmland ownership BVM covers
-    -- entire purchased parcels including buildings, not just field polygons.
+    -- ── Per-pixel path (nutrients + pest/disease/compaction GRLE layers) ──────
+    if layerSystem and layerSystem.available and layerSystem.hasData and fieldKey and fieldKey ~= "weed" then
+        local entry = layerSystem:getLayerEntryForField(fieldKey)
+        if entry then
+            local handle = entry.handle
+            local def    = entry.def
+            -- Value 0 = unwritten pixel → transparent.
+            -- Values 1-255 → decode to semantic float → status color.
+            for i = 1, 255 do
+                local semanticVal = def.minVal + (i / 255.0) * (def.maxVal - def.minVal)
+                local r, g, b = soilMapOverlay:valueToLayerColor(layerIdx, semanticVal)
+                setDensityMapVisualizationOverlayStateColor(ov, handle, 0, 0, 8, i, r, g, b, 1.0)
+            end
+            self._usingDensityLayers = true
+            generateDensityMapVisualizationOverlay(ov)
+            self._buildHandle   = ov
+            self._buildInFlight = true
+            return
+        end
+    end
+
+    -- ── Fallback: polygon-fill dots via SoilMapOverlay ────────────────────────
     self._usingDensityLayers = false
 end
 
