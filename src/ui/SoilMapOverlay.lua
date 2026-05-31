@@ -142,6 +142,18 @@ function SoilMapOverlay.new(soilSystem, settings)
     -- Cell inspection tooltip: set by onMapClick, cleared on layer change or re-click
     self.selectedCell = nil   -- { worldX, worldZ, farmlandId, info }
 
+    -- PDA DMV double-buffer overlay (async density-map visualization)
+    self._pdaDMVAvailable  = false
+    self._pdaOverlays      = {nil, nil}
+    self._pdaShowIdx       = 1
+    self._pdaBuildIdx      = 2
+    self._pdaBuildInFlight = false
+    self._pdaBuildHandle   = nil
+    self._pdaHasShownOnce  = false
+    self._pdaUsingDMV      = false
+    self._pdaActiveLayer   = -1
+    self._pdaNextBuildMs   = 0
+
     return self
 end
 
@@ -150,12 +162,32 @@ end
 function SoilMapOverlay:initialize()
     SoilLogger.info("SoilMapOverlay: initialized (DMF Heatmap Mode)")
     self:installMinimapZoomHooks()
+
+    if createDensityMapVisualizationOverlay and not g_dedicatedServer then
+        local resX, resY = 1024, 1024
+        local mog = g_currentMission and g_currentMission.mapOverlayGenerator
+        if mog and MapOverlayGenerator and MapOverlayGenerator.OVERLAY_RESOLUTION then
+            local fsRes = MapOverlayGenerator.OVERLAY_RESOLUTION.FOLIAGE_STATE
+            if fsRes and fsRes[1] and fsRes[2] then resX, resY = fsRes[1], fsRes[2] end
+        end
+        self._pdaOverlays[1] = createDensityMapVisualizationOverlay("SF_PDAHeatmapA", resX, resY)
+        self._pdaOverlays[2] = createDensityMapVisualizationOverlay("SF_PDAHeatmapB", resX, resY)
+        self._pdaDMVAvailable = (self._pdaOverlays[1] ~= nil and self._pdaOverlays[2] ~= nil)
+        if self._pdaDMVAvailable then
+            SoilLogger.info("[OK] SoilMapOverlay PDA DMV overlays created (%dx%d)", resX, resY)
+        else
+            SoilLogger.warning("SoilMapOverlay: PDA DMV overlay creation failed — polygon fallback active")
+        end
+    end
 end
 
 -- ── Delete ────────────────────────────────────────────────
 
 function SoilMapOverlay:delete()
-    self.samplePoints = {}
+    self.samplePoints      = {}
+    self._pdaOverlays      = {nil, nil}
+    self._pdaBuildInFlight = false
+    self._pdaBuildHandle   = nil
     SoilLogger.info("SoilMapOverlay: deleted")
 end
 
@@ -191,9 +223,11 @@ function SoilMapOverlay:getSelectedFilterCount(filterStates)
 end
 
 function SoilMapOverlay:requestRefresh()
-    self.nextSampleUpdateTime = 0
+    self.nextSampleUpdateTime  = 0
     self.nextMinimapUpdateTime = 0
-    self.fieldPolyCache = {}
+    self.fieldPolyCache        = {}
+    self._pdaNextBuildMs       = 0
+    self._pdaActiveLayer       = -1   -- force DMV rebuild on next draw
 end
 
 -- ── Layer selection ───────────────────────────────────────
@@ -215,6 +249,88 @@ end
 -- Alias used by SoilMapFrame; equivalent to requestRefresh
 function SoilMapOverlay:requestGenerate()
     self:requestRefresh()
+end
+
+-- ── PDA DMV overlay (density-map visualization) ───────────
+
+-- Maps SoilMapOverlay layer index → SoilLayerSystem field key for GRLE layers.
+-- Layer 6 (urgency) is computed and has no GRLE; layer 7 (weed) uses WeedSystem.
+local PDA_LAYER_GRLE = {
+    [1]  = "nitrogen",
+    [2]  = "phosphorus",
+    [3]  = "potassium",
+    [4]  = "pH",
+    [5]  = "organicMatter",
+    [8]  = "pestPressure",
+    [9]  = "diseasePressure",
+    [10] = "compaction",
+}
+
+function SoilMapOverlay:_pdaPollBuildFinished()
+    if not self._pdaBuildInFlight or not self._pdaBuildHandle then return end
+    if not getIsDensityMapVisualizationOverlayReady then return end
+    if getIsDensityMapVisualizationOverlayReady(self._pdaBuildHandle) then
+        self._pdaShowIdx, self._pdaBuildIdx = self._pdaBuildIdx, self._pdaShowIdx
+        self._pdaBuildInFlight = false
+        self._pdaBuildHandle   = nil
+        self._pdaHasShownOnce  = true
+    end
+end
+
+function SoilMapOverlay:_pdaKickBuild(layerIdx)
+    local ov = self._pdaOverlays[self._pdaBuildIdx]
+    if not ov then return end
+
+    if resetDensityMapVisualizationOverlay then
+        resetDensityMapVisualizationOverlay(ov)
+    end
+
+    local layerSystem = self.soilSystem and self.soilSystem.layerSystem
+
+    -- Weed layer: game-native foliage density map
+    if layerIdx == 7 and layerSystem and layerSystem.hasWeedLayer then
+        local mapId, firstCh, numCh = layerSystem:getWeedMapData()
+        if mapId then
+            local weedColors = {
+                {0.95, 0.85, 0.20}, {0.95, 0.70, 0.10}, {0.90, 0.55, 0.05},
+                {0.85, 0.35, 0.05}, {0.80, 0.20, 0.05},
+            }
+            local maxState = math.max(1, (2 ^ (numCh or 4)) - 1)
+            for state = 1, maxState do
+                local ci = math.min(state, #weedColors)
+                local r, g, b = weedColors[ci][1], weedColors[ci][2], weedColors[ci][3]
+                setDensityMapVisualizationOverlayStateColor(ov, mapId, firstCh or 0, 0, numCh or 4, state, r, g, b, 0.85)
+            end
+            self._pdaUsingDMV = true
+            generateDensityMapVisualizationOverlay(ov)
+            self._pdaBuildHandle   = ov
+            self._pdaBuildInFlight = true
+            return
+        end
+    end
+
+    -- GRLE-backed layers (N/P/K/pH/OM/Pest/Disease/Compaction)
+    local fieldKey = PDA_LAYER_GRLE[layerIdx]
+    if fieldKey and layerSystem and layerSystem.available and layerSystem.hasData then
+        local entry = layerSystem:getLayerEntryForField(fieldKey)
+        if entry then
+            local handle = entry.handle
+            local def    = entry.def
+            for i = 1, 255 do
+                local semanticVal = def.minVal + (i / 255.0) * (def.maxVal - def.minVal)
+                local r, g, b = self:valueToLayerColor(layerIdx, semanticVal)
+                setDensityMapVisualizationOverlayStateColor(ov, handle, 0, 0, 8, i, r, g, b, 1.0)
+            end
+            self._pdaUsingDMV = true
+            generateDensityMapVisualizationOverlay(ov)
+            self._pdaBuildHandle   = ov
+            self._pdaBuildInFlight = true
+            return
+        end
+    end
+
+    -- No DMV for this layer (urgency = layer 6, or GRLE not yet available)
+    self._pdaUsingDMV = false
 end
 
 -- ── Sidebar Clicks ────────────────────────────────────────
@@ -524,55 +640,67 @@ function SoilMapOverlay:onDraw(frame, mapElement, ingameMap, pageIndex)
     local layerIdx = self.settings.activeMapLayer or 0
     if layerIdx <= 0 then return end
 
-    self:updateSamplePoints(false)
+    -- Poll async DMV build
+    self:_pdaPollBuildFinished()
 
-    if #self.samplePoints == 0 then return end
-
-    -- Use the layout-based bounds (DFF pattern) — ingameMap:getPosition() does not exist.
     local mapX, mapY, mapWidth, mapHeight = self:getMapRenderBounds(frame, ingameMap)
     if mapX == nil or mapWidth == nil or mapHeight == nil then return end
 
-    local mapMaxX = mapX + mapWidth
-    local mapMaxY = mapY + mapHeight
-
-    -- Tile draw size = zone cell size so each rendered tile covers exactly one data cell.
-    local drawStep = SoilConstants.ZONE.CELL_SIZE
-    local sizeX, sizeY
-    local probeX, probeZ = 0, 0
-    local ax, ay = self:worldToScreenPosition(ingameMap, probeX, probeZ)
-    local bx, by = self:worldToScreenPosition(ingameMap, probeX + drawStep, probeZ)
-    local cx, cy = self:worldToScreenPosition(ingameMap, probeX, probeZ + drawStep)
-    if ax and bx and cx then
-        local dxX = math.abs(bx - ax)
-        local dyZ = math.abs(cy - ay)
-        -- Add 15% overlap so adjacent tiles don't leave hairline gaps
-        sizeX = math.max(dxX * 1.15, 0.0005)
-        sizeY = math.max(dyZ * 1.15, 0.0005)
-    else
-        sizeX, sizeY = getNormalizedScreenValues(10, 10)
+    -- Kick a new DMV build when layer changed or refresh interval elapsed
+    local now = (g_currentMission and g_currentMission.time) or 0
+    if self._pdaDMVAvailable and not self._pdaBuildInFlight
+       and (self._pdaActiveLayer ~= layerIdx or now >= self._pdaNextBuildMs) then
+        self._pdaNextBuildMs  = now + SoilMapOverlay.SAMPLE_UPDATE_INTERVAL_MS
+        self._pdaActiveLayer  = layerIdx
+        self:_pdaKickBuild(layerIdx)
     end
-    local halfX, halfY = sizeX * 0.5, sizeY * 0.5
 
-    -- Derive affine transform coefficients from the 3 probe points.
-    -- The map is a linear projection so this is exact at any zoom/pan level.
-    -- Replaces a per-point worldToScreenPosition() engine call with arithmetic,
-    -- cutting ~40k Lua→C++ calls per frame down to the 3 probes above.
-    local scaleXX = (bx - ax) / drawStep
-    local scaleYX = (by - ay) / drawStep
-    local scaleXZ = (cx - ax) / drawStep
-    local scaleYZ = (cy - ay) / drawStep
+    if self._pdaHasShownOnce and self._pdaUsingDMV then
+        -- ── Per-pixel DMV path ────────────────────────────────────
+        local ov = self._pdaOverlays[self._pdaShowIdx]
+        if ov then
+            setOverlayColor(ov, 1, 1, 1, SoilMapOverlay.ALPHA)
+            renderOverlay(ov, mapX, mapY, mapWidth, mapHeight)
+        end
+    else
+        -- ── Polygon dot fallback (urgency layer, or DMV not yet ready) ──
+        self:updateSamplePoints(false)
 
-    for _, point in ipairs(self.samplePoints) do
-        local screenX = ax + point.x * scaleXX + point.z * scaleXZ
-        local screenY = ay + point.x * scaleYX + point.z * scaleYZ
-        if screenX >= mapX and screenX <= mapMaxX
-           and screenY >= mapY and screenY <= mapMaxY then
-            drawFilledRect(screenX - halfX, screenY - halfY, sizeX, sizeY,
-                           point.r, point.g, point.b, (point.a or 1.0) * SoilMapOverlay.ALPHA)
+        if #self.samplePoints > 0 then
+            local mapMaxX = mapX + mapWidth
+            local mapMaxY = mapY + mapHeight
+
+            local drawStep = SoilConstants.ZONE.CELL_SIZE
+            local ax, ay = self:worldToScreenPosition(ingameMap, 0, 0)
+            local bx, by = self:worldToScreenPosition(ingameMap, drawStep, 0)
+            local cx, cy = self:worldToScreenPosition(ingameMap, 0, drawStep)
+            local sizeX, sizeY
+            if ax and bx and cx then
+                sizeX = math.max(math.abs(bx - ax) * 1.15, 0.0005)
+                sizeY = math.max(math.abs(cy - ay) * 1.15, 0.0005)
+            else
+                sizeX, sizeY = getNormalizedScreenValues(10, 10)
+            end
+            local halfX, halfY = sizeX * 0.5, sizeY * 0.5
+
+            local scaleXX = (bx - ax) / drawStep
+            local scaleYX = (by - ay) / drawStep
+            local scaleXZ = (cx - ax) / drawStep
+            local scaleYZ = (cy - ay) / drawStep
+
+            for _, point in ipairs(self.samplePoints) do
+                local screenX = ax + point.x * scaleXX + point.z * scaleXZ
+                local screenY = ay + point.x * scaleYX + point.z * scaleYZ
+                if screenX >= mapX and screenX <= mapMaxX
+                   and screenY >= mapY and screenY <= mapMaxY then
+                    drawFilledRect(screenX - halfX, screenY - halfY, sizeX, sizeY,
+                                   point.r, point.g, point.b, (point.a or 1.0) * SoilMapOverlay.ALPHA)
+                end
+            end
         end
     end
 
-    -- Draw the cell inspection tooltip on top of tiles
+    -- Draw the cell inspection tooltip on top of the overlay
     self:drawCellTooltip(ingameMap, mapX, mapY, mapWidth, mapHeight)
 end
 

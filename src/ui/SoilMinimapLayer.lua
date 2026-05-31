@@ -125,18 +125,20 @@ function SoilMinimapLayer:_pollBuildFinished()
     end
 end
 
--- Maps PDA layer index to the SoilLayerSystem field key.
--- All 9 layers have per-pixel density map support; weed is special (game-native map).
+-- Maps settings.activeMapLayer index → SoilLayerSystem field key.
+-- Indices must match SoilMapOverlay.LAYER_KEYS exactly.
+-- [6] urgency is computed (no GRLE); [7] weed uses the game WeedSystem foliage map.
 local LAYER_FIELD_KEYS = {
-    [1] = "nitrogen",
-    [2] = "phosphorus",
-    [3] = "potassium",
-    [4] = "pH",
-    [5] = "organicMatter",
-    [6] = "pestPressure",
-    [7] = "diseasePressure",
-    [8] = "compaction",
-    [9] = "weed",           -- sentinel: rendered from game's WeedSystem map
+    [1]  = "nitrogen",
+    [2]  = "phosphorus",
+    [3]  = "potassium",
+    [4]  = "pH",
+    [5]  = "organicMatter",
+    -- [6] = urgency: computed from N/P/K — no density map layer
+    [7]  = "weed",              -- WeedSystem foliage density map (read-only)
+    [8]  = "pestPressure",      -- soilPest GRLE
+    [9]  = "diseasePressure",   -- soilDisease GRLE
+    [10] = "compaction",        -- soilCompaction GRLE
 }
 
 function SoilMinimapLayer:_startBuild(soilMapOverlay)
