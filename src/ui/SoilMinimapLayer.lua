@@ -183,7 +183,7 @@ function SoilMinimapLayer:_startBuild(soilMapOverlay)
     end
 
     -- ── Per-pixel path (nutrients + pest/disease/compaction GRLE layers) ──────
-    if layerSystem and layerSystem.available and layerSystem.hasData and fieldKey and fieldKey ~= "weed" then
+    if layerSystem and layerSystem.available and fieldKey and fieldKey ~= "weed" then
         local entry = layerSystem:getLayerEntryForField(fieldKey)
         if entry then
             local handle = entry.handle

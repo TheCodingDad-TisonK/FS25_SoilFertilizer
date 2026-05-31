@@ -311,7 +311,7 @@ function SoilMapOverlay:_pdaKickBuild(layerIdx)
 
     -- GRLE-backed layers (N/P/K/pH/OM/Pest/Disease/Compaction)
     local fieldKey = PDA_LAYER_GRLE[layerIdx]
-    if fieldKey and layerSystem and layerSystem.available and layerSystem.hasData then
+    if fieldKey and layerSystem and layerSystem.available then
         local entry = layerSystem:getLayerEntryForField(fieldKey)
         if entry then
             local handle = entry.handle
