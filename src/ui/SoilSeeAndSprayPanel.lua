@@ -101,13 +101,20 @@ function SoilSeeAndSprayPanel:getCellData(vehicle)
     if not ok or not x then return nil, nil, nil end
     local sfm = g_SoilFertilityManager
     if not sfm or not sfm.soilSystem then return nil, nil, nil end
-    local field = nil
+
+    -- Tier 1: field lookup → farmland.id (field.fieldId is nil in FS25)
+    local fieldId = nil
     if g_fieldManager then
         local fok, f = pcall(function() return g_fieldManager:getFieldAtWorldPosition(x, z) end)
-        if fok and f then field = f end
+        if fok and f and f.farmland then fieldId = f.farmland.id end
     end
-    local fieldId = field and field.fieldId
+    -- Tier 2: farmland object fallback
+    if not fieldId and g_farmlandManager then
+        local fok, farmland = pcall(function() return g_farmlandManager:getFarmlandAtWorldPosition(x, z) end)
+        if fok and farmland and farmland.id and farmland.id > 0 then fieldId = farmland.id end
+    end
     if not fieldId or fieldId <= 0 then return nil, nil, nil end
+
     local fd = sfm.soilSystem.fieldData[fieldId]
     if not fd then return nil, nil, nil end
     local zone = SoilConstants.ZONE

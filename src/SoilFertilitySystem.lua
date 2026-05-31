@@ -110,17 +110,8 @@ function SoilFertilitySystem:initialize()
             mapSize, scale, self.cellSize, self.cellAreaHa)
     end
 
-    -- Scan fields using real FieldManager
-    if g_fieldManager then
-        self:scanFields()
-    else
-        self:warning("FieldManager not available - will try delayed initialization")
-    end
-
-    -- Install hooks via HookManager
-    self.hookManager:installAll(self)
-
-    -- Initialize density map layer integration (per-pixel soil maps)
+    -- Initialize density map layer integration FIRST so scanFields can read from GRLE.
+    -- layerSystem.available must be true before scanFields runs or the GRLE seed is skipped.
     if self.layerSystem then
         self.layerSystem:initialize()
     end
@@ -129,6 +120,16 @@ function SoilFertilitySystem:initialize()
     if self.bundledMaps then
         self.bundledMaps:initialize()
     end
+
+    -- Scan fields using real FieldManager (now runs with layerSystem ready)
+    if g_fieldManager then
+        self:scanFields()
+    else
+        self:warning("FieldManager not available - will try delayed initialization")
+    end
+
+    -- Install hooks via HookManager
+    self.hookManager:installAll(self)
 
     self.isInitialized = true
     self:info("Soil Fertility System initialized successfully")
@@ -1350,8 +1351,9 @@ function SoilFertilitySystem:scanFields()
 
                 -- If this is a newly created field and density layers are available,
                 -- read existing layer values (pre-seeded GRLE) instead of using defaults.
-                if isNew and self.layerSystem and self.layerSystem.available and field.farmland then
-                    self.layerSystem:readFieldFromLayers(actualFieldId, self.fieldData[actualFieldId], field.farmland)
+                if isNew and self.layerSystem and self.layerSystem.available then
+                    -- Pass the Field object (not field.farmland) — Field has polygonPoints for AABB
+                    self.layerSystem:readFieldFromLayers(actualFieldId, self.fieldData[actualFieldId], field)
                 end
 
                 -- PHASE 1: only owned farmlands enter the active simulation set.
@@ -1375,6 +1377,9 @@ function SoilFertilitySystem:scanFields()
             if type(farmlandId) == "number" and farmlandId > 0 and not self.fieldData[farmlandId] then
                 local flArea = (farmlandObj and farmlandObj.areaInHa) or 1.0
                 self:getOrCreateField(farmlandId, true, flArea)
+                if self.layerSystem and self.layerSystem.available and farmlandObj then
+                    self.layerSystem:readFieldFromLayers(farmlandId, self.fieldData[farmlandId], farmlandObj)
+                end
                 fieldCount = fieldCount + 1
                 SoilLogger.debug("Secondary scan caught missed farmland %d (%.2f ha)", farmlandId, flArea)
             end

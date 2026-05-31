@@ -1700,7 +1700,7 @@ function SoilMapOverlay:installMinimapZoomHooks()
 
         local origSet = layoutClass.setWorldSize
         layoutClass.setWorldSize = function(layout, ...)
-            origSet(layout, ...)
+            if origSet then origSet(layout, ...) end
             layout._sfOrigWorldSizeFactor = layout.worldSizeFactor
         end
 
@@ -1709,7 +1709,7 @@ function SoilMapOverlay:installMinimapZoomHooks()
             if layout._sfOrigWorldSizeFactor ~= nil then
                 layout.worldSizeFactor = layout._sfOrigWorldSizeFactor * SoilMapOverlay.minimapZoomSmoothed
             end
-            origUpdate(layout, ...)
+            if origUpdate then origUpdate(layout, ...) end
         end
 
         layoutClass._sfZoomHooked = true

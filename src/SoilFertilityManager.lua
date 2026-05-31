@@ -1122,6 +1122,21 @@ function SoilFertilityManager:loadSoilData()
         end
     else
         SoilLogger.info("No saved soil data found at %s, using defaults", xmlPath)
+        -- Fresh start: scanFields already seeded fieldData from GRLE layers (if available).
+        -- Push that data to the density map layers now so the PDA DMV overlay and minimap
+        -- heatmap show real values immediately rather than after the first fertilizer event.
+        local ls = self.soilSystem and self.soilSystem.layerSystem
+        if ls and ls.available and not ls.hasData then
+            local pushed = 0
+            for fid, data in pairs(self.soilSystem.fieldData) do
+                ls:writeFieldToLayers(fid, data, nil)  -- nil → function looks up Field by fid
+                pushed = pushed + 1
+            end
+            if pushed > 0 then
+                ls.hasData = true
+                SoilLogger.info("Fresh start: pushed %d GRLE-seeded fields to density layers", pushed)
+            end
+        end
     end
 end
 
