@@ -1146,9 +1146,9 @@ function SoilFertilityManager:seedGRLEFromFieldData()
 
     local count = 0
     for fieldId, field in pairs(fieldData) do
-        local farmland = g_farmlandManager and g_farmlandManager:getFarmlandById(fieldId)
-        if farmland then
-            layerSys:writeFieldToLayers(fieldId, field, farmland)
+        local fsField = g_fieldManager and g_fieldManager.fields and g_fieldManager.fields[fieldId]
+        if fsField then
+            layerSys:writeFieldToLayers(fieldId, field, fsField)
             count = count + 1
         end
     end

@@ -2220,13 +2220,13 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
         end
     end
 
-    -- ── Sync pest/disease/compaction to density map layers ───────────────────
-    -- Paint the field AABB with the current daily values so the minimap and
-    -- PDA overlay stay in sync without needing per-setter hooks everywhere.
+    -- ── Sync all nutrient/pressure layers to density maps ───────────────────
+    -- Paint the exact field polygon with current daily values so the minimap
+    -- heatmap stays current after harvest depletion, rain, and seasonal changes.
     if layerSys and layerSys.available then
-        local farmland = farmland or (g_farmlandManager and g_farmlandManager:getFarmlandById(fieldId))
-        if farmland then
-            layerSys:writeFieldToLayers(fieldId, field, farmland)
+        local fsField = g_fieldManager and g_fieldManager.fields and g_fieldManager.fields[fieldId]
+        if fsField then
+            layerSys:writeFieldToLayers(fieldId, field, fsField)
         end
     end
 
