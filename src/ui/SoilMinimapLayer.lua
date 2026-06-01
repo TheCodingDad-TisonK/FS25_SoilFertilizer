@@ -184,10 +184,11 @@ function SoilMinimapLayer:_startBuild(soilMapOverlay)
     end
 
     -- ── Per-pixel path (nutrients + pest/disease/compaction GRLE layers) ──────
-    -- State 0 (unwritten GRLE pixels) is mapped to transparent, so generating the
-    -- overlay before soil data is written is safe — fields without data just show
-    -- nothing and the overlay populates on the next rebuild after writeFieldToLayers runs.
-    if layerSystem and layerSystem.available and fieldKey and fieldKey ~= "weed" then
+    -- layerSystem.hasData is set true only after writeFieldToLayers has pushed real
+    -- soil values into the GRLE.  Without this guard the overlay generates but shows
+    -- nothing (all pixels state 0 = transparent) and the polygon-dot fallback is
+    -- suppressed, leaving the minimap blank for new or not-yet-loaded games.
+    if layerSystem and layerSystem.available and layerSystem.hasData and fieldKey and fieldKey ~= "weed" then
         local entry = layerSystem:getLayerEntryForField(fieldKey)
         if entry then
             local handle = entry.handle

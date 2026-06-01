@@ -1542,7 +1542,7 @@ end
 function SoilMapOverlay:onDrawMinimap(ingameMap)
     if ingameMap == nil then return end
     if ingameMap.isFullscreen then return end
-    if ingameMap.state == nil then return end
+    if ingameMap.state == nil or ingameMap.state <= 1 then return end
     -- Suppress minimap dots when any full-screen GUI is open (pause menu, dialogs, etc.)
     if g_gui ~= nil and g_gui:getIsGuiVisible() then return end
 
