@@ -24,10 +24,10 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
-    "v2.3.2.0",
-    "- Fixed: HUD minimap soil overlay now renders correctly again",
-    "- Fixed: PDA map reverted to reliable field-polygon tile rendering",
-    "- Fixed: PDA no longer shows minimap content at wrong scale",
+    "v2.3.3.0",
+    "- Fixed: DMV heatmap minimap now shows only owned fields (not entire terrain)",
+    "- Fixed: Minimap heatmap no longer disappears after first render",
+    "- Fixed: GRLE cleared for unowned fields on load and on ownership change",
 }
 
 -- ── i18n helper ───────────────────────────────────────────
