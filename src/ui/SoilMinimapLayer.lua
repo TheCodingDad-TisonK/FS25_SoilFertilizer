@@ -234,18 +234,10 @@ function SoilMinimapLayer:draw(mapSelf)
     if not self._initialized then return end
     if not mapSelf then return end
 
-    -- PDA fullscreen map has isFullscreen as a truthy integer (1) while the HUD minimap has nil.
-    -- Using a truthy check (not == true) correctly blocks PDA without blocking HUD.
+    -- IngameMap:setFullscreen(true) is used for the M-key / PDA full map view.
+    -- Minimap size states (1=small, 2=medium, 3=large) keep isFullscreen=false.
     if mapSelf.isFullscreen then return end
     if g_gui ~= nil and g_gui:getIsGuiVisible() then return end
-
-    -- Secondary identity guard: when the HUD minimap ref is resolvable, only draw on that instance.
-    local hudMap = nil
-    if g_currentMission and g_currentMission.hud then
-        local hud = g_currentMission.hud
-        hudMap = hud.ingameMap or hud.inGameMap or hud.minimap or hud.miniMap
-    end
-    if hudMap ~= nil and mapSelf ~= hudMap then return end
 
     if not self._usingDensityLayers then
         -- No GRLE density-map layers on this terrain — hand off to polygon centroid dots.
