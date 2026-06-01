@@ -451,6 +451,10 @@ function SoilFertilitySystem:onFieldOwnershipChanged(fieldId, farmlandId, farmId
         -- Field sold / abandoned — pull it out of the active simulation set.
         -- fieldData intentionally kept: new owner inherits the soil conditions.
         self:_removeFromActiveSet(fieldId)
+        -- Clear GRLE so unmasked DMV no longer colours this unowned field.
+        if self.layerSystem and self.layerSystem.available then
+            self.layerSystem:clearFieldFromLayers(fieldId, nil)
+        end
         SoilLogger.debug("[PERF-P1] Field %d released by farm — removed from active set (data preserved)", fieldId)
         return
     end
@@ -459,6 +463,10 @@ function SoilFertilitySystem:onFieldOwnershipChanged(fieldId, farmlandId, farmId
     local field = self:getOrCreateField(fieldId, true)
     if field then
         self:_addToActiveSet(fieldId)
+        -- Write GRLE so unmasked DMV shows this newly-owned field on next rebuild.
+        if self.layerSystem and self.layerSystem.available then
+            self.layerSystem:writeFieldToLayers(fieldId, field, nil)
+        end
         SoilLogger.debug("[PERF-P1] Field %d acquired by farm %d — added to active set", fieldId, farmId)
     end
 end
@@ -3568,17 +3576,21 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
     -- Guard: only run if the layer system is available.
     if self.layerSystem and self.layerSystem.available and g_farmlandManager then
         local pushed = 0
+        local cleared = 0
         for fieldId, data in pairs(self.fieldData) do
             local farmland = g_farmlandManager:getFarmlandById(fieldId)
             if farmland then
-                self.layerSystem:writeFieldToLayers(fieldId, data, farmland)
-                pushed = pushed + 1
+                if self.activeFieldIds[fieldId] then
+                    self.layerSystem:writeFieldToLayers(fieldId, data, farmland)
+                    pushed = pushed + 1
+                else
+                    self.layerSystem:clearFieldFromLayers(fieldId, farmland)
+                    cleared = cleared + 1
+                end
             end
         end
-        if pushed > 0 then
-            self:info("Pushed %d fields to density map layers after load", pushed)
-            self.layerSystem.hasData = true
-        end
+        self.layerSystem.hasData = true
+        self:info("Pushed %d owned fields, cleared %d unowned fields to density map layers after load", pushed, cleared)
     end
 
     -- Re-broadcast after load so clients that were connected during a

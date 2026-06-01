@@ -513,6 +513,45 @@ function SoilLayerSystem:writeFieldToLayers(fieldId, fieldData, fsFieldOrFarmlan
 end
 
 -- ─────────────────────────────────────────────────────────
+-- Clear ALL nutrient layers for a field (write 0 to entire
+-- AABB).  Call this for unowned fields so the unmasked DMV
+-- only colours owned field areas.
+-- ─────────────────────────────────────────────────────────
+
+---@param fieldId          number
+---@param fsFieldOrFarmland table|nil  Field or farmland object; nil → looks up by fieldId
+function SoilLayerSystem:clearFieldFromLayers(fieldId, fsFieldOrFarmland)
+    if not self.available then return end
+
+    local fsField = fsFieldOrFarmland
+    if fsField and not fsField.polygonPoints and not fsField.posX then
+        fsField = getFieldByFarmlandId(fieldId)
+    elseif not fsField then
+        fsField = getFieldByFarmlandId(fieldId)
+    end
+
+    local cx, cz, hw, hh = getFieldAABB(fsField)
+    if not cx then return end
+
+    for _, def in ipairs(LAYER_DEFS) do
+        local entry = self.layerHandles[def.name]
+        if entry then
+            local modifier = entry.modifier
+            local filter   = DensityMapFilter.new(modifier)
+            modifier:setParallelogramWorldCoords(
+                cx - hw, cz - hh,
+                cx + hw, cz - hh,
+                cx - hw, cz + hh,
+                DensityCoordType.POINT_POINT_POINT
+            )
+            modifier:executeSet(0, filter, nil)
+        end
+    end
+
+    SoilLogger.debug("SoilLayerSystem: cleared GRLE for field %d", fieldId)
+end
+
+-- ─────────────────────────────────────────────────────────
 -- Incremental write at a world position for a specific
 -- nutrient layer.  Use this inside applyFertilizer /
 -- onHarvest for per-pixel real-time updates.

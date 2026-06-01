@@ -1128,14 +1128,19 @@ function SoilFertilityManager:loadSoilData()
         local ls = self.soilSystem and self.soilSystem.layerSystem
         if ls and ls.available and not ls.hasData then
             local pushed = 0
+            local cleared = 0
+            local activeIds = self.soilSystem.activeFieldIds or {}
             for fid, data in pairs(self.soilSystem.fieldData) do
-                ls:writeFieldToLayers(fid, data, nil)  -- nil → function looks up Field by fid
-                pushed = pushed + 1
+                if activeIds[fid] then
+                    ls:writeFieldToLayers(fid, data, nil)
+                    pushed = pushed + 1
+                else
+                    ls:clearFieldFromLayers(fid, nil)
+                    cleared = cleared + 1
+                end
             end
-            if pushed > 0 then
-                ls.hasData = true
-                SoilLogger.info("Fresh start: pushed %d GRLE-seeded fields to density layers", pushed)
-            end
+            ls.hasData = true
+            SoilLogger.info("Fresh start: pushed %d owned, cleared %d unowned fields to density layers", pushed, cleared)
         end
     end
 end
