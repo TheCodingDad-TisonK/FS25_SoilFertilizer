@@ -499,24 +499,23 @@ function SoilLayerSystem:writeFieldToLayers(fieldId, fieldData, fsFieldOrFarmlan
         return
     end
 
-    -- Paint entire AABB with the current field value for non-perPixel layers only.
-    -- perPixel layers (N/P/K/pH/OM) are written per-pixel by spray events and must
-    -- not be bulk-overwritten here or the per-pixel precision is lost.
+    -- Paint entire AABB with the current field-average value for ALL layers.
+    -- perPixel layers (N/P/K/pH/OM) use field averages here; spray events then
+    -- overlay precise per-pixel values on top.  Writing the average each day
+    -- keeps the heatmap accurate after harvest depletion and seasonal changes.
     for _, def in ipairs(LAYER_DEFS) do
-        if not def.perPixel then
-            local entry = self.layerHandles[def.name]
-            if entry and fieldData[def.field] ~= nil then
-                local encoded = encode(fieldData[def.field], def)
-                local modifier = entry.modifier
-                local filter   = DensityMapFilter.new(modifier)
-                modifier:setParallelogramWorldCoords(
-                    cx - hw, cz - hh,
-                    cx + hw, cz - hh,
-                    cx - hw, cz + hh,
-                    DensityCoordType.POINT_POINT_POINT
-                )
-                modifier:executeSet(encoded, filter, nil)
-            end
+        local entry = self.layerHandles[def.name]
+        if entry and fieldData[def.field] ~= nil then
+            local encoded = encode(fieldData[def.field], def)
+            local modifier = entry.modifier
+            local filter   = DensityMapFilter.new(modifier)
+            modifier:setParallelogramWorldCoords(
+                cx - hw, cz - hh,
+                cx + hw, cz - hh,
+                cx - hw, cz + hh,
+                DensityCoordType.POINT_POINT_POINT
+            )
+            modifier:executeSet(encoded, filter, nil)
         end
     end
 
