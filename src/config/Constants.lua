@@ -412,7 +412,7 @@ SoilConstants.PURCHASABLE_SINGLE_NUTRIENT = {
 -- ========================================
 SoilConstants.STATUS_THRESHOLDS = {
     nitrogen   = { poor = 30, fair = 50 },
-    phosphorus = { poor = 25, fair = 45 },
+    phosphorus = { poor = 25, fair = 40 },  -- was 45; lowered to match CROP_NUTRIENT_TARGETS default P.opt (40)
     potassium  = { poor = 20, fair = 40 },
 }
 
@@ -722,7 +722,7 @@ SoilConstants.SPRAYER_RATE = {
     -- Used when SF_TOGGLE_AUTO is active on a sprayer
     AUTO_RATE_TARGETS = {
         N  = 80,
-        P  = 70,
+        P  = 50,   -- was 70 (42 ppm); lowered to 50 (30 ppm) — above most crop P optima without over-shooting
         K  = 75,
         -- Aligned to PH_OPTIMAL (6.5) so auto-lime stops at the agronomic optimum.
         pH = 6.5,
