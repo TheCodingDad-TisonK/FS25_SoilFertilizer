@@ -364,9 +364,9 @@ function SoilHUD:calculateHeight()
         
         local mgr = g_SoilFertilityManager
         if mgr and mgr.settings then
-            if mgr.settings.weedPressure and (info.weedPressure or 0) > 0 then h = h + SoilHUD.LINE_H end
-            if mgr.settings.pestPressure and (info.pestPressure or 0) > 0 then h = h + SoilHUD.LINE_H end
-            if mgr.settings.diseasePressure and (info.diseasePressure or 0) > 0 then h = h + SoilHUD.LINE_H end
+            if mgr.settings.weedPressure    and ((info.weedPressure    or 0) > 0 or info.herbicideActive)  then h = h + SoilHUD.LINE_H end
+            if mgr.settings.pestPressure    and ((info.pestPressure    or 0) > 0 or info.insecticideActive) then h = h + SoilHUD.LINE_H end
+            if mgr.settings.diseasePressure and ((info.diseasePressure or 0) > 0 or info.fungicideActive)   then h = h + SoilHUD.LINE_H end
             if self._cachedSprayer and (info.sessionCoverageFraction or info.coverageFraction or 0) > 0 then h = h + SoilHUD.LINE_H end
             if mgr.settings.compactionEnabled and (info.compaction or 0) > 0 then h = h + SoilHUD.LINE_H end
         end
@@ -850,7 +850,7 @@ function SoilHUD:refreshFieldData()
     self.cachedPlayerZ = z
 
     if fieldId then
-        self.cachedFieldInfo = soilSys:getFieldInfo(fieldId)
+        self.cachedFieldInfo = soilSys:getFieldInfo(fieldId, x, z)
 
         if fieldId ~= prevId and self.cachedFieldInfo then
             local info = self.cachedFieldInfo
@@ -882,7 +882,8 @@ function SoilHUD:refreshFieldData()
     -- Pre-format display strings so draw() at 60 FPS never calls string.format
     local info = self.cachedFieldInfo
     if info and fieldId then
-        self._fmt_fieldText = string.format(g_i18n:getText("sf_hud_field"), fieldId) .. " (Avg)"
+        local dataSuffix = info.fromZoneCell and " (Local)" or " (Avg)"
+        self._fmt_fieldText = string.format(g_i18n:getText("sf_hud_field"), fieldId) .. dataSuffix
         local crop = info.lastCrop
         if crop and crop ~= "" then
             self._fmt_cropText = crop:sub(1,1):upper() .. crop:sub(2)
@@ -1222,16 +1223,16 @@ function SoilHUD:drawPanel()
         -- Weed / pest / disease pressure rows
         local mgr = g_SoilFertilityManager
         if mgr then
-            if mgr.settings.weedPressure and (info.weedPressure or 0) > 0 then
-                cy = self:drawPressureRow("sf_hud_weeds", info.weedPressure,
+            if mgr.settings.weedPressure    and ((info.weedPressure    or 0) > 0 or info.herbicideActive) then
+                cy = self:drawPressureRow("sf_hud_weeds", info.weedPressure or 0,
                     info.herbicideActive, px, cy, pw, s, fontMult)
             end
-            if mgr.settings.pestPressure and (info.pestPressure or 0) > 0 then
-                cy = self:drawPressureRow("sf_hud_pests", info.pestPressure,
+            if mgr.settings.pestPressure    and ((info.pestPressure    or 0) > 0 or info.insecticideActive) then
+                cy = self:drawPressureRow("sf_hud_pests", info.pestPressure or 0,
                     info.insecticideActive, px, cy, pw, s, fontMult)
             end
-            if mgr.settings.diseasePressure and (info.diseasePressure or 0) > 0 then
-                cy = self:drawPressureRow("sf_hud_disease", info.diseasePressure,
+            if mgr.settings.diseasePressure and ((info.diseasePressure or 0) > 0 or info.fungicideActive) then
+                cy = self:drawPressureRow("sf_hud_disease", info.diseasePressure or 0,
                     info.fungicideActive, px, cy, pw, s, fontMult)
             end
 

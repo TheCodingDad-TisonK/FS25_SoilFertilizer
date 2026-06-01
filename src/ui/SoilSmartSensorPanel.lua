@@ -110,22 +110,34 @@ function SoilSmartSensorPanel:getActiveSprayer()
     return nil
 end
 
--- Returns the field ID and soil data for the vehicle's current position.
+-- Returns the field ID and field info for the vehicle's current position.
 function SoilSmartSensorPanel:getFieldData(vehicle)
     if not vehicle or not vehicle.rootNode then return nil, nil end
     local ok, x, _, z = pcall(getWorldTranslation, vehicle.rootNode)
     if not ok or not x then return nil, nil end
     local sfm = g_SoilFertilityManager
     if not sfm or not sfm.soilSystem then return nil, nil end
-    local field = nil
+
+    -- Tier 1: field lookup → farmland.id (field.fieldId is nil in FS25)
+    local fieldId = nil
     if g_fieldManager then
-        local fok, f = pcall(function() return g_fieldManager:getFieldAtWorldPosition(x, z) end)
-        if fok and f then field = f end
+        local fok, field = pcall(function() return g_fieldManager:getFieldAtWorldPosition(x, z) end)
+        if fok and field and field.farmland then
+            fieldId = field.farmland.id
+        end
     end
-    local fieldId = field and field.fieldId
+    -- Tier 2: farmland object fallback
+    if not fieldId and g_farmlandManager then
+        local fok, farmland = pcall(function() return g_farmlandManager:getFarmlandAtWorldPosition(x, z) end)
+        if fok and farmland and farmland.id and farmland.id > 0 then
+            fieldId = farmland.id
+        end
+    end
     if not fieldId or fieldId <= 0 then return nil, nil end
-    local fd = sfm.soilSystem.fieldData[fieldId]
-    return fieldId, fd
+
+    -- Use getFieldInfo so per-cell zone data is included when available
+    local info = sfm.soilSystem:getFieldInfo(fieldId, x, z)
+    return fieldId, info
 end
 
 -- Returns sensor key display string from input binding, or fallback.
@@ -320,24 +332,27 @@ function SoilSmartSensorPanel:drawPanel(sprayer, sfm)
     local diseaseOn = sensorMgr:isDiseaseEnabled(vehicleId)
     local nutrientOn = sensorMgr:isNutrientEnabled(vehicleId)
 
-    -- Build value strings
+    -- Build value strings (fd is a getFieldInfo table, not raw fieldData)
     local pestVal, diseaseVal, nutVal = "", "", ""
     if fd then
         local pest = fd.pestPressure    or 0
         local dis  = fd.diseasePressure or 0
-        local k    = fd.potassium  or 0
-        local p    = fd.phosphorus or 0
+        local k    = fd.potassium  and fd.potassium.value  or 0
+        local p    = fd.phosphorus and fd.phosphorus.value or 0
+        local ppm  = SoilConstants.PPM_DISPLAY or { P = 1, K = 1 }
         if pest <= 0 then
-            pestVal = "No pressure - field is clean"
+            pestVal = g_i18n:getText("sf_sensor_no_pressure") or "No pressure"
         else
             pestVal = string.format("%.0f%%", pest)
         end
         if dis <= 0 then
-            diseaseVal = "No pressure - field is clean"
+            diseaseVal = g_i18n:getText("sf_sensor_no_pressure") or "No pressure"
         else
             diseaseVal = string.format("%.0f%%", dis)
         end
-        nutVal = string.format("K=%d  P=%d", math.floor(k), math.floor(p))
+        nutVal = string.format("K=%d  P=%d",
+            math.floor(k * (ppm.K or 1) + 0.5),
+            math.floor(p * (ppm.P or 1) + 0.5))
     end
 
     local rows = {

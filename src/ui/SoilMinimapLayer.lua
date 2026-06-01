@@ -195,8 +195,11 @@ function SoilMinimapLayer:_startBuild(soilMapOverlay)
             local def    = entry.def
             -- Engine limit: 16 state color sets. Read top 4 bits of the 8-bit value.
             -- Signature: (overlay, mapId, maskMapId, fieldMask, firstChannel, numChannels, state, r, g, b, a)
-            -- maskMapId=0, fieldMask=0 (no mask), firstChannel=4 reads bits 4-7 → 16 states.
-            -- State 0 = raw 0-15 (unwritten/near-zero) → transparent.
+            -- State 0 = raw bits 4-7 = 0 (unwritten/near-zero) → always transparent.
+            -- State 0 = raw bits 4-7 = 0 (unwritten/near-zero) → always transparent.
+            -- No masking: our GRLE starts as all-zeros; writeFieldToLayers only paints
+            -- field AABBs, so only field areas ever have non-zero state values.
+            -- Unmasked rendering therefore naturally restricts coloring to field areas.
             setDensityMapVisualizationOverlayStateColor(ov, handle, 0, 0, 4, 4, 0, 0, 0, 0, 0)
             for i = 1, 15 do
                 local semanticVal = def.minVal + (i / 15.0) * (def.maxVal - def.minVal)
@@ -255,48 +258,57 @@ function SoilMinimapLayer:draw(mapSelf)
     local ov = self._overlays[self._showIdx]
     if not ov then return end
 
-    -- Map world-rect → screen rect using the same layout helpers BMP uses
+    -- Map world-rect to screen rect using the layout helpers.
+    -- The DMV overlay covers the full terrain in UV space (0,0)→(1,1).
+    -- We use UV mapping to select only the visible window defined by
+    -- mapExtensionOffsetX/Z (pan) and mapExtensionScaleFactor (zoom),
+    -- rendering the result at the full minimap screen rect.
     local layout = mapSelf.layout
     if not layout then return end
 
     local w, h = layout:getMapSize()
     local x, y = layout:getMapPosition()
-    local px, py = layout:getMapPivot()
 
     local extX = mapSelf.mapExtensionOffsetX    or 0
     local extZ = mapSelf.mapExtensionOffsetZ    or 0
     local scl  = mapSelf.mapExtensionScaleFactor or 1
 
-    local mx = x + w * extX
-    local my = y + h * extZ
-    local mw = w * scl
-    local mh = h * scl
-    local rx = (px + x) - mx
-    local ry = (py + y) - my
+    -- Visible terrain window in UV space (U = east-west, V = south-north)
+    local uL = extX
+    local uR = extX + scl
+    local vB = extZ
+    local vT = extZ + scl
 
-    -- Clip rect (circle minimap, etc.)
-    local didClip  = false
-    local uL, vT, uR, vB = 0, 0, 1, 1
+    -- Render destination: full minimap screen rect
+    local rx, ry, rw, rh = x, y, w, h
+
+    -- Clip rect (circular minimap mask) — adjust screen rect and UV together
+    local didClip = false
     if mapSelf.clipX1 ~= nil then
-        local x1, y1 = mx, my
-        local x2, y2 = mx + mw, my + mh
         local cx1, cy1 = mapSelf.clipX1, mapSelf.clipY1
         local cx2, cy2 = mapSelf.clipX2, mapSelf.clipY2
-        local rx1 = math.max(x1, cx1); local ry1 = math.max(y1, cy1)
-        local rx2 = math.min(x2, cx2); local ry2 = math.min(y2, cy2)
-        if (rx2 - rx1) <= 0 or (ry2 - ry1) <= 0 then return end
-        uL = (rx1 - x1) / (x2 - x1); vT = (ry1 - y1) / (y2 - y1)
-        uR = (rx2 - x1) / (x2 - x1); vB = (ry2 - y1) / (y2 - y1)
-        mx, my, mw, mh = rx1, ry1, rx2 - rx1, ry2 - ry1
+        local sx1 = math.max(x, cx1); local sy1 = math.max(y, cy1)
+        local sx2 = math.min(x + w, cx2); local sy2 = math.min(y + h, cy2)
+        if (sx2 - sx1) <= 0 or (sy2 - sy1) <= 0 then return end
+        -- Remap UV to the clipped sub-region of the full minimap
+        local uPerPx = scl / w
+        local vPerPx = scl / h
+        uL = extX + (sx1 - x) * uPerPx
+        uR = extX + (sx2 - x) * uPerPx
+        vB = extZ + (sy1 - y) * vPerPx
+        vT = extZ + (sy2 - y) * vPerPx
+        rx, ry, rw, rh = sx1, sy1, sx2 - sx1, sy2 - sy1
         didClip = true
     end
 
-    if didClip then
-        setOverlayUVs(ov, uL, vT, uL, vB, uR, vT, uR, vB)
-    end
+    -- UV corners: (bottom-left, top-left, bottom-right, top-right)
+    setOverlayUVs(ov, uL, vB, uL, vT, uR, vB, uR, vT)
 
     if layout.getMapRotation then
-        setOverlayRotation(ov, layout:getMapRotation(), rx, ry)
+        local rot = layout:getMapRotation()
+        if rot and rot ~= 0 then
+            setOverlayRotation(ov, rot, x + w * 0.5, y + h * 0.5)
+        end
     end
 
     local alpha = 0.72
@@ -305,9 +317,9 @@ function SoilMinimapLayer:draw(mapSelf)
         if a then alpha = math.sqrt(a) * 0.72 end
     end
     setOverlayColor(ov, 1, 1, 1, alpha)
-    renderOverlay(ov, mx, my, mw, mh)
+    renderOverlay(ov, rx, ry, rw, rh)
 
-    if didClip and Overlay ~= nil and Overlay.DEFAULT_UVS ~= nil then
+    if Overlay ~= nil and Overlay.DEFAULT_UVS ~= nil then
         setOverlayUVs(ov, unpack(Overlay.DEFAULT_UVS))
     end
 end

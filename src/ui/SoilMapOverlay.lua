@@ -311,10 +311,10 @@ function SoilMapOverlay:_pdaKickBuild(layerIdx)
     end
 
     -- GRLE-backed layers (N/P/K/pH/OM/Pest/Disease/Compaction)
-    -- Require hasData so we don't generate a fully-transparent overlay before
-    -- writeFieldToLayers has run — that would suppress the polygon-dot fallback.
+    -- State 0 (unwritten GRLE pixels) is mapped to transparent, so generating the
+    -- overlay early is safe — unpopulated areas stay invisible until data is written.
     local fieldKey = PDA_LAYER_GRLE[layerIdx]
-    if fieldKey and layerSystem and layerSystem.available and layerSystem.hasData then
+    if fieldKey and layerSystem and layerSystem.available then
         local entry = layerSystem:getLayerEntryForField(fieldKey)
         if entry then
             local handle = entry.handle
@@ -1700,7 +1700,7 @@ function SoilMapOverlay:installMinimapZoomHooks()
 
         local origSet = layoutClass.setWorldSize
         layoutClass.setWorldSize = function(layout, ...)
-            origSet(layout, ...)
+            if origSet then origSet(layout, ...) end
             layout._sfOrigWorldSizeFactor = layout.worldSizeFactor
         end
 
@@ -1709,7 +1709,7 @@ function SoilMapOverlay:installMinimapZoomHooks()
             if layout._sfOrigWorldSizeFactor ~= nil then
                 layout.worldSizeFactor = layout._sfOrigWorldSizeFactor * SoilMapOverlay.minimapZoomSmoothed
             end
-            origUpdate(layout, ...)
+            if origUpdate then origUpdate(layout, ...) end
         end
 
         layoutClass._sfZoomHooked = true

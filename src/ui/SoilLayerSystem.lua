@@ -360,52 +360,82 @@ function SoilLayerSystem:readValueAtWorld(layerName, worldX, worldZ)
 end
 
 -- ─────────────────────────────────────────────────────────
--- Read back the AVERAGE encoded value across a farmland
--- polygon and return the decoded semantic float.
--- Samples a grid of world points across the farmland AABB.
+-- Derive the AABB (cx, cz, hw, hh) for a FS25 Field object.
+-- FS25 Field objects have polygonPoints (scene node IDs) and
+-- posX/posZ (centroid).  Farmland objects have NO geometry.
+-- Returns cx, cz, hw, hh or nil on failure.
+-- ─────────────────────────────────────────────────────────
+local function getFieldAABB(fsField)
+    if not fsField then return nil end
+
+    -- Primary: derive AABB from polygon node world positions
+    local polyNodes = fsField.polygonPoints
+    if polyNodes and #polyNodes >= 3 then
+        local minX, maxX, minZ, maxZ = math.huge, -math.huge, math.huge, -math.huge
+        for i = 1, #polyNodes do
+            local nodeId = polyNodes[i]
+            if nodeId and nodeId ~= 0 then
+                local ok, wx, _, wz = pcall(getWorldTranslation, nodeId)
+                if ok and wx then
+                    if wx < minX then minX = wx end
+                    if wx > maxX then maxX = wx end
+                    if wz < minZ then minZ = wz end
+                    if wz > maxZ then maxZ = wz end
+                end
+            end
+        end
+        if minX ~= math.huge then
+            return (minX + maxX) / 2, (minZ + maxZ) / 2,
+                   (maxX - minX) / 2, (maxZ - minZ) / 2
+        end
+    end
+
+    -- Fallback: use centroid + area-based half-extents
+    local cx = fsField.posX
+    local cz = fsField.posZ
+    if cx and cz then
+        local area   = fsField.areaHa or (fsField.farmland and fsField.farmland.areaInHa) or 1.0
+        local halfSide = math.sqrt(area * 10000) / 2
+        return cx, cz, halfSide, halfSide
+    end
+
+    return nil
+end
+
+-- ─────────────────────────────────────────────────────────
+-- Look up the FS25 Field object for a given farmland ID.
+-- Returns nil when g_fieldManager is unavailable.
+-- ─────────────────────────────────────────────────────────
+local function getFieldByFarmlandId(farmlandId)
+    if not g_fieldManager or not g_fieldManager.fields then return nil end
+    for _, f in ipairs(g_fieldManager.fields) do
+        if f and f.farmland and f.farmland.id == farmlandId then
+            return f
+        end
+    end
+    return nil
+end
+
+-- ─────────────────────────────────────────────────────────
+-- Read back the AVERAGE encoded value across a field polygon
+-- and return the decoded semantic float.
+-- Samples a grid of world points across the field AABB.
 -- Used during scanFields to initialise fieldData from an
 -- existing GRLE (e.g. a fresh savegame or a pre-seeded map).
+-- fsField must be a FS25 Field object (has polygonPoints).
 -- ─────────────────────────────────────────────────────────
 
 ---@param layerName string
----@param farmland  table    FS25 farmland object (has .x .z .width .height or polygon)
+---@param fsField   table    FS25 Field object (field.farmland.id is the key)
 ---@return number|nil  Semantic average, or nil if layer missing / no valid reads
-function SoilLayerSystem:readAverageForFarmland(layerName, farmland)
+function SoilLayerSystem:readAverageForFarmland(layerName, fsField)
     if not self.available then return nil end
 
     local entry = self.layerHandles[layerName]
     if not entry then return nil end
 
-    -- Determine bounding box from farmland fields
-    local cx, cz, hw, hh
-    if farmland.x and farmland.z then
-        -- Some maps expose world-space center + half-extents
-        cx = farmland.x
-        cz = farmland.z
-        hw = (farmland.width  and farmland.width  / 2) or 50
-        hh = (farmland.height and farmland.height / 2) or 50
-    elseif farmland.polygon and #farmland.polygon >= 2 then
-        -- Derive AABB from polygon points (format: {x1, z1, x2, z2, ...})
-        local minX, maxX, minZ, maxZ = math.huge, -math.huge, math.huge, -math.huge
-        for i = 1, #farmland.polygon, 2 do
-            local px = farmland.polygon[i]
-            local pz = farmland.polygon[i + 1]
-            if px and pz then
-                if px < minX then minX = px end
-                if px > maxX then maxX = px end
-                if pz < minZ then minZ = pz end
-                if pz > maxZ then maxZ = pz end
-            end
-        end
-        if minX == math.huge then return nil end
-        cx = (minX + maxX) / 2
-        cz = (minZ + maxZ) / 2
-        hw = (maxX - minX) / 2
-        hh = (maxZ - minZ) / 2
-    else
-        -- Absolute fallback: can't determine farmland boundary
-        return nil
-    end
+    local cx, cz, hw, hh = getFieldAABB(fsField)
+    if not cx then return nil end
 
     -- Sample a 5×5 grid across the AABB
     local STEPS = 5
@@ -439,38 +469,25 @@ end
 -- visual heatmap matches what's stored).
 -- ─────────────────────────────────────────────────────────
 
----@param fieldId  number
----@param fieldData table  The fieldData[fieldId] table
----@param farmland  table  FS25 farmland object for the field
-function SoilLayerSystem:writeFieldToLayers(fieldId, fieldData, farmland)
+---@param fieldId   number
+---@param fieldData table   The fieldData[fieldId] table
+---@param fsFieldOrFarmland table  FS25 Field object preferred; farmland ID used to look up Field if needed
+function SoilLayerSystem:writeFieldToLayers(fieldId, fieldData, fsFieldOrFarmland)
     if not self.available then return end
-    if not fieldData or not farmland then return end
+    if not fieldData then return end
 
-    -- Determine bounding box (same logic as readAverageForFarmland)
-    local cx, cz, hw, hh
-    if farmland.x and farmland.z then
-        cx = farmland.x
-        cz = farmland.z
-        hw = (farmland.width  and farmland.width  / 2) or 50
-        hh = (farmland.height and farmland.height / 2) or 50
-    elseif farmland.polygon and #farmland.polygon >= 2 then
-        local minX, maxX, minZ, maxZ = math.huge, -math.huge, math.huge, -math.huge
-        for i = 1, #farmland.polygon, 2 do
-            local px = farmland.polygon[i]
-            local pz = farmland.polygon[i + 1]
-            if px and pz then
-                if px < minX then minX = px end
-                if px > maxX then maxX = px end
-                if pz < minZ then minZ = pz end
-                if pz > maxZ then maxZ = pz end
-            end
-        end
-        if minX == math.huge then return end
-        cx = (minX + maxX) / 2
-        cz = (minZ + maxZ) / 2
-        hw = (maxX - minX) / 2
-        hh = (maxZ - minZ) / 2
-    else
+    -- Resolve to a Field object (which has polygonPoints for AABB).
+    -- Callers may pass a Field object directly, or a farmland object (which has no geometry).
+    -- When a farmland object is passed, look up the Field via g_fieldManager.
+    local fsField = fsFieldOrFarmland
+    if fsField and not fsField.polygonPoints and not fsField.posX then
+        -- Likely a farmland object — look up the corresponding Field
+        fsField = getFieldByFarmlandId(fieldId)
+    end
+
+    local cx, cz, hw, hh = getFieldAABB(fsField)
+    if not cx then
+        SoilLogger.debug("SoilLayerSystem: writeFieldToLayers skipped field %d (no geometry)", fieldId)
         return
     end
 
@@ -493,6 +510,45 @@ function SoilLayerSystem:writeFieldToLayers(fieldId, fieldData, farmland)
     end
 
     SoilLogger.debug("SoilLayerSystem: painted field %d to density layers", fieldId)
+end
+
+-- ─────────────────────────────────────────────────────────
+-- Clear ALL nutrient layers for a field (write 0 to entire
+-- AABB).  Call this for unowned fields so the unmasked DMV
+-- only colours owned field areas.
+-- ─────────────────────────────────────────────────────────
+
+---@param fieldId          number
+---@param fsFieldOrFarmland table|nil  Field or farmland object; nil → looks up by fieldId
+function SoilLayerSystem:clearFieldFromLayers(fieldId, fsFieldOrFarmland)
+    if not self.available then return end
+
+    local fsField = fsFieldOrFarmland
+    if fsField and not fsField.polygonPoints and not fsField.posX then
+        fsField = getFieldByFarmlandId(fieldId)
+    elseif not fsField then
+        fsField = getFieldByFarmlandId(fieldId)
+    end
+
+    local cx, cz, hw, hh = getFieldAABB(fsField)
+    if not cx then return end
+
+    for _, def in ipairs(LAYER_DEFS) do
+        local entry = self.layerHandles[def.name]
+        if entry then
+            local modifier = entry.modifier
+            local filter   = DensityMapFilter.new(modifier)
+            modifier:setParallelogramWorldCoords(
+                cx - hw, cz - hh,
+                cx + hw, cz - hh,
+                cx - hw, cz + hh,
+                DensityCoordType.POINT_POINT_POINT
+            )
+            modifier:executeSet(0, filter, nil)
+        end
+    end
+
+    SoilLogger.debug("SoilLayerSystem: cleared GRLE for field %d", fieldId)
 end
 
 -- ─────────────────────────────────────────────────────────
@@ -546,14 +602,20 @@ end
 ---@param fieldData table  The fieldData[fieldId] table (modified in-place)
 ---@param farmland  table  FS25 farmland object
 ---@return boolean
-function SoilLayerSystem:readFieldFromLayers(fieldId, fieldData, farmland)
+function SoilLayerSystem:readFieldFromLayers(fieldId, fieldData, fsField)
     if not self.available then return false end
+
+    -- Resolve to a Field object if a farmland was passed
+    if fsField and not fsField.polygonPoints and not fsField.posX then
+        fsField = getFieldByFarmlandId(fieldId)
+    end
+    if not fsField then return false end
 
     local anyRead = false
     for _, def in ipairs(LAYER_DEFS) do
         local entry = self.layerHandles[def.name]
         if entry then
-            local avg = self:readAverageForFarmland(def.name, farmland)
+            local avg = self:readAverageForFarmland(def.name, fsField)
             if avg ~= nil then
                 fieldData[def.field] = avg
                 anyRead = true
