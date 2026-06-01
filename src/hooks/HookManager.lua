@@ -1318,12 +1318,14 @@ function HookManager:installVariableRateHook()
     end
 
     -- Classify fill types at install time
-    local nFerts  = {}   -- N-dominant (UAN, liquid urea, etc.)
-    local pFerts  = {}   -- P-dominant (MAP, DAP, etc.)
-    local kFerts  = {}   -- K-only (POTASH, etc.)
-    local npkFerts = {}  -- multi-nutrient (all N/P/K fertilizers)
+    local nFerts   = {}   -- N-dominant (UAN, liquid urea, etc.)
+    local pFerts   = {}   -- P-dominant (MAP, DAP, etc.)
+    local kFerts   = {}   -- K-only (POTASH, etc.)
+    local npkFerts = {}   -- multi-nutrient (all N/P/K fertilizers)
+    local omFerts  = {}   -- OM-primary (compost, manure, digestate — target organic matter)
 
     local profs = SoilConstants.FERTILIZER_PROFILES
+    local omPrimarySet = SoilConstants.SPRAYER_RATE and SoilConstants.SPRAYER_RATE.OM_PRIMARY_PRODUCTS
     if profs then
         for name, prof in pairs(profs) do
             local n = prof.N or 0
@@ -1334,6 +1336,9 @@ function HookManager:installVariableRateHook()
                 if n > 0 and p == 0 and k == 0 then nFerts[name] = true end
                 if p > 0 and k == 0             then pFerts[name] = true end
                 if k > 0 and p == 0             then kFerts[name] = true end
+            end
+            if omPrimarySet and omPrimarySet[name] then
+                omFerts[name] = true
             end
         end
     end
@@ -1370,7 +1375,7 @@ function HookManager:installVariableRateHook()
                 return
             end
             local ft = g_fillTypeManager and g_fillTypeManager:getFillTypeByIndex(fillTypeIndex)
-            if not ft or not npkFerts[ft.name] then
+            if not ft or (not npkFerts[ft.name] and not omFerts[ft.name]) then
                 sensorMgr:clearSectionRates(vehicleId)
                 return
             end
@@ -1378,6 +1383,7 @@ function HookManager:installVariableRateHook()
             local isN   = nFerts[ft.name]  == true
             local isP   = pFerts[ft.name]  == true
             local isK   = kFerts[ft.name]  == true
+            local isOM  = omFerts[ft.name] == true
 
             -- Manual rate ceiling
             local rm = sfm.sprayerRateManager
@@ -1413,7 +1419,15 @@ function HookManager:installVariableRateHook()
                             local cell = fd.zoneData and fd.zoneData[cellKey]
 
                             local nutrientVal
-                            if isN then
+                            local effTarget = target
+                            if isOM then
+                                -- OM-primary products (compost, manure, digestate): target organic matter
+                                local omTarget = SoilConstants.SPRAYER_RATE and
+                                    SoilConstants.SPRAYER_RATE.AUTO_RATE_TARGETS and
+                                    SoilConstants.SPRAYER_RATE.AUTO_RATE_TARGETS.OM or 5.0
+                                nutrientVal = (cell and cell.OM) or fd.organicMatter or omTarget
+                                effTarget   = omTarget
+                            elseif isN then
                                 nutrientVal = (cell and cell.N) or fd.nitrogen or target
                             elseif isP then
                                 nutrientVal = (cell and cell.P) or fd.phosphorus or target
@@ -1427,7 +1441,7 @@ function HookManager:installVariableRateHook()
                                 nutrientVal = math.min(n, p, k)
                             end
 
-                            local deficit = math.max(0, target - nutrientVal) / target
+                            local deficit = math.max(0, effTarget - nutrientVal) / effTarget
                             rate = vrCfg.MIN_RATE + deficit * (vrCfg.MAX_RATE - vrCfg.MIN_RATE)
                         end
                     end

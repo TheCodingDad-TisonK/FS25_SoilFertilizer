@@ -594,10 +594,10 @@ function SoilReportDialog:updateFieldRows()
                     -- Field ID
                     if row.id then row.id:setText(tostring(fieldId)) end
 
-                    -- N / P / K (ppm, color-coded)
-                    setColoredText(row.n, tostring(math.floor(info.nitrogen.value   * ppm.N + 0.5)), getStatusColor(info.nitrogen.status))
-                    setColoredText(row.p, tostring(math.floor(info.phosphorus.value * ppm.P + 0.5)), getStatusColor(info.phosphorus.status))
-                    setColoredText(row.k, tostring(math.floor(info.potassium.value  * ppm.K + 0.5)), getStatusColor(info.potassium.status))
+                    -- N / P / K (% of bar, 0-100, color-coded — consistent with weed/pest display)
+                    setColoredText(row.n, string.format("%d%%", math.floor(info.nitrogen.value   + 0.5)), getStatusColor(info.nitrogen.status))
+                    setColoredText(row.p, string.format("%d%%", math.floor(info.phosphorus.value + 0.5)), getStatusColor(info.phosphorus.status))
+                    setColoredText(row.k, string.format("%d%%", math.floor(info.potassium.value  + 0.5)), getStatusColor(info.potassium.status))
 
                     -- pH
                     setColoredText(row.ph, string.format("%.1f", info.pH), getPHColor(info.pH))
