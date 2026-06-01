@@ -21,7 +21,7 @@ SoilMinimapLayer = {}
 SoilMinimapLayer_mt = Class(SoilMinimapLayer)
 
 SoilMinimapLayer.OVERLAY_RESOLUTION  = 512   -- texture resolution (width = height)
-SoilMinimapLayer.REFRESH_INTERVAL_MS = 8000  -- max rebuild cadence when dirty (ms)
+SoilMinimapLayer.REFRESH_INTERVAL_MS = 3000  -- max rebuild cadence when dirty (ms)
 SoilMinimapLayer.POLL_INTERVAL_MS    = 200   -- how often to check if build finished (ms)
 
 function SoilMinimapLayer.new(soilSystem, settings)
