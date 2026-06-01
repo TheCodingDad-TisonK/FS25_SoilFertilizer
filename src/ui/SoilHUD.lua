@@ -364,9 +364,9 @@ function SoilHUD:calculateHeight()
         
         local mgr = g_SoilFertilityManager
         if mgr and mgr.settings then
-            if mgr.settings.weedPressure and (info.weedPressure or 0) > 0 then h = h + SoilHUD.LINE_H end
-            if mgr.settings.pestPressure and (info.pestPressure or 0) > 0 then h = h + SoilHUD.LINE_H end
-            if mgr.settings.diseasePressure and (info.diseasePressure or 0) > 0 then h = h + SoilHUD.LINE_H end
+            if mgr.settings.weedPressure    and ((info.weedPressure    or 0) > 0 or info.herbicideActive)  then h = h + SoilHUD.LINE_H end
+            if mgr.settings.pestPressure    and ((info.pestPressure    or 0) > 0 or info.insecticideActive) then h = h + SoilHUD.LINE_H end
+            if mgr.settings.diseasePressure and ((info.diseasePressure or 0) > 0 or info.fungicideActive)   then h = h + SoilHUD.LINE_H end
             if self._cachedSprayer and (info.sessionCoverageFraction or info.coverageFraction or 0) > 0 then h = h + SoilHUD.LINE_H end
             if mgr.settings.compactionEnabled and (info.compaction or 0) > 0 then h = h + SoilHUD.LINE_H end
         end
@@ -1223,16 +1223,16 @@ function SoilHUD:drawPanel()
         -- Weed / pest / disease pressure rows
         local mgr = g_SoilFertilityManager
         if mgr then
-            if mgr.settings.weedPressure and (info.weedPressure or 0) > 0 then
-                cy = self:drawPressureRow("sf_hud_weeds", info.weedPressure,
+            if mgr.settings.weedPressure    and ((info.weedPressure    or 0) > 0 or info.herbicideActive) then
+                cy = self:drawPressureRow("sf_hud_weeds", info.weedPressure or 0,
                     info.herbicideActive, px, cy, pw, s, fontMult)
             end
-            if mgr.settings.pestPressure and (info.pestPressure or 0) > 0 then
-                cy = self:drawPressureRow("sf_hud_pests", info.pestPressure,
+            if mgr.settings.pestPressure    and ((info.pestPressure    or 0) > 0 or info.insecticideActive) then
+                cy = self:drawPressureRow("sf_hud_pests", info.pestPressure or 0,
                     info.insecticideActive, px, cy, pw, s, fontMult)
             end
-            if mgr.settings.diseasePressure and (info.diseasePressure or 0) > 0 then
-                cy = self:drawPressureRow("sf_hud_disease", info.diseasePressure,
+            if mgr.settings.diseasePressure and ((info.diseasePressure or 0) > 0 or info.fungicideActive) then
+                cy = self:drawPressureRow("sf_hud_disease", info.diseasePressure or 0,
                     info.fungicideActive, px, cy, pw, s, fontMult)
             end
 

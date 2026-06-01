@@ -311,10 +311,10 @@ function SoilMapOverlay:_pdaKickBuild(layerIdx)
     end
 
     -- GRLE-backed layers (N/P/K/pH/OM/Pest/Disease/Compaction)
-    -- Require hasData so we don't generate a fully-transparent overlay before
-    -- writeFieldToLayers has run — that would suppress the polygon-dot fallback.
+    -- State 0 (unwritten GRLE pixels) is mapped to transparent, so generating the
+    -- overlay early is safe — unpopulated areas stay invisible until data is written.
     local fieldKey = PDA_LAYER_GRLE[layerIdx]
-    if fieldKey and layerSystem and layerSystem.available and layerSystem.hasData then
+    if fieldKey and layerSystem and layerSystem.available then
         local entry = layerSystem:getLayerEntryForField(fieldKey)
         if entry then
             local handle = entry.handle
@@ -1542,7 +1542,7 @@ end
 function SoilMapOverlay:onDrawMinimap(ingameMap)
     if ingameMap == nil then return end
     if ingameMap.isFullscreen then return end
-    if ingameMap.state == nil or ingameMap.state <= 1 then return end
+    if ingameMap.state == nil then return end
     -- Suppress minimap dots when any full-screen GUI is open (pause menu, dialogs, etc.)
     if g_gui ~= nil and g_gui:getIsGuiVisible() then return end
 

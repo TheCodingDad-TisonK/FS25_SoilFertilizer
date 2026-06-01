@@ -229,7 +229,10 @@ function SoilSeeAndSprayPanel:drawPanel(sprayer, sfm)
             local anyAbove = (pOn and pVal >= ssCfgE.PEST_THRESHOLD)
                           or (dOn and dVal >= ssCfgE.DISEASE_THRESHOLD)
                           or (wOn and not weedProtected and wVal >= ssCfgE.WEED_THRESHOLD)
-            allSuppressed = not anyAbove
+            -- Only show "all suppressed" when we have valid field data.
+            -- Without field data all pressures default to 0, which would incorrectly
+            -- show the suppressed notice on every road or grass area.
+            allSuppressed = fdE ~= nil and not anyAbove
         end
     end
 

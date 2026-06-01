@@ -2690,22 +2690,18 @@ function SoilFertilitySystem:onInsecticideAppliedIncremental(fieldId, reduction)
         field.insecticideDaysLeft = pp.INSECTICIDE_DURATION_DAYS * daysPerMonth
     end
 
-    -- Local zoneData update
+    -- Update per-cell pest pressure for existing zoneData entries only.
+    -- Do NOT create new entries here — doing so would stamp N/P/K/pH/OM field-average
+    -- values onto cells the insecticide boom passes over, making those cells appear
+    -- "treated with nutrients" on the soil map overlay (issue #517 root cause).
     local x, z = self._lastSprayX, self._lastSprayZ
-    if x and z then
+    if x and z and field.zoneData then
         local zone = SoilConstants.ZONE
         local cellKey = tostring(math.floor(x / zone.CELL_SIZE) * 10000 + math.floor(z / zone.CELL_SIZE))
-        if not field.zoneData then field.zoneData = {} end
-        if not field.zoneData[cellKey] then
-            field.zoneData[cellKey] = {
-                N = field.nitrogen, P = field.phosphorus, K = field.potassium,
-                pH = field.pH, OM = field.organicMatter,
-                weedPressure = field.weedPressure, pestPressure = field.pestPressure,
-                diseasePressure = field.diseasePressure, compaction = field.compaction
-            }
-        end
         local cell = field.zoneData[cellKey]
-        cell.pestPressure = math.max(0, (cell.pestPressure or field.pestPressure or 0) - reduction)
+        if cell then
+            cell.pestPressure = math.max(0, (cell.pestPressure or field.pestPressure or 0) - reduction)
+        end
     end
 end
 
@@ -2724,22 +2720,18 @@ function SoilFertilitySystem:onFungicideAppliedIncremental(fieldId, reduction)
         field.fungicideDaysLeft = dp.FUNGICIDE_DURATION_DAYS * daysPerMonth
     end
 
-    -- Local zoneData update
+    -- Update per-cell disease pressure for existing zoneData entries only.
+    -- Do NOT create new entries here — doing so would stamp N/P/K/pH/OM field-average
+    -- values onto cells the fungicide boom passes over, making those cells appear
+    -- "treated with nutrients" on the soil map overlay (issue #517 root cause).
     local x, z = self._lastSprayX, self._lastSprayZ
-    if x and z then
+    if x and z and field.zoneData then
         local zone = SoilConstants.ZONE
         local cellKey = tostring(math.floor(x / zone.CELL_SIZE) * 10000 + math.floor(z / zone.CELL_SIZE))
-        if not field.zoneData then field.zoneData = {} end
-        if not field.zoneData[cellKey] then
-            field.zoneData[cellKey] = {
-                N = field.nitrogen, P = field.phosphorus, K = field.potassium,
-                pH = field.pH, OM = field.organicMatter,
-                weedPressure = field.weedPressure, pestPressure = field.pestPressure,
-                diseasePressure = field.diseasePressure, compaction = field.compaction
-            }
-        end
         local cell = field.zoneData[cellKey]
-        cell.diseasePressure = math.max(0, (cell.diseasePressure or field.diseasePressure or 0) - reduction)
+        if cell then
+            cell.diseasePressure = math.max(0, (cell.diseasePressure or field.diseasePressure or 0) - reduction)
+        end
     end
 end
 
