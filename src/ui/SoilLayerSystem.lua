@@ -484,39 +484,66 @@ function SoilLayerSystem:writeFieldToLayers(fieldId, fieldData, fsFieldOrFarmlan
     if not self.available then return end
     if not fieldData then return end
 
-    -- Resolve to a Field object (which has polygonPoints for AABB).
-    -- Callers may pass a Field object directly, or a farmland object (which has no geometry).
-    -- When a farmland object is passed, look up the Field via g_fieldManager.
+    -- Resolve to a Field object (which has polygonPoints for polygon painting).
     local fsField = fsFieldOrFarmland
     if fsField and not fsField.polygonPoints and not fsField.posX then
-        -- Likely a farmland object — look up the corresponding Field
         fsField = getFieldByFarmlandId(fieldId)
     end
 
-    local cx, cz, hw, hh = getFieldAABB(fsField)
-    if not cx then
-        SoilLogger.debug("SoilLayerSystem: writeFieldToLayers skipped field %d (no geometry)", fieldId)
-        return
+    -- Gather polygon points from the Field object.
+    -- Prefer field:getPolygonPoints() method; fall back to the .polygonPoints table.
+    local polyNodes
+    if fsField then
+        if type(fsField.getPolygonPoints) == "function" then
+            local ok, pts = pcall(function() return fsField:getPolygonPoints() end)
+            if ok then polyNodes = pts end
+        end
+        if not polyNodes then polyNodes = fsField.polygonPoints end
     end
 
-    -- Paint entire AABB with the current field value for non-perPixel layers only.
-    -- perPixel layers (N/P/K/pH/OM) are written per-pixel by spray events and must
-    -- not be bulk-overwritten here or the per-pixel precision is lost.
+    local usePolygon = polyNodes and #polyNodes >= 3
+
+    -- AABB fallback for fields whose polygon data is unavailable.
+    local cx, cz, hw, hh
+    if not usePolygon then
+        cx, cz, hw, hh = getFieldAABB(fsField)
+        if not cx then
+            SoilLogger.debug("SoilLayerSystem: writeFieldToLayers skipped field %d (no geometry)", fieldId)
+            return
+        end
+    end
+
+    -- Paint the field polygon (or AABB fallback) for ALL layers.
+    -- perPixel layers (N/P/K/pH/OM) are painted with the field-average value so the
+    -- heatmap stays accurate after harvest depletion and seasonal changes.
+    -- Spray events then overlay precise per-pixel values on top.
     for _, def in ipairs(LAYER_DEFS) do
-        if not def.perPixel then
-            local entry = self.layerHandles[def.name]
-            if entry and fieldData[def.field] ~= nil then
-                local encoded = encode(fieldData[def.field], def)
-                local modifier = entry.modifier
-                local filter   = DensityMapFilter.new(modifier)
+        local entry = self.layerHandles[def.name]
+        if entry and fieldData[def.field] ~= nil then
+            local encoded = encode(fieldData[def.field], def)
+            local modifier = entry.modifier
+            local filter   = DensityMapFilter.new(modifier)
+
+            if usePolygon then
+                modifier:clearPolygonPoints()
+                for _, nodeId in ipairs(polyNodes) do
+                    if nodeId and nodeId ~= 0 then
+                        local ok, wx, _, wz = pcall(getWorldTranslation, nodeId)
+                        if ok and wx then
+                            modifier:addPolygonPointWorldCoords(wx, wz)
+                        end
+                    end
+                end
+            else
                 modifier:setParallelogramWorldCoords(
                     cx - hw, cz - hh,
                     cx + hw, cz - hh,
                     cx - hw, cz + hh,
                     DensityCoordType.POINT_POINT_POINT
                 )
-                modifier:executeSet(encoded, filter, nil)
             end
+
+            modifier:executeSet(encoded, filter, nil)
         end
     end
 
@@ -541,20 +568,43 @@ function SoilLayerSystem:clearFieldFromLayers(fieldId, fsFieldOrFarmland)
         fsField = getFieldByFarmlandId(fieldId)
     end
 
-    local cx, cz, hw, hh = getFieldAABB(fsField)
-    if not cx then return end
+    local polyNodes
+    if fsField then
+        if type(fsField.getPolygonPoints) == "function" then
+            local ok, pts = pcall(function() return fsField:getPolygonPoints() end)
+            if ok then polyNodes = pts end
+        end
+        if not polyNodes then polyNodes = fsField.polygonPoints end
+    end
+
+    local usePolygon = polyNodes and #polyNodes >= 3
+    local cx, cz, hw, hh
+    if not usePolygon then
+        cx, cz, hw, hh = getFieldAABB(fsField)
+        if not cx then return end
+    end
 
     for _, def in ipairs(LAYER_DEFS) do
         local entry = self.layerHandles[def.name]
         if entry then
             local modifier = entry.modifier
             local filter   = DensityMapFilter.new(modifier)
-            modifier:setParallelogramWorldCoords(
-                cx - hw, cz - hh,
-                cx + hw, cz - hh,
-                cx - hw, cz + hh,
-                DensityCoordType.POINT_POINT_POINT
-            )
+            if usePolygon then
+                modifier:clearPolygonPoints()
+                for _, nodeId in ipairs(polyNodes) do
+                    if nodeId and nodeId ~= 0 then
+                        local ok, wx, _, wz = pcall(getWorldTranslation, nodeId)
+                        if ok and wx then modifier:addPolygonPointWorldCoords(wx, wz) end
+                    end
+                end
+            else
+                modifier:setParallelogramWorldCoords(
+                    cx - hw, cz - hh,
+                    cx + hw, cz - hh,
+                    cx - hw, cz + hh,
+                    DensityCoordType.POINT_POINT_POINT
+                )
+            end
             modifier:executeSet(0, filter, nil)
         end
     end

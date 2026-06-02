@@ -328,6 +328,7 @@ function SoilFertilitySystem:onHarvest(fieldId, fruitTypeIndex, liters, strawRat
         harvestField.sessionCoverageFraction = 0
         harvestField.sessionCoverageCells    = {}
         harvestField.sessionLastProduct      = nil
+        harvestField._farmlandAreaConfirmed  = nil  -- re-confirm on next session's first spray (#507)
     end
 
     SoilLogger.debug("Harvest: Field %d, Crop %d, %.0fL (biological), area=%.1f", fieldId, fruitTypeIndex, liters, area or 0)
@@ -2220,13 +2221,13 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
         end
     end
 
-    -- ── Sync pest/disease/compaction to density map layers ───────────────────
-    -- Paint the field AABB with the current daily values so the minimap and
-    -- PDA overlay stay in sync without needing per-setter hooks everywhere.
+    -- ── Sync all nutrient/pressure layers to density maps ───────────────────
+    -- Paint the exact field polygon with current daily values so the minimap
+    -- heatmap stays current after harvest depletion, rain, and seasonal changes.
     if layerSys and layerSys.available then
-        local farmland = farmland or (g_farmlandManager and g_farmlandManager:getFarmlandById(fieldId))
-        if farmland then
-            layerSys:writeFieldToLayers(fieldId, field, farmland)
+        local fsField = g_fieldManager and g_fieldManager.fields and g_fieldManager.fields[fieldId]
+        if fsField then
+            layerSys:writeFieldToLayers(fieldId, field, fsField)
         end
     end
 
@@ -2440,7 +2441,16 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
         if spx and spz and g_farmlandManager then
             local farmlandTmp = g_farmlandManager:getFarmlandAtWorldPosition(spx, spz)
             local fsField = farmlandTmp and g_fieldManager and g_fieldManager.farmlandIdFieldMapping and g_fieldManager.farmlandIdFieldMapping[farmlandTmp.id]
-            local hasCrop = fsField and fsField.fieldState and fsField.fieldState.fruitTypeIndex and fsField.fieldState.fruitTypeIndex ~= FruitType.UNKNOWN
+            -- Issue #532: use live FieldState query (fsField.fieldState is stale on freshly-plowed/fallow fields)
+            local hasCrop = false
+            if fsField and fsField.posX and fsField.posZ then
+                local ok, fs = pcall(function()
+                    local s = FieldState.new()
+                    s:update(fsField.posX, fsField.posZ)
+                    return s
+                end)
+                hasCrop = ok and fs and fs.fruitTypeIndex ~= nil and fs.fruitTypeIndex ~= FruitType.UNKNOWN
+            end
             if hasCrop then
                 if isLimeAmendment then
                     field.amendBurnPenalty = 0.80
@@ -2462,10 +2472,12 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
     local limits = SoilConstants.NUTRIENT_LIMITS
 
     -- AREA NORMALIZATION: Calculate hectares for this field.
-    -- Confirm area on first spray — prefer the actual crop polygon area (field.areaHa)
+    -- Confirm area on first spray of each session — prefer the actual crop polygon area (field.areaHa)
     -- because farmland.areaInHa includes roads/hedges (~2× crop area), which causes
     -- Pass% to cap at ~50% after a full field pass (issue #475/#476).
-    if not field._farmlandAreaConfirmed and g_farmlandManager then
+    -- Also re-confirm at the start of every new session so field-size changes (issue #507) take effect.
+    local _isNewSession = not next(field.sessionCoverageCells or {})
+    if (not field._farmlandAreaConfirmed or _isNewSession) and g_farmlandManager then
         local farmlandObj = g_farmlandManager:getFarmlandById(fieldId)
         if farmlandObj and farmlandObj.areaInHa and farmlandObj.areaInHa > 0 then
             -- Try crop polygon area via farmland mapping (g_fieldManager has no getFieldAtWorldPosition)

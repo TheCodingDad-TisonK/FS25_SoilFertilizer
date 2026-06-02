@@ -723,6 +723,7 @@ function SoilFertilityManager:onMissionStarted()
 
         self:loadSoilData()
         self.soilSystem:prePopulateAllZoneData()
+        self:seedGRLEFromFieldData()
     end)
 
     if not ok then
@@ -1128,6 +1129,35 @@ function SoilFertilityManager:loadSoilData()
         -- GRLE minimap heatmap fills in per-pixel from sprayer events.
         -- No bulk AABB seed here — see SoilFertilitySystem.lua loadFromXMLFile note.
     end
+end
+
+-- Seed all GRLE layers (including N/P/K/pH/OM) with the current fieldData values
+-- so the DMV minimap heatmap shows a full field heatmap on session start.
+-- Called once after loadSoilData() has populated fieldData.
+function SoilFertilityManager:seedGRLEFromFieldData()
+    local soilSys = self.soilSystem
+    if not soilSys then return end
+    local layerSys = soilSys.layerSystem
+    if not layerSys or not layerSys.available then return end
+    if g_dedicatedServer then return end
+
+    local fieldData = soilSys.fieldData
+    if not fieldData then return end
+
+    local count = 0
+    for fieldId, field in pairs(fieldData) do
+        local fsField = g_fieldManager and g_fieldManager.fields and g_fieldManager.fields[fieldId]
+        if fsField then
+            layerSys:writeFieldToLayers(fieldId, field, fsField)
+            count = count + 1
+        end
+    end
+
+    if self.soilMinimapLayer then
+        self.soilMinimapLayer:markDirty()
+    end
+
+    SoilLogger.info("GRLE startup seed complete: %d field(s) seeded to all layers", count)
 end
 
 --- Update loop called every frame

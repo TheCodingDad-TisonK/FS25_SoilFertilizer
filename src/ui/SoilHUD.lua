@@ -128,6 +128,12 @@ function SoilHUD.new(soilSystem, settings)
     -- Height dirty flag: set by refreshFieldData, cleared after calculateHeight()
     self._heightDirty = true
 
+    -- Mini-report display-mode stabilizer: prevents rapid cell↔field-avg flipping (#531)
+    self._miniLastIsCell      = nil
+    self._miniModePendingAt   = nil
+    self._miniStableSamples   = nil
+    self._miniStableCellLabel = nil
+
     -- Single overlay handle
     self.fillOverlay = nil
 
@@ -1779,8 +1785,9 @@ function SoilHUD:drawMiniReport()
     local wx = self.cachedPlayerX
     local wz = self.cachedPlayerZ
 
-    local samples = nil
+    local samples  = nil
     local cellLabel = nil
+    local isCell   = false
 
     -- 1. Try to get per-cell zoneData first; fall back to field-level averages.
     if wx and wz and self.cachedFieldId and self.cachedFieldId > 0 then
@@ -1797,6 +1804,7 @@ function SoilHUD:drawMiniReport()
                     cell = field.zoneData[cellKey]
                     if cell then
                         cellLabel = string.format("C %d\xC2\xB7%d", cx, cz)
+                        isCell = true
                     end
                 end
 
@@ -1819,6 +1827,33 @@ function SoilHUD:drawMiniReport()
                 end
             end
         end
+    end
+
+    -- Debounce (#531): only switch between cell and field-avg display after 2 seconds of stability.
+    -- As a sprayer drives over unsprayed cells the source would otherwise flip every few seconds.
+    if samples then
+        local DEBOUNCE_MS = 2000
+        if self._miniLastIsCell ~= isCell then
+            if not self._miniModePendingAt then
+                self._miniModePendingAt = self.animTimer
+            end
+            if (self.animTimer - self._miniModePendingAt) < DEBOUNCE_MS and self._miniStableSamples then
+                samples   = self._miniStableSamples
+                cellLabel = self._miniStableCellLabel
+            else
+                self._miniLastIsCell      = isCell
+                self._miniModePendingAt   = nil
+                self._miniStableSamples   = samples
+                self._miniStableCellLabel = cellLabel
+            end
+        else
+            self._miniModePendingAt   = nil
+            self._miniStableSamples   = samples
+            self._miniStableCellLabel = cellLabel
+        end
+    else
+        self._miniModePendingAt = nil
+        self._miniLastIsCell    = nil
     end
 
     -- 2. If still no data, samples remains nil (player off-field or system not ready).
