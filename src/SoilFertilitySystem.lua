@@ -322,6 +322,7 @@ function SoilFertilitySystem:onHarvest(fieldId, fruitTypeIndex, liters, strawRat
         harvestField.sessionCoverageCells    = {}
         harvestField.sessionLastProduct      = nil
         harvestField._farmlandAreaConfirmed  = nil  -- re-confirm on next session's first spray (#507)
+        harvestField.sprayTrailPts           = nil
     end
 
     SoilLogger.debug("Harvest: Field %d, Crop %d, %.0fL (biological), area=%.1f", fieldId, fruitTypeIndex, liters, area or 0)
@@ -2001,6 +2002,7 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
                     field.sessionCoverageFraction = 0
                     field.sessionCoverageCells    = {}
                     field.sessionLastProduct      = nil
+                    field.sprayTrailPts           = nil
                 end
             end
 
@@ -2823,6 +2825,7 @@ function SoilFertilitySystem:trackSprayerCoverage(fieldId, liters, fillTypeName,
         field.sessionCoverageHa       = 0
         field.sessionCoverageFraction = 0
         field.sessionCoverageCells    = {}
+        field.sprayTrailPts           = nil
     end
 
     if fillTypeName then field.sessionLastProduct = fillTypeName end
@@ -2887,6 +2890,17 @@ function SoilFertilitySystem:markBoomCells(fieldId, boomPoints)
             if not field.sessionCoverageCells[cellKey] then
                 field.sessionCoverageCells[cellKey] = true
                 field.sessionCoverageHa = math.min(areaInHa, (field.sessionCoverageHa or 0) + cellArea)
+                -- ── Spray trail (in-view overlay) ──────────────────────────────
+                -- Cache world-center + terrain height for SoilHUD:drawSprayTrail().
+                if not field.sprayTrailPts then field.sprayTrailPts = {} end
+                local twx = (cx + 0.5) * zone.CELL_SIZE
+                local twz = (cz + 0.5) * zone.CELL_SIZE
+                local twy = 0.3
+                if g_terrainNode then
+                    local ok, h = pcall(getTerrainHeightAtWorldPos, g_terrainNode, twx, 0, twz)
+                    if ok and h then twy = h + 0.3 end
+                end
+                table.insert(field.sprayTrailPts, {wx = twx, wy = twy, wz = twz})
             end
             if not field.dailyCoverageCells[cellKey] then
                 field.dailyCoverageCells[cellKey] = true
@@ -2920,6 +2934,11 @@ function SoilFertilitySystem:markBoomCells(fieldId, boomPoints)
     -- Recompute fractions after all cells are processed
     field.coverageFraction        = math.min(1.0, (field.coveredAreaHa  or 0) / areaInHa)
     field.sessionCoverageFraction = math.min(1.0, (field.sessionCoverageHa or 0) / areaInHa)
+
+    -- Full pass complete — clear trail so the overlay disappears as a visual reward
+    if (field.sessionCoverageFraction or 0) >= 1.0 and field.sprayTrailPts then
+        field.sprayTrailPts = nil
+    end
 end
 
 --- Direct-path buffering for non-profile products (Herbicide/Insecticide/Fungicide)
