@@ -2749,5 +2749,57 @@
       "count": 6,
       "uniques": 5
     }
+  ],
+  "2026-06-03": [
+    {
+      "referrer": "github.com",
+      "count": 2358,
+      "uniques": 215
+    },
+    {
+      "referrer": "Google",
+      "count": 884,
+      "uniques": 273
+    },
+    {
+      "referrer": "kingmods.net",
+      "count": 563,
+      "uniques": 193
+    },
+    {
+      "referrer": "Bing",
+      "count": 277,
+      "uniques": 53
+    },
+    {
+      "referrer": "youtube.com",
+      "count": 214,
+      "uniques": 133
+    },
+    {
+      "referrer": "reddit.com",
+      "count": 30,
+      "uniques": 20
+    },
+    {
+      "referrer": "yandex.ru",
+      "count": 21,
+      "uniques": 2
+    },
+    {
+      "referrer": "Yahoo",
+      "count": 16,
+      "uniques": 5
+    },
+    {
+      "referrer": "forbidden-mods.de",
+      "count": 16,
+      "uniques": 5
+    },
+    {
+      "referrer": "DuckDuckGo",
+      "count": 6,
+      "uniques": 5
+    }
   ]
 }
