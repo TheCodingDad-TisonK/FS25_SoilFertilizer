@@ -218,6 +218,7 @@
     <e k="sf_hud_title" v="GIÁM SÁT ĐẤT" eh="f8cda642" />
     <e k="sf_hud_field" v="Cánh đồng %d" eh="08988997" />
     <e k="sf_hud_noField" v="Hãy đi vào cánh đồng" eh="62c55e9e" />
+    <e k="sf_sprayer_no_field" v="Lái xe ra đồng" />
     <e k="sf_hud_fallow" v="Để hoang" eh="eafe5913" />
     <e k="sf_hud_weeds" v="Cỏ dại" eh="324181de" />
     <e k="sf_hud_pests" v="Sâu bệnh" eh="2fed5101" />

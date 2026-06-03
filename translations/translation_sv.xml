@@ -218,6 +218,7 @@
     <e k="sf_hud_title" v="MARKÖVERVAKNING" eh="f8cda642" />
     <e k="sf_hud_field" v="Fält %d" eh="08988997" />
     <e k="sf_hud_noField" v="Gå ut på ett fält" eh="62c55e9e" />
+    <e k="sf_sprayer_no_field" v="Kör till ett fält" />
     <e k="sf_hud_fallow" v="Träda" eh="eafe5913" />
     <e k="sf_hud_weeds" v="Ogräs" eh="324181de" />
     <e k="sf_hud_pests" v="Skadedjur" eh="2fed5101" />

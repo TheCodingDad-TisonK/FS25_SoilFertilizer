@@ -56,6 +56,8 @@ source(modDirectory .. "src/ui/SoilHUD.lua")
 source(modDirectory .. "src/ui/SoilSmartSensorPanel.lua")
 source(modDirectory .. "src/ui/SoilSeeAndSprayPanel.lua")
 source(modDirectory .. "src/ui/SoilVariableRatePanel.lua")
+source(modDirectory .. "src/ui/SoilSprayerInfoPanel.lua")
+source(modDirectory .. "src/ui/SoilHarvesterPanel.lua")
 source(modDirectory .. "src/ui/SoilReportDialog.lua")
 source(modDirectory .. "src/ui/SoilMapOverlay.lua")
 source(modDirectory .. "src/ui/SoilMinimapLayer.lua")
@@ -460,9 +462,27 @@ Mission00.onStartMission = Utils.appendedFunction(Mission00.onStartMission, miss
 -- Prepend so our cleanup runs before FS25 tears down g_inputBinding/HUD (fixes black screen with AGS)
 FSBaseMission.delete = Utils.prependedFunction(FSBaseMission.delete, unload)
 
+local _sprayerF1HookInstalled = false
+
 FSBaseMission.update = Utils.appendedFunction(FSBaseMission.update, function(mission, dt)
     if sfm then
         sfm:update(dt)
+        if sfm.sprayerInfoPanel then
+            sfm.sprayerInfoPanel:update(dt)
+        end
+        if sfm.harvesterPanel then
+            sfm.harvesterPanel:update(dt)
+        end
+    end
+    -- Cache F1 geometry whenever InputHelpDisplay draws (for auto-anchor positioning)
+    if not _sprayerF1HookInstalled and InputHelpDisplay and InputHelpDisplay.draw then
+        InputHelpDisplay.draw = Utils.appendedFunction(InputHelpDisplay.draw, function(displaySelf)
+            local m = g_SoilFertilityManager
+            if m and m.sprayerInfoPanel then
+                m.sprayerInfoPanel:cacheF1Geometry(displaySelf)
+            end
+        end)
+        _sprayerF1HookInstalled = true
     end
 end)
 
@@ -486,6 +506,12 @@ FSBaseMission.draw = Utils.appendedFunction(FSBaseMission.draw, function(mission
     end
     if sfm and sfm.variableRatePanel then
         sfm.variableRatePanel:draw()
+    end
+    if sfm and sfm.sprayerInfoPanel then
+        sfm.sprayerInfoPanel:draw()
+    end
+    if sfm and sfm.harvesterPanel then
+        sfm.harvesterPanel:draw()
     end
     -- Soil layer overlay on the HUD minimap (bottom-left corner).
     -- Uses the ingameMap ref captured at map-load time (g_currentMission.ingameMap is nil in FS25).
@@ -557,6 +583,14 @@ function soilMouseHandler:mouseEvent(posX, posY, isDown, isUp, button, eventUsed
     end
     if sfm and sfm.soilHUD then
         local consumed = sfm.soilHUD:onMouseEvent(posX, posY, isDown, isUp, button, eventUsed)
+        eventUsed = consumed or eventUsed
+    end
+    if sfm and sfm.sprayerInfoPanel then
+        local consumed = sfm.sprayerInfoPanel:onMouseEvent(posX, posY, isDown, isUp, button, eventUsed)
+        eventUsed = consumed or eventUsed
+    end
+    if sfm and sfm.harvesterPanel then
+        local consumed = sfm.harvesterPanel:onMouseEvent(posX, posY, isDown, isUp, button, eventUsed)
         eventUsed = consumed or eventUsed
     end
     return eventUsed

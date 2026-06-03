@@ -218,6 +218,7 @@
     <e k="sf_hud_title" v="TALAJ MONITOR" eh="f8cda642" />
     <e k="sf_hud_field" v="Mező %d" eh="08988997" />
     <e k="sf_hud_noField" v="Sétáljon egy mezőre" eh="62c55e9e" />
+    <e k="sf_sprayer_no_field" v="Hajtson a mezőre" />
     <e k="sf_hud_fallow" v="Ugar" eh="eafe5913" />
     <e k="sf_hud_weeds" v="Gyomok" eh="324181de" />
     <e k="sf_hud_pests" v="Kártevők" eh="2fed5101" />

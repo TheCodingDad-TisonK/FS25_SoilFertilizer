@@ -218,6 +218,7 @@
     <e k="sf_hud_title" v="BODENMONITOR" eh="f8cda642" />
     <e k="sf_hud_field" v="Feld %d" eh="08988997" />
     <e k="sf_hud_noField" v="Betreten Sie ein Feld" eh="62c55e9e" />
+    <e k="sf_sprayer_no_field" v="Fahren Sie auf ein Feld" />
     <e k="sf_hud_fallow" v="Brach" eh="eafe5913" />
     <e k="sf_hud_weeds" v="Unkraut" eh="324181de" />
     <e k="sf_hud_pests" v="Schädlinge" eh="2fed5101" />

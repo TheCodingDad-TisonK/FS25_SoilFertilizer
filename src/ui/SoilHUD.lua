@@ -462,6 +462,9 @@ function SoilHUD:onMouseEvent(posX, posY, isDown, isUp, button, eventUsed)
     if isDown and button == Input.MOUSE_BUTTON_RIGHT then
         if self.editMode then
             self:exitEditMode()
+            local sfm = g_SoilFertilityManager
+            if sfm and sfm.sprayerInfoPanel then sfm.sprayerInfoPanel:exitEditMode() end
+            if sfm and sfm.harvesterPanel   then sfm.harvesterPanel:exitEditMode()   end
             return true
         end
         return false
@@ -669,6 +672,9 @@ function SoilHUD:update(dt)
         end
         if g_gui and (g_gui:getIsGuiVisible() or g_gui:getIsDialogVisible()) then
             self:exitEditMode()
+            local sfm = g_SoilFertilityManager
+            if sfm and sfm.sprayerInfoPanel then sfm.sprayerInfoPanel:exitEditMode() end
+            if sfm and sfm.harvesterPanel   then sfm.harvesterPanel:exitEditMode()   end
         end
         if not self.dragging and not self.resizing then
             if g_inputBinding and g_inputBinding.mousePosXLast then
