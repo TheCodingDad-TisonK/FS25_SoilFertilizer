@@ -218,6 +218,7 @@
     <e k="sf_hud_title" v="MONITOR TANAH" eh="f8cda642" />
     <e k="sf_hud_field" v="Lahan %d" eh="08988997" />
     <e k="sf_hud_noField" v="Masuk ke dalam lahan" eh="62c55e9e" />
+    <e k="sf_sprayer_no_field" v="Kendarai ke ladang" />
     <e k="sf_hud_fallow" v="Bera" eh="eafe5913" />
     <e k="sf_hud_weeds" v="Gulma" eh="324181de" />
     <e k="sf_hud_pests" v="Hama" eh="2fed5101" />

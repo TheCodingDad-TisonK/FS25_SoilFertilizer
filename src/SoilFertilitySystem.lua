@@ -43,13 +43,6 @@ function SoilFertilitySystem.new(settings)
     -- Stores the game day, not a timestamp, so the notification fires at most once per field per in-game day.
     self.fertNotifyShown = {}
 
-    -- Per-field throttle for GRLE pixel writes (fieldId → mission time of last write, ms).
-    -- The spray hook fires many times per second; writing to DensityMapModifier on every
-    -- call costs 5 GPU terrain writes per section per tick. We only need to update the GRLE
-    -- fast enough for the minimap (3 s rebuild interval), so 2.5 s per field is sufficient.
-    self._pixelWriteLastMs = {}
-    self._pixelWriteIntervalMs = 2500
-
     -- Per-day throttle tables for crop protection pressure reductions (fieldId → game day last applied).
     -- The sprayer hook fires every frame while the sprayer is active. Without throttling, a single
     -- pass across a field applies the full pressure reduction 60+ times per second, instantly
@@ -329,6 +322,7 @@ function SoilFertilitySystem:onHarvest(fieldId, fruitTypeIndex, liters, strawRat
         harvestField.sessionCoverageCells    = {}
         harvestField.sessionLastProduct      = nil
         harvestField._farmlandAreaConfirmed  = nil  -- re-confirm on next session's first spray (#507)
+        harvestField.sprayTrailPts           = nil
     end
 
     SoilLogger.debug("Harvest: Field %d, Crop %d, %.0fL (biological), area=%.1f", fieldId, fruitTypeIndex, liters, area or 0)
@@ -2008,6 +2002,7 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
                     field.sessionCoverageFraction = 0
                     field.sessionCoverageCells    = {}
                     field.sessionLastProduct      = nil
+                    field.sprayTrailPts           = nil
                 end
             end
 
@@ -2605,26 +2600,17 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
         end
 
         -- Write updated values to density map layers (per-pixel, at sprayer position).
-        -- Throttled to once per 2.5 s per field — the spray hook fires many times per
-        -- second (one call per VWW section per tick), but DensityMapModifier GPU writes
-        -- only need to keep pace with the minimap rebuild interval (3 s).
-        -- markDirty() is always called so the minimap queues a rebuild regardless.
+        -- No throttle — live updates paint a continuous trail on the minimap heatmap.
         if self.layerSystem and self.layerSystem.available then
             local x, z = self._lastSprayX, self._lastSprayZ
             if x and z then
                 local minimapLayer = g_SoilFertilityManager and g_SoilFertilityManager.soilMinimapLayer
                 if minimapLayer then minimapLayer:markDirty() end
-
-                local now = g_currentMission and g_currentMission.time or 0
-                local lastWrite = self._pixelWriteLastMs[fieldId] or 0
-                if (now - lastWrite) >= self._pixelWriteIntervalMs then
-                    self._pixelWriteLastMs[fieldId] = now
-                    if entry.N then self.layerSystem:updatePixelForField("nitrogen",      x, z, field.nitrogen,      2.0) end
-                    if entry.P then self.layerSystem:updatePixelForField("phosphorus",    x, z, field.phosphorus,    2.0) end
-                    if entry.K then self.layerSystem:updatePixelForField("potassium",     x, z, field.potassium,     2.0) end
-                    if entry.pH then self.layerSystem:updatePixelForField("pH",           x, z, field.pH,            2.0) end
-                    if entry.OM then self.layerSystem:updatePixelForField("organicMatter",x, z, field.organicMatter, 2.0) end
-                end
+                if entry.N then self.layerSystem:updatePixelForField("nitrogen",      x, z, field.nitrogen,      2.0) end
+                if entry.P then self.layerSystem:updatePixelForField("phosphorus",    x, z, field.phosphorus,    2.0) end
+                if entry.K then self.layerSystem:updatePixelForField("potassium",     x, z, field.potassium,     2.0) end
+                if entry.pH then self.layerSystem:updatePixelForField("pH",           x, z, field.pH,            2.0) end
+                if entry.OM then self.layerSystem:updatePixelForField("organicMatter",x, z, field.organicMatter, 2.0) end
             end
         end
 
@@ -2839,6 +2825,7 @@ function SoilFertilitySystem:trackSprayerCoverage(fieldId, liters, fillTypeName,
         field.sessionCoverageHa       = 0
         field.sessionCoverageFraction = 0
         field.sessionCoverageCells    = {}
+        field.sprayTrailPts           = nil
     end
 
     if fillTypeName then field.sessionLastProduct = fillTypeName end
@@ -2903,6 +2890,17 @@ function SoilFertilitySystem:markBoomCells(fieldId, boomPoints)
             if not field.sessionCoverageCells[cellKey] then
                 field.sessionCoverageCells[cellKey] = true
                 field.sessionCoverageHa = math.min(areaInHa, (field.sessionCoverageHa or 0) + cellArea)
+                -- ── Spray trail (in-view overlay) ──────────────────────────────
+                -- Cache world-center + terrain height for SoilHUD:drawSprayTrail().
+                if not field.sprayTrailPts then field.sprayTrailPts = {} end
+                local twx = (cx + 0.5) * zone.CELL_SIZE
+                local twz = (cz + 0.5) * zone.CELL_SIZE
+                local twy = 0.3
+                if g_terrainNode then
+                    local ok, h = pcall(getTerrainHeightAtWorldPos, g_terrainNode, twx, 0, twz)
+                    if ok and h then twy = h + 0.3 end
+                end
+                table.insert(field.sprayTrailPts, {wx = twx, wy = twy, wz = twz})
             end
             if not field.dailyCoverageCells[cellKey] then
                 field.dailyCoverageCells[cellKey] = true
@@ -2936,6 +2934,11 @@ function SoilFertilitySystem:markBoomCells(fieldId, boomPoints)
     -- Recompute fractions after all cells are processed
     field.coverageFraction        = math.min(1.0, (field.coveredAreaHa  or 0) / areaInHa)
     field.sessionCoverageFraction = math.min(1.0, (field.sessionCoverageHa or 0) / areaInHa)
+
+    -- Full pass complete — clear trail so the overlay disappears as a visual reward
+    if (field.sessionCoverageFraction or 0) >= 1.0 and field.sprayTrailPts then
+        field.sprayTrailPts = nil
+    end
 end
 
 --- Direct-path buffering for non-profile products (Herbicide/Insecticide/Fungicide)

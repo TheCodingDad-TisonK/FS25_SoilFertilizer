@@ -170,7 +170,16 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
             self.variableRatePanel = SoilVariableRatePanel.new(self.soilSystem, self.settings)
             SoilLogger.info("Variable Rate panel created")
         end
-
+        -- Sprayer Info panel (gap view)
+        if SoilSprayerInfoPanel then
+            self.sprayerInfoPanel = SoilSprayerInfoPanel.new(self.soilSystem, self.settings)
+            SoilLogger.info("Sprayer Info panel created")
+        end
+        -- Harvester panel (grain tank + yield info)
+        if SoilHarvesterPanel then
+            self.harvesterPanel = SoilHarvesterPanel.new(self.soilSystem, self.settings)
+            SoilLogger.info("Harvester panel created")
+        end
 
         -- Hook PlayerInputComponent.registerActionEvents to register J/K in the PLAYER context.
         -- PLAYER context is reused (not recreated) when the player returns on foot, so these
@@ -645,6 +654,12 @@ function SoilFertilityManager:onMissionLoaded()
         if self.variableRatePanel then
             self.variableRatePanel:initialize()
         end
+        if self.sprayerInfoPanel then
+            self.sprayerInfoPanel:initialize()
+        end
+        if self.harvesterPanel then
+            self.harvesterPanel:initialize()
+        end
     end)
 
     if not success then
@@ -755,14 +770,16 @@ end
 -- Input callback for HUD drag toggle (SF_HUD_DRAG, default Shift+H)
 function SoilFertilityManager:onHUDDragInput()
     if not self.soilHUD then return end
-    -- Don't steal RMB when HUD is hidden or mod is disabled — prevents mouse cursor
-    -- appearing on RMB vehicle actions (e.g. direction change) after implement cycling.
     if not self.soilHUD.visible then return end
     if not (self.settings and self.settings.showHUD and self.settings.enabled) then return end
     if self.soilHUD.editMode then
         self.soilHUD:exitEditMode()
+        if self.sprayerInfoPanel then self.sprayerInfoPanel:exitEditMode() end
+        if self.harvesterPanel   then self.harvesterPanel:exitEditMode()   end
     else
         self.soilHUD:enterEditMode()
+        if self.sprayerInfoPanel then self.sprayerInfoPanel:enterEditMode() end
+        if self.harvesterPanel   then self.harvesterPanel:enterEditMode()   end
     end
 end
 
@@ -1488,6 +1505,14 @@ function SoilFertilityManager:delete()
     if self.variableRatePanel then
         self.variableRatePanel:delete()
         self.variableRatePanel = nil
+    end
+    if self.sprayerInfoPanel then
+        self.sprayerInfoPanel:delete()
+        self.sprayerInfoPanel = nil
+    end
+    if self.harvesterPanel then
+        self.harvesterPanel:delete()
+        self.harvesterPanel = nil
     end
 
     -- Clean up all registered input action events (PLAYER context)

@@ -218,6 +218,7 @@
     <e k="sf_hud_title" v="JORDMONITOR" eh="f8cda642" />
     <e k="sf_hud_field" v="Mark %d" eh="08988997" />
     <e k="sf_hud_noField" v="Gå ud på en mark" eh="62c55e9e" />
+    <e k="sf_sprayer_no_field" v="Kør til en mark" />
     <e k="sf_hud_fallow" v="Brak" eh="eafe5913" />
     <e k="sf_hud_weeds" v="Ukrudt" eh="324181de" />
     <e k="sf_hud_pests" v="Skadedyr" eh="2fed5101" />

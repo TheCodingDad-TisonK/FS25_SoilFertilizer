@@ -462,6 +462,9 @@ function SoilHUD:onMouseEvent(posX, posY, isDown, isUp, button, eventUsed)
     if isDown and button == Input.MOUSE_BUTTON_RIGHT then
         if self.editMode then
             self:exitEditMode()
+            local sfm = g_SoilFertilityManager
+            if sfm and sfm.sprayerInfoPanel then sfm.sprayerInfoPanel:exitEditMode() end
+            if sfm and sfm.harvesterPanel   then sfm.harvesterPanel:exitEditMode()   end
             return true
         end
         return false
@@ -669,6 +672,9 @@ function SoilHUD:update(dt)
         end
         if g_gui and (g_gui:getIsGuiVisible() or g_gui:getIsDialogVisible()) then
             self:exitEditMode()
+            local sfm = g_SoilFertilityManager
+            if sfm and sfm.sprayerInfoPanel then sfm.sprayerInfoPanel:exitEditMode() end
+            if sfm and sfm.harvesterPanel   then sfm.harvesterPanel:exitEditMode()   end
         end
         if not self.dragging and not self.resizing then
             if g_inputBinding and g_inputBinding.mousePosXLast then
@@ -1110,6 +1116,40 @@ function SoilHUD:drawRect(x, y, w, h, c, a)
     renderOverlay(self.fillOverlay, x, y, w, h)
 end
 
+--- Draws a semi-transparent dot at every boom cell sprayed this session.
+--- Disappears automatically when full-field coverage reaches 100%.
+function SoilHUD:drawSprayTrail()
+    if not self.fillOverlay then return end
+    local soilSys = g_SoilFertilityManager and g_SoilFertilityManager.soilSystem
+    if not soilSys then return end
+    local fieldId = self.cachedFieldId
+    if not fieldId or fieldId <= 0 then return end
+    local field = soilSys.fieldData and soilSys.fieldData[fieldId]
+    if not field or not field.sprayTrailPts or #field.sprayTrailPts == 0 then return end
+
+    -- Player world position for distance culling
+    local px, pz = 0, 0
+    if g_localPlayer then
+        local ok, lx, _, lz = pcall(function() return g_localPlayer:getPosition() end)
+        if ok and lx then px, pz = lx, lz end
+    end
+
+    local maxDistSq = 200 * 200
+    local half = 0.0025  -- half of 0.005 normalized quad size
+
+    setOverlayColor(self.fillOverlay, 0.25, 0.95, 0.55, 0.38)
+    for _, pt in ipairs(field.sprayTrailPts) do
+        local dx = pt.wx - px
+        local dz = pt.wz - pz
+        if dx*dx + dz*dz <= maxDistSq then
+            local sx, sy, sz = project(pt.wx, pt.wy, pt.wz)
+            if sz <= 1 then
+                renderOverlay(self.fillOverlay, sx - half, sy - half, half*2, half*2)
+            end
+        end
+    end
+end
+
 -- ── Draw ─────────────────────────────────────────────────
 function SoilHUD:draw()
     if not self.initialized then return end
@@ -1124,6 +1164,8 @@ function SoilHUD:draw()
             if g_currentMission.hud.ingameMap.state == IngameMap.STATE_LARGE_MAP then return end
         end
     end
+
+    self:drawSprayTrail()
 
     self:drawPanel()
 
