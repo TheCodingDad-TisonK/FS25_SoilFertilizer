@@ -3752,3 +3752,58 @@ function SoilFertilitySystem:onSubsoilerPass(farmlandId, worldX, worldZ)
     SoilLogger.debug("Subsoiler: field=%d cell=%s  %.0f→%.0f%%  avg=%.1f%%",
         farmlandId, cellKey, prev, newVal, field.compaction)
 end
+
+--- Records one combine-pass cell for the harvest trail overlay.
+--- Deduplicates by 10×10 m cell. Resets on a new game day (new harvest session).
+--- Auto-clears when estimated full-field coverage is reached.
+---@param fieldId number
+---@param wx      number  World X (combine rootNode)
+---@param wz      number  World Z (combine rootNode)
+function SoilFertilitySystem:recordHarvestTrailPoint(fieldId, wx, wz)
+    local field = self.fieldData and self.fieldData[fieldId]
+    if not field then return end
+
+    local zone = SoilConstants.ZONE
+    if not zone then return end
+
+    local currentDay = (g_currentMission and g_currentMission.environment and
+                        g_currentMission.environment.currentDay) or 0
+
+    -- New game day = new harvest session; wipe the previous trail
+    if field.harvestSessionDay ~= currentDay then
+        field.harvestSessionDay = currentDay
+        field.harvestTrailPts   = nil
+        field.harvestCells      = nil
+    end
+
+    -- Deduplicate by cell
+    local cx = math.floor(wx / zone.CELL_SIZE)
+    local cz = math.floor(wz / zone.CELL_SIZE)
+    local cellKey = tostring(cx * 10000 + cz)
+
+    if not field.harvestCells then field.harvestCells = {} end
+    if field.harvestCells[cellKey] then return end
+    field.harvestCells[cellKey] = true
+
+    -- Record world-centre of cell with terrain height for 3-D projection
+    if not field.harvestTrailPts then field.harvestTrailPts = {} end
+    local twx = (cx + 0.5) * zone.CELL_SIZE
+    local twz = (cz + 0.5) * zone.CELL_SIZE
+    local twy = 0.3
+    if g_terrainNode then
+        local ok, h = pcall(getTerrainHeightAtWorldPos, g_terrainNode, twx, 0, twz)
+        if ok and h then twy = h + 0.3 end
+    end
+    table.insert(field.harvestTrailPts, {wx = twx, wy = twy, wz = twz})
+
+    -- Auto-clear once the full field area has been covered (visual reward)
+    local cellArea = zone.CELL_AREA_HA
+    local areaHa   = (field.fieldArea and field.fieldArea > 0) and field.fieldArea or 1.0
+    local count    = 0
+    for _ in pairs(field.harvestCells) do count = count + 1 end
+    if count * cellArea >= areaHa then
+        field.harvestTrailPts   = nil
+        field.harvestCells      = nil
+        field.harvestSessionDay = nil
+    end
+end

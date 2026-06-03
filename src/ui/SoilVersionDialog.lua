@@ -25,6 +25,8 @@ SoilVersionDialog.INSTANCE = nil
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
     "v2.3.6.0",
+    "- New: harvest trail overlay — amber dots show combine pass in the",
+    "  game world and on the minimap; clears when full field is covered",
     "- New: harvester panel stats bar — 4 cells showing estimated t/ha,",
     "  field coverage %, session area harvested, and total field area",
     "- Fixed: weed pressure no longer spikes on reload or time-skip;",

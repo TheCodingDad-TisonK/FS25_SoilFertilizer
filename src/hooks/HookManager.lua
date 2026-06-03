@@ -1640,6 +1640,7 @@ function HookManager:installHarvestHook()
             -- Detect field for nutrient depletion tracking (onHarvest).
             -- Yield modifier is NO LONGER applied here — see installYieldModifierHook.
             local detectedFieldId = nil
+            local detectedX, detectedZ = nil, nil
 
             -- NOTE: liters=0 is normal in swath/windrow mode (isSwathActive=true on the combine).
             -- The crop is deposited on the ground rather than collected in the hopper.
@@ -1719,6 +1720,7 @@ function HookManager:installHarvestHook()
                     end
 
                     detectedFieldId = fieldId
+                    detectedX, detectedZ = x, z
                     SoilLogger.debug("Harvest hook: Field %d, Crop %d, area=%.1fm2 (yield modifier applied via hopper hook)",
                         fieldId, inputFruitType, area)
                 end)
@@ -1746,6 +1748,13 @@ function HookManager:installHarvestHook()
                 if not ok then
                     SoilLogger.error("Harvest hook (nutrient update) failed: %s", tostring(errMsg))
                 end
+            end
+
+            -- Harvest trail: record combine position for in-world + minimap overlay
+            if detectedFieldId and detectedX then
+                pcall(function()
+                    g_SoilFertilityManager.soilSystem:recordHarvestTrailPoint(detectedFieldId, detectedX, detectedZ)
+                end)
             end
 
             -- Forward original return values so Cutter.lua gets appliedDelta intact
