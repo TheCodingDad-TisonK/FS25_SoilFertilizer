@@ -92,6 +92,9 @@ function SoilMinimapLayer:initialize()
     self._resX = resX
     self._resY = resY
 
+    -- Plain pixel overlay for drawing harvest trail dots on the minimap
+    self._dotOverlay = createImageOverlay("dataS/menu/base/graph_pixel.dds")
+
     self._initialized = true
     SoilLogger.info("[OK] SoilMinimapLayer initialized (per-layer DMV overlays %dx%d, lazy-created)", resX, resY)
     return true
@@ -102,6 +105,10 @@ function SoilMinimapLayer:delete()
     self._initialized = false
     self._overlays    = {}
     self._buildInFlight = false
+    if self._dotOverlay and self._dotOverlay ~= 0 then
+        delete(self._dotOverlay)
+        self._dotOverlay = nil
+    end
 end
 
 -- Mark the current layer's overlay dirty so the next rebuild cycle regenerates it.
@@ -372,5 +379,48 @@ function SoilMinimapLayer:draw(mapSelf)
 
     if didClip and Overlay ~= nil and Overlay.DEFAULT_UVS ~= nil then
         setOverlayUVs(ov, unpack(Overlay.DEFAULT_UVS))
+    end
+
+    self:drawHarvestTrailDots(mapSelf)
+end
+
+--- Draws amber pixel dots on the minimap for each harvested cell in the current session.
+function SoilMinimapLayer:drawHarvestTrailDots(mapSelf)
+    local dotOv = self._dotOverlay
+    if not dotOv or dotOv == 0 then return end
+
+    local soilSys = self.soilSystem
+    if not soilSys or not soilSys.fieldData then return end
+
+    local layout = mapSelf and (mapSelf.fullScreenLayout or mapSelf.layout)
+    if not layout or not layout.getMapObjectPosition then return end
+
+    local worldSizeX = mapSelf.worldSizeX or (g_currentMission and g_currentMission.terrainSize) or 2048
+    local worldSizeZ = mapSelf.worldSizeZ or (g_currentMission and g_currentMission.terrainSize) or 2048
+    if worldSizeX == 0 or worldSizeZ == 0 then return end
+
+    local extX = mapSelf.mapExtensionOffsetX    or 0
+    local extZ = mapSelf.mapExtensionOffsetZ    or 0
+    local scl  = mapSelf.mapExtensionScaleFactor or 1
+    local offX = mapSelf.worldCenterOffsetX     or 0
+    local offZ = mapSelf.worldCenterOffsetZ     or 0
+
+    local dotSz = 0.0038
+    local half  = dotSz * 0.5
+
+    setOverlayColor(dotOv, 0.95, 0.65, 0.10, 0.60)
+
+    for _, field in pairs(soilSys.fieldData) do
+        local pts = field.harvestTrailPts
+        if pts then
+            for _, pt in ipairs(pts) do
+                local objX = ((pt.wx + offX) / worldSizeX) * scl + extX
+                local objZ = ((pt.wz + offZ) / worldSizeZ) * scl + extZ
+                local sx, sy = layout:getMapObjectPosition(objX, objZ, 0, 0)
+                if sx and sy then
+                    renderOverlay(dotOv, sx - half, sy - half, dotSz, dotSz)
+                end
+            end
+        end
     end
 end

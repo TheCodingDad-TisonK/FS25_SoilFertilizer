@@ -1116,6 +1116,39 @@ function SoilHUD:drawRect(x, y, w, h, c, a)
     renderOverlay(self.fillOverlay, x, y, w, h)
 end
 
+--- Draws amber dots for each cell the combine has passed over today.
+--- Disappears automatically when full-field coverage is reached.
+function SoilHUD:drawHarvestTrail()
+    if not self.fillOverlay then return end
+    local soilSys = g_SoilFertilityManager and g_SoilFertilityManager.soilSystem
+    if not soilSys then return end
+    local fieldId = self.cachedFieldId
+    if not fieldId or fieldId <= 0 then return end
+    local field = soilSys.fieldData and soilSys.fieldData[fieldId]
+    if not field or not field.harvestTrailPts or #field.harvestTrailPts == 0 then return end
+
+    local px, pz = 0, 0
+    if g_localPlayer then
+        local ok, lx, _, lz = pcall(function() return g_localPlayer:getPosition() end)
+        if ok and lx then px, pz = lx, lz end
+    end
+
+    local maxDistSq = 200 * 200
+    local half = 0.0030
+
+    setOverlayColor(self.fillOverlay, 0.95, 0.65, 0.10, 0.45)
+    for _, pt in ipairs(field.harvestTrailPts) do
+        local dx = pt.wx - px
+        local dz = pt.wz - pz
+        if dx*dx + dz*dz <= maxDistSq then
+            local sx, sy, sz = project(pt.wx, pt.wy, pt.wz)
+            if sz <= 1 then
+                renderOverlay(self.fillOverlay, sx - half, sy - half, half*2, half*2)
+            end
+        end
+    end
+end
+
 --- Draws a semi-transparent dot at every boom cell sprayed this session.
 --- Disappears automatically when full-field coverage reaches 100%.
 function SoilHUD:drawSprayTrail()
@@ -1166,6 +1199,7 @@ function SoilHUD:draw()
     end
 
     self:drawSprayTrail()
+    self:drawHarvestTrail()
 
     self:drawPanel()
 
