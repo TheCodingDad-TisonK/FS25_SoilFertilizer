@@ -192,6 +192,14 @@ end
 
 -- ── Combine / grain tank helpers ──────────────────────────
 
+-- Fill type names that are never grain tanks
+local NON_CROP_TYPES = {
+    diesel=true, electriccharge=true, methane=true, water=true,
+    dea=true, exhaustfluid=true, pigfood=true, manure=true,
+    slurry=true, digestate=true, liquidfertilizer=true,
+    fertilizer=true, lime=true, herbicide=true, oil=true,
+}
+
 function SoilHarvesterPanel:getActiveCombine()
     local player = g_localPlayer
     if not player or type(player.getIsInVehicle) ~= "function" then return nil end
@@ -199,7 +207,6 @@ function SoilHarvesterPanel:getActiveCombine()
     local vehicle = player:getCurrentVehicle()
     if not vehicle then return nil end
     if vehicle.spec_combine then return vehicle end
-    -- Check attached implements (e.g. self-propelled with combine attachment)
     local impl = vehicle.spec_attacherJoints and vehicle.spec_attacherJoints.attachedImplements
     if impl then
         for _, att in ipairs(impl) do
@@ -209,49 +216,100 @@ function SoilHarvesterPanel:getActiveCombine()
     return nil
 end
 
--- Returns { fillType, level, capacity, ratio } for the combine's grain tank.
--- Returns nil if no valid grain tank found.
+-- Returns grain tank { level, capacity, ratio, fillType } for the combine.
+-- Works even when tank is empty (fill type UNKNOWN) — detects by largest capacity.
 function SoilHarvesterPanel:getGrainTank(combine)
     if not combine then return nil end
-    local ok, numUnits = pcall(function() return combine:getNumFillUnits() end)
-    if not ok or not numUnits or numUnits == 0 then return nil end
+    -- Use getFillUnits() — the correct FS25 API (getNumFillUnits does not exist)
+    local ok, units = pcall(function() return combine:getFillUnits() end)
+    if not ok or not units or #units == 0 then return nil end
 
-    for i = 1, numUnits do
+    local bestUnit = nil
+    local bestCap  = 0
+
+    for i = 1, #units do
         local cap = combine:getFillUnitCapacity(i)
-        if cap and cap > 0 then
-            local ft = combine:getFillUnitFillType(i)
-            -- Skip empty/unknown/diesel fill units
+        if cap and cap > bestCap then
+            local ft   = combine:getFillUnitFillType(i)
+            local skip = false
             if ft and ft ~= FillType.UNKNOWN then
-                local lvl = combine:getFillUnitFillLevel(i) or 0
-                local fillTypeObj = g_fillTypeManager and g_fillTypeManager:getFillTypeByIndex(ft)
-                -- Only count crop fill types (not diesel/oil/water)
-                if fillTypeObj and fillTypeObj.name then
-                    local n = fillTypeObj.name:lower()
-                    local isDiesel = (n == "diesel" or n == "electriccharge" or n == "methane"
-                                      or n == "water" or n == "pigfood" or n == "oat"  -- note: 'oat' stays
-                                      or n == "dea" or n == "exhaustfluid")
-                    -- whitelist crops instead of blacklist
-                    local isCrop = SoilConstants.CROP_EXTRACTION and SoilConstants.CROP_EXTRACTION[n]
-                    if not isCrop then
-                        -- fallback: accept any fill type that isn't clearly a consumable
-                        isCrop = not (n == "diesel" or n == "electriccharge" or n == "methane"
-                                      or n == "water" or n == "dea" or n == "exhaustfluid"
-                                      or n == "pigfood" or n == "manure" or n == "slurry"
-                                      or n == "digestate" or n == "liquidfertilizer"
-                                      or n == "fertilizer" or n == "lime" or n == "herbicide")
-                    end
-                    if isCrop then
-                        return {
-                            fillType = fillTypeObj,
-                            level    = lvl,
-                            capacity = cap,
-                            ratio    = lvl / cap,
-                        }
-                    end
+                local ftObj = g_fillTypeManager and g_fillTypeManager:getFillTypeByIndex(ft)
+                if ftObj and ftObj.name and NON_CROP_TYPES[ftObj.name:lower()] then
+                    skip = true
+                end
+            end
+            if not skip then
+                bestUnit = i
+                bestCap  = cap
+            end
+        end
+    end
+
+    if not bestUnit then return nil end
+
+    local lvl   = combine:getFillUnitFillLevel(bestUnit) or 0
+    local ft    = combine:getFillUnitFillType(bestUnit)
+    local ftObj = (ft and ft ~= FillType.UNKNOWN)
+                  and g_fillTypeManager and g_fillTypeManager:getFillTypeByIndex(ft)
+                  or nil
+
+    return {
+        fillType = ftObj,
+        level    = lvl,
+        capacity = bestCap,
+        ratio    = lvl / bestCap,
+    }
+end
+
+-- Returns a fill type object for the crop being harvested.
+-- Falls back from tank fill type → cutter header → field lastCrop.
+function SoilHarvesterPanel:getCropFillType(combine, tank)
+    -- 1. Tank fill type when tank has content
+    if tank and tank.fillType then return tank.fillType end
+
+    -- 2. Cutter/header fruit type (works even when tank is empty)
+    local sources = { combine }
+    local impl = combine.spec_attacherJoints and combine.spec_attacherJoints.attachedImplements
+    if impl then
+        for _, att in ipairs(impl) do
+            if att.object then table.insert(sources, att.object) end
+        end
+    end
+    for _, src in ipairs(sources) do
+        -- spec_cutter stores the fruit type index being cut
+        local spec = src.spec_cutter
+        if spec then
+            local fruitIdx = (spec.workAreaParameters and spec.workAreaParameters.lastFruitTypeIndex)
+                          or spec.currentFruitTypeIndex
+                          or (spec.lastCutFruitType)
+            if fruitIdx and fruitIdx > 0 then
+                local fruitType = g_fruitTypeManager and g_fruitTypeManager:getFruitTypeByIndex(fruitIdx)
+                if fruitType then
+                    local ft = g_fillTypeManager and g_fillTypeManager:getFillTypeByName(fruitType.name)
+                    if ft then return ft end
+                end
+            end
+        end
+        -- spec_combine may store the last input fruit type
+        local cs = src.spec_combine
+        if cs then
+            local fruitIdx = cs.currentInputFruitTypeIndex or cs.lastFruitTypeIndex
+            if fruitIdx and fruitIdx > 0 then
+                local fruitType = g_fruitTypeManager and g_fruitTypeManager:getFruitTypeByIndex(fruitIdx)
+                if fruitType then
+                    local ft = g_fillTypeManager and g_fillTypeManager:getFillTypeByName(fruitType.name)
+                    if ft then return ft end
                 end
             end
         end
     end
+
+    -- 3. Field lastCrop (stored by our soil system)
+    if self._fieldInfo and self._fieldInfo.lastCrop then
+        local ft = g_fillTypeManager and g_fillTypeManager:getFillTypeByName(self._fieldInfo.lastCrop)
+        if ft then return ft end
+    end
+
     return nil
 end
 
@@ -347,8 +405,9 @@ function SoilHarvesterPanel:draw()
         if not self.editMode then return end
     end
 
-    local combine = self:getActiveCombine()
-    local tank    = combine and self:getGrainTank(combine)
+    local combine  = self:getActiveCombine()
+    local tank     = combine and self:getGrainTank(combine)
+    local cropFT   = combine and self:getCropFillType(combine, tank)
     local isActive = combine ~= nil
 
     if not self.editMode and not isActive then return end
@@ -408,7 +467,7 @@ function SoilHarvesterPanel:draw()
 
     -- Title text
     local titleFontSz = 0.0095
-    local cropName    = (tank and tank.fillType and (tank.fillType.title or tank.fillType.name))
+    local cropName    = (cropFT and (cropFT.title or cropFT.name))
                         or (self.editMode and "Harvester Panel" or "")
     local fieldStr    = ""
     if self._fieldId then
