@@ -27,6 +27,7 @@ SoilSprayerInfoPanel.ROW_H    = 0.022
 SoilSprayerInfoPanel.BAR_H    = 0.009
 SoilSprayerInfoPanel.FLAG_W   = 0.0018
 SoilSprayerInfoPanel.FLAG_CAP = 0.0030
+SoilSprayerInfoPanel.STAT_H   = 0.036
 
 -- Default position (bottom-left corner, used when no saved position exists)
 SoilSprayerInfoPanel.DEFAULT_X = 0.015625
@@ -423,8 +424,18 @@ function SoilSprayerInfoPanel:draw()
 
     local activeRows = {}
     if profile then
+        -- Find the largest nutrient value in this fertilizer's profile so we can
+        -- filter out trace nutrients (< 8% of the primary). This prevents e.g.
+        -- MAP (N=11, P=411) from showing an N bar alongside the P bar.
+        local maxProfileVal = 0
         for _, nd in ipairs(NUTRIENT_ROWS) do
-            if (profile[nd.profileKey] or 0) ~= 0 then
+            local v = profile[nd.profileKey] or 0
+            if v > maxProfileVal then maxProfileVal = v end
+        end
+        local threshold = maxProfileVal * 0.08
+        for _, nd in ipairs(NUTRIENT_ROWS) do
+            local v = profile[nd.profileKey] or 0
+            if v > 0 and v >= threshold then
                 table.insert(activeRows, nd)
             end
         end
@@ -446,7 +457,8 @@ function SoilSprayerInfoPanel:draw()
 
     local hasField   = self._fieldInfo ~= nil
     local numContent = isActive and (#activeRows + (hasField and 0 or 1)) or 1
-    local panelH     = titleH + pad + numContent * rowH + pad
+    local statH      = (isActive and hasField) and (SoilSprayerInfoPanel.STAT_H * sc) or 0
+    local panelH     = titleH + pad + numContent * rowH + statH + pad
     local panelW     = 0.190 * sc
 
     -- Determine panel bottom-left corner
@@ -612,6 +624,97 @@ function SoilSprayerInfoPanel:draw()
 
             cy = cy - rowH
         end
+    end
+
+    -- ── Stats bar (coverage, session ha, field area, days since harvest) ──
+    if isActive and hasField and statH > 0 then
+        local info          = self._fieldInfo
+        local sessCov       = (info and info.sessionCoverageFraction) or 0
+        local fieldArea     = (info and info.fieldArea) or 0
+        local sessHa        = sessCov * fieldArea
+        local daysSinceHarv = (info and info.daysSinceHarvest) or 0
+
+        local sbY   = panelBot
+        local sbH   = statH
+        local cellW = panelW / 4
+        local statSz = sbH * 0.38
+        local statFs = 0.0075 * sc
+
+        -- Separator line
+        self:drawRect(panelX, sbY + sbH - 0.0015*sc, panelW, 0.0015*sc,
+                      SoilSprayerInfoPanel.C_BORDER, 0.80)
+        -- Cell dividers
+        for i = 1, 3 do
+            self:drawRect(panelX + cellW * i - 0.0008*sc, sbY + pad,
+                          0.0008*sc, sbH - pad * 2,
+                          SoilSprayerInfoPanel.C_BORDER, 0.60)
+        end
+
+        -- ── Cell 1: Coverage % + mini bar ────────────────────────
+        local covPct = math.floor(sessCov * 100 + 0.5)
+        local covStr = string.format("%d%%", covPct)
+        local covCol = (sessCov >= 0.80) and SoilSprayerInfoPanel.C_GOOD
+                    or (sessCov >= 0.40) and SoilSprayerInfoPanel.C_FAIR
+                    or SoilSprayerInfoPanel.C_LABEL
+        local mbW  = cellW * 0.72
+        local mbH  = 0.0045 * sc
+        local mbX  = panelX + (cellW - mbW) * 0.5
+        local mbY  = sbY + sbH * 0.62
+        local mSeg = 4
+        local mGap = 0.0015 * sc
+        local mSW  = (mbW - (mSeg-1)*mGap) / mSeg
+        local mFill = sessCov * mSeg
+        for mi = 0, mSeg - 1 do
+            local msx = mbX + mi * (mSW + mGap)
+            self:drawRect(msx, mbY, mSW, mbH, SoilSprayerInfoPanel.C_BAR_BG)
+            local mfrac = math.max(0, math.min(1, mFill - mi))
+            if mfrac > 0 then
+                self:drawRect(msx, mbY, mSW * mfrac, mbH, covCol)
+            end
+        end
+        setTextAlignment(RenderText.ALIGN_CENTER)
+        setTextColor(covCol[1], covCol[2], covCol[3], covCol[4] or 1)
+        renderText(panelX + cellW * 0.5,
+                   sbY + (sbH * 0.30 - statFs) * 0.5 + mbH + 0.003*sc, statFs, covStr)
+
+        -- ── Cell 2: Session ha sprayed ────────────────────────────
+        local cell2X    = panelX + cellW
+        local sessHaStr = string.format("%.2f ha", sessHa)
+        setTextAlignment(RenderText.ALIGN_CENTER)
+        setTextColor(unpack(SoilSprayerInfoPanel.C_VALUE))
+        renderText(cell2X + cellW * 0.5, sbY + (sbH * 0.35 - statFs) * 0.5, statFs, sessHaStr)
+
+        -- ── Cell 3: Field icon + total field area ─────────────────
+        local cell3X = panelX + cellW * 2
+        local ic3sz  = statSz
+        local ic3lx  = cell3X + (cellW - ic3sz) * 0.5
+        local ic3by  = sbY + sbH * 0.45
+        local ib3    = ic3sz * 0.11
+        local icm3   = ib3 * 0.70
+        self:drawRect(ic3lx,                ic3by,                ic3sz,       ib3,   SoilSprayerInfoPanel.C_LABEL, 0.80)
+        self:drawRect(ic3lx,                ic3by + ic3sz - ib3,  ic3sz,       ib3,   SoilSprayerInfoPanel.C_LABEL, 0.80)
+        self:drawRect(ic3lx,                ic3by,                ib3,         ic3sz, SoilSprayerInfoPanel.C_LABEL, 0.80)
+        self:drawRect(ic3lx + ic3sz - ib3,  ic3by,                ib3,         ic3sz, SoilSprayerInfoPanel.C_LABEL, 0.80)
+        self:drawRect(ic3lx + ib3,          ic3by + ic3sz*0.5 - icm3*0.5, ic3sz-ib3*2, icm3, SoilSprayerInfoPanel.C_LABEL, 0.40)
+        self:drawRect(ic3lx + ic3sz*0.5 - icm3*0.5, ic3by + ib3, icm3, ic3sz-ib3*2, SoilSprayerInfoPanel.C_LABEL, 0.40)
+        local areaStr = string.format("%.1f ha", fieldArea)
+        setTextAlignment(RenderText.ALIGN_CENTER)
+        setTextColor(unpack(SoilSprayerInfoPanel.C_VALUE))
+        renderText(cell3X + cellW * 0.5, sbY + (sbH * 0.35 - statFs) * 0.5, statFs, areaStr)
+
+        -- ── Cell 4: Calendar icon + days since last harvest ───────
+        local cell4X = panelX + cellW * 3
+        local ic4sz  = statSz
+        local ic4lx  = cell4X + (cellW - ic4sz) * 0.5
+        local ic4by  = sbY + sbH * 0.45
+        self:drawRect(ic4lx,               ic4by,               ic4sz,       ic4sz * 0.85, SoilSprayerInfoPanel.C_DIM, 0.40)
+        self:drawRect(ic4lx,               ic4by + ic4sz * 0.72, ic4sz,      ic4sz * 0.13, SoilSprayerInfoPanel.C_DIM, 0.90)
+        self:drawRect(ic4lx + ic4sz*0.22,  ic4by + ic4sz * 0.79, ic4sz*0.16, ic4sz * 0.22, SoilSprayerInfoPanel.C_BG, 1.0)
+        self:drawRect(ic4lx + ic4sz*0.62,  ic4by + ic4sz * 0.79, ic4sz*0.16, ic4sz * 0.22, SoilSprayerInfoPanel.C_BG, 1.0)
+        local dayStr = (daysSinceHarv > 0) and string.format("%dd", math.floor(daysSinceHarv)) or "--"
+        setTextAlignment(RenderText.ALIGN_CENTER)
+        setTextColor(SoilSprayerInfoPanel.C_DIM[1], SoilSprayerInfoPanel.C_DIM[2], SoilSprayerInfoPanel.C_DIM[3], 0.90)
+        renderText(cell4X + cellW * 0.5, sbY + (sbH * 0.35 - statFs) * 0.5, statFs, dayStr)
     end
 
     -- Reset text state
