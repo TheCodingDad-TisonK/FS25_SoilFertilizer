@@ -41,6 +41,8 @@
     <e k="sf_show_hud_long" v="Näytä/piilota maaperätietojen HUD (F8 tilapäiseen vaihtoon)" eh="4e2e11b6" />
     <e k="sf_show_mini_report_short" v="Näytä soluraportti" eh="6b14e786" />
     <e k="sf_show_mini_report_long" v="Näytä/piilota minimapin soluraportti" eh="9f57fb65" />
+    <e k="sf_show_work_trail_short" v="Work Trail" />
+    <e k="sf_show_work_trail_long" v="Show/hide spray and harvest trail dots in-world and on the minimap" />
     <e k="sf_hud_position_short" v="HUDin sijainti" eh="5ac371f2" />
     <e k="sf_hud_position_long" v="Valitse missä maaperätietojen HUD näkyy näytöllä" eh="d7b9c109" />
     <e k="sf_hud_pos_1" v="Yläoikea" eh="5f9f6784" />
@@ -614,6 +616,7 @@
     <e k="sf_desc_showNotifications" v="Maaperän tilasta kertovat ilmoitukset" eh="7f275b4b" />
     <e k="sf_desc_showHUD" v="Näytä maaperän HUD-näyttö" eh="fa8b9224" />
     <e k="sf_desc_showMiniReport" v="Näytä minimapin solunäkymä" eh="b847f98c" />
+    <e k="sf_desc_showWorkTrail" v="Show spray and harvest pass trail overlays" />
     <e k="sf_desc_hudPosition" v="HUD-näytön kiinnityskohta" eh="98c8bcea" />
     <e k="sf_desc_hudColorTheme" v="HUDin väripaletti" eh="97271907" />
     <e k="sf_desc_hudFontSize" v="HUDin tekstin koko" eh="48a6fc15" />

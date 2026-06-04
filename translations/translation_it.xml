@@ -41,6 +41,8 @@
     <e k="sf_show_hud_long" v="Mostra/nascondi overlay HUD info suolo (F8 per alternare temporaneamente)" eh="4e2e11b6" />
     <e k="sf_show_mini_report_short" v="Mostra rapporto cella" eh="6b14e786" />
     <e k="sf_show_mini_report_long" v="Mostra/nascondi overlay rapporto cella sulla minimappa" eh="9f57fb65" />
+    <e k="sf_show_work_trail_short" v="Work Trail" />
+    <e k="sf_show_work_trail_long" v="Show/hide spray and harvest trail dots in-world and on the minimap" />
     <e k="sf_hud_position_short" v="Posizione HUD" eh="5ac371f2" />
     <e k="sf_hud_position_long" v="Scegli dove appare l'HUD info suolo sullo schermo" eh="d7b9c109" />
     <e k="sf_hud_pos_1" v="In alto a destra" eh="5f9f6784" />
@@ -651,6 +653,7 @@
     <e k="sf_desc_showNotifications" v="Notifiche di gioco sullo stato del suolo" eh="7f275b4b" />
     <e k="sf_desc_showHUD" v="Mostra l'overlay dell'HUD del suolo" eh="fa8b9224" />
     <e k="sf_desc_showMiniReport" v="Mostra l'overlay del rapporto cella sulla minimappa" eh="b847f98c" />
+    <e k="sf_desc_showWorkTrail" v="Show spray and harvest pass trail overlays" />
     <e k="sf_desc_hudPosition" v="Posizione di ancoraggio predefinita dell'HUD" eh="98c8bcea" />
     <e k="sf_desc_hudColorTheme" v="Tavolozza colori per gli elementi dell'HUD" eh="97271907" />
     <e k="sf_desc_hudFontSize" v="Dimensione del testo dell'HUD" eh="48a6fc15" />

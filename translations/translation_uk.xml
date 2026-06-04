@@ -41,6 +41,8 @@
     <e k="sf_show_hud_long" v="Показати/сховати HUD інформації про ґрунт (F8 для тимчасового перемикання)" eh="4e2e11b6" />
     <e k="sf_show_mini_report_short" v="Звіт комірки" eh="6b14e786" />
     <e k="sf_show_mini_report_long" v="Показати/сховати звіт комірки на міні-карті" eh="9f57fb65" />
+    <e k="sf_show_work_trail_short" v="Work Trail" />
+    <e k="sf_show_work_trail_long" v="Show/hide spray and harvest trail dots in-world and on the minimap" />
     <e k="sf_hud_position_short" v="Позиція HUD" eh="5ac371f2" />
     <e k="sf_hud_position_long" v="Виберіть, де на екрані відображатиметься HUD ґрунту" eh="d7b9c109" />
     <e k="sf_hud_pos_1" v="Верхній правий" eh="5f9f6784" />
@@ -613,6 +615,7 @@
     <e k="sf_desc_showNotifications" v="Сповіщення про стан ґрунту в грі" eh="7f275b4b" />
     <e k="sf_desc_showHUD" v="Показувати HUD оверлей ґрунту" eh="fa8b9224" />
     <e k="sf_desc_showMiniReport" v="Показувати звіт комірки на міні-карті" eh="b847f98c" />
+    <e k="sf_desc_showWorkTrail" v="Show spray and harvest pass trail overlays" />
     <e k="sf_desc_hudPosition" v="Фіксована позиція HUD" eh="98c8bcea" />
     <e k="sf_desc_hudColorTheme" v="Колірна палітра елементів HUD" eh="97271907" />
     <e k="sf_desc_hudFontSize" v="Розмір тексту HUD" eh="48a6fc15" />

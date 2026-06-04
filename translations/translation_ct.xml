@@ -41,6 +41,8 @@
     <e k="sf_show_hud_long" v="Mostra/amaga la superposició de l'HUD d'informació del sòl (F8 per alternar temporalment)" eh="4e2e11b6" />
     <e k="sf_show_mini_report_short" v="Mostrar informe de cel·la" eh="6b14e786" />
     <e k="sf_show_mini_report_long" v="Mostra/amaga la superposició de l'informe de cel·la del minimapa" eh="9f57fb65" />
+    <e k="sf_show_work_trail_short" v="Work Trail" />
+    <e k="sf_show_work_trail_long" v="Show/hide spray and harvest trail dots in-world and on the minimap" />
     <e k="sf_hud_position_short" v="Posició de l'HUD" eh="5ac371f2" />
     <e k="sf_hud_position_long" v="Trieu on apareix l'HUD d'informació del sòl a la pantalla" eh="d7b9c109" />
     <e k="sf_hud_pos_1" v="A dalt a la dreta" eh="5f9f6784" />
@@ -651,6 +653,7 @@
     <e k="sf_desc_showNotifications" v="Notificacions de l'estat del sòl al joc" eh="7f275b4b" />
     <e k="sf_desc_showHUD" v="Mostra la superposició de l'HUD del sòl" eh="fa8b9224" />
     <e k="sf_desc_showMiniReport" v="Mostra la superposició de l'informe de cel·la del minimapa" eh="b847f98c" />
+    <e k="sf_desc_showWorkTrail" v="Show spray and harvest pass trail overlays" />
     <e k="sf_desc_hudPosition" v="Posició d'ancoratge predeterminada de l'HUD" eh="98c8bcea" />
     <e k="sf_desc_hudColorTheme" v="Paleta de colors per als elements de l'HUD" eh="97271907" />
     <e k="sf_desc_hudFontSize" v="Mida del text de l'HUD" eh="48a6fc15" />

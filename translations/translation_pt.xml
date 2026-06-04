@@ -41,6 +41,8 @@
     <e k="sf_show_hud_long" v="Mostrar/ocultar a sobreposição do HUD de informações do solo (F8 para alternar temporariamente)" eh="4e2e11b6" />
     <e k="sf_show_mini_report_short" v="Mostrar Relatório de Célula" eh="6b14e786" />
     <e k="sf_show_mini_report_long" v="Mostrar/ocultar a sobreposição do relatório de células do minimapa" eh="9f57fb65" />
+    <e k="sf_show_work_trail_short" v="Work Trail" />
+    <e k="sf_show_work_trail_long" v="Show/hide spray and harvest trail dots in-world and on the minimap" />
     <e k="sf_hud_position_short" v="Posição do HUD" eh="5ac371f2" />
     <e k="sf_hud_position_long" v="Escolha onde o HUD de informações do solo aparece no ecrã" eh="d7b9c109" />
     <e k="sf_hud_pos_1" v="Canto Superior Direito" eh="5f9f6784" />
@@ -652,6 +654,7 @@
     <e k="sf_desc_showNotifications" v="Notificações de estado do solo no jogo" eh="7f275b4b" />
     <e k="sf_desc_showHUD" v="Mostrar a sobreposição do HUD do solo" eh="fa8b9224" />
     <e k="sf_desc_showMiniReport" v="Mostrar a sobreposição do relatório de células do minimapa" eh="b847f98c" />
+    <e k="sf_desc_showWorkTrail" v="Show spray and harvest pass trail overlays" />
     <e k="sf_desc_hudPosition" v="Posição de ancoragem do HUD" eh="98c8bcea" />
     <e k="sf_desc_hudColorTheme" v="Paleta de cores para elementos do HUD" eh="97271907" />
     <e k="sf_desc_hudFontSize" v="Tamanho do texto do HUD" eh="48a6fc15" />

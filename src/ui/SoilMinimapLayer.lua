@@ -381,7 +381,9 @@ function SoilMinimapLayer:draw(mapSelf)
         setOverlayUVs(ov, unpack(Overlay.DEFAULT_UVS))
     end
 
-    self:drawHarvestTrailDots(mapSelf)
+    if not self.settings or self.settings.showWorkTrail ~= false then
+        self:drawHarvestTrailDots(mapSelf)
+    end
 end
 
 --- Draws amber pixel dots on the minimap for each harvested cell in the current session.

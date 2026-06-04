@@ -41,6 +41,8 @@
     <e k="sf_show_hud_long" v="Pokaż/ukryj nakładkę HUD z informacjami o glebie (F8, aby przełączyć tymczasowo)" eh="4e2e11b6" />
     <e k="sf_show_mini_report_short" v="Pokaż raport komórki" eh="6b14e786" />
     <e k="sf_show_mini_report_long" v="Pokaż/ukryj nakładkę raportu komórki na minimapie" eh="9f57fb65" />
+    <e k="sf_show_work_trail_short" v="Work Trail" />
+    <e k="sf_show_work_trail_long" v="Show/hide spray and harvest trail dots in-world and on the minimap" />
     <e k="sf_hud_position_short" v="Pozycja HUD" eh="5ac371f2" />
     <e k="sf_hud_position_long" v="Wybierz miejsce wyświetlania HUDu z informacjami o glebie" eh="d7b9c109" />
     <e k="sf_hud_pos_1" v="Góra prawa" eh="5f9f6784" />
@@ -639,6 +641,7 @@
     <e k="sf_desc_showNotifications" v="Powiadomienia o statusie gleby w grze" eh="7f275b4b" />
     <e k="sf_desc_showHUD" v="Pokaż nakładkę HUD gleby" eh="fa8b9224" />
     <e k="sf_desc_showMiniReport" v="Pokaż nakładkę raportu komórki na minimapie" eh="b847f98c" />
+    <e k="sf_desc_showWorkTrail" v="Show spray and harvest pass trail overlays" />
     <e k="sf_desc_hudPosition" v="Predefiniowana pozycja zakotwiczenia HUD" eh="98c8bcea" />
     <e k="sf_desc_hudColorTheme" v="Paleta kolorów dla elementów HUD" eh="97271907" />
     <e k="sf_desc_hudFontSize" v="Rozmiar tekstu HUD" eh="48a6fc15" />

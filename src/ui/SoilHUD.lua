@@ -1198,8 +1198,10 @@ function SoilHUD:draw()
         end
     end
 
-    self:drawSprayTrail()
-    self:drawHarvestTrail()
+    if self.settings.showWorkTrail then
+        self:drawSprayTrail()
+        self:drawHarvestTrail()
+    end
 
     self:drawPanel()
 
