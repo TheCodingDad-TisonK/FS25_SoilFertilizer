@@ -186,6 +186,12 @@ function HookManager:installAll(soilSystem)
         self:propagateExternalFillHookToLiveVehicles()
     end
 
+    -- Rate multiplier → wap.usage + wap.usagePerMin (event listener, reliable class-table dispatch).
+    -- Must run before installSprayerUsageHook so the chain is: vanilla sets wap.usage → this hook
+    -- scales it → onEndWorkAreaProcessing reads the already-scaled value.
+    local sprayStartOk = self:installSprayerStartHook()
+    if sprayStartOk then successCount = successCount + 1 else failCount = failCount + 1 end
+
     -- Speed-based area-normalized consumption (tank-drain path).
     -- Replaces vanilla getSprayerUsage's speedLimit with actual lastSpeed so product
     -- consumption scales correctly with area covered at the vehicle's real speed.
@@ -2190,10 +2196,13 @@ function HookManager:installSprayerAreaHook()
                     return
                 end
 
-                -- Apply rate multiplier
+                -- Rate multiplier is applied to wap.usage by installSprayerStartHook before
+                -- onEndWorkAreaProcessing runs. liters (= wap.usage) already reflects the
+                -- multiplier; do NOT multiply again or nutrient gain would be multiplier².
+                -- Keep rateMultiplier lookup for burn-threshold check only.
                 local rm = g_SoilFertilityManager.sprayerRateManager
                 local rateMultiplier = (rm ~= nil) and rm:getMultiplier(self.id) or 1.0
-                local effectiveLiters = liters * rateMultiplier
+                local effectiveLiters = liters
 
                 -- Section Control double-penalty fix (Issue #345):
                 -- wap.usage already reflects section shutoff (VariableWorkWidth.getIsWorkAreaActive
@@ -3744,6 +3753,52 @@ function HookManager:installExternalFillHook()
 end
 
 -- =========================================================
+-- HOOK 9a-pre: Rate multiplier applied to wap.usage / wap.usagePerMin
+-- =========================================================
+-- onStartWorkAreaProcessing is registered as an EVENT LISTENER (not registerFunction),
+-- so class-table patches via Utils.appendedFunction reach ALL vehicles reliably without
+-- any 3-layer instance-table patching. This is the correct place to apply the rate
+-- multiplier to the values that control:
+--   • tank drain rate (wap.usage read in onEndWorkAreaProcessing)
+--   • L/min HUD display (wap.usagePerMin read by getVariableWorkWidthUsage)
+-- Applying mapMult inside getSprayerUsage (Hook 9a) was unreliable because
+-- copyTypeFunctionsInto copies getSprayerUsage directly into vehicle instance tables,
+-- and Layer-3 live patching missed vehicles in some FS25 versions (issue #538).
+---@return boolean success
+function HookManager:installSprayerStartHook()
+    if not Sprayer or type(Sprayer.onStartWorkAreaProcessing) ~= "function" then
+        SoilLogger.warning("SprayerStart hook: Sprayer.onStartWorkAreaProcessing not available — skipping")
+        return false
+    end
+
+    local original = Sprayer.onStartWorkAreaProcessing
+    Sprayer.onStartWorkAreaProcessing = Utils.appendedFunction(
+        original,
+        function(self, dt)
+            if not self.isServer then return end
+            local spec = self.spec_sprayer
+            if not spec or not spec.workAreaParameters then return end
+            if not g_SoilFertilityManager or not g_SoilFertilityManager.sprayerRateManager then return end
+
+            local mult = g_SoilFertilityManager.sprayerRateManager:getMultiplier(self.id or 0)
+            if mult == 1.0 then return end
+
+            local wap = spec.workAreaParameters
+            if wap.usage and wap.usage ~= 0 then
+                wap.usage = wap.usage * mult
+            end
+            if wap.usagePerMin and wap.usagePerMin ~= 0 then
+                wap.usagePerMin = wap.usagePerMin * mult
+            end
+        end
+    )
+
+    self:register(Sprayer, "onStartWorkAreaProcessing", original, "Sprayer.onStartWorkAreaProcessing (rate multiplier)")
+    SoilLogger.info("[OK] SprayerStart hook installed — rate multiplier applied to wap.usage/usagePerMin")
+    return true
+end
+
+-- =========================================================
 -- HOOK 9a: Speed-based area-normalized sprayer consumption
 -- =========================================================
 -- Vanilla Sprayer:getSprayerUsage multiplies by self.speedLimit (configured max speed,
@@ -3759,6 +3814,7 @@ end
 --
 -- Three-layer patch required: SpecializationUtil.registerFunction (line 91 of Sprayer.lua)
 -- + copyTypeFunctionsInto means class-table patches never reach live vehicle instances.
+-- Rate multiplier is no longer applied here; see installSprayerStartHook above.
 ---@return boolean success
 function HookManager:installSprayerUsageHook()
     if not Sprayer or type(Sprayer.getSprayerUsage) ~= "function" then
@@ -3838,12 +3894,13 @@ function HookManager:installSprayerUsageHook()
                 if okW and w and w > 0 then workWidth = w end
             end
 
-            local mapMult = 1.0
-            if g_SoilFertilityManager and g_SoilFertilityManager.sprayerRateManager then
-                mapMult = g_SoilFertilityManager.sprayerRateManager:getMultiplier(sprayerSelf.id or 0)
-            end
-
-            local usage = fillScale * mapMult * lps * actualSpeedKmh * workWidth * dt * 0.001
+            -- Rate multiplier is NOT applied here. It is applied via installSprayerStartHook
+            -- (appended to Sprayer.onStartWorkAreaProcessing, an event listener with reliable
+            -- class-table dispatch) which multiplies wap.usage and wap.usagePerMin after vanilla
+            -- sets them. Applying it here via the 3-layer instance-table patch was unreliable:
+            -- copyTypeFunctionsInto copies getSprayerUsage into vehicle instances at load time,
+            -- and Layer 3 instance patching missed vehicles in some FS25 versions (issue #538).
+            local usage = fillScale * lps * actualSpeedKmh * workWidth * dt * 0.001
 
             -- Throttled diagnostic: log once per 4 s per vehicle (debug mode only).
             -- Shows speed / width / lps / usage-per-second / effective L/ha so you can
@@ -3861,8 +3918,8 @@ function HookManager:installSprayerUsageHook()
                 local ft = g_fillTypeManager and g_fillTypeManager:getFillTypeByIndex(fillType)
                 if ft then ftName = ft.name end
                 SoilLogger.debug(
-                    "SprayUsage veh=%d type=%-12s  spd=%.1f km/h  w=%.1fm  lps=%.6f  scale=%.2f  rate=%.2fx  usage/s=%.4f L/s  eff=%.1f L/ha",
-                    vehId, ftName, actualSpeedKmh, workWidth, lps, fillScale, mapMult, usagePerSec, effectiveLpha)
+                    "SprayUsage veh=%d type=%-12s  spd=%.1f km/h  w=%.1fm  lps=%.6f  scale=%.2f  usage/s=%.4f L/s  eff=%.1f L/ha",
+                    vehId, ftName, actualSpeedKmh, workWidth, lps, fillScale, usagePerSec, effectiveLpha)
             end
 
             return usage
