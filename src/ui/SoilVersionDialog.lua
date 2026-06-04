@@ -24,6 +24,9 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
+    "- New: Overlap Prevention — boom sections automatically shut off",
+    "  over ground already sprayed this season; no Precision Farming",
+    "  required (toggle in Smart Systems settings page)",
     "- Fixed: 'Weeds' bar renamed to 'Weed Risk' — it shows growth",
     "  pressure/risk, not current weed presence",
     "- New: work trail toggle in HUD & Display settings — show/hide",
