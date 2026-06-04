@@ -1183,6 +1183,43 @@ function SoilHUD:drawSprayTrail()
     end
 end
 
+--- Draws earth-brown (plow) or tan (cultivate) dots for each cell tilled today.
+--- Disappears automatically when full-field coverage is reached.
+function SoilHUD:drawTillageTrail()
+    if not self.fillOverlay then return end
+    local soilSys = g_SoilFertilityManager and g_SoilFertilityManager.soilSystem
+    if not soilSys then return end
+    local fieldId = self.cachedFieldId
+    if not fieldId or fieldId <= 0 then return end
+    local field = soilSys.fieldData and soilSys.fieldData[fieldId]
+    if not field or not field.tillageTrailPts or #field.tillageTrailPts == 0 then return end
+
+    local px, pz = 0, 0
+    if g_localPlayer then
+        local ok, lx, _, lz = pcall(function() return g_localPlayer:getPosition() end)
+        if ok and lx then px, pz = lx, lz end
+    end
+
+    local maxDistSq = 200 * 200
+    local half = 0.0030
+
+    for _, pt in ipairs(field.tillageTrailPts) do
+        local dx = pt.wx - px
+        local dz = pt.wz - pz
+        if dx*dx + dz*dz <= maxDistSq then
+            local sx, sy, sz = project(pt.wx, pt.wy, pt.wz)
+            if sz <= 1 then
+                if pt.isPlow then
+                    setOverlayColor(self.fillOverlay, 0.55, 0.28, 0.05, 0.50)
+                else
+                    setOverlayColor(self.fillOverlay, 0.72, 0.52, 0.22, 0.45)
+                end
+                renderOverlay(self.fillOverlay, sx - half, sy - half, half*2, half*2)
+            end
+        end
+    end
+end
+
 -- ── Draw ─────────────────────────────────────────────────
 function SoilHUD:draw()
     if not self.initialized then return end
@@ -1201,6 +1238,7 @@ function SoilHUD:draw()
     if self.settings.showWorkTrail then
         self:drawSprayTrail()
         self:drawHarvestTrail()
+        self:drawTillageTrail()
     end
 
     self:drawPanel()

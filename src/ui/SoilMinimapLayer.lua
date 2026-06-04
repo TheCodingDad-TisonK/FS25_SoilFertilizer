@@ -374,6 +374,52 @@ function SoilMinimapLayer:draw(mapSelf)
 
     if not self.settings or self.settings.showWorkTrail ~= false then
         self:drawHarvestTrailDots(mapSelf)
+        self:drawTillageTrailDots(mapSelf)
+    end
+end
+
+--- Draws earth-brown/tan pixel dots on the minimap for each tilled cell today.
+--- Dark brown = plow pass, tan = cultivate pass.
+function SoilMinimapLayer:drawTillageTrailDots(mapSelf)
+    local dotOv = self._dotOverlay
+    if not dotOv or dotOv == 0 then return end
+
+    local soilSys = self.soilSystem
+    if not soilSys or not soilSys.fieldData then return end
+
+    local layout = mapSelf and (mapSelf.fullScreenLayout or mapSelf.layout)
+    if not layout or not layout.getMapObjectPosition then return end
+
+    local worldSizeX = mapSelf.worldSizeX or (g_currentMission and g_currentMission.terrainSize) or 2048
+    local worldSizeZ = mapSelf.worldSizeZ or (g_currentMission and g_currentMission.terrainSize) or 2048
+    if worldSizeX == 0 or worldSizeZ == 0 then return end
+
+    local extX = mapSelf.mapExtensionOffsetX    or 0
+    local extZ = mapSelf.mapExtensionOffsetZ    or 0
+    local scl  = mapSelf.mapExtensionScaleFactor or 1
+    local offX = mapSelf.worldCenterOffsetX     or 0
+    local offZ = mapSelf.worldCenterOffsetZ     or 0
+
+    local dotSz = 0.0038
+    local half  = dotSz * 0.5
+
+    for _, field in pairs(soilSys.fieldData) do
+        local pts = field.tillageTrailPts
+        if pts then
+            for _, pt in ipairs(pts) do
+                if pt.isPlow then
+                    setOverlayColor(dotOv, 0.55, 0.28, 0.05, 0.65)
+                else
+                    setOverlayColor(dotOv, 0.72, 0.52, 0.22, 0.60)
+                end
+                local objX = ((pt.wx + offX) / worldSizeX) * scl + extX
+                local objZ = ((pt.wz + offZ) / worldSizeZ) * scl + extZ
+                local sx, sy = layout:getMapObjectPosition(objX, objZ, 0, 0)
+                if sx and sy then
+                    renderOverlay(dotOv, sx - half, sy - half, dotSz, dotSz)
+                end
+            end
+        end
     end
 end
 
