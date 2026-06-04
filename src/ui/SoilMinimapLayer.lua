@@ -45,8 +45,6 @@ function SoilMinimapLayer.new(soilSystem, settings)
     self._usingDensityLayers = false
     self._dirty          = true    -- force first build on init
     self._lastLayerIdx   = -1      -- detect layer-switch → force rebuild
-    self._prevMW         = nil     -- animation-skip: previous frame's terrain width
-    self._prevMH         = nil     -- animation-skip: previous frame's terrain height
     self._farmlandMap    = nil
     self._farmlandNumCh  = nil
     self._nextRebuildMs  = 0
@@ -136,8 +134,6 @@ function SoilMinimapLayer:update(dt, soilMapOverlay)
         self._lastLayerIdx  = layerIdx
         self._dirty         = true
         self._buildInFlight = false  -- cancel any in-flight build from the previous layer
-        self._prevMW        = nil    -- reset animation baseline for the new layer
-        self._prevMH        = nil
     end
 
     -- Only rebuild when dirty and the previous build has finished
@@ -328,39 +324,34 @@ function SoilMinimapLayer:draw(mapSelf)
     local my = y + h * extZ
     local mw = w * scl
     local mh = h * scl
-    local rx = (px + x) - mx
-    local ry = (py + y) - my
+    -- Rotation pivot: absolute screen coordinates of the map centre.
+    -- px/py are already in screen space from layout:getMapPivot() (or widget centre).
+    local rx = px
+    local ry = py
 
-    -- Skip rendering while the minimap layout is animating between states.
-    local prevMW = self._prevMW
-    local prevMH = self._prevMH
-    self._prevMW = mw
-    self._prevMH = mh
-    if prevMW ~= nil and (math.abs(mw - prevMW) > 0.003 or math.abs(mh - prevMH) > 0.003) then
-        return
-    end
+    -- Always clip the overlay to the minimap widget bounds.
+    -- mapSelf.clipX1 is passed as a draw-call parameter, not stored as a property, so it
+    -- is nil here. Fall back to the widget rect from layout so that on large maps (16x etc.)
+    -- where mapExtensionScaleFactor > 1 and the terrain rect extends beyond the widget,
+    -- we still extract the correct UV slice and don't render an oversized off-screen rect.
+    local cx1 = mapSelf.clipX1 or x
+    local cy1 = mapSelf.clipY1 or y
+    local cx2 = mapSelf.clipX2 or (x + w)
+    local cy2 = mapSelf.clipY2 or (y + h)
 
-    setOverlayUVs(ov, 0, 0, 0, 1, 1, 0, 1, 1)
+    local x1, y1 = mx, my
+    local x2, y2 = mx + mw, my + mh
+    if x1 == x2 or y1 == y2 then return end
 
-    local didClip = false
-    local uL, vT, uR, vB = 0, 0, 1, 1
-    if mapSelf.clipX1 ~= nil then
-        local x1, y1 = mx, my
-        local x2, y2 = mx + mw, my + mh
-        local cx1, cy1 = mapSelf.clipX1, mapSelf.clipY1
-        local cx2, cy2 = mapSelf.clipX2, mapSelf.clipY2
-        local rx1 = math.max(x1, cx1); local ry1 = math.max(y1, cy1)
-        local rx2 = math.min(x2, cx2); local ry2 = math.min(y2, cy2)
-        if (rx2 - rx1) <= 0 or (ry2 - ry1) <= 0 then return end
-        uL = (rx1 - x1) / (x2 - x1); vT = (ry1 - y1) / (y2 - y1)
-        uR = (rx2 - x1) / (x2 - x1); vB = (ry2 - y1) / (y2 - y1)
-        mx, my, mw, mh = rx1, ry1, rx2 - rx1, ry2 - ry1
-        didClip = true
-    end
+    local rx1 = math.max(x1, cx1); local ry1 = math.max(y1, cy1)
+    local rx2 = math.min(x2, cx2); local ry2 = math.min(y2, cy2)
+    if (rx2 - rx1) <= 0 or (ry2 - ry1) <= 0 then return end
 
-    if didClip then
-        setOverlayUVs(ov, uL, vT, uL, vB, uR, vT, uR, vB)
-    end
+    local uL = (rx1 - x1) / (x2 - x1); local vT = (ry1 - y1) / (y2 - y1)
+    local uR = (rx2 - x1) / (x2 - x1); local vB = (ry2 - y1) / (y2 - y1)
+    mx, my, mw, mh = rx1, ry1, rx2 - rx1, ry2 - ry1
+
+    setOverlayUVs(ov, uL, vT, uL, vB, uR, vT, uR, vB)
 
     if layout.getMapRotation then
         local rot = layout:getMapRotation()
@@ -377,7 +368,7 @@ function SoilMinimapLayer:draw(mapSelf)
     setOverlayColor(ov, 1, 1, 1, alpha)
     renderOverlay(ov, mx, my, mw, mh)
 
-    if didClip and Overlay ~= nil and Overlay.DEFAULT_UVS ~= nil then
+    if Overlay ~= nil and Overlay.DEFAULT_UVS ~= nil then
         setOverlayUVs(ov, unpack(Overlay.DEFAULT_UVS))
     end
 
