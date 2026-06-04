@@ -2801,5 +2801,57 @@
       "count": 6,
       "uniques": 5
     }
+  ],
+  "2026-06-04": [
+    {
+      "referrer": "github.com",
+      "count": 2371,
+      "uniques": 214
+    },
+    {
+      "referrer": "Google",
+      "count": 882,
+      "uniques": 267
+    },
+    {
+      "referrer": "kingmods.net",
+      "count": 531,
+      "uniques": 190
+    },
+    {
+      "referrer": "Bing",
+      "count": 280,
+      "uniques": 53
+    },
+    {
+      "referrer": "youtube.com",
+      "count": 207,
+      "uniques": 127
+    },
+    {
+      "referrer": "reddit.com",
+      "count": 29,
+      "uniques": 20
+    },
+    {
+      "referrer": "yandex.ru",
+      "count": 23,
+      "uniques": 2
+    },
+    {
+      "referrer": "DuckDuckGo",
+      "count": 19,
+      "uniques": 5
+    },
+    {
+      "referrer": "Yahoo",
+      "count": 16,
+      "uniques": 5
+    },
+    {
+      "referrer": "forbidden-mods.de",
+      "count": 16,
+      "uniques": 5
+    }
   ]
 }
