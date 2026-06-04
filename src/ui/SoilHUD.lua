@@ -848,7 +848,7 @@ function SoilHUD:updateFieldInfoBox()
     if     info.potassium.status  == "Poor" then table.insert(needs, "K!")
     elseif info.potassium.status  == "Fair" then table.insert(needs, "K")  end
     if info.pH and (info.pH < phGoodLow or info.pH > phGoodHigh) then table.insert(needs, "pH") end
-    if weedPct    >= weedMed    then table.insert(needs, g_i18n:getText("sf_hud_weeds")   or "Weeds")   end
+    if weedPct    >= weedMed    then table.insert(needs, g_i18n:getText("sf_hud_weeds")   or "Weed Risk")   end
     if pestPct    >= pestMed    then table.insert(needs, g_i18n:getText("sf_hud_pests")   or "Pests")   end
     if diseasePct >= diseaseMed then table.insert(needs, g_i18n:getText("sf_hud_disease") or "Disease") end
     if compPct    > 10          then table.insert(needs, g_i18n:getText("sf_hud_compaction") or "Compaction") end
@@ -873,7 +873,7 @@ function SoilHUD:updateFieldInfoBox()
     box:addLine("K (ppm)", fmtNutrient(info.potassium.value,  "K", ppm.K))
     box:addLine("pH",      string.format("%.1f", info.pH))
     box:addLine("OM",      string.format("%.1f%%", info.organicMatter))
-    if weedPct    > 0 then box:addLine(g_i18n:getText("sf_hud_weeds")      or "Weeds",      pressureLine(weedPct,    info.herbicideActive))  end
+    if weedPct    > 0 then box:addLine(g_i18n:getText("sf_hud_weeds")      or "Weed Risk",  pressureLine(weedPct,    info.herbicideActive))  end
     if pestPct    > 0 then box:addLine(g_i18n:getText("sf_hud_pests")      or "Pests",      pressureLine(pestPct,    info.insecticideActive)) end
     if diseasePct > 0 then box:addLine(g_i18n:getText("sf_hud_disease")    or "Disease",    pressureLine(diseasePct, info.fungicideActive))   end
     if compPct    > 0 then
