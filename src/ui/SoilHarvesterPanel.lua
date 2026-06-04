@@ -677,11 +677,8 @@ function SoilHarvesterPanel:draw()
         end
 
         -- Gather values
-        local fieldArea = (info and info.fieldArea) or 0
-        local sessCov   = (info and info.sessionCoverageFraction) or 0
-        local totCov    = (info and info.coverageFraction) or 0
-        local sessHa    = sessCov * fieldArea
-        local totHa     = fieldArea
+        local fieldArea     = (info and info.fieldArea) or 0
+        local daysSinceHarv = (info and info.daysSinceHarvest) or 0
 
         -- Yield estimate: yieldEfficiency * base crop yield (t/ha)
         local cropName  = info and info.lastCrop
@@ -716,36 +713,26 @@ function SoilHarvesterPanel:draw()
         setTextColor(unpack(C.C_VALUE))
         renderText(cell1X + cellW * 0.5, sbY + (sbH * 0.35 - 0.0075*sc) * 0.5, 0.0075*sc, thaStr)
 
-        -- ── Cell 2: Coverage % + mini progress bar ─────────────
-        local cell2X = panelX + cellW
-        local covPct  = math.floor(sessCov * 100 + 0.5)
-        local covStr  = string.format("%d%%", covPct)
-        local covCol  = (sessCov >= 0.80) and C.C_GOOD
-                     or (sessCov >= 0.40) and C.C_FAIR
-                     or C.C_LABEL
-
-        -- Small mini-bar (3 segments) showing coverage
-        local mbW  = cellW * 0.72
-        local mbH  = 0.0045 * sc
-        local mbX  = cell2X + (cellW - mbW) * 0.5
-        local mbY  = sbY + sbH * 0.60
-        local mSeg = 4
-        local mGap = 0.0015 * sc
-        local mSW  = (mbW - (mSeg-1)*mGap) / mSeg
-        local mFill = sessCov * mSeg
-        for mi = 0, mSeg - 1 do
-            local msx = mbX + mi * (mSW + mGap)
-            self:drawRect(msx, mbY, mSW, mbH, C.C_SEG_BG)
-            local mfrac = math.max(0, math.min(1, mFill - mi))
-            if mfrac > 0 then
-                self:drawRect(msx, mbY, mSW * mfrac, mbH, covCol)
-            end
+        -- ── Cell 2: Grain bag icon + session grain (L) ──────────
+        local cell2X  = panelX + cellW
+        local sessL   = self._sessGrainL or 0
+        local grainStr
+        if sessL >= 1000 then
+            grainStr = string.format("%.1f kL", sessL / 1000)
+        else
+            grainStr = string.format("%d L", math.floor(sessL + 0.5))
         end
+        -- Grain bag icon (bag body + neck + tie knot)
+        local gb_sz = isz
+        local gb_x  = cell2X + (cellW - gb_sz * 0.75) * 0.5
+        local gb_y  = sbY + sbH * 0.42
+        self:drawRect(gb_x,               gb_y,              gb_sz * 0.75, gb_sz * 0.58, C.C_TITLE_FG, 0.85)
+        self:drawRect(gb_x + gb_sz*0.20,  gb_y + gb_sz*0.58, gb_sz * 0.35, gb_sz * 0.20, C.C_TITLE_FG, 0.72)
+        self:drawRect(gb_x + gb_sz*0.27,  gb_y + gb_sz*0.76, gb_sz * 0.21, gb_sz * 0.12, C.C_TITLE_FG, 0.60)
 
-        -- Coverage % text
         setTextAlignment(RenderText.ALIGN_CENTER)
-        setTextColor(covCol[1], covCol[2], covCol[3], covCol[4] or 1)
-        renderText(cell2X + cellW * 0.5, sbY + (sbH * 0.30 - 0.0075*sc) * 0.5 + mbH + 0.003*sc, 0.0080*sc, covStr)
+        setTextColor(unpack(C.C_VALUE))
+        renderText(cell2X + cellW * 0.5, sbY + (sbH * 0.35 - 0.0075*sc) * 0.5, 0.0075*sc, grainStr)
 
         -- ── Cell 3: Field icon + session area (ha) ─────────────
         local cell3X = panelX + cellW * 2
@@ -763,30 +750,26 @@ function SoilHarvesterPanel:draw()
         self:drawRect(ic3lx + ib, ic3by + ic3sz*0.5 - icm*0.5, ic3sz-ib*2, icm, C.C_LABEL, 0.40)
         self:drawRect(ic3lx + ic3sz*0.5 - icm*0.5, ic3by + ib, icm, ic3sz-ib*2, C.C_LABEL, 0.40)
 
-        local sessHaStr = string.format("%.1f ha", sessHa)
+        local areaStr = string.format("%.1f ha", fieldArea)
         setTextAlignment(RenderText.ALIGN_CENTER)
         setTextColor(unpack(C.C_VALUE))
-        renderText(cell3X + cellW * 0.5, sbY + (sbH * 0.35 - 0.0075*sc) * 0.5, 0.0075*sc, sessHaStr)
+        renderText(cell3X + cellW * 0.5, sbY + (sbH * 0.35 - 0.0075*sc) * 0.5, 0.0075*sc, areaStr)
 
-        -- ── Cell 4: Sigma field icon + total field area (ha) ───
+        -- ── Cell 4: Calendar icon + days since last harvest ────
         local cell4X = panelX + cellW * 3
         local ic4sz  = isz
-        local ic4lx  = cell4X + (cellW - ic4sz) * 0.5 + ic4sz * 0.15
+        local ic4lx  = cell4X + (cellW - ic4sz) * 0.5
         local ic4by  = sbY + sbH * 0.45
-        -- Same field icon (slightly right to leave room for Σ)
-        self:drawRect(ic4lx,               ic4by,               ic4sz * 0.85, ib,              C.C_DIM, 0.80)
-        self:drawRect(ic4lx,               ic4by + ic4sz - ib,  ic4sz * 0.85, ib,              C.C_DIM, 0.80)
-        self:drawRect(ic4lx,               ic4by,               ib,           ic4sz,            C.C_DIM, 0.80)
-        self:drawRect(ic4lx + ic4sz*0.85 - ib, ic4by,           ib,           ic4sz,            C.C_DIM, 0.80)
-        -- Σ prefix (tiny, left of icon)
-        setTextAlignment(RenderText.ALIGN_RIGHT)
-        setTextColor(C.C_DIM[1], C.C_DIM[2], C.C_DIM[3], 0.90)
-        renderText(ic4lx - 0.001, ic4by + ic4sz * 0.25, ic4sz * 0.55, "S")
+        -- Calendar icon: box body + header bar + two ring notches
+        self:drawRect(ic4lx,               ic4by,               ic4sz, ic4sz * 0.85, C.C_DIM, 0.40)
+        self:drawRect(ic4lx,               ic4by + ic4sz * 0.72, ic4sz, ic4sz * 0.13, C.C_DIM, 0.90)
+        self:drawRect(ic4lx + ic4sz*0.22,  ic4by + ic4sz * 0.79, ic4sz * 0.16, ic4sz * 0.22, C.C_TITLE_BG, 1.0)
+        self:drawRect(ic4lx + ic4sz*0.62,  ic4by + ic4sz * 0.79, ic4sz * 0.16, ic4sz * 0.22, C.C_TITLE_BG, 1.0)
 
-        local totHaStr = string.format("%.1f ha", totHa)
+        local dayStr = (daysSinceHarv > 0) and string.format("%dd", math.floor(daysSinceHarv)) or "--"
         setTextAlignment(RenderText.ALIGN_CENTER)
         setTextColor(C.C_DIM[1], C.C_DIM[2], C.C_DIM[3], 0.90)
-        renderText(cell4X + cellW * 0.5, sbY + (sbH * 0.35 - 0.0075*sc) * 0.5, 0.0075*sc, totHaStr)
+        renderText(cell4X + cellW * 0.5, sbY + (sbH * 0.35 - 0.0075*sc) * 0.5, 0.0075*sc, dayStr)
     end
 
     -- Reset text state
