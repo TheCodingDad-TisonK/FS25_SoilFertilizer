@@ -30,12 +30,6 @@ SoilVersionDialog.CHANGELOG = {
     "  game world and on the minimap; clears when full field is covered",
     "- New: harvester panel stats bar — 4 cells showing estimated t/ha,",
     "  field coverage %, session area harvested, and total field area",
-    "- Fixed: weed pressure no longer spikes on reload or time-skip;",
-    "  increases are now capped at 20 pts/day so pressure rises gradually",
-    "- Fixed: SF application rate multiplier now shown in sprayer panel",
-    "  title bar so you always know the active rate at a glance",
-    "- Fixed: colorblind mode now auto-enables when the game's own",
-    "  colorblind setting is turned on",
 }
 
 -- ── i18n helper ───────────────────────────────────────────
