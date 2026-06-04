@@ -41,6 +41,8 @@
     <e k="sf_show_hud_long" v="Показать/скрыть накладку HUD с информацией о грунте (F8 для временного переключения)" eh="4e2e11b6" />
     <e k="sf_show_mini_report_short" v="Показать отчет по ячейке" eh="6b14e786" />
     <e k="sf_show_mini_report_long" v="Показать/скрыть наложение отчета по ячейке на миникарте" eh="9f57fb65" />
+    <e k="sf_show_work_trail_short" v="Work Trail" />
+    <e k="sf_show_work_trail_long" v="Show/hide spray and harvest trail dots in-world and on the minimap" />
     <e k="sf_hud_position_short" v="Позиция HUD" eh="5ac371f2" />
     <e k="sf_hud_position_long" v="Выберите, где на экране отображается HUD с информацией о грунте" eh="d7b9c109" />
     <e k="sf_hud_pos_1" v="Справа вверху" eh="5f9f6784" />
@@ -607,6 +609,7 @@
     <e k="sf_desc_showNotifications" v="Уведомления о статусе почвы" eh="7f275b4b" />
     <e k="sf_desc_showHUD" v="Показать HUD почвы" eh="fa8b9224" />
     <e k="sf_desc_showMiniReport" v="Отчет по ячейке на миникарте" eh="b847f98c" />
+    <e k="sf_desc_showWorkTrail" v="Show spray and harvest pass trail overlays" />
     <e k="sf_desc_hudPosition" v="Позиция привязки HUD" eh="98c8bcea" />
     <e k="sf_desc_hudColorTheme" v="Цветовая палитра HUD" eh="97271907" />
     <e k="sf_desc_hudFontSize" v="Размер текста HUD" eh="48a6fc15" />

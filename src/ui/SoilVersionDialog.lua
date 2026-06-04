@@ -24,6 +24,8 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
+    "- New: work trail toggle in HUD & Display settings — show/hide",
+    "  spray and harvest trail dots (in-world and on minimap)",
     "- New: harvest trail overlay — amber dots show combine pass in the",
     "  game world and on the minimap; clears when full field is covered",
     "- New: harvester panel stats bar — 4 cells showing estimated t/ha,",

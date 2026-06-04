@@ -65,6 +65,13 @@ SettingsSchema.definitions = {
         localOnly = true,
     },
     {
+        id = "showWorkTrail",
+        type = "boolean",
+        default = true,
+        uiId = "sf_show_work_trail",
+        localOnly = true,
+    },
+    {
         id = "miniReportX",
         type = "number",
         default = 0.18,
