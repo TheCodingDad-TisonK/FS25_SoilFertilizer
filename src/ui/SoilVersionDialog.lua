@@ -24,6 +24,8 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
+    "- Fixed: 'Weeds' bar renamed to 'Weed Risk' — it shows growth",
+    "  pressure/risk, not current weed presence",
     "- New: work trail toggle in HUD & Display settings — show/hide",
     "  spray and harvest trail dots (in-world and on minimap)",
     "- New: harvest trail overlay — amber dots show combine pass in the",
