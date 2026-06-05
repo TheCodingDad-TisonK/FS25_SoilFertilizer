@@ -24,17 +24,17 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
-    "- New: Overlap Prevention — boom sections automatically shut off",
-    "  over ground already sprayed this season; no Precision Farming",
-    "  required (toggle in Smart Systems settings page)",
-    "- Fixed: 'Weeds' bar renamed to 'Weed Risk' — it shows growth",
-    "  pressure/risk, not current weed presence",
-    "- New: work trail toggle in HUD & Display settings — show/hide",
-    "  spray and harvest trail dots (in-world and on minimap)",
-    "- New: harvest trail overlay — amber dots show combine pass in the",
-    "  game world and on the minimap; clears when full field is covered",
-    "- New: harvester panel stats bar — 4 cells showing estimated t/ha,",
-    "  field coverage %, session area harvested, and total field area",
+    "- Fixed: Variable Rate double-reduction bug — VR now redistributes",
+    "  the already-rate-scaled budget rather than reducing it again;",
+    "  total nutrient credit is preserved across all boom sections",
+    "- Fixed: Ghost bar now accounts for replenishment rate setting;",
+    "  projection matches what the field actually receives",
+    "- Fixed: HUD soil bars — removed confusing yellow fair/good tick;",
+    "  only the orange-red minimum and cyan crop-optimal ticks remain",
+    "- Fixed: Yield modifier frozen at first harvest call per crop cycle;",
+    "  yield no longer drops as the combine crosses the field",
+    "- Fixed: Fertilizer pricing rebalanced — organics now dramatically",
+    "  cheaper; UAN32/UAN28 correctly priced as budget liquid nitrogen",
 }
 
 -- ── i18n helper ───────────────────────────────────────────

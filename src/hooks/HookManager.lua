@@ -1460,8 +1460,9 @@ function HookManager:installVariableRateHook()
                     -- zone boundaries (#479). 40% blend toward target per tick gives ~0.5s lag.
                     local prevRate = sensorMgr:getSectionRate(vehicleId, section) or rate
                     rate = prevRate * 0.6 + rate * 0.4
-                    -- Never exceed the player's manual rate ceiling
-                    rate = math.min(rate, manualMult)
+                    -- VR rates are redistribution weights; do NOT cap at manualMult.
+                    -- The manual rate budget is already applied to wap.usage by
+                    -- installSprayerStartHook. Capping here caused double-reduction (#555).
                     sensorMgr:setSectionRate(vehicleId, section, rate)
                 end
             end
@@ -2520,8 +2521,7 @@ function HookManager:installSprayerAreaHook()
                     for i = scratchN + 1, #scratch do scratch[i] = nil end
 
                     if scratchN > 0 then
-                        local litersPerSection = effectiveLiters / scratchN
-                        -- Variable Rate (System 3): look up per-section multiplier if active
+                        -- Variable Rate (System 3): look up per-section weights if active
                         local vrSectionRates = nil
                         do
                             local sfmVR = g_SoilFertilityManager
@@ -2530,6 +2530,20 @@ function HookManager:installSprayerAreaHook()
                                 vrSectionRates = smVR.sectionRates[self.id]
                             end
                         end
+
+                        -- Normalize VR weights so total nutrient credit == effectiveLiters.
+                        -- VR redistribution does NOT change the total; it only shifts credit
+                        -- toward deficit sections. Without normalization, applySingle would
+                        -- receive (wap.usage * manualMult) * vrWeight — a double reduction
+                        -- when auto rate selects a sub-unity multiplier (#555/#538).
+                        local vrWeightSum = 0.0
+                        for i = 1, scratchN do
+                            local w = (vrSectionRates and vrSectionRates[scratch[i]]) or 1.0
+                            vrWeightSum = vrWeightSum + w
+                        end
+                        -- vrWeightSum == 0 only if all weights are 0 (degenerate); guard.
+                        if vrWeightSum <= 0 then vrWeightSum = scratchN end
+
                         for i = 1, scratchN do
                             local section = scratch[i]
                             local sx, sz = rootX, rootZ
@@ -2542,8 +2556,10 @@ function HookManager:installSprayerAreaHook()
                                 end
                             end
                             local sectionFieldId = hookMgrRef:getFieldIdAtWorldPosition(sx, sz)
-                            local vrMult = (vrSectionRates and vrSectionRates[section]) or 1.0
-                            applySingle(sectionFieldId, litersPerSection * vrMult, sx, sz)
+                            local vrWeight = (vrSectionRates and vrSectionRates[section]) or 1.0
+                            -- Proportional share: preserves total = effectiveLiters
+                            local sectionLiters = effectiveLiters * (vrWeight / vrWeightSum)
+                            applySingle(sectionFieldId, sectionLiters, sx, sz)
                         end
                     else
                         applySingle(fieldId, effectiveLiters, rootX, rootZ)

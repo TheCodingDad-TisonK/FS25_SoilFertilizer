@@ -1528,7 +1528,14 @@ function SoilHUD:drawNutrientRow(label, baseLabel, nutrient, px, cy, pw, s, font
                 local remaining = math.max(0, threshold - currentBuffer)
                 
                 if remaining > 0 then
-                    projectedDelta = profile[label] * (remaining / 1000) / (info.fieldArea or 1.0)
+                    -- Apply replenishment rate multiplier: the actual nutrient gain in
+                    -- applyFertilizer is scaled by rrMult; the ghost bar must match (#555).
+                    local sfm = g_SoilFertilityManager
+                    local rrIdx  = sfm and sfm.settings and sfm.settings.replenishmentRate or 3
+                    local rrMult = SoilConstants.DIFFICULTY and
+                        SoilConstants.DIFFICULTY.REPLENISHMENT_MULTIPLIERS and
+                        SoilConstants.DIFFICULTY.REPLENISHMENT_MULTIPLIERS[rrIdx] or 1.0
+                    projectedDelta = profile[label] * (remaining / 1000) / (info.fieldArea or 1.0) * rrMult
                     local ghostFill = math.min(1.0 - fill, projectedDelta / 100)
                     if ghostFill > 0 then
                         self:drawRect(barX + barW * fill, barY, barW * ghostFill, barH, col, 0.35)
@@ -1538,7 +1545,10 @@ function SoilHUD:drawNutrientRow(label, baseLabel, nutrient, px, cy, pw, s, font
         end
     end
 
-    -- Threshold tick marks (global poor/fair)
+    -- Threshold tick marks — only the poor/fair (minimum) boundary.
+    -- The fair/good yellow tick was removed (#554): with per-crop optimal ticks
+    -- already shown in cyan, having fair above the orange minimum caused the cyan
+    -- target to appear "outside" the high/low range on well-stocked crops.
     local thresholdKey = baseLabel == "N" and "nitrogen"
                       or baseLabel == "P" and "phosphorus"
                       or baseLabel == "K" and "potassium"
@@ -1550,9 +1560,7 @@ function SoilHUD:drawNutrientRow(label, baseLabel, nutrient, px, cy, pw, s, font
             local tickH  = barH + 0.002 * s
             local tickY  = barY - 0.001 * s
             local poorX  = barX + barW * (th.poor / 100) - tickW * 0.5
-            local fairX  = barX + barW * (th.fair / 100) - tickW * 0.5
-            self:drawRect(poorX, tickY, tickW, tickH, {0.90, 0.35, 0.20, 0.75})  -- orange-red  = poor/fair boundary
-            self:drawRect(fairX, tickY, tickW, tickH, {0.90, 0.80, 0.20, 0.75})  -- yellow      = fair/good boundary
+            self:drawRect(poorX, tickY, tickW, tickH, {0.90, 0.35, 0.20, 0.75})  -- orange-red = minimum threshold
         end
     end
 
