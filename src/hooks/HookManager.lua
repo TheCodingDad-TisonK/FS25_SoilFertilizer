@@ -1564,31 +1564,6 @@ function HookManager:installOverlapPreventionHook()
     Sprayer.onStartWorkAreaProcessing = Utils.prependedFunction(
         Sprayer.onStartWorkAreaProcessing,
         function(sprayerSelf, dt)
-            -- Reset caches each tick. Safety-restore if onEndWorkAreaProcessing missed a tick.
-            sprayerSelf._sfOverlapSuppressed = nil
-
-            -- section.effects (base-game VWW nodes)
-            local prevHidden = sprayerSelf._sfOverlapHiddenEffects
-            if prevHidden then
-                for _, effects in pairs(prevHidden) do
-                    for _, effectNode in ipairs(effects) do
-                        setVisibility(effectNode, true)
-                    end
-                end
-                sprayerSelf._sfOverlapHiddenEffects = nil
-            end
-
-            -- ESE shader nodes (PF sprayers: spec_extendedSprayerEffects)
-            local prevESE = sprayerSelf._sfOverlapHiddenESE
-            if prevESE then
-                for _, saved in pairs(prevESE) do
-                    for _, ed in ipairs(saved) do
-                        setShaderParameter(ed.node, "fadeProgress", ed.c1, ed.c2, 0, 0, false)
-                    end
-                end
-                sprayerSelf._sfOverlapHiddenESE = nil
-            end
-
             local sfm = g_SoilFertilityManager
             if not sfm then return end
             if sfm.settings and sfm.settings.overlapPrevention == false then return end
@@ -1626,6 +1601,14 @@ function HookManager:installOverlapPreventionHook()
                     fillTypeIndex, tostring(checkFert), tostring(lvlMax), rootX, rootZ)
             end
 
+            -- Transition-based effect management:
+            -- prevSuppressed = sections suppressed last frame (persists via _sfOverlapSuppressedSections)
+            -- currSuppressed = sections suppressed this frame (built below, stored at end)
+            -- Stop effects when newly suppressed; start effects when transitioning back to clear.
+            -- The APPEND re-stops currSuppressed after updateSprayerEffects may restart everything.
+            local prevSuppressed = sprayerSelf._sfOverlapSuppressedSections or {}
+            local currSuppressed = {}
+
             local suppressCount = 0
             for i, section in ipairs(vww.sections) do
                 if section.isActive and not section.isCenter then
@@ -1653,8 +1636,6 @@ function HookManager:installOverlapPreventionHook()
                                 SoilLogger.debug("[OverlapPrev]   sec%d tip=%s px=%.1f pz=%.1f lvl=%s lvlMax=%s",
                                     i, tostring(hasTip), px, pz, tostring(lvl), tostring(lvlMax))
                             end
-                            -- Suppress on ANY spray level > 0 (field already received at least
-                            -- one fertilizer application this season — first-pass overlap counts).
                             return lvl ~= nil and lvl > 0
                         elseif checkLime then
                             stModifier:setParallelogramWorldCoords(
@@ -1665,61 +1646,41 @@ function HookManager:installOverlapPreventionHook()
                         return false
                     end
 
-                    -- Check tip first; if not conclusive fall back to midpoint
                     alreadySprayed = checkPoint(tx, tz) or checkPoint(mx, mz)
 
                     if alreadySprayed then
                         section.isActive = false
                         suppressCount = suppressCount + 1
+                        currSuppressed[i] = section
 
-                        if not sprayerSelf._sfOverlapSuppressed then
-                            sprayerSelf._sfOverlapSuppressed = {}
-                        end
-                        sprayerSelf._sfOverlapSuppressed[i] = true
-
-                        -- Hide base-game VWW section.effects nodes (non-ESE sprayers).
+                        -- Stop section effects (idempotent if already stopped).
                         if section.effects and #section.effects > 0 then
-                            if not sprayerSelf._sfOverlapHiddenEffects then
-                                sprayerSelf._sfOverlapHiddenEffects = {}
-                            end
-                            sprayerSelf._sfOverlapHiddenEffects[i] = section.effects
-                            for _, effectNode in ipairs(section.effects) do
-                                setVisibility(effectNode, false)
-                            end
+                            g_effectManager:stopEffects(section.effects)
                         end
 
-                        -- Hide ESE per-nozzle shader effects (PF sprayers).
-                        -- spec_extendedSprayerEffects.sprayerEffectsBySection[i] holds effectData
-                        -- objects whose effectNode is the i3d shader plane.  fadeCur drives the
-                        -- "fadeProgress" shader param: {1,1}=on, {1,-1}=off (LUADOC lines 688/692).
-                        -- We save the current fadeCur and force "fadeProgress" to {1,-1} immediately;
-                        -- onEndWorkAreaProcessing restores the saved values.
+                        -- ESE per-nozzle shader: force fadeProgress to off {1,-1}.
                         local eseSpec = sprayerSelf.spec_extendedSprayerEffects
                         if eseSpec and eseSpec.sprayerEffectsBySection then
                             local sectionEffects = eseSpec.sprayerEffectsBySection[i]
                             if sectionEffects then
-                                if not sprayerSelf._sfOverlapHiddenESE then
-                                    sprayerSelf._sfOverlapHiddenESE = {}
-                                end
-                                local saved = {}
                                 for _, ed in ipairs(sectionEffects) do
                                     if ed.effectNode and ed.fadeCur then
-                                        saved[#saved + 1] = {
-                                            node = ed.effectNode,
-                                            c1   = ed.fadeCur[1],
-                                            c2   = ed.fadeCur[2],
-                                        }
                                         setShaderParameter(ed.effectNode, "fadeProgress", 1, -1, 0, 0, false)
                                     end
                                 end
-                                if #saved > 0 then
-                                    sprayerSelf._sfOverlapHiddenESE[i] = saved
-                                end
                             end
+                        end
+                    elseif prevSuppressed[i] then
+                        -- Transition: was suppressed last frame, now clear → restart effects.
+                        local prevSection = prevSuppressed[i]
+                        if prevSection.effects and #prevSection.effects > 0 then
+                            g_effectManager:startEffects(prevSection.effects)
                         end
                     end
                 end
             end
+
+            sprayerSelf._sfOverlapSuppressedSections = currSuppressed
 
             if doLog and suppressCount > 0 then
                 SoilLogger.debug("[OverlapPrev] suppressed %d sections", suppressCount)
@@ -1731,42 +1692,31 @@ function HookManager:installOverlapPreventionHook()
         "Sprayer.onStartWorkAreaProcessing (SF overlap prevention)")
     SoilLogger.info("[OK] SF Overlap Prevention hook installed — SPRAY_LEVEL density-map nozzle shutoff active")
 
-    -- Restore base-game VWW section.effects nodes after work areas process.
-    -- These are i3d nodes hidden during suppression; they must be shown again before
-    -- the next render frame so the boom looks correct when not overlapping.
+    -- Re-suppress section effects after the original onEndWorkAreaProcessing runs.
+    -- Sprayer:updateSprayerEffects() (called from onEndWorkAreaProcessing) may call
+    -- g_effectManager:startEffects(spec.effects) on a state-change tick (e.g. sprayer
+    -- just turned on after braking), restarting effects we suppressed in the PREPEND.
+    -- This APPEND re-stops them so the boom stays visually correct.
     if type(Sprayer.onEndWorkAreaProcessing) == "function" then
         local origEnd = Sprayer.onEndWorkAreaProcessing
         Sprayer.onEndWorkAreaProcessing = Utils.appendedFunction(
             Sprayer.onEndWorkAreaProcessing,
             function(sprayerSelf, dt, hasProcessed)
-                -- Restore base-game VWW section.effects nodes.
-                local hidden = sprayerSelf._sfOverlapHiddenEffects
-                if hidden then
-                    for _, effects in pairs(hidden) do
-                        for _, effectNode in ipairs(effects) do
-                            setVisibility(effectNode, true)
+                local suppressed = sprayerSelf._sfOverlapSuppressedSections
+                if suppressed then
+                    for _, section in pairs(suppressed) do
+                        if section.effects and #section.effects > 0 then
+                            g_effectManager:stopEffects(section.effects)
                         end
                     end
-                    sprayerSelf._sfOverlapHiddenEffects = nil
-                end
-
-                -- Restore ESE per-nozzle shader params to pre-suppression fadeCur values.
-                local eseHidden = sprayerSelf._sfOverlapHiddenESE
-                if eseHidden then
-                    for _, saved in pairs(eseHidden) do
-                        for _, ed in ipairs(saved) do
-                            setShaderParameter(ed.node, "fadeProgress", ed.c1, ed.c2, 0, 0, false)
-                        end
-                    end
-                    sprayerSelf._sfOverlapHiddenESE = nil
                 end
             end
         )
         self:register(Sprayer, "onEndWorkAreaProcessing", origEnd,
-            "Sprayer.onEndWorkAreaProcessing (SF overlap section.effects restore)")
+            "Sprayer.onEndWorkAreaProcessing (SF overlap section.effects re-suppress)")
     end
 
-    SoilLogger.info("[OK] SF Overlap Prevention — ESE shader suppression via spec_extendedSprayerEffects.sprayerEffectsBySection active")
+    SoilLogger.info("[OK] SF Overlap Prevention — transition-based visual suppression active (stopEffects/startEffects on section state change)")
     return true
 end
 
