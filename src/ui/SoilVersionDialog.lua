@@ -24,14 +24,9 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
-    "- Fixed: Soil Monitor HUD now always shows field averages; local",
-    "  cell values no longer replace averages while you spray",
-    "- Fixed: Field edge/boundary cells now always receive nutrient",
-    "  credit — boom tip midpoint off-field fallback prevents Fair edges",
-    "- Fixed: Map cell tooltip bars now show numeric values with units",
-    "  (N/P/K as %, pH as decimal, OM as %) not just unlabeled bars",
-    "- Fixed: P fair/good threshold fallback corrected (45 to 40) in",
-    "  farm overview panel to match all other displays",
+    "- Fixed: Spray visual effects no longer fire when boom is folded",
+    "  or vehicle is stationary — effects are now suppressed every tick",
+    "  when conditions are not met (was only suppressed on state change)",
 }
 
 -- ── i18n helper ───────────────────────────────────────────

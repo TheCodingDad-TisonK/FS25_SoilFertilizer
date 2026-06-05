@@ -4746,19 +4746,27 @@ function HookManager:installSprayerVisualEffectHook()
                 end
             end
 
-            -- Only act on state change to avoid per-tick overhead
-            if effectsVisible == spec._soilEffectsActive then return end
-
-            spec._soilEffectsActive   = effectsVisible
-            spec._soilManagedFillType = fillType
-
-            if effectsVisible then
-                startSprayerEffects(sprayerSelf, vanillaFillType)
-                SoilLogger.debug("SprayerVisual: started effects (fillType=%d → vanilla=%d)", fillType, vanillaFillType)
-            else
+            -- Stop path: suppress every tick (no state-change guard).
+            -- vanilla onUpdateTick runs before us (appendedFunction) and can
+            -- restart effects each tick, so we must cancel every tick — same
+            -- reason the vanilla fill type path at line ~4725 does the same.
+            if not effectsVisible then
                 stopSprayerEffects(sprayerSelf)
-                SoilLogger.debug("SprayerVisual: stopped effects (fillType=%d)", fillType)
+                if spec._soilEffectsActive ~= false then
+                    spec._soilEffectsActive   = false
+                    spec._soilManagedFillType = fillType
+                    SoilLogger.debug("SprayerVisual: stopped effects (fillType=%d)", fillType)
+                end
+                return
             end
+
+            -- Start path: only act on state change to avoid per-tick overhead
+            if spec._soilEffectsActive then return end
+
+            spec._soilEffectsActive   = true
+            spec._soilManagedFillType = fillType
+            startSprayerEffects(sprayerSelf, vanillaFillType)
+            SoilLogger.debug("SprayerVisual: started effects (fillType=%d → vanilla=%d)", fillType, vanillaFillType)
         end
     )
     self:register(Sprayer, "onUpdateTick", original, "Sprayer.onUpdateTick (sprayer visual effects)")
