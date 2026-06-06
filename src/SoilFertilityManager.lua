@@ -323,6 +323,9 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
                     "rateUpEventId",     "rateDownEventId",
                     "toggleAutoEventId", "vehicleSettingsPanelEventId",
                     "vehicleHudDragEventId", "vehicleMinimapZoomEventId",
+                    "sensorPestEventId", "sensorDiseaseEventId", "sensorNutrientEventId",
+                    "seeSprayPestEventId", "seeSprayDiseaseEventId", "seeSprayWeedEventId",
+                    "variableRateEventId",
                     -- PLAYER context IDs (invalidated as a side-effect of the above removes)
                     "toggleHUDEventId",
                     "cycleMapLayerEventId", "settingsPanelEventId", "hudDragEventId",
