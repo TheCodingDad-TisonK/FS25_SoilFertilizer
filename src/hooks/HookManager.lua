@@ -2359,15 +2359,15 @@ function HookManager:installSprayerAreaHook()
             if self.getIsTurnedOn ~= nil and not self:getIsTurnedOn() then return end
 
             -- Guard: folded implement must not record nutrient application.
-            -- Use turnOnFoldMinLimit/turnOnFoldMaxLimit (vanilla's own gate) so both
-            -- deploy orientations work — foldAnimTime=0-deployed and foldAnimTime=1-deployed.
+            -- Mirror vanilla Foldable line 1286: working position is dir==-1,fa==0 OR dir==1,fa==1.
+            -- turnOnFoldDirection==0 means no fold restriction; fall back to animation-only guard.
             if self.spec_foldable then
                 local foldSpec = self.spec_foldable
-                local fa = foldSpec.foldAnimTime
-                if fa ~= nil and foldSpec.turnOnFoldMinLimit ~= nil then
-                    if fa < foldSpec.turnOnFoldMinLimit or fa > (foldSpec.turnOnFoldMaxLimit or 1) then
-                        return
-                    end
+                local fa  = foldSpec.foldAnimTime
+                local dir = foldSpec.turnOnFoldDirection or 0
+                if fa ~= nil then
+                    local notWorking = (dir == -1 and fa ~= 0) or (dir == 1 and fa ~= 1) or (dir == 0 and fa > 0 and fa < 1)
+                    if notWorking then return end
                 end
             end
 
@@ -4789,21 +4789,16 @@ function HookManager:installSprayerVisualEffectHook()
             local speed = (sprayerSelf.getLastSpeed and sprayerSelf:getLastSpeed()) or 0
             local effectsVisible = sprayerSelf:getAreEffectsVisible() and speed >= 0.5
 
-            -- Suppress effects while animating OR when fully folded.
-            -- foldAnimTime=0 and foldAnimTime=1 are both valid stable end-states (which one is
-            -- "deployed" depends on the vehicle), so we can't gate on a raw value alone.
-            -- turnOnFoldMinLimit/turnOnFoldMaxLimit are vanilla's own working-range limits —
-            -- if fa is outside them the implement is folded regardless of deploy orientation.
+            -- Suppress effects while animating or folded.
+            -- Mirror vanilla Foldable line 1286: working position is dir==-1,fa==0 OR dir==1,fa==1.
+            -- turnOnFoldDirection==0 means no fold restriction; suppress only mid-animation then.
             if sprayerSelf.spec_foldable then
                 local foldSpec = sprayerSelf.spec_foldable
-                local fa = foldSpec.foldAnimTime
+                local fa  = foldSpec.foldAnimTime
+                local dir = foldSpec.turnOnFoldDirection or 0
                 if fa ~= nil then
-                    local animating    = fa > 0 and fa < 1
-                    local minL         = foldSpec.turnOnFoldMinLimit
-                    local outOfRange   = minL ~= nil and (fa < minL or fa > (foldSpec.turnOnFoldMaxLimit or 1))
-                    if animating or outOfRange then
-                        effectsVisible = false
-                    end
+                    local notWorking = (dir == -1 and fa ~= 0) or (dir == 1 and fa ~= 1) or (dir == 0 and fa > 0 and fa < 1)
+                    if notWorking then effectsVisible = false end
                 end
             end
 
