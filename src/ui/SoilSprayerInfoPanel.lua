@@ -93,9 +93,11 @@ function SoilSprayerInfoPanel.new(soilSystem, settings)
     self._f1Cache = nil
 
     -- Field detection cache (populated by update, throttled)
-    self._detectTimer = 0
-    self._fieldId     = nil
-    self._fieldInfo   = nil
+    self._detectTimer   = 0
+    self._fieldId       = nil
+    self._fieldInfo     = nil
+    -- Smoothed display values: interpolated toward _fieldInfo every frame (~400ms time constant)
+    self._smoothValues  = {}
 
     -- Per-frame draw cache (set by update, consumed by draw to avoid per-frame API calls)
     self._cachedSprayer = nil
@@ -311,6 +313,23 @@ end
 function SoilSprayerInfoPanel:update(dt)
     self._animTimer   = self._animTimer + dt
     self._detectTimer = self._detectTimer - dt * 0.001
+
+    -- Smooth nutrient display values toward field data every frame (~400ms time constant).
+    -- This eases field-boundary transitions instead of snapping, matching PF's UsageBuffer approach.
+    local sv    = self._smoothValues
+    local info  = self._fieldInfo
+    local alpha = 1.0 - math.exp(-dt * 0.0025)
+    for _, nd in ipairs(NUTRIENT_ROWS) do
+        if info then
+            local raw = info[nd.fieldKey]
+            local tgt = (type(raw) == "table") and (raw.value or 0) or (raw or 0)
+            local cur = sv[nd.fieldKey]
+            sv[nd.fieldKey] = (cur == nil) and tgt or (cur + (tgt - cur) * alpha)
+        else
+            sv[nd.fieldKey] = nil
+        end
+    end
+
     if self._detectTimer > 0 then return end
     self._detectTimer = 0.5
 
@@ -581,8 +600,7 @@ function SoilSprayerInfoPanel:draw()
         local info = self._fieldInfo
         for _, nd in ipairs(activeRows) do
             local pKey    = nd.profileKey
-            local rawRet  = info[nd.fieldKey]
-            local rawVal  = (type(rawRet) == "table") and (rawRet.value or 0) or (rawRet or 0)
+            local rawVal  = self._smoothValues[nd.fieldKey] or 0
             local maxVal  = nd.maxVal
             local rowBot  = cy - rowH
             local barMidY = rowBot + (rowH - barH) * 0.5

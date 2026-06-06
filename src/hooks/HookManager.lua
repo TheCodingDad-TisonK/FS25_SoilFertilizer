@@ -1808,8 +1808,21 @@ function HookManager:installSectionStatePreserver()
                 if not saved then return end
                 local vww = sprayerSelf.spec_variableWorkWidth
                 if vww and vww.sections then
+                    -- Capture which sections were suppressed by our hooks (was active → became inactive).
+                    -- The visual effects hook reads _sfSuppressedSections every tick to stop nozzle
+                    -- animations on those sections, matching PF's per-nozzle effect behavior.
+                    local suppressed = sprayerSelf._sfSuppressedSections
+                    if not suppressed then
+                        suppressed = {}
+                        sprayerSelf._sfSuppressedSections = suppressed
+                    else
+                        for k in pairs(suppressed) do suppressed[k] = nil end
+                    end
                     for i, section in ipairs(vww.sections) do
                         if saved[i] ~= nil then
+                            if saved[i] and not section.isActive then
+                                suppressed[i] = true
+                            end
                             section.isActive = saved[i]
                         end
                     end
@@ -4682,20 +4695,9 @@ function HookManager:installSprayerVisualEffectHook()
                 g_soundManager:playSamples(st.samples and st.samples.spray or {})
             end
         end
-        -- Start VWW wing-section effects (these are separate from spec.effects and
-        -- are never started by the vanilla system for custom fill types, causing only
-        -- the center to show mist while wing booms appear dry).
-        local vww = vehicle.spec_variableWorkWidth
-        if vww and vww.sections then
-            local suppressed = vehicle._sfOverlapSuppressedSections or {}
-            for i, section in ipairs(vww.sections) do
-                if section.isActive and not suppressed[i] and
-                   section.effects and #section.effects > 0 then
-                    g_effectManager:setEffectTypeInfo(section.effects, vanillaFillType)
-                    g_effectManager:startEffects(section.effects)
-                end
-            end
-        end
+        -- VWW wing-section effects are managed per-tick in onUpdateTick so that
+        -- suppression from Smart Sensor / boundary enforcement / overlap prevention
+        -- can be applied every frame, matching PF's per-nozzle effect behavior.
     end
 
     local function stopSprayerEffects(vehicle)
@@ -4780,6 +4782,28 @@ function HookManager:installSprayerVisualEffectHook()
                     SoilLogger.debug("SprayerVisual: stopped effects (fillType=%d)", fillType)
                 end
                 return
+            end
+
+            -- Per-tick VWW section effect management.
+            -- Runs every tick when effectsVisible=true so suppression state from Smart Sensor,
+            -- boundary enforcement, and overlap prevention is reflected in nozzle animations,
+            -- matching PF's per-nozzle updateSprayerEffectState() behavior.
+            do
+                local vwwS = sprayerSelf.spec_variableWorkWidth
+                if vwwS and vwwS.sections then
+                    local sfSuppressed      = sprayerSelf._sfSuppressedSections       or {}
+                    local overlapSuppressed = sprayerSelf._sfOverlapSuppressedSections or {}
+                    for i, section in ipairs(vwwS.sections) do
+                        if section.effects and #section.effects > 0 then
+                            if section.isActive and not sfSuppressed[i] and not overlapSuppressed[i] then
+                                g_effectManager:setEffectTypeInfo(section.effects, vanillaFillType)
+                                g_effectManager:startEffects(section.effects)
+                            else
+                                g_effectManager:stopEffects(section.effects)
+                            end
+                        end
+                    end
+                end
             end
 
             -- Start path: only act on state change to avoid per-tick overhead
