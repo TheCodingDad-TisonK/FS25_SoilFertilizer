@@ -1118,6 +1118,17 @@ function SoilFertilityManager:seedGRLEFromFieldData()
     local count = 0
     for fieldId, field in pairs(fieldData) do
         local fsField = g_fieldManager and g_fieldManager.fields and g_fieldManager.fields[fieldId]
+        if not fsField or not fsField.farmland or fsField.farmland.id ~= fieldId then
+            fsField = nil
+            if g_fieldManager and g_fieldManager.fields then
+                for _, f in ipairs(g_fieldManager.fields) do
+                    if f and f.farmland and f.farmland.id == fieldId then
+                        fsField = f
+                        break
+                    end
+                end
+            end
+        end
         if fsField then
             layerSys:writeFieldToLayers(fieldId, field, fsField)
             count = count + 1

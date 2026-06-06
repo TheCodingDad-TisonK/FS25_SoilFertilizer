@@ -1555,7 +1555,6 @@ function SoilMapOverlay:onDrawMinimap(ingameMap)
     -- per-pixel NPK data, skip centroid dots — the overlay already paints the minimap.
     local sml = g_SoilFertilityManager and g_SoilFertilityManager.soilMinimapLayer
     if sml and sml._initialized and sml._usingDensityLayers then
-        self:drawMiniReport(ingameMap)
         return
     end
 

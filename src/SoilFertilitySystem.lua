@@ -2030,9 +2030,10 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
             local gameWeedFactor = 0.0
             if g_fieldManager and g_fieldManager.fields then
                 local fsField = g_fieldManager.fields[fieldId]
-                if not fsField then
+                if not fsField or not fsField.farmland or fsField.farmland.id ~= fieldId then
+                    fsField = nil
                     for _, f in ipairs(g_fieldManager.fields) do
-                        if f and (f.fieldId == fieldId or f.id == fieldId) then
+                        if f and f.farmland and f.farmland.id == fieldId then
                             fsField = f
                             break
                         end
@@ -2249,6 +2250,17 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
     -- preserved between daily updates.
     if layerSys and layerSys.available then
         local fsField = g_fieldManager and g_fieldManager.fields and g_fieldManager.fields[fieldId]
+        if not fsField or not fsField.farmland or fsField.farmland.id ~= fieldId then
+            fsField = nil
+            if g_fieldManager and g_fieldManager.fields then
+                for _, f in ipairs(g_fieldManager.fields) do
+                    if f and f.farmland and f.farmland.id == fieldId then
+                        fsField = f
+                        break
+                    end
+                end
+            end
+        end
         if fsField then
             layerSys:writeFieldToLayers(fieldId, field, fsField, true)
         end
