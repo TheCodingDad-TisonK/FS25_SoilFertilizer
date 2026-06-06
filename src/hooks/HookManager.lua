@@ -1058,6 +1058,8 @@ function HookManager:installSectionControlHook()
                                 if not fid or fid <= 0 or
                                    (vehicleFieldId and vehicleFieldId > 0 and fid ~= vehicleFieldId) then
                                     section.isActive = false
+                                    if not sprayerSelf._sfSuppressedSections then sprayerSelf._sfSuppressedSections = {} end
+                                    sprayerSelf._sfSuppressedSections[i] = true
                                 end
                             end
                         end
@@ -1141,6 +1143,8 @@ function HookManager:installSectionControlHook()
                             end
                             if skip then
                                 section.isActive = false
+                                if not sprayerSelf._sfSuppressedSections then sprayerSelf._sfSuppressedSections = {} end
+                                sprayerSelf._sfSuppressedSections[i] = true
                             end
                         end
                     end
@@ -1299,7 +1303,11 @@ function HookManager:installSeeAndSprayHook()
                                 end
                                 skip = skip or weedsGone
                             end
-                            if skip then section.isActive = false end
+                            if skip then
+                                section.isActive = false
+                                if not sprayerSelf._sfSuppressedSections then sprayerSelf._sfSuppressedSections = {} end
+                                sprayerSelf._sfSuppressedSections[i] = true
+                            end
                         end
                     end
                 end
@@ -1753,6 +1761,17 @@ function HookManager:installSectionStatePreserver()
             local vww = sprayerSelf.spec_variableWorkWidth
             if not vww or not vww.sections or #vww.sections == 0 then return end
 
+            -- Clear suppression tracking from the previous work-area pass.
+            -- Each appended hook writes to _sfSuppressedSections directly when it
+            -- suppresses a section. Clearing here (before the original + our hooks run)
+            -- ensures only THIS tick's suppression is visible to the visual effects hook.
+            -- Do NOT infer suppression by comparing before/after states — that would
+            -- falsely capture VWW's own section management as "suppressed by us".
+            local sfSup = sprayerSelf._sfSuppressedSections
+            if sfSup then
+                for k in pairs(sfSup) do sfSup[k] = nil end
+            end
+
             -- Reuse existing table to avoid per-tick allocation
             local saved = sprayerSelf._sfSavedSectionStates
             if not saved then
@@ -1810,21 +1829,8 @@ function HookManager:installSectionStatePreserver()
                 if not saved then return end
                 local vww = sprayerSelf.spec_variableWorkWidth
                 if vww and vww.sections then
-                    -- Capture which sections were suppressed by our hooks (was active → became inactive).
-                    -- The visual effects hook reads _sfSuppressedSections every tick to stop nozzle
-                    -- animations on those sections, matching PF's per-nozzle effect behavior.
-                    local suppressed = sprayerSelf._sfSuppressedSections
-                    if not suppressed then
-                        suppressed = {}
-                        sprayerSelf._sfSuppressedSections = suppressed
-                    else
-                        for k in pairs(suppressed) do suppressed[k] = nil end
-                    end
                     for i, section in ipairs(vww.sections) do
                         if saved[i] ~= nil then
-                            if saved[i] and not section.isActive then
-                                suppressed[i] = true
-                            end
                             section.isActive = saved[i]
                         end
                     end
