@@ -4695,9 +4695,20 @@ function HookManager:installSprayerVisualEffectHook()
                 g_soundManager:playSamples(st.samples and st.samples.spray or {})
             end
         end
-        -- VWW wing-section effects are managed per-tick in onUpdateTick so that
-        -- suppression from Smart Sensor / boundary enforcement / overlap prevention
-        -- can be applied every frame, matching PF's per-nozzle effect behavior.
+        -- Start VWW wing-section effects for sections that are active and not suppressed.
+        -- (The per-tick loop in onUpdateTick will stop suppressed sections dynamically.)
+        local vww = vehicle.spec_variableWorkWidth
+        if vww and vww.sections then
+            local sfSuppressed      = vehicle._sfSuppressedSections       or {}
+            local overlapSuppressed = vehicle._sfOverlapSuppressedSections or {}
+            for i, section in ipairs(vww.sections) do
+                if section.isActive and not sfSuppressed[i] and not overlapSuppressed[i] and
+                   section.effects and #section.effects > 0 then
+                    g_effectManager:setEffectTypeInfo(section.effects, vanillaFillType)
+                    g_effectManager:startEffects(section.effects)
+                end
+            end
+        end
     end
 
     local function stopSprayerEffects(vehicle)
@@ -4784,10 +4795,12 @@ function HookManager:installSprayerVisualEffectHook()
                 return
             end
 
-            -- Per-tick VWW section effect management.
-            -- Runs every tick when effectsVisible=true so suppression state from Smart Sensor,
-            -- boundary enforcement, and overlap prevention is reflected in nozzle animations,
-            -- matching PF's per-nozzle updateSprayerEffectState() behavior.
+            -- Per-tick VWW section effect correction.
+            -- startSprayerEffects handles the initial start (state change). This loop handles
+            -- dynamic suppression changes: stops effects on sections suppressed by Smart Sensor,
+            -- boundary enforcement, or overlap prevention; restarts them when un-suppressed.
+            -- Does NOT stop sections that VWW set to isActive=false for its own reasons
+            -- (overlap prevention, width control, "no width" mode) — those are VWW's concern.
             do
                 local vwwS = sprayerSelf.spec_variableWorkWidth
                 if vwwS and vwwS.sections then
@@ -4795,12 +4808,15 @@ function HookManager:installSprayerVisualEffectHook()
                     local overlapSuppressed = sprayerSelf._sfOverlapSuppressedSections or {}
                     for i, section in ipairs(vwwS.sections) do
                         if section.effects and #section.effects > 0 then
-                            if section.isActive and not sfSuppressed[i] and not overlapSuppressed[i] then
+                            if sfSuppressed[i] or overlapSuppressed[i] then
+                                -- Positively suppressed by our system: stop nozzle animation
+                                g_effectManager:stopEffects(section.effects)
+                            elseif section.isActive then
+                                -- Active and not suppressed: ensure running (handles un-suppress)
                                 g_effectManager:setEffectTypeInfo(section.effects, vanillaFillType)
                                 g_effectManager:startEffects(section.effects)
-                            else
-                                g_effectManager:stopEffects(section.effects)
                             end
+                            -- isActive=false + not suppressed: VWW-managed, do not interfere
                         end
                     end
                 end
