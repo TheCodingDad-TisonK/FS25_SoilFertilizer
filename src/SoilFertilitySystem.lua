@@ -1603,12 +1603,16 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing, area)
         -- Lua 5.1-compatible deterministic hash (LCG-style, no bitwise ops).
         -- Produces a float in [0.0, 1.0) that is stable for the same (fieldId, slot) pair
         -- across save/load cycles. Avoids touching math.randomseed (global state).
+        -- 1664525 / 1013904223 are the standard Numerical Recipes LCG constants;
+        -- 4294967296 = 2^32 is the modulus (the LCG period).
         n = (n * 1664525 + 1013904223) % 4294967296
         n = (n * 1664525 + 1013904223) % 4294967296
         return n / 4294967296
     end
     local function randField(slot)
-        -- Each nutrient gets its own deterministic slot so values are independent
+        -- Each nutrient gets its own deterministic slot so values are independent.
+        -- 67890 is an arbitrary large stride that spreads adjacent fieldIds far apart
+        -- in the hash input, so neighbouring fields don't get correlated variation.
         local r = hash(fieldId * 67890 + slot)
         return r * 2.0 - 1.0  -- range [-1.0, 1.0]
     end
@@ -1616,8 +1620,6 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing, area)
     local function randomize(baseValue, variation, slot)
         return baseValue + randField(slot) * variation
     end
-
-    local defaults = SoilConstants.FIELD_DEFAULTS
 
     -- Attempt farmland area lookup at creation time so the correct area is used
     -- for nutrient/herbicide calculations from the very first plow or spray pass.
@@ -1643,9 +1645,13 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing, area)
     self.fieldData[fieldId] = {
         fieldArea = initialArea,
         _farmlandAreaConfirmed = confirmedArea,
-        nitrogen   = math.floor(randomize(tunN,  tunN  * 0.10, 1)),
-        phosphorus = math.floor(randomize(tunP,  tunP  * 0.10, 2)),
-        potassium  = math.floor(randomize(tunK,  tunK  * 0.10, 3)),
+        -- Clamp to [0,100] to match the load path (:3518-3520). At tuning index 5
+        -- DEFAULT_N/DEFAULT_K = 100, and the ±10% variation can floor to ~110, so an
+        -- unclamped fresh field would read N>100 until the first save/reload snapped
+        -- it back down. Clamping here keeps init and reload values consistent.
+        nitrogen   = math.max(0, math.min(100, math.floor(randomize(tunN,  tunN  * 0.10, 1)))),
+        phosphorus = math.max(0, math.min(100, math.floor(randomize(tunP,  tunP  * 0.10, 2)))),
+        potassium  = math.max(0, math.min(100, math.floor(randomize(tunK,  tunK  * 0.10, 3)))),
         organicMatter = math.max(1.0, math.min(10.0, randomize(tunOM, 0.5, 4))),
         pH            = math.max(5.0, math.min(8.5,  randomize(tunPH, 0.5, 5))),
         lastCrop = nil,
@@ -2030,9 +2036,10 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
             local gameWeedFactor = 0.0
             if g_fieldManager and g_fieldManager.fields then
                 local fsField = g_fieldManager.fields[fieldId]
-                if not fsField then
+                if not fsField or not fsField.farmland or fsField.farmland.id ~= fieldId then
+                    fsField = nil
                     for _, f in ipairs(g_fieldManager.fields) do
-                        if f and (f.fieldId == fieldId or f.id == fieldId) then
+                        if f and f.farmland and f.farmland.id == fieldId then
                             fsField = f
                             break
                         end
@@ -2249,6 +2256,17 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
     -- preserved between daily updates.
     if layerSys and layerSys.available then
         local fsField = g_fieldManager and g_fieldManager.fields and g_fieldManager.fields[fieldId]
+        if not fsField or not fsField.farmland or fsField.farmland.id ~= fieldId then
+            fsField = nil
+            if g_fieldManager and g_fieldManager.fields then
+                for _, f in ipairs(g_fieldManager.fields) do
+                    if f and f.farmland and f.farmland.id == fieldId then
+                        fsField = f
+                        break
+                    end
+                end
+            end
+        end
         if fsField then
             layerSys:writeFieldToLayers(fieldId, field, fsField, true)
         end
