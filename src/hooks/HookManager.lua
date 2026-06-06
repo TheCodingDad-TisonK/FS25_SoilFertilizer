@@ -2360,14 +2360,16 @@ function HookManager:installSprayerAreaHook()
 
             -- Guard: folded implement must not record nutrient application.
             -- Mirror vanilla Foldable line 1286: working position is dir==-1,fa==0 OR dir==1,fa==1.
-            -- turnOnFoldDirection==0 means no fold restriction; fall back to animation-only guard.
+            -- turnOnFoldDirection is always 1 or -1 after Foldable init; nil falls back to
+            -- animation-only detection (0 < fa < 1).
             if self.spec_foldable then
                 local foldSpec = self.spec_foldable
                 local fa  = foldSpec.foldAnimTime
-                local dir = foldSpec.turnOnFoldDirection or 0
+                local dir = foldSpec.turnOnFoldDirection
                 if fa ~= nil then
-                    local notWorking = (dir == -1 and fa ~= 0) or (dir == 1 and fa ~= 1) or (dir == 0 and fa > 0 and fa < 1)
-                    if notWorking then return end
+                    local folded = dir ~= nil and ((dir == -1 and fa ~= 0) or (dir == 1 and fa ~= 1))
+                                or (dir == nil and fa > 0 and fa < 1)
+                    if folded then return end
                 end
             end
 
@@ -4773,13 +4775,30 @@ function HookManager:installSprayerVisualEffectHook()
                 spec._soilEffectsActive   = nil
             end
 
+            -- Fold detection — computed once, applied to both vanilla and custom paths below.
+            -- Mirror vanilla Foldable line 1286: working position is dir==-1,fa==0 OR dir==1,fa==1.
+            -- turnOnFoldDirection defaults to 1 or -1 (never 0 after Foldable init); if somehow
+            -- nil, fall back to animation-only detection (0 < fa < 1).
+            local isFolded = false
+            if sprayerSelf.spec_foldable then
+                local foldSpec = sprayerSelf.spec_foldable
+                local fa  = foldSpec.foldAnimTime
+                local dir = foldSpec.turnOnFoldDirection
+                if fa ~= nil then
+                    if dir ~= nil then
+                        isFolded = (dir == -1 and fa ~= 0) or (dir == 1 and fa ~= 1)
+                    else
+                        isFolded = fa > 0 and fa < 1
+                    end
+                end
+            end
+
             if not vanillaFillType then
-                -- Vanilla fill type (e.g. HERBICIDE): stop effects every tick when stationary.
-                -- We run AFTER the vanilla onUpdateTick (appendedFunction), so vanilla may restart
-                -- effects each tick. State-change guards don't work here — must suppress every tick.
-                -- g_effectManager:stopEffects is a no-op when effects are already stopped.
+                -- Vanilla fill type (e.g. HERBICIDE): stop effects when stationary OR folded.
+                -- We run AFTER vanilla onUpdateTick (appendedFunction), so we must suppress
+                -- every tick — state-change guards don't work here.
                 local speed = (sprayerSelf.getLastSpeed and sprayerSelf:getLastSpeed()) or 0
-                if speed < 0.5 then
+                if speed < 0.5 or isFolded then
                     stopSprayerEffects(sprayerSelf)
                 end
                 return
@@ -4789,18 +4808,7 @@ function HookManager:installSprayerVisualEffectHook()
             local speed = (sprayerSelf.getLastSpeed and sprayerSelf:getLastSpeed()) or 0
             local effectsVisible = sprayerSelf:getAreEffectsVisible() and speed >= 0.5
 
-            -- Suppress effects while animating or folded.
-            -- Mirror vanilla Foldable line 1286: working position is dir==-1,fa==0 OR dir==1,fa==1.
-            -- turnOnFoldDirection==0 means no fold restriction; suppress only mid-animation then.
-            if sprayerSelf.spec_foldable then
-                local foldSpec = sprayerSelf.spec_foldable
-                local fa  = foldSpec.foldAnimTime
-                local dir = foldSpec.turnOnFoldDirection or 0
-                if fa ~= nil then
-                    local notWorking = (dir == -1 and fa ~= 0) or (dir == 1 and fa ~= 1) or (dir == 0 and fa > 0 and fa < 1)
-                    if notWorking then effectsVisible = false end
-                end
-            end
+            if isFolded then effectsVisible = false end
 
             -- Stop path: suppress every tick (no state-change guard).
             -- vanilla onUpdateTick runs before us (appendedFunction) and can
