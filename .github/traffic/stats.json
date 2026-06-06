@@ -21780,65 +21780,65 @@
     "watchers": 9
   },
   {
-    "timestamp": "2026-06-06T00:12:57Z",
+    "timestamp": "2026-06-06T12:08:46Z",
     "date": "2026-06-06",
     "views": {
-      "count": 10143,
-      "uniques": 1159
+      "count": 10628,
+      "uniques": 1316
     },
     "clones": {
-      "count": 3167,
-      "uniques": 861
+      "count": 3190,
+      "uniques": 866
     },
     "referrers": [
       {
         "referrer": "github.com",
-        "count": 2413,
-        "uniques": 216
+        "count": 2474,
+        "uniques": 223
       },
       {
         "referrer": "Google",
-        "count": 883,
-        "uniques": 270
+        "count": 896,
+        "uniques": 273
       },
       {
         "referrer": "kingmods.net",
-        "count": 543,
-        "uniques": 196
+        "count": 563,
+        "uniques": 199
       },
       {
         "referrer": "Bing",
-        "count": 285,
-        "uniques": 55
+        "count": 323,
+        "uniques": 60
       },
       {
         "referrer": "youtube.com",
-        "count": 159,
-        "uniques": 100
+        "count": 139,
+        "uniques": 87
+      },
+      {
+        "referrer": "facebook.com",
+        "count": 74,
+        "uniques": 71
+      },
+      {
+        "referrer": "lm.facebook.com",
+        "count": 29,
+        "uniques": 28
       },
       {
         "referrer": "reddit.com",
-        "count": 28,
-        "uniques": 19
+        "count": 29,
+        "uniques": 20
       },
       {
-        "referrer": "yandex.ru",
-        "count": 23,
-        "uniques": 2
+        "referrer": "l.facebook.com",
+        "count": 27,
+        "uniques": 14
       },
       {
         "referrer": "DuckDuckGo",
-        "count": 19,
-        "uniques": 5
-      },
-      {
-        "referrer": "Yahoo",
-        "count": 16,
-        "uniques": 5
-      },
-      {
-        "referrer": "forbidden-mods.de",
-        "count": 16,
+        "count": 24,
         "uniques": 5
       }
     ],
@@ -21846,20 +21846,20 @@
       {
         "path": "/TheCodingDad-TisonK/FS25_SoilFertilizer",
         "title": "Overview",
-        "count": 3950,
-        "uniques": 898
+        "count": 4193,
+        "uniques": 1039
       },
       {
         "path": "/TheCodingDad-TisonK/FS25_SoilFertilizer/releases",
         "title": "/releases",
-        "count": 986,
-        "uniques": 262
+        "count": 1028,
+        "uniques": 270
       },
       {
         "path": "/TheCodingDad-TisonK/FS25_SoilFertilizer/issues",
         "title": "/issues",
-        "count": 772,
-        "uniques": 171
+        "count": 805,
+        "uniques": 178
       },
       {
         "path": "/TheCodingDad-TisonK/FS25_SoilFertilizer/releases/tag/v2.2.3.3",
@@ -21870,20 +21870,26 @@
       {
         "path": "/TheCodingDad-TisonK/FS25_SoilFertilizer/releases/tag/v2.2.5.0",
         "title": "/releases/tag/v2.2.5.0",
-        "count": 204,
+        "count": 205,
         "uniques": 125
       },
       {
         "path": "/TheCodingDad-TisonK/FS25_SoilFertilizer/discussions",
         "title": "/discussions",
-        "count": 187,
-        "uniques": 64
+        "count": 189,
+        "uniques": 66
+      },
+      {
+        "path": "/TheCodingDad-TisonK/FS25_SoilFertilizer/releases/tag/v2.3.7.0",
+        "title": "/releases/tag/v2.3.7.0",
+        "count": 148,
+        "uniques": 108
       },
       {
         "path": "/TheCodingDad-TisonK/FS25_SoilFertilizer/releases/tag/v2.2.0.0",
         "title": "/releases/tag/v2.2.0.0",
-        "count": 135,
-        "uniques": 104
+        "count": 121,
+        "uniques": 91
       },
       {
         "path": "/TheCodingDad-TisonK/FS25_SoilFertilizer/releases/tag/v2.2.3.6",
@@ -21896,19 +21902,13 @@
         "title": "/releases/tag/v2.2.3.9",
         "count": 115,
         "uniques": 81
-      },
-      {
-        "path": "/TheCodingDad-TisonK/FS25_SoilFertilizer/releases/tag/v2.2.3.5",
-        "title": "/releases/tag/v2.2.3.5",
-        "count": 97,
-        "uniques": 67
       }
     ],
     "releases": [
       {
         "assets": [
           {
-            "downloads": 37,
+            "downloads": 194,
             "name": "FS25_SoilFertilizer.zip"
           }
         ],
@@ -22160,7 +22160,7 @@
       {
         "assets": [
           {
-            "downloads": 249,
+            "downloads": 250,
             "name": "FS25_SoilFertilizer.zip"
           }
         ],
@@ -22176,7 +22176,7 @@
         "tag": "v2.1.7.0"
       }
     ],
-    "stars": 70,
+    "stars": 73,
     "forks": 11,
     "watchers": 9
   }
