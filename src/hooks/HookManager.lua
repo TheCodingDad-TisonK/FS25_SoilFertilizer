@@ -4737,7 +4737,11 @@ function HookManager:installSprayerVisualEffectHook()
     local function stopSprayerEffects(vehicle)
         local spec = vehicle.spec_sprayer
         if not spec then return end
+        -- Mirror vanilla Sprayer updateSprayerEffects off-path exactly:
+        -- spec.effects, spec.animationNodes, spec.samples.spray, then all sprayTypes.
         g_effectManager:stopEffects(spec.effects)
+        g_animationManager:stopAnimations(spec.animationNodes)
+        g_soundManager:stopSamples(spec.samples and spec.samples.spray or {})
         for _, st in ipairs(spec.sprayTypes or {}) do
             g_effectManager:stopEffects(st.effects)
             g_animationManager:stopAnimations(st.animationNodes)
