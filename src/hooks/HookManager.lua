@@ -1003,6 +1003,7 @@ function HookManager:installSectionControlHook()
     local diseaseFillTypes = {}   -- ftName → true  (fungicides)
     local kOnlyFillTypes   = {}   -- ftName → true  (K dominant, P=0)
     local pDomFillTypes    = {}   -- ftName → true  (P dominant, K=0)
+    local nDomFillTypes    = {}   -- ftName → true  (N only, P=0 K=0)
 
     local pp = SoilConstants.PEST_PRESSURE
     if pp and pp.INSECTICIDE_TYPES then
@@ -1020,6 +1021,7 @@ function HookManager:installSectionControlHook()
             local k = prof.K or 0
             if k > 0 and p == 0 then kOnlyFillTypes[name] = true end
             if p > 0 and k == 0 then pDomFillTypes[name]  = true end
+            if n > 0 and p == 0 and k == 0 then nDomFillTypes[name] = true end
         end
     end
 
@@ -1056,6 +1058,8 @@ function HookManager:installSectionControlHook()
                                 if not fid or fid <= 0 or
                                    (vehicleFieldId and vehicleFieldId > 0 and fid ~= vehicleFieldId) then
                                     section.isActive = false
+                                    if not sprayerSelf._sfSuppressedSections then sprayerSelf._sfSuppressedSections = {} end
+                                    sprayerSelf._sfSuppressedSections[i] = true
                                 end
                             end
                         end
@@ -1090,13 +1094,14 @@ function HookManager:installSectionControlHook()
             local isDisease = diseaseFillTypes[ft.name] == true
             local isKOnly   = kOnlyFillTypes[ft.name]   == true
             local isPDom    = pDomFillTypes[ft.name]    == true
+            local isNDom    = nDomFillTypes[ft.name]    == true
 
-            if not isPest and not isDisease and not isKOnly and not isPDom then return end
+            if not isPest and not isDisease and not isKOnly and not isPDom and not isNDom then return end
 
             -- Check which sensors are active for this vehicle
-            local pestOn    = isPest                and sensorMgr:isPestEnabled(vehicleId)
-            local diseaseOn = isDisease             and sensorMgr:isDiseaseEnabled(vehicleId)
-            local nutrientOn = (isKOnly or isPDom)  and sensorMgr:isNutrientEnabled(vehicleId)
+            local pestOn     = isPest                          and sensorMgr:isPestEnabled(vehicleId)
+            local diseaseOn  = isDisease                       and sensorMgr:isDiseaseEnabled(vehicleId)
+            local nutrientOn = (isKOnly or isPDom or isNDom)  and sensorMgr:isNutrientEnabled(vehicleId)
 
             if not pestOn and not diseaseOn and not nutrientOn then return end
 
@@ -1109,11 +1114,13 @@ function HookManager:installSectionControlHook()
             local tips = sprayerSelf._sfSectionTip
 
             for i, section in ipairs(vww.sections) do
-                -- Only suppress sections VWW has activated. isCenter sections are never
-                -- added to sectionsLeft/Right so VWW never touches them — leave them alone.
-                -- installSectionStatePreserver() restores isActive after work areas process.
-                if section.isActive and not section.isCenter then
-                    -- Midpoint between root and section outer edge (from preserver cache)
+                -- Center sections CAN be suppressed: getIsWorkAreaActive() checks workArea.sectionIndex
+                -- → section.isActive for all sections including center. Center has no tip node, so its
+                -- position check falls back to rootX/rootZ (vehicle center = center strip position).
+                -- installSectionStatePreserver() restores isActive for all sections after work areas process.
+                if section.isActive then
+                    -- Midpoint between root and section outer edge (from preserver cache).
+                    -- Center section has no tip node → tips[i] = nil → falls back to rootX/rootZ.
                     local tip = tips and tips[i]
                     local sx = tip and ((rootX + tip[1]) * 0.5) or rootX
                     local sz = tip and ((rootZ + tip[2]) * 0.5) or rootZ
@@ -1125,6 +1132,9 @@ function HookManager:installSectionControlHook()
                             local skip = false
                             if pestOn    then skip = skip or ((fd.pestPressure    or 0) <= 0) end
                             if diseaseOn then skip = skip or ((fd.diseasePressure or 0) <= 0) end
+                            if nutrientOn and isNDom then
+                                skip = skip or ((fd.nitrogen   or 0) >= NUTRIENT_TARGET)
+                            end
                             if nutrientOn and isKOnly then
                                 skip = skip or ((fd.potassium  or 0) >= NUTRIENT_TARGET)
                             end
@@ -1133,6 +1143,8 @@ function HookManager:installSectionControlHook()
                             end
                             if skip then
                                 section.isActive = false
+                                if not sprayerSelf._sfSuppressedSections then sprayerSelf._sfSuppressedSections = {} end
+                                sprayerSelf._sfSuppressedSections[i] = true
                             end
                         end
                     end
@@ -1144,7 +1156,7 @@ function HookManager:installSectionControlHook()
     self:register(Sprayer, "onStartWorkAreaProcessing", origStart,
         "Sprayer.onStartWorkAreaProcessing (SF section sensor)")
 
-    SoilLogger.info("[OK] SF Smart Sensor hook installed — pest/disease/nutrient K+P section control active")
+    SoilLogger.info("[OK] SF Smart Sensor hook installed — pest/disease/nutrient N+K+P section control active")
     return true
 end
 
@@ -1291,7 +1303,11 @@ function HookManager:installSeeAndSprayHook()
                                 end
                                 skip = skip or weedsGone
                             end
-                            if skip then section.isActive = false end
+                            if skip then
+                                section.isActive = false
+                                if not sprayerSelf._sfSuppressedSections then sprayerSelf._sfSuppressedSections = {} end
+                                sprayerSelf._sfSuppressedSections[i] = true
+                            end
                         end
                     end
                 end
@@ -1744,6 +1760,17 @@ function HookManager:installSectionStatePreserver()
         function(sprayerSelf, dt)
             local vww = sprayerSelf.spec_variableWorkWidth
             if not vww or not vww.sections or #vww.sections == 0 then return end
+
+            -- Clear suppression tracking from the previous work-area pass.
+            -- Each appended hook writes to _sfSuppressedSections directly when it
+            -- suppresses a section. Clearing here (before the original + our hooks run)
+            -- ensures only THIS tick's suppression is visible to the visual effects hook.
+            -- Do NOT infer suppression by comparing before/after states — that would
+            -- falsely capture VWW's own section management as "suppressed by us".
+            local sfSup = sprayerSelf._sfSuppressedSections
+            if sfSup then
+                for k in pairs(sfSup) do sfSup[k] = nil end
+            end
 
             -- Reuse existing table to avoid per-tick allocation
             local saved = sprayerSelf._sfSavedSectionStates
@@ -2330,6 +2357,21 @@ function HookManager:installSprayerAreaHook()
             local sprayFillLevel = spec.workAreaParameters.sprayFillLevel
 
             if self.getIsTurnedOn ~= nil and not self:getIsTurnedOn() then return end
+
+            -- Guard: folded implement must not record nutrient application.
+            -- Mirror vanilla Foldable line 1286: working position is dir==-1,fa==0 OR dir==1,fa==1.
+            -- turnOnFoldDirection is always 1 or -1 after Foldable init; nil falls back to
+            -- animation-only detection (0 < fa < 1).
+            if self.spec_foldable then
+                local foldSpec = self.spec_foldable
+                local fa  = foldSpec.foldAnimTime
+                local dir = foldSpec.turnOnFoldDirection
+                if fa ~= nil then
+                    local folded = dir ~= nil and ((dir == -1 and fa ~= 0) or (dir == 1 and fa ~= 1))
+                                or (dir == nil and fa > 0 and fa < 1)
+                    if folded then return end
+                end
+            end
 
             if not fillTypeIndex or fillTypeIndex <= 0 then return end
 
@@ -4676,14 +4718,14 @@ function HookManager:installSprayerVisualEffectHook()
                 g_soundManager:playSamples(st.samples and st.samples.spray or {})
             end
         end
-        -- Start VWW wing-section effects (these are separate from spec.effects and
-        -- are never started by the vanilla system for custom fill types, causing only
-        -- the center to show mist while wing booms appear dry).
+        -- Start VWW wing-section effects for sections that are active and not suppressed.
+        -- (The per-tick loop in onUpdateTick will stop suppressed sections dynamically.)
         local vww = vehicle.spec_variableWorkWidth
         if vww and vww.sections then
-            local suppressed = vehicle._sfOverlapSuppressedSections or {}
+            local sfSuppressed      = vehicle._sfSuppressedSections       or {}
+            local overlapSuppressed = vehicle._sfOverlapSuppressedSections or {}
             for i, section in ipairs(vww.sections) do
-                if section.isActive and not suppressed[i] and
+                if section.isActive and not sfSuppressed[i] and not overlapSuppressed[i] and
                    section.effects and #section.effects > 0 then
                     g_effectManager:setEffectTypeInfo(section.effects, vanillaFillType)
                     g_effectManager:startEffects(section.effects)
@@ -4695,7 +4737,11 @@ function HookManager:installSprayerVisualEffectHook()
     local function stopSprayerEffects(vehicle)
         local spec = vehicle.spec_sprayer
         if not spec then return end
+        -- Mirror vanilla Sprayer updateSprayerEffects off-path exactly:
+        -- spec.effects, spec.animationNodes, spec.samples.spray, then all sprayTypes.
         g_effectManager:stopEffects(spec.effects)
+        g_animationManager:stopAnimations(spec.animationNodes)
+        g_soundManager:stopSamples(spec.samples and spec.samples.spray or {})
         for _, st in ipairs(spec.sprayTypes or {}) do
             g_effectManager:stopEffects(st.effects)
             g_animationManager:stopAnimations(st.animationNodes)
@@ -4733,13 +4779,30 @@ function HookManager:installSprayerVisualEffectHook()
                 spec._soilEffectsActive   = nil
             end
 
+            -- Fold detection — computed once, applied to both vanilla and custom paths below.
+            -- Mirror vanilla Foldable line 1286: working position is dir==-1,fa==0 OR dir==1,fa==1.
+            -- turnOnFoldDirection defaults to 1 or -1 (never 0 after Foldable init); if somehow
+            -- nil, fall back to animation-only detection (0 < fa < 1).
+            local isFolded = false
+            if sprayerSelf.spec_foldable then
+                local foldSpec = sprayerSelf.spec_foldable
+                local fa  = foldSpec.foldAnimTime
+                local dir = foldSpec.turnOnFoldDirection
+                if fa ~= nil then
+                    if dir ~= nil then
+                        isFolded = (dir == -1 and fa ~= 0) or (dir == 1 and fa ~= 1)
+                    else
+                        isFolded = fa > 0 and fa < 1
+                    end
+                end
+            end
+
             if not vanillaFillType then
-                -- Vanilla fill type (e.g. HERBICIDE): stop effects every tick when stationary.
-                -- We run AFTER the vanilla onUpdateTick (appendedFunction), so vanilla may restart
-                -- effects each tick. State-change guards don't work here — must suppress every tick.
-                -- g_effectManager:stopEffects is a no-op when effects are already stopped.
+                -- Vanilla fill type (e.g. HERBICIDE): stop effects when stationary OR folded.
+                -- We run AFTER vanilla onUpdateTick (appendedFunction), so we must suppress
+                -- every tick — state-change guards don't work here.
                 local speed = (sprayerSelf.getLastSpeed and sprayerSelf:getLastSpeed()) or 0
-                if speed < 0.5 then
+                if speed < 0.5 or isFolded then
                     stopSprayerEffects(sprayerSelf)
                 end
                 return
@@ -4749,18 +4812,7 @@ function HookManager:installSprayerVisualEffectHook()
             local speed = (sprayerSelf.getLastSpeed and sprayerSelf:getLastSpeed()) or 0
             local effectsVisible = sprayerSelf:getAreEffectsVisible() and speed >= 0.5
 
-            -- Suppress effects while the fold animation is actively running mid-travel.
-            -- Courseplay folds the implement before filling completes, leaving effects stuck on.
-            -- In FS25, foldAnimTime=0 and foldAnimTime=1 are both stable end-states (fully folded
-            -- or fully deployed depending on the vehicle). Suppressing at any value below 0.9 breaks
-            -- all sprayers whose deployed/working state is foldAnimTime=0 (the default base state).
-            -- Only suppress when strictly between 0 and 1 (actively animating).
-            if sprayerSelf.spec_foldable then
-                local fa = sprayerSelf.spec_foldable.foldAnimTime
-                if fa ~= nil and fa > 0 and fa < 1 then
-                    effectsVisible = false
-                end
-            end
+            if isFolded then effectsVisible = false end
 
             -- Stop path: suppress every tick (no state-change guard).
             -- vanilla onUpdateTick runs before us (appendedFunction) and can
@@ -4774,6 +4826,33 @@ function HookManager:installSprayerVisualEffectHook()
                     SoilLogger.debug("SprayerVisual: stopped effects (fillType=%d)", fillType)
                 end
                 return
+            end
+
+            -- Per-tick VWW section effect correction.
+            -- startSprayerEffects handles the initial start (state change). This loop handles
+            -- dynamic suppression changes: stops effects on sections suppressed by Smart Sensor,
+            -- boundary enforcement, or overlap prevention; restarts them when un-suppressed.
+            -- Does NOT stop sections that VWW set to isActive=false for its own reasons
+            -- (overlap prevention, width control, "no width" mode) — those are VWW's concern.
+            do
+                local vwwS = sprayerSelf.spec_variableWorkWidth
+                if vwwS and vwwS.sections then
+                    local sfSuppressed      = sprayerSelf._sfSuppressedSections       or {}
+                    local overlapSuppressed = sprayerSelf._sfOverlapSuppressedSections or {}
+                    for i, section in ipairs(vwwS.sections) do
+                        if section.effects and #section.effects > 0 then
+                            if sfSuppressed[i] or overlapSuppressed[i] then
+                                -- Positively suppressed by our system: stop nozzle animation
+                                g_effectManager:stopEffects(section.effects)
+                            elseif section.isActive then
+                                -- Active and not suppressed: ensure running (handles un-suppress)
+                                g_effectManager:setEffectTypeInfo(section.effects, vanillaFillType)
+                                g_effectManager:startEffects(section.effects)
+                            end
+                            -- isActive=false + not suppressed: VWW-managed, do not interfere
+                        end
+                    end
+                end
             end
 
             -- Start path: only act on state change to avoid per-tick overhead

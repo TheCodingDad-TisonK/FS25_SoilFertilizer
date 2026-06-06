@@ -336,12 +336,11 @@ function SoilFertilitySystem:onHarvest(fieldId, fruitTypeIndex, liters, strawRat
         harvestField._farmlandAreaConfirmed  = nil  -- re-confirm on next session's first spray (#507)
         harvestField.sprayTrailPts           = nil
 
-        -- Clear frozen yield modifier when a NEW crop type is harvested. This indicates
-        -- the start of a new crop cycle; the old snapshot is stale (#556).
-        if harvestField.frozenYieldFruitType and harvestField.frozenYieldFruitType ~= fruitTypeIndex then
-            harvestField.frozenYieldModifier  = nil
-            harvestField.frozenYieldFruitType = nil
-        end
+        -- Clear the frozen yield modifier now that the harvest session is complete.
+        -- The freeze exists to prevent mid-pass modifier drops (#556); once onHarvest
+        -- fires the session is over and the snapshot must not carry into the next season.
+        harvestField.frozenYieldModifier  = nil
+        harvestField.frozenYieldFruitType = nil
     end
 
     SoilLogger.debug("Harvest: Field %d, Crop %d, %.0fL (biological), area=%.1f", fieldId, fruitTypeIndex, liters, area or 0)
