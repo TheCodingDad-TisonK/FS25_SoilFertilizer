@@ -95,6 +95,11 @@ function SoilHarvesterPanel.new(soilSystem, settings)
     self._fieldId     = nil
     self._fieldInfo   = nil
 
+    -- Per-frame draw cache (set by update, consumed by draw to avoid per-frame API calls)
+    self._cachedCombine = nil
+    self._cachedTank    = nil
+    self._cachedCropFT  = nil
+
     -- Session grain tracking for t/ha estimate
     self._sessGrainL   = 0
     self._lastTankLvl  = nil
@@ -379,8 +384,11 @@ function SoilHarvesterPanel:update(dt)
 
     local combine = self:getActiveCombine()
     if not combine then
-        self._fieldId   = nil
-        self._fieldInfo = nil
+        self._fieldId      = nil
+        self._fieldInfo    = nil
+        self._cachedCombine = nil
+        self._cachedTank    = nil
+        self._cachedCropFT  = nil
         return
     end
 
@@ -391,21 +399,16 @@ function SoilHarvesterPanel:update(dt)
         if ok then x, z = px, pz end
     end
     if not x then
-        self._fieldId   = nil
-        self._fieldInfo = nil
+        self._fieldId      = nil
+        self._fieldInfo    = nil
+        self._cachedCombine = nil
+        self._cachedTank    = nil
+        self._cachedCropFT  = nil
         return
     end
 
     local fieldId = nil
-    if g_fieldManager then
-        local ok, field = pcall(function()
-            return g_fieldManager:getFieldAtWorldPosition(x, z)
-        end)
-        if ok and field and field.farmland and field.farmland.id then
-            fieldId = field.farmland.id
-        end
-    end
-    if not fieldId and g_farmlandManager then
+    if g_farmlandManager then
         local ok, farmland = pcall(function()
             return g_farmlandManager:getFarmlandAtWorldPosition(x, z)
         end)
@@ -442,6 +445,11 @@ function SoilHarvesterPanel:update(dt)
     else
         self._lastTankLvl = nil
     end
+
+    -- Cache for draw() so it doesn't repeat these API calls every rendered frame
+    self._cachedCombine = combine
+    self._cachedTank    = tank
+    self._cachedCropFT  = combine and self:getCropFillType(combine, tank) or nil
 end
 
 -- ── Draw helpers ──────────────────────────────────────────
@@ -483,9 +491,9 @@ function SoilHarvesterPanel:draw()
         if not self.editMode then return end
     end
 
-    local combine  = self:getActiveCombine()
-    local tank     = combine and self:getGrainTank(combine)
-    local cropFT   = combine and self:getCropFillType(combine, tank)
+    local combine  = self._cachedCombine
+    local tank     = self._cachedTank
+    local cropFT   = self._cachedCropFT
     local isActive = combine ~= nil
 
     if not self.editMode and not isActive then return end
@@ -644,9 +652,9 @@ function SoilHarvesterPanel:draw()
 
         local info = self._fieldInfo
         if info and info.yieldEfficiency then
-            local pct    = math.floor(info.yieldEfficiency * 100 + 0.5)
-            local effCol = (info.yieldEfficiency >= 0.80) and SoilHarvesterPanel.C_GOOD
-                        or (info.yieldEfficiency >= 0.55) and SoilHarvesterPanel.C_FAIR
+            local pct    = info.yieldEfficiency  -- already 0-100 integer from getFieldInfo()
+            local effCol = (info.yieldEfficiency >= 80) and SoilHarvesterPanel.C_GOOD
+                        or (info.yieldEfficiency >= 55) and SoilHarvesterPanel.C_FAIR
                         or  SoilHarvesterPanel.C_POOR
             local effStr = string.format("%d%%", pct)
             setTextAlignment(RenderText.ALIGN_RIGHT)

@@ -97,6 +97,9 @@ function SoilSprayerInfoPanel.new(soilSystem, settings)
     self._fieldId     = nil
     self._fieldInfo   = nil
 
+    -- Per-frame draw cache (set by update, consumed by draw to avoid per-frame API calls)
+    self._cachedSprayer = nil
+
     return self
 end
 
@@ -312,6 +315,7 @@ function SoilSprayerInfoPanel:update(dt)
     self._detectTimer = 0.5
 
     local sprayer = self:getActiveSprayer()
+    self._cachedSprayer = sprayer
     if not sprayer then
         self._fieldId   = nil
         self._fieldInfo = nil
@@ -335,15 +339,7 @@ function SoilSprayerInfoPanel:update(dt)
     end
 
     local fieldId = nil
-    if g_fieldManager then
-        local ok, field = pcall(function()
-            return g_fieldManager:getFieldAtWorldPosition(x, z)
-        end)
-        if ok and field and field.farmland and field.farmland.id then
-            fieldId = field.farmland.id
-        end
-    end
-    if not fieldId and g_farmlandManager then
+    if g_farmlandManager then
         local ok, farmland = pcall(function()
             return g_farmlandManager:getFarmlandAtWorldPosition(x, z)
         end)
@@ -417,8 +413,8 @@ function SoilSprayerInfoPanel:draw()
         if not self.editMode then return end
     end
 
-    -- Determine what to show
-    local sprayer  = self:getActiveSprayer()
+    -- Determine what to show (sprayer cached by update() to avoid per-frame API calls)
+    local sprayer  = self._cachedSprayer
     local fillType = sprayer and self:getSprayerFillType(sprayer)
     local profile  = fillType and SoilConstants.FERTILIZER_PROFILES and SoilConstants.FERTILIZER_PROFILES[fillType.name]
 
