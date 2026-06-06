@@ -109,10 +109,18 @@
         <actionBinding action="SF_SENSOR_PEST" />
         <actionBinding action="SF_SENSOR_DISEASE" />
         <actionBinding action="SF_SENSOR_NUTRIENT" />
-        <actionBinding action="SF_SEE_SPRAY_PEST" />
-        <actionBinding action="SF_SEE_SPRAY_DISEASE" />
-        <actionBinding action="SF_SEE_SPRAY_WEED" />
-        <actionBinding action="SF_VARIABLE_RATE" />
+        <actionBinding action="SF_SEE_SPRAY_PEST">
+            <binding device="KB_MOUSE_DEFAULT" input="KEY_lalt KEY_4" />
+        </actionBinding>
+        <actionBinding action="SF_SEE_SPRAY_DISEASE">
+            <binding device="KB_MOUSE_DEFAULT" input="KEY_lalt KEY_5" />
+        </actionBinding>
+        <actionBinding action="SF_SEE_SPRAY_WEED">
+            <binding device="KB_MOUSE_DEFAULT" input="KEY_lalt KEY_6" />
+        </actionBinding>
+        <actionBinding action="SF_VARIABLE_RATE">
+            <binding device="KB_MOUSE_DEFAULT" input="KEY_lalt KEY_7" />
+        </actionBinding>
         <actionBinding action="SF_MINIMAP_ZOOM" />
     </inputBinding>
 

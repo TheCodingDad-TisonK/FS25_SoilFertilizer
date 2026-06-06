@@ -38,29 +38,43 @@ Each field builds its own history. Nitrogen drops after a heavy wheat crop. Rain
 
 ---
 
-## 🆕 What's New in v2.2.5.0
+## 🆕 What's New in v2.4.0.0
 
-These are hotfixes over v2.2.4.1:
+**New features:**
+- Added JD R700i (28 m) and R975i (36 m) sprayers with per-nozzle section control
+- Added tillage work trail (plow/cultivate) visible on HUD and minimap
 
-- Fixed weed pressure bar oscillating after partial herbicide spray (same-day sticky fix)
-- Fixed Weeds/Pests/Disease % values misaligned in HUD — values now correctly left-align after their bar
+**Fixes:**
+- Variable rate + auto rate no longer double-reduces nutrient gain — 50% rate now delivers 50%, not near-zero
+- Spray mist no longer fires when boom is folded or stopped
+- Field edge sections now always receive nutrient credit
+- HUD always shows field averages, not local cell values
+- Ghost bar now correctly applies the Replenishment Rate multiplier
+- Yield modifier no longer drops during multi-pass harvest
+- Map cell tooltip bars now show numeric values (N/P/K %, pH, OM %)
+- P threshold in farm overview corrected (was 45, now 40)
+- Minimap overlay anchoring fixed on large maps
+
+**Balancing:**
+- Rebalanced pricing across all 20 custom fertilizer types
+
+<details>
+<summary>Previous releases</summary>
+
+### v2.2.5.0
+- Fixed weed pressure bar oscillating after partial herbicide spray
+- Fixed Weeds/Pests/Disease % values misaligned in HUD
+- Fixed Precision Farming detection triggering for users with PF disabled in mod manager
 - Updated French (fr) translation (community contribution)
-- Fixed version dialog not appearing when the mod was previously disabled
-- Fixed Precision Farming detection incorrectly triggering for users with PF installed but disabled in the mod manager
-- Fixed startup crash in fill type category lookup
-- Fixed version dialog being suppressed by crashes during mod initialization
 
 ### v2.2.4.0 / v2.2.4.1
-- Fixed N and K starting at 90%+ on new saves (defaults now correctly N=50, P=33, K=38)
+- Fixed N and K starting at 90%+ on new saves
 - Fixed Pass% capping at ~50% after a full-field spray
 - Fixed Partial Width mode crediting inactive boom sections
 - Fixed variable rate display oscillating with MAP/P-type fertilizers
 - Fixed liquid lime draining entire tank instantly
-- Fixed herbicide session coverage reset between sessions
-- Fixed Weeds/Pests/Disease HUD bars rendering one row above their labels
-- Fixed LIQUIDLIME remapping to the correct spray type
-- Fixed herbicide weed browning and protection window
-- Danish (da) translation update
+
+</details>
 
 ---
 
@@ -414,7 +428,7 @@ All integrations are detected automatically at runtime and fail gracefully if th
 |---|---|
 | 🌱 **Base game lime indicator** | The base game's "needs liming" flag is a separate system from our pH tracking. Both update when you apply lime through the sprayer, but the indicators can show different states until the field is treated. Workaround: disable the base game's liming requirement in **Settings → Farming → Liming** to rely solely on our HUD. |
 | 🌐 **Multiplayer** | Soil simulation runs on the server only. Clients receive synced state on join and after each harvest or fertiliser event. |
-| ⚠️ **Section Control** | Section-based nutrient credit scaling works correctly. When outer boom sections are shut off at field boundaries, nutrient credit scales to the active fraction. |
+| ⚠️ **Section Control** | When outer boom sections are shut off at field boundaries, nutrient credit scales to the active fraction. Sections manually blocked by a Section Control mod may not be detected — credit is based on the sprayer's reported active sections, not physical coverage. |
 
 ---
 
