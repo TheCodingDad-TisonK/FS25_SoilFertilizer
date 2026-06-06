@@ -2358,6 +2358,19 @@ function HookManager:installSprayerAreaHook()
 
             if self.getIsTurnedOn ~= nil and not self:getIsTurnedOn() then return end
 
+            -- Guard: folded implement must not record nutrient application.
+            -- Use turnOnFoldMinLimit/turnOnFoldMaxLimit (vanilla's own gate) so both
+            -- deploy orientations work — foldAnimTime=0-deployed and foldAnimTime=1-deployed.
+            if self.spec_foldable then
+                local foldSpec = self.spec_foldable
+                local fa = foldSpec.foldAnimTime
+                if fa ~= nil and foldSpec.turnOnFoldMinLimit ~= nil then
+                    if fa < foldSpec.turnOnFoldMinLimit or fa > (foldSpec.turnOnFoldMaxLimit or 1) then
+                        return
+                    end
+                end
+            end
+
             if not fillTypeIndex or fillTypeIndex <= 0 then return end
 
             -- Track the active custom fill type BEFORE the liters/sprayFillLevel guards.
@@ -4776,16 +4789,21 @@ function HookManager:installSprayerVisualEffectHook()
             local speed = (sprayerSelf.getLastSpeed and sprayerSelf:getLastSpeed()) or 0
             local effectsVisible = sprayerSelf:getAreEffectsVisible() and speed >= 0.5
 
-            -- Suppress effects while the fold animation is actively running mid-travel.
-            -- Courseplay folds the implement before filling completes, leaving effects stuck on.
-            -- In FS25, foldAnimTime=0 and foldAnimTime=1 are both stable end-states (fully folded
-            -- or fully deployed depending on the vehicle). Suppressing at any value below 0.9 breaks
-            -- all sprayers whose deployed/working state is foldAnimTime=0 (the default base state).
-            -- Only suppress when strictly between 0 and 1 (actively animating).
+            -- Suppress effects while animating OR when fully folded.
+            -- foldAnimTime=0 and foldAnimTime=1 are both valid stable end-states (which one is
+            -- "deployed" depends on the vehicle), so we can't gate on a raw value alone.
+            -- turnOnFoldMinLimit/turnOnFoldMaxLimit are vanilla's own working-range limits —
+            -- if fa is outside them the implement is folded regardless of deploy orientation.
             if sprayerSelf.spec_foldable then
-                local fa = sprayerSelf.spec_foldable.foldAnimTime
-                if fa ~= nil and fa > 0 and fa < 1 then
-                    effectsVisible = false
+                local foldSpec = sprayerSelf.spec_foldable
+                local fa = foldSpec.foldAnimTime
+                if fa ~= nil then
+                    local animating    = fa > 0 and fa < 1
+                    local minL         = foldSpec.turnOnFoldMinLimit
+                    local outOfRange   = minL ~= nil and (fa < minL or fa > (foldSpec.turnOnFoldMaxLimit or 1))
+                    if animating or outOfRange then
+                        effectsVisible = false
+                    end
                 end
             end
 
