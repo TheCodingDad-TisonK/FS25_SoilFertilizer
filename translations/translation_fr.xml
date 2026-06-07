@@ -979,5 +979,13 @@
     <e k="sf_guide_tab_3" v="FLUX DE TRAVAIL" eh="a3f6045a" />
     <e k="sf_guide_tab_4" v="PRODUITS" eh="7589c616" />
     <e k="sf_guide_tab_5" v="F.A.Q." eh="783fecdf" />
+    <e k="sf_report_fields_tracked"   v="Fields Tracked:" />
+    <e k="sf_report_rotation_bonus"   v="Rotation Bonus" />
+    <e k="sf_report_rotation_fatigue" v="Fatigue: same crop" />
+    <e k="sf_report_rotation_ok"      v="Rotation: OK" />
+    <e k="sf_report_rec_optimal"      v="Soil Health: Optimal" />
+    <e k="sf_report_rec_good"         v="Good" />
+    <e k="sf_report_rec_fair"         v="Fair" />
+    <e k="sf_report_rec_poor"         v="Poor" />
     </elements>
 </l10n>
