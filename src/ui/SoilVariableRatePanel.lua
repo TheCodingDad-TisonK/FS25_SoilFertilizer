@@ -276,8 +276,8 @@ function SoilVariableRatePanel:drawPanel(sprayer, sfm)
     local vehicleId = sprayer.id
     local isVROn    = sensorMgr:isVariableRateEnabled(vehicleId)
 
-    -- Info row: status + key
-    local keyVR = "Alt+7"
+    -- Info row: status + key (empty if SF_VARIABLE_RATE is not bound)
+    local keyVR = ""
     if g_inputDisplayManager then
         local ok, el = pcall(function()
             return g_inputDisplayManager:getControllerSymbolOverlays(InputAction.SF_VARIABLE_RATE, "", "", false)
@@ -302,11 +302,14 @@ function SoilVariableRatePanel:drawPanel(sprayer, sfm)
     setTextColor(statusC[1], statusC[2], statusC[3], 1.0)
     renderText(tx, infoY + infoH * 0.25, fsDim, g_i18n:getText("sf_var_rate_label") .. "  " .. statusStr)
 
-    setTextAlignment(RenderText.ALIGN_RIGHT)
-    setTextColor(SoilVariableRatePanel.C_DIM[1], SoilVariableRatePanel.C_DIM[2],
-        SoilVariableRatePanel.C_DIM[3], 0.70)
-    renderText(valX, infoY + infoH * 0.25, fsDim, "[" .. keyVR .. "]")
-    setTextAlignment(RenderText.ALIGN_LEFT)
+    -- Key hint — only shown when SF_VARIABLE_RATE is actually bound
+    if keyVR and keyVR ~= "" then
+        setTextAlignment(RenderText.ALIGN_RIGHT)
+        setTextColor(SoilVariableRatePanel.C_DIM[1], SoilVariableRatePanel.C_DIM[2],
+            SoilVariableRatePanel.C_DIM[3], 0.70)
+        renderText(valX, infoY + infoH * 0.25, fsDim, "[" .. keyVR .. "]")
+        setTextAlignment(RenderText.ALIGN_LEFT)
+    end
 
     -- Bar chart
     local barAreaY = infoY + infoH + pad * 0.5

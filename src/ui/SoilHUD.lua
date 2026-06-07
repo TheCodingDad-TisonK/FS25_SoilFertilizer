@@ -1638,7 +1638,7 @@ function SoilHUD:drawPressureRow(labelKey, pressure, isProtected, px, cy, pw, s,
     -- which ensures bars are centred within their own row and not in the row above (#HUD).
     cy = cy - rowH
 
-    -- 3-level color (matches getPressureColor in SoilReportDialog — aligned with Constants thresholds)
+    -- 3-level color aligned with Constants thresholds (WEED_PRESSURE.LOW / MEDIUM)
     local wp = SoilConstants.WEED_PRESSURE  -- LOW=20, MEDIUM=50 (shared by weed/pest/disease)
     local col
     if pressure < wp.LOW        then col = SoilHUD.C_GOOD

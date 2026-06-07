@@ -4,9 +4,8 @@
 -- Compact in-vehicle overlay displayed when the player is
 -- controlling a sprayer. Shows the three Smart Sensor states
 -- (Pest / Disease / Nutrient) and current field readings for
--- the product loaded.  Sensor toggles use three vehicle-
--- category input actions (SF_SENSOR_PEST, SF_SENSOR_DISEASE,
--- SF_SENSOR_NUTRIENT) bound by default to Alt+1/2/3.
+-- the product loaded.  Sensor states are controlled via
+-- Admin > Smart Systems in Settings.
 --
 -- Visual style matches SoilHUD and the rate panel:
 --   • Same dark background with color-theme tinting
@@ -322,10 +321,10 @@ function SoilSmartSensorPanel:drawPanel(sprayer, sfm)
     local _, fd = self:getFieldData(sprayer)
     local vehicleId = sprayer.id
 
-    -- Bound keys (lazy lookup)
-    local keyPest    = getActionKey("SF_SENSOR_PEST",    "Alt+1")
-    local keyDisease = getActionKey("SF_SENSOR_DISEASE", "Alt+2")
-    local keyNut     = getActionKey("SF_SENSOR_NUTRIENT","Alt+3")
+    -- Key hints — empty fallback since SF_SENSOR_* actions are not registered
+    local keyPest    = getActionKey("SF_SENSOR_PEST",    "")
+    local keyDisease = getActionKey("SF_SENSOR_DISEASE", "")
+    local keyNut     = getActionKey("SF_SENSOR_NUTRIENT","")
 
     local pestOn    = sensorMgr:isPestEnabled(vehicleId)
     local diseaseOn = sensorMgr:isDiseaseEnabled(vehicleId)
@@ -386,12 +385,14 @@ function SoilSmartSensorPanel:drawPanel(sprayer, sfm)
         setTextColor(labelC[1], labelC[2], labelC[3], labelC[4] or 1.0)
         renderText(tx + 0.010*s, midY - fs * 0.45, fs, row.label)
 
-        -- Key hint (right-aligned, dim)
-        setTextAlignment(RenderText.ALIGN_RIGHT)
-        setTextColor(SoilSmartSensorPanel.C_DIM[1], SoilSmartSensorPanel.C_DIM[2],
-            SoilSmartSensorPanel.C_DIM[3], 0.70)
-        renderText(valX, midY - fsDim * 0.45, fsDim, "[" .. row.key .. "]")
-        setTextAlignment(RenderText.ALIGN_LEFT)
+        -- Key hint (right-aligned, dim) — only shown when a binding exists
+        if row.key and row.key ~= "" then
+            setTextAlignment(RenderText.ALIGN_RIGHT)
+            setTextColor(SoilSmartSensorPanel.C_DIM[1], SoilSmartSensorPanel.C_DIM[2],
+                SoilSmartSensorPanel.C_DIM[3], 0.70)
+            renderText(valX, midY - fsDim * 0.45, fsDim, "[" .. row.key .. "]")
+            setTextAlignment(RenderText.ALIGN_LEFT)
+        end
 
         -- Value readout when sensor is on
         if row.on and row.val ~= "" then

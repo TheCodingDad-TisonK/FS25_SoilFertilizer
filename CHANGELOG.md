@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.4.1.0]
+
+### Fixed
+- Fixed custom fertilizer fill plane textures causing texture array warnings on load (converted DDS to PNG)
+- Fixed soil data now tracked live per-nozzle section during application — no stale cell values
+- Fixed nozzle sections at field edges no longer lose coverage credit at boundaries
+- Fixed See & Spray shop configuration blocks now correctly wrapped in parent elements
+
+### Changed
+- See & Spray is now a vehicle purchase configuration on the JD R700i and JD R975i — not a runtime toggle key
+- Field Report dialog removed — field detail is accessible via PDA → Farm Overview (click any field row)
+
+---
+
 ## [2.2.5.0]
 
 ### Fixed

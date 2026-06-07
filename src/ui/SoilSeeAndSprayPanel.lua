@@ -341,9 +341,10 @@ function SoilSeeAndSprayPanel:drawPanel(sprayer, sfm)
     local _, fd, cell = self:getCellData(sprayer)
     local ssCfg = SoilConstants.SEE_AND_SPRAY
 
-    local keyPest    = getActionKey("SF_SEE_SPRAY_PEST",    "Alt+4")
-    local keyDisease = getActionKey("SF_SEE_SPRAY_DISEASE", "Alt+5")
-    local keyWeed    = getActionKey("SF_SEE_SPRAY_WEED",    "Alt+6")
+    -- Key hints — empty fallback; S&S is configured at vehicle purchase, not runtime keybind
+    local keyPest    = getActionKey("SF_SEE_SPRAY_PEST",    "")
+    local keyDisease = getActionKey("SF_SEE_SPRAY_DISEASE", "")
+    local keyWeed    = getActionKey("SF_SEE_SPRAY_WEED",    "")
 
     local pestOn    = sensorMgr:isSeeSprayPestEnabled(vehicleId)
     local diseaseOn = sensorMgr:isSeeSprayDiseaseEnabled(vehicleId)
@@ -422,11 +423,14 @@ function SoilSeeAndSprayPanel:drawPanel(sprayer, sfm)
         setTextColor(labelC[1], labelC[2], labelC[3], labelC[4] or 1.0)
         renderText(tx + 0.010*s, midY - fs * 0.45, fs, row.label)
 
-        setTextAlignment(RenderText.ALIGN_RIGHT)
-        setTextColor(SoilSeeAndSprayPanel.C_DIM[1], SoilSeeAndSprayPanel.C_DIM[2],
-            SoilSeeAndSprayPanel.C_DIM[3], 0.70)
-        renderText(valX, midY - fsDim * 0.45, fsDim, "[" .. row.key .. "]")
-        setTextAlignment(RenderText.ALIGN_LEFT)
+        -- Key hint — only shown when a binding exists
+        if row.key and row.key ~= "" then
+            setTextAlignment(RenderText.ALIGN_RIGHT)
+            setTextColor(SoilSeeAndSprayPanel.C_DIM[1], SoilSeeAndSprayPanel.C_DIM[2],
+                SoilSeeAndSprayPanel.C_DIM[3], 0.70)
+            renderText(valX, midY - fsDim * 0.45, fsDim, "[" .. row.key .. "]")
+            setTextAlignment(RenderText.ALIGN_LEFT)
+        end
 
         if row.on and row.val ~= "" then
             if row.protected then
