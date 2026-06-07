@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <l10n>
     <elements>
     <e k="sf_section" v="Sol &amp; Engrais" eh="f31197fb" />
@@ -712,7 +712,9 @@
     <e k="sf_variable_rate_long"           v="Activer ou désactiver l’application à taux variable basée sur les déficits du sol" />
     <e k="sf_desc_smartSensorEnabled"      v="Permet aux joueurs d’utiliser le Smart Sensor pour contrôler les sections de rampe selon les données du sol en temps réel" />
     <e k="sf_desc_seeAndSprayEnabled"      v="Supprime les sections de rampe au-dessus des zones qui n’ont pas besoin de traitement" />
-    <e k="sf_desc_variableRateEnabled"     v="Ajuste le taux d’application par section selon les déficits en nutriments du sol" />
+    <e k="sf_config_seeSprayWeed"          v="See &amp; Spray: Weed" />
+    <e k="sf_config_seeSprayPest"          v="See &amp; Spray: Pest" />
+    <e k="sf_config_seeSprayDisease"       v="See &amp; Spray: Disease" />    <e k="sf_desc_variableRateEnabled"     v="Ajuste le taux d’application par section selon les déficits en nutriments du sol" />
     <e k="sf_panel_hdr_field_boundary"     v="Contrôle des limites de champ" />
     <e k="sf_field_boundary_short"         v="Contrôle des limites" />
     <e k="sf_field_boundary_long"          v="Activer ou désactiver le contrôle automatique des limites de champ" />

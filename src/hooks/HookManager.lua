@@ -1241,12 +1241,11 @@ function HookManager:installSeeAndSprayHook()
         Sprayer.onStartWorkAreaProcessing,
         function(sprayerSelf, dt)
             local sfm = g_SoilFertilityManager
-            if not sfm or not sfm.sensorManager or not sfm.soilSystem then return end
+            if not sfm or not sfm.soilSystem then return end
 
-            if sfm.settings and sfm.settings.seeAndSprayEnabled == false then return end
-
-            local sensorMgr = sfm.sensorManager
-            local vehicleId = sprayerSelf.id
+            -- See & Spray is a purchased vehicle feature — read from SFNozzleEffects spec.
+            local sfSpec = SFNozzleEffects and sprayerSelf[SFNozzleEffects.SPEC_TABLE_NAME]
+            if not sfSpec then return end
 
             local vww = sprayerSelf.spec_variableWorkWidth
             if not vww or not vww.sections or #vww.sections == 0 then return end
@@ -1265,9 +1264,9 @@ function HookManager:installSeeAndSprayHook()
             local isWeed    = weedFTs[ft.name]    == true
             if not isPest and not isDisease and not isWeed then return end
 
-            local pestSS    = isPest    and sensorMgr:isSeeSprayPestEnabled(vehicleId)
-            local diseaseSS = isDisease and sensorMgr:isSeeSprayDiseaseEnabled(vehicleId)
-            local weedSS    = isWeed    and sensorMgr:isSeeSprayWeedEnabled(vehicleId)
+            local pestSS    = isPest    and sfSpec.seeSprayPest    == true
+            local diseaseSS = isDisease and sfSpec.seeSprayDisease == true
+            local weedSS    = isWeed    and sfSpec.seeSprayWeed    == true
             if not pestSS and not diseaseSS and not weedSS then return end
 
             -- Use preserver-cached root position (computed once before all hooks)

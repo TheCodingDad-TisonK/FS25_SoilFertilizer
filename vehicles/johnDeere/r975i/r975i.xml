@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
-<vehicle type="sprayer" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../bin/shared/xml/schema/vehicle.xsd">
+<vehicle type="FS25_SoilFertilizer.sfSprayer" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../bin/shared/xml/schema/vehicle.xsd">
     <annotation>Copyright (C) GIANTS Software GmbH, All Rights Reserved.</annotation>
 
     <storeData>
@@ -1171,4 +1171,23 @@
         <i3dMapping id="aiCollisionNode" node="0>0|6|3" />
         <i3dMapping id="hosesSeeSpray" node="0>1|2" />
     </i3dMappings>
+
+    <sfSeeSprayWeed>
+        <sfSeeSprayWeedConfigurations isYesNoOption="true">
+            <sfSeeSprayWeedConfiguration name="$l10n_configuration_valueNo"  price="0"/>
+            <sfSeeSprayWeedConfiguration name="$l10n_configuration_valueYes" price="2500"/>
+        </sfSeeSprayWeedConfigurations>
+    </sfSeeSprayWeed>
+    <sfSeeSprayPest>
+        <sfSeeSprayPestConfigurations isYesNoOption="true">
+            <sfSeeSprayPestConfiguration name="$l10n_configuration_valueNo"  price="0"/>
+            <sfSeeSprayPestConfiguration name="$l10n_configuration_valueYes" price="2500"/>
+        </sfSeeSprayPestConfigurations>
+    </sfSeeSprayPest>
+    <sfSeeSprayDisease>
+        <sfSeeSprayDiseaseConfigurations isYesNoOption="true">
+            <sfSeeSprayDiseaseConfiguration name="$l10n_configuration_valueNo"  price="0"/>
+            <sfSeeSprayDiseaseConfiguration name="$l10n_configuration_valueYes" price="2500"/>
+        </sfSeeSprayDiseaseConfigurations>
+    </sfSeeSprayDisease>
 </vehicle>

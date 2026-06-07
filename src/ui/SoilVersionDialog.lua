@@ -24,21 +24,12 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
-    "- New: JD R700i (28m) and R975i (36m) sprayers with per-nozzle",
-    "  section control",
-    "- New: Tillage work trail (plow/cultivate) on HUD and minimap",
-    "- Fixed: Variable rate + auto rate no longer double-reduces nutrient",
-    "  gain — 50% rate now delivers 50%, not near-zero",
-    "- Fixed: Spray mist no longer fires when boom is folded or stopped",
-    "- Fixed: Field edge sections now always receive nutrient credit",
-    "- Fixed: HUD always shows field averages, not local cell values",
-    "- Fixed: Ghost bar now applies Replenishment Rate multiplier",
-    "- Fixed: Yield modifier no longer drops during multi-pass harvest",
-    "- Fixed: Map cell tooltip bars now show numeric values (N/P/K %,",
-    "  pH, OM %)",
-    "- Fixed: P threshold in farm overview corrected (45 -> 40)",
-    "- Fixed: Minimap overlay anchoring on large maps (#547)",
-    "- Pricing: rebalanced all 20 custom fertilizer types",
+    "- Fixed: Custom fertilizer piles load without texture warnings",
+    "- Fixed: Soil data tracked live per-nozzle during application",
+    "- Fixed: Field edge nozzle sections no longer lose coverage credit",
+    "- Fixed: See & Spray is now a vehicle shop config on JD R700i / R975i",
+    "  (no longer a runtime toggle key)",
+    "- Changed: Field Report dialog removed — detail is in PDA > Farm Overview",
 }
 
 -- ── i18n helper ───────────────────────────────────────────

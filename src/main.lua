@@ -38,6 +38,7 @@ source(modDirectory .. "src/config/SettingsSchema.lua")
 
 -- 2. Specializations (must load before core systems so vehicleType registration fires)
 source(modDirectory .. "src/specializations/SFNozzleEffects.lua")
+SFNozzleEffects.init(modDirectory)
 
 -- 3. Core systems
 source(modDirectory .. "src/hooks/HookManager.lua")
@@ -56,8 +57,6 @@ source(modDirectory .. "src/settings/SoilSettingsGUI.lua")
 source(modDirectory .. "src/utils/UIHelper.lua")
 source(modDirectory .. "src/settings/SoilSettingsUI.lua")
 source(modDirectory .. "src/ui/SoilHUD.lua")
-source(modDirectory .. "src/ui/SoilSmartSensorPanel.lua")
-source(modDirectory .. "src/ui/SoilSeeAndSprayPanel.lua")
 source(modDirectory .. "src/ui/SoilVariableRatePanel.lua")
 source(modDirectory .. "src/ui/SoilSprayerInfoPanel.lua")
 source(modDirectory .. "src/ui/SoilHarvesterPanel.lua")
@@ -507,12 +506,6 @@ FSBaseMission.draw = Utils.appendedFunction(FSBaseMission.draw, function(mission
     end
     if sfm and sfm.tuningPanel then
         sfm.tuningPanel:draw()
-    end
-    if sfm and sfm.smartSensorPanel then
-        sfm.smartSensorPanel:draw()
-    end
-    if sfm and sfm.seeAndSprayPanel then
-        sfm.seeAndSprayPanel:draw()
     end
     if sfm and sfm.variableRatePanel then
         sfm.variableRatePanel:draw()

@@ -26,7 +26,6 @@ function SoilSensorManager.new()
     -- System 1: Smart Sensor — vehicleId → { pest=bool, disease=bool, nutrient=bool }
     self.vehicleSensors = {}
     -- System 2: See & Spray — vehicleId → { pest=bool, disease=bool, weed=bool }
-    self.seeAndSpray = {}
     -- System 3: Variable Rate — vehicleId → bool
     self.variableRate = {}
     -- System 3: per-section rate cache — vehicleId → { [sectionRef] = multiplier }
@@ -101,42 +100,6 @@ function SoilSensorManager:hasAnySensorEnabled(vehicleId)
     return s.pest or s.disease or s.nutrient
 end
 
--- ── System 2: See & Spray ─────────────────────────────────
-
----@param vehicleId number
----@return table { pest=bool, disease=bool, weed=bool }
-function SoilSensorManager:getSeeAndSpray(vehicleId)
-    if not self.seeAndSpray[vehicleId] then
-        self.seeAndSpray[vehicleId] = { pest = false, disease = false, weed = false }
-    end
-    return self.seeAndSpray[vehicleId]
-end
-
-function SoilSensorManager:isSeeSprayPestEnabled(vehicleId)
-    local s = self.seeAndSpray[vehicleId]; return s ~= nil and s.pest == true
-end
-function SoilSensorManager:isSeeSprayDiseaseEnabled(vehicleId)
-    local s = self.seeAndSpray[vehicleId]; return s ~= nil and s.disease == true
-end
-function SoilSensorManager:isSeeSprayWeedEnabled(vehicleId)
-    local s = self.seeAndSpray[vehicleId]; return s ~= nil and s.weed == true
-end
-
-function SoilSensorManager:toggleSeeSprayPest(vehicleId)
-    local s = self:getSeeAndSpray(vehicleId); s.pest = not s.pest; return s.pest
-end
-function SoilSensorManager:toggleSeeSprayDisease(vehicleId)
-    local s = self:getSeeAndSpray(vehicleId); s.disease = not s.disease; return s.disease
-end
-function SoilSensorManager:toggleSeeSprayWeed(vehicleId)
-    local s = self:getSeeAndSpray(vehicleId); s.weed = not s.weed; return s.weed
-end
-
-function SoilSensorManager:hasAnySeeSprayEnabled(vehicleId)
-    local s = self.seeAndSpray[vehicleId]
-    return s ~= nil and (s.pest or s.disease or s.weed)
-end
-
 -- ── System 3: Variable Rate ───────────────────────────────
 
 function SoilSensorManager:isVariableRateEnabled(vehicleId)
@@ -170,7 +133,6 @@ end
 --- Called on mod unload.
 function SoilSensorManager:delete()
     self.vehicleSensors = {}
-    self.seeAndSpray    = {}
     self.variableRate   = {}
     self.sectionRates   = {}
 end

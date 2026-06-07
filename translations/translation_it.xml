@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <l10n>
     <elements>
     <e k="sf_section" v="Suolo &amp; Fertilizzazione" eh="f31197fb" />
@@ -732,7 +732,9 @@
     <e k="sf_variable_rate_long"           v="Enable or disable Variable Rate Application based on soil deficits" />
     <e k="sf_desc_smartSensorEnabled"      v="Allow players to use Smart Sensor boom-section control based on live soil data" />
     <e k="sf_desc_seeAndSprayEnabled"      v="Suppress boom sections over areas that do not need spraying" />
-    <e k="sf_desc_variableRateEnabled"     v="Adjust application rate per section based on soil nutrient deficits" />
+    <e k="sf_config_seeSprayWeed"          v="See &amp; Spray: Weed" />
+    <e k="sf_config_seeSprayPest"          v="See &amp; Spray: Pest" />
+    <e k="sf_config_seeSprayDisease"       v="See &amp; Spray: Disease" />    <e k="sf_desc_variableRateEnabled"     v="Adjust application rate per section based on soil nutrient deficits" />
     <e k="sf_panel_hdr_field_boundary"     v="Field Boundary Control" />
     <e k="sf_field_boundary_short"         v="Boundary Control" />
     <e k="sf_field_boundary_long"          v="Enable or disable automatic field boundary section control" />

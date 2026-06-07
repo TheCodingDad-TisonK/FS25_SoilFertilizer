@@ -2679,37 +2679,50 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
             -- so it is not called here. See HookManager:installSprayerAreaHook.
             if field.fieldArea and field.fieldArea > 0 then areaInHa = field.fieldArea end
 
+            -- Per-frame N/P/K/OM deltas (same formula as the field-average update above).
+            -- Captured here so new cells can be initialised with PRE-update field values and
+            -- then receive the delta once, preventing double-counting on first spray while
+            -- keeping existing cells live on every subsequent pass.
+            local dN  = entry.N  and (entry.N  * factor * tunFert) or 0
+            local dP  = entry.P  and (entry.P  * factor * tunFert) or 0
+            local dK  = entry.K  and (entry.K  * factor * tunFert) or 0
+            local dOM = entry.OM and (entry.OM * factor * tunFert) or 0
+
             if not field.zoneData then field.zoneData = {} end
             if not field.zoneData[cellKey] then
                 local zdCount = 0
                 for _ in pairs(field.zoneData) do zdCount = zdCount + 1 end
                 if zdCount < MAX_ZONE_CELLS then
                     field.zoneData[cellKey] = {
-                        N  = field.nitrogen,
-                        P  = field.phosphorus,
-                        K  = field.potassium,
-                        pH = field.pH,
-                        OM = field.organicMatter,
-                        weedPressure = field.weedPressure,
-                        pestPressure = field.pestPressure,
+                        -- Pre-update values: the delta block below brings this cell to the
+                        -- same level as the field average without double-counting the delta.
+                        N  = math.max(limits.MIN, field.nitrogen      - dN),
+                        P  = math.max(limits.MIN, field.phosphorus    - dP),
+                        K  = math.max(limits.MIN, field.potassium     - dK),
+                        pH = field.pH,   -- pH already post-update via bulk sync above
+                        OM = math.max(0, field.organicMatter          - dOM),
+                        weedPressure    = field.weedPressure,
+                        pestPressure    = field.pestPressure,
                         diseasePressure = field.diseasePressure,
-                        compaction = field.compaction,
+                        compaction      = field.compaction,
                     }
                 end
             end
             local cell = field.zoneData[cellKey]
             if not cell then return end
-            -- cellFactor must use areaInHa (not zone.CELL_AREA_HA) so that each cell
-            -- absorbs nutrients at exactly the same per-frame rate as the whole-field
-            -- average.  Using CELL_AREA_HA (0.01 ha) as the denominator made cells
-            -- gain nutrients up to 1000× faster than the field total, causing the HUD
-            -- to show near-complete N saturation after less than 1% field coverage
-            -- (issue #205 Bug 2).
-            -- N/P/K/pH/OM for this cell are already updated by the bulk sync above.
-            -- Only apply spatial crop-protection reductions here (pest/disease sprays
-            -- are position-specific; the bulk sync doesn't cover them).
+
+            -- Apply N/P/K/OM delta to this specific cell so it tracks live nutrient levels
+            -- rather than a stale snapshot of the field average at first-application time.
+            -- pH is handled by the bulk sync above (applied to all cells uniformly).
+            -- Pest/disease are position-specific and handled separately below.
+            -- cellFactor note: must use areaInHa (not zone.CELL_AREA_HA) — see issue #205 Bug 2.
+            if dN  > 0 then cell.N  = math.min(limits.MAX,                cell.N  + dN)  end
+            if dP  > 0 then cell.P  = math.min(limits.MAX,                cell.P  + dP)  end
+            if dK  > 0 then cell.K  = math.min(limits.MAX,                cell.K  + dK)  end
+            if dOM > 0 then cell.OM = math.min(limits.ORGANIC_MATTER_MAX, cell.OM + dOM) end
+
             local cellFactor = (liters / 1000.0) / areaInHa
-            if entry.pestReduction    then cell.pestPressure    = math.max(0, (cell.pestPressure or field.pestPressure or 0) - entry.pestReduction * cellFactor) end
+            if entry.pestReduction    then cell.pestPressure    = math.max(0, (cell.pestPressure    or field.pestPressure    or 0) - entry.pestReduction    * cellFactor) end
             if entry.diseaseReduction then cell.diseasePressure = math.max(0, (cell.diseasePressure or field.diseasePressure or 0) - entry.diseaseReduction * cellFactor) end
         end
     end

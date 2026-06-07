@@ -230,12 +230,6 @@ SettingsSchema.definitions = {
         uiId = "sf_smart_sensor",
     },
     {
-        id = "seeAndSprayEnabled",
-        type = "boolean",
-        default = true,
-        uiId = "sf_see_and_spray",
-    },
-    {
         id = "variableRateEnabled",
         type = "boolean",
         default = true,

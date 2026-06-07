@@ -80,13 +80,13 @@ function SoilHUD.new(soilSystem, settings)
     self.animTimer        = 0
 
     -- Sub-panel free positioning (independent mode)
-    self.freePos        = { smartSensor = {}, seeAndSpray = {}, varRate = {} }
+    self.freePos        = { varRate = {} }
     self.draggingSubKey = nil   -- key into freePos while dragging a sub-panel
     self.subDragOffX    = 0
     self.subDragOffY    = 0
 
     -- Loaded-from-disk collapsed states applied on first panel draw
-    self.savedCollapsed = { smartSensor = false, seeAndSpray = false, varRate = false }
+    self.savedCollapsed = { varRate = false }
 
     -- Camera freeze (NPCFavor pattern)
     self.savedCamRotX = nil
@@ -276,25 +276,18 @@ function SoilHUD:saveLayout()
         xml:setBool("hudLayout.visible",  self.visible)
 
         -- Sub-panel free positions
-        for _, key in ipairs({"smartSensor", "seeAndSpray", "varRate"}) do
-            local fp = self.freePos[key]
+        do
+            local fp = self.freePos["varRate"]
             if fp and fp.x ~= nil then
-                xml:setFloat("hudLayout.freePosX_" .. key, fp.x)
-                xml:setFloat("hudLayout.freePosY_" .. key, fp.y)
+                xml:setFloat("hudLayout.freePosX_varRate", fp.x)
+                xml:setFloat("hudLayout.freePosY_varRate", fp.y)
             end
         end
 
         -- Sub-panel collapsed states
         local sfm = g_SoilFertilityManager
-        if sfm then
-            local panels = {
-                smartSensor = sfm.smartSensorPanel,
-                seeAndSpray = sfm.seeAndSprayPanel,
-                varRate     = sfm.variableRatePanel,
-            }
-            for key, p in pairs(panels) do
-                if p then xml:setBool("hudLayout.collapsed_" .. key, p.collapsed) end
-            end
+        if sfm and sfm.variableRatePanel then
+            xml:setBool("hudLayout.collapsed_varRate", sfm.variableRatePanel.collapsed)
         end
 
         xml:save()
@@ -313,21 +306,15 @@ function SoilHUD:loadLayout()
         self.visible = xml:getBool("hudLayout.visible",  self.visible)
 
         -- Sub-panel free positions
-        for _, key in ipairs({"smartSensor", "seeAndSpray", "varRate"}) do
-            local xKey = "hudLayout.freePosX_" .. key
-            local yKey = "hudLayout.freePosY_" .. key
-            local x = xml:getFloat(xKey, nil)
-            local y = xml:getFloat(yKey, nil)
-            if x ~= nil and y ~= nil then
-                self.freePos[key] = { x = x, y = y }
-            end
+        do
+            local x = xml:getFloat("hudLayout.freePosX_varRate", nil)
+            local y = xml:getFloat("hudLayout.freePosY_varRate", nil)
+            if x ~= nil and y ~= nil then self.freePos["varRate"] = { x = x, y = y } end
         end
 
         -- Sub-panel collapsed states (applied on first draw since panels may not exist yet)
         self.savedCollapsed = {
-            smartSensor = xml:getBool("hudLayout.collapsed_smartSensor", false),
-            seeAndSpray = xml:getBool("hudLayout.collapsed_seeAndSpray", false),
-            varRate     = xml:getBool("hudLayout.collapsed_varRate",     false),
+            varRate = xml:getBool("hudLayout.collapsed_varRate", false),
         }
 
         xml:delete()
@@ -484,9 +471,7 @@ function SoilHUD:onMouseEvent(posX, posY, isDown, isUp, button, eventUsed)
         local sfm = g_SoilFertilityManager
         if sfm then
             local subPanels = {
-                { panel = sfm.smartSensorPanel,  key = "smartSensor" },
-                { panel = sfm.seeAndSprayPanel,  key = "seeAndSpray" },
-                { panel = sfm.variableRatePanel, key = "varRate"     },
+                { panel = sfm.variableRatePanel, key = "varRate" },
             }
             for _, sp in ipairs(subPanels) do
                 local p = sp.panel
@@ -1653,7 +1638,7 @@ function SoilHUD:drawPressureRow(labelKey, pressure, isProtected, px, cy, pw, s,
     -- which ensures bars are centred within their own row and not in the row above (#HUD).
     cy = cy - rowH
 
-    -- 3-level color (matches getPressureColor in SoilReportDialog — aligned with Constants thresholds)
+    -- 3-level color aligned with Constants thresholds (WEED_PRESSURE.LOW / MEDIUM)
     local wp = SoilConstants.WEED_PRESSURE  -- LOW=20, MEDIUM=50 (shared by weed/pest/disease)
     local col
     if pressure < wp.LOW        then col = SoilHUD.C_GOOD

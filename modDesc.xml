@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <modDesc descVersion="108">
     <author>TisonK</author>
-    <version>2.4.0.0</version>
+    <version>2.4.1.0</version>
     <modName>FS25_SoilFertilizer</modName>
     <title>
         <en>Realistic Soil &amp; Fertilizer</en>
@@ -73,9 +73,9 @@
     </specializations>
 
     <vehicleTypes>
-        <vehicleType name="sprayer">
-            <specialization name="FS25_SoilFertilizer.sfNozzleEffects"/>
-        </vehicleType>
+        <type name="sfSprayer" parent="sprayer" filename="$dataS/scripts/vehicles/Vehicle.lua">
+            <specialization name="sfNozzleEffects"/>
+        </type>
     </vehicleTypes>
 
     <actions>
@@ -86,12 +86,6 @@
         <action name="SF_CYCLE_MAP_LAYER"   category="ONFOOT" />
         <action name="SF_OPEN_SETTINGS"     category="ONFOOT" />
         <action name="SF_HUD_DRAG"          category="ONFOOT" />
-        <action name="SF_SENSOR_PEST"       category="VEHICLE" />
-        <action name="SF_SENSOR_DISEASE"    category="VEHICLE" />
-        <action name="SF_SENSOR_NUTRIENT"   category="VEHICLE" />
-        <action name="SF_SEE_SPRAY_PEST"    category="VEHICLE" />
-        <action name="SF_SEE_SPRAY_DISEASE" category="VEHICLE" />
-        <action name="SF_SEE_SPRAY_WEED"    category="VEHICLE" />
         <action name="SF_VARIABLE_RATE"     category="VEHICLE" />
         <action name="SF_MINIMAP_ZOOM"      category="ONFOOT" />
     </actions>
@@ -106,18 +100,6 @@
         <actionBinding action="SF_CYCLE_MAP_LAYER" />
         <actionBinding action="SF_OPEN_SETTINGS" />
         <actionBinding action="SF_HUD_DRAG" />
-        <actionBinding action="SF_SENSOR_PEST" />
-        <actionBinding action="SF_SENSOR_DISEASE" />
-        <actionBinding action="SF_SENSOR_NUTRIENT" />
-        <actionBinding action="SF_SEE_SPRAY_PEST">
-            <binding device="KB_MOUSE_DEFAULT" input="KEY_lalt KEY_4" />
-        </actionBinding>
-        <actionBinding action="SF_SEE_SPRAY_DISEASE">
-            <binding device="KB_MOUSE_DEFAULT" input="KEY_lalt KEY_5" />
-        </actionBinding>
-        <actionBinding action="SF_SEE_SPRAY_WEED">
-            <binding device="KB_MOUSE_DEFAULT" input="KEY_lalt KEY_6" />
-        </actionBinding>
         <actionBinding action="SF_VARIABLE_RATE">
             <binding device="KB_MOUSE_DEFAULT" input="KEY_lalt KEY_7" />
         </actionBinding>

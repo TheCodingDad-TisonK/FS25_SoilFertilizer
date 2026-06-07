@@ -1,23 +1,116 @@
 -- SFNozzleEffects — per-nozzle See & Spray specialization for SF mod sprayers.
--- Each nozzle probes its soil zone cell 1m ahead and is individually suppressed
--- when no enabled See & Spray sensor exceeds its threshold.
+-- Clones sprayerNozzleEffect.i3d once per nozzle, animates with shader parameters,
+-- and individually suppresses nozzles when no enabled See & Spray sensor exceeds
+-- its threshold 1m ahead. Mirrors PF's ExtendedSprayerEffects pattern.
 -- No PF dependency — ever.
 
 SFNozzleEffects = {}
-SFNozzleEffects.SPEC_TABLE_NAME = "spec_extendedSprayerEffects"
+SFNozzleEffects.SPEC_TABLE_NAME = "spec_FS25_SoilFertilizer.sfNozzleEffects"
 
-local CELL_SIZE = 10  -- matches SoilConstants.ZONE.CELL_SIZE
+-- Fade direction vectors (mirrors PF ESE constants)
+SFNozzleEffects.FADE_DIR_OFF   = {0,  0}
+SFNozzleEffects.FADE_DIR_START = {0,  1}
+SFNozzleEffects.FADE_DIR_STOP  = {0, -1}
+
+local STATE_OFF         = 0
+local STATE_ON          = 1
+local STATE_TURNING_ON  = 2
+local STATE_TURNING_OFF = 3
+
+local CELL_SIZE = 10   -- matches SoilConstants.ZONE.CELL_SIZE
+local FADE_TIME = 250  -- ms, matches PF effectFadeTime
+
+-- Class-level shared state — one i3d template serves all vehicle instances.
+SFNozzleEffects._templateNode = nil
+SFNozzleEffects._i3dReady     = false
+
+-- Called from main.lua after module load, before any vehicles instantiate.
+function SFNozzleEffects.init(modDir)
+
+    local path = modDir .. "shared/sprayerNozzleEffect.i3d"
+    g_i3DManager:loadI3DFileAsync(path, true, true, SFNozzleEffects._onI3DLoaded, nil, {})
+end
+
+function SFNozzleEffects._onI3DLoaded(_, i3dNode, failedReason, args)
+    if i3dNode ~= nil and i3dNode ~= 0 then
+        SFNozzleEffects._templateNode = getChildAt(i3dNode, 0)
+        unlink(SFNozzleEffects._templateNode)
+        delete(i3dNode)
+        SFNozzleEffects._i3dReady = true
+        SoilLogger.info("[SFNozzleEffects] Effect i3d loaded — shader plane template ready")
+    else
+        SoilLogger.warning("[SFNozzleEffects] sprayerNozzleEffect.i3d failed to load (reason=%s) — shader effects disabled, fluid scaling still active", tostring(failedReason))
+    end
+end
+
+-- ── Helper: clone effect nodes onto all nozzles (called once template is ready) ─
+
+local function sfSetupEffectNodes(vehicle)
+    local spec = vehicle[SFNozzleEffects.SPEC_TABLE_NAME]
+    if not spec or not SFNozzleEffects._templateNode then return end
+
+    local material = g_materialManager and g_materialManager:getMaterial(FillType.LIQUIDFERTILIZER, "sprayer", 1)
+
+    for _, effectData in ipairs(spec.sprayerEffects) do
+        local ok, effectNode = pcall(clone, SFNozzleEffects._templateNode, false, false, false)
+        if ok and effectNode and effectNode ~= 0 then
+            if material then setMaterial(effectNode, material, 0) end
+
+            -- Initialise shader params — nozzle starts fully OFF
+            effectData.fadeCur = {1, -1}
+            setShaderParameter(effectNode, "fadeProgress", effectData.fadeCur[1], effectData.fadeCur[2], 0, 0, false)
+            setShaderParameter(effectNode, "offsetUV",     math.random(), math.random(), 0, 0, false)
+            setShaderParameter(effectNode, "isPulsating",  0, nil, nil, nil, false)
+            setShaderParameter(effectNode, "blinkMulti",   1, 1, 100, math.random() * 100, false)
+
+            -- Attach to nozzle anchor (probeNode is the physical nozzle transform node)
+            link(effectData.probeNode, effectNode)
+
+            effectData.effectNode = effectNode
+            effectData.state      = STATE_OFF
+            effectData.fadeDir    = SFNozzleEffects.FADE_DIR_OFF
+        end
+    end
+
+    SoilLogger.info("[SFNozzleEffects] %d effect nodes linked on %s",
+        spec.numCustomEffects, tostring(vehicle.configFileName))
+end
+
+-- ── Specialization registration ───────────────────────────────────────────────
 
 function SFNozzleEffects.initSpecialization()
     local schema = Vehicle.xmlSchema
     schema:setXMLSpecializationType("SFNozzleEffects")
 
-    schema:register(XMLValueType.INT,         "vehicle.sprayer.nozzles(?)#foldingConfigurationIndex", "Folding config index for this nozzle group", 1)
-    schema:register(XMLValueType.NODE_INDEX,  "vehicle.sprayer.nozzles(?).nozzle(?)#node",            "Nozzle anchor node")
-    schema:register(XMLValueType.VECTOR_TRANS,"vehicle.sprayer.nozzles(?).nozzle(?)#translation",     "Translation offset from anchor node")
-    schema:register(XMLValueType.VECTOR_ROT,  "vehicle.sprayer.nozzles(?).nozzle(?)#rotation",        "Rotation offset from anchor node")
+    schema:register(XMLValueType.INT,          "vehicle.sprayer.nozzles(?)#foldingConfigurationIndex", "Folding config index for this nozzle group", 1)
+    schema:register(XMLValueType.NODE_INDEX,   "vehicle.sprayer.nozzles(?).nozzle(?)#node",            "Nozzle anchor node")
+    schema:register(XMLValueType.VECTOR_TRANS, "vehicle.sprayer.nozzles(?).nozzle(?)#translation",     "Translation offset from anchor node")
+    schema:register(XMLValueType.VECTOR_ROT,   "vehicle.sprayer.nozzles(?).nozzle(?)#rotation",        "Rotation offset from anchor node")
 
     schema:setXMLSpecializationType()
+
+    -- Register See & Spray as Yes/No shop configurations (one per target type).
+    -- Mirrors PF WeedSpotSpray.initSpecialization() pattern exactly.
+    if g_vehicleConfigurationManager then
+        g_vehicleConfigurationManager:addConfigurationType(
+            "sfSeeSprayWeed",
+            g_i18n:getText("sf_config_seeSprayWeed"),
+            "sfSeeSprayWeed",
+            VehicleConfigurationItem
+        )
+        g_vehicleConfigurationManager:addConfigurationType(
+            "sfSeeSprayPest",
+            g_i18n:getText("sf_config_seeSprayPest"),
+            "sfSeeSprayPest",
+            VehicleConfigurationItem
+        )
+        g_vehicleConfigurationManager:addConfigurationType(
+            "sfSeeSprayDisease",
+            g_i18n:getText("sf_config_seeSprayDisease"),
+            "sfSeeSprayDisease",
+            VehicleConfigurationItem
+        )
+    end
 end
 
 function SFNozzleEffects.prerequisitesPresent(specializations)
@@ -31,14 +124,31 @@ function SFNozzleEffects.registerFunctions(vehicleType)
 end
 
 function SFNozzleEffects.registerOverwrittenFunctions(vehicleType)
-    SpecializationUtil.registerOverwrittenFunction(vehicleType, "getSprayerUsage", SFNozzleEffects.getSprayerUsage)
+    SpecializationUtil.registerOverwrittenFunction(vehicleType, "getSprayerUsage",      SFNozzleEffects.getSprayerUsage)
+    SpecializationUtil.registerOverwrittenFunction(vehicleType, "getAreEffectsVisible", SFNozzleEffects.getAreEffectsVisible)
 end
 
 function SFNozzleEffects.registerEventListeners(vehicleType)
+    SpecializationUtil.registerEventListener(vehicleType, "onPreLoad",  SFNozzleEffects)
     SpecializationUtil.registerEventListener(vehicleType, "onLoad",     SFNozzleEffects)
     SpecializationUtil.registerEventListener(vehicleType, "onPostLoad", SFNozzleEffects)
     SpecializationUtil.registerEventListener(vehicleType, "onUpdate",   SFNozzleEffects)
+    SpecializationUtil.registerEventListener(vehicleType, "onDelete",   SFNozzleEffects)
 end
+
+-- ── onPreLoad — read vehicle purchase configurations ─────────────────────────
+
+function SFNozzleEffects:onPreLoad(savegame)
+    local spec = self[SFNozzleEffects.SPEC_TABLE_NAME]
+    -- configurations["sfSeeSprayWeed"] = 1 → No, 2 → Yes  (FS25 Yes/No convention)
+    spec.seeSprayWeed    = (self.configurations["sfSeeSprayWeed"]    or 1) > 1
+    spec.seeSprayPest    = (self.configurations["sfSeeSprayPest"]    or 1) > 1
+    spec.seeSprayDisease = (self.configurations["sfSeeSprayDisease"] or 1) > 1
+    SoilLogger.debug("[SFNozzleEffects] onPreLoad: seeSprayWeed=%s seeSprayPest=%s seeSprayDisease=%s",
+        tostring(spec.seeSprayWeed), tostring(spec.seeSprayPest), tostring(spec.seeSprayDisease))
+end
+
+-- ── onLoad — read nozzle nodes from XML ──────────────────────────────────────
 
 function SFNozzleEffects:onLoad(savegame)
     local spec = self[SFNozzleEffects.SPEC_TABLE_NAME]
@@ -48,20 +158,29 @@ function SFNozzleEffects:onLoad(savegame)
     spec.hasCustomEffects        = false
     spec.numCustomEffects        = 0
     spec.pwmEnabled              = false
-    spec.effectFadeTime          = 250
+    spec.effectFadeTime          = FADE_TIME
     spec.effectsDirty            = false
+    spec._effectsPending         = false
 
-    -- Field ID cache — updated once per second to avoid per-frame field lookups.
     spec._sfFieldId    = nil
     spec._sfFieldTimer = 0
 
-    -- Collect nozzle anchor nodes for the active folding configuration.
-    -- Section mapping happens in onPostLoad once VWW is ready.
+    spec._groundTypeMapId   = nil
+    spec._groundTypeFirstCh = 0
+    spec._groundTypeNumCh   = 0
+
     spec.pendingNozzles = {}
+    SoilLogger.debug("[SFNozzleEffects] onLoad: %s", tostring(self.configFileName))
+
+    local groupCount = 0
     self.xmlFile:iterate("vehicle.sprayer.nozzles", function(_, nozzlesKey)
+        groupCount = groupCount + 1
         local foldingIdx    = self.xmlFile:getValue(nozzlesKey .. "#foldingConfigurationIndex", 1)
         local activeFolding = self.configurations["folding"]
-        if foldingIdx == activeFolding or (activeFolding == nil and foldingIdx == 1) then
+        local isActive = (foldingIdx == activeFolding) or (activeFolding == nil and foldingIdx == 1)
+        SoilLogger.debug("[SFNozzleEffects]   nozzle group %d: foldingIdx=%s activeFolding=%s isActive=%s",
+            groupCount, tostring(foldingIdx), tostring(activeFolding), tostring(isActive))
+        if isActive then
             self.xmlFile:iterate(nozzlesKey .. ".nozzle", function(_, key)
                 local node = self.xmlFile:getValue(key .. "#node", nil, self.components, self.i3dMappings)
                 if node ~= nil then
@@ -70,7 +189,11 @@ function SFNozzleEffects:onLoad(savegame)
             end)
         end
     end)
+    SoilLogger.debug("[SFNozzleEffects] onLoad done: %d groups, %d nozzles pending",
+        groupCount, #spec.pendingNozzles)
 end
+
+-- ── onPostLoad — section mapping then effect node setup ───────────────────────
 
 function SFNozzleEffects:onPostLoad(savegame)
     local spec     = self[SFNozzleEffects.SPEC_TABLE_NAME]
@@ -81,7 +204,6 @@ function SFNozzleEffects:onPostLoad(savegame)
         return
     end
 
-    -- Dead-band half-width around center (mirrors ESE initExtendedSprayerNozzleEffect)
     local minWidth = 1
     if spec_vww.sectionNodes and #spec_vww.sectionNodes > 0 then
         local sn     = spec_vww.sectionNodes[1]
@@ -96,7 +218,6 @@ function SFNozzleEffects:onPostLoad(savegame)
         end)
         if not ok then xOffset = 0 end
 
-        -- Map nozzle X offset to VWW section index
         local sectionIndex = 0
         if xOffset > minWidth and spec_vww.sectionsLeft then
             for _, section in ipairs(spec_vww.sectionsLeft) do
@@ -114,13 +235,12 @@ function SFNozzleEffects:onPostLoad(savegame)
             end
         end
 
-        -- effectNode stays nil: we have no shader plane and HookManager's
-        -- setShaderParameter guard (ed.effectNode ~= nil) must stay safe.
-        -- probeNode is the real i3d node used for localToWorld() probing.
         local effectData = {
-            effectNode   = nil,
-            probeNode    = nozzleNode,
-            fadeCur      = {1, -1},
+            effectNode   = nil,               -- populated by sfSetupEffectNodes once i3d ready
+            probeNode    = nozzleNode,         -- physical anchor — used for localToWorld probing
+            fadeCur      = {1, -1},            -- shader fade progress: {1,-1} = fully off
+            fadeDir      = SFNozzleEffects.FADE_DIR_OFF,
+            state        = STATE_OFF,
             sectionIndex = sectionIndex,
             isActive     = false,
         }
@@ -130,20 +250,61 @@ function SFNozzleEffects:onPostLoad(savegame)
         if spec.sprayerEffectsBySection[sectionIndex] == nil then
             spec.sprayerEffectsBySection[sectionIndex] = {}
         end
-        local bucket = spec.sprayerEffectsBySection[sectionIndex]
-        bucket[#bucket + 1] = effectData
+        spec.sprayerEffectsBySection[sectionIndex][#spec.sprayerEffectsBySection[sectionIndex] + 1] = effectData
     end
 
     spec.pendingNozzles   = nil
+
+    -- Cache ground-type density map channels for the field boundary check.
+    -- Must extract only the GROUND_TYPE channel; reading the full terrainDetailId
+    -- packs in angle/spray bits that can be non-zero even on headland grass.
+    if g_currentMission and g_currentMission.fieldGroundSystem then
+        local mapId, firstCh, numCh = g_currentMission.fieldGroundSystem:getDensityMapData(FieldDensityMap.GROUND_TYPE)
+        spec._groundTypeMapId   = mapId
+        spec._groundTypeFirstCh = firstCh
+        spec._groundTypeNumCh   = numCh
+    end
+
     spec.numCustomEffects = #spec.sprayerEffects
     spec.hasCustomEffects = spec.numCustomEffects > 0
+
+    if spec.hasCustomEffects then
+        if SFNozzleEffects._i3dReady then
+            sfSetupEffectNodes(self)
+        else
+            spec._effectsPending = true   -- retry in onUpdate once i3d has landed
+        end
+    end
 end
 
--- ── Per-frame update ──────────────────────────────────────────────────────────
+-- ── onDelete — release all cloned effect nodes ────────────────────────────────
+
+function SFNozzleEffects:onDelete()
+    local spec = self[SFNozzleEffects.SPEC_TABLE_NAME]
+    if not spec then return end
+    for _, effectData in ipairs(spec.sprayerEffects or {}) do
+        if effectData.effectNode then
+            delete(effectData.effectNode)
+            effectData.effectNode = nil
+        end
+    end
+end
+
+-- ── onUpdate — field ID cache, nozzle state, shader fade animation ────────────
 
 function SFNozzleEffects:onUpdate(dt, isActiveForInput, isActiveForInputIgnoreSelection, isSelected)
     local spec = self[SFNozzleEffects.SPEC_TABLE_NAME]
     if not spec.hasCustomEffects then return end
+
+    -- Deferred effect node setup: i3d may not have been ready at onPostLoad time.
+    if spec._effectsPending then
+        if SFNozzleEffects._i3dReady then
+            sfSetupEffectNodes(self)
+            spec._effectsPending = false
+        else
+            return  -- still waiting; fluid scaling still inactive but no crash
+        end
+    end
 
     -- Refresh field ID cache once per second from vehicle root position.
     spec._sfFieldTimer = spec._sfFieldTimer + dt
@@ -166,83 +327,199 @@ function SFNozzleEffects:onUpdate(dt, isActiveForInput, isActiveForInputIgnoreSe
         end
     end
 
+    -- Update per-nozzle active state (also triggers fade direction transitions).
     local isTurnedOn = self:getIsTurnedOn()
     local lastSpeed  = (self.getLastSpeed and self:getLastSpeed()) or 0
     self:updateExtendedSprayerNozzleEffectsState(spec.sprayerEffects, dt, isTurnedOn, lastSpeed)
+
+    -- Animate shader fade transitions for any nozzle with an effect node.
+    for _, effectData in ipairs(spec.sprayerEffects) do
+        local effectNode = effectData.effectNode
+        if effectNode then
+            local state = effectData.state
+            if state == STATE_TURNING_ON or state == STATE_TURNING_OFF then
+                local fadeCur = effectData.fadeCur
+                local fadeDir = effectData.fadeDir
+                fadeCur[1] = math.max(-1, math.min(1, fadeCur[1] + fadeDir[1] * (dt / FADE_TIME)))
+                fadeCur[2] = math.max(-1, math.min(1, fadeCur[2] + fadeDir[2] * (dt / FADE_TIME)))
+                setShaderParameter(effectNode, "fadeProgress", fadeCur[1], fadeCur[2], 0, 0, false)
+
+                if state == STATE_TURNING_OFF and fadeCur[2] <= -1 then
+                    effectData.state   = STATE_OFF
+                    effectData.fadeDir = SFNozzleEffects.FADE_DIR_OFF
+                elseif state == STATE_TURNING_ON and fadeCur[2] >= 1 then
+                    effectData.state   = STATE_ON
+                    effectData.fadeDir = SFNozzleEffects.FADE_DIR_OFF
+                end
+            end
+        end
+    end
 end
 
 -- ── Nozzle state functions ────────────────────────────────────────────────────
 
--- Batch update — iterates all nozzles and sets isActive on each effectData.
+-- Batch update: sets isActive on each effectData and fires fade transitions.
 function SFNozzleEffects:updateExtendedSprayerNozzleEffectsState(sprayerEffects, dt, isTurnedOn, lastSpeed)
     for _, effectData in ipairs(sprayerEffects) do
         local isActive, _ = self:updateExtendedSprayerNozzleEffectState(effectData, dt, isTurnedOn, lastSpeed)
-        effectData.isActive = isActive
+
+        if isActive ~= effectData.isActive then
+            effectData.isActive = isActive
+
+            if effectData.effectNode then
+                if isActive then
+                    if effectData.state == STATE_OFF or effectData.state == STATE_TURNING_OFF then
+                        effectData.state   = STATE_TURNING_ON
+                        effectData.fadeDir = SFNozzleEffects.FADE_DIR_START
+                    end
+                else
+                    if effectData.state == STATE_ON or effectData.state == STATE_TURNING_ON then
+                        effectData.state   = STATE_TURNING_OFF
+                        effectData.fadeDir = SFNozzleEffects.FADE_DIR_STOP
+                    end
+                end
+            end
+        end
     end
 end
 
 -- Per-nozzle decision: returns (isActive, amountScale).
--- When See & Spray is disabled the nozzle follows section state (normal operation).
--- When See & Spray is enabled the nozzle probes its cell 1m ahead and is
--- suppressed if no enabled sensor exceeds its threshold at that position.
+-- Checks in order: sprayer state → section active → field boundary → See & Spray threshold.
 function SFNozzleEffects:updateExtendedSprayerNozzleEffectState(effectData, dt, isTurnedOn, lastSpeed)
-    if not isTurnedOn                                                  then return false, 1 end
-    if (lastSpeed or 0) < 0.25                                         then return false, 1 end
-    if self.movingDirection and self.movingDirection < 0               then return false, 1 end
+    if not isTurnedOn                                      then return false, 1 end
+    if (lastSpeed or 0) < 0.25                             then return false, 1 end
+    if self.movingDirection and self.movingDirection < 0   then return false, 1 end
 
-    -- VWW section guard — mirrors ESE initExtendedSprayerNozzleEffect
     local spec_vww = self.spec_variableWorkWidth
     if spec_vww and spec_vww.sections and effectData.sectionIndex ~= 0 then
         local section = spec_vww.sections[effectData.sectionIndex]
         if section and not section.isActive then return false, 1 end
     end
 
+    local spec = self[SFNozzleEffects.SPEC_TABLE_NAME]
+
+    -- Resolve fill type once — shared by Pass 3 nutrient check and See & Spray below.
+    local sprayerSpec = self.spec_sprayer
+    local wap = sprayerSpec and sprayerSpec.workAreaParameters
+    local fillTypeIndex = wap and wap.sprayFillType
+    local ft
+    if fillTypeIndex and fillTypeIndex ~= 0 then
+        ft = g_fillTypeManager and g_fillTypeManager:getFillTypeByIndex(fillTypeIndex)
+    end
+
+    -- Probe nozzle world position once — reused for all three passes below.
+    local probeX, probeZ
+    if effectData.probeNode then
+        local ok, nx, _, nz = pcall(getWorldTranslation, effectData.probeNode)
+        if ok and nx then probeX, probeZ = nx, nz end
+    end
+
+    if probeX then
+        -- Pass 1: GROUND_TYPE channel — off-field (grass / road) → suppress.
+        -- Bit-extracted from the packed terrain detail map; reading the full raw value
+        -- gives false non-zero at headland grass because angle/spray bits stay stale.
+        if spec._groundTypeMapId then
+            local rawBits = getDensityAtWorldPos(spec._groundTypeMapId, probeX, 0, probeZ)
+            local groundTypeValue = bit32.band(
+                bit32.rshift(rawBits, spec._groundTypeFirstCh),
+                2 ^ spec._groundTypeNumCh - 1)
+            if groundTypeValue == 0 then return false, 1 end
+        end
+
+        -- Pass 2: farmland ID — crossing onto an adjacent parcel → suppress.
+        if g_farmlandManager then
+            local nFarmId = g_farmlandManager:getFarmlandIdAtWorldPosition(probeX, probeZ)
+            local vFarmId = spec._sfFieldId
+            if nFarmId == 0 or (vFarmId and vFarmId > 0 and nFarmId ~= vFarmId) then
+                return false, 1
+            end
+        end
+
+        -- Pass 3: nutrient adequacy — suppress visual when this cell already has enough
+        -- of every nutrient the current fill type contributes. No vehicle config needed.
+        -- Suppresses only when ALL contributing criteria are met: a DAP nozzle over a
+        -- high-N/low-P cell keeps spraying for the P benefit even if N is already full.
+        local sfm = g_SoilFertilityManager
+        local prof = ft and SoilConstants.FERTILIZER_PROFILES and SoilConstants.FERTILIZER_PROFILES[ft.name]
+        if sfm and sfm.soilSystem and prof then
+            local fieldId = spec._sfFieldId
+            local fd = fieldId and sfm.soilSystem.fieldData[fieldId]
+            if fd then
+                local cellKey = tostring(math.floor(probeX / CELL_SIZE) * 10000 + math.floor(probeZ / CELL_SIZE))
+                local cell    = fd.zoneData and fd.zoneData[cellKey]
+                -- Cell values are kept live by applyFertilizer (updated every frame while
+                -- spraying). For cells not yet visited by the boom, fall back to the field
+                -- average which is always current.
+                local cellN  = (cell and cell.N)  or fd.nitrogen      or 0
+                local cellP  = (cell and cell.P)  or fd.phosphorus    or 0
+                local cellK  = (cell and cell.K)  or fd.potassium     or 0
+                local cellPH = (cell and cell.pH) or fd.pH            or SoilConstants.NUTRIENT_LIMITS.PH_OPTIMAL
+                local cellOM = (cell and cell.OM) or fd.organicMatter or SoilConstants.FIELD_DEFAULTS.organicMatter
+                local tgt     = SoilConstants.SPRAYER_RATE.AUTO_RATE_TARGETS
+                local adequate, anyCriteria = true, false
+                if (prof.N  or 0) > 0 then adequate = adequate and (cellN  >= tgt.N );  anyCriteria = true end
+                if (prof.P  or 0) > 0 then adequate = adequate and (cellP  >= tgt.P );  anyCriteria = true end
+                if (prof.K  or 0) > 0 then adequate = adequate and (cellK  >= tgt.K );  anyCriteria = true end
+                if (prof.pH or 0) > 0 then adequate = adequate and (cellPH >= tgt.pH);  anyCriteria = true end
+                local omProd = SoilConstants.SPRAYER_RATE.OM_PRIMARY_PRODUCTS
+                if omProd and omProd[ft.name] then adequate = adequate and (cellOM >= tgt.OM); anyCriteria = true end
+                if anyCriteria and adequate then return false, 1 end
+            end
+        end
+    end
+
+    -- See & Spray: only active when the vehicle was purchased with that capability.
+    local hasAny = spec.seeSprayWeed or spec.seeSprayPest or spec.seeSprayDisease
+    if not hasAny then return isTurnedOn, 1 end
+
+    if not ft then return isTurnedOn, 1 end
+
+    local ssCfg = SoilConstants.SEE_AND_SPRAY
+    local isPest    = spec.seeSprayPest    and SoilConstants.PEST_PRESSURE.INSECTICIDE_TYPES[ft.name]
+    local isDisease = spec.seeSprayDisease and SoilConstants.DISEASE_PRESSURE.FUNGICIDE_TYPES[ft.name]
+    local isWeed    = spec.seeSprayWeed    and SoilConstants.WEED_PRESSURE.HERBICIDE_TYPES[ft.name]
+
+    -- Not a targeted chemical — spray normally.
+    if not isPest and not isDisease and not isWeed then return isTurnedOn, 1 end
+
     local sfm = g_SoilFertilityManager
-    if not sfm or not sfm.sensorManager then return isTurnedOn, 1 end
+    if not sfm then return isTurnedOn, 1 end
 
-    -- No See & Spray active: nozzle state follows isTurnedOn
-    if not sfm.sensorManager:hasAnySeeSprayEnabled(self.id) then return isTurnedOn, 1 end
-
-    -- No cached field: default to spray (fail-open)
-    local spec   = self[SFNozzleEffects.SPEC_TABLE_NAME]
     local fieldId = spec._sfFieldId
     if not fieldId then return true, 1 end
 
     local fd = sfm.soilSystem and sfm.soilSystem.fieldData[fieldId]
     if not fd then return true, 1 end
 
-    -- Probe 1m ahead of this nozzle node in world space
+    -- Probe 1m ahead in the nozzle's forward direction to get the soil cell.
     if not effectData.probeNode then return true, 1 end
     local pok, px, _, pz = pcall(localToWorld, effectData.probeNode, 0, 0, 1)
     if not pok then return true, 1 end
 
-    -- Resolve zone cell at probe position
     local cellKey = tostring(math.floor(px / CELL_SIZE) * 10000 + math.floor(pz / CELL_SIZE))
     local cell    = fd.zoneData and fd.zoneData[cellKey]
-    local ssCfg   = SoilConstants.SEE_AND_SPRAY
-    local vid     = self.id
 
     local pestVal    = (cell and cell.pestPressure)    or (fd.pestPressure    or 0)
     local diseaseVal = (cell and cell.diseasePressure) or (fd.diseasePressure or 0)
     local weedVal    = (cell and cell.weedPressure)    or (fd.weedPressure    or 0)
 
-    -- Spray if any enabled sensor is above its threshold here
-    if sfm.sensorManager:isSeeSprayPestEnabled(vid) and pestVal >= ssCfg.PEST_THRESHOLD then
-        return true, 1
-    end
-    if sfm.sensorManager:isSeeSprayDiseaseEnabled(vid) and diseaseVal >= ssCfg.DISEASE_THRESHOLD then
-        return true, 1
-    end
-    if sfm.sensorManager:isSeeSprayWeedEnabled(vid) and weedVal >= ssCfg.WEED_THRESHOLD
-        and not (fd.herbicideDaysLeft and fd.herbicideDaysLeft > 0) then
-        return true, 1
-    end
+    if isPest    and pestVal    >= ssCfg.PEST_THRESHOLD    then return true, 1 end
+    if isDisease and diseaseVal >= ssCfg.DISEASE_THRESHOLD then return true, 1 end
+    if isWeed    and weedVal    >= ssCfg.WEED_THRESHOLD
+        and not (fd.herbicideDaysLeft and fd.herbicideDaysLeft > 0) then return true, 1 end
 
-    -- All enabled sensors below threshold at this nozzle → suppress
     return false, 1
 end
 
--- ── Usage scaling ─────────────────────────────────────────────────────────────
+-- ── Overwritten functions ─────────────────────────────────────────────────────
+
+-- Suppress vanilla spray particle effects — our shader planes handle the visual.
+function SFNozzleEffects:getAreEffectsVisible(superFunc)
+    if self[SFNozzleEffects.SPEC_TABLE_NAME].hasCustomEffects then
+        return false
+    end
+    return superFunc(self)
+end
 
 -- Returns (numActive, fraction) of nozzles currently active.
 function SFNozzleEffects:getNumExtendedSprayerNozzleEffectsActive()
@@ -258,16 +535,13 @@ function SFNozzleEffects:getNumExtendedSprayerNozzleEffectsActive()
 end
 
 -- Scale spray fluid consumption by the fraction of active nozzles.
--- Only applies when See & Spray is enabled — otherwise falls through unchanged.
 function SFNozzleEffects:getSprayerUsage(superFunc, fillType, dt)
     local usage = superFunc(self, fillType, dt)
     local spec  = self[SFNozzleEffects.SPEC_TABLE_NAME]
-    local sfm   = g_SoilFertilityManager
-    if spec.hasCustomEffects and sfm and sfm.sensorManager
-        and sfm.sensorManager:hasAnySeeSprayEnabled(self.id) then
+    local hasAny = spec.seeSprayWeed or spec.seeSprayPest or spec.seeSprayDisease
+    if spec.hasCustomEffects and hasAny then
         local _, alpha = self:getNumExtendedSprayerNozzleEffectsActive()
         usage = usage * alpha
-        -- Keep a minimum nonzero value so the AI worker doesn't halt (mirrors PF pattern)
         if (self.getIsAIActive ~= nil and self:getIsAIActive()) and usage == 0 then
             usage = 0.0001
         end

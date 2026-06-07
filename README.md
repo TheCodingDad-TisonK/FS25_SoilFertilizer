@@ -38,7 +38,18 @@ Each field builds its own history. Nitrogen drops after a heavy wheat crop. Rain
 
 ---
 
-## 🆕 What's New in v2.4.0.0
+## 🆕 What's New in v2.4.1.0
+
+**Fixes:**
+- Custom fertilizer piles (MAP, DAP, Urea, AMS, etc.) now load without texture warnings
+- Soil data tracked live per-nozzle section during application — no stale values at field edges
+- Nozzle sections at field boundaries no longer lose coverage credit
+- See & Spray is now a vehicle shop configuration on the JD R700i and R975i — not a runtime toggle key
+
+<details>
+<summary>Previous releases</summary>
+
+### v2.4.0.0
 
 **New features:**
 - Added JD R700i (28 m) and R975i (36 m) sprayers with per-nozzle section control
@@ -57,9 +68,6 @@ Each field builds its own history. Nitrogen drops after a heavy wheat crop. Rain
 
 **Balancing:**
 - Rebalanced pricing across all 20 custom fertilizer types
-
-<details>
-<summary>Previous releases</summary>
 
 ### v2.2.5.0
 - Fixed weed pressure bar oscillating after partial herbicide spray
@@ -231,17 +239,17 @@ The mod isn't just about what you put in — it's about what the world takes out
 | 🚜 **Plowing bonus** | Aerates soil, nudging pH toward neutral and boosting organic matter mixing. |
 | 🌿 **Residue incorporation** | Working post-harvest stubble back into the soil releases a small NPK and OM pulse from decomposing straw. Deeper tillage releases more; direct-drills release the least. |
 
-### 🤖 Smart Precision Systems (VWW sprayer required)
+### 🤖 Smart Precision Systems
 
-Three in-vehicle overlay panels activate when you enter a Variable Work Width (VWW) capable sprayer. Each appears as a collapsible HUD panel that can be independently repositioned in Free Panel Layout mode.
+Three in-vehicle overlay panels that appear when you enter a supported sprayer. Each appears as a collapsible HUD panel that can be independently repositioned in Free Panel Layout mode.
 
-| System | What it does | Keybind |
+| System | What it does | How to enable |
 |---|---|---|
-| **Smart Sensor** | Monitors pest, disease, and nutrient need per section. Blocks spraying on sections with no active need detected. | Alt+1 / Alt+2 / Alt+3 (per type) |
-| **See & Spray** | Shows live per-cell pressure for pest, disease, and weed at the sprayer's current position. Colour-coded per section. | Alt+4 / Alt+5 / Alt+6 (per type) |
-| **Variable Rate** | Adjusts boom output rate per section based on soil deficits for the loaded product. Green bar = low rate; red bar = high rate. | Alt+7 (on/off) |
+| **Smart Sensor** | Monitors pest, disease, and nutrient need per section. Blocks spraying on sections with no active need detected. | Settings → Admin → Smart Systems. Works with any VWW sprayer. |
+| **See & Spray** | Shows live per-cell pressure for pest, disease, and weed at the sprayer's current position. Colour-coded per section. | Purchase a **JD R700i** or **JD R975i** with the *See & Spray* shop configuration selected. |
+| **Variable Rate** | Adjusts boom output rate per section based on soil deficits for the loaded product. Green bar = low rate; red bar = high rate. | Bind `SF_VARIABLE_RATE` in **Controls → Mods**. Enable in Admin → Smart Systems. |
 
-All three require a VWW-capable sprayer and must be enabled individually via **Settings → Admin → Smart Systems**.
+Smart Sensor and Variable Rate work with any VWW-capable sprayer. **See & Spray requires the JD R700i (28 m) or JD R975i (36 m)** with the See & Spray option selected at purchase — base game sprayers are not tested with this feature.
 
 **Free Panel Layout** — Enable in Settings → Display → Position, then use the Shift+H edit mode to drag each panel independently. Press **[−]** in any panel's title bar to collapse it to the title bar only. Positions and collapse states are saved to `hud.xml`.
 
@@ -259,7 +267,7 @@ Fully customisable: 5 positions, 4 colour themes, 5 transparency levels, 3 font 
 
 ### 📋 Full Farm Soil Report
 
-Press **`K`** to open a full farm overview sorted by urgency — the fields that need the most attention appear at the top. Each row shows N/P/K, pH, OM, weed and pest pressure, and an overall status badge. Click **►** on any row to open a field detail view with a complete breakdown, yield forecast, and specific treatment recommendations.
+The **Farm Overview** tab in the Soil PDA page shows all your fields sorted by urgency — the fields that need the most attention appear at the top. Each row shows N/P/K, pH, OM, weed and pest pressure, and an overall status badge. Click any row to open a field detail popup with a complete breakdown, yield forecast, and specific treatment recommendations.
 
 ### 📱 Soil PDA Page
 
@@ -411,7 +419,7 @@ All integrations are detected automatically at runtime and fail gracefully if th
 3. Amber or red values → that field needs fertilizer or lime
 4. Apply lime first — it unlocks the full value of everything else
 5. Apply fertilizer → watch N/P/K climb in real time
-6. Press K → open the full farm soil report sorted by urgency
+6. Open the tablet → Soil & Fertilizer → Farm Overview to see all fields by urgency
 7. Press Shift+O → open the full settings panel to tune the simulation
 8. Let a field go fallow for a season → it slowly recovers on its own
 9. At harvest → healthy soil means the full yield you worked for
@@ -446,7 +454,7 @@ This mod is licensed under **[CC BY-NC-ND 4.0](https://creativecommons.org/licen
 
 You may share it in its original form with attribution. You may not sell it, modify and redistribute it, or reupload it under a different name or authorship. Contributions via pull request are explicitly permitted and encouraged.
 
-**Author:** TisonK &nbsp;·&nbsp; **Version:** 2.4.0.0
+**Author:** TisonK &nbsp;·&nbsp; **Version:** 2.4.1.0
 
 © 2026 TisonK — See [LICENSE](LICENSE) for full terms.
 
