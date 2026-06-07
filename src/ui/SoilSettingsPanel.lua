@@ -210,7 +210,6 @@ local SETTING_DESCS = {
     debugMode             = "sf_desc_debugMode",
     showNotifications     = "sf_desc_showNotifications",
     smartSensorEnabled    = "sf_desc_smartSensorEnabled",
-    seeAndSprayEnabled    = "sf_desc_seeAndSprayEnabled",
     variableRateEnabled   = "sf_desc_variableRateEnabled",
     fieldBoundaryControl  = "sf_desc_fieldBoundaryControl",
     overlapPrevention     = "sf_desc_overlapPrevention",
@@ -295,12 +294,6 @@ local SMART_SYSTEMS_SECTIONS = {
         headerKey = "sf_panel_hdr_smart_sensor_sys",
         items     = {
             { stype = "setting", id = "smartSensorEnabled" },
-        },
-    },
-    {
-        headerKey = "sf_panel_hdr_see_spray_sys",
-        items     = {
-            { stype = "setting", id = "seeAndSprayEnabled" },
         },
     },
     {

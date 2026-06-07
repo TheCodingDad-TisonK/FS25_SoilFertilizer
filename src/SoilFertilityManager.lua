@@ -149,16 +149,6 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
             SoilLogger.info("Tuning panel created")
         end
 
-        -- Smart Sensor panel (System 1)
-        if SoilSmartSensorPanel then
-            self.smartSensorPanel = SoilSmartSensorPanel.new(self.soilSystem, self.settings)
-            SoilLogger.info("Smart Sensor panel created")
-        end
-        -- See & Spray panel (System 2)
-        if SoilSeeAndSprayPanel then
-            self.seeAndSprayPanel = SoilSeeAndSprayPanel.new(self.soilSystem, self.settings)
-            SoilLogger.info("See & Spray panel created")
-        end
         -- Variable Rate panel (System 3)
         if SoilVariableRatePanel then
             self.variableRatePanel = SoilVariableRatePanel.new(self.soilSystem, self.settings)
@@ -385,56 +375,11 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
                     SoilLogger.debug("Auto toggle (Shift+L) registered in VEHICLE context")
                 end
 
-                -- Smart Sensor toggles (Alt+1 / Alt+2 / Alt+3)
-                if g_SoilFertilityManager.sensorManager then
-                    local spOk, spId = binding:registerActionEvent(
-                        InputAction.SF_SENSOR_PEST, g_SoilFertilityManager,
-                        g_SoilFertilityManager.onSensorPestInput,
-                        false, true, false, true
-                    )
-                    if spOk and spId then
-                        g_SoilFertilityManager.sensorPestEventId = spId
-                        SoilLogger.debug("Sensor PEST toggle registered in VEHICLE context")
-                    end
-                    local sdOk, sdId = binding:registerActionEvent(
-                        InputAction.SF_SENSOR_DISEASE, g_SoilFertilityManager,
-                        g_SoilFertilityManager.onSensorDiseaseInput,
-                        false, true, false, true
-                    )
-                    if sdOk and sdId then
-                        g_SoilFertilityManager.sensorDiseaseEventId = sdId
-                        SoilLogger.debug("Sensor DISEASE toggle registered in VEHICLE context")
-                    end
-                    local snOk, snId = binding:registerActionEvent(
-                        InputAction.SF_SENSOR_NUTRIENT, g_SoilFertilityManager,
-                        g_SoilFertilityManager.onSensorNutrientInput,
-                        false, true, false, true
-                    )
-                    if snOk and snId then
-                        g_SoilFertilityManager.sensorNutrientEventId = snId
-                        SoilLogger.debug("Sensor NUTRIENT toggle registered in VEHICLE context")
-                    end
-
-                    -- See & Spray toggles (System 2)
-                    local ss1Ok, ss1Id = binding:registerActionEvent(
-                        InputAction.SF_SEE_SPRAY_PEST, g_SoilFertilityManager,
-                        g_SoilFertilityManager.onSeeSprayPestInput, false, true, false, true)
-                    if ss1Ok and ss1Id then g_SoilFertilityManager.seeSprayPestEventId = ss1Id end
-                    local ss2Ok, ss2Id = binding:registerActionEvent(
-                        InputAction.SF_SEE_SPRAY_DISEASE, g_SoilFertilityManager,
-                        g_SoilFertilityManager.onSeeSprayDiseaseInput, false, true, false, true)
-                    if ss2Ok and ss2Id then g_SoilFertilityManager.seeSprayDiseaseEventId = ss2Id end
-                    local ss3Ok, ss3Id = binding:registerActionEvent(
-                        InputAction.SF_SEE_SPRAY_WEED, g_SoilFertilityManager,
-                        g_SoilFertilityManager.onSeeSprayWeedInput, false, true, false, true)
-                    if ss3Ok and ss3Id then g_SoilFertilityManager.seeSprayWeedEventId = ss3Id end
-
-                    -- Variable Rate toggle (System 3)
-                    local vrOk, vrId = binding:registerActionEvent(
-                        InputAction.SF_VARIABLE_RATE, g_SoilFertilityManager,
-                        g_SoilFertilityManager.onVariableRateInput, false, true, false, true)
-                    if vrOk and vrId then g_SoilFertilityManager.variableRateEventId = vrId end
-                end
+                -- Variable Rate toggle (System 3)
+                local vrOk, vrId = binding:registerActionEvent(
+                    InputAction.SF_VARIABLE_RATE, g_SoilFertilityManager,
+                    g_SoilFertilityManager.onVariableRateInput, false, true, false, true)
+                if vrOk and vrId then g_SoilFertilityManager.variableRateEventId = vrId end
 
                 -- Settings panel (Shift+O) in VEHICLE context
                 if g_SoilFertilityManager.settingsPanel then
@@ -603,12 +548,6 @@ function SoilFertilityManager:onMissionLoaded()
             self.tuningPanel:initialize()
         end
 
-        if self.smartSensorPanel then
-            self.smartSensorPanel:initialize()
-        end
-        if self.seeAndSprayPanel then
-            self.seeAndSprayPanel:initialize()
-        end
         if self.variableRatePanel then
             self.variableRatePanel:initialize()
         end
@@ -876,56 +815,6 @@ local function showSensorMsg(name, on)
     if g_currentMission and g_currentMission.hud and g_currentMission.hud.showBlinkingWarning then
         g_currentMission.hud:showBlinkingWarning(txt, 2000)
     end
-end
-
-function SoilFertilityManager:onSensorPestInput()
-    local vehicle = getSensorVehicle()
-    if not vehicle or not self.sensorManager then return end
-    local newState = self.sensorManager:togglePest(vehicle.id)
-    showSensorMsg(g_i18n and g_i18n:getText("sf_sensor_pest") or "Pest Sensor", newState)
-    SoilLogger.debug("[SmartSensor] Pest sensor %s for vehicle %d", newState and "ON" or "OFF", vehicle.id)
-end
-
-function SoilFertilityManager:onSensorDiseaseInput()
-    local vehicle = getSensorVehicle()
-    if not vehicle or not self.sensorManager then return end
-    local newState = self.sensorManager:toggleDisease(vehicle.id)
-    showSensorMsg(g_i18n and g_i18n:getText("sf_sensor_disease") or "Disease Sensor", newState)
-    SoilLogger.debug("[SmartSensor] Disease sensor %s for vehicle %d", newState and "ON" or "OFF", vehicle.id)
-end
-
-function SoilFertilityManager:onSensorNutrientInput()
-    local vehicle = getSensorVehicle()
-    if not vehicle or not self.sensorManager then return end
-    local newState = self.sensorManager:toggleNutrient(vehicle.id)
-    showSensorMsg(g_i18n and g_i18n:getText("sf_sensor_nutrient") or "Nutrient Sensor", newState)
-    SoilLogger.debug("[SmartSensor] Nutrient sensor %s for vehicle %d", newState and "ON" or "OFF", vehicle.id)
-end
-
--- ── System 2: See & Spray input callbacks ─────────────────
-
-function SoilFertilityManager:onSeeSprayPestInput()
-    local vehicle = getSensorVehicle()
-    if not vehicle or not self.sensorManager then return end
-    local newState = self.sensorManager:toggleSeeSprayPest(vehicle.id)
-    showSensorMsg(g_i18n and g_i18n:getText("sf_see_spray_pest") or "See & Spray (Pest)", newState)
-    SoilLogger.debug("[SeeAndSpray] Pest %s for vehicle %d", newState and "ON" or "OFF", vehicle.id)
-end
-
-function SoilFertilityManager:onSeeSprayDiseaseInput()
-    local vehicle = getSensorVehicle()
-    if not vehicle or not self.sensorManager then return end
-    local newState = self.sensorManager:toggleSeeSprayDisease(vehicle.id)
-    showSensorMsg(g_i18n and g_i18n:getText("sf_see_spray_disease") or "See & Spray (Disease)", newState)
-    SoilLogger.debug("[SeeAndSpray] Disease %s for vehicle %d", newState and "ON" or "OFF", vehicle.id)
-end
-
-function SoilFertilityManager:onSeeSprayWeedInput()
-    local vehicle = getSensorVehicle()
-    if not vehicle or not self.sensorManager then return end
-    local newState = self.sensorManager:toggleSeeSprayWeed(vehicle.id)
-    showSensorMsg(g_i18n and g_i18n:getText("sf_see_spray_weed") or "See & Spray (Weed)", newState)
-    SoilLogger.debug("[SeeAndSpray] Weed %s for vehicle %d", newState and "ON" or "OFF", vehicle.id)
 end
 
 -- ── System 3: Variable Rate input callback ─────────────────
@@ -1457,14 +1346,6 @@ function SoilFertilityManager:delete()
     if self.sensorManager then
         self.sensorManager:delete()
         self.sensorManager = nil
-    end
-    if self.smartSensorPanel then
-        self.smartSensorPanel:delete()
-        self.smartSensorPanel = nil
-    end
-    if self.seeAndSprayPanel then
-        self.seeAndSprayPanel:delete()
-        self.seeAndSprayPanel = nil
     end
     if self.variableRatePanel then
         self.variableRatePanel:delete()

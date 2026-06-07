@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <l10n>
     <elements>
     <e k="sf_section" v="Půda &amp; Hnojivo" eh="f31197fb" />
@@ -785,7 +785,9 @@
     <e k="sf_variable_rate_long"           v="Povolit nebo zakázat aplikaci variabilní dávky podle deficitů půdy" />
     <e k="sf_desc_smartSensorEnabled"      v="Umožnit hráčům používat Chytrý senzor pro kontrolu sekcí ramene na základě živých dat půdy" />
     <e k="sf_desc_seeAndSprayEnabled"      v="Potlačit sekce ramene nad oblastmi, které nepotřebují postřik" />
-    <e k="sf_desc_variableRateEnabled"     v="Upravit míru aplikace na sekci podle deficitů živin v půdě" />
+    <e k="sf_config_seeSprayWeed"          v="See &amp; Spray: Weed" />
+    <e k="sf_config_seeSprayPest"          v="See &amp; Spray: Pest" />
+    <e k="sf_config_seeSprayDisease"       v="See &amp; Spray: Disease" />    <e k="sf_desc_variableRateEnabled"     v="Upravit míru aplikace na sekci podle deficitů živin v půdě" />
     <e k="sf_panel_hdr_field_boundary"     v="Kontrola hranice pole" />
     <e k="sf_field_boundary_short"         v="Kontrola hranice" />
     <e k="sf_field_boundary_long"          v="Povolit nebo zakázat automatickou kontrolu sekcí ramene na hranici pole" />
