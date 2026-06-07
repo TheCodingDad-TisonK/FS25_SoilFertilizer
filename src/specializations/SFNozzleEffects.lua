@@ -165,6 +165,10 @@ function SFNozzleEffects:onLoad(savegame)
     spec._sfFieldId    = nil
     spec._sfFieldTimer = 0
 
+    spec._groundTypeMapId   = nil
+    spec._groundTypeFirstCh = 0
+    spec._groundTypeNumCh   = 0
+
     spec.pendingNozzles = {}
     SoilLogger.debug("[SFNozzleEffects] onLoad: %s", tostring(self.configFileName))
 
@@ -250,6 +254,17 @@ function SFNozzleEffects:onPostLoad(savegame)
     end
 
     spec.pendingNozzles   = nil
+
+    -- Cache ground-type density map channels for the field boundary check.
+    -- Must extract only the GROUND_TYPE channel; reading the full terrainDetailId
+    -- packs in angle/spray bits that can be non-zero even on headland grass.
+    if g_currentMission and g_currentMission.fieldGroundSystem then
+        local mapId, firstCh, numCh = g_currentMission.fieldGroundSystem:getDensityMapData(FieldDensityMap.GROUND_TYPE)
+        spec._groundTypeMapId   = mapId
+        spec._groundTypeFirstCh = firstCh
+        spec._groundTypeNumCh   = numCh
+    end
+
     spec.numCustomEffects = #spec.sprayerEffects
     spec.hasCustomEffects = spec.numCustomEffects > 0
 
@@ -381,16 +396,36 @@ function SFNozzleEffects:updateExtendedSprayerNozzleEffectState(effectData, dt, 
         if section and not section.isActive then return false, 1 end
     end
 
-    -- Sub-meter field boundary: check exact nozzle world position against farmland map.
-    if g_farmlandManager and effectData.probeNode then
+    -- Sub-meter field boundary: two-pass check per nozzle.
+    -- Pass 1 — GROUND_TYPE channel only: 0 = FieldGroundType.NONE (grass/road).
+    --           Uses bit32 extraction to isolate the ground-type channel from the
+    --           packed terrain detail map. Reading the full terrainDetailId gives
+    --           false non-zero results at grass because angle/spray channels have
+    --           stale data there. Pattern from ExtendedSprayer / WeedSpotSpray.
+    -- Pass 2 — farmland map: suppresses nozzles that cross onto an adjacent field
+    --           parcel where both sides are cultivated (inter-field boundary).
+    local spec = self[SFNozzleEffects.SPEC_TABLE_NAME]
+    if effectData.probeNode then
         local ok, nx, _, nz = pcall(getWorldTranslation, effectData.probeNode)
-        if ok and nx and g_farmlandManager:getFarmlandIdAtWorldPosition(nx, nz) == 0 then
-            return false, 1
+        if ok and nx then
+            if spec._groundTypeMapId then
+                local rawBits      = getDensityAtWorldPos(spec._groundTypeMapId, nx, 0, nz)
+                local groundTypeValue = bit32.band(
+                    bit32.rshift(rawBits, spec._groundTypeFirstCh),
+                    2 ^ spec._groundTypeNumCh - 1)
+                if groundTypeValue == 0 then return false, 1 end
+            end
+            if g_farmlandManager then
+                local nFarmId = g_farmlandManager:getFarmlandIdAtWorldPosition(nx, nz)
+                local vFarmId = spec._sfFieldId
+                if nFarmId == 0 or (vFarmId and vFarmId > 0 and nFarmId ~= vFarmId) then
+                    return false, 1
+                end
+            end
         end
     end
 
     -- See & Spray: only active when the vehicle was purchased with that capability.
-    local spec = self[SFNozzleEffects.SPEC_TABLE_NAME]
     local hasAny = spec.seeSprayWeed or spec.seeSprayPest or spec.seeSprayDisease
     if not hasAny then return isTurnedOn, 1 end
 
