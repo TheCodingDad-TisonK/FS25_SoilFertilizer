@@ -24,14 +24,6 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
-    "- Fixed: Custom fertilizer piles load without texture warnings",
-    "- Fixed: Soil data tracked live per-nozzle during application",
-    "- Fixed: Field edge nozzle sections no longer lose coverage credit",
-    "- Fixed: See & Spray is now a vehicle shop config on JD R700i / R975i",
-    "  (no longer a runtime toggle key)",
-    "- Changed: Field Report dialog removed — detail is in PDA > Farm Overview",
-    "",
-    "v2.4.1.1 — Hotfix",
     "- Fixed: Dry spreader types (UREA, AMS, MAP, DAP, POTASH, etc.) now show",
     "  spreading visual correctly (was invisible before)",
     "- Fixed: HERBICIDE, INSECTICIDE, FUNGICIDE sprayer visuals restored",
