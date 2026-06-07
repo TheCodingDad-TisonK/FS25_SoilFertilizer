@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<i3D name="sprayerNozzleEffect" version="1.6" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://i3d.giants.ch/schema/i3d-1.6.xsd">
+
+  <Files>
+    <File fileId="1" filename="$data/shared/default_normal.png" />
+  </Files>
+
+  <Materials>
+    <Material name="default_mat" materialId="1" diffuseColor="0.5 0.5 0.5 1">
+      <Normalmap fileId="1"/>
+    </Material>
+  </Materials>
+
+
+  <Shapes externalShapesFile="sprayerNozzleEffect.i3d.shapes">
+  </Shapes>
+
+  <Scene>
+    <Shape name="nozzleEffect" shapeId="1" castsShadows="true" receiveShadows="true" materialIds="1" clipDistance="100" nodeId="1"/>
+  </Scene>
+
+  <UserAttributes>
+  </UserAttributes>
+</i3D>
