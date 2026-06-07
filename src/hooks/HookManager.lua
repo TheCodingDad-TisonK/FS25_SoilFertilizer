@@ -1854,8 +1854,11 @@ function HookManager:installSectionStatePreserver()
                 if not saved then return end
                 local vww = sprayerSelf.spec_variableWorkWidth
                 if vww and vww.sections then
+                    -- Don't restore sections suppressed by overlap prevention —
+                    -- they must stay isActive=false so SFNozzleEffects fades them out.
+                    local overlapSup = sprayerSelf._sfOverlapSuppressedSections
                     for i, section in ipairs(vww.sections) do
-                        if saved[i] ~= nil then
+                        if saved[i] ~= nil and (not overlapSup or not overlapSup[i]) then
                             section.isActive = saved[i]
                         end
                     end
@@ -4705,21 +4708,19 @@ function HookManager:installSprayerVisualEffectHook()
     local fertIdx    = fm:getFillTypeIndexByName("FERTILIZER")
     local liqFertIdx = fm:getFillTypeIndexByName("LIQUIDFERTILIZER")
 
-    -- Build remap: custom fill type index → vanilla fill type index (cosmetic only)
+    -- Build remap: custom fill type index → vanilla fill type index (cosmetic only).
+    -- LIQUID types only — solid types are intentionally EXCLUDED.
+    -- Solid types (UREA, AMS, MAP, DAP, etc.) use the vanilla path (remap returns nil →
+    -- just return), which lets vanilla's onEndWorkAreaProcessing/updateSprayerEffects manage
+    -- effects. This matches how AN works (AN is absent from this remap and works correctly).
+    -- The custom path (Sprayer.onUpdateTick appended) fires BEFORE WorkArea.onUpdateTick,
+    -- so getAreEffectsVisible() is false when our code runs — the stop-path kills effects
+    -- every tick for solid types. The vanilla path fires from onEndWorkAreaProcessing, which
+    -- runs AFTER processSprayerArea sets lastSprayTime → effectsVisible = true → effects start.
     local remap = {}
-    if fertIdx then
-        for _, name in ipairs({ "UREA", "AMS", "MAP", "DAP", "POTASH", "POLIFOSKA",
-                                 "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM" }) do
-            local idx = fm:getFillTypeIndexByName(name)
-            if idx then remap[idx] = fertIdx end
-        end
-    end
     if liqFertIdx then
-        -- INSECTICIDE/FUNGICIDE are intentionally excluded here — they have dedicated vehicle
-        -- slots (preserved by vanillaNames in installSprayTypeEffectsHook) and vanilla manages
-        -- their effects cleanly. Including them in the visual remap bypasses the slot lookup
-        -- and causes effects to never start on sprayers without a LIQUIDFERTILIZER slot.
         for _, name in ipairs({ "UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME",
+                                 "HERBICIDE", "INSECTICIDE", "FUNGICIDE",
                                  "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH" }) do
             local idx = fm:getFillTypeIndexByName(name)
             if idx then remap[idx] = liqFertIdx end
@@ -4830,17 +4831,13 @@ function HookManager:installSprayerVisualEffectHook()
             end
 
             if not vanillaFillType then
-                -- Vanilla fill type (HERBICIDE, INSECTICIDE, FUNGICIDE): let vanilla manage
-                -- effects entirely via getAreEffectsVisible() / updateSprayerEffects().
-                -- Calling stopSprayerEffects here desyncs vanilla's lastEffectsState,
-                -- causing effects to stay dark after any pause — vanilla sees no state
-                -- change on recovery and never restarts them.
                 return
             end
 
-            -- Gate on speed: no visual spray when standing still (matches our nutrient hook guard)
-            local speed = (sprayerSelf.getLastSpeed and sprayerSelf:getLastSpeed()) or 0
-            local effectsVisible = sprayerSelf:getAreEffectsVisible() and speed >= 0.5
+            -- getAreEffectsVisible() uses a 100ms window on lastSprayTime; if processSprayerArea
+            -- isn't running (vehicle stopped or empty) that window expires naturally — no speed
+            -- check needed. The speed check broke trailed spreaders whose getLastSpeed() returns 0.
+            local effectsVisible = sprayerSelf:getAreEffectsVisible()
 
             if isFolded then effectsVisible = false end
 
