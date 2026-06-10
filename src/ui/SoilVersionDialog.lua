@@ -24,6 +24,8 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
+    "- Fixed: See & Spray no longer drains tank when no target pressure is detected",
+    "  (insecticide/herbicide/fungicide now fail-closed: suppressed until target confirmed)",
     "- Fixed: Pest pressure no longer builds up on grass / forage fields",
     "  (grass, drygrass, clover, luzerne fields now skip pest growth and yield penalty)",
     "- Fixed: Soil compaction now accumulates during harvest and heavy vehicle driving",

@@ -514,18 +514,19 @@ function SFNozzleEffects:updateExtendedSprayerNozzleEffectState(effectData, dt, 
     if not isPest and not isDisease and not isWeed then return isTurnedOn, 1 end
 
     -- See & Spray threshold checks (per-cell using probeNode 1m ahead).
+    -- Fail-closed: suppress the nozzle until a target is positively confirmed.
     local sfm = g_SoilFertilityManager
-    if not sfm then return isTurnedOn, 1 end
+    if not sfm then return false, 1 end
 
     local fieldId = spec._sfFieldId
-    if not fieldId then return true, 1 end
+    if not fieldId then return false, 1 end
 
     local fd = sfm.soilSystem and sfm.soilSystem.fieldData[fieldId]
-    if not fd then return true, 1 end
+    if not fd then return false, 1 end
 
-    if not effectData.probeNode then return true, 1 end
+    if not effectData.probeNode then return false, 1 end
     local pok, px, _, pz = pcall(localToWorld, effectData.probeNode, 0, 0, 1)
-    if not pok then return true, 1 end
+    if not pok then return false, 1 end
 
     local cellKey = tostring(math.floor(px / CELL_SIZE) * 10000 + math.floor(pz / CELL_SIZE))
     local cell    = fd.zoneData and fd.zoneData[cellKey]
@@ -546,18 +547,23 @@ end
 
 -- Field-level See & Spray check for non-custom-nozzle vehicles (hasCustomEffects=false).
 -- Returns true → spray normally; false → suppress (no target pressure in this field).
+-- Fail-closed for See & Spray chemicals: suppress until a target is positively confirmed.
+-- Non-See&Spray fill types (fertilisers) are classified first and always return true.
 local function sfCheckFieldSeeSpraysTarget(spec, ft)
-    local sfm = g_SoilFertilityManager
-    if not sfm then return true end
-    local fieldId = spec._sfFieldId
-    if not fieldId then return true end
-    local fd = sfm.soilSystem and sfm.soilSystem.fieldData[fieldId]
-    if not fd or not ft then return true end
-    local ssCfg = SoilConstants.SEE_AND_SPRAY
+    if not ft then return true end
+    local ssCfg     = SoilConstants.SEE_AND_SPRAY
     local isPest    = spec.seeSprayPest    and SoilConstants.PEST_PRESSURE.INSECTICIDE_TYPES[ft.name]
     local isDisease = spec.seeSprayDisease and SoilConstants.DISEASE_PRESSURE.FUNGICIDE_TYPES[ft.name]
     local isWeed    = spec.seeSprayWeed    and SoilConstants.WEED_PRESSURE.HERBICIDE_TYPES[ft.name]
+    -- Not a See & Spray chemical (e.g. fertiliser) → always spray regardless of field state.
     if not isPest and not isDisease and not isWeed then return true end
+    -- It IS a See & Spray chemical — require a positive confirmation before allowing fluid.
+    local sfm = g_SoilFertilityManager
+    if not sfm then return false end
+    local fieldId = spec._sfFieldId
+    if not fieldId then return false end
+    local fd = sfm.soilSystem and sfm.soilSystem.fieldData[fieldId]
+    if not fd then return false end
     if isPest    and (fd.pestPressure    or 0) >= ssCfg.PEST_THRESHOLD    then return true end
     if isDisease and (fd.diseasePressure or 0) >= ssCfg.DISEASE_THRESHOLD then return true end
     if isWeed    and (fd.weedPressure    or 0) >= ssCfg.WEED_THRESHOLD
