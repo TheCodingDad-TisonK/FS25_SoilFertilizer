@@ -30,6 +30,13 @@ SoilVersionDialog.CHANGELOG = {
     "  (same root cause as the crash above)",
     "- Fixed: Nutrient status 'Good' now aligns with the crop's blue-tick optimum",
     "  (reaching the crop target no longer shows 'Fair')",
+    "- Fixed: Outer boom sections now show spray visuals when See & Spray is not purchased",
+    "  (field-boundary check was incorrectly suppressing nozzles over field edges)",
+    "- Fixed: Soil overlay blank on large/custom maps (Evergreen Coast etc.)",
+    "  (secondary field scan now adds owned farmlands to the active set)",
+    "- Fixed: Treatment dialog now shows lb/ac and gal/ac when imperial units is enabled",
+    "- Fixed: Herbicide applied via the FERTILIZER_PROFILES path now correctly",
+    "  prevents the daily weed-pressure update from overwriting the reduction",
 }
 
 -- ── i18n helper ───────────────────────────────────────────

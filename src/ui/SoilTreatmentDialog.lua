@@ -143,14 +143,31 @@ local function _rateString(profileKey, nutrientKey, deficit, rrMult, fieldArea)
     local baseRate = SoilConstants.SPRAYER_RATE.BASE_RATES[profileKey]
     if not profile or not profile[nutrientKey] or profile[nutrientKey] == 0 then return nil end
 
-    local coeff    = profile[nutrientKey]
+    local coeff     = profile[nutrientKey]
     local ratePerHa = deficit * 1000 / (coeff * rrMult)
     local total     = ratePerHa * fieldArea
-    local unit      = (baseRate and baseRate.unit == "dry") and "kg/ha" or "L/ha"
+    local isDry     = baseRate and baseRate.unit == "dry"
+    local useImp    = g_SoilFertilityManager and g_SoilFertilityManager.settings
+                        and g_SoilFertilityManager.settings.useImperialUnits
 
-    return string.format("%s %d %s (%d %s)",
-        profileKey, math.ceil(ratePerHa), unit,
-        math.ceil(total), (unit == "kg/ha") and "kg" or "L")
+    local displayRate, displayTotal, unit, totalUnit
+    if useImp then
+        if isDry then
+            displayRate  = math.ceil(ratePerHa * SoilConstants.KG_PER_HA_TO_LB_PER_AC)
+            displayTotal = math.ceil(total * 2.20462)
+            unit, totalUnit = "lb/ac", "lb"
+        else
+            displayRate  = math.ceil(ratePerHa * SoilConstants.L_PER_HA_TO_GAL_PER_AC)
+            displayTotal = math.ceil(total * 0.26417)
+            unit, totalUnit = "gal/ac", "gal"
+        end
+    else
+        displayRate  = math.ceil(ratePerHa)
+        displayTotal = math.ceil(total)
+        unit, totalUnit = isDry and "kg/ha" or "L/ha", isDry and "kg" or "L"
+    end
+
+    return string.format("%s %d %s (%d %s)", profileKey, displayRate, unit, displayTotal, totalUnit)
 end
 
 -- Builds a two-product action string for a nutrient, e.g.:
