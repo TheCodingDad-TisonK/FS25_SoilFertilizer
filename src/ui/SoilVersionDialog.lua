@@ -39,6 +39,8 @@ SoilVersionDialog.CHANGELOG = {
     "  prevents the daily weed-pressure update from overwriting the reduction",
     "- Fixed: See & Spray now works on sprayers without custom nozzle nodes (e.g. Condor)",
     "  (effects and fluid usage now suppressed correctly when no target pressure in field)",
+    "- Fixed: JD sprayer outer boom sections now spray fertilizer across the full width",
+    "  (field-boundary check was incorrectly suppressing outer sections for fertilizers)",
 }
 
 -- ── i18n helper ───────────────────────────────────────────
