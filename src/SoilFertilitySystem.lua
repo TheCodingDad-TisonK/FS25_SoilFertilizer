@@ -1404,6 +1404,10 @@ function SoilFertilitySystem:scanFields()
                 if self.layerSystem and self.layerSystem.available and farmlandObj then
                     self.layerSystem:readFieldFromLayers(farmlandId, self.fieldData[farmlandId], farmlandObj)
                 end
+                local farmlandOwner2 = g_farmlandManager:getFarmlandOwner(farmlandId)
+                if farmlandOwner2 and farmlandOwner2 > 0 then
+                    self:_addToActiveSet(farmlandId)
+                end
                 fieldCount = fieldCount + 1
                 SoilLogger.debug("Secondary scan caught missed farmland %d (%.2f ha)", farmlandId, flArea)
             end
@@ -2076,9 +2080,13 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
             -- 1-2 days — reading it would overwrite the pressure reduction from onHerbicideApplied.
             -- Under protection, or when herbicide was applied today (even partial coverage), only
             -- allow pressure to decrease — never let the daily weedFactor read undo a reduction.
-            local herbicideAppliedToday = self.herbicideDailyApplied and
-                self.herbicideDailyApplied[fieldId] and
-                self.herbicideDailyApplied[fieldId].day == currentDay
+            -- herbicideAppliedDay is set by onHerbicideApplied (FERTILIZER_PROFILES path);
+            -- herbicideDailyApplied is set by the direct-application path — check both.
+            local herbicideAppliedToday =
+                (self.herbicideDailyApplied and
+                 self.herbicideDailyApplied[fieldId] and
+                 self.herbicideDailyApplied[fieldId].day == currentDay)
+                or (self.herbicideAppliedDay[fieldId] == currentDay)
             local target = math.max(0, math.min(100, gameWeedFactor * 100))
             if (field.herbicideDaysLeft or 0) > 0 or herbicideAppliedToday then
                 -- Under herbicide protection: only allow pressure to decrease

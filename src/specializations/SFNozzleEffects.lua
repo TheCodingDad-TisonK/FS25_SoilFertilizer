@@ -398,6 +398,12 @@ function SFNozzleEffects:updateExtendedSprayerNozzleEffectState(effectData, dt, 
 
     local spec = self[SFNozzleEffects.SPEC_TABLE_NAME]
 
+    -- Passes 1-3 and See & Spray threshold checks only apply when at least one See & Spray
+    -- feature is purchased.  Without it every active VWW section sprays normally, matching
+    -- vanilla behaviour (all nozzles on regardless of field-boundary or nutrient state).
+    local hasAny = spec.seeSprayWeed or spec.seeSprayPest or spec.seeSprayDisease
+    if not hasAny then return isTurnedOn, 1 end
+
     -- Resolve fill type once — shared by Pass 3 nutrient check and See & Spray below.
     local sprayerSpec = self.spec_sprayer
     local wap = sprayerSpec and sprayerSpec.workAreaParameters
@@ -406,6 +412,8 @@ function SFNozzleEffects:updateExtendedSprayerNozzleEffectState(effectData, dt, 
     if fillTypeIndex and fillTypeIndex ~= 0 then
         ft = g_fillTypeManager and g_fillTypeManager:getFillTypeByIndex(fillTypeIndex)
     end
+
+    if not ft then return isTurnedOn, 1 end
 
     -- Probe nozzle world position once — reused for all three passes below.
     local probeX, probeZ
@@ -436,11 +444,11 @@ function SFNozzleEffects:updateExtendedSprayerNozzleEffectState(effectData, dt, 
         end
 
         -- Pass 3: nutrient adequacy — suppress visual when this cell already has enough
-        -- of every nutrient the current fill type contributes. No vehicle config needed.
+        -- of every nutrient the current fill type contributes.
         -- Suppresses only when ALL contributing criteria are met: a DAP nozzle over a
         -- high-N/low-P cell keeps spraying for the P benefit even if N is already full.
         local sfm = g_SoilFertilityManager
-        local prof = ft and SoilConstants.FERTILIZER_PROFILES and SoilConstants.FERTILIZER_PROFILES[ft.name]
+        local prof = SoilConstants.FERTILIZER_PROFILES and SoilConstants.FERTILIZER_PROFILES[ft.name]
         if sfm and sfm.soilSystem and prof then
             local fieldId = spec._sfFieldId
             local fd = fieldId and sfm.soilSystem.fieldData[fieldId]
@@ -467,12 +475,6 @@ function SFNozzleEffects:updateExtendedSprayerNozzleEffectState(effectData, dt, 
             end
         end
     end
-
-    -- See & Spray: only active when the vehicle was purchased with that capability.
-    local hasAny = spec.seeSprayWeed or spec.seeSprayPest or spec.seeSprayDisease
-    if not hasAny then return isTurnedOn, 1 end
-
-    if not ft then return isTurnedOn, 1 end
 
     local ssCfg = SoilConstants.SEE_AND_SPRAY
     local isPest    = spec.seeSprayPest    and SoilConstants.PEST_PRESSURE.INSECTICIDE_TYPES[ft.name]
