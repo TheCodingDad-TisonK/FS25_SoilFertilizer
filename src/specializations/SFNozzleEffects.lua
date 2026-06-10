@@ -294,7 +294,34 @@ end
 
 function SFNozzleEffects:onUpdate(dt, isActiveForInput, isActiveForInputIgnoreSelection, isSelected)
     local spec = self[SFNozzleEffects.SPEC_TABLE_NAME]
-    if not spec.hasCustomEffects then return end
+    if not spec.hasCustomEffects then
+        -- Non-custom-nozzle vehicles (e.g. Condor) still need the field ID cache when
+        -- See & Spray is purchased so that getAreEffectsVisible / getSprayerUsage can
+        -- suppress effects and consumption when there is no target pressure.
+        local hasAny = spec.seeSprayWeed or spec.seeSprayPest or spec.seeSprayDisease
+        if hasAny then
+            spec._sfFieldTimer = spec._sfFieldTimer + dt
+            if spec._sfFieldTimer >= 1000 then
+                spec._sfFieldTimer = 0
+                local sfm = g_SoilFertilityManager
+                if sfm and sfm.soilSystem then
+                    local pok, rx, _, rz = pcall(getWorldTranslation, self.rootNode)
+                    if pok and rx then
+                        local fieldId = nil
+                        local fok, f = pcall(function() return g_fieldManager:getFieldAtWorldPosition(rx, rz) end)
+                        if fok and f and f.farmland then
+                            fieldId = f.farmland.id
+                        elseif g_farmlandManager then
+                            local lok, fl = pcall(function() return g_farmlandManager:getFarmlandAtWorldPosition(rx, rz) end)
+                            if lok and fl and fl.id and fl.id > 0 then fieldId = fl.id end
+                        end
+                        spec._sfFieldId = fieldId
+                    end
+                end
+            end
+        end
+        return
+    end
 
     -- Deferred effect node setup: i3d may not have been ready at onPostLoad time.
     if spec._effectsPending then
@@ -415,7 +442,16 @@ function SFNozzleEffects:updateExtendedSprayerNozzleEffectState(effectData, dt, 
 
     if not ft then return isTurnedOn, 1 end
 
-    -- Probe nozzle world position once — reused for all three passes below.
+    -- Classify the fill type before probing so field-boundary passes can be selectively
+    -- applied.  Passes 1+2 only gate See & Spray chemicals (herbicide / insecticide /
+    -- fungicide).  Fertilisers must NOT be gated — outer boom sections that cross the
+    -- headland edge while the vehicle is inside the field should still spray.
+    local ssCfg     = SoilConstants.SEE_AND_SPRAY
+    local isPest    = spec.seeSprayPest    and SoilConstants.PEST_PRESSURE.INSECTICIDE_TYPES[ft.name]
+    local isDisease = spec.seeSprayDisease and SoilConstants.DISEASE_PRESSURE.FUNGICIDE_TYPES[ft.name]
+    local isWeed    = spec.seeSprayWeed    and SoilConstants.WEED_PRESSURE.HERBICIDE_TYPES[ft.name]
+
+    -- Probe nozzle world position once — reused for all passes below.
     local probeX, probeZ
     if effectData.probeNode then
         local ok, nx, _, nz = pcall(getWorldTranslation, effectData.probeNode)
@@ -423,46 +459,44 @@ function SFNozzleEffects:updateExtendedSprayerNozzleEffectState(effectData, dt, 
     end
 
     if probeX then
-        -- Pass 1: GROUND_TYPE channel — off-field (grass / road) → suppress.
-        -- Bit-extracted from the packed terrain detail map; reading the full raw value
-        -- gives false non-zero at headland grass because angle/spray bits stay stale.
-        if spec._groundTypeMapId then
-            local rawBits = getDensityAtWorldPos(spec._groundTypeMapId, probeX, 0, probeZ)
-            local groundTypeValue = bit32.band(
-                bit32.rshift(rawBits, spec._groundTypeFirstCh),
-                2 ^ spec._groundTypeNumCh - 1)
-            if groundTypeValue == 0 then return false, 1 end
-        end
+        -- Passes 1+2: field-boundary checks — See & Spray chemicals only.
+        -- Fertiliser outer boom sections crossing the headland must not be gated here.
+        if isPest or isDisease or isWeed then
+            -- Pass 1: GROUND_TYPE channel — off-field (grass / road) → suppress.
+            if spec._groundTypeMapId then
+                local rawBits = getDensityAtWorldPos(spec._groundTypeMapId, probeX, 0, probeZ)
+                local groundTypeValue = bit32.band(
+                    bit32.rshift(rawBits, spec._groundTypeFirstCh),
+                    2 ^ spec._groundTypeNumCh - 1)
+                if groundTypeValue == 0 then return false, 1 end
+            end
 
-        -- Pass 2: farmland ID — crossing onto an adjacent parcel → suppress.
-        if g_farmlandManager then
-            local nFarmId = g_farmlandManager:getFarmlandIdAtWorldPosition(probeX, probeZ)
-            local vFarmId = spec._sfFieldId
-            if nFarmId == 0 or (vFarmId and vFarmId > 0 and nFarmId ~= vFarmId) then
-                return false, 1
+            -- Pass 2: farmland ID — crossing onto an adjacent parcel → suppress.
+            if g_farmlandManager then
+                local nFarmId = g_farmlandManager:getFarmlandIdAtWorldPosition(probeX, probeZ)
+                local vFarmId = spec._sfFieldId
+                if nFarmId == 0 or (vFarmId and vFarmId > 0 and nFarmId ~= vFarmId) then
+                    return false, 1
+                end
             end
         end
 
         -- Pass 3: nutrient adequacy — suppress visual when this cell already has enough
-        -- of every nutrient the current fill type contributes.
-        -- Suppresses only when ALL contributing criteria are met: a DAP nozzle over a
-        -- high-N/low-P cell keeps spraying for the P benefit even if N is already full.
-        local sfm = g_SoilFertilityManager
-        local prof = SoilConstants.FERTILIZER_PROFILES and SoilConstants.FERTILIZER_PROFILES[ft.name]
-        if sfm and sfm.soilSystem and prof then
-            local fieldId = spec._sfFieldId
-            local fd = fieldId and sfm.soilSystem.fieldData[fieldId]
-            if fd then
+        -- of every nutrient the current fill type contributes.  Fertilisers only (never
+        -- triggers for herbicide / insecticide / fungicide which have no FERTILIZER_PROFILE).
+        local sfm3 = g_SoilFertilityManager
+        local prof  = SoilConstants.FERTILIZER_PROFILES and SoilConstants.FERTILIZER_PROFILES[ft.name]
+        if sfm3 and sfm3.soilSystem and prof then
+            local fieldId3 = spec._sfFieldId
+            local fd3 = fieldId3 and sfm3.soilSystem.fieldData[fieldId3]
+            if fd3 then
                 local cellKey = tostring(math.floor(probeX / CELL_SIZE) * 10000 + math.floor(probeZ / CELL_SIZE))
-                local cell    = fd.zoneData and fd.zoneData[cellKey]
-                -- Cell values are kept live by applyFertilizer (updated every frame while
-                -- spraying). For cells not yet visited by the boom, fall back to the field
-                -- average which is always current.
-                local cellN  = (cell and cell.N)  or fd.nitrogen      or 0
-                local cellP  = (cell and cell.P)  or fd.phosphorus    or 0
-                local cellK  = (cell and cell.K)  or fd.potassium     or 0
-                local cellPH = (cell and cell.pH) or fd.pH            or SoilConstants.NUTRIENT_LIMITS.PH_OPTIMAL
-                local cellOM = (cell and cell.OM) or fd.organicMatter or SoilConstants.FIELD_DEFAULTS.organicMatter
+                local cell    = fd3.zoneData and fd3.zoneData[cellKey]
+                local cellN  = (cell and cell.N)  or fd3.nitrogen      or 0
+                local cellP  = (cell and cell.P)  or fd3.phosphorus    or 0
+                local cellK  = (cell and cell.K)  or fd3.potassium     or 0
+                local cellPH = (cell and cell.pH) or fd3.pH            or SoilConstants.NUTRIENT_LIMITS.PH_OPTIMAL
+                local cellOM = (cell and cell.OM) or fd3.organicMatter or SoilConstants.FIELD_DEFAULTS.organicMatter
                 local tgt     = SoilConstants.SPRAYER_RATE.AUTO_RATE_TARGETS
                 local adequate, anyCriteria = true, false
                 if (prof.N  or 0) > 0 then adequate = adequate and (cellN  >= tgt.N );  anyCriteria = true end
@@ -476,14 +510,10 @@ function SFNozzleEffects:updateExtendedSprayerNozzleEffectState(effectData, dt, 
         end
     end
 
-    local ssCfg = SoilConstants.SEE_AND_SPRAY
-    local isPest    = spec.seeSprayPest    and SoilConstants.PEST_PRESSURE.INSECTICIDE_TYPES[ft.name]
-    local isDisease = spec.seeSprayDisease and SoilConstants.DISEASE_PRESSURE.FUNGICIDE_TYPES[ft.name]
-    local isWeed    = spec.seeSprayWeed    and SoilConstants.WEED_PRESSURE.HERBICIDE_TYPES[ft.name]
-
-    -- Not a targeted chemical — spray normally.
+    -- Not a targeted See & Spray chemical — spray normally (fertilisers reach here).
     if not isPest and not isDisease and not isWeed then return isTurnedOn, 1 end
 
+    -- See & Spray threshold checks (per-cell using probeNode 1m ahead).
     local sfm = g_SoilFertilityManager
     if not sfm then return isTurnedOn, 1 end
 
@@ -493,7 +523,6 @@ function SFNozzleEffects:updateExtendedSprayerNozzleEffectState(effectData, dt, 
     local fd = sfm.soilSystem and sfm.soilSystem.fieldData[fieldId]
     if not fd then return true, 1 end
 
-    -- Probe 1m ahead in the nozzle's forward direction to get the soil cell.
     if not effectData.probeNode then return true, 1 end
     local pok, px, _, pz = pcall(localToWorld, effectData.probeNode, 0, 0, 1)
     if not pok then return true, 1 end
@@ -515,10 +544,40 @@ end
 
 -- ── Overwritten functions ─────────────────────────────────────────────────────
 
+-- Field-level See & Spray check for non-custom-nozzle vehicles (hasCustomEffects=false).
+-- Returns true → spray normally; false → suppress (no target pressure in this field).
+local function sfCheckFieldSeeSpraysTarget(spec, ft)
+    local sfm = g_SoilFertilityManager
+    if not sfm then return true end
+    local fieldId = spec._sfFieldId
+    if not fieldId then return true end
+    local fd = sfm.soilSystem and sfm.soilSystem.fieldData[fieldId]
+    if not fd or not ft then return true end
+    local ssCfg = SoilConstants.SEE_AND_SPRAY
+    local isPest    = spec.seeSprayPest    and SoilConstants.PEST_PRESSURE.INSECTICIDE_TYPES[ft.name]
+    local isDisease = spec.seeSprayDisease and SoilConstants.DISEASE_PRESSURE.FUNGICIDE_TYPES[ft.name]
+    local isWeed    = spec.seeSprayWeed    and SoilConstants.WEED_PRESSURE.HERBICIDE_TYPES[ft.name]
+    if not isPest and not isDisease and not isWeed then return true end
+    if isPest    and (fd.pestPressure    or 0) >= ssCfg.PEST_THRESHOLD    then return true end
+    if isDisease and (fd.diseasePressure or 0) >= ssCfg.DISEASE_THRESHOLD then return true end
+    if isWeed    and (fd.weedPressure    or 0) >= ssCfg.WEED_THRESHOLD
+        and not (fd.herbicideDaysLeft and fd.herbicideDaysLeft > 0)       then return true end
+    return false
+end
+
 -- Suppress vanilla spray particle effects — our shader planes handle the visual.
+-- For non-custom-nozzle vehicles with See & Spray purchased, suppress when no target.
 function SFNozzleEffects:getAreEffectsVisible(superFunc)
-    if self[SFNozzleEffects.SPEC_TABLE_NAME].hasCustomEffects then
-        return false
+    local spec = self[SFNozzleEffects.SPEC_TABLE_NAME]
+    if spec.hasCustomEffects then return false end
+    local hasAny = spec.seeSprayWeed or spec.seeSprayPest or spec.seeSprayDisease
+    if hasAny then
+        local sprayerSpec = self.spec_sprayer
+        local wap = sprayerSpec and sprayerSpec.workAreaParameters
+        local fillTypeIndex = wap and wap.sprayFillType
+        local ft = (fillTypeIndex and fillTypeIndex ~= 0)
+            and g_fillTypeManager and g_fillTypeManager:getFillTypeByIndex(fillTypeIndex)
+        if not sfCheckFieldSeeSpraysTarget(spec, ft) then return false end
     end
     return superFunc(self)
 end
@@ -537,6 +596,7 @@ function SFNozzleEffects:getNumExtendedSprayerNozzleEffectsActive()
 end
 
 -- Scale spray fluid consumption by the fraction of active nozzles.
+-- Non-custom-nozzle vehicles with See & Spray purchased drop to zero when no target.
 function SFNozzleEffects:getSprayerUsage(superFunc, fillType, dt)
     local usage = superFunc(self, fillType, dt)
     local spec  = self[SFNozzleEffects.SPEC_TABLE_NAME]
@@ -546,6 +606,16 @@ function SFNozzleEffects:getSprayerUsage(superFunc, fillType, dt)
         usage = usage * alpha
         if (self.getIsAIActive ~= nil and self:getIsAIActive()) and usage == 0 then
             usage = 0.0001
+        end
+    elseif not spec.hasCustomEffects and hasAny then
+        local sprayerSpec = self.spec_sprayer
+        local wap = sprayerSpec and sprayerSpec.workAreaParameters
+        local fillTypeIndex = wap and wap.sprayFillType
+        local ft = (fillTypeIndex and fillTypeIndex ~= 0)
+            and g_fillTypeManager and g_fillTypeManager:getFillTypeByIndex(fillTypeIndex)
+        if not sfCheckFieldSeeSpraysTarget(spec, ft) then
+            usage = 0
+            if (self.getIsAIActive ~= nil and self:getIsAIActive()) then usage = 0.0001 end
         end
     end
     return usage
