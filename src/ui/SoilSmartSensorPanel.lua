@@ -232,7 +232,15 @@ function SoilSmartSensorPanel:drawPanel(sprayer, sfm)
     local panelH    = collapsed and titleH or fullPanelH
 
     local stackedX = hud.panelX
-    local stackedY = (hud.panelY - gap - ratePanelH) - SoilSmartSensorPanel.GAP * s - panelH
+    -- Stack below variableRatePanel if it drew this frame, else below the sprayer rate bar
+    local vrPanel = sfm and sfm.variableRatePanel
+    local baseY
+    if vrPanel and vrPanel.lastDrawRect then
+        baseY = vrPanel.lastDrawRect.y
+    else
+        baseY = hud.panelY - gap - ratePanelH
+    end
+    local stackedY = baseY - SoilSmartSensorPanel.GAP * s - panelH
 
     -- Free position when independent mode is on
     local panelX, panelY
