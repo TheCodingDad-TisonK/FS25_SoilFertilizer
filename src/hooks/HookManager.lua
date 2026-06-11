@@ -1054,8 +1054,10 @@ function HookManager:installSectionControlHook()
             local sfm = g_SoilFertilityManager
             if not sfm or not sfm.sensorManager or not sfm.soilSystem then return end
 
-            -- Field Boundary Enforcement: suppress boom sections whose outer tip
-            -- extends outside the current field polygon or onto an adjacent field.
+            -- Field Boundary Enforcement + Overlap Prevention:
+            -- (1) Suppress boom sections whose outer tip extends outside the current field.
+            -- (2) Suppress boom sections whose outer tip is in a cell already sprayed this session.
+            -- Both checks share the same tip position cache and section loop.
             -- Independent of Smart Sensor — applies to every fill type when enabled.
             if sfm.settings and sfm.settings.fieldBoundaryControl then
                 local vwwBE = sprayerSelf.spec_variableWorkWidth
@@ -1066,21 +1068,43 @@ function HookManager:installSectionControlHook()
                     if rx then
                         local vehicleFieldId = hookMgrRef:getFieldIdAtWorldPosition(rx, rz)
                         local tips = sprayerSelf._sfSectionTip
+
+                        -- Pre-fetch sessionCoverageCells for this field (nil if no data yet)
+                        local soilSysRef   = sfm.soilSystem
+                        local fieldDataRef = soilSysRef and soilSysRef.fieldData
+                        local fieldEntry   = (fieldDataRef and vehicleFieldId and vehicleFieldId > 0)
+                                            and fieldDataRef[vehicleFieldId] or nil
+                        local coveredCells = fieldEntry and fieldEntry.sessionCoverageCells or nil
+                        local zoneCell     = SoilConstants.ZONE and SoilConstants.ZONE.CELL_SIZE or 10
+
                         for i, section in ipairs(vwwBE.sections) do
                             if section.isActive and not section.isCenter then
-                                -- Boundary uses full tip position (not midpoint).
-                                -- Skip check when no tip is available — falling back to root
-                                -- position gives a false "in field" result for outer sections.
+                                -- Boundary + overlap use the outer tip position.
+                                -- Skip when no tip available — root fallback gives false "in field".
                                 local tip = tips and tips[i]
                                 if tip then
                                     local sx = tip[1]
                                     local sz = tip[2]
+
+                                    -- (1) Boundary: tip must be in the same field as the vehicle
                                     local fid = hookMgrRef:getFieldIdAtWorldPosition(sx, sz)
                                     if not fid or fid <= 0 or
                                        (vehicleFieldId and vehicleFieldId > 0 and fid ~= vehicleFieldId) then
                                         section.isActive = false
                                         if not sprayerSelf._sfSuppressedSections then sprayerSelf._sfSuppressedSections = {} end
                                         sprayerSelf._sfSuppressedSections[i] = true
+                                    end
+
+                                    -- (2) Overlap: tip cell already visited this session → re-spray suppressed
+                                    if section.isActive and coveredCells then
+                                        local cx      = math.floor(sx / zoneCell)
+                                        local cz      = math.floor(sz / zoneCell)
+                                        local cellKey = tostring(cx * 10000 + cz)
+                                        if coveredCells[cellKey] then
+                                            section.isActive = false
+                                            if not sprayerSelf._sfSuppressedSections then sprayerSelf._sfSuppressedSections = {} end
+                                            sprayerSelf._sfSuppressedSections[i] = true
+                                        end
                                     end
                                 end
                             end
