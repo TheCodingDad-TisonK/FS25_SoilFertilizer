@@ -458,6 +458,12 @@ function SFNozzleEffects:updateExtendedSprayerNozzleEffectState(effectData, dt, 
         if ok and nx then probeX, probeZ = nx, nz end
     end
 
+    -- Farmland ID resolved from the nozzle probe position (filled by Pass 2).
+    -- Used for the threshold check so the tractor body being on the headland or a road
+    -- does not suppress nozzles that are still over the crop (spec._sfFieldId is cached
+    -- from the vehicle root and can be nil during headland turns).
+    local nozzleFarmId = nil
+
     if probeX then
         -- Passes 1+2: field-boundary checks — See & Spray chemicals only.
         -- Fertiliser outer boom sections crossing the headland must not be gated here.
@@ -472,12 +478,15 @@ function SFNozzleEffects:updateExtendedSprayerNozzleEffectState(effectData, dt, 
             end
 
             -- Pass 2: farmland ID — crossing onto an adjacent parcel → suppress.
+            -- Save the validated farmland ID so the threshold check can use the nozzle
+            -- probe position instead of the vehicle-root cache (spec._sfFieldId).
             if g_farmlandManager then
                 local nFarmId = g_farmlandManager:getFarmlandIdAtWorldPosition(probeX, probeZ)
                 local vFarmId = spec._sfFieldId
                 if nFarmId == 0 or (vFarmId and vFarmId > 0 and nFarmId ~= vFarmId) then
                     return false, 1
                 end
+                if nFarmId > 0 then nozzleFarmId = nFarmId end
             end
         end
 
@@ -487,7 +496,7 @@ function SFNozzleEffects:updateExtendedSprayerNozzleEffectState(effectData, dt, 
         local sfm3 = g_SoilFertilityManager
         local prof  = SoilConstants.FERTILIZER_PROFILES and SoilConstants.FERTILIZER_PROFILES[ft.name]
         if sfm3 and sfm3.soilSystem and prof then
-            local fieldId3 = spec._sfFieldId
+            local fieldId3 = nozzleFarmId or spec._sfFieldId
             local fd3 = fieldId3 and sfm3.soilSystem.fieldData[fieldId3]
             if fd3 then
                 local cellKey = tostring(math.floor(probeX / CELL_SIZE) * 10000 + math.floor(probeZ / CELL_SIZE))
@@ -518,7 +527,9 @@ function SFNozzleEffects:updateExtendedSprayerNozzleEffectState(effectData, dt, 
     local sfm = g_SoilFertilityManager
     if not sfm then return false, 1 end
 
-    local fieldId = spec._sfFieldId
+    -- Prefer the farmland ID resolved from the nozzle probe position (Pass 2).
+    -- Fall back to the vehicle-root cache only when the probe position was unavailable.
+    local fieldId = nozzleFarmId or spec._sfFieldId
     if not fieldId then return false, 1 end
 
     local fd = sfm.soilSystem and sfm.soilSystem.fieldData[fieldId]
