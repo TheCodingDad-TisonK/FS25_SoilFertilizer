@@ -1068,16 +1068,20 @@ function HookManager:installSectionControlHook()
                         local tips = sprayerSelf._sfSectionTip
                         for i, section in ipairs(vwwBE.sections) do
                             if section.isActive and not section.isCenter then
-                                -- Boundary uses full tip position (not midpoint)
+                                -- Boundary uses full tip position (not midpoint).
+                                -- Skip check when no tip is available — falling back to root
+                                -- position gives a false "in field" result for outer sections.
                                 local tip = tips and tips[i]
-                                local sx = tip and tip[1] or rx
-                                local sz = tip and tip[2] or rz
-                                local fid = hookMgrRef:getFieldIdAtWorldPosition(sx, sz)
-                                if not fid or fid <= 0 or
-                                   (vehicleFieldId and vehicleFieldId > 0 and fid ~= vehicleFieldId) then
-                                    section.isActive = false
-                                    if not sprayerSelf._sfSuppressedSections then sprayerSelf._sfSuppressedSections = {} end
-                                    sprayerSelf._sfSuppressedSections[i] = true
+                                if tip then
+                                    local sx = tip[1]
+                                    local sz = tip[2]
+                                    local fid = hookMgrRef:getFieldIdAtWorldPosition(sx, sz)
+                                    if not fid or fid <= 0 or
+                                       (vehicleFieldId and vehicleFieldId > 0 and fid ~= vehicleFieldId) then
+                                        section.isActive = false
+                                        if not sprayerSelf._sfSuppressedSections then sprayerSelf._sfSuppressedSections = {} end
+                                        sprayerSelf._sfSuppressedSections[i] = true
+                                    end
                                 end
                             end
                         end
@@ -1848,8 +1852,23 @@ function HookManager:installSectionStatePreserver()
                 end
                 for i, section in ipairs(vww.sections) do
                     saved[i] = (prevOverlapSup and prevOverlapSup[i] ~= nil) and true or section.isActive
-                    if section.maxWidthNode then
-                        local ok, wx, _, wz = pcall(getWorldTranslation, section.maxWidthNode)
+                    -- Prefer the dedicated maxWidthNode (outer edge of boom section).
+                    -- Fall back to workArea.width for sprayers that define sections via
+                    -- work area geometry instead of an explicit maxWidthNode.
+                    local tipNode = section.maxWidthNode
+                    if not tipNode then
+                        local waSpec = sprayerSelf.spec_workArea
+                        if waSpec and waSpec.workAreas then
+                            for _, wa in ipairs(waSpec.workAreas) do
+                                if wa.sectionIndex == i and wa.width then
+                                    tipNode = wa.width
+                                    break
+                                end
+                            end
+                        end
+                    end
+                    if tipNode then
+                        local ok, wx, _, wz = pcall(getWorldTranslation, tipNode)
                         if ok and wx then
                             local t = tips[i]
                             if not t then t = {}; tips[i] = t end
