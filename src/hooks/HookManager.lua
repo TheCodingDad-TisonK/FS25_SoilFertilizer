@@ -1678,12 +1678,19 @@ function HookManager:installOverlapPreventionHook()
                             if checkFert then
                                 lvlModifier:setParallelogramWorldCoords(
                                     px, pz, px + 0.1, pz, px, pz + 0.1, DensityCoordType.POINT_POINT_POINT)
-                                local lvl = lvlModifier:executeGet(lvlFilter, nil)
+                                -- Check how many pixels in this area are AT max spray level.
+                                -- executeGet returns (sumPixels, numMatchingPixels, total) — use
+                                -- numMatchingPixels (2nd return) with an EQUAL filter so that
+                                -- multi-pixel areas on high-res maps (16x etc.) don't produce false
+                                -- positives via a sumPixels > 0 test (#600).  Only suppress when
+                                -- the area is FULLY fertilized (at lvlMax), not merely touched.
+                                lvlFilter:setValueCompareParams(DensityValueCompareType.EQUAL, lvlMax)
+                                local _, numAtMax, _ = lvlModifier:executeGet(lvlFilter, nil)
                                 if doLog and i <= 4 then
-                                    SoilLogger.debug("[OverlapPrev]   sec%d px=%.1f pz=%.1f lvl=%s lvlMax=%s",
-                                        i, px, pz, tostring(lvl), tostring(lvlMax))
+                                    SoilLogger.debug("[OverlapPrev]   sec%d px=%.1f pz=%.1f numAtMax=%s lvlMax=%s",
+                                        i, px, pz, tostring(numAtMax), tostring(lvlMax))
                                 end
-                                return lvl ~= nil and lvl > 0
+                                return numAtMax ~= nil and numAtMax > 0
                             elseif checkLime then
                                 stModifier:setParallelogramWorldCoords(
                                     px, pz, px + 0.1, pz, px, pz + 0.1, DensityCoordType.POINT_POINT_POINT)
@@ -3302,11 +3309,13 @@ function HookManager:installFillUnitHookEarly()
     end
 
     local solidNames         = {"UREA", "AN", "AMS", "MAP", "DAP", "POTASH", "POLIFOSKA",
-                                 "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM"}
+                                 "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM", "LIME"}
     local liquidNames        = {"UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME", "INSECTICIDE", "FUNGICIDE",
                                 "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH"}
     -- Organic dry types also work in manure spreaders (MANURE fill-unit base)
     local manureCompatNames  = {"COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE"}
+    -- GYPSUM is physically applied the same way as lime; inject it into dedicated lime spreaders
+    local limeCompatNames    = {"GYPSUM"}
 
     local original = FillUnit.onPostLoad
     FillUnit.onPostLoad = Utils.prependedFunction(original, function(vehicleSelf)
@@ -3315,6 +3324,7 @@ function HookManager:installFillUnitHookEarly()
         local fertIdx    = fm:getFillTypeIndexByName("FERTILIZER")
         local liqFertIdx = fm:getFillTypeIndexByName("LIQUIDFERTILIZER")
         local manureIdx  = fm:getFillTypeIndexByName("MANURE")
+        local limeIdx    = fm:getFillTypeIndexByName("LIME")
         local spec = vehicleSelf.spec_fillUnit
         if not spec or not spec.fillUnits then return end
         for _, fu in pairs(spec.fillUnits) do
@@ -3322,6 +3332,7 @@ function HookManager:installFillUnitHookEarly()
                 local addSolid  = fertIdx    and fu.supportedFillTypes[fertIdx]
                 local addLiquid = liqFertIdx and fu.supportedFillTypes[liqFertIdx]
                 local addManure = manureIdx  and fu.supportedFillTypes[manureIdx]
+                local addLime   = limeIdx    and fu.supportedFillTypes[limeIdx]
                 if addSolid then
                     for _, name in ipairs(solidNames) do
                         local idx = fm:getFillTypeIndexByName(name)
@@ -3336,6 +3347,12 @@ function HookManager:installFillUnitHookEarly()
                 end
                 if addManure then
                     for _, name in ipairs(manureCompatNames) do
+                        local idx = fm:getFillTypeIndexByName(name)
+                        if idx then fu.supportedFillTypes[idx] = true end
+                    end
+                end
+                if addLime then
+                    for _, name in ipairs(limeCompatNames) do
                         local idx = fm:getFillTypeIndexByName(name)
                         if idx then fu.supportedFillTypes[idx] = true end
                     end
@@ -3416,25 +3433,31 @@ function HookManager:installFillUnitHook()
     -- CHICKEN_MANURE (organic dry products) were accepted by trailers (which
     -- support both) but rejected by dedicated spreaders (MANURE-only fill unit).
     local manureIndex = fm:getFillTypeIndexByName("MANURE")
+    local limeIndex   = fm:getFillTypeIndexByName("LIME")
 
     local solidNames  = {"UREA", "AN", "AMS", "MAP", "DAP", "POTASH", "POLIFOSKA",
-                          "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM"}
+                          "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM", "LIME"}
     local liquidNames = {"UAN32", "UAN28", "ANHYDROUS", "STARTER", "LIQUIDLIME", "INSECTICIDE", "FUNGICIDE",
                          "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH"}
     -- Organic dry types also work in manure spreaders (MANURE fill-unit base).
     local manureCompatNames = {"COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE"}
+    -- GYPSUM is physically applied the same way as lime; inject into dedicated lime spreaders.
+    local limeCompatNames   = {"GYPSUM"}
     -- Store for deferred re-patch (dedi server timing fix)
     self._fuSolidNames  = solidNames
     self._fuLiquidNames = liquidNames
     self._fuManureCompatNames = manureCompatNames
+    self._fuLimeCompatNames   = limeCompatNames
     self._fuFertIndex    = fertIndex
     self._fuLiqFertIndex = liqFertIndex
     self._fuManureIndex  = manureIndex
+    self._fuLimeIndex    = limeIndex
     self._fuFm           = fm
 
-    local solidIndices       = {}
-    local liquidIndices      = {}
+    local solidIndices        = {}
+    local liquidIndices       = {}
     local manureCompatIndices = {}
+    local limeCompatIndices   = {}
     for _, name in ipairs(solidNames) do
         local idx = fm:getFillTypeIndexByName(name)
         if idx then table.insert(solidIndices, idx) end
@@ -3446,6 +3469,10 @@ function HookManager:installFillUnitHook()
     for _, name in ipairs(manureCompatNames) do
         local idx = fm:getFillTypeIndexByName(name)
         if idx then table.insert(manureCompatIndices, idx) end
+    end
+    for _, name in ipairs(limeCompatNames) do
+        local idx = fm:getFillTypeIndexByName(name)
+        if idx then table.insert(limeCompatIndices, idx) end
     end
 
     -- Category-based indices: safety net for fill types in our fillTypes.xml not yet in solidNames
@@ -3478,6 +3505,8 @@ function HookManager:installFillUnitHook()
                 local addLiquid = liqFertIndex and fillUnit.supportedFillTypes[liqFertIndex]
                 -- Manure spreaders support MANURE; enable organic dry types for them too
                 local addManure = manureIndex  and fillUnit.supportedFillTypes[manureIndex]
+                -- Dedicated lime spreaders support LIME; enable GYPSUM for them too
+                local addLime   = limeIndex    and fillUnit.supportedFillTypes[limeIndex]
                 if addSolid then
                     for _, idx in ipairs(solidIndices) do
                         fillUnit.supportedFillTypes[idx] = true
@@ -3490,6 +3519,11 @@ function HookManager:installFillUnitHook()
                 end
                 if addManure then
                     for _, idx in ipairs(manureCompatIndices) do
+                        fillUnit.supportedFillTypes[idx] = true
+                    end
+                end
+                if addLime then
+                    for _, idx in ipairs(limeCompatIndices) do
                         fillUnit.supportedFillTypes[idx] = true
                     end
                 end
@@ -3529,8 +3563,9 @@ function HookManager:installFillUnitHook()
 
     -- Build customToBase: custom fill type index → vanilla base type index.
     -- Used by getFillUnitSupportsFillType hook below.
-    local customToBase  = {}
+    local customToBase   = {}
     local customToManure = {}  -- organic dry types that also fit in MANURE-based fill units
+    local customToLime   = {}  -- lime-compatible types (GYPSUM) that fit in LIME-based fill units
     if fertIndex then
         for _, idx in ipairs(solidIndices) do
             customToBase[idx] = fertIndex
@@ -3546,6 +3581,11 @@ function HookManager:installFillUnitHook()
             customToManure[idx] = manureIndex
         end
     end
+    if limeIndex then
+        for _, idx in ipairs(limeCompatIndices) do
+            customToLime[idx] = limeIndex
+        end
+    end
 
     -- Hook getFillUnitSupportsFillType so Dischargeable:dischargeToObject (vehicle-to-vehicle
     -- auger wagon → spreader, tanker → sprayer, etc.) passes the fill type check for our
@@ -3554,7 +3594,7 @@ function HookManager:installFillUnitHook()
     -- table. Wrapping the method directly is the belt-and-suspenders fix.
     --
     -- Logic: if the vehicle supports the corresponding vanilla base type (FERTILIZER or
-    -- LIQUIDFERTILIZER or MANURE), it also supports the matching custom type.
+    -- LIQUIDFERTILIZER or MANURE or LIME), it also supports the matching custom type.
     if FillUnit.getFillUnitSupportsFillType then
         local origGetSupports = FillUnit.getFillUnitSupportsFillType
         FillUnit.getFillUnitSupportsFillType = function(vehicleSelf, fillUnitIndex, fillType)
@@ -3570,6 +3610,11 @@ function HookManager:installFillUnitHook()
             -- Organic dry types (BIOSOLIDS, CHICKEN_MANURE) also fit MANURE-based fill units.
             local manureBase = customToManure[fillType]
             if manureBase and origGetSupports(vehicleSelf, fillUnitIndex, manureBase) then
+                return true
+            end
+            -- GYPSUM fits LIME-based fill units (dedicated lime spreaders).
+            local limeBase = customToLime[fillType]
+            if limeBase and origGetSupports(vehicleSelf, fillUnitIndex, limeBase) then
                 return true
             end
             -- Category-based fallback: support any fill type in the "fertilizer" /
@@ -3631,8 +3676,9 @@ function HookManager:reapplyFillUnitPatch()
     local fertIdx    = self._fuFertIndex    or fm:getFillTypeIndexByName("FERTILIZER")
     local liqFertIdx = self._fuLiqFertIndex or fm:getFillTypeIndexByName("LIQUIDFERTILIZER")
     local manureIdx  = self._fuManureIndex  or fm:getFillTypeIndexByName("MANURE")
+    local limeIdx    = self._fuLimeIndex    or fm:getFillTypeIndexByName("LIME")
 
-    local solidIdxs, liquidIdxs, manureIdxs = {}, {}, {}
+    local solidIdxs, liquidIdxs, manureIdxs, limeIdxs = {}, {}, {}, {}
     local found, missing = 0, 0
     for _, name in ipairs(self._fuSolidNames or {}) do
         local idx = fm:getFillTypeIndexByName(name)
@@ -3646,6 +3692,10 @@ function HookManager:reapplyFillUnitPatch()
     for _, name in ipairs(self._fuManureCompatNames or {}) do
         local idx = fm:getFillTypeIndexByName(name)
         if idx then table.insert(manureIdxs, idx) end
+    end
+    for _, name in ipairs(self._fuLimeCompatNames or {}) do
+        local idx = fm:getFillTypeIndexByName(name)
+        if idx then table.insert(limeIdxs, idx) end
     end
 
     if found == 0 then return false end  -- still not available
@@ -3662,9 +3712,11 @@ function HookManager:reapplyFillUnitPatch()
                     local addSolid  = fertIdx    and fillUnit.supportedFillTypes[fertIdx]
                     local addLiquid = liqFertIdx and fillUnit.supportedFillTypes[liqFertIdx]
                     local addManure = manureIdx  and fillUnit.supportedFillTypes[manureIdx]
+                    local addLime   = limeIdx    and fillUnit.supportedFillTypes[limeIdx]
                     if addSolid  then for _, idx in ipairs(solidIdxs)  do fillUnit.supportedFillTypes[idx] = true end end
                     if addLiquid then for _, idx in ipairs(liquidIdxs) do fillUnit.supportedFillTypes[idx] = true end end
                     if addManure then for _, idx in ipairs(manureIdxs) do fillUnit.supportedFillTypes[idx] = true end end
+                    if addLime   then for _, idx in ipairs(limeIdxs)   do fillUnit.supportedFillTypes[idx] = true end end
                 end
             end
         end
