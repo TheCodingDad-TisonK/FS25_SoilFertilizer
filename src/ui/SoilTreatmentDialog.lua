@@ -153,11 +153,11 @@ local function _rateString(profileKey, nutrientKey, deficit, rrMult, fieldArea)
     local displayRate, displayTotal, unit, totalUnit
     if useImp then
         if isDry then
-            displayRate  = math.ceil(ratePerHa * SoilConstants.KG_PER_HA_TO_LB_PER_AC)
+            displayRate  = math.ceil(ratePerHa * SoilConstants.SPRAYER_RATE.KG_PER_HA_TO_LB_PER_AC)
             displayTotal = math.ceil(total * 2.20462)
             unit, totalUnit = "lb/ac", "lb"
         else
-            displayRate  = math.ceil(ratePerHa * SoilConstants.L_PER_HA_TO_GAL_PER_AC)
+            displayRate  = math.ceil(ratePerHa * SoilConstants.SPRAYER_RATE.L_PER_HA_TO_GAL_PER_AC)
             displayTotal = math.ceil(total * 0.26417)
             unit, totalUnit = "gal/ac", "gal"
         end
