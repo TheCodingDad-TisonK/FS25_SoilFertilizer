@@ -295,32 +295,32 @@ function SoilMinimapLayer:draw(mapSelf)
         end
         -- Still show the layer indicator in the polygon fallback path
         if layerIdx > 0 then
-            local layout = mapSelf.layout
-            if layout and layout.getMapSize and layout.getMapPosition then
-                local iw, ih = layout:getMapSize()
-                local ix, iy = layout:getMapPosition()
-                self:drawLayerIndicator(ix, iy, iw, ih, layerIdx)
-            end
+            self:drawLayerIndicator(mapSelf:getPosition(), mapSelf:getWidth(), mapSelf:getHeight(), layerIdx)
         end
         return
     end
 
     if layerIdx <= 0 then return end
 
-    local ovEntry = self._overlays[layerIdx]
-    if not ovEntry or not ovEntry.hasShown then return end
-
-    local ov = ovEntry.ov
-    if not ov then return end
-
     -- Map terrain-space → screen rect using the same math the game uses for
     -- its built-in BMP overlay layers (proven in v2.2.5).
     local layout = mapSelf.layout
     if not layout then return end
 
+    -- Draw the layer indicator before any overlay-readiness or layout-type guards
+    -- that might return early. mapSelf inherits HUDElement — getPosition/getWidth/
+    -- getHeight return the minimap widget's screen-space bounds.
+    self:drawLayerIndicator(mapSelf:getPosition(), mapSelf:getWidth(), mapSelf:getHeight(), layerIdx)
+
     -- Circle minimap rotates with the vehicle heading; our terrain-space overlay doesn't
     -- transform correctly in that coordinate frame and drifts. Skip until fixed (#578).
     if layout:isa(IngameMapLayoutCircle) then return end
+
+    local ovEntry = self._overlays[layerIdx]
+    if not ovEntry or not ovEntry.hasShown then return end
+
+    local ov = ovEntry.ov
+    if not ov then return end
 
     local w, h   = layout:getMapSize()
     local x, y   = layout:getMapPosition()
@@ -390,12 +390,6 @@ function SoilMinimapLayer:draw(mapSelf)
         self:drawHarvestTrailDots(mapSelf)
         self:drawTillageTrailDots(mapSelf)
     end
-
-    -- Use the raw widget rect (not the clipped terrain rect) so the label always
-    -- lands in the top-left corner of the minimap widget regardless of zoom/offset.
-    local indW, indH = layout:getMapSize()
-    local indX, indY = layout:getMapPosition()
-    self:drawLayerIndicator(indX, indY, indW, indH, layerIdx)
 end
 
 -- Short labels for each layer index (displayed in minimap corner).
