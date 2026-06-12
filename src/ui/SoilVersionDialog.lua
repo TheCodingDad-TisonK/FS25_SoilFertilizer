@@ -24,6 +24,9 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
+    "- Fixed: Overlap prevention no longer shuts off boom sections on pre-fertilized or",
+    "  previously-sprayed fields (density-map approach replaced with session-cell tracking;",
+    "  only ground sprayed in the current session can trigger suppression — #600)",
     "- Fixed: Field boundary section control now works on all sprayer types",
     "  (tip node selected by furthest-from-root distance; correct for JD, Condor, and vanilla sprayers)",
     "- Added: Overlap prevention — boom sections auto-shut-off over already-sprayed ground",
