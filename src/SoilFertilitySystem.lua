@@ -3017,8 +3017,10 @@ function SoilFertilitySystem:markBoomCells(fieldId, boomPoints)
     field.coverageFraction        = math.min(1.0, (field.coveredAreaHa  or 0) / areaInHa)
     field.sessionCoverageFraction = math.min(1.0, (field.sessionCoverageHa or 0) / areaInHa)
 
-    -- Full pass complete — clear trail so the overlay disappears as a visual reward
-    if (field.sessionCoverageFraction or 0) >= 1.0 and field.sprayTrailPts then
+    -- Full pass complete — clear trail so the overlay disappears as a visual reward.
+    -- Match the 0.99 threshold used by overlap prevention so dots clear when the
+    -- sprayer auto-shuts off rather than requiring the last fractional percent.
+    if (field.sessionCoverageFraction or 0) >= 0.99 and field.sprayTrailPts then
         field.sprayTrailPts = nil
     end
 end

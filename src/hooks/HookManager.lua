@@ -1653,12 +1653,20 @@ function HookManager:installOverlapPreventionHook()
             -- Get this session's coverage cells for the current field.
             -- These are stamped by markBoomCells() inside onStartWorkAreaProcessing
             -- (the frame AFTER spray), so they represent ground sprayed in prior frames.
+            -- When the vehicle root is on the headland / just outside the field boundary,
+            -- fall back to the last known field ID so the 99% gate still fires.
             local vehicleFieldId = hookMgrRef:getFieldIdAtWorldPosition(rootX, rootZ)
+            if not vehicleFieldId or vehicleFieldId <= 0 then
+                vehicleFieldId = sprayerSelf._sfLastKnownFieldId
+            end
             if not vehicleFieldId or vehicleFieldId <= 0 then return end
 
             local soilSys   = sfm.soilSystem
             local fieldData = soilSys and soilSys.fieldData
             local fieldEntry = fieldData and fieldData[vehicleFieldId]
+
+            -- Keep the last known field ID fresh for headland fallback.
+            if fieldEntry then sprayerSelf._sfLastKnownFieldId = vehicleFieldId end
             local coveredCells = fieldEntry and fieldEntry.sessionCoverageCells
             -- If no cells have been stamped yet this session, nothing to suppress.
             -- Clear any stale suppression so sections don't stay locked.
