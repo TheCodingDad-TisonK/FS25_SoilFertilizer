@@ -1054,8 +1054,12 @@ function HookManager:installSectionControlHook()
             local sfm = g_SoilFertilityManager
             if not sfm or not sfm.sensorManager or not sfm.soilSystem then return end
 
-            -- Field Boundary Enforcement: suppress boom sections whose outer tip
-            -- extends outside the current field polygon or onto an adjacent field.
+            -- Field Boundary Enforcement + Overlap Prevention:
+            -- (1) Suppress boom sections whose outer tip extends outside the current field.
+            -- (2) Suppress boom sections whose outer tip (or root for center) is in a cell
+            --     already sprayed this session AND stamped more than OVERLAP_GRACE_MS ago.
+            --     The grace period prevents self-suppression on the current forward pass:
+            --     a cell stamped < 20 s ago is still "fresh" and won't block its own section.
             -- Independent of Smart Sensor — applies to every fill type when enabled.
             if sfm.settings and sfm.settings.fieldBoundaryControl then
                 local vwwBE = sprayerSelf.spec_variableWorkWidth
@@ -1066,18 +1070,59 @@ function HookManager:installSectionControlHook()
                     if rx then
                         local vehicleFieldId = hookMgrRef:getFieldIdAtWorldPosition(rx, rz)
                         local tips = sprayerSelf._sfSectionTip
+
+                        -- Pre-fetch overlap state for this field
+                        local soilSysRef   = sfm.soilSystem
+                        local fieldDataRef = soilSysRef and soilSysRef.fieldData
+                        local fieldEntry   = (fieldDataRef and vehicleFieldId and vehicleFieldId > 0)
+                                            and fieldDataRef[vehicleFieldId] or nil
+                        local coveredCells = fieldEntry and fieldEntry.sessionCoverageCells or nil
+                        local zoneCell     = SoilConstants.ZONE and SoilConstants.ZONE.CELL_SIZE or 10
+                        local graceMs      = SoilConstants.ZONE and SoilConstants.ZONE.OVERLAP_GRACE_MS or 20000
+                        local nowMs        = g_currentMission and g_currentMission.time or 0
+
                         for i, section in ipairs(vwwBE.sections) do
-                            if section.isActive and not section.isCenter then
-                                -- Boundary uses full tip position (not midpoint)
-                                local tip = tips and tips[i]
-                                local sx = tip and tip[1] or rx
-                                local sz = tip and tip[2] or rz
-                                local fid = hookMgrRef:getFieldIdAtWorldPosition(sx, sz)
-                                if not fid or fid <= 0 or
-                                   (vehicleFieldId and vehicleFieldId > 0 and fid ~= vehicleFieldId) then
-                                    section.isActive = false
-                                    if not sprayerSelf._sfSuppressedSections then sprayerSelf._sfSuppressedSections = {} end
-                                    sprayerSelf._sfSuppressedSections[i] = true
+                            if section.isActive then
+                                -- Determine position to check:
+                                -- Non-center sections use the cached outer tip.
+                                -- Center section uses the vehicle root (no tip node).
+                                local sx, sz
+                                if section.isCenter then
+                                    sx = rx
+                                    sz = rz
+                                else
+                                    local tip = tips and tips[i]
+                                    if tip then
+                                        sx = tip[1]
+                                        sz = tip[2]
+                                    end
+                                end
+
+                                if sx then
+                                    -- (1) Boundary: non-center tip must be in the same field.
+                                    --     Center section is always on the vehicle root — skip.
+                                    if not section.isCenter then
+                                        local fid = hookMgrRef:getFieldIdAtWorldPosition(sx, sz)
+                                        if not fid or fid <= 0 or
+                                           (vehicleFieldId and vehicleFieldId > 0 and fid ~= vehicleFieldId) then
+                                            section.isActive = false
+                                            if not sprayerSelf._sfSuppressedSections then sprayerSelf._sfSuppressedSections = {} end
+                                            sprayerSelf._sfSuppressedSections[i] = true
+                                        end
+                                    end
+
+                                    -- (2) Overlap: cell already visited AND older than grace period.
+                                    if section.isActive and coveredCells then
+                                        local cx      = math.floor(sx / zoneCell)
+                                        local cz      = math.floor(sz / zoneCell)
+                                        local cellKey = tostring(cx * 10000 + cz)
+                                        local stampMs = coveredCells[cellKey]
+                                        if stampMs and (nowMs - stampMs) > graceMs then
+                                            section.isActive = false
+                                            if not sprayerSelf._sfSuppressedSections then sprayerSelf._sfSuppressedSections = {} end
+                                            sprayerSelf._sfSuppressedSections[i] = true
+                                        end
+                                    end
                                 end
                             end
                         end
@@ -1507,14 +1552,25 @@ function HookManager:installVariableRateHook()
 end
 
 -- =========================================================
--- OVERLAP PREVENTION: density-map-based nozzle shutoff
+-- OVERLAP PREVENTION: session-cell-based nozzle shutoff
 -- =========================================================
--- Appended to onStartWorkAreaProcessing (after VariableRate, before StatePreserver).
--- For each active VWW section, reads the FS25 SPRAY_LEVEL density map channel at
--- the section midpoint. If the cell is already at maximum spray level (i.e. fully
--- fertilized this season), that section is suppressed so the nozzle does not
--- re-apply product on overlapping swaths.
--- Lime uses SPRAY_TYPE detection instead (lime does not use a level counter).
+-- Prepended to onStartWorkAreaProcessing (before VWW processes work areas).
+-- For each non-center VWW section, checks whether the section tip's 10×10 m cell
+-- was already sprayed by this sprayer during the current session (tracked in
+-- sessionCoverageCells with a timestamp).  If the cell was stamped more than
+-- OVERLAP_GRACE_MS ago, the section is suppressed so the nozzle does not
+-- re-apply product on overlapping headland swaths.
+--
+-- Uses session coverage cells rather than the SPRAY_LEVEL density map.
+-- The density-map approach (EQUAL lvlMax) was unreliable because:
+--   • getMaxValue() returns the maximum that CAN be stored (e.g. 2 for a 2-bit
+--     field), which equals the game's "fully fertilised" state — so any field
+--     that was fertilised to completion in a previous season or earlier in the
+--     same game-day reads as "already done" and suppresses all wing sections
+--     the moment the sprayer enters, regardless of whether the player has
+--     sprayed anything this pass (#600 persisted after the EQUAL fix).
+-- Session cells are reset on harvest, product change, and game load, so they
+-- only ever reflect what this sprayer session has actually applied.
 -- StatePreserver restores section.isActive after work areas process — no permanent lock.
 -- No-ops when the overlapPrevention setting is disabled.
 function HookManager:installOverlapPreventionHook()
@@ -1523,68 +1579,37 @@ function HookManager:installOverlapPreventionHook()
         return false
     end
 
-    -- Build fill-type lookup tables at install time.
+    local hookMgrRef = self
+
+    -- Build fill-type lookup table at install time.
     -- We cannot rely on stDesc.isFertilizer for SF custom types — Lua-registered
     -- spray types via addSprayType() do not inherit the isFertilizer flag from the
     -- display type.  Use explicit name lists instead (same approach as SmartSensor).
-    local fertFillTypes = {}  -- fillTypeIndex → true (use SPRAY_LEVEL check)
-    local limeFillTypes = {}  -- fillTypeIndex → true (use SPRAY_TYPE check)
+    -- Lime is included: we track lime application via session cells the same way.
+    local trackableFillTypes = {}  -- fillTypeIndex → true
 
-    local function addFTByName(tbl, name)
+    local function addFTByName(name)
         local ft = g_fillTypeManager and g_fillTypeManager:getFillTypeByName(name)
-        if ft then tbl[ft.index] = true end
+        if ft then trackableFillTypes[ft.index] = true end
     end
 
-    -- Vanilla fertilizer fill types (isFertilizer is reliable for these)
+    -- Vanilla fertilizer fill types
     for _, name in ipairs({ "FERTILIZER", "LIQUIDFERTILIZER", "MANURE", "LIQUIDMANURE", "DIGESTATE" }) do
-        addFTByName(fertFillTypes, name)
+        addFTByName(name)
     end
-    -- SF custom liquid fertilizers (excludes INSECTICIDE/FUNGICIDE which are pest/disease products)
+    -- SF custom liquid fertilizers (excludes INSECTICIDE/FUNGICIDE)
     for _, name in ipairs({ "UAN32", "UAN28", "ANHYDROUS", "STARTER",
                              "LIQUID_UREA", "LIQUID_AMS", "LIQUID_MAP", "LIQUID_DAP", "LIQUID_POTASH" }) do
-        addFTByName(fertFillTypes, name)
+        addFTByName(name)
     end
     -- SF custom solid fertilizers
     for _, name in ipairs({ "UREA", "AMS", "AN", "MAP", "DAP", "POTASH", "POLIFOSKA",
                              "COMPOST", "BIOSOLIDS", "CHICKEN_MANURE", "PELLETIZED_MANURE", "GYPSUM" }) do
-        addFTByName(fertFillTypes, name)
+        addFTByName(name)
     end
-    -- Lime fill types (SPRAY_TYPE check, not SPRAY_LEVEL)
+    -- Lime fill types
     for _, name in ipairs({ "LIME", "LIQUIDLIME" }) do
-        addFTByName(limeFillTypes, name)
-    end
-
-    -- Density map handles: lazy-initialised on first call after the mission loads.
-    local lvlMapId, lvlFirstCh, lvlNumCh = nil, nil, nil
-    local lvlMax                          = nil
-    local lvlModifier, lvlFilter          = nil, nil
-
-    local stMapId, stFirstCh, stNumCh    = nil, nil, nil
-    local stModifier, stFilter            = nil, nil
-
-    local limeGroundType                  = nil
-
-    local function initHandles()
-        if lvlMapId then return true end
-        local mission = g_currentMission
-        if not mission or not mission.fieldGroundSystem then return false end
-        local fgs = mission.fieldGroundSystem
-
-        local ok = pcall(function()
-            lvlMapId, lvlFirstCh, lvlNumCh = fgs:getDensityMapData(FieldDensityMap.SPRAY_LEVEL)
-            lvlMax = fgs:getMaxValue(FieldDensityMap.SPRAY_LEVEL)
-            stMapId, stFirstCh, stNumCh    = fgs:getDensityMapData(FieldDensityMap.SPRAY_TYPE)
-        end)
-        if not ok or not lvlMapId or not stMapId then return false end
-
-        lvlModifier = DensityMapModifier.new(lvlMapId, lvlFirstCh, lvlNumCh, g_terrainNode)
-        lvlFilter   = DensityMapFilter.new(lvlModifier)
-        stModifier  = DensityMapModifier.new(stMapId,  stFirstCh,  stNumCh,  g_terrainNode)
-        stFilter    = DensityMapFilter.new(stModifier)
-
-        local limeST = g_sprayTypeManager and g_sprayTypeManager:getSprayTypeByName("LIME")
-        limeGroundType = limeST and limeST.sprayGroundType
-        return true
+        addFTByName(name)
     end
 
     -- Throttle for debug diagnostic logging: log once per ~2 s per sprayer
@@ -1610,9 +1635,7 @@ function HookManager:installOverlapPreventionHook()
             local fillTypeIndex = wap.sprayFillType
             if not fillTypeIndex or fillTypeIndex == 0 then return end
 
-            local checkFert = fertFillTypes[fillTypeIndex] == true
-            local checkLime = limeFillTypes[fillTypeIndex] == true
-            if not checkFert and not checkLime then
+            if not trackableFillTypes[fillTypeIndex] then
                 -- Clear any stale suppression left over from a prior fertilizer fill type.
                 -- Without this, switching from LIQUIDFERTILIZER to FUNGICIDE/HERBICIDE leaves
                 -- _sfOverlapSuppressedSections populated, which blocks section state restoration
@@ -1623,23 +1646,44 @@ function HookManager:installOverlapPreventionHook()
                 return
             end
 
-            if not initHandles() then return end
-
             local rootX = sprayerSelf._sfRootX
             local rootZ = sprayerSelf._sfRootZ
             if not rootX then return end
+
+            -- Get this session's coverage cells for the current field.
+            -- These are stamped by markBoomCells() inside onStartWorkAreaProcessing
+            -- (the frame AFTER spray), so they represent ground sprayed in prior frames.
+            local vehicleFieldId = hookMgrRef:getFieldIdAtWorldPosition(rootX, rootZ)
+            if not vehicleFieldId or vehicleFieldId <= 0 then return end
+
+            local soilSys   = sfm.soilSystem
+            local fieldData = soilSys and soilSys.fieldData
+            local fieldEntry = fieldData and fieldData[vehicleFieldId]
+            local coveredCells = fieldEntry and fieldEntry.sessionCoverageCells
+            -- If no cells have been stamped yet this session, nothing to suppress.
+            -- Clear any stale suppression so sections don't stay locked.
+            if not coveredCells or not next(coveredCells) then
+                if sprayerSelf._sfOverlapSuppressedSections then
+                    sprayerSelf._sfOverlapSuppressedSections = {}
+                end
+                return
+            end
+
+            local zone    = SoilConstants.ZONE
+            local zoneCell = zone and zone.CELL_SIZE or 10
+            local graceMs  = zone and zone.OVERLAP_GRACE_MS or 20000
+            local nowMs    = g_currentMission and g_currentMission.time or 0
 
             local tips = sprayerSelf._sfSectionTip
 
             -- Debug diagnostic: throttled to once per ~2s per sprayer instance
             local debugEnabled = sfm.settings and sfm.settings.debugMode
-            local now = g_currentMission and g_currentMission.time or 0
             local vid = tostring(sprayerSelf)
-            local doLog = debugEnabled and (not dbgLogThrottle[vid] or (now - dbgLogThrottle[vid]) > 2000)
+            local doLog = debugEnabled and (not dbgLogThrottle[vid] or (nowMs - dbgLogThrottle[vid]) > 2000)
             if doLog then
-                dbgLogThrottle[vid] = now
-                SoilLogger.debug("[OverlapPrev] ft=%d checkFert=%s lvlMax=%s rootX=%.1f rootZ=%.1f",
-                    fillTypeIndex, tostring(checkFert), tostring(lvlMax), rootX, rootZ)
+                dbgLogThrottle[vid] = nowMs
+                SoilLogger.debug("[OverlapPrev] ft=%d fieldId=%d rootX=%.1f rootZ=%.1f graceMs=%d",
+                    fillTypeIndex, vehicleFieldId, rootX, rootZ, graceMs)
             end
 
             -- Transition-based effect management:
@@ -1664,43 +1708,22 @@ function HookManager:installOverlapPreventionHook()
                     -- second pass, the tractor track is already sprayed and all tip-less
                     -- wing sections would be suppressed, leaving only the center spraying.
                     if tip then
-                        -- Sample ONLY at TIP (outermost edge of this section's coverage).
-                        -- If the outer edge is on already-sprayed ground, the section is fully
-                        -- covered → suppress.  If the outer edge is fresh, let it spray even if
-                        -- the midpoint overlaps a previous swath.  The old midpoint OR check
-                        -- caused false positives for sections straddling the swath boundary.
+                        -- Check ONLY the TIP cell (outermost edge of this section's coverage).
+                        -- If the outer edge's cell was stamped by us this session and the stamp
+                        -- is older than graceMs, the section is fully covered → suppress.
                         local tx = tip[1]
                         local tz = tip[2]
 
-                        local alreadySprayed = false
+                        local cx = math.floor(tx / zoneCell)
+                        local cz = math.floor(tz / zoneCell)
+                        local cellKey = tostring(cx * 10000 + cz)
+                        local stampMs = coveredCells[cellKey]
+                        local alreadySprayed = stampMs ~= nil and (nowMs - stampMs) > graceMs
 
-                        local function checkPoint(px, pz)
-                            if checkFert then
-                                lvlModifier:setParallelogramWorldCoords(
-                                    px, pz, px + 0.1, pz, px, pz + 0.1, DensityCoordType.POINT_POINT_POINT)
-                                -- Check how many pixels in this area are AT max spray level.
-                                -- executeGet returns (sumPixels, numMatchingPixels, total) — use
-                                -- numMatchingPixels (2nd return) with an EQUAL filter so that
-                                -- multi-pixel areas on high-res maps (16x etc.) don't produce false
-                                -- positives via a sumPixels > 0 test (#600).  Only suppress when
-                                -- the area is FULLY fertilized (at lvlMax), not merely touched.
-                                lvlFilter:setValueCompareParams(DensityValueCompareType.EQUAL, lvlMax)
-                                local _, numAtMax, _ = lvlModifier:executeGet(lvlFilter, nil)
-                                if doLog and i <= 4 then
-                                    SoilLogger.debug("[OverlapPrev]   sec%d px=%.1f pz=%.1f numAtMax=%s lvlMax=%s",
-                                        i, px, pz, tostring(numAtMax), tostring(lvlMax))
-                                end
-                                return numAtMax ~= nil and numAtMax > 0
-                            elseif checkLime then
-                                stModifier:setParallelogramWorldCoords(
-                                    px, pz, px + 0.1, pz, px, pz + 0.1, DensityCoordType.POINT_POINT_POINT)
-                                local stype = stModifier:executeGet(stFilter, nil)
-                                return stype ~= nil and limeGroundType ~= nil and stype == limeGroundType
-                            end
-                            return false
+                        if doLog and i <= 4 then
+                            SoilLogger.debug("[OverlapPrev]   sec%d tx=%.1f tz=%.1f stampMs=%s graceOk=%s",
+                                i, tx, tz, tostring(stampMs), tostring(alreadySprayed))
                         end
-
-                        alreadySprayed = checkPoint(tx, tz)
 
                         if alreadySprayed then
                             section.isActive = false
@@ -1747,7 +1770,7 @@ function HookManager:installOverlapPreventionHook()
 
     self:register(Sprayer, "onStartWorkAreaProcessing", origStart,
         "Sprayer.onStartWorkAreaProcessing (SF overlap prevention)")
-    SoilLogger.info("[OK] SF Overlap Prevention hook installed — SPRAY_LEVEL density-map nozzle shutoff active")
+    SoilLogger.info("[OK] SF Overlap Prevention hook installed — session-cell overlap detection active")
 
     -- Re-suppress section effects after the original onEndWorkAreaProcessing runs.
     -- Sprayer:updateSprayerEffects() (called from onEndWorkAreaProcessing) may call
@@ -1848,15 +1871,46 @@ function HookManager:installSectionStatePreserver()
                 end
                 for i, section in ipairs(vww.sections) do
                     saved[i] = (prevOverlapSup and prevOverlapSup[i] ~= nil) and true or section.isActive
-                    if section.maxWidthNode then
-                        local ok, wx, _, wz = pcall(getWorldTranslation, section.maxWidthNode)
-                        if ok and wx then
-                            local t = tips[i]
-                            if not t then t = {}; tips[i] = t end
-                            t[1] = wx; t[2] = wz
-                        else
-                            tips[i] = nil
+                    -- Choose the node that is FURTHEST from the vehicle root as the tip.
+                    -- The outer boom edge is always further from the root than any inner node,
+                    -- so distance is a reliable discriminator across all sprayer configurations:
+                    --   • JD R700i/R975i: maxWidthNode marks inner transitions; workArea.width
+                    --     is further and correctly reaches the outer tip.
+                    --   • Vanilla / other sprayers: maxWidthNode is at the outer tip; it is
+                    --     further than the workArea.width node, so it wins.
+                    --   • Sprayers with no maxWidthNode (e.g. Condor): workArea.width is the
+                    --     only candidate and is used directly.
+                    local bestDistSq = -1
+                    local bestX, bestZ = nil, nil
+
+                    local function tryNode(node)
+                        if not node then return end
+                        local ok, wx, _, wz = pcall(getWorldTranslation, node)
+                        if not ok or not wx then return end
+                        local dx = wx - rx
+                        local dz = wz - rz
+                        local d2 = dx * dx + dz * dz
+                        if d2 > bestDistSq then
+                            bestDistSq = d2
+                            bestX = wx
+                            bestZ = wz
                         end
+                    end
+
+                    tryNode(section.maxWidthNode)
+                    local waSpec = sprayerSelf.spec_workArea
+                    if waSpec and waSpec.workAreas then
+                        for _, wa in ipairs(waSpec.workAreas) do
+                            if wa.sectionIndex == i then
+                                tryNode(wa.width)
+                            end
+                        end
+                    end
+
+                    if bestX then
+                        local t = tips[i]
+                        if not t then t = {}; tips[i] = t end
+                        t[1] = bestX; t[2] = bestZ
                     else
                         tips[i] = nil
                     end
@@ -5139,6 +5193,10 @@ function HookManager:getBoomCellPositions(vehicle, rootX, rootZ)
             z = z + cellSize
         end
     end
+
+    -- Always include the root cell so the center section has a stamp to check.
+    -- The sweep may skip it depending on alignment with the 10 m grid.
+    table.insert(pts, {x = rootX, z = rootZ})
 
     return (#pts > 1) and pts or nil
 end
