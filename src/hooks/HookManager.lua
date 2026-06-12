@@ -1893,33 +1893,46 @@ function HookManager:installSectionStatePreserver()
                 end
                 for i, section in ipairs(vww.sections) do
                     saved[i] = (prevOverlapSup and prevOverlapSup[i] ~= nil) and true or section.isActive
-                    -- Prefer workArea.width (the outer lateral edge of each work area)
-                    -- as the section tip — this is geometrically accurate for all sprayers.
-                    -- maxWidthNode is a per-section optional node that may mark inner section
-                    -- transition boundaries rather than the true boom tip (confirmed on JD R700i/R975i),
-                    -- so it is only used as a last resort when no work area geometry is available.
-                    local tipNode = nil
+                    -- Choose the node that is FURTHEST from the vehicle root as the tip.
+                    -- The outer boom edge is always further from the root than any inner node,
+                    -- so distance is a reliable discriminator across all sprayer configurations:
+                    --   • JD R700i/R975i: maxWidthNode marks inner transitions; workArea.width
+                    --     is further and correctly reaches the outer tip.
+                    --   • Vanilla / other sprayers: maxWidthNode is at the outer tip; it is
+                    --     further than the workArea.width node, so it wins.
+                    --   • Sprayers with no maxWidthNode (e.g. Condor): workArea.width is the
+                    --     only candidate and is used directly.
+                    local bestDistSq = -1
+                    local bestX, bestZ = nil, nil
+
+                    local function tryNode(node)
+                        if not node then return end
+                        local ok, wx, _, wz = pcall(getWorldTranslation, node)
+                        if not ok or not wx then return end
+                        local dx = wx - rx
+                        local dz = wz - rz
+                        local d2 = dx * dx + dz * dz
+                        if d2 > bestDistSq then
+                            bestDistSq = d2
+                            bestX = wx
+                            bestZ = wz
+                        end
+                    end
+
+                    tryNode(section.maxWidthNode)
                     local waSpec = sprayerSelf.spec_workArea
                     if waSpec and waSpec.workAreas then
                         for _, wa in ipairs(waSpec.workAreas) do
-                            if wa.sectionIndex == i and wa.width then
-                                tipNode = wa.width
-                                break
+                            if wa.sectionIndex == i then
+                                tryNode(wa.width)
                             end
                         end
                     end
-                    if not tipNode then
-                        tipNode = section.maxWidthNode
-                    end
-                    if tipNode then
-                        local ok, wx, _, wz = pcall(getWorldTranslation, tipNode)
-                        if ok and wx then
-                            local t = tips[i]
-                            if not t then t = {}; tips[i] = t end
-                            t[1] = wx; t[2] = wz
-                        else
-                            tips[i] = nil
-                        end
+
+                    if bestX then
+                        local t = tips[i]
+                        if not t then t = {}; tips[i] = t end
+                        t[1] = bestX; t[2] = bestZ
                     else
                         tips[i] = nil
                     end

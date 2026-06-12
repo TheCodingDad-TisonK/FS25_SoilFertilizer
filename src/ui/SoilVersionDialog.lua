@@ -24,8 +24,8 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
-    "- Fixed: Field boundary section control now works on sprayers without maxWidthNode",
-    "  and on JD R700i/R975i (work area geometry used as primary tip; maxWidthNode is fallback)",
+    "- Fixed: Field boundary section control now works on all sprayer types",
+    "  (tip node selected by furthest-from-root distance; correct for JD, Condor, and vanilla sprayers)",
     "- Added: Overlap prevention — boom sections auto-shut-off over already-sprayed ground",
     "  (20-second grace prevents self-suppression on current pass; center section included)",
     "- Fixed: See & Spray no longer drains tank when no target pressure is detected",
