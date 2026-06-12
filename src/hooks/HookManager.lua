@@ -1716,29 +1716,32 @@ function HookManager:installOverlapPreventionHook()
 
                 if not alreadySprayed then
                     -- Tip-based cell check. Wing sections use their outer tip node;
-                    -- sections with no tip node (e.g. self-propelled centre) fall back
-                    -- to the vehicle root position.
+                    -- sections with no tip node fall back to the vehicle root position.
                     --
                     -- Grace period rationale:
-                    --   Wings: graceMs required because the tip's cell may have been
-                    --     freshly stamped by an adjacent strip only seconds ago — skipping
-                    --     the grace would cause false suppression on the current forward pass.
-                    --   Centre (root fallback): the cell directly under the root is ALWAYS
-                    --     unstamped ahead of the current pass (markBoomCells runs AFTER this
-                    --     PREPEND, so the current-position cell hasn't been stamped yet).
-                    --     Any stamp means "visited in a prior pass" → suppress immediately,
-                    --     no grace needed. This fixes small-field re-spray suppression
-                    --     where headland turns are < graceMs and the timed check never fires.
+                    --   Wings (tip in a different cell from root): graceMs required —
+                    --     the tip's cell may have been freshly stamped by an adjacent
+                    --     strip only seconds ago, and skipping grace would cause false
+                    --     suppression on the current forward pass.
+                    --   Centre (no tip, OR tip maps to the same cell as root): the
+                    --     cell under the root/tip is ALWAYS unstamped ahead of the
+                    --     vehicle on the current pass (markBoomCells runs AFTER this
+                    --     PREPEND), so any existing stamp means "visited in a prior
+                    --     pass." No grace needed — this also fixes JD R700i/R975i
+                    --     where the centre tip exists but falls in the root cell.
                     local tx = tip and tip[1] or rootX
                     local tz = tip and tip[2] or rootZ
                     local cx = math.floor(tx / zoneCell)
                     local cz = math.floor(tz / zoneCell)
                     local cellKey = tostring(cx * 10000 + cz)
                     local stampMs = coveredCells[cellKey]
-                    if tip then
+                    local rootCx = math.floor(rootX / zoneCell)
+                    local rootCz = math.floor(rootZ / zoneCell)
+                    local isCentreCell = (cx == rootCx and cz == rootCz)
+                    if tip and not isCentreCell then
                         alreadySprayed = stampMs ~= nil and (nowMs - stampMs) > graceMs
                     else
-                        alreadySprayed = stampMs ~= nil  -- no grace for root fallback
+                        alreadySprayed = stampMs ~= nil  -- no grace for centre cell
                     end
 
                     if doLog and i <= 4 then
