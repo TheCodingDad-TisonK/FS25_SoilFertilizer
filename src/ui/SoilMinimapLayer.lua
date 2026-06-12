@@ -285,16 +285,26 @@ function SoilMinimapLayer:draw(mapSelf)
     if mapSelf.isFullscreen then return end
     if g_gui ~= nil and g_gui:getIsGuiVisible() then return end
 
+    local layerIdx = self.settings and (self.settings.activeMapLayer or 0) or 0
+
     if not self._usingDensityLayers then
         -- No GRLE density-map layers on this terrain — hand off to polygon centroid dots.
         local sfm = g_SoilFertilityManager
         if sfm and sfm.soilMapOverlay then
             sfm.soilMapOverlay:onDrawMinimap(mapSelf)
         end
+        -- Still show the layer indicator in the polygon fallback path
+        if layerIdx > 0 then
+            local layout = mapSelf.layout
+            if layout and layout.getMapSize and layout.getMapPosition then
+                local iw, ih = layout:getMapSize()
+                local ix, iy = layout:getMapPosition()
+                self:drawLayerIndicator(ix, iy, iw, ih, layerIdx)
+            end
+        end
         return
     end
 
-    local layerIdx = self.settings and (self.settings.activeMapLayer or 0) or 0
     if layerIdx <= 0 then return end
 
     local ovEntry = self._overlays[layerIdx]
@@ -381,7 +391,11 @@ function SoilMinimapLayer:draw(mapSelf)
         self:drawTillageTrailDots(mapSelf)
     end
 
-    self:drawLayerIndicator(mx, my, mw, mh, layerIdx)
+    -- Use the raw widget rect (not the clipped terrain rect) so the label always
+    -- lands in the top-left corner of the minimap widget regardless of zoom/offset.
+    local indW, indH = layout:getMapSize()
+    local indX, indY = layout:getMapPosition()
+    self:drawLayerIndicator(indX, indY, indW, indH, layerIdx)
 end
 
 -- Short labels for each layer index (displayed in minimap corner).
@@ -400,28 +414,36 @@ local LAYER_LABEL_COLOR = {
     [9]  = {0.80, 0.10, 0.80},  [10] = {0.55, 0.30, 0.10},
 }
 
--- Draws a small "N", "pH", etc. tag in the bottom-left corner of the minimap.
+-- Draws a small "N", "pH", etc. tag in the top-left corner of the minimap widget.
+-- mx/my = bottom-left of the (clipped) minimap rect; mw/mh = size.
 function SoilMinimapLayer:drawLayerIndicator(mx, my, mw, mh, layerIdx)
     local label = LAYER_LABEL[layerIdx]
     if not label then return end
 
     local col = LAYER_LABEL_COLOR[layerIdx] or {1, 1, 1}
-    local sz  = 0.010
-    local pad = 0.004
-    local tx  = mx + pad
-    local ty  = my + pad
+    local sz  = 0.014   -- larger for readability
+    local pad = 0.005
 
-    -- Shadow for legibility
+    -- Top-left corner: y goes up from bottom, so top = my + mh
+    local tx = mx + pad
+    local ty = my + mh - sz - pad
+
+    -- Dark semi-transparent pill background
+    if self._dotOverlay and self._dotOverlay ~= 0 then
+        local bgW = sz * (#label * 0.62 + 0.4)
+        local bgH = sz * 1.35
+        setOverlayColor(self._dotOverlay, 0, 0, 0, 0.52)
+        renderOverlay(self._dotOverlay, tx - pad * 0.5, ty - pad * 0.3, bgW, bgH)
+    end
+
+    -- Text with shadow
     setTextBold(true)
     setTextAlignment(RenderText.ALIGN_LEFT)
-    setTextColor(0, 0, 0, 0.65)
-    renderText(tx + 0.001, ty - 0.001, sz, label)
-
-    -- Coloured label
-    setTextColor(col[1], col[2], col[3], 0.92)
+    setTextColor(0, 0, 0, 0.70)
+    renderText(tx + 0.0008, ty - 0.0008, sz, label)
+    setTextColor(col[1], col[2], col[3], 0.95)
     renderText(tx, ty, sz, label)
 
-    -- Reset
     setTextBold(false)
     setTextColor(1, 1, 1, 1)
     setTextAlignment(RenderText.ALIGN_LEFT)
