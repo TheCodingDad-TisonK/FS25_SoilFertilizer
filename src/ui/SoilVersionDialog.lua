@@ -24,14 +24,18 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
+    "- New: Full German translation (thanks to Drehverschluss for contributing it)",
+    "- Fixed: Spray Pass% no longer reaches 100% before the field is fully covered",
     "- Fixed: Soil compaction layer never appeared on the map",
     "  (heavy vehicles now compact every cell they drive over, spraying or not)",
     "- Fixed: Compaction trail now paints continuously at any speed",
     "  (driving faster no longer skips cells — the whole wheel path is sampled)",
     "- Fixed: Compaction heatmap refreshes live while driving (no longer needs a spray to show)",
-    "- Fixed: Daily soil update no longer wipes the per-cell compaction trail",
-    "- Fixed: Removed 'getCurrentVehicle' error spam from the compaction check",
     "- Changed: A single heavy pass is now clearly visible (stronger effect + steeper colour ramp)",
+    "- Fixed: Boom section overlap prevention now covers the centre sections and JD R700i/R975i",
+    "- Fixed: Headland and near-fully-covered fields behave correctly at the 99% coverage threshold",
+    "- Fixed: Session pass% now resets on plowing, cultivating and day change",
+    "- Fixed: Full-codebase review pass — 14 additional bug fixes and polish",
 }
 
 -- ── i18n helper ───────────────────────────────────────────
