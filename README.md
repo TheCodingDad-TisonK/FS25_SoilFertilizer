@@ -38,7 +38,7 @@ Each field builds its own history. Nitrogen drops after a heavy wheat crop. Rain
 
 ---
 
-## 🆕 What's New in v2.4.2.5
+## 🆕 What's New in v2.4.2.4
 
 **Fixes:**
 - Fixed the major texture loss introduced in 2.4.1.0. Fill plane textures are back to DDS, so the game's shared pile texture array no longer breaks and every pile renders correctly again
@@ -466,7 +466,7 @@ This mod is licensed under **[CC BY-NC-ND 4.0](https://creativecommons.org/licen
 
 You may share it in its original form with attribution. You may not sell it, modify and redistribute it, or reupload it under a different name or authorship. Contributions via pull request are explicitly permitted and encouraged.
 
-**Author:** TisonK &nbsp;·&nbsp; **Version:** 2.4.2.5
+**Author:** TisonK &nbsp;·&nbsp; **Version:** 2.4.2.4
 
 © 2026 TisonK — See [LICENSE](LICENSE) for full terms.
 

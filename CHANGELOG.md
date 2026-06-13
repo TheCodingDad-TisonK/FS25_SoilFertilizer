@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.4.2.5]
+## [2.4.2.4]
 
 ### Fixed
 - Fixed major texture loss introduced in 2.4.1.0. The fill plane textures were converted from DDS to PNG, which produced a mipmap count mismatch (7 vs 8) in the game's shared fill plane texture array and broke pile textures across the whole game. Reverted to DDS and removed the orphaned PNG files.
