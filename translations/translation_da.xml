@@ -337,6 +337,7 @@
     <e k="sf_map_layer_pest" v="Skadedyrstryk" eh="18a7c2be" />
     <e k="sf_map_layer_disease" v="Sygdomstryk" eh="2b805cc9" />
     <e k="sf_map_layer_compaction" v="Pakning" eh="19cf3ee7" />
+    <e k="sf_map_layer_yield" v="Udbytte" />
     <e k="sf_map_overlay_cycle" v="Skift+M: Skift jordlag" eh="032fdac7" />
     <e k="sf_map_page_title" v="Jordlag" eh="04a675fb" />
     <e k="sf_map_sidebar_header" v="Jordkortlag" eh="81332549" />

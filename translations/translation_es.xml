@@ -337,6 +337,7 @@
     <e k="sf_map_layer_pest" v="Presión de plagas" eh="18a7c2be" />
     <e k="sf_map_layer_disease" v="Presión de enfermedad" eh="2b805cc9" />
     <e k="sf_map_layer_compaction" v="Compactación" eh="19cf3ee7" />
+    <e k="sf_map_layer_yield" v="Rendimiento" />
     <e k="sf_map_overlay_cycle" v="Shift+M: Ciclar capa de suelo" eh="032fdac7" />
     <e k="sf_map_page_title" v="Capas de suelo" eh="04a675fb" />
     <e k="sf_map_sidebar_header" v="Capa de mapa" eh="81332549" />

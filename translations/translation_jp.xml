@@ -351,6 +351,7 @@
     <e k="sf_map_layer_pest" v="害虫圧" eh="18a7c2be" />
     <e k="sf_map_layer_disease" v="病害圧" eh="2b805cc9" />
     <e k="sf_map_layer_compaction" v="踏み固め" eh="19cf3ee7" />
+    <e k="sf_map_layer_yield" v="収量" />
     <e k="sf_map_overlay_cycle" v="Shift+M: 土壌レイヤー切替" eh="032fdac7" />
     <e k="sf_map_page_title" v="土壌レイヤー" eh="04a675fb" />
     <e k="sf_map_sidebar_header" v="土壌マップレイヤー" eh="81332549" />

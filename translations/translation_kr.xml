@@ -350,6 +350,7 @@
     <e k="sf_map_layer_pest" v="해충 발생 정도" eh="18a7c2be" />
     <e k="sf_map_layer_disease" v="병해 발생 정도" eh="2b805cc9" />
     <e k="sf_map_layer_compaction" v="압축도" eh="19cf3ee7" />
+    <e k="sf_map_layer_yield" v="수확량" />
     <e k="sf_map_overlay_cycle" v="Shift+M: 토양 레이어 전환" eh="032fdac7" />
     <e k="sf_map_page_title" v="토양 레이어" eh="04a675fb" />
     <e k="sf_map_sidebar_header" v="토양 지도 레이어" eh="81332549" />

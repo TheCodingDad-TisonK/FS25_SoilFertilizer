@@ -24,6 +24,9 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
+    "- New: Yield soil-map layer - the overlay and minimap can now show each field's",
+    "  yield potential (field-average), coloured red to green. Use the Soil Layer",
+    "  Installer to add the soilYield layer to your map",
     "- Fixed: Yield % in the soil monitor now matches the grain you actually harvest",
     "  (the shown yield no longer slides down as the combine crosses the field -",
     "   monitor and real harvest now use one field-average calculation)",

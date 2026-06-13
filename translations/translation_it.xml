@@ -351,6 +351,7 @@
     <e k="sf_map_layer_pest" v="Pressione Parassiti" eh="18a7c2be" />
     <e k="sf_map_layer_disease" v="Pressione Malattie" eh="2b805cc9" />
     <e k="sf_map_layer_compaction" v="Compattazione" eh="19cf3ee7" />
+    <e k="sf_map_layer_yield" v="Resa" />
     <e k="sf_map_overlay_cycle" v="Maiusc+M: Cicla Livelli Suolo" eh="032fdac7" />
     <e k="sf_map_page_title" v="Livelli del Suolo" eh="04a675fb" />
     <e k="sf_map_sidebar_header" v="Livello Mappa del Suolo" eh="81332549" />

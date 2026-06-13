@@ -338,6 +338,7 @@
     <e k="sf_map_layer_pest" v="Tuholaispaine" eh="18a7c2be" />
     <e k="sf_map_layer_disease" v="Tautipaine" eh="2b805cc9" />
     <e k="sf_map_layer_compaction" v="Tiivistyminen" eh="19cf3ee7" />
+    <e k="sf_map_layer_yield" v="Sato" />
     <e k="sf_map_overlay_cycle" v="Shift+M: Vaihda karttatasoa" eh="032fdac7" />
     <e k="sf_map_page_title" v="Maaperätasot" eh="04a675fb" />
     <e k="sf_map_sidebar_header" v="Maaperän karttataso" eh="81332549" />

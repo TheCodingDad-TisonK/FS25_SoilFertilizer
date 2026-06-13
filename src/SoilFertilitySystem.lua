@@ -2341,8 +2341,17 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
     -- read above is the single authoritative source.
     local layerSys = self.layerSystem
 
+    -- Refresh the field-uniform yield value painted into the soilYield layer.
+    -- getFieldInfo returns the SAME field-average yield % shown on the Soil Monitor
+    -- and applied by the combine hook, so the map layer can never disagree with the
+    -- grain you harvest. No managed crop (fallow/grass) → 0 (renders empty).
+    do
+        local yinfo = self:getFieldInfo(fieldId)
+        field.yieldEfficiency = (yinfo and yinfo.yieldEfficiency) or 0
+    end
+
     -- ── Sync all nutrient/pressure layers to density maps ───────────────────
-    -- Paint non-perPixel layers (pest/disease/compaction) with the daily average.
+    -- Paint non-perPixel layers (pest/disease/compaction/yield) with the daily average.
     -- N/P/K/pH/OM are skipped (skipPerPixel=true) so per-pixel spray history is
     -- preserved between daily updates.
     if layerSys and layerSys.available then

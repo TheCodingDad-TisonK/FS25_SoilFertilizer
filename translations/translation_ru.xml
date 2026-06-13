@@ -338,6 +338,7 @@
     <e k="sf_map_layer_pest" v="Вредители" eh="18a7c2be" />
     <e k="sf_map_layer_disease" v="Болезни" eh="2b805cc9" />
     <e k="sf_map_layer_compaction" v="Уплотнение" eh="19cf3ee7" />
+    <e k="sf_map_layer_yield" v="Урожайность" />
     <e k="sf_map_overlay_cycle" v="Shift+M: Переключить слой" eh="032fdac7" />
     <e k="sf_map_page_title" v="Слои почвы" eh="04a675fb" />
     <e k="sf_map_sidebar_header" v="Слой карты почв" eh="81332549" />

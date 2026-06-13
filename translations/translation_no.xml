@@ -351,6 +351,7 @@
     <e k="sf_map_layer_pest" v="Skadedyrtrykk" eh="18a7c2be" />
     <e k="sf_map_layer_disease" v="Sykdomstrykk" eh="2b805cc9" />
     <e k="sf_map_layer_compaction" v="Jordpakking" eh="19cf3ee7" />
+    <e k="sf_map_layer_yield" v="Avling" />
     <e k="sf_map_overlay_cycle" v="Shift+M: Bytt jordlag" eh="032fdac7" />
     <e k="sf_map_page_title" v="Jordlag" eh="04a675fb" />
     <e k="sf_map_sidebar_header" v="Jordkartlag" eh="81332549" />

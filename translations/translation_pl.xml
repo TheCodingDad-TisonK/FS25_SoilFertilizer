@@ -351,6 +351,7 @@
     <e k="sf_map_layer_pest" v="Presja szkodników" eh="18a7c2be" />
     <e k="sf_map_layer_disease" v="Presja chorób" eh="2b805cc9" />
     <e k="sf_map_layer_compaction" v="Zagęszczenie" eh="19cf3ee7" />
+    <e k="sf_map_layer_yield" v="Plon" />
     <e k="sf_map_overlay_cycle" v="Shift+M: Zmień warstwę gleby" eh="032fdac7" />
     <e k="sf_map_page_title" v="Warstwy gleby" eh="04a675fb" />
     <e k="sf_map_sidebar_header" v="Warstwa mapy gleby" eh="81332549" />

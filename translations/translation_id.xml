@@ -351,6 +351,7 @@
     <e k="sf_map_layer_pest" v="Tekanan Hama" eh="18a7c2be" />
     <e k="sf_map_layer_disease" v="Tekanan Penyakit" eh="2b805cc9" />
     <e k="sf_map_layer_compaction" v="Pemadatan" eh="19cf3ee7" />
+    <e k="sf_map_layer_yield" v="Hasil Panen" />
     <e k="sf_map_overlay_cycle" v="Shift+M: Siklus Lapisan Tanah" eh="032fdac7" />
     <e k="sf_map_page_title" v="Lapisan Tanah" eh="04a675fb" />
     <e k="sf_map_sidebar_header" v="Lapisan Peta Tanah" eh="81332549" />

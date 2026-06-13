@@ -352,6 +352,7 @@
     <e k="sf_map_layer_pest" v="Kártevőnyomás" eh="18a7c2be" />
     <e k="sf_map_layer_disease" v="Betegségnyomás" eh="2b805cc9" />
     <e k="sf_map_layer_compaction" v="Tömörödés" eh="19cf3ee7" />
+    <e k="sf_map_layer_yield" v="Hozam" />
     <e k="sf_map_overlay_cycle" v="Shift+M: Talajréteg váltása" eh="032fdac7" />
     <e k="sf_map_page_title" v="Talajrétegek" eh="04a675fb" />
     <e k="sf_map_sidebar_header" v="Talajtérkép réteg" eh="81332549" />
