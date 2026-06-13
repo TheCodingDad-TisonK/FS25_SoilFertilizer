@@ -31,6 +31,8 @@ SoilVersionDialog.CHANGELOG = {
     "  (any silo or storage bin that already takes base fertilizer, lime or",
     "   manure will now accept the matching SF products, including third-party bins)",
     "- Custom pile colours for each product are restored",
+    "- Improved: Minimap layer label now shows the full translated name plus its",
+    "  short code, e.g. Nitrogen [N] / Stickstoff [N] (thanks Drehverschluss)",
 }
 
 -- ── i18n helper ───────────────────────────────────────────

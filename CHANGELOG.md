@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - SF fertilizers, lime and organics now work in bulk and silo storage (#605). A runtime hook injects the SF fill types into any placeable silo whose storage, unload trigger or load trigger already accepts the matching base type (FERTILIZER, LIME, MANURE or LIQUIDFERTILIZER). Works automatically with third-party storage bins, no manual configuration. Multiplayer safe: injection runs identically on server and client so storage sync ordering stays consistent.
 
+### Changed
+- Minimap layer label now shows the full localized name plus its short code, e.g. "Nitrogen [N]" or "Stickstoff [N]" (#622). The name is pulled from the same l10n keys as the big-map Overview, so there is a single set of strings to translate. The label font shrinks automatically for long names so it always fits the minimap. Thanks to Drehverschluss for the suggestion.
+
 ---
 
 ## [2.4.1.0]

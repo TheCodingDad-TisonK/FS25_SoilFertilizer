@@ -47,6 +47,9 @@ Each field builds its own history. Nitrogen drops after a heavy wheat crop. Rain
 **New:**
 - SF fertilizers, lime and organics now work in bulk and silo storage. Any silo or storage bin that already accepts base game fertilizer, lime or manure will now also accept the matching SF products, including bins from third-party storage mods
 
+**Improved:**
+- The minimap layer label now shows the full localized name plus its short code, for example "Nitrogen [N]" or "Stickstoff [N]". It uses the same translations as the big map, so there are no language gaps
+
 <details>
 <summary>Previous releases</summary>
 
