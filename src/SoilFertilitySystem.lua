@@ -2971,9 +2971,59 @@ function SoilFertilitySystem:trackSprayerCoverage(fieldId, liters, fillTypeName,
     end
 end
 
+--- Resolve and cache the world-space crop-boundary polygon for a field.
+--- Used to bound coverage + overlay stamping to the actual field polygon so that
+--- wide-boom overhang past the headland and turn-row sweeps can't credit off-field
+--- cells (which previously pushed pass% to 100% before the field was done).
+--- Resolved once per field and cached on field._polyVerts:
+---   • a verts array (>=3 points) when the polygon is available
+---   • false when it is not (caller falls back to counting every cell)
+--- Same resolution path as _prePopulateZoneData (g_fieldManager.fields → polygonPoints).
+---@param fieldId number
+---@param field   table   self.fieldData[fieldId]
+---@return table|nil verts  Array of {x=, z=} world coords, or nil when unavailable
+function SoilFertilitySystem:_getFieldPolyVerts(fieldId, field)
+    -- Cached result: verts table = available, false = resolved-but-unavailable.
+    if field._polyVerts ~= nil then
+        return field._polyVerts or nil
+    end
+
+    local verts = nil
+    if g_fieldManager and g_fieldManager.fields then
+        for _, f in ipairs(g_fieldManager.fields) do
+            if f and f.farmland and f.farmland.id == fieldId then
+                local polyNodes = f.polygonPoints
+                if polyNodes and #polyNodes > 0 then
+                    verts = {}
+                    for i = 1, #polyNodes do
+                        local nodeId = polyNodes[i]
+                        if nodeId and nodeId ~= 0 then
+                            local ok, wx, _, wz = pcall(getWorldTranslation, nodeId)
+                            if ok and wx then
+                                table.insert(verts, {x = wx, z = wz})
+                            end
+                        end
+                    end
+                end
+                break
+            end
+        end
+    end
+
+    if verts and #verts >= 3 then
+        field._polyVerts = verts
+        return verts
+    end
+
+    field._polyVerts = false  -- mark unavailable so we don't retry every spray tick
+    return nil
+end
+
 --- Stamp zone cells at every position in boomPoints and update cell-deduped coverage.
 --- Coverage (session + daily) is incremented only for cells not previously visited,
 --- eliminating overlap inflation from headland turns and second passes.
+--- Cells whose centre falls outside the field polygon are rejected so coverage
+--- stays consistent with the polygon-bounded overlay (see _prePopulateZoneData).
 --- Also stamps visual overlay entries (zoneData) for the PDA map.
 --- Called from HookManager after applySingle to fill in the full lateral sweep.
 ---@param fieldId   number
@@ -2987,6 +3037,9 @@ function SoilFertilitySystem:markBoomCells(fieldId, boomPoints)
     local cellArea = zone.CELL_AREA_HA  -- 0.01 ha per 10×10 m cell
     local areaInHa = (field.fieldArea and field.fieldArea > 0) and field.fieldArea or 1.0
 
+    -- Field polygon (nil = unavailable → count every cell, as before).
+    local polyVerts = self:_getFieldPolyVerts(fieldId, field)
+
     if not field.sessionCoverageCells then field.sessionCoverageCells = {} end
     if not field.dailyCoverageCells   then field.dailyCoverageCells   = {} end
     if not field.zoneData             then field.zoneData             = {} end
@@ -2999,51 +3052,63 @@ function SoilFertilitySystem:markBoomCells(fieldId, boomPoints)
         if not seen[cellKey] then
             seen[cellKey] = true
 
-            -- ── Coverage deduplication ─────────────────────────────────────────
-            -- Store stamp timestamp (ms) so the overlap check can apply a grace period
-            -- and avoid suppressing sections that are still on their current pass.
-            if not field.sessionCoverageCells[cellKey] then
-                field.sessionCoverageCells[cellKey] = (g_currentMission and g_currentMission.time) or 0
-                field.sessionCoverageHa = math.min(areaInHa, (field.sessionCoverageHa or 0) + cellArea)
-                -- ── Spray trail (in-view overlay) ──────────────────────────────
-                -- Cache world-center + terrain height for SoilHUD:drawSprayTrail().
-                if not field.sprayTrailPts then field.sprayTrailPts = {} end
-                local twx = (cx + 0.5) * zone.CELL_SIZE
-                local twz = (cz + 0.5) * zone.CELL_SIZE
-                local twy = 0.3
-                if g_terrainNode then
-                    local ok, h = pcall(getTerrainHeightAtWorldPos, g_terrainNode, twx, 0, twz)
-                    if ok and h then twy = h + 0.3 end
-                end
-                table.insert(field.sprayTrailPts, {wx = twx, wy = twy, wz = twz})
-            end
-            if not field.dailyCoverageCells[cellKey] then
-                field.dailyCoverageCells[cellKey] = true
-                field.coveredAreaHa = math.min(areaInHa, (field.coveredAreaHa or 0) + cellArea)
-            end
+            -- Cell centre — used both for the polygon membership test and the
+            -- spray-trail point so they stay in lockstep.
+            local cellCx = (cx + 0.5) * zone.CELL_SIZE
+            local cellCz = (cz + 0.5) * zone.CELL_SIZE
 
-            -- ── Visual overlay (zoneData) ──────────────────────────────────────
-            -- Enforce cell cap: only affects sub-field visual detail, not coverage accuracy.
-            -- Use a tracked counter (field.zoneDataSize) instead of iterating pairs every tick.
-            local canWrite = true
-            if field.zoneData[cellKey] == nil then
-                if (field.zoneDataSize or 0) >= MAX_ZONE_CELLS then canWrite = false end
-            end
-            if canWrite then
-                if field.zoneData[cellKey] == nil then
-                    field.zoneDataSize = (field.zoneDataSize or 0) + 1
+            -- Reject boom cells whose centre falls outside the field polygon.
+            -- Wide-boom overhang past the headland and turn-row sweeps would
+            -- otherwise credit off-field cells, inflating pass% to 100% before
+            -- the field interior is actually covered. This matches the overlay,
+            -- which is already polygon-bounded in _prePopulateZoneData. When the
+            -- polygon is unavailable (polyVerts == nil) fall back to counting all.
+            if polyVerts == nil or _isPointInPoly(cellCx, cellCz, polyVerts) then
+
+                -- ── Coverage deduplication ─────────────────────────────────────────
+                -- Store stamp timestamp (ms) so the overlap check can apply a grace period
+                -- and avoid suppressing sections that are still on their current pass.
+                if not field.sessionCoverageCells[cellKey] then
+                    field.sessionCoverageCells[cellKey] = (g_currentMission and g_currentMission.time) or 0
+                    field.sessionCoverageHa = math.min(areaInHa, (field.sessionCoverageHa or 0) + cellArea)
+                    -- ── Spray trail (in-view overlay) ──────────────────────────────
+                    -- Cache world-center + terrain height for SoilHUD:drawSprayTrail().
+                    if not field.sprayTrailPts then field.sprayTrailPts = {} end
+                    local twy = 0.3
+                    if g_terrainNode then
+                        local ok, h = pcall(getTerrainHeightAtWorldPos, g_terrainNode, cellCx, 0, cellCz)
+                        if ok and h then twy = h + 0.3 end
+                    end
+                    table.insert(field.sprayTrailPts, {wx = cellCx, wy = twy, wz = cellCz})
                 end
-                field.zoneData[cellKey] = {
-                    N  = field.nitrogen       or SoilConstants.FIELD_DEFAULTS.nitrogen,
-                    P  = field.phosphorus     or SoilConstants.FIELD_DEFAULTS.phosphorus,
-                    K  = field.potassium      or SoilConstants.FIELD_DEFAULTS.potassium,
-                    pH = field.pH             or SoilConstants.FIELD_DEFAULTS.pH,
-                    OM = field.organicMatter  or SoilConstants.FIELD_DEFAULTS.organicMatter,
-                    weedPressure    = field.weedPressure    or 0,
-                    pestPressure    = field.pestPressure    or 0,
-                    diseasePressure = field.diseasePressure or 0,
-                    compaction      = field.compaction      or 0,
-                }
+                if not field.dailyCoverageCells[cellKey] then
+                    field.dailyCoverageCells[cellKey] = true
+                    field.coveredAreaHa = math.min(areaInHa, (field.coveredAreaHa or 0) + cellArea)
+                end
+
+                -- ── Visual overlay (zoneData) ──────────────────────────────────────
+                -- Enforce cell cap: only affects sub-field visual detail, not coverage accuracy.
+                -- Use a tracked counter (field.zoneDataSize) instead of iterating pairs every tick.
+                local canWrite = true
+                if field.zoneData[cellKey] == nil then
+                    if (field.zoneDataSize or 0) >= MAX_ZONE_CELLS then canWrite = false end
+                end
+                if canWrite then
+                    if field.zoneData[cellKey] == nil then
+                        field.zoneDataSize = (field.zoneDataSize or 0) + 1
+                    end
+                    field.zoneData[cellKey] = {
+                        N  = field.nitrogen       or SoilConstants.FIELD_DEFAULTS.nitrogen,
+                        P  = field.phosphorus     or SoilConstants.FIELD_DEFAULTS.phosphorus,
+                        K  = field.potassium      or SoilConstants.FIELD_DEFAULTS.potassium,
+                        pH = field.pH             or SoilConstants.FIELD_DEFAULTS.pH,
+                        OM = field.organicMatter  or SoilConstants.FIELD_DEFAULTS.organicMatter,
+                        weedPressure    = field.weedPressure    or 0,
+                        pestPressure    = field.pestPressure    or 0,
+                        diseasePressure = field.diseasePressure or 0,
+                        compaction      = field.compaction      or 0,
+                    }
+                end
             end
         end
     end
@@ -3921,6 +3986,13 @@ function SoilFertilitySystem:recordHarvestTrailPoint(fieldId, wx, wz)
     local cz = math.floor(wz / zone.CELL_SIZE)
     local cellKey = tostring(cx * 10000 + cz)
 
+    -- Reject cells outside the field polygon so headland turns / off-field driving
+    -- don't inflate the cell count and auto-clear the trail before the field is done.
+    local polyVerts = self:_getFieldPolyVerts(fieldId, field)
+    if polyVerts and not _isPointInPoly((cx + 0.5) * zone.CELL_SIZE, (cz + 0.5) * zone.CELL_SIZE, polyVerts) then
+        return
+    end
+
     if not field.harvestCells then field.harvestCells = {} end
     if field.harvestCells[cellKey] then return end
     field.harvestCells[cellKey] = true
@@ -3971,6 +4043,13 @@ function SoilFertilitySystem:recordTillageTrailPoint(fieldId, wx, wz, isPlow)
     local cx = math.floor(wx / zone.CELL_SIZE)
     local cz = math.floor(wz / zone.CELL_SIZE)
     local cellKey = tostring(cx * 10000 + cz)
+
+    -- Reject cells outside the field polygon so headland turns / off-field driving
+    -- don't inflate the cell count and auto-clear the trail before the field is done.
+    local polyVerts = self:_getFieldPolyVerts(fieldId, field)
+    if polyVerts and not _isPointInPoly((cx + 0.5) * zone.CELL_SIZE, (cz + 0.5) * zone.CELL_SIZE, polyVerts) then
+        return
+    end
 
     if not field.tillageCells then field.tillageCells = {} end
     if field.tillageCells[cellKey] then return end
