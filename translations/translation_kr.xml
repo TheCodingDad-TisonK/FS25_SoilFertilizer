@@ -520,6 +520,7 @@
     <e k="sf_hud_pass_coverage" v="[EN] Pass: %d%% (%s)" eh="531a10ef" />
     <e k="sf_hud_compaction" v="압축도: %d%%" eh="bef3a4f5" />
     <e k="sf_hud_yield_eff" v="[EN] Yield: %d%%" eh="7b49cf24" />
+    <e k="sf_hud_amend_burn" v="작물 손상: -%d%%" />
 
     <!-- Sprayer rate HUD -->
     <e k="sf_sprayer_auto_on" v="살포량 ( 자동: 켬 )" eh="099b5dac" />

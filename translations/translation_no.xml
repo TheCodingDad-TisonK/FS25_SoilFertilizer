@@ -521,6 +521,7 @@
     <e k="sf_hud_pass_coverage" v="[EN] Pass: %d%% (%s)" eh="531a10ef" />
     <e k="sf_hud_compaction" v="Pakking: %d%%" eh="bef3a4f5" />
     <e k="sf_hud_yield_eff" v="[EN] Yield: %d%%" eh="7b49cf24" />
+    <e k="sf_hud_amend_burn" v="Svireskade: -%d%%" />
 
     <!-- Sprayer rate HUD -->
     <e k="sf_sprayer_auto_on" v="PÅFØR. RATE ( AUTO: PÅ )" eh="099b5dac" />

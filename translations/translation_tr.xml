@@ -501,6 +501,7 @@
     <e k="sf_hud_pass_coverage" v="[EN] Pass: %d%% (%s)" eh="531a10ef" />
     <e k="sf_hud_compaction" v="Sıkışma: %d%%" eh="bef3a4f5" />
     <e k="sf_hud_yield_eff" v="[EN] Yield: %d%%" eh="7b49cf24" />
+    <e k="sf_hud_amend_burn" v="Yanık: -%d%%" />
 
     <e k="sf_sprayer_auto_on" v="UYGULAMA ORANI ( OTO: AÇIK )" eh="099b5dac" />
     <e k="sf_sprayer_auto_off" v="UYGULAMA ORANI  OTO: KAPALI [%s]" eh="848cc106" />
