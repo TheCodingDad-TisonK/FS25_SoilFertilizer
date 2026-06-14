@@ -258,6 +258,42 @@ SoilConstants.CROP_EXTRACTION = {
     sorghum    = { N=2.30, P=0.90, K=1.80 },  -- Efficient nutrient user
     peas       = { N=2.90, P=1.10, K=2.00 },  -- Legume, moderate demand
     beans      = { N=3.00, P=1.20, K=2.10 },  -- Legume, similar to peas
+
+    -- Expanded coverage (issue #630, seeded from Arissani's crop NPK dataset).
+    -- Values stay on the existing unitless 0-100 depletion scale and are tuned
+    -- relative to the agronomically-similar crop above, NOT mapped 1:1 from the
+    -- CSV's kg/ha (those are uptake/demand figures, not our depletion units).
+    -- These retire the generic fallback for the common base + modded map crops.
+    rice          = { N=2.00, P=1.05, K=1.60 },  -- Paddy cereal, higher P than wheat
+    ricelonggrain = { N=2.10, P=1.10, K=1.70 },  -- Long-grain variant, slightly hungrier
+    cotton        = { N=2.40, P=1.10, K=2.00 },  -- Fibre crop, steady N/K draw
+    sugarcane     = { N=2.80, P=1.30, K=3.50 },  -- High biomass, heavy K feeder
+    carrot        = { N=2.60, P=1.20, K=3.80 },  -- Root crop, high K demand
+    parsnip       = { N=2.40, P=1.20, K=3.50 },  -- Root crop, similar to carrot
+    beetroot      = { N=2.80, P=1.30, K=4.00 },  -- Root crop, very high K
+    onion         = { N=2.50, P=1.20, K=2.50 },  -- Bulb crop, moderate-high demand
+    spinach       = { N=2.20, P=0.90, K=1.60 },  -- Leafy green, N-driven
+    spelt         = { N=1.90, P=0.80, K=1.60 },  -- Ancient wheat, light cereal
+    rye_mf        = { N=2.00, P=0.80, K=1.80 },  -- Multifruit rye alias (= rye)
+    greenbean     = { N=3.00, P=1.20, K=2.10 },  -- Legume, as field beans
+    green_beans   = { N=3.00, P=1.20, K=2.10 },  -- Legume name variant
+    mustard       = { N=2.20, P=0.90, K=1.60 },  -- Brassica oilseed/catch crop
+}
+
+-- Perennial forage crops (mowable, regrow after a cut without re-seeding).
+-- Used by issue #629: organic fertilizer (slurry/manure/digestate) spread on these
+-- while the sward is short (growthState below minHarvestingGrowthState) does NOT
+-- trigger the OM amendment-burn penalty, matching real meadow/pasture management.
+-- Keys are lowercase FS25 fruit-type names.
+SoilConstants.PERENNIAL_FORAGE_NAMES = {
+    grass      = true,
+    meadow     = true,
+    drygrass   = true,
+    fieldgrass = true,
+    ryegrass   = true,
+    alfalfa    = true,
+    luzerne    = true,
+    clover     = true,
 }
 
 -- Default extraction for unknown crops (average cereal)

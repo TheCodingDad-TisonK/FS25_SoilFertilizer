@@ -380,11 +380,22 @@ function SoilFertilitySystem:onHarvest(fieldId, fruitTypeIndex, liters, strawRat
 
     SoilLogger.debug("Harvest: Field %d, Crop %d, %.0fL (biological), area=%.1f", fieldId, fruitTypeIndex, liters, area or 0)
 
-    -- Broadcast to clients if server in multiplayer
+    -- Broadcast to clients in multiplayer, throttled to once every 5 s per field.
+    -- onHarvest is driven by Combine.addCutterArea, which fires many times per second
+    -- per combine. An unthrottled broadcast here floods the network the instant the
+    -- cutter engages the crop and stalls every client — the dedicated-server FPS
+    -- collapse in issue #631. Mirror the same 5 s throttle already used by onMow and
+    -- onFertilizerApplied so the per-tick fire-rate no longer reaches the wire.
     if g_server and g_currentMission and g_currentMission.missionDynamicInfo and g_currentMission.missionDynamicInfo.isMultiplayer then
         local field = self.fieldData[fieldId]
         if field and SoilFieldUpdateEvent then
-            g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
+            local now = g_currentMission.time or 0
+            if not self._harvestBroadcastTime then self._harvestBroadcastTime = {} end
+            local last = self._harvestBroadcastTime[fieldId] or 0
+            if (now - last) >= 5000 then
+                self._harvestBroadcastTime[fieldId] = now
+                g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
+            end
         end
     end
 end
@@ -2584,13 +2595,18 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
             local fsField = farmlandTmp and g_fieldManager and g_fieldManager.farmlandIdFieldMapping and g_fieldManager.farmlandIdFieldMapping[farmlandTmp.id]
             -- Issue #532: use live FieldState query (fsField.fieldState is stale on freshly-plowed/fallow fields)
             local hasCrop = false
+            local cropFruitIndex, cropGrowthState = nil, nil
             if fsField and fsField.posX and fsField.posZ then
                 local ok, fs = pcall(function()
                     local s = FieldState.new()
                     s:update(fsField.posX, fsField.posZ)
                     return s
                 end)
-                hasCrop = ok and fs and fs.fruitTypeIndex ~= nil and fs.fruitTypeIndex ~= FruitType.UNKNOWN
+                if ok and fs and fs.fruitTypeIndex ~= nil and fs.fruitTypeIndex ~= FruitType.UNKNOWN then
+                    hasCrop          = true
+                    cropFruitIndex   = fs.fruitTypeIndex
+                    cropGrowthState  = fs.growthState
+                end
             end
             if hasCrop then
                 if isLimeAmendment then
@@ -2600,11 +2616,31 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
                         g_i18n:getText("sf_notify_lime_crop_title"),
                         string.format(g_i18n:getText("sf_notify_lime_crop_body"), fieldId))
                 else
-                    field.amendBurnPenalty = math.max(field.amendBurnPenalty or 0, 0.20)
-                    field._amendBurnNotified = true
-                    self:showNotification(
-                        g_i18n:getText("sf_notify_om_crop_title"),
-                        string.format(g_i18n:getText("sf_notify_om_crop_body"), fieldId))
+                    -- Issue #629: spreading organic fertilizer (slurry/manure/digestate) on a
+                    -- perennial forage crop (grass, meadow, alfalfa…) is standard practice right
+                    -- after a cut while the sward is short, so the burn penalty must NOT fire then.
+                    -- Only penalise once the forage has regrown past its harvest-ready growth
+                    -- state (tall grass, where a slurry pass really would foul the crop). Annual
+                    -- crops keep the penalty at every growth stage.
+                    local exempt = false
+                    if cropFruitIndex then
+                        local fruitDesc = g_fruitTypeManager and g_fruitTypeManager:getFruitTypeByIndex(cropFruitIndex)
+                        local fruitName = fruitDesc and fruitDesc.name and string.lower(fruitDesc.name)
+                        local perennialSet = SoilConstants.PERENNIAL_FORAGE_NAMES
+                        if fruitName and perennialSet and perennialSet[fruitName] then
+                            local minHarvest = fruitDesc and fruitDesc.minHarvestingGrowthState
+                            if not minHarvest or minHarvest <= 0 or (cropGrowthState or 0) < minHarvest then
+                                exempt = true
+                            end
+                        end
+                    end
+                    if not exempt then
+                        field.amendBurnPenalty = math.max(field.amendBurnPenalty or 0, 0.20)
+                        field._amendBurnNotified = true
+                        self:showNotification(
+                            g_i18n:getText("sf_notify_om_crop_title"),
+                            string.format(g_i18n:getText("sf_notify_om_crop_body"), fieldId))
+                    end
                 end
             end
         end
