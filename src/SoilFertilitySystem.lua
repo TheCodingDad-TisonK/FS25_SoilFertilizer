@@ -1648,48 +1648,33 @@ function SoilFertilitySystem:_rebuildActiveList()
 end
 
 -- Get or create field data
-function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing, area)
-    if not fieldId or fieldId <= 0 then return nil end
-
-    -- Return existing field
-    if self.fieldData[fieldId] then
-        -- Update area if provided (handles initial scan or later updates)
-        if area and area > 0 then
-            self.fieldData[fieldId].fieldArea = area
-        end
-        return self.fieldData[fieldId]
+-- Roll a fresh field's starting soil profile (N/P/K/pH/OM). Single source of truth
+-- for both lazy field creation and the SoilRerollFields console command, so the
+-- variation formula is never duplicated.
+--
+-- Two parts are summed:
+--   • a smooth REGIONAL gradient sampled at the farmland centre, so neighbouring
+--     fields cohere into believable good/poor regions across the map, and
+--   • per-field NOISE that decorrelates individual fields within a region.
+-- Amounts live in SoilConstants.FIELD_VARIATION.
+--
+-- NOTE (issue #632): the previous "deterministic hash" was an affine LCG
+-- (a*n+b mod m) with no nonlinear step. Evaluated on the arithmetic input
+-- fieldId*67890+slot it returned an ARITHMETIC sequence — every field stepped in
+-- lockstep along one ramp and all five nutrients shared the same step, so the whole
+-- map looked uniform. fract(sin(x)) supplies the nonlinearity (math.sin is the only
+-- Lua 5.1 primitive that breaks the progression) so values are genuinely independent
+-- per (field, nutrient), while staying stable across save/load and avoiding
+-- math.randomseed (which would pollute the shared global PRNG).
+function SoilFertilitySystem:_computeInitialSoil(fieldId, farmlandObj)
+    if farmlandObj == nil and g_farmlandManager then
+        farmlandObj = g_farmlandManager:getFarmlandById(fieldId)
     end
 
-    -- Don't create if not requested
-    if not createIfMissing then
-        return nil
+    local fieldCX, fieldCZ  -- farmland centre (world XZ); nil → pseudo-position fallback
+    if farmlandObj and self.bundledMaps then
+        fieldCX, fieldCZ = self.bundledMaps:getFarmlandCenter(farmlandObj)
     end
-
-    -- MULTIPLAYER SAFETY: Only server should create new fields
-    -- Clients must wait for sync to avoid desync issues with randomized initial values
-    if g_currentMission and g_currentMission.missionDynamicInfo and g_currentMission.missionDynamicInfo.isMultiplayer then
-        if g_server == nil then
-            -- Client in multiplayer - return nil and wait for server sync
-            return nil
-        end
-    end
-
-    -- Allow lazy creation (HUD-safe, server-only in multiplayer)
-    -- Give each fresh field a believable starting soil profile. Two parts are summed:
-    --   • a smooth REGIONAL gradient over the farmland centre, so neighbouring fields
-    --     share a similar profile and the map forms coherent good/poor regions, and
-    --   • per-field NOISE that decorrelates individual fields within a region.
-    -- Amounts live in SoilConstants.FIELD_VARIATION.
-    --
-    -- NOTE (issue #632): the previous "deterministic hash" was an affine LCG
-    -- (a*n+b mod m) with no nonlinear step. Evaluated on the arithmetic input
-    -- fieldId*67890+slot it returned an ARITHMETIC sequence — every field stepped
-    -- in lockstep along one ramp and all five nutrients shared the same step, so the
-    -- whole map looked uniform. fract(sin(x)) supplies the nonlinearity (math.sin is
-    -- the only Lua 5.1 primitive that breaks the progression) so values are genuinely
-    -- independent per (field, nutrient), while staying stable across save/load and
-    -- avoiding math.randomseed (which would pollute the shared global PRNG).
-    local fieldCX, fieldCZ  -- farmland centre (world XZ), assigned during the area lookup below
 
     local function hash01(a, b)
         -- Nonlinear 2-input hash → [0.0, 1.0). Classic fract(sin(dot)) mix.
@@ -1719,26 +1704,6 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing, area)
         return baseValue + regionalField(slot) * regionalAmt + noiseField(slot) * noiseAmt
     end
 
-    -- Attempt farmland area + centre lookup at creation time so the correct area is
-    -- used for nutrient/herbicide calculations from the very first plow or spray pass,
-    -- and so the regional gradient can be sampled at the field's location.
-    -- Without this, area defaults to 1.0 ha and only corrects on first fertilizer spray.
-    local confirmedArea = false
-    local initialArea = area or 1.0
-    local farmlandObj = g_farmlandManager and g_farmlandManager:getFarmlandById(fieldId) or nil
-    if farmlandObj then
-        if not area and farmlandObj.areaInHa and farmlandObj.areaInHa > 0 then
-            initialArea = farmlandObj.areaInHa
-            confirmedArea = true
-        end
-        if self.bundledMaps then
-            fieldCX, fieldCZ = self.bundledMaps:getFarmlandCenter(farmlandObj)
-        end
-    end
-    if area and area > 0 then
-        confirmedArea = true
-    end
-
     local tunN  = getTuningMult(self.settings, "tuningDefaultN",  "DEFAULT_N")
     local tunP  = getTuningMult(self.settings, "tuningDefaultP",  "DEFAULT_P")
     local tunK  = getTuningMult(self.settings, "tuningDefaultK",  "DEFAULT_K")
@@ -1746,18 +1711,89 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing, area)
     local tunOM = getTuningMult(self.settings, "tuningDefaultOM", "DEFAULT_OM")
     local V     = SoilConstants.FIELD_VARIATION
 
+    -- Clamp to [0,100] / range to match the load path so init and reload stay consistent.
+    -- At tuning index 5 DEFAULT_N/DEFAULT_K = 100 and the spread can push above 100, so
+    -- an unclamped value would read >100 until the first save/reload snapped it back.
+    local soil = {
+        nitrogen      = math.max(0,   math.min(100,  math.floor(randomize(tunN, tunN * V.NPK_REGIONAL, tunN * V.NPK_NOISE, 1)))),
+        phosphorus    = math.max(0,   math.min(100,  math.floor(randomize(tunP, tunP * V.NPK_REGIONAL, tunP * V.NPK_NOISE, 2)))),
+        potassium     = math.max(0,   math.min(100,  math.floor(randomize(tunK, tunK * V.NPK_REGIONAL, tunK * V.NPK_NOISE, 3)))),
+        organicMatter = math.max(1.0, math.min(10.0, randomize(tunOM, V.OM_REGIONAL, V.OM_NOISE, 4))),
+        pH            = math.max(5.0, math.min(8.5,  randomize(tunPH, V.PH_REGIONAL, V.PH_NOISE, 5))),
+    }
+
+    -- Bundled GRLE override: replace the rolled pH with a spatially-aware value from the
+    -- pre-baked regional map. Only fires when terrain info layers are absent
+    -- (SoilLayerSystem.available = false), so map-prepared saves are unaffected.
+    if not (self.layerSystem and self.layerSystem.available) then
+        if self.bundledMaps and self.bundledMaps.available and farmlandObj then
+            local cx, cz = self.bundledMaps:getFarmlandCenter(farmlandObj)
+            if cx ~= nil then
+                local sampledPH = self.bundledMaps:sampleAtWorldPos(cx, cz)
+                if sampledPH ~= nil then
+                    soil.pH = sampledPH
+                    SoilLogger.debug("BundledMaps: field %d pH set to %.2f from GRLE (world %.0f,%.0f)", fieldId, sampledPH, cx, cz)
+                end
+            end
+        end
+    end
+
+    return soil
+end
+
+function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing, area)
+    if not fieldId or fieldId <= 0 then return nil end
+
+    -- Return existing field
+    if self.fieldData[fieldId] then
+        -- Update area if provided (handles initial scan or later updates)
+        if area and area > 0 then
+            self.fieldData[fieldId].fieldArea = area
+        end
+        return self.fieldData[fieldId]
+    end
+
+    -- Don't create if not requested
+    if not createIfMissing then
+        return nil
+    end
+
+    -- MULTIPLAYER SAFETY: Only server should create new fields
+    -- Clients must wait for sync to avoid desync issues with randomized initial values
+    if g_currentMission and g_currentMission.missionDynamicInfo and g_currentMission.missionDynamicInfo.isMultiplayer then
+        if g_server == nil then
+            -- Client in multiplayer - return nil and wait for server sync
+            return nil
+        end
+    end
+
+    -- Allow lazy creation (HUD-safe, server-only in multiplayer).
+    -- Attempt a farmland area lookup at creation time so the correct area is used for
+    -- nutrient/herbicide calculations from the very first plow or spray pass. Without
+    -- this, area defaults to 1.0 ha and only corrects on first fertilizer spray.
+    local confirmedArea = false
+    local initialArea = area or 1.0
+    local farmlandObj = g_farmlandManager and g_farmlandManager:getFarmlandById(fieldId) or nil
+    if farmlandObj and not area and farmlandObj.areaInHa and farmlandObj.areaInHa > 0 then
+        initialArea = farmlandObj.areaInHa
+        confirmedArea = true
+    end
+    if area and area > 0 then
+        confirmedArea = true
+    end
+
+    -- Roll the starting soil profile (regional gradient + per-field noise, plus any
+    -- bundled-GRLE pH override). Shared with the SoilRerollFields console command.
+    local soil = self:_computeInitialSoil(fieldId, farmlandObj)
+
     self.fieldData[fieldId] = {
         fieldArea = initialArea,
         _farmlandAreaConfirmed = confirmedArea,
-        -- Clamp to [0,100] to match the load path (:3518-3520). At tuning index 5
-        -- DEFAULT_N/DEFAULT_K = 100, and the regional+noise spread can push a fresh
-        -- field above 100, so an unclamped value would read >100 until the first
-        -- save/reload snapped it back down. Clamping here keeps init and reload consistent.
-        nitrogen   = math.max(0, math.min(100, math.floor(randomize(tunN, tunN * V.NPK_REGIONAL, tunN * V.NPK_NOISE, 1)))),
-        phosphorus = math.max(0, math.min(100, math.floor(randomize(tunP, tunP * V.NPK_REGIONAL, tunP * V.NPK_NOISE, 2)))),
-        potassium  = math.max(0, math.min(100, math.floor(randomize(tunK, tunK * V.NPK_REGIONAL, tunK * V.NPK_NOISE, 3)))),
-        organicMatter = math.max(1.0, math.min(10.0, randomize(tunOM, V.OM_REGIONAL, V.OM_NOISE, 4))),
-        pH            = math.max(5.0, math.min(8.5,  randomize(tunPH, V.PH_REGIONAL, V.PH_NOISE, 5))),
+        nitrogen      = soil.nitrogen,
+        phosphorus    = soil.phosphorus,
+        potassium     = soil.potassium,
+        organicMatter = soil.organicMatter,
+        pH            = soil.pH,
         lastCrop = nil,
         lastCrop2 = nil,
         lastCrop3 = nil,
@@ -1792,25 +1828,6 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing, area)
         lastAlertSeason = nil, -- Season when the last critical alert fired (persisted)
     }
 
-    -- Bundled GRLE override: replace randomized pH with spatially-aware value
-    -- from the pre-baked regional map. Only fires when terrain info layers are
-    -- absent (SoilLayerSystem.available = false), so prepared maps are unaffected.
-    if not (self.layerSystem and self.layerSystem.available) then
-        if self.bundledMaps and self.bundledMaps.available and g_farmlandManager then
-            local farmlandObj = g_farmlandManager:getFarmlandById(fieldId)
-            if farmlandObj then
-                local cx, cz = self.bundledMaps:getFarmlandCenter(farmlandObj)
-                if cx ~= nil then
-                    local sampledPH = self.bundledMaps:sampleAtWorldPos(cx, cz)
-                    if sampledPH ~= nil then
-                        self.fieldData[fieldId].pH = sampledPH
-                        SoilLogger.debug("BundledMaps: field %d pH set to %.2f from GRLE (world %.0f,%.0f)", fieldId, sampledPH, cx, cz)
-                    end
-                end
-            end
-        end
-    end
-
     self:log("Lazy-created field %d area=%.2f ha confirmed=%s",
         fieldId, self.fieldData[fieldId].fieldArea, tostring(confirmedArea))
 
@@ -1819,6 +1836,34 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing, area)
     self:_prePopulateZoneData(fieldId)
 
     return self.fieldData[fieldId]
+end
+
+-- Re-roll the starting soil profile of EVERY known field using the current variation
+-- logic (:_computeInitialSoil). Lets players on an existing save pick up the regional
+-- variation introduced in 2.4.2.6 without starting a new game (issue #632). Resets
+-- N/P/K/pH/OM and clears per-zone data so the soil maps repaint from the new averages;
+-- crop history, pressures, money and progression are left untouched.
+-- Returns the number of fields re-rolled.
+function SoilFertilitySystem:rerollAllFields()
+    local count = 0
+    for fieldId, field in pairs(self.fieldData) do
+        if type(fieldId) == "number" and type(field) == "table" then
+            local soil = self:_computeInitialSoil(fieldId)
+            field.nitrogen          = soil.nitrogen
+            field.phosphorus        = soil.phosphorus
+            field.potassium         = soil.potassium
+            field.organicMatter     = soil.organicMatter
+            field.pH                = soil.pH
+            field.fertilizerApplied = 0
+            -- Drop cached per-zone values and rebuild from the new field average so the
+            -- overlay / minimap reflect the re-rolled profile immediately.
+            field.zoneData = {}
+            self:_prePopulateZoneData(fieldId)
+            count = count + 1
+        end
+    end
+    SoilLogger.info("rerollAllFields: re-rolled soil for %d fields", count)
+    return count
 end
 
 -- ── Zone Data Pre-Population ──────────────────────────────────────────────────

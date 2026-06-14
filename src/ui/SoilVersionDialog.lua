@@ -38,6 +38,9 @@ SoilVersionDialog.CHANGELOG = {
     "- Fixed: New fields no longer start with near-identical soil. The starting",
     "  N/P/K/pH/OM now vary by region across the map, with per-field variation on",
     "  top, instead of every field sharing the same profile (#632)",
+    "- New: console command SoilRerollFields re-rolls the starting soil of every",
+    "  field with the new regional variation, so existing saves can get it without",
+    "  starting a new game (#632)",
 }
 
 -- ── i18n helper ───────────────────────────────────────────

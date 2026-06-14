@@ -46,6 +46,7 @@ function SoilSettingsGUI:registerConsoleCommands()
     addConsoleCommand("SoilPFDump", "Dump Precision Farming bridge API for integration diagnostics", "consoleCommandPFDump", self)
     addConsoleCommand("soilSetState", "Set field state: soilSetState <fieldId> <N> <P> <K> <pH> <OM>", "consoleCommandSetState", self)
     addConsoleCommand("soilRecoverField", "Recover field to default values: soilRecoverField [fieldId]", "consoleCommandRecoverField", self)
+    addConsoleCommand("SoilRerollFields", "Re-roll starting soil (N/P/K/pH/OM) for all fields with the new regional variation (#632)", "consoleCommandRerollFields", self)
     addConsoleCommand("soilfertility", "Show all soil commands", "consoleCommandHelp", self)
 
     SoilLogger.info("Console commands registered")
@@ -74,6 +75,7 @@ function SoilSettingsGUI:consoleCommandHelp()
     print("SoilPFDump - Dump Precision Farming API for integration diagnostics")
     print("soilSetState <fieldId> <N> <P> <K> <pH> <OM> - Set state for a field")
     print("soilRecoverField [fieldId] - Recover field to default values")
+    print("SoilRerollFields - Re-roll starting soil for all fields (new regional variation)")
     print("==============================================")
     return "Type 'soilfertility' for more info"
 end
@@ -696,6 +698,28 @@ function SoilSettingsGUI:consoleCommandRecoverField(fieldId)
     local msg = string.format("Field %d recovered to defaults.", fid)
     if not isServer then msg = msg .. " (Client only! Run on server to persist)" end
     return msg
+end
+
+--- Re-roll the starting soil profile (N/P/K/pH/OM) of every field using the current
+--- regional-variation logic. Lets existing saves pick up the 2.4.2.6 variation without
+--- starting a new game (issue #632). Crop history, money and progression are untouched.
+function SoilSettingsGUI:consoleCommandRerollFields()
+    if not g_SoilFertilityManager or not g_SoilFertilityManager.soilSystem then
+        return "Error: Soil Mod not initialized"
+    end
+
+    -- Multiplayer: only the server owns field data; a client re-roll would desync.
+    local isServer = g_currentMission and g_currentMission:getIsServer()
+    if not isServer then
+        return "Re-roll must be run on the server/host (it owns the field data)."
+    end
+
+    local count = g_SoilFertilityManager.soilSystem:rerollAllFields()
+    g_SoilFertilityManager:saveSoilData()
+
+    return string.format(
+        "Re-rolled starting soil (N, P, K, pH, OM) for %d fields and saved. " ..
+        "Fields now vary by region; reopen the soil map if it looks stale.", count)
 end
 
 function SoilSettingsGUI:consoleCommandPFDump()
