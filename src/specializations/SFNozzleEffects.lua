@@ -118,9 +118,16 @@ function SFNozzleEffects.prerequisitesPresent(specializations)
 end
 
 function SFNozzleEffects.registerFunctions(vehicleType)
-    SpecializationUtil.registerFunction(vehicleType, "getNumExtendedSprayerNozzleEffectsActive",  SFNozzleEffects.getNumExtendedSprayerNozzleEffectsActive)
-    SpecializationUtil.registerFunction(vehicleType, "updateExtendedSprayerNozzleEffectsState",   SFNozzleEffects.updateExtendedSprayerNozzleEffectsState)
-    SpecializationUtil.registerFunction(vehicleType, "updateExtendedSprayerNozzleEffectState",    SFNozzleEffects.updateExtendedSprayerNozzleEffectState)
+    -- NOTE: these names are intentionally sf-prefixed and unique. Precision Farming's
+    -- ExtendedSprayerEffects spec registers updateExtendedSprayerNozzleEffectsState /
+    -- updateExtendedSprayerNozzleEffectState / getNumExtendedSprayerNozzleEffectsActive
+    -- with a DIFFERENT signature (its ...EffectsState takes an extra useFullSection arg).
+    -- Sharing those names lets one spec overwrite the other, so PF's 5-arg caller would hit
+    -- our 4-arg function and pass a boolean into lastSpeed (the SFNozzleEffects:419
+    -- "compare boolean < number" crash, issue #636). Never reuse PF's function names here.
+    SpecializationUtil.registerFunction(vehicleType, "sfGetNumNozzleEffectsActive",  SFNozzleEffects.sfGetNumNozzleEffectsActive)
+    SpecializationUtil.registerFunction(vehicleType, "sfUpdateNozzleEffectsState",   SFNozzleEffects.sfUpdateNozzleEffectsState)
+    SpecializationUtil.registerFunction(vehicleType, "sfUpdateNozzleEffectState",    SFNozzleEffects.sfUpdateNozzleEffectState)
 end
 
 function SFNozzleEffects.registerOverwrittenFunctions(vehicleType)
@@ -357,7 +364,7 @@ function SFNozzleEffects:onUpdate(dt, isActiveForInput, isActiveForInputIgnoreSe
     -- Update per-nozzle active state (also triggers fade direction transitions).
     local isTurnedOn = self:getIsTurnedOn()
     local lastSpeed  = tonumber(self.getLastSpeed and self:getLastSpeed()) or 0
-    self:updateExtendedSprayerNozzleEffectsState(spec.sprayerEffects, dt, isTurnedOn, lastSpeed)
+    self:sfUpdateNozzleEffectsState(spec.sprayerEffects, dt, isTurnedOn, lastSpeed)
 
     -- Animate shader fade transitions for any nozzle with an effect node.
     for _, effectData in ipairs(spec.sprayerEffects) do
@@ -386,9 +393,9 @@ end
 -- ── Nozzle state functions ────────────────────────────────────────────────────
 
 -- Batch update: sets isActive on each effectData and fires fade transitions.
-function SFNozzleEffects:updateExtendedSprayerNozzleEffectsState(sprayerEffects, dt, isTurnedOn, lastSpeed)
+function SFNozzleEffects:sfUpdateNozzleEffectsState(sprayerEffects, dt, isTurnedOn, lastSpeed)
     for _, effectData in ipairs(sprayerEffects) do
-        local isActive, _ = self:updateExtendedSprayerNozzleEffectState(effectData, dt, isTurnedOn, lastSpeed)
+        local isActive, _ = self:sfUpdateNozzleEffectState(effectData, dt, isTurnedOn, lastSpeed)
 
         if isActive ~= effectData.isActive then
             effectData.isActive = isActive
@@ -412,11 +419,11 @@ end
 
 -- Per-nozzle decision: returns (isActive, amountScale).
 -- Checks in order: sprayer state → section active → field boundary → See & Spray threshold.
-function SFNozzleEffects:updateExtendedSprayerNozzleEffectState(effectData, dt, isTurnedOn, lastSpeed)
+function SFNozzleEffects:sfUpdateNozzleEffectState(effectData, dt, isTurnedOn, lastSpeed)
     local spec = self[SFNozzleEffects.SPEC_TABLE_NAME]
 
     if not isTurnedOn                                      then return false, 1 end
-    if (lastSpeed or 0) < 0.25                             then return false, 1 end
+    if (tonumber(lastSpeed) or 0) < 0.25                  then return false, 1 end
     if self.movingDirection and self.movingDirection < 0   then return false, 1 end
 
     local spec_vww = self.spec_variableWorkWidth
@@ -591,7 +598,7 @@ function SFNozzleEffects:getAreEffectsVisible(superFunc)
 end
 
 -- Returns (numActive, fraction) of nozzles currently active.
-function SFNozzleEffects:getNumExtendedSprayerNozzleEffectsActive()
+function SFNozzleEffects:sfGetNumNozzleEffectsActive()
     local spec = self[SFNozzleEffects.SPEC_TABLE_NAME]
     if not spec or not spec.hasCustomEffects or spec.numCustomEffects == 0 then
         return 1, 1
@@ -610,7 +617,7 @@ function SFNozzleEffects:getSprayerUsage(superFunc, fillType, dt)
     local spec  = self[SFNozzleEffects.SPEC_TABLE_NAME]
     local hasAny = spec.seeSprayWeed or spec.seeSprayPest or spec.seeSprayDisease
     if spec.hasCustomEffects and hasAny then
-        local numActive, alpha = self:getNumExtendedSprayerNozzleEffectsActive()
+        local numActive, alpha = self:sfGetNumNozzleEffectsActive()
         usage = usage * alpha
         if (self.getIsAIActive ~= nil and self:getIsAIActive()) and usage == 0 then
             usage = 0.0001

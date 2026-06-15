@@ -895,9 +895,11 @@ function SoilHUD:refreshFieldData()
     local info = self.cachedFieldInfo
     if info and fieldId then
         self._fmt_fieldText = string.format(g_i18n:getText("sf_hud_field"), fieldId)
-        local crop = info.lastCrop
-        if crop and crop ~= "" then
-            self._fmt_cropText = crop:sub(1,1):upper() .. crop:sub(2)
+        -- Localize the crop name (#635): info.lastCrop is the raw uppercase fruit-type
+        -- identifier (e.g. "GREENRYE"); SoilUtils maps it to the engine's localized title.
+        local cropText = SoilUtils.getCropDisplayName(info.lastCrop)
+        if cropText then
+            self._fmt_cropText = cropText
         else
             self._fmt_cropText = g_i18n:getText("sf_hud_fallow")
         end

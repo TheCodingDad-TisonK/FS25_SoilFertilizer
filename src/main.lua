@@ -456,6 +456,17 @@ local function hookSaveLoadEvents()
                 end
                 if g_SoilFertilityManager then
                     g_SoilFertilityManager:saveSoilData()
+                    -- Persist settings here too, NOT only on-change (#637).
+                    -- saveToXMLFile fires with savegameDirectory pointing at the tempsavegame
+                    -- staging dir, whose contents FS25 then copies over the real savegame
+                    -- folder. soilData.xml persists because it is written here; the settings
+                    -- file was only ever written on-change to the live dir, so that copy step
+                    -- clobbered it and difficulty/replenishment/enabled reverted to defaults
+                    -- after a normal save+reload. Writing it here makes settings ride the
+                    -- canonical save into tempsavegame → real dir like everything else.
+                    if g_SoilFertilityManager.settings then
+                        g_SoilFertilityManager.settings:save()
+                    end
                     if g_SoilFertilityManager.soilHUD then
                         g_SoilFertilityManager.soilHUD:saveLayout()
                     end

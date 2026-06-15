@@ -281,8 +281,9 @@ function SoilFieldDetailDialog:_populateData()
 
     -- History
     if self.detailLastCrop then
-        local cropName = info.lastCrop
-        if cropName == nil or cropName == "" then
+        -- Localized crop name (#635) — info.lastCrop is the raw uppercase identifier.
+        local cropName = SoilUtils.getCropDisplayName(info.lastCrop)
+        if cropName == nil then
             cropName = tr("sf_detail_no_crop", "None recorded")
         end
         self.detailLastCrop:setText(cropName)
