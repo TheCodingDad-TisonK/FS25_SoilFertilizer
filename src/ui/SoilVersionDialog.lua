@@ -32,8 +32,8 @@ SoilVersionDialog.CHANGELOG = {
     "  number of in-game days and is also cleared when you harvest the field (#639)",
     "- Fixed: A single harvest no longer fills all three crop-history slots with the",
     "  same crop, which was triggering a false same-crop rotation penalty (#638)",
-    "- Fixed: Crash and on-screen error spam (SFNozzleEffects) when Precision Farming",
-    "  is also installed - our sprayer functions no longer collide with PF's (#636)",
+    "- Fixed: Crash and on-screen error spam (SFNozzleEffects) that could happen in some",
+    "  mod setups - our sprayer functions no longer collide with another mod's (#636)",
 }
 
 -- ── i18n helper ───────────────────────────────────────────

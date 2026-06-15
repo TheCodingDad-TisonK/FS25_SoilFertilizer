@@ -118,13 +118,13 @@ function SFNozzleEffects.prerequisitesPresent(specializations)
 end
 
 function SFNozzleEffects.registerFunctions(vehicleType)
-    -- NOTE: these names are intentionally sf-prefixed and unique. Precision Farming's
-    -- ExtendedSprayerEffects spec registers updateExtendedSprayerNozzleEffectsState /
+    -- NOTE: these names are intentionally sf-prefixed and unique. Another sprayer-effects
+    -- specialization in the wild registers updateExtendedSprayerNozzleEffectsState /
     -- updateExtendedSprayerNozzleEffectState / getNumExtendedSprayerNozzleEffectsActive
     -- with a DIFFERENT signature (its ...EffectsState takes an extra useFullSection arg).
-    -- Sharing those names lets one spec overwrite the other, so PF's 5-arg caller would hit
+    -- Sharing those names lets one spec overwrite the other, so the 5-arg caller would hit
     -- our 4-arg function and pass a boolean into lastSpeed (the SFNozzleEffects:419
-    -- "compare boolean < number" crash, issue #636). Never reuse PF's function names here.
+    -- "compare boolean < number" crash, issue #636). Never reuse those names here.
     SpecializationUtil.registerFunction(vehicleType, "sfGetNumNozzleEffectsActive",  SFNozzleEffects.sfGetNumNozzleEffectsActive)
     SpecializationUtil.registerFunction(vehicleType, "sfUpdateNozzleEffectsState",   SFNozzleEffects.sfUpdateNozzleEffectsState)
     SpecializationUtil.registerFunction(vehicleType, "sfUpdateNozzleEffectState",    SFNozzleEffects.sfUpdateNozzleEffectState)
