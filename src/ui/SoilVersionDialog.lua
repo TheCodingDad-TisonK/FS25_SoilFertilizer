@@ -32,6 +32,9 @@ SoilVersionDialog.CHANGELOG = {
     "  triggers the organic-matter burn penalty (#645)",
     "- Fixed: Removed duplicate translation entries that were spamming warnings in the",
     "  log on startup (#642)",
+    "- New: Lime can now be applied to young or freshly cut grass and pasture without",
+    "  the yield burn penalty, matching real pasture management. Tall forage and annual",
+    "  crops still take the penalty (#646)",
 }
 
 -- ── i18n helper ───────────────────────────────────────────

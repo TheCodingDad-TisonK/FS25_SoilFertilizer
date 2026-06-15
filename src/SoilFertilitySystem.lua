@@ -2743,45 +2743,49 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
                 end
             end
             if hasCrop then
-                if isLimeAmendment then
-                    field.amendBurnPenalty = 0.80
-                    field._amendBurnNotified = true
-                    self:showNotification(
-                        g_i18n:getText("sf_notify_lime_crop_title"),
-                        string.format(g_i18n:getText("sf_notify_lime_crop_body"), fieldId))
-                else
-                    -- Issue #629: spreading organic fertilizer (slurry/manure/digestate) on a
-                    -- perennial forage crop (grass, meadow, alfalfa…) is standard practice right
-                    -- after a cut while the sward is short, so the burn penalty must NOT fire then.
-                    -- Only penalise once the forage has regrown past its harvest-ready growth
-                    -- state (tall grass, where a slurry pass really would foul the crop). Annual
-                    -- crops keep the penalty at every growth stage.
-                    local exempt = false
-                    if cropFruitIndex then
-                        local fruitDesc = g_fruitTypeManager and g_fruitTypeManager:getFruitTypeByIndex(cropFruitIndex)
-                        local fruitName = fruitDesc and fruitDesc.name and string.lower(fruitDesc.name)
-                        local perennialSet = SoilConstants.PERENNIAL_FORAGE_NAMES
-                        if fruitName and perennialSet and perennialSet[fruitName] then
-                            -- Only penalise while the forage is actually TALL, i.e. inside its
-                            -- harvest window [minHarvestingGrowthState, maxHarvestingGrowthState].
-                            -- Growth states are NOT linearly ordered: the post-mow "cut" state has
-                            -- a HIGHER index than the harvest-ready states, so the old lower-bound
-                            -- check (gs < minHarvest) let freshly-cut grass through and wrongly
-                            -- burned it (#645). Exempt anything below the window (young regrowth),
-                            -- above it (cut/withered), or flagged as a cut state.
-                            local minH = fruitDesc.minHarvestingGrowthState
-                            local maxH = fruitDesc.maxHarvestingGrowthState
-                            local gs   = cropGrowthState or 0
-                            local cutStates = fruitDesc.cutStates
-                            local inHarvestWindow = minH and minH > 0 and gs >= minH
-                                and (not maxH or maxH <= 0 or gs <= maxH)
-                                and not (cutStates and cutStates[gs])
-                            if not inHarvestWindow then
-                                exempt = true
-                            end
-                        end
+                -- Perennial forage (grass, meadow, alfalfa…) is exempt from amendment burn
+                -- while the sward is short — young regrowth or freshly cut. Liming or spreading
+                -- organics on a short/cut sward is standard practice (small leaf area, low burn
+                -- risk), so only penalise once it has regrown into its harvest window (tall).
+                -- Annual crops are never exempt. Shared by lime (#646) and organic matter
+                -- (#629/#645).
+                local perennialExempt = false
+                if cropFruitIndex then
+                    local fruitDesc = g_fruitTypeManager and g_fruitTypeManager:getFruitTypeByIndex(cropFruitIndex)
+                    local fruitName = fruitDesc and fruitDesc.name and string.lower(fruitDesc.name)
+                    local perennialSet = SoilConstants.PERENNIAL_FORAGE_NAMES
+                    if fruitDesc and fruitName and perennialSet and perennialSet[fruitName] then
+                        -- Growth states are NOT linearly ordered: the post-mow "cut" state has a
+                        -- HIGHER index than the harvest-ready states, so a lower-bound-only check
+                        -- let cut grass through as "fully grown" (#645). Penalise ONLY inside the
+                        -- harvest window [minHarvestingGrowthState, maxHarvestingGrowthState];
+                        -- exempt young regrowth, cut and withered states.
+                        local minH = fruitDesc.minHarvestingGrowthState
+                        local maxH = fruitDesc.maxHarvestingGrowthState
+                        local gs   = cropGrowthState or 0
+                        local cutStates = fruitDesc.cutStates
+                        local inHarvestWindow = minH and minH > 0 and gs >= minH
+                            and (not maxH or maxH <= 0 or gs <= maxH)
+                            and not (cutStates and cutStates[gs])
+                        perennialExempt = not inHarvestWindow
                     end
-                    if not exempt then
+                end
+
+                if isLimeAmendment then
+                    -- #646: liming early-stage / cut perennial forage is realistic pasture
+                    -- management, so skip the -80% burn there. Tall forage and every annual
+                    -- crop still take it.
+                    if not perennialExempt then
+                        field.amendBurnPenalty = 0.80
+                        field._amendBurnNotified = true
+                        self:showNotification(
+                            g_i18n:getText("sf_notify_lime_crop_title"),
+                            string.format(g_i18n:getText("sf_notify_lime_crop_body"), fieldId))
+                    end
+                else
+                    -- #629/#645: organic fertilizer (slurry/manure/digestate) on short/cut
+                    -- perennial forage is standard practice, so skip the -20% burn there.
+                    if not perennialExempt then
                         field.amendBurnPenalty = math.max(field.amendBurnPenalty or 0, 0.20)
                         field._amendBurnNotified = true
                         self:showNotification(

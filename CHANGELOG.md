@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed duplicate l10n entries from 23 of the 26 translation files (#642). The smart-systems, smart-sensor and hud-layout keys were defined twice, which the engine logged as "Duplicate l10n entry ... Ignoring this definition" on load. 322 duplicate entries removed; no displayed text changed.
 
 ### Changed
+- Lime amendments no longer trigger the -80% burn penalty on young or freshly cut perennial forage (#646). Liming a short/cut sward to correct topsoil pH is standard pasture management, so the same harvest-window exemption added for organic matter now also covers lime. Tall forage (inside its harvest window) and all annual crops still take the penalty.
 - Release notes, changelog and the in-game version dialog now describe the #636 sprayer-crash fix generically instead of naming a specific other mod.
 
 ## [2.4.2.7]
