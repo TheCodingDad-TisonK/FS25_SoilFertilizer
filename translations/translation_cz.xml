@@ -775,7 +775,6 @@
     <e k="action_SF_SENSOR_PEST"     v="SF: Přepnout senzor škůdců" />
     <e k="action_SF_SENSOR_DISEASE"  v="SF: Přepnout senzor chorob" />
         <!-- SMART SYSTEMS -->
-    <e k="sf_panel_hdr_smart_systems"      v="Chytré systémy" />
     <e k="sf_nav_smart_systems_label"      v="Chytré systémy" />
     <e k="sf_nav_smart_systems_desc"       v="Nastavit Chytrý senzor, Vidět &amp; Postřiknout a systémy Variabilní dávky" />
     <e k="sf_nav_tuning_label"            v="Editor ladění konstant" />
@@ -783,13 +782,10 @@
     <e k="sf_panel_hdr_smart_sensor_sys"   v="Systém Chytrý senzor" />
     <e k="sf_panel_hdr_see_spray_sys"      v="Systém Vidět &amp; Postřiknout" />
     <e k="sf_panel_hdr_var_rate_sys"       v="Systém Variabilní dávky" />
-    <e k="sf_smart_sensor_short"           v="Chytrý senzor" />
-    <e k="sf_smart_sensor_long"            v="Povolit nebo zakázat systém Chytrého postřikového senzoru" />
     <e k="sf_see_and_spray_short"          v="Vidět &amp; Postřiknout" />
     <e k="sf_see_and_spray_long"           v="Povolit nebo zakázat systém přesného postřiku Vidět &amp; Postřiknout" />
     <e k="sf_variable_rate_short"          v="Variabilní dávka" />
     <e k="sf_variable_rate_long"           v="Povolit nebo zakázat aplikaci variabilní dávky podle deficitů půdy" />
-    <e k="sf_desc_smartSensorEnabled"      v="Umožnit hráčům používat Chytrý senzor pro kontrolu sekcí ramene na základě živých dat půdy" />
     <e k="sf_desc_seeAndSprayEnabled"      v="Potlačit sekce ramene nad oblastmi, které nepotřebují postřik" />
     <e k="sf_config_seeSprayWeed"          v="See &amp; Spray: Weed" />
     <e k="sf_config_seeSprayPest"          v="See &amp; Spray: Pest" />
@@ -804,11 +800,6 @@
     <e k="sf_desc_overlapPrevention"       v="Automaticky vypíná sekce ramene nad zemí, která je již plně ohnojená, a zabraňuje zbytečné opakované aplikaci na překrývajících se záběrech." />
 
     <!-- SMART SENSOR PANEL -->
-    <e k="sf_sensor_pest"        v="Senzor škůdců" />
-    <e k="sf_sensor_disease"     v="Senzor chorob" />
-    <e k="sf_sensor_nutrient"    v="Senzor živin" />
-    <e k="sf_sensor_state_on"    v="ZAP" />
-    <e k="sf_sensor_state_off"   v="VYP" />
     <!-- SEE AND SPRAY PANEL -->
     <e k="sf_see_spray_panel_title" v="VIDĚT &amp; POSTŘIKNOUT" eh="a7e00bf0" />
     <e k="sf_see_spray_pest"        v="Škůdci" />
@@ -819,20 +810,15 @@
     <e k="sf_var_rate_panel_title" v="VARIABILNÍ DÁVKA" eh="799c3bf7" />
     <e k="sf_var_rate_label"       v="Var. dávka" />
     <!-- INPUT ACTIONS -->
-    <e k="action_SF_SENSOR_PEST"       v="SF: Přepnout senzor škůdců" />
-    <e k="action_SF_SENSOR_DISEASE"    v="SF: Přepnout senzor chorob" />
     <e k="action_SF_SENSOR_NUTRIENT"   v="SF: Přepnout senzor živin" />
     <e k="action_SF_SEE_SPRAY_PEST"    v="SF: Přepnout Vidět &amp; Postřiknout Škůdci" />
     <e k="action_SF_SEE_SPRAY_DISEASE" v="SF: Přepnout Vidět &amp; Postřiknout Choroby" eh="205a3668" />
     <e k="action_SF_SEE_SPRAY_WEED"    v="SF: Přepnout Vidět &amp; Postřiknout Plevel" />
     <e k="action_SF_VARIABLE_RATE"     v="SF: Přepnout variabilní dávku" />
         <!-- HUD LAYOUT DRAG BUTTON -->
-    <e k="sf_panel_hdr_hud_layout"   v="Rozvržení HUD" />
     <e k="sf_independent_panels_short" v="Volné rozvržení panelů" eh="704a20a4" />
     <e k="sf_independent_panels_long" v="Umožnit nezávislé umístění panelů chytrých systémů v režimu úprav" eh="de43cebd" />
-    <e k="sf_desc_independentPanels" v="Přetáhněte každý panel volně pomocí režimu úprav Shift+H. Sbalte panely tlačítkem − v záhlaví." eh="7c60edfc" />    <e k="sf_hud_enter_drag_label"   v="Přesunout &amp; Změnit velikost panelů" />
-    <e k="sf_hud_enter_drag_desc"    v="Tažením HUD přemístíte — tažením rohu změníte velikost — PMB nebo Esc pro dokončení" />
-    <e k="sf_guide_sub_1" v="Přehled — Co tento mod sleduje a proč na tom záleží" eh="83e88693" />
+    <e k="sf_desc_independentPanels" v="Přetáhněte každý panel volně pomocí režimu úprav Shift+H. Sbalte panely tlačítkem − v záhlaví." eh="7c60edfc" />        <e k="sf_guide_sub_1" v="Přehled — Co tento mod sleduje a proč na tom záleží" eh="83e88693" />
     <e k="sf_guide_sub_2" v="Průvodce HUD — Čtení živinových pruhů a ukazatelů na obrazovce" eh="ffbe123f" />
     <e k="sf_guide_sub_3" v="Pracovní postup — Váš každodenní a sezónní postup správy půdy" eh="75d263dd" />
     <e k="sf_guide_sub_4" v="Produkty — Co každé hnojivo ovlivňuje a kdy ho použít" eh="2a127c60" />

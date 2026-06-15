@@ -704,7 +704,6 @@
     <e k="action_SF_SENSOR_PEST"     v="SF: Plagsensor omschakelen" />
     <e k="action_SF_SENSOR_DISEASE"  v="SF: Ziektesensor omschakelen" />
     <!-- SMART SYSTEMS -->
-    <e k="sf_panel_hdr_smart_systems"      v="Slimme systemen" />
     <e k="sf_nav_smart_systems_label"      v="Slimme systemen" />
     <e k="sf_nav_smart_systems_desc"       v="Slimme sensor, Zie &amp; Sproei en Variabele doseringssystemen configureren" />
     <e k="sf_nav_tuning_label"            v="Constanten afstemeditor" />
@@ -712,13 +711,10 @@
     <e k="sf_panel_hdr_smart_sensor_sys"   v="Slimme sensorsysteem" />
     <e k="sf_panel_hdr_see_spray_sys"      v="Zie &amp; Sproei systeem" />
     <e k="sf_panel_hdr_var_rate_sys"       v="Variabele doseringssysteem" />
-    <e k="sf_smart_sensor_short"           v="Slimme sensor" />
-    <e k="sf_smart_sensor_long"            v="Het slimme sproeisensorsysteem in- of uitschakelen" />
     <e k="sf_see_and_spray_short"          v="Zie &amp; Sproei" />
     <e k="sf_see_and_spray_long"           v="Het Zie &amp; Sproei precisiesproeisysteem in- of uitschakelen" />
     <e k="sf_variable_rate_short"          v="Variabele dosering" />
     <e k="sf_variable_rate_long"           v="Variabele dosering op basis van bodemtekorten in- of uitschakelen" />
-    <e k="sf_desc_smartSensorEnabled"      v="Spelers toestaan de slimme sensor voor boomregeling te gebruiken op basis van live bodemgegevens" />
     <e k="sf_desc_seeAndSprayEnabled"      v="Boomsecties onderdrukken boven gebieden die geen bespuiting nodig hebben" />
     <e k="sf_config_seeSprayWeed"          v="Zie &amp; Sproei: Onkruid" />
     <e k="sf_config_seeSprayPest"          v="Zie &amp; Sproei: Plaag" />
@@ -734,11 +730,6 @@
     <e k="sf_desc_overlapPrevention"       v="Sluit automatisch boomsecties boven grond die al volledig bemest is, om verspillende hertoepassing op overlappende banen te voorkomen." />
 
     <!-- SMART SENSOR PANEL -->
-    <e k="sf_sensor_pest"        v="Plagsensor" />
-    <e k="sf_sensor_disease"     v="Ziektesensor" />
-    <e k="sf_sensor_nutrient"    v="Voedingsstoffensensor" />
-    <e k="sf_sensor_state_on"    v="AAN" />
-    <e k="sf_sensor_state_off"   v="UIT" />
     <!-- SEE AND SPRAY PANEL -->
     <e k="sf_see_spray_panel_title" v="ZIE &amp; SPROEI" eh="a7e00bf0" />
     <e k="sf_see_spray_pest"        v="Plaag" />
@@ -749,20 +740,15 @@
     <e k="sf_var_rate_panel_title" v="VARIABELE DOSERING" eh="799c3bf7" />
     <e k="sf_var_rate_label"       v="Var. dosering" />
     <!-- INPUT ACTIONS -->
-    <e k="action_SF_SENSOR_PEST"       v="SF: Plagsensor omschakelen" />
-    <e k="action_SF_SENSOR_DISEASE"    v="SF: Ziektesensor omschakelen" />
     <e k="action_SF_SENSOR_NUTRIENT"   v="SF: Voedingsstoffensensor omschakelen" />
     <e k="action_SF_SEE_SPRAY_PEST"    v="SF: Zie &amp; Sproei Plaag omschakelen" />
     <e k="action_SF_SEE_SPRAY_DISEASE" v="SF: Zie &amp; Sproei Ziekte omschakelen" eh="205a3668" />
     <e k="action_SF_SEE_SPRAY_WEED"    v="SF: Zie &amp; Sproei Onkruid omschakelen" />
     <e k="action_SF_VARIABLE_RATE"     v="SF: Variabele dosering omschakelen" />
     <!-- HUD LAYOUT DRAG BUTTON -->
-    <e k="sf_panel_hdr_hud_layout"   v="HUD-indeling" />
     <e k="sf_independent_panels_short" v="Vrije paneelindeling" eh="704a20a4" />
     <e k="sf_independent_panels_long" v="Slimme systeempanelen toestaan onafhankelijk te worden gepositioneerd in de bewerkingsmodus" eh="de43cebd" />
     <e k="sf_desc_independentPanels" v="Sleep elk paneel vrij via de Shift+H bewerkingsmodus. Klap panelen in met de − knop in hun titelbalk." eh="7c60edfc" />
-    <e k="sf_hud_enter_drag_label"   v="Panelen verplaatsen &amp; vergroten/verkleinen" />
-    <e k="sf_hud_enter_drag_desc"    v="Sleep HUD om te verplaatsen — sleep hoek om formaat aan te passen — RMB of Esc om te voltooien" />
     <e k="sf_guide_sub_1" v="Overzicht — Wat deze mod bijhoudt en waarom het belangrijk is" eh="83e88693" />
     <e k="sf_guide_sub_2" v="HUD-gids — De voedingsstofbalken en schermweergaven lezen" eh="ffbe123f" />
     <e k="sf_guide_sub_3" v="Werkwijze — Je dagelijkse en seizoensgebonden bodembeheerroutine" eh="75d263dd" />
