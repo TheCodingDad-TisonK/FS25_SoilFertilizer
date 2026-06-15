@@ -851,9 +851,9 @@ function SoilMapOverlay:drawCellTooltip(ingameMap, mapX, mapY, mapWidth, mapHeig
         elseif pct < med then return ttFAIR[1], ttFAIR[2], ttFAIR[3]
         else return ttPOOR[1], ttPOOR[2], ttPOOR[3] end
     end
+    -- Localized crop name (#635) — see SoilUtils.getCropDisplayName.
     local function cropTitle(name)
-        if not name or name == "" then return nil end
-        return (name:sub(1,1):upper() .. name:sub(2):lower()):gsub("_", " ")
+        return SoilUtils.getCropDisplayName(name)
     end
 
     -- Build layer-specific row list: each entry { label, value, r, g, b }

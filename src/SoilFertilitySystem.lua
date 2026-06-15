@@ -360,6 +360,18 @@ function SoilFertilitySystem:onHarvest(fieldId, fruitTypeIndex, liters, strawRat
         end
     end
 
+    -- Clear weed/disease chemical protection on harvest too (#639). The crop cycle ends
+    -- with the harvest, so carrying the previous spray's "protected" status into the bare
+    -- field left the HUD showing weed/disease protection that the player could not clear.
+    -- Mirrors the insecticide reset above (counters only — pressure is re-derived live).
+    do
+        local field = self.fieldData[fieldId]
+        if field then
+            field.herbicideDaysLeft = 0
+            field.fungicideDaysLeft = 0
+        end
+    end
+
     -- Nutrient depletion uses original (biological) liters — the soil gave up these
     -- nutrients regardless of the yield modifier applied in the combine hook.
     self:updateFieldNutrients(fieldId, fruitTypeIndex, liters, strawRatio, area)
@@ -1078,8 +1090,11 @@ function SoilFertilitySystem:onHerbicideApplied(fieldId, effectiveness)
     local reduction = wp.HERBICIDE_PRESSURE_REDUCTION * (effectiveness or 1.0)
     local before = field.weedPressure or 0
     field.weedPressure = math.max(0, before - reduction)
-    local daysPerMonth = (g_currentMission and g_currentMission.environment and g_currentMission.environment.daysPerPeriod) or 1
-    field.herbicideDaysLeft = wp.HERBICIDE_DURATION_DAYS * daysPerMonth
+    -- Duration is in in-game DAYS (the daily tick decrements it by 1 per game day), so
+    -- it must equal the day count directly. Multiplying by daysPerPeriod made protection
+    -- last DURATION_DAYS *months* — it never expired, so the HUD "protected" status stuck
+    -- forever (#639). See HERBICIDE_DURATION_DAYS comment in Constants.lua.
+    field.herbicideDaysLeft = wp.HERBICIDE_DURATION_DAYS
 
     self:log("[Herbicide] Field %d: weed pressure %.0f -> %.0f, protected for %d days",
         fieldId, before, field.weedPressure, field.herbicideDaysLeft)
@@ -1209,10 +1224,10 @@ function SoilFertilitySystem:onInsecticideApplied(fieldId, effectiveness)
     local reduction = pp.INSECTICIDE_PRESSURE_REDUCTION * (effectiveness or 1.0)
     local before = field.pestPressure or 0
     field.pestPressure = math.max(0, before - reduction)
-    local daysPerMonth = (g_currentMission and g_currentMission.environment and g_currentMission.environment.daysPerPeriod) or 1
+    -- Duration is in in-game DAYS (decremented 1/game-day); see #639 / onHerbicideApplied.
     local protThreshold = SoilConstants.COVERAGE and SoilConstants.COVERAGE.PROTECTION_THRESHOLD or 0.80
     if (field.sessionCoverageFraction or 0) >= protThreshold then
-        field.insecticideDaysLeft = pp.INSECTICIDE_DURATION_DAYS * daysPerMonth
+        field.insecticideDaysLeft = pp.INSECTICIDE_DURATION_DAYS
     end
 
     self:log("[Insecticide] Field %d: pest pressure %.0f -> %.0f, protected for %d days",
@@ -1248,10 +1263,11 @@ function SoilFertilitySystem:onFungicideApplied(fieldId, effectiveness)
     local reduction = dp.FUNGICIDE_PRESSURE_REDUCTION * (effectiveness or 1.0)
     local before = field.diseasePressure or 0
     field.diseasePressure = math.max(0, before - reduction)
-    local daysPerMonth = (g_currentMission and g_currentMission.environment and g_currentMission.environment.daysPerPeriod) or 1
+    -- Duration is in in-game DAYS (decremented 1/game-day); see #639 / onHerbicideApplied.
+    -- cm.fungicideMult still scales it (shorter in wet climates).
     local protThreshold = SoilConstants.COVERAGE and SoilConstants.COVERAGE.PROTECTION_THRESHOLD or 0.80
     if (field.sessionCoverageFraction or 0) >= protThreshold then
-        field.fungicideDaysLeft = math.floor(dp.FUNGICIDE_DURATION_DAYS * cm.fungicideMult * daysPerMonth)
+        field.fungicideDaysLeft = math.floor(dp.FUNGICIDE_DURATION_DAYS * cm.fungicideMult)
     end
 
     self:log("[Fungicide] Field %d: disease pressure %.0f -> %.0f, protected for %d days",
@@ -2563,9 +2579,20 @@ function SoilFertilitySystem:updateFieldNutrients(fieldId, fruitTypeIndex, harve
         return
     end
 
-    -- Shift crop history before recording new crop (lastCrop → lastCrop2 → lastCrop3)
-    field.lastCrop3 = field.lastCrop2
-    field.lastCrop2 = field.lastCrop
+    -- Shift crop history ONCE per harvest event (lastCrop → lastCrop2 → lastCrop3).
+    -- updateFieldNutrients fires many times during a single harvest (addCutterArea is
+    -- per-cut, see Step 1), so an unguarded shift pushes the SAME crop into lastCrop2 and
+    -- lastCrop3 within one harvest — faking a 3-season monoculture and a false rotation
+    -- fatigue penalty (#638). A genuine new harvest event = the crop differs from the last
+    -- recorded crop, OR this harvest is on a later game day than the previous record. Both
+    -- conditions collapse the repeated per-cut calls (same crop, same day) into one shift,
+    -- while still recording back-to-back same-crop seasons so fatigue detection works.
+    local currentDay = (g_currentMission and g_currentMission.environment
+                        and g_currentMission.environment.currentDay) or 0
+    if field.lastCrop ~= fruitDesc.name or field.lastHarvest ~= currentDay then
+        field.lastCrop3 = field.lastCrop2
+        field.lastCrop2 = field.lastCrop
+    end
 
     -- Look up crop-specific extraction rates (how much N/P/K this crop removes from soil)
     -- Different crops have different nutrient demands:
@@ -2654,7 +2681,7 @@ function SoilFertilitySystem:updateFieldNutrients(fieldId, fruitTypeIndex, harve
     end
 
     field.lastCrop = fruitDesc.name
-    field.lastHarvest = (g_currentMission and g_currentMission.environment and g_currentMission.environment.currentDay) or 0
+    field.lastHarvest = currentDay
 
     self:log(
         "Harvest depletion field %d (%s): -N %.5f -P %.5f -K %.5f  straw sr=%.2f +OM %.5f",
@@ -3007,10 +3034,10 @@ function SoilFertilitySystem:onInsecticideAppliedIncremental(fieldId, reduction)
     local pp = SoilConstants.PEST_PRESSURE
     local before = field.pestPressure or 0
     field.pestPressure = math.max(0, before - reduction)
-    local daysPerMonth = (g_currentMission and g_currentMission.environment and g_currentMission.environment.daysPerPeriod) or 1
+    -- Duration is in in-game DAYS (decremented 1/game-day); see #639 / onHerbicideApplied.
     local protThreshold = SoilConstants.COVERAGE and SoilConstants.COVERAGE.PROTECTION_THRESHOLD or 0.80
     if (field.sessionCoverageFraction or 0) >= protThreshold then
-        field.insecticideDaysLeft = pp.INSECTICIDE_DURATION_DAYS * daysPerMonth
+        field.insecticideDaysLeft = pp.INSECTICIDE_DURATION_DAYS
     end
 
     -- Update per-cell pest pressure for existing zoneData entries only.
@@ -3039,10 +3066,10 @@ function SoilFertilitySystem:onFungicideAppliedIncremental(fieldId, reduction)
         or SoilConstants.DISEASE_CLIMATE_MOISTURE[2]
     local before = field.diseasePressure or 0
     field.diseasePressure = math.max(0, before - reduction)
-    local daysPerMonth = (g_currentMission and g_currentMission.environment and g_currentMission.environment.daysPerPeriod) or 1
+    -- Duration is in in-game DAYS (decremented 1/game-day); see #639 / onHerbicideApplied.
     local protThreshold = SoilConstants.COVERAGE and SoilConstants.COVERAGE.PROTECTION_THRESHOLD or 0.80
     if (field.sessionCoverageFraction or 0) >= protThreshold then
-        field.fungicideDaysLeft = math.floor(dp.FUNGICIDE_DURATION_DAYS * (cm.fungicideMult or 1) * daysPerMonth)
+        field.fungicideDaysLeft = math.floor(dp.FUNGICIDE_DURATION_DAYS * (cm.fungicideMult or 1))
     end
 
     -- Update per-cell disease pressure for existing zoneData entries only.
@@ -3350,12 +3377,12 @@ function SoilFertilitySystem:onHerbicideAppliedDirect(fieldId, effectiveness, li
     if reduction > 0 then
         local before = field.weedPressure or 0
         field.weedPressure = math.max(0, before - reduction)
-        local daysPerMonth = (g_currentMission and g_currentMission.environment and g_currentMission.environment.daysPerPeriod) or 1
         -- Only grant protected status once 80% of the field has been covered (issue #441)
         local protThreshold = SoilConstants.COVERAGE and SoilConstants.COVERAGE.PROTECTION_THRESHOLD or 0.80
         local wasProtected = (field.herbicideDaysLeft or 0) > 0
         if (field.sessionCoverageFraction or 0) >= protThreshold then
-            field.herbicideDaysLeft = SoilConstants.WEED_PRESSURE.HERBICIDE_DURATION_DAYS * daysPerMonth
+            -- Duration is in in-game DAYS (decremented 1/game-day); see #639.
+            field.herbicideDaysLeft = SoilConstants.WEED_PRESSURE.HERBICIDE_DURATION_DAYS
             -- Apply weed map state (visual browning) exactly once when protection is first granted.
             -- applyWeedMapState is server-only; guards inside it handle the nil-field case.
             if not wasProtected and g_server then
