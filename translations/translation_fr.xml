@@ -39,12 +39,12 @@
     <e k="sf_notifications_long" v="Activer/désactiver les notifications sol et engrais" eh="9a872f8f" />
     <e k="sf_show_hud_short" v="Afficher le HUD" eh="c94fd4d7" />
     <e k="sf_show_hud_long" v="Afficher/masquer le HUD d'information du sol (F8 pour basculer temporairement)" eh="4e2e11b6" />
-    <e k="sf_show_work_trail_short" v="Work Trail" />
-    <e k="sf_show_work_trail_long" v="Show/hide spray and harvest trail dots in-world and on the minimap" />
-    <e k="sf_show_sprayer_panel_short" v="Sprayer Panel" />
-    <e k="sf_show_sprayer_panel_long" v="Show/hide the sprayer nutrient info panel when driving a sprayer" />
-    <e k="sf_show_harvester_panel_short" v="Harvester Panel" />
-    <e k="sf_show_harvester_panel_long" v="Show/hide the harvester grain tank status panel when harvesting" />
+	<e k="sf_show_sprayer_panel_short" v="Panneau pulvérisateur" />
+    <e k="sf_desc_showSprayerInfoPanel" v="Afficher ou masquer le panneau d'informations de pulvérisation lors de l'utilisation d'un pulvérisateur" />
+    <e k="sf_show_harvester_panel_short" v="Panneau moissonneuse" />
+    <e k="sf_desc_showHarvesterPanel" v="Afficher ou masquer le panneau d'état de la trémie de la moissonneuse pendant la récolte" />
+    <e k="sf_show_work_trail_short" v="Trace de travail" />
+    <e k="sf_show_work_trail_long" v="Afficher/masquer les points de trace de pulvérisation et de récolte dans le monde et sur la mini-carte" />
     <e k="sf_hud_position_short" v="Position du HUD" eh="5ac371f2" />
     <e k="sf_hud_position_long" v="Choisir où afficher le HUD du sol à l'écran" eh="d7b9c109" />
     <e k="sf_hud_pos_1" v="Haut droite" eh="5f9f6784" />
@@ -191,7 +191,7 @@
     <e k="sf_hud_noField" v="Entrez dans un champ" eh="62c55e9e" />
     <e k="sf_sprayer_no_field" v="Conduisez sur un champ" />
     <e k="sf_hud_fallow" v="Jachère" eh="eafe5913" />
-    <e k="sf_hud_weeds" v="Mauvaises herbes Risk" eh="324181de" />
+    <e k="sf_hud_weeds" v="Mauvaises herbes" eh="324181de" />
     <e k="sf_hud_pests" v="Ravageurs" eh="2fed5101" />
     <e k="sf_hud_disease" v="Maladie" eh="e7067a8c" />
     <e k="sf_hud_protected" v="(protégé)" eh="8273211e" />
@@ -315,6 +315,11 @@
     <e k="helpLine_sf_mp_p1_auth_text" v="Toute la simulation du sol s’exécute sur le serveur. Les clients reçoivent toutes les données des champs et les paramètres à la connexion, avec une nouvelle tentative automatique si le serveur est encore en cours de chargement. Les paramètres d’affichage du HUD (position, thème, taille) sont propres à chaque joueur et ne sont jamais synchronisés avec le serveur." eh="db72a3f9" />
     <e k="helpLine_sf_mp_p1_ded_title" v="Serveurs dédiés" eh="4d3a45ba" />
     <e k="helpLine_sf_mp_p1_ded_text" v="Les serveurs dédiés exécutent toute la simulation sans surcharge HUD ou interface graphique - c’est normal. Utilisez les commandes console (soilStatus, SoilSetDifficulty, SoilShowSettings, etc.) pour gérer et vérifier les paramètres sur un serveur dédié." eh="3df784d6" />
+	<e k="helpline_sf_mp_p2_title" v="Flux de travail multijoueur" />
+    <e k="helpline_sf_mp_p2_compat_title" v="Compatibilité multijoueur" />
+    <e k="helpline_sf_mp_p2_compat_text" v="Tous les joueurs doivent avoir les mêmes mods et les mêmes versions installés pour garantir une synchronisation correcte des données." />
+    <e k="helpline_sf_mp_p2_workflow_title" v="Organisation du travail multijoueur" />
+    <e k="helpline_sf_mp_p2_workflow_text" v="Attribuez les champs et les tâches aux différents joueurs afin d'améliorer l'efficacité et d'éviter les doublons." />
     <e k="sf_crop_rotation_short" v="Rotation des cultures" eh="def2c162" />
     <e k="sf_crop_rotation_long" v="Activer/désactiver le bonus de rotation des cultures et la fatigue des monocultures (les légumineuses restaurent l’azote ; les cultures répétées augmentent la déplétion)" eh="958b4212" />
     <e k="sf_gypsum_title" v="Gypse (pH-)" eh="d66da34c" />
@@ -341,7 +346,7 @@
     <e k="sf_map_layer_pest" v="Pression des ravageurs" eh="18a7c2be" />
     <e k="sf_map_layer_disease" v="Pression des maladies" eh="2b805cc9" />
     <e k="sf_map_layer_compaction" v="Compaction du sol" eh="19cf3ee7" />
-    <e k="sf_map_layer_yield" v="Rendement" />
+	<e k="sf_map_layer_yield" v="Rendement" />
     <e k="sf_map_overlay_cycle" v="Shift+M : changer de couche de sol" eh="032fdac7" />
     <e k="sf_map_page_title" v="Couches du sol" eh="04a675fb" />
     <e k="sf_map_sidebar_header" v="Couche de carte des sols" eh="81332549" />
@@ -513,7 +518,6 @@
     <e k="sf_hud_pass_coverage" v="Passage : %d%% (%s)" eh="531a10ef" />
     <e k="sf_hud_compaction" v="Compaction : %d%%" eh="bef3a4f5" />
     <e k="sf_hud_yield_eff" v="Rendement : %d%%" eh="7b49cf24" />
-    <e k="sf_hud_amend_burn" v="Brûlure: -%d%%" />
 
     <!-- ======================================================
          HUD DU DÉBIT DU PULVÉRISATEUR
@@ -599,7 +603,7 @@
     <e k="sf_desc_fertilizerCosts" v="Coût réel en jeu des engrais" eh="1c197c9f" />
     <e k="sf_desc_showNotifications" v="Notifications de statut du sol en jeu" eh="7f275b4b" />
     <e k="sf_desc_showHUD" v="Afficher le HUD du sol" eh="fa8b9224" />
-    <e k="sf_desc_showWorkTrail" v="Show spray and harvest pass trail overlays" />
+    <e k="sf_desc_showWorkTrail" v="Afficher les traces de passages de pulvérisation et de récolte" />
     <e k="sf_desc_hudPosition" v="Position d’ancrage prédéfinie du HUD" eh="98c8bcea" />
     <e k="sf_desc_hudColorTheme" v="Palette de couleurs du HUD" eh="97271907" />
     <e k="sf_desc_hudFontSize" v="Taille du texte du HUD" eh="48a6fc15" />
@@ -718,17 +722,18 @@
     <e k="sf_variable_rate_long"           v="Activer ou désactiver l’application à taux variable basée sur les déficits du sol" />
     <e k="sf_desc_smartSensorEnabled"      v="Permet aux joueurs d’utiliser le Smart Sensor pour contrôler les sections de rampe selon les données du sol en temps réel" />
     <e k="sf_desc_seeAndSprayEnabled"      v="Supprime les sections de rampe au-dessus des zones qui n’ont pas besoin de traitement" />
-    <e k="sf_config_seeSprayWeed"          v="See &amp; Spray: Weed" />
-    <e k="sf_config_seeSprayPest"          v="See &amp; Spray: Pest" />
-    <e k="sf_config_seeSprayDisease"       v="See &amp; Spray: Disease" />    <e k="sf_desc_variableRateEnabled"     v="Ajuste le taux d’application par section selon les déficits en nutriments du sol" />
+    <e k="sf_config_seeSprayWeed"          v="See &amp; Spray : Mauvaises herbes" />
+    <e k="sf_config_seeSprayPest"          v="See &amp; Spray : Ravageurs" />
+    <e k="sf_config_seeSprayDisease"       v="See &amp; Spray : Maladies" />
+    <e k="sf_desc_variableRateEnabled"     v="Ajuste le taux d’application par section selon les déficits en nutriments du sol" />
     <e k="sf_panel_hdr_field_boundary"     v="Contrôle des limites de champ" />
     <e k="sf_field_boundary_short"         v="Contrôle des limites" />
     <e k="sf_field_boundary_long"          v="Activer ou désactiver le contrôle automatique des limites de champ" />
     <e k="sf_desc_fieldBoundaryControl"    v="Désactive automatiquement les sections de rampe en dehors des champs pour éviter toute application hors zone cultivée." />
-    <e k="sf_panel_hdr_overlap_prev"      v="Overlap Prevention" />
-    <e k="sf_overlap_prev_short"           v="Overlap Prevention" />
-    <e k="sf_overlap_prev_long"            v="Enable or disable density-map-based overlap prevention" />
-    <e k="sf_desc_overlapPrevention"       v="Automatically shuts off boom sections over ground that is already fully fertilized, preventing wasteful re-application on overlapping swaths." />
+    <e k="sf_panel_hdr_overlap_prev"      v="Prévention du chevauchement" />
+    <e k="sf_overlap_prev_short"           v="Prévention du chevauchement" />
+    <e k="sf_overlap_prev_long"            v="Activer ou désactiver la prévention du chevauchement basée sur la carte de densité" />
+    <e k="sf_desc_overlapPrevention"       v="Désactive automatiquement les sections de rampe sur les zones déjà entièrement fertilisées, évitant ainsi les réapplications inutiles sur les passages qui se chevauchent." />
 
 
     <!-- ======================================================
@@ -987,13 +992,16 @@
     <e k="sf_guide_tab_3" v="FLUX DE TRAVAIL" eh="a3f6045a" />
     <e k="sf_guide_tab_4" v="PRODUITS" eh="7589c616" />
     <e k="sf_guide_tab_5" v="F.A.Q." eh="783fecdf" />
-    <e k="sf_report_fields_tracked"   v="Fields Tracked:" />
-    <e k="sf_report_rotation_bonus"   v="Rotation Bonus" />
-    <e k="sf_report_rotation_fatigue" v="Fatigue: same crop" />
-    <e k="sf_report_rotation_ok"      v="Rotation: OK" />
-    <e k="sf_report_rec_optimal"      v="Soil Health: Optimal" />
-    <e k="sf_report_rec_good"         v="Good" />
-    <e k="sf_report_rec_fair"         v="Fair" />
-    <e k="sf_report_rec_poor"         v="Poor" />
-    </elements>
+    <e k="sf_report_fields_tracked"   v="Champs suivis :" />
+    <e k="sf_report_rotation_bonus"   v="Bonus de rotation" />
+    <e k="sf_report_rotation_fatigue" v="Fatigue : même culture" />
+    <e k="sf_report_rotation_ok"      v="Rotation : OK" />
+    <e k="sf_report_rec_optimal"      v="Santé du sol : Optimale" />
+    <e k="sf_report_rec_good"         v="Bonne" />
+    <e k="sf_report_rec_fair"         v="Moyenne" />
+    <e k="sf_report_rec_poor"         v="Mauvaise" />
+        <e k="sf_show_sprayer_panel_long" v="Show/hide the sprayer nutrient info panel when driving a sprayer" />
+    <e k="sf_show_harvester_panel_long" v="Show/hide the harvester grain tank status panel when harvesting" />
+    <e k="sf_hud_amend_burn" v="Brûlure: -%d%%" />
+</elements>
 </l10n>
