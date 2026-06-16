@@ -3497,74 +3497,93 @@ function SoilFertilitySystem:onFungicideAppliedDirect(fieldId, effectiveness, li
 end
 
 --- Apply over-application burn penalty to a field.
---- Called by HookManager after fertilizer is applied at rate > BURN_RISK_THRESHOLD.
---- At risk threshold: probabilistic burn (probability scales linearly with excess).
---- At guaranteed threshold: burn every application.
---- Burn reduces pH and nitrogen to simulate salt/chemical soil damage.
+--- Called by HookManager every tick (and once per boom section) while fertilizer
+--- is applied at rate > BURN_RISK_THRESHOLD.
+---
+--- The burn is *metered by how long you over-apply*, not fired per tick: each tick
+--- docks a slice of pH/N proportional to the elapsed over-spray time, capped per
+--- pass at the BURN_*_CERTAIN/RISK magnitudes. A brief overlap costs a small slice;
+--- BURN_FULL_DAMAGE_MS of continuous over-spray reaches the full magnitude. Sibling
+--- boom sections in the same tick contribute dt == 0, so a wide boom never
+--- multiplies the penalty. A spray gap longer than BURN_PASS_GAP_MS (boom lifted,
+--- headland turn) starts a fresh pass.
+---
+--- Approach #1 from issue #649: the dock still lands on the whole-field pH/N scalar
+--- (soil is tracked per field, not per zone, and yield is field-average by design),
+--- but metering by duration makes the *magnitude* proportional to the over-applied
+--- area for a given boom, so a small/brief overlap no longer craters the field.
 ---@param fieldId number
 ---@param rateMultiplier number The actual rate multiplier used (e.g. 1.5)
 function SoilFertilitySystem:applyBurnEffect(fieldId, rateMultiplier)
     local field = self.fieldData[fieldId]
     if not field then return end
 
-    -- ── Once-per-pass gate ───────────────────────────────────────────────────
-    -- onEndWorkAreaProcessing fires every physics tick, once per active boom
-    -- section, so without a gate a few seconds of over-spraying stacks hundreds
-    -- of whole-field burns and floors pH/N (Discord report). Collapse a
-    -- continuous over-application pass into a single burn attempt: continuous
-    -- spraying never re-burns; a gap (boom lifted / headland turn) longer than
-    -- BURN_PASS_GAP_MS starts a fresh pass that may burn once more. The flags are
-    -- transient runtime state (not persisted). This also caps the per-section
-    -- multiplication: the first active section claims the pass, the rest gate out.
-    local now   = (g_currentMission and g_currentMission.time) or 0
-    local gapMs = SoilConstants.SPRAYER_RATE.BURN_PASS_GAP_MS or 1500
-    if field._lastBurnTickTime and (now - field._lastBurnTickTime) <= gapMs then
-        field._lastBurnTickTime = now            -- refresh so continuous spraying stays one pass
-        if field._burnPassAttempted then return end  -- already rolled/burned this pass
-    end
-    field._lastBurnTickTime  = now
-    field._burnPassAttempted = true
-
     local burnCfg = SoilConstants.SPRAYER_RATE
     local limits  = SoilConstants.NUTRIENT_LIMITS
-    local phDrop  = 0
-    local nDrain  = 0
+    local now     = (g_currentMission and g_currentMission.time) or 0
+    local gapMs   = burnCfg.BURN_PASS_GAP_MS or 1500
+    local fullMs  = burnCfg.BURN_FULL_DAMAGE_MS or 8000
 
-    local daysPerMonth = (g_currentMission and g_currentMission.environment and g_currentMission.environment.daysPerPeriod) or 1
-    if rateMultiplier >= burnCfg.BURN_GUARANTEED_THRESHOLD then
-        phDrop = burnCfg.BURN_PH_DROP_CERTAIN
-        nDrain = burnCfg.BURN_N_DRAIN_CERTAIN
-        field.burnDaysLeft = 3 * daysPerMonth   -- show burn warning in HUD (Issue #349 scaling)
+    -- ── Pass continuity & elapsed-time slice ─────────────────────────────────
+    -- dt is the over-spray time since the previous tick. Sibling sections in the
+    -- same tick see dt == 0 (the first one already advanced _lastBurnTickTime).
+    local dt
+    if field._lastBurnTickTime and (now - field._lastBurnTickTime) <= gapMs then
+        dt = now - field._lastBurnTickTime
     else
-        -- Probability scales linearly between risk threshold and guaranteed threshold
+        -- New pass: reset the per-pass accumulators, caps and one-shot flags.
+        dt = 0
+        field._burnPassPh       = 0
+        field._burnPassN        = 0
+        field._burnPassNotified = nil
+    end
+    field._lastBurnTickTime = now
+    if dt <= 0 then return end   -- first tick of a pass, or a sibling section this tick
+
+    -- ── Full-pass magnitude for the current rate (the per-pass cap) ───────────
+    local fullPh, fullN
+    if rateMultiplier >= burnCfg.BURN_GUARANTEED_THRESHOLD then
+        fullPh, fullN = burnCfg.BURN_PH_DROP_CERTAIN, burnCfg.BURN_N_DRAIN_CERTAIN
+    else
+        -- Risk band: magnitude scales linearly with how far past the risk threshold.
         local excess = (rateMultiplier - burnCfg.BURN_RISK_THRESHOLD) /
                        (burnCfg.BURN_GUARANTEED_THRESHOLD - burnCfg.BURN_RISK_THRESHOLD)
-        if math.random() < excess then
-            phDrop = burnCfg.BURN_PH_DROP_RISK
-            nDrain = burnCfg.BURN_N_DRAIN_RISK
-            field.burnDaysLeft = 3 * daysPerMonth
-        end
+        excess = math.max(0.0, math.min(1.0, excess))
+        fullPh, fullN = burnCfg.BURN_PH_DROP_RISK * excess, burnCfg.BURN_N_DRAIN_RISK * excess
     end
 
-    if phDrop > 0 then
-        field.pH       = math.max(limits.PH_MIN, field.pH - phDrop)
-        field.nitrogen = math.max(limits.MIN, field.nitrogen - nDrain)
+    -- ── This tick's slice, clamped to the remaining per-pass budget ───────────
+    local frac   = math.min(1.0, dt / fullMs)
+    local phDrop = math.min(fullPh * frac, math.max(0.0, fullPh - (field._burnPassPh or 0)))
+    local nDrain = math.min(fullN  * frac, math.max(0.0, fullN  - (field._burnPassN  or 0)))
+    if phDrop <= 0 and nDrain <= 0 then return end
 
-        self:log("Burn effect field %d: pH -%.2f, N -%.1f (rate=%.0f%%)",
-            fieldId, phDrop, nDrain, rateMultiplier * 100)
+    field.pH          = math.max(limits.PH_MIN, field.pH - phDrop)
+    field.nitrogen    = math.max(limits.MIN, field.nitrogen - nDrain)
+    field._burnPassPh = (field._burnPassPh or 0) + phDrop
+    field._burnPassN  = (field._burnPassN  or 0) + nDrain
 
-        if self.settings.showNotifications then
-            self:showNotification(
-                g_i18n:getText("sf_notify_burn_title"),
-                string.format(g_i18n:getText("sf_notify_burn_body"), fieldId, field.pH)
-            )
-        end
+    local daysPerMonth = (g_currentMission and g_currentMission.environment and g_currentMission.environment.daysPerPeriod) or 1
+    field.burnDaysLeft = 3 * daysPerMonth   -- show burn warning in HUD (Issue #349 scaling)
 
-        -- Broadcast updated field data in multiplayer
-        if g_server and g_currentMission and g_currentMission.missionDynamicInfo and g_currentMission.missionDynamicInfo.isMultiplayer then
-            if SoilFieldUpdateEvent then
-                g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
-            end
+    self:log("Burn slice field %d: pH -%.3f, N -%.2f (pass pH -%.2f, rate=%.0f%%)",
+        fieldId, phDrop, nDrain, field._burnPassPh, rateMultiplier * 100)
+
+    -- One notification per pass (the per-tick slices would otherwise spam it).
+    if self.settings.showNotifications and not field._burnPassNotified then
+        field._burnPassNotified = true
+        self:showNotification(
+            g_i18n:getText("sf_notify_burn_title"),
+            string.format(g_i18n:getText("sf_notify_burn_body"), fieldId, field.pH)
+        )
+    end
+
+    -- Broadcast in multiplayer, throttled to ~once per gap window so the per-tick
+    -- slices don't flood the network. Clients converge via the next sync anyway.
+    if g_server and g_currentMission and g_currentMission.missionDynamicInfo and g_currentMission.missionDynamicInfo.isMultiplayer then
+        if SoilFieldUpdateEvent and (not field._lastBurnBroadcast or (now - field._lastBurnBroadcast) >= gapMs) then
+            field._lastBurnBroadcast = now
+            g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
         end
     end
 end

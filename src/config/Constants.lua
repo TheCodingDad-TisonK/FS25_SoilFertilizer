@@ -728,15 +728,20 @@ SoilConstants.SPRAYER_RATE = {
     DEFAULT_INDEX             = 10,    -- 1.0x
     BURN_RISK_THRESHOLD       = 1.25,  -- above this: chance of burn
     BURN_GUARANTEED_THRESHOLD = 1.50,  -- at or above this: burn every time
-    BURN_PH_DROP_RISK         = 0.15,  -- pH units lost on probabilistic burn
-    BURN_PH_DROP_CERTAIN      = 0.30,  -- pH units lost on guaranteed burn
-    BURN_N_DRAIN_RISK         = 5.0,   -- N points lost on probabilistic burn
-    BURN_N_DRAIN_CERTAIN      = 12.0,  -- N points lost on guaranteed burn
-    -- Once-per-pass gate: onEndWorkAreaProcessing fires every physics tick and
-    -- once per active boom section, so a burn must be collapsed to a single
-    -- attempt per continuous over-application pass (see applyBurnEffect). A gap
-    -- longer than this (boom lifted, headland turn) counts as a fresh pass.
-    BURN_PASS_GAP_MS          = 1500,  -- ms of spray inactivity that ends a burn pass
+    BURN_PH_DROP_RISK         = 0.15,  -- max pH lost over a full pass in the risk band (scaled by excess)
+    BURN_PH_DROP_CERTAIN      = 0.30,  -- max pH lost over a full pass at/above the guaranteed threshold
+    BURN_N_DRAIN_RISK         = 5.0,   -- max N lost over a full pass in the risk band (scaled by excess)
+    BURN_N_DRAIN_CERTAIN      = 12.0,  -- max N lost over a full pass at/above the guaranteed threshold
+    -- The burn is metered by how long you over-apply, not fired per tick:
+    -- onEndWorkAreaProcessing runs every physics tick and once per active boom
+    -- section, so applyBurnEffect docks a slice each tick proportional to elapsed
+    -- over-spray time, capped per pass at the BURN_*_CERTAIN/RISK magnitudes
+    -- above. A brief overlap costs a small slice; BURN_FULL_DAMAGE_MS of
+    -- continuous over-spray reaches the full magnitude. Sibling boom sections in
+    -- one tick add dt == 0, so a wide boom never multiplies the penalty. A gap
+    -- longer than BURN_PASS_GAP_MS (boom lifted, headland turn) starts a fresh pass.
+    BURN_PASS_GAP_MS          = 1500,  -- ms of over-spray inactivity that ends a burn pass
+    BURN_FULL_DAMAGE_MS       = 8000,  -- ms of continuous over-spray to reach full burn magnitude
     FERTILIZER_COVERAGE_THRESHOLD = 0.90, -- % field coverage needed before nutrients are credited (V1.6 Realism Update)
 
     -- Reference application rates at 1.0x (step 10) per fill type.
