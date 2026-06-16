@@ -732,6 +732,11 @@ SoilConstants.SPRAYER_RATE = {
     BURN_PH_DROP_CERTAIN      = 0.30,  -- pH units lost on guaranteed burn
     BURN_N_DRAIN_RISK         = 5.0,   -- N points lost on probabilistic burn
     BURN_N_DRAIN_CERTAIN      = 12.0,  -- N points lost on guaranteed burn
+    -- Once-per-pass gate: onEndWorkAreaProcessing fires every physics tick and
+    -- once per active boom section, so a burn must be collapsed to a single
+    -- attempt per continuous over-application pass (see applyBurnEffect). A gap
+    -- longer than this (boom lifted, headland turn) counts as a fresh pass.
+    BURN_PASS_GAP_MS          = 1500,  -- ms of spray inactivity that ends a burn pass
     FERTILIZER_COVERAGE_THRESHOLD = 0.90, -- % field coverage needed before nutrients are credited (V1.6 Realism Update)
 
     -- Reference application rates at 1.0x (step 10) per fill type.

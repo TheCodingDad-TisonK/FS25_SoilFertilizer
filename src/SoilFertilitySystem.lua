@@ -3507,6 +3507,24 @@ function SoilFertilitySystem:applyBurnEffect(fieldId, rateMultiplier)
     local field = self.fieldData[fieldId]
     if not field then return end
 
+    -- ── Once-per-pass gate ───────────────────────────────────────────────────
+    -- onEndWorkAreaProcessing fires every physics tick, once per active boom
+    -- section, so without a gate a few seconds of over-spraying stacks hundreds
+    -- of whole-field burns and floors pH/N (Discord report). Collapse a
+    -- continuous over-application pass into a single burn attempt: continuous
+    -- spraying never re-burns; a gap (boom lifted / headland turn) longer than
+    -- BURN_PASS_GAP_MS starts a fresh pass that may burn once more. The flags are
+    -- transient runtime state (not persisted). This also caps the per-section
+    -- multiplication: the first active section claims the pass, the rest gate out.
+    local now   = (g_currentMission and g_currentMission.time) or 0
+    local gapMs = SoilConstants.SPRAYER_RATE.BURN_PASS_GAP_MS or 1500
+    if field._lastBurnTickTime and (now - field._lastBurnTickTime) <= gapMs then
+        field._lastBurnTickTime = now            -- refresh so continuous spraying stays one pass
+        if field._burnPassAttempted then return end  -- already rolled/burned this pass
+    end
+    field._lastBurnTickTime  = now
+    field._burnPassAttempted = true
+
     local burnCfg = SoilConstants.SPRAYER_RATE
     local limits  = SoilConstants.NUTRIENT_LIMITS
     local phDrop  = 0

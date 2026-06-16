@@ -24,6 +24,11 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
+    "- Fixed: Briefly over-applying fertilizer no longer wrecks the whole field. The",
+    "  over-application burn used to fire every moment the boom was down and once per",
+    "  boom section, so a few seconds of over-spraying stacked hundreds of penalties",
+    "  and crashed the field's pH and nitrogen. The burn now lands once per spraying",
+    "  pass, so a short overlap costs a single small penalty",
     "- Fixed: Fertilizing a field could do nothing after reloading a save. The field was",
     "  wrongly treated as already fully covered, which switched the spreader sections off",
     "  so nothing was applied and the soil never changed. Reloading now starts a fresh",
