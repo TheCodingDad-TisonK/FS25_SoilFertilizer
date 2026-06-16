@@ -2743,32 +2743,49 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
                 end
             end
             if hasCrop then
-                if isLimeAmendment then
-                    field.amendBurnPenalty = 0.80
-                    field._amendBurnNotified = true
-                    self:showNotification(
-                        g_i18n:getText("sf_notify_lime_crop_title"),
-                        string.format(g_i18n:getText("sf_notify_lime_crop_body"), fieldId))
-                else
-                    -- Issue #629: spreading organic fertilizer (slurry/manure/digestate) on a
-                    -- perennial forage crop (grass, meadow, alfalfa…) is standard practice right
-                    -- after a cut while the sward is short, so the burn penalty must NOT fire then.
-                    -- Only penalise once the forage has regrown past its harvest-ready growth
-                    -- state (tall grass, where a slurry pass really would foul the crop). Annual
-                    -- crops keep the penalty at every growth stage.
-                    local exempt = false
-                    if cropFruitIndex then
-                        local fruitDesc = g_fruitTypeManager and g_fruitTypeManager:getFruitTypeByIndex(cropFruitIndex)
-                        local fruitName = fruitDesc and fruitDesc.name and string.lower(fruitDesc.name)
-                        local perennialSet = SoilConstants.PERENNIAL_FORAGE_NAMES
-                        if fruitName and perennialSet and perennialSet[fruitName] then
-                            local minHarvest = fruitDesc and fruitDesc.minHarvestingGrowthState
-                            if not minHarvest or minHarvest <= 0 or (cropGrowthState or 0) < minHarvest then
-                                exempt = true
-                            end
-                        end
+                -- Perennial forage (grass, meadow, alfalfa…) is exempt from amendment burn
+                -- while the sward is short — young regrowth or freshly cut. Liming or spreading
+                -- organics on a short/cut sward is standard practice (small leaf area, low burn
+                -- risk), so only penalise once it has regrown into its harvest window (tall).
+                -- Annual crops are never exempt. Shared by lime (#646) and organic matter
+                -- (#629/#645).
+                local perennialExempt = false
+                if cropFruitIndex then
+                    local fruitDesc = g_fruitTypeManager and g_fruitTypeManager:getFruitTypeByIndex(cropFruitIndex)
+                    local fruitName = fruitDesc and fruitDesc.name and string.lower(fruitDesc.name)
+                    local perennialSet = SoilConstants.PERENNIAL_FORAGE_NAMES
+                    if fruitDesc and fruitName and perennialSet and perennialSet[fruitName] then
+                        -- Growth states are NOT linearly ordered: the post-mow "cut" state has a
+                        -- HIGHER index than the harvest-ready states, so a lower-bound-only check
+                        -- let cut grass through as "fully grown" (#645). Penalise ONLY inside the
+                        -- harvest window [minHarvestingGrowthState, maxHarvestingGrowthState];
+                        -- exempt young regrowth, cut and withered states.
+                        local minH = fruitDesc.minHarvestingGrowthState
+                        local maxH = fruitDesc.maxHarvestingGrowthState
+                        local gs   = cropGrowthState or 0
+                        local cutStates = fruitDesc.cutStates
+                        local inHarvestWindow = minH and minH > 0 and gs >= minH
+                            and (not maxH or maxH <= 0 or gs <= maxH)
+                            and not (cutStates and cutStates[gs])
+                        perennialExempt = not inHarvestWindow
                     end
-                    if not exempt then
+                end
+
+                if isLimeAmendment then
+                    -- #646: liming early-stage / cut perennial forage is realistic pasture
+                    -- management, so skip the -80% burn there. Tall forage and every annual
+                    -- crop still take it.
+                    if not perennialExempt then
+                        field.amendBurnPenalty = 0.80
+                        field._amendBurnNotified = true
+                        self:showNotification(
+                            g_i18n:getText("sf_notify_lime_crop_title"),
+                            string.format(g_i18n:getText("sf_notify_lime_crop_body"), fieldId))
+                    end
+                else
+                    -- #629/#645: organic fertilizer (slurry/manure/digestate) on short/cut
+                    -- perennial forage is standard practice, so skip the -20% burn there.
+                    if not perennialExempt then
                         field.amendBurnPenalty = math.max(field.amendBurnPenalty or 0, 0.20)
                         field._amendBurnNotified = true
                         self:showNotification(
@@ -3243,9 +3260,18 @@ end
 --- stays consistent with the polygon-bounded overlay (see _prePopulateZoneData).
 --- Also stamps visual overlay entries (zoneData) for the PDA map.
 --- Called from HookManager after applySingle to fill in the full lateral sweep.
+---
+--- overlayOnly: when true, stamp the visual overlay (zoneData) and the spray trail
+--- but DO NOT advance the session/daily coverage counters — the caller drives those
+--- via the liter-based trackSprayerCoverage instead. Used for broadcast / dry
+--- spreaders (no VariableWorkWidth): the per-field polygon test below rejects boom
+--- cells that credit the wrong sub-field on multi-field farmlands, which froze the
+--- pass% / session-ha counters for dry spreaders after #626 rerouted them off the
+--- liter path (#650). The liter estimate has no such polygon dependency.
 ---@param fieldId   number
 ---@param boomPoints table  Array of {x=, z=} world positions
-function SoilFertilitySystem:markBoomCells(fieldId, boomPoints)
+---@param overlayOnly boolean|nil  When true, stamp visuals only; skip coverage counters
+function SoilFertilitySystem:markBoomCells(fieldId, boomPoints, overlayOnly)
     if not boomPoints or #boomPoints == 0 then return end
     local field = self.fieldData and self.fieldData[fieldId]
     if not field then return end
@@ -3287,7 +3313,9 @@ function SoilFertilitySystem:markBoomCells(fieldId, boomPoints)
                 -- and avoid suppressing sections that are still on their current pass.
                 if not field.sessionCoverageCells[cellKey] then
                     field.sessionCoverageCells[cellKey] = (g_currentMission and g_currentMission.time) or 0
-                    field.sessionCoverageHa = math.min(areaInHa, (field.sessionCoverageHa or 0) + cellArea)
+                    if not overlayOnly then
+                        field.sessionCoverageHa = math.min(areaInHa, (field.sessionCoverageHa or 0) + cellArea)
+                    end
                     -- ── Spray trail (in-view overlay) ──────────────────────────────
                     -- Cache world-center + terrain height for SoilHUD:drawSprayTrail().
                     if not field.sprayTrailPts then field.sprayTrailPts = {} end
@@ -3298,7 +3326,7 @@ function SoilFertilitySystem:markBoomCells(fieldId, boomPoints)
                     end
                     table.insert(field.sprayTrailPts, {wx = cellCx, wy = twy, wz = cellCz})
                 end
-                if not field.dailyCoverageCells[cellKey] then
+                if not overlayOnly and not field.dailyCoverageCells[cellKey] then
                     field.dailyCoverageCells[cellKey] = true
                     field.coveredAreaHa = math.min(areaInHa, (field.coveredAreaHa or 0) + cellArea)
                 end
@@ -3330,9 +3358,13 @@ function SoilFertilitySystem:markBoomCells(fieldId, boomPoints)
         end
     end
 
-    -- Recompute fractions after all cells are processed
-    field.coverageFraction        = math.min(1.0, (field.coveredAreaHa  or 0) / areaInHa)
-    field.sessionCoverageFraction = math.min(1.0, (field.sessionCoverageHa or 0) / areaInHa)
+    -- Recompute fractions after all cells are processed.
+    -- In overlayOnly mode the counters are owned by trackSprayerCoverage (liter-based);
+    -- leave the fractions it set untouched so the pass% / ha display stays consistent.
+    if not overlayOnly then
+        field.coverageFraction        = math.min(1.0, (field.coveredAreaHa  or 0) / areaInHa)
+        field.sessionCoverageFraction = math.min(1.0, (field.sessionCoverageHa or 0) / areaInHa)
+    end
 
     -- Full pass complete — clear trail so the overlay disappears as a visual reward.
     -- Match the 0.99 threshold used by overlap prevention so dots clear when the
@@ -3480,10 +3512,21 @@ function SoilFertilitySystem:onFungicideAppliedDirect(fieldId, effectiveness, li
 end
 
 --- Apply over-application burn penalty to a field.
---- Called by HookManager after fertilizer is applied at rate > BURN_RISK_THRESHOLD.
---- At risk threshold: probabilistic burn (probability scales linearly with excess).
---- At guaranteed threshold: burn every application.
---- Burn reduces pH and nitrogen to simulate salt/chemical soil damage.
+--- Called by HookManager every tick (and once per boom section) while fertilizer
+--- is applied at rate > BURN_RISK_THRESHOLD.
+---
+--- The burn is *metered by how long you over-apply*, not fired per tick: each tick
+--- docks a slice of pH/N proportional to the elapsed over-spray time, capped per
+--- pass at the BURN_*_CERTAIN/RISK magnitudes. A brief overlap costs a small slice;
+--- BURN_FULL_DAMAGE_MS of continuous over-spray reaches the full magnitude. Sibling
+--- boom sections in the same tick contribute dt == 0, so a wide boom never
+--- multiplies the penalty. A spray gap longer than BURN_PASS_GAP_MS (boom lifted,
+--- headland turn) starts a fresh pass.
+---
+--- Approach #1 from issue #649: the dock still lands on the whole-field pH/N scalar
+--- (soil is tracked per field, not per zone, and yield is field-average by design),
+--- but metering by duration makes the *magnitude* proportional to the over-applied
+--- area for a given boom, so a small/brief overlap no longer craters the field.
 ---@param fieldId number
 ---@param rateMultiplier number The actual rate multiplier used (e.g. 1.5)
 function SoilFertilitySystem:applyBurnEffect(fieldId, rateMultiplier)
@@ -3492,44 +3535,70 @@ function SoilFertilitySystem:applyBurnEffect(fieldId, rateMultiplier)
 
     local burnCfg = SoilConstants.SPRAYER_RATE
     local limits  = SoilConstants.NUTRIENT_LIMITS
-    local phDrop  = 0
-    local nDrain  = 0
+    local now     = (g_currentMission and g_currentMission.time) or 0
+    local gapMs   = burnCfg.BURN_PASS_GAP_MS or 1500
+    local fullMs  = burnCfg.BURN_FULL_DAMAGE_MS or 8000
 
-    local daysPerMonth = (g_currentMission and g_currentMission.environment and g_currentMission.environment.daysPerPeriod) or 1
-    if rateMultiplier >= burnCfg.BURN_GUARANTEED_THRESHOLD then
-        phDrop = burnCfg.BURN_PH_DROP_CERTAIN
-        nDrain = burnCfg.BURN_N_DRAIN_CERTAIN
-        field.burnDaysLeft = 3 * daysPerMonth   -- show burn warning in HUD (Issue #349 scaling)
+    -- ── Pass continuity & elapsed-time slice ─────────────────────────────────
+    -- dt is the over-spray time since the previous tick. Sibling sections in the
+    -- same tick see dt == 0 (the first one already advanced _lastBurnTickTime).
+    local dt
+    if field._lastBurnTickTime and (now - field._lastBurnTickTime) <= gapMs then
+        dt = now - field._lastBurnTickTime
     else
-        -- Probability scales linearly between risk threshold and guaranteed threshold
+        -- New pass: reset the per-pass accumulators, caps and one-shot flags.
+        dt = 0
+        field._burnPassPh       = 0
+        field._burnPassN        = 0
+        field._burnPassNotified = nil
+    end
+    field._lastBurnTickTime = now
+    if dt <= 0 then return end   -- first tick of a pass, or a sibling section this tick
+
+    -- ── Full-pass magnitude for the current rate (the per-pass cap) ───────────
+    local fullPh, fullN
+    if rateMultiplier >= burnCfg.BURN_GUARANTEED_THRESHOLD then
+        fullPh, fullN = burnCfg.BURN_PH_DROP_CERTAIN, burnCfg.BURN_N_DRAIN_CERTAIN
+    else
+        -- Risk band: magnitude scales linearly with how far past the risk threshold.
         local excess = (rateMultiplier - burnCfg.BURN_RISK_THRESHOLD) /
                        (burnCfg.BURN_GUARANTEED_THRESHOLD - burnCfg.BURN_RISK_THRESHOLD)
-        if math.random() < excess then
-            phDrop = burnCfg.BURN_PH_DROP_RISK
-            nDrain = burnCfg.BURN_N_DRAIN_RISK
-            field.burnDaysLeft = 3 * daysPerMonth
-        end
+        excess = math.max(0.0, math.min(1.0, excess))
+        fullPh, fullN = burnCfg.BURN_PH_DROP_RISK * excess, burnCfg.BURN_N_DRAIN_RISK * excess
     end
 
-    if phDrop > 0 then
-        field.pH       = math.max(limits.PH_MIN, field.pH - phDrop)
-        field.nitrogen = math.max(limits.MIN, field.nitrogen - nDrain)
+    -- ── This tick's slice, clamped to the remaining per-pass budget ───────────
+    local frac   = math.min(1.0, dt / fullMs)
+    local phDrop = math.min(fullPh * frac, math.max(0.0, fullPh - (field._burnPassPh or 0)))
+    local nDrain = math.min(fullN  * frac, math.max(0.0, fullN  - (field._burnPassN  or 0)))
+    if phDrop <= 0 and nDrain <= 0 then return end
 
-        self:log("Burn effect field %d: pH -%.2f, N -%.1f (rate=%.0f%%)",
-            fieldId, phDrop, nDrain, rateMultiplier * 100)
+    field.pH          = math.max(limits.PH_MIN, field.pH - phDrop)
+    field.nitrogen    = math.max(limits.MIN, field.nitrogen - nDrain)
+    field._burnPassPh = (field._burnPassPh or 0) + phDrop
+    field._burnPassN  = (field._burnPassN  or 0) + nDrain
 
-        if self.settings.showNotifications then
-            self:showNotification(
-                g_i18n:getText("sf_notify_burn_title"),
-                string.format(g_i18n:getText("sf_notify_burn_body"), fieldId, field.pH)
-            )
-        end
+    local daysPerMonth = (g_currentMission and g_currentMission.environment and g_currentMission.environment.daysPerPeriod) or 1
+    field.burnDaysLeft = 3 * daysPerMonth   -- show burn warning in HUD (Issue #349 scaling)
 
-        -- Broadcast updated field data in multiplayer
-        if g_server and g_currentMission and g_currentMission.missionDynamicInfo and g_currentMission.missionDynamicInfo.isMultiplayer then
-            if SoilFieldUpdateEvent then
-                g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
-            end
+    self:log("Burn slice field %d: pH -%.3f, N -%.2f (pass pH -%.2f, rate=%.0f%%)",
+        fieldId, phDrop, nDrain, field._burnPassPh, rateMultiplier * 100)
+
+    -- One notification per pass (the per-tick slices would otherwise spam it).
+    if self.settings.showNotifications and not field._burnPassNotified then
+        field._burnPassNotified = true
+        self:showNotification(
+            g_i18n:getText("sf_notify_burn_title"),
+            string.format(g_i18n:getText("sf_notify_burn_body"), fieldId, field.pH)
+        )
+    end
+
+    -- Broadcast in multiplayer, throttled to ~once per gap window so the per-tick
+    -- slices don't flood the network. Clients converge via the next sync anyway.
+    if g_server and g_currentMission and g_currentMission.missionDynamicInfo and g_currentMission.missionDynamicInfo.isMultiplayer then
+        if SoilFieldUpdateEvent and (not field._lastBurnBroadcast or (now - field._lastBurnBroadcast) >= gapMs) then
+            field._lastBurnBroadcast = now
+            g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
         end
     end
 end
@@ -3919,17 +3988,20 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
             sessionLastProduct = nil,
         }
 
-        -- Restore coverage tracking so pass% persists across reloads (#608).
-        -- sessionCoverageCells is intentionally left empty (timestamps are session-local),
-        -- but the ha/fraction values are seeded from the saved cumulative coverage so the
-        -- sprayer panel displays the correct % immediately on reload and markBoomCells
-        -- continues accumulating from the right baseline instead of resetting to 0.
+        -- Restore only the DAILY coverage so the daily pass% and protection thresholds
+        -- carry across reloads (#608). Do NOT restore the SESSION coverage: it is
+        -- session-local and a reload starts a fresh spray session.
+        --
+        -- Seeding sessionCoverageFraction from the save was the #640 bug: the overlap
+        -- prevention gate treats sessionCoverageFraction >= 0.99 as "field fully covered",
+        -- suppresses every boom section and forces processSprayerArea to return 0. So any
+        -- field that had been fertilized before saving loaded back as already-covered and
+        -- silently refused ALL further fertilizer on every crop (the "fields don't update
+        -- after spreading" / "N not going up" reports), until a harvest/plow/cultivate/
+        -- day-change happened to reset the session fraction. sessionCoverage* stay 0/empty.
         do
-            local f    = self.fieldData[fieldId]
-            local ha   = f.coverageFraction * f.fieldArea
-            f.coveredAreaHa           = ha
-            f.sessionCoverageHa       = ha
-            f.sessionCoverageFraction = f.coverageFraction
+            local f = self.fieldData[fieldId]
+            f.coveredAreaHa = f.coverageFraction * f.fieldArea
         end
 
         -- Load daily application throttles
