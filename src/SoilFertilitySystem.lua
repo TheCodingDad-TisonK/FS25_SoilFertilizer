@@ -3260,9 +3260,18 @@ end
 --- stays consistent with the polygon-bounded overlay (see _prePopulateZoneData).
 --- Also stamps visual overlay entries (zoneData) for the PDA map.
 --- Called from HookManager after applySingle to fill in the full lateral sweep.
+---
+--- overlayOnly: when true, stamp the visual overlay (zoneData) and the spray trail
+--- but DO NOT advance the session/daily coverage counters — the caller drives those
+--- via the liter-based trackSprayerCoverage instead. Used for broadcast / dry
+--- spreaders (no VariableWorkWidth): the per-field polygon test below rejects boom
+--- cells that credit the wrong sub-field on multi-field farmlands, which froze the
+--- pass% / session-ha counters for dry spreaders after #626 rerouted them off the
+--- liter path (#650). The liter estimate has no such polygon dependency.
 ---@param fieldId   number
 ---@param boomPoints table  Array of {x=, z=} world positions
-function SoilFertilitySystem:markBoomCells(fieldId, boomPoints)
+---@param overlayOnly boolean|nil  When true, stamp visuals only; skip coverage counters
+function SoilFertilitySystem:markBoomCells(fieldId, boomPoints, overlayOnly)
     if not boomPoints or #boomPoints == 0 then return end
     local field = self.fieldData and self.fieldData[fieldId]
     if not field then return end
@@ -3304,7 +3313,9 @@ function SoilFertilitySystem:markBoomCells(fieldId, boomPoints)
                 -- and avoid suppressing sections that are still on their current pass.
                 if not field.sessionCoverageCells[cellKey] then
                     field.sessionCoverageCells[cellKey] = (g_currentMission and g_currentMission.time) or 0
-                    field.sessionCoverageHa = math.min(areaInHa, (field.sessionCoverageHa or 0) + cellArea)
+                    if not overlayOnly then
+                        field.sessionCoverageHa = math.min(areaInHa, (field.sessionCoverageHa or 0) + cellArea)
+                    end
                     -- ── Spray trail (in-view overlay) ──────────────────────────────
                     -- Cache world-center + terrain height for SoilHUD:drawSprayTrail().
                     if not field.sprayTrailPts then field.sprayTrailPts = {} end
@@ -3315,7 +3326,7 @@ function SoilFertilitySystem:markBoomCells(fieldId, boomPoints)
                     end
                     table.insert(field.sprayTrailPts, {wx = cellCx, wy = twy, wz = cellCz})
                 end
-                if not field.dailyCoverageCells[cellKey] then
+                if not overlayOnly and not field.dailyCoverageCells[cellKey] then
                     field.dailyCoverageCells[cellKey] = true
                     field.coveredAreaHa = math.min(areaInHa, (field.coveredAreaHa or 0) + cellArea)
                 end
@@ -3347,9 +3358,13 @@ function SoilFertilitySystem:markBoomCells(fieldId, boomPoints)
         end
     end
 
-    -- Recompute fractions after all cells are processed
-    field.coverageFraction        = math.min(1.0, (field.coveredAreaHa  or 0) / areaInHa)
-    field.sessionCoverageFraction = math.min(1.0, (field.sessionCoverageHa or 0) / areaInHa)
+    -- Recompute fractions after all cells are processed.
+    -- In overlayOnly mode the counters are owned by trackSprayerCoverage (liter-based);
+    -- leave the fractions it set untouched so the pass% / ha display stays consistent.
+    if not overlayOnly then
+        field.coverageFraction        = math.min(1.0, (field.coveredAreaHa  or 0) / areaInHa)
+        field.sessionCoverageFraction = math.min(1.0, (field.sessionCoverageHa or 0) / areaInHa)
+    end
 
     -- Full pass complete — clear trail so the overlay disappears as a visual reward.
     -- Match the 0.99 threshold used by overlap prevention so dots clear when the

@@ -24,6 +24,10 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
+    "- Fixed: Dry and broadcast spreaders (lime, granular fertilizer) now move the",
+    "  Pass% and hectares counters again. Spreading painted the field but the counters",
+    "  stayed at 0 while liquid sprayers worked. Spreaders now track coverage the",
+    "  reliable way regardless of field layout (#650)",
     "- Fixed: Briefly over-applying fertilizer no longer wrecks the whole field. The",
     "  over-application burn used to fire every moment the boom was down and once per",
     "  boom section, so a few seconds of over-spraying stacked hundreds of penalties",

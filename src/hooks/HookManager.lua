@@ -2807,14 +2807,35 @@ function HookManager:installSprayerAreaHook()
                 -- Sweep all cells under the full boom width for display (#362).
                 -- Nutrients are already attributed to the field by applySingle/section loop;
                 -- markBoomCells only stamps display entries for unvisited lateral cells.
-                -- For solid/map spreaders getBoomCellPositions returns nil (no spanning boom);
-                -- fall back to liter-based coverage so pass counter still updates (#454).
+                --
+                -- Pass% / session-ha accounting depends on the implement type:
+                --   • VWW sprayers/spreaders: markBoomCells owns the counter — its per-section
+                --     cell dedup is accurate and matches the overlap-prevention grace logic.
+                --   • Broadcast / dry spreaders (no VWW): markBoomCells routes every boom cell
+                --     through a per-field polygon test that credits the FIRST field on the
+                --     farmland, so on multi-field farmlands (and other geometry edge cases) the
+                --     cells are rejected and the counter freezes — dry spreaders "paint but the
+                --     pass% / ha never move" while liquid sprayers work (#650). #626 rerouted
+                --     solids onto this path; the reliable liter-based estimate (#454) has no
+                --     polygon dependency, so we use it for the counter and let markBoomCells
+                --     stamp the visual overlay only.
                 if soilSys and fieldId and fieldId > 0 then
+                    local vww = self.spec_variableWorkWidth
+                    local hasVWW = vww and vww.sections and #vww.sections > 0
                     local boomPts = hookMgrRef:getBoomCellPositions(self, rootX, rootZ)
-                    if boomPts then
+                    if hasVWW and boomPts then
                         soilSys:markBoomCells(fieldId, boomPts)
-                    elseif liters > 0 then
-                        soilSys:trackSprayerCoverage(fieldId, liters, fillType.name, true)
+                    else
+                        -- Broadcast / dry spreader (or any vehicle with no spanning boom).
+                        if boomPts then
+                            soilSys:markBoomCells(fieldId, boomPts, true)  -- overlay only
+                        end
+                        -- Fertilizers advance the counter here via the liter estimate. Crop
+                        -- protection products already did so in the trackSprayerCoverage call
+                        -- above (updateFractions = not isFertilizer), so don't double-count.
+                        if liters > 0 and isFertilizer then
+                            soilSys:trackSprayerCoverage(fieldId, liters, fillType.name, true)
+                        end
                     end
                 end
 
