@@ -39,6 +39,12 @@ The FieldSentry backend ships two of these logic suites, both against pure Lua m
   exemption + hinting engine, retroactive nutrient reconciliation (idempotent per
   contract sequence), persistence with schema versioning + v1→v2 migration, and the
   multiplayer FIFO mask sync.
+- `fieldsentry_phase3_test.lua` — Phase 3 (#651): the meadow toggle API + persistence and
+  the grassland daily profile (regrowth, slow pH drift, pressure shedding) plus the
+  daily-loop routing that sends a flagged field down the meadow path.
+- `fieldsentry_phase4_test.lua` — Phase 4 (#651): deco / fake-field classification — the
+  author/player hint, the injected detector hook (fail-safe), rule order (structural
+  before classification), persistence, and reuse of the FR5 mask broadcast.
 
 ## Writing a logic test
 

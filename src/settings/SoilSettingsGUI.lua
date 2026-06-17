@@ -51,6 +51,7 @@ function SoilSettingsGUI:registerConsoleCommands()
     addConsoleCommand("SoilBlacklistField", "FieldSentry: sleep/wake a field's soil sim: SoilBlacklistField <fieldId> [true|false] (#651)", "consoleCommandBlacklistField", self)
     addConsoleCommand("SoilFieldSentry", "FieldSentry: show a field's sim status, or list all slept fields: SoilFieldSentry [fieldId] (#651)", "consoleCommandFieldSentry", self)
     addConsoleCommand("SoilMeadowField", "FieldSentry: flag/clear a field as meadow (grassland profile): SoilMeadowField <fieldId> [true|false] (#651)", "consoleCommandMeadowField", self)
+    addConsoleCommand("SoilDecoField", "FieldSentry: flag/clear a field as decorative/fake (sim frozen): SoilDecoField <fieldId> [true|false] (#651)", "consoleCommandDecoField", self)
     addConsoleCommand("soilfertility", "Show all soil commands", "consoleCommandHelp", self)
 
     SoilLogger.info("Console commands registered")
@@ -84,6 +85,7 @@ function SoilSettingsGUI:consoleCommandHelp()
     print("SoilBlacklistField <fieldId> [true|false] - FieldSentry: sleep/wake a field's soil sim (#651)")
     print("SoilFieldSentry [fieldId] - FieldSentry: show a field's sim status, or list slept fields (#651)")
     print("SoilMeadowField <fieldId> [true|false] - FieldSentry: flag/clear a field as meadow (#651)")
+    print("SoilDecoField <fieldId> [true|false] - FieldSentry: flag/clear a field as decorative/fake (#651)")
     print("==============================================")
     return "Type 'soilfertility' for more info"
 end
@@ -172,6 +174,33 @@ function SoilSettingsGUI:consoleCommandMeadowField(fieldId, state)
 
     return string.format("Field %d is now %s.", fid,
         newVal and "a MEADOW (grassland profile)" or "normal cropland")
+end
+
+--- SoilDecoField <fieldId> [true|false]
+--- Flags a field as decorative / fake (or clears it). A deco field is masked: its soil
+--- freezes and the daily sim skips it. Deterministic author/player intent.
+function SoilSettingsGUI:consoleCommandDecoField(fieldId, state)
+    if not FieldSentry_API then return "Error: FieldSentry not initialized" end
+
+    local fid = tonumber(fieldId)
+    if not fid then return "Usage: SoilDecoField <fieldId> [true|false]" end
+
+    local isServer = g_currentMission and g_currentMission:getIsServer()
+    if not isServer then
+        return "FieldSentry toggles must be run on the server/host (it owns the field data)."
+    end
+
+    local newVal
+    if state == nil then
+        newVal = not FieldSentry_API.isFieldDeco(fid)
+    else
+        local s = tostring(state):lower()
+        newVal = (s == "true" or s == "1" or s == "on")
+    end
+    FieldSentry_API.markDecoField(fid, newVal)
+
+    return string.format("Field %d is now %s.", fid,
+        newVal and "DECORATIVE (sim frozen)" or "a normal field")
 end
 
 function SoilSettingsGUI:consoleCommandSetDifficulty(difficulty)
