@@ -3890,6 +3890,18 @@ function SoilFertilitySystem:saveToXMLFile(xmlFile, key)
             setXMLFloat(xmlFile, fieldKey .. "#compaction", field.compaction or 0)
             setXMLFloat(xmlFile, fieldKey .. "#amendBurnPenalty", field.amendBurnPenalty or 0)
 
+            -- Persist the frozen yield modifier so an in-progress harvest keeps the exact
+            -- same yield (and any amendment burn baked into it on the first cut) across a
+            -- save/reload. Without this, reloading recomputed the modifier from the
+            -- now-depleted field-average nutrients with the one-shot burn already consumed,
+            -- so the yield figure silently changed after every reload and a save/reload
+            -- erased an active burn penalty entirely (#656). Only written while a freeze is
+            -- live; cleared on the next game-day change by _processOneDailyField as before.
+            if field.frozenYieldModifier and field.frozenYieldFruitType then
+                setXMLFloat(xmlFile, fieldKey .. "#frozenYieldModifier", field.frozenYieldModifier)
+                setXMLInt(xmlFile, fieldKey .. "#frozenYieldFruitType", field.frozenYieldFruitType)
+            end
+
             -- Save daily application throttles
             setXMLInt(xmlFile, fieldKey .. "#herbicideAppliedDay", self.herbicideAppliedDay[fieldId] or 0)
             setXMLInt(xmlFile, fieldKey .. "#insecticideAppliedDay", self.insecticideAppliedDay[fieldId] or 0)
@@ -3970,6 +3982,8 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
             dryDayCount = getXMLInt(xmlFile, fieldKey .. "#dryDayCount") or 0,
             burnDaysLeft = getXMLInt(xmlFile, fieldKey .. "#burnDaysLeft") or 0,
             amendBurnPenalty = getXMLFloat(xmlFile, fieldKey .. "#amendBurnPenalty") or nil,
+            frozenYieldModifier  = getXMLFloat(xmlFile, fieldKey .. "#frozenYieldModifier") or nil,
+            frozenYieldFruitType = getXMLInt(xmlFile, fieldKey .. "#frozenYieldFruitType") or nil,
             coverageFraction = getXMLFloat(xmlFile, fieldKey .. "#coverageFraction") or 0,
             lastAlertSeason = getXMLInt(xmlFile, fieldKey .. "#lastAlertSeason") or nil,
             compaction = 0,
@@ -4063,27 +4077,29 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
             zi = zi + 1
         end
 
-        -- Load per-cell compaction data and reconstruct running sum + average
+        -- Reconstruct the compaction running sum + field-average from the per-cell
+        -- zoneData just loaded. Gameplay (onCompaction / onSubsoilerPass) stores per-cell
+        -- compaction in zoneData[cellKey].compaction and derives the field.compaction
+        -- scalar from compactionSum / compactionTotalCells — it never populates the legacy
+        -- compactionCells table. So saving wrote an empty compactionCells block and the
+        -- scalar reset to 0 on every reload, even though the per-cell values round-tripped
+        -- in zoneData: that was the "compaction drops to 0% after reload" half of #656.
+        -- Rebuilding the sum from zoneData keeps it consistent with the per-cell deltas
+        -- that onCompaction / onSubsoilerPass apply afterwards.
         local zone = SoilConstants.ZONE
-        local ci = 0
-        local sumLoaded = 0
-        while true do
-            local ck = string.format("%s.compactionCell(%d)", fieldKey, ci)
-            local cellKey = getXMLString(xmlFile, ck .. "#key")
-            if not cellKey then break end
-            local val = getXMLFloat(xmlFile, ck .. "#v") or 0
-            if val > 0 then
-                self.fieldData[fieldId].compactionCells[cellKey] = val
-                sumLoaded = sumLoaded + val
+        local f = self.fieldData[fieldId]
+        local compSum = 0
+        if f.zoneData then
+            for _, cell in pairs(f.zoneData) do
+                compSum = compSum + (cell.compaction or 0)
             end
-            ci = ci + 1
         end
-        if ci > 0 then
-            local areaInHa = self.fieldData[fieldId].fieldArea or 1.0
+        if compSum > 0 then
+            local areaInHa   = f.fieldArea or 1.0
             local totalCells = math.max(1, math.ceil(areaInHa / zone.CELL_AREA_HA))
-            self.fieldData[fieldId].compactionSum = sumLoaded
-            self.fieldData[fieldId].compactionTotalCells = totalCells
-            self.fieldData[fieldId].compaction = sumLoaded / totalCells
+            f.compactionSum        = compSum
+            f.compactionTotalCells = totalCells
+            f.compaction           = compSum / totalCells
         end
 
         index = index + 1
