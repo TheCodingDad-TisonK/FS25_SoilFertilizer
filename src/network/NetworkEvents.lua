@@ -1393,6 +1393,72 @@ function SoilNetworkEvents_SendFieldSentryToggle(fieldId, manual)
 end
 
 -- ========================================
+-- FIELDSENTRY MEADOW TOGGLE (#651 Phase 3)
+-- ========================================
+-- Server-authoritative, mirrors the manual-blacklist toggle. A meadow field still
+-- simulates (on grassland rules), so this only carries the persistent player intent.
+SoilFieldMeadowEvent = {}
+SoilFieldMeadowEvent_mt = Class(SoilFieldMeadowEvent, Event)
+
+InitEventClass(SoilFieldMeadowEvent, "SoilFieldMeadowEvent")
+
+function SoilFieldMeadowEvent.emptyNew()
+    return Event.new(SoilFieldMeadowEvent_mt)
+end
+
+function SoilFieldMeadowEvent.new(fieldId, meadow)
+    local self = SoilFieldMeadowEvent.emptyNew()
+    self.fieldId = fieldId
+    self.meadow = meadow
+    return self
+end
+
+function SoilFieldMeadowEvent:readStream(streamId, connection)
+    self.fieldId = streamReadInt32(streamId)
+    self.meadow = streamReadBool(streamId)
+    self:run(connection)
+end
+
+function SoilFieldMeadowEvent:writeStream(streamId, connection)
+    streamWriteInt32(streamId, self.fieldId)
+    streamWriteBool(streamId, self.meadow)
+end
+
+function SoilFieldMeadowEvent:run(connection)
+    if g_server ~= nil then
+        if not connection:getIsServer() then
+            local user = g_currentMission.userManager and
+                         g_currentMission.userManager:getUserByConnection(connection)
+            if not user or not user:getIsMasterUser() then
+                SoilLogger.warning("FieldSentry: non-admin meadow toggle denied")
+                return
+            end
+        end
+        if FieldSentry_API then FieldSentry_API.setFieldMeadow(self.fieldId, self.meadow) end
+        if g_server then
+            g_server:broadcastEvent(SoilFieldMeadowEvent.new(self.fieldId, self.meadow), nil, connection)
+        end
+    else
+        if FieldSentry_API then FieldSentry_API.setFieldMeadow(self.fieldId, self.meadow) end
+    end
+end
+
+--- Set a field's meadow flag with multiplayer sync.
+--- Pure client: asks the server. Server/host: applies and broadcasts to clients.
+---@param fieldId number
+---@param meadow boolean
+function SoilNetworkEvents_SendFieldMeadowToggle(fieldId, meadow)
+    if g_client and not g_server then
+        g_client:getServerConnection():sendEvent(SoilFieldMeadowEvent.new(fieldId, meadow))
+    else
+        if FieldSentry_API then FieldSentry_API.setFieldMeadow(fieldId, meadow) end
+        if g_server then
+            g_server:broadcastEvent(SoilFieldMeadowEvent.new(fieldId, meadow))
+        end
+    end
+end
+
+-- ========================================
 -- FIELDSENTRY CONTRACT-MASK STATUS SYNC (#654, FR5)
 -- ========================================
 -- Server -> clients only. The contract mask is evaluated server-side (refreshContract);

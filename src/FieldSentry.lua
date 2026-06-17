@@ -54,6 +54,22 @@ function FieldSentry_Core.reasonName(reason)
     return REASON_NAMES[reason] or "unknown"
 end
 
+-- l10n keys for the reasons that can actually surface in the UI (the sim-asleep states).
+-- Console output and logs keep using reasonName (English); the field-detail dialog
+-- localizes through these keys, with the English reasonName as the fallback.
+local REASON_L10N = {
+    [BL.MANUAL] = "sf_fs_reason_manual",
+    [BL.NPC]    = "sf_fs_reason_npc",
+    [BL.DECO]   = "sf_fs_reason_deco",
+}
+
+--- l10n key for a reason enum, or nil if it has no localized string (caller falls back).
+---@param reason number
+---@return string|nil
+function FieldSentry_Core.reasonL10nKey(reason)
+    return REASON_L10N[reason]
+end
+
 -- Self-contained logger so FieldSentry never hard-depends on Logger load order and the
 -- offline test harness (no SoilLogger) stays clean. No-ops if SoilLogger is absent.
 local function fsLog(level, fmt, ...)
@@ -83,6 +99,12 @@ FieldSentry_Core.SCHEMA_VERSION = 2
 -- nil in single player and in the offline test harness.
 FieldSentry_Core.maskBroadcaster = nil
 
+-- Phase 4 (#651): optional deco / fake-field detector, injected by a map or integration
+-- mod. Signature: function(fieldId) -> boolean (true = decorative / no valid fruit). Kept
+-- deterministic by the caller (foliage layer + author hints only). nil = no auto-detection,
+-- which is the safe default; the author/player decoHint still works without it.
+FieldSentry_Core.decoDetector = nil
+
 -- Per-field state, created lazily on first toggle.
 --   manualBlacklist    : boolean  persistent player intent
 --   meadowToggle       : boolean  persistent player intent (Phase 1 stores it; the
@@ -109,6 +131,9 @@ local function getOrCreate(fieldId)
             lastContractSeq    = 0,     -- FR3 idempotency token (last reconciled contract)
             pendingRetro       = nil,   -- FR3 catch-up queued when the sim API is unavailable
             hints              = nil,   -- transient UI diagnostics, allocated on demand
+            -- Phase 4 (#651): deco / fake-field classification
+            decoHint           = false, -- persistent author/player mark
+            decoDetected       = false, -- transient result from the injected detector
         }
         FieldSentry_Core.FieldState[fieldId] = f
     end
@@ -120,44 +145,61 @@ end
 -- result on f). Rule order: structural (manual) → contract exemption → contract mask,
 -- exactly as FR2 requires (exemption after structural, before classification).
 local function evaluate(f)
-    -- Structural constraint: an explicit manual blacklist wins outright.
+    -- Structural constraints run first and short-circuit (Manual, then Contract). Only if
+    -- none masked do the classification rules (Deco) run. Matches the proposal's order.
+
+    -- Structural: an explicit manual blacklist wins outright.
     if f.manualBlacklist then
+        if f.hints then f.hints.contractExempt = nil; f.hints.favorTier = nil end
         f.evaluatedBlacklist = BL.MANUAL
         return f.evaluatedBlacklist
     end
 
-    -- Contract masking + favor-tier exemption (FR2). A trusted high-favor provider can
-    -- ask (allowSAndF) to keep S&F running on its contract field instead of masking it.
+    -- Structural: an active contract masks (NPC) unless a trusted high-favor provider opts
+    -- out (FR2, allowSAndF + favorTier >= threshold). An exemption lets structural return
+    -- NONE so classification still gets a look.
     if f.contractActive then
         local info   = f.contractInfo
         local exempt = info and info.allowSAndF
                        and (info.favorTier or 0) >= FieldSentry_Core.FAVOR_TIER_THRESHOLD
         if exempt then
-            -- Let the sim run; record a transient hint only. Never auto-flip a persistent
-            -- player setting (FR2 state-integrity constraint).
+            -- Record a transient hint only; never auto-flip a persistent player setting.
             f.hints = f.hints or {}
             f.hints.contractExempt = true
             f.hints.favorTier      = info.favorTier
-            f.evaluatedBlacklist   = BL.NONE
+            -- fall through to classification (structural returned NONE)
         else
-            if f.hints then
-                f.hints.contractExempt = nil
-                f.hints.favorTier      = nil
-            end
+            if f.hints then f.hints.contractExempt = nil; f.hints.favorTier = nil end
             f.evaluatedBlacklist = BL.NPC
+            return f.evaluatedBlacklist
         end
+    else
+        if f.hints then f.hints.contractExempt = nil; f.hints.favorTier = nil end
+    end
+
+    -- Classification: deco / fake field (Phase 4, #651). Deterministic signals only — an
+    -- author/player hint (decoHint) or an injected foliage/no-fruit detector result
+    -- (decoDetected). Field size and crop history are deliberately ignored.
+    if f.decoHint or f.decoDetected then
+        f.evaluatedBlacklist = BL.DECO
         return f.evaluatedBlacklist
     end
 
-    -- No constraint left.
-    if f.hints then
-        f.hints.contractExempt = nil
-        f.hints.favorTier      = nil
-    end
     f.evaluatedBlacklist = BL.NONE
     return f.evaluatedBlacklist
 end
 FieldSentry_Core.evaluate = evaluate
+
+-- FR5 helper: bump the per-field sequence and broadcast when the mask actually changed.
+-- Shared by refreshContract and markDecoField so any server-side mask change syncs.
+local function broadcastMaskIfChanged(fieldId, f, prevReason)
+    if f.evaluatedBlacklist ~= prevReason then
+        f.lastSeq = (f.lastSeq or 0) + 1
+        if FieldSentry_Core.maskBroadcaster then
+            FieldSentry_Core.maskBroadcaster(fieldId, f.evaluatedBlacklist, f.lastSeq)
+        end
+    end
+end
 
 -- =========================================================
 -- Public API
@@ -226,6 +268,51 @@ function FieldSentry_API.getManualBlacklist()
     local out = {}
     for id, f in pairs(FieldSentry_Core.FieldState) do
         if f.manualBlacklist then out[#out + 1] = id end
+    end
+    table.sort(out)
+    return out
+end
+
+-- =========================================================
+-- Meadow toggle (Phase 3, #651)
+-- =========================================================
+-- Persistent player intent that a field is permanent grassland. FieldSentry only stores
+-- the toggle (and exposes it on the hot path); the meadow simulation profile itself lives
+-- in S&F (locked decision). A meadow field is NOT sim-disabled — it still runs, just on
+-- grassland rules — so meadowToggle is independent of the blacklist mask.
+
+--- Set the meadow toggle for a field.
+---@param fieldId number
+---@param enabled boolean
+---@return boolean newValue
+function FieldSentry_API.setFieldMeadow(fieldId, enabled)
+    local f = getOrCreate(fieldId)
+    f.meadowToggle = enabled and true or false
+    return f.meadowToggle
+end
+
+--- Toggle the meadow flag for a field. Returns the new value.
+---@param fieldId number
+---@return boolean newValue
+function FieldSentry_API.toggleFieldMeadow(fieldId)
+    local f = getOrCreate(fieldId)
+    return FieldSentry_API.setFieldMeadow(fieldId, not f.meadowToggle)
+end
+
+--- Is this field flagged as a meadow? (read-only, no state created)
+---@param fieldId number
+---@return boolean
+function FieldSentry_API.isFieldMeadow(fieldId)
+    local f = FieldSentry_Core.FieldState[fieldId]
+    return (f ~= nil) and f.meadowToggle == true
+end
+
+--- Sorted list of field ids flagged as meadow (console / persistence).
+---@return number[]
+function FieldSentry_API.getMeadowList()
+    local out = {}
+    for id, f in pairs(FieldSentry_Core.FieldState) do
+        if f.meadowToggle then out[#out + 1] = id end
     end
     table.sort(out)
     return out
@@ -370,7 +457,18 @@ function FieldSentry_API.refreshContract(fieldId)
     end
 
     local underContract, info = FieldSentry_API.isFieldUnderAnyContract(fieldId)
-    if not underContract and not f then
+
+    -- Phase 4: run the injected deco detector (deterministic, caller-owned). pcall so a bad
+    -- detector can never break the daily pass; a thrown error just means "not deco".
+    local decoDetected = false
+    if FieldSentry_Core.decoDetector then
+        local ok, res = pcall(FieldSentry_Core.decoDetector, fieldId)
+        decoDetected = ok and res == true
+    end
+
+    -- Keep state lean: nothing to track for an ordinary field with no contract, no deco
+    -- detection and no existing state.
+    if not underContract and not decoDetected and not f then
         return false, BL.NONE
     end
 
@@ -378,19 +476,47 @@ function FieldSentry_API.refreshContract(fieldId)
     local prevReason = f.evaluatedBlacklist
     f.contractActive = underContract
     f.contractInfo   = underContract and info or nil
+    f.decoDetected   = decoDetected
     evaluate(f)
-
-    -- FR5: when the server changes a field's mask, bump its FIFO sequence and broadcast so
-    -- clients mirror the status for the map-tab readout. Stale client packets are dropped
-    -- by seq in applyMaskSync, so out-of-order delivery cannot corrupt state.
-    if f.evaluatedBlacklist ~= prevReason then
-        f.lastSeq = (f.lastSeq or 0) + 1
-        if FieldSentry_Core.maskBroadcaster then
-            FieldSentry_Core.maskBroadcaster(fieldId, f.evaluatedBlacklist, f.lastSeq)
-        end
-    end
+    broadcastMaskIfChanged(fieldId, f, prevReason)  -- FR5 sync, only on actual change
 
     return (f.evaluatedBlacklist ~= BL.NONE), f.evaluatedBlacklist
+end
+
+--- Mark (or clear) a field as a decorative / fake field (Phase 4, #651). Persistent
+--- author/player intent. A deco field is masked (BLACKLIST.DECO) and its soil freezes.
+--- Re-evaluates and, server-side, broadcasts the mask change through the FR5 sync path.
+---@param fieldId number
+---@param isDeco boolean
+---@return boolean newValue
+function FieldSentry_API.markDecoField(fieldId, isDeco)
+    local f = getOrCreate(fieldId)
+    local prevReason = f.evaluatedBlacklist
+    f.decoHint = isDeco and true or false
+    evaluate(f)
+    broadcastMaskIfChanged(fieldId, f, prevReason)
+    return f.decoHint
+end
+
+--- Is this field decorative / fake? True if the author/player hinted it OR the injected
+--- detector flagged it. Read-only, no state created.
+---@param fieldId number
+---@return boolean
+function FieldSentry_API.isFieldDeco(fieldId)
+    local f = FieldSentry_Core.FieldState[fieldId]
+    return (f ~= nil) and (f.decoHint == true or f.decoDetected == true)
+end
+
+--- Sorted list of field ids the author/player has hinted as deco (console / persistence).
+--- Detector-only matches are transient and not listed here.
+---@return number[]
+function FieldSentry_API.getDecoList()
+    local out = {}
+    for id, f in pairs(FieldSentry_Core.FieldState) do
+        if f.decoHint then out[#out + 1] = id end
+    end
+    table.sort(out)
+    return out
 end
 
 --- Client-side FIFO apply of a server mask broadcast (FR5). Drops stale or duplicate
@@ -523,10 +649,13 @@ function FieldSentry_API.saveToXMLFile(xmlFile, key)
     for id, f in pairs(FieldSentry_Core.FieldState) do
         local hasPending = f.pendingRetro ~= nil
         -- Only persist a field that carries durable state worth restoring.
-        if f.manualBlacklist or (f.lastContractSeq or 0) > 0 or hasPending then
+        if f.manualBlacklist or f.meadowToggle or f.decoHint
+           or (f.lastContractSeq or 0) > 0 or hasPending then
             local entryKey = string.format("%s.field(%d)", key, idx)
             setXMLInt(xmlFile, entryKey .. "#id", id)
             setXMLInt(xmlFile, entryKey .. "#manual", f.manualBlacklist and 1 or 0)
+            setXMLInt(xmlFile, entryKey .. "#meadow", f.meadowToggle and 1 or 0)
+            setXMLInt(xmlFile, entryKey .. "#deco", f.decoHint and 1 or 0)
             setXMLInt(xmlFile, entryKey .. "#lastContractSeq", f.lastContractSeq or 0)
             if hasPending then
                 local p = f.pendingRetro
@@ -558,11 +687,15 @@ function FieldSentry_API.loadFromXMLFile(xmlFile, key)
                 migrateLegacyEntry(id)
             else
                 local manual   = (getXMLInt(xmlFile, entryKey .. "#manual") or 0) == 1
+                local meadow   = (getXMLInt(xmlFile, entryKey .. "#meadow") or 0) == 1
+                local deco     = (getXMLInt(xmlFile, entryKey .. "#deco") or 0) == 1
                 local lastSeq  = getXMLInt(xmlFile, entryKey .. "#lastContractSeq") or 0
                 local retroSeq = getXMLInt(xmlFile, entryKey .. "#retroSeq")
-                if manual or lastSeq > 0 or retroSeq then
+                if manual or meadow or deco or lastSeq > 0 or retroSeq then
                     local f = getOrCreate(id)
                     f.manualBlacklist = manual
+                    f.meadowToggle    = meadow
+                    f.decoHint        = deco
                     f.lastContractSeq = lastSeq
                     if retroSeq then
                         local fruit = getXMLString(xmlFile, entryKey .. "#retroFruit")
