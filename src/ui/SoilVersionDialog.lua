@@ -24,6 +24,16 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
+    "- Fixed: Texture array warnings from the fill-plane normal and displacement maps. The",
+    "  mip levels did not line up with the shared pile texture array, which spams the log",
+    "  and can disturb fill-plane rendering. Corrected dds files contributed by Sabo-7 (#657)",
+    "- Fixed: Soil compaction no longer resets to 0% after you save and reload. The",
+    "  per-cell compaction was being saved, but on load the field average was rebuilt",
+    "  from the wrong table, so it always came back as zero (#656)",
+    "- Fixed: A field's expected yield no longer jumps around after a save and reload",
+    "  during a harvest. The frozen yield value (including any lime or organic burn) now",
+    "  carries across the reload, so the figure stays put and a save/reload can no longer",
+    "  wipe an active burn penalty (#656)",
     "- Fixed: Dry and broadcast spreaders (lime, granular fertilizer) now move the",
     "  Pass% and hectares counters again. Spreading painted the field but the counters",
     "  stayed at 0 while liquid sprayers worked. Spreaders now track coverage the",

@@ -207,6 +207,25 @@ SoilConstants.FALLOW_RECOVERY = {
 }
 
 -- ========================================
+-- MEADOW PROFILE (FieldSentry Phase 3, #651)
+-- ========================================
+-- Daily grassland rates used when a field is flagged as a meadow in FieldSentry. Opt-in
+-- per field, so this never affects normal cropland. A meadow follows grassland rules
+-- instead of crop-rotation rules: gentle nutrient regrowth (root turnover + clover/legume
+-- fixation in the sward), a slow creep in organic matter, slow pH drift, and no rotation
+-- or seasonal-harvest penalties. Slightly more generous than bare fallow because an
+-- established sward cycles nutrients better than open ground. All TUNABLE — these want
+-- in-game balancing against real pasture behaviour.
+SoilConstants.MEADOW = {
+    REGROW_N        = 0.10,   -- N points/day regrown
+    REGROW_P        = 0.04,
+    REGROW_K        = 0.06,
+    OM_GAIN         = 0.01,   -- organic matter % points/day (slow build, matches fallow)
+    PH_DRIFT_FACTOR = 0.5,    -- pH normalises at half the cropland rate
+    PRESSURE_DECAY  = 2.0,    -- weed/pest/disease pressure points shed per day on grass
+}
+
+-- ========================================
 -- CHOPPED STRAW / CHAFF ORGANIC MATTER GAIN
 -- ========================================
 -- When a combine chops straw instead of dropping it, the material decomposes

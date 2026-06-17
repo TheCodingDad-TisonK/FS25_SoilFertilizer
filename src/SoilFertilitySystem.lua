@@ -2117,7 +2117,61 @@ end
 -- Uses snapshotted day/season values stored on self to avoid per-call lookups.
 ---@param fieldId number
 ---@param field table  fieldData entry (pre-validated non-nil by caller)
+--- Meadow daily profile (FieldSentry Phase 3, #651). Grassland rules: gentle nutrient
+--- regrowth toward a pasture equilibrium, a slow organic-matter creep, slow pH drift, and
+--- none of the crop-rotation / seasonal-harvest penalties. Pressures shed gently so a
+--- converted field settles. Opt-in per field, so normal crops are never touched. The
+--- shared daily housekeeping (buffer/coverage/freeze reset, compaction decay) runs in
+--- _processOneDailyField before this is called. Coefficients live in SoilConstants.MEADOW.
+---@param field table
+---@param timeFactor number  1 / daysPerMonth (Issue #349 month normalization)
+---@param limits table       SoilConstants.NUTRIENT_LIMITS
+function SoilFertilitySystem:_applyMeadowProfile(field, timeFactor, limits)
+    local m = SoilConstants.MEADOW
+    if not m then return end
+
+    -- Gentle nutrient regrowth (root turnover + clover/legume fixation in the sward).
+    field.nitrogen   = math.min(limits.MAX, (field.nitrogen   or 0) + m.REGROW_N * timeFactor)
+    field.phosphorus = math.min(limits.MAX, (field.phosphorus or 0) + m.REGROW_P * timeFactor)
+    field.potassium  = math.min(limits.MAX, (field.potassium  or 0) + m.REGROW_K * timeFactor)
+
+    -- Stable structure: organic matter creeps up slightly, never depletes.
+    field.organicMatter = math.min(limits.ORGANIC_MATTER_MAX,
+        (field.organicMatter or 0) + m.OM_GAIN * timeFactor)
+
+    -- Slow pH drift toward neutral, at a reduced rate vs cropland.
+    local phRate = (SoilConstants.PH_NORMALIZATION.RATE or 0) * m.PH_DRIFT_FACTOR * timeFactor
+    if field.pH < limits.PH_NEUTRAL_LOW then
+        field.pH = math.min(limits.PH_NEUTRAL_LOW, field.pH + phRate)
+    elseif field.pH > limits.PH_NEUTRAL_HIGH then
+        field.pH = math.max(limits.PH_NEUTRAL_HIGH, field.pH - phRate)
+    end
+
+    -- Grassland sheds accumulated weed/pest/disease pressure instead of building it.
+    field.weedPressure    = math.max(0, (field.weedPressure    or 0) - m.PRESSURE_DECAY * timeFactor)
+    field.pestPressure    = math.max(0, (field.pestPressure    or 0) - m.PRESSURE_DECAY * timeFactor)
+    field.diseasePressure = math.max(0, (field.diseasePressure or 0) - m.PRESSURE_DECAY * timeFactor)
+end
+
 function SoilFertilitySystem:_processOneDailyField(fieldId, field)
+    -- FieldSentry gate (#651): a field the player has put to sleep (manual blacklist)
+    -- — or that a later phase disables (deco/NPC/farmland) — skips the daily
+    -- depletion/recovery/leaching/seasonal pass entirely, so its soil values freeze
+    -- at whatever they were. Single O(1) check; no equation code below is touched.
+    local isMeadow = false
+    if FieldSentry_API then
+        -- Phase 2 (#654): re-evaluate contract status on this same daily-batch seam so
+        -- masking tracks active vanilla/NPC contracts without a parallel scheduler. Then
+        -- gate. refreshContract is server-authoritative and a no-op on older builds.
+        if FieldSentry_API.refreshContract then
+            FieldSentry_API.refreshContract(fieldId)
+        end
+        local disabled, _, meadow = FieldSentry_API.isFieldSimDisabled(fieldId)
+        if disabled then return end
+        -- Phase 3 (#651): a meadow field still simulates, but on grassland rules.
+        isMeadow = meadow == true
+    end
+
     local limits   = SoilConstants.NUTRIENT_LIMITS
     local recovery = SoilConstants.FALLOW_RECOVERY
     local seasonal = SoilConstants.SEASONAL_EFFECTS
@@ -2164,6 +2218,17 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
             local tunComp = getTuningMult(self.settings, "tuningCompactionDecay", "ZERO_MULT")
             field.compaction = math.max(0, field.compaction - cp.NATURAL_DECAY_PER_DAY * timeFactor * tunComp)
         end
+    end
+
+    -- ── Meadow profile branch (FieldSentry Phase 3, #651) ────────────────────
+    -- A field the player flagged as a meadow follows grassland rules instead of the
+    -- crop-rotation logic below: gentle nutrient regrowth, slow pH drift, stable organic
+    -- matter, and no rotation/seasonal-harvest penalties. FieldSentry only supplies the
+    -- toggle; the profile itself lives here in S&F (locked decision, #651). The shared
+    -- housekeeping above (buffer/coverage/freeze reset, compaction decay) already ran.
+    if isMeadow then
+        self:_applyMeadowProfile(field, timeFactor, limits)
+        return
     end
 
     -- ── Fallow recovery ──────────────────────────────────────────────────────
@@ -3769,9 +3834,23 @@ function SoilFertilitySystem:getFieldInfo(fieldId, x, z)
         yieldEfficiency = math.floor(mod * 100 + 0.5)
     end
 
+    -- FieldSentry (#651) status, surfaced so any readout (field detail dialog, HUD,
+    -- map overlay) can show that a slept field's soil is frozen by intent, not broken.
+    -- isFieldSimDisabled is allocation-free, so this stays cheap for per-frame callers.
+    local fsDisabled, fsReason, fsReasonKey = false, "active", nil
+    if FieldSentry_API then
+        local d, r = FieldSentry_API.isFieldSimDisabled(fieldId)
+        fsDisabled = d
+        fsReason   = FieldSentry_Core.reasonName(r)
+        if FieldSentry_Core.reasonL10nKey then fsReasonKey = FieldSentry_Core.reasonL10nKey(r) end
+    end
+
     return {
         fieldId = fieldId,
         fieldArea = field.fieldArea or 1.0,
+        simDisabled          = fsDisabled,
+        simDisabledReason    = fsReason,
+        simDisabledReasonKey = fsReasonKey,
         nitrogen = { value = math.floor(n), status = nutrientStatus(n, "nitrogen", cropTargets) },
         phosphorus = { value = math.floor(p), status = nutrientStatus(p, "phosphorus", cropTargets) },
         potassium = { value = math.floor(k), status = nutrientStatus(k, "potassium", cropTargets) },
@@ -3890,6 +3969,18 @@ function SoilFertilitySystem:saveToXMLFile(xmlFile, key)
             setXMLFloat(xmlFile, fieldKey .. "#compaction", field.compaction or 0)
             setXMLFloat(xmlFile, fieldKey .. "#amendBurnPenalty", field.amendBurnPenalty or 0)
 
+            -- Persist the frozen yield modifier so an in-progress harvest keeps the exact
+            -- same yield (and any amendment burn baked into it on the first cut) across a
+            -- save/reload. Without this, reloading recomputed the modifier from the
+            -- now-depleted field-average nutrients with the one-shot burn already consumed,
+            -- so the yield figure silently changed after every reload and a save/reload
+            -- erased an active burn penalty entirely (#656). Only written while a freeze is
+            -- live; cleared on the next game-day change by _processOneDailyField as before.
+            if field.frozenYieldModifier and field.frozenYieldFruitType then
+                setXMLFloat(xmlFile, fieldKey .. "#frozenYieldModifier", field.frozenYieldModifier)
+                setXMLInt(xmlFile, fieldKey .. "#frozenYieldFruitType", field.frozenYieldFruitType)
+            end
+
             -- Save daily application throttles
             setXMLInt(xmlFile, fieldKey .. "#herbicideAppliedDay", self.herbicideAppliedDay[fieldId] or 0)
             setXMLInt(xmlFile, fieldKey .. "#insecticideAppliedDay", self.insecticideAppliedDay[fieldId] or 0)
@@ -3970,6 +4061,8 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
             dryDayCount = getXMLInt(xmlFile, fieldKey .. "#dryDayCount") or 0,
             burnDaysLeft = getXMLInt(xmlFile, fieldKey .. "#burnDaysLeft") or 0,
             amendBurnPenalty = getXMLFloat(xmlFile, fieldKey .. "#amendBurnPenalty") or nil,
+            frozenYieldModifier  = getXMLFloat(xmlFile, fieldKey .. "#frozenYieldModifier") or nil,
+            frozenYieldFruitType = getXMLInt(xmlFile, fieldKey .. "#frozenYieldFruitType") or nil,
             coverageFraction = getXMLFloat(xmlFile, fieldKey .. "#coverageFraction") or 0,
             lastAlertSeason = getXMLInt(xmlFile, fieldKey .. "#lastAlertSeason") or nil,
             compaction = 0,
@@ -4063,27 +4156,29 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
             zi = zi + 1
         end
 
-        -- Load per-cell compaction data and reconstruct running sum + average
+        -- Reconstruct the compaction running sum + field-average from the per-cell
+        -- zoneData just loaded. Gameplay (onCompaction / onSubsoilerPass) stores per-cell
+        -- compaction in zoneData[cellKey].compaction and derives the field.compaction
+        -- scalar from compactionSum / compactionTotalCells — it never populates the legacy
+        -- compactionCells table. So saving wrote an empty compactionCells block and the
+        -- scalar reset to 0 on every reload, even though the per-cell values round-tripped
+        -- in zoneData: that was the "compaction drops to 0% after reload" half of #656.
+        -- Rebuilding the sum from zoneData keeps it consistent with the per-cell deltas
+        -- that onCompaction / onSubsoilerPass apply afterwards.
         local zone = SoilConstants.ZONE
-        local ci = 0
-        local sumLoaded = 0
-        while true do
-            local ck = string.format("%s.compactionCell(%d)", fieldKey, ci)
-            local cellKey = getXMLString(xmlFile, ck .. "#key")
-            if not cellKey then break end
-            local val = getXMLFloat(xmlFile, ck .. "#v") or 0
-            if val > 0 then
-                self.fieldData[fieldId].compactionCells[cellKey] = val
-                sumLoaded = sumLoaded + val
+        local f = self.fieldData[fieldId]
+        local compSum = 0
+        if f.zoneData then
+            for _, cell in pairs(f.zoneData) do
+                compSum = compSum + (cell.compaction or 0)
             end
-            ci = ci + 1
         end
-        if ci > 0 then
-            local areaInHa = self.fieldData[fieldId].fieldArea or 1.0
+        if compSum > 0 then
+            local areaInHa   = f.fieldArea or 1.0
             local totalCells = math.max(1, math.ceil(areaInHa / zone.CELL_AREA_HA))
-            self.fieldData[fieldId].compactionSum = sumLoaded
-            self.fieldData[fieldId].compactionTotalCells = totalCells
-            self.fieldData[fieldId].compaction = sumLoaded / totalCells
+            f.compactionSum        = compSum
+            f.compactionTotalCells = totalCells
+            f.compaction           = compSum / totalCells
         end
 
         index = index + 1
@@ -4239,6 +4334,37 @@ function SoilFertilitySystem:onSubsoilerPass(farmlandId, worldX, worldZ)
 
     SoilLogger.debug("Subsoiler: field=%d cell=%s  %.0f→%.0f%%  avg=%.1f%%",
         farmlandId, cellKey, prev, newVal, field.compaction)
+end
+
+--- FieldSentry FR3 (#654): apply a one-shot, lightweight nutrient catch-up to a field's
+--- average N/P/K. Used to reconcile a contract that harvested the field while FieldSentry
+--- had it masked, so it does not sit frozen in stasis. Deliberately cheap — it only
+--- touches the field-average scalars (no zone writes, no extraction model, no per-cell
+--- work), so it never kicks off the heavy daily sim. FieldSentry computes the amounts
+--- from its own static crop coefficients; this just applies and (in MP) broadcasts them.
+---@param fieldId number
+---@param dN number  nitrogen points to remove
+---@param dP number  phosphorus points to remove
+---@param dK number  potassium points to remove
+---@return boolean applied
+function SoilFertilitySystem:applyRetroactiveDrain(fieldId, dN, dP, dK)
+    local field = self.fieldData and self.fieldData[fieldId]
+    if not field then return false end
+
+    local limits = SoilConstants.NUTRIENT_LIMITS
+    local minV = (limits and limits.MIN) or 0
+    field.nitrogen   = math.max(minV, (field.nitrogen   or 0) - (dN or 0))
+    field.phosphorus = math.max(minV, (field.phosphorus or 0) - (dP or 0))
+    field.potassium  = math.max(minV, (field.potassium  or 0) - (dK or 0))
+
+    -- Mirror the harvest/fertilize sync path so clients see the reconciled values.
+    if g_server and g_currentMission and g_currentMission.missionDynamicInfo
+       and g_currentMission.missionDynamicInfo.isMultiplayer and SoilFieldUpdateEvent then
+        g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
+    end
+
+    SoilLogger.debug("FieldSentry retro drain: field=%d  -N %.1f -P %.1f -K %.1f", fieldId, dN or 0, dP or 0, dK or 0)
+    return true
 end
 
 --- Records one combine-pass cell for the harvest trail overlay.
