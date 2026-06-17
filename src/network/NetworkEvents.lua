@@ -1392,4 +1392,57 @@ function SoilNetworkEvents_SendFieldSentryToggle(fieldId, manual)
     end
 end
 
+-- ========================================
+-- FIELDSENTRY CONTRACT-MASK STATUS SYNC (#654, FR5)
+-- ========================================
+-- Server -> clients only. The contract mask is evaluated server-side (refreshContract);
+-- this mirrors the resulting reason enum to clients for the map-tab readout. Carries a
+-- per-field sequence so clients drop stale / out-of-order packets (FieldSentry FIFO guard).
+SoilFieldSentryStatusEvent = {}
+SoilFieldSentryStatusEvent_mt = Class(SoilFieldSentryStatusEvent, Event)
+
+InitEventClass(SoilFieldSentryStatusEvent, "SoilFieldSentryStatusEvent")
+
+function SoilFieldSentryStatusEvent.emptyNew()
+    return Event.new(SoilFieldSentryStatusEvent_mt)
+end
+
+function SoilFieldSentryStatusEvent.new(fieldId, reason, seq)
+    local self = SoilFieldSentryStatusEvent.emptyNew()
+    self.fieldId = fieldId
+    self.reason  = reason
+    self.seq     = seq
+    return self
+end
+
+function SoilFieldSentryStatusEvent:readStream(streamId, connection)
+    self.fieldId = streamReadInt32(streamId)
+    self.reason  = streamReadUIntN(streamId, 3)   -- BLACKLIST enum 0..6 fits in 3 bits
+    self.seq     = streamReadInt32(streamId)
+    self:run(connection)
+end
+
+function SoilFieldSentryStatusEvent:writeStream(streamId, connection)
+    streamWriteInt32(streamId, self.fieldId)
+    streamWriteUIntN(streamId, self.reason or 0, 3)
+    streamWriteInt32(streamId, self.seq or 0)
+end
+
+function SoilFieldSentryStatusEvent:run(connection)
+    -- Clients only: apply the server's authoritative mask with the FIFO seq guard.
+    if g_server == nil and FieldSentry_API and FieldSentry_API.applyMaskSync then
+        FieldSentry_API.applyMaskSync(self.fieldId, self.reason, self.seq)
+    end
+end
+
+-- Inject the broadcaster so FieldSentry can push mask changes without referencing the
+-- network API itself. Server-only; nil-safe if FieldSentry is somehow absent.
+if FieldSentry_Core then
+    FieldSentry_Core.maskBroadcaster = function(fieldId, reason, seq)
+        if g_server then
+            g_server:broadcastEvent(SoilFieldSentryStatusEvent.new(fieldId, reason, seq))
+        end
+    end
+end
+
 SoilLogger.info("Network events system loaded")

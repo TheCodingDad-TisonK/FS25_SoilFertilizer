@@ -77,6 +77,12 @@ FieldSentry_Core.FAVOR_TIER_THRESHOLD = 4
 -- migrateLegacy can upgrade older saves in place.
 FieldSentry_Core.SCHEMA_VERSION = 2
 
+-- FR5: optional mask broadcaster, injected by the network layer (NetworkEvents) so this
+-- module never references the networking API directly. Signature:
+--   function(fieldId, reason, seq)   -- called server-side when a field's mask changes.
+-- nil in single player and in the offline test harness.
+FieldSentry_Core.maskBroadcaster = nil
+
 -- Per-field state, created lazily on first toggle.
 --   manualBlacklist    : boolean  persistent player intent
 --   meadowToggle       : boolean  persistent player intent (Phase 1 stores it; the
@@ -369,10 +375,39 @@ function FieldSentry_API.refreshContract(fieldId)
     end
 
     f = getOrCreate(fieldId)
+    local prevReason = f.evaluatedBlacklist
     f.contractActive = underContract
     f.contractInfo   = underContract and info or nil
     evaluate(f)
+
+    -- FR5: when the server changes a field's mask, bump its FIFO sequence and broadcast so
+    -- clients mirror the status for the map-tab readout. Stale client packets are dropped
+    -- by seq in applyMaskSync, so out-of-order delivery cannot corrupt state.
+    if f.evaluatedBlacklist ~= prevReason then
+        f.lastSeq = (f.lastSeq or 0) + 1
+        if FieldSentry_Core.maskBroadcaster then
+            FieldSentry_Core.maskBroadcaster(fieldId, f.evaluatedBlacklist, f.lastSeq)
+        end
+    end
+
     return (f.evaluatedBlacklist ~= BL.NONE), f.evaluatedBlacklist
+end
+
+--- Client-side FIFO apply of a server mask broadcast (FR5). Drops stale or duplicate
+--- packets so out-of-order delivery can never corrupt field state.
+---@param fieldId number
+---@param reason number  FieldSentry_Core.BLACKLIST enum from the server
+---@param seq number     server's monotonic per-field sequence token
+---@return boolean applied
+function FieldSentry_API.applyMaskSync(fieldId, reason, seq)
+    seq = seq or 0
+    local f = getOrCreate(fieldId)
+    if seq <= (f.lastSeq or 0) then
+        return false  -- stale or duplicate
+    end
+    f.lastSeq            = seq
+    f.evaluatedBlacklist = reason
+    return true
 end
 
 -- =========================================================

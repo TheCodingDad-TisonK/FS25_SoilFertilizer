@@ -306,3 +306,53 @@ do
        FieldSentry_Core.FieldState[62].lastContractSeq, 5)
   g_SoilFertilityManager = nil
 end
+
+-- ── FR5: MP authority + FIFO mask sync ─────────────────────
+do
+  asClient()  -- a client applying the server's authoritative broadcasts
+  FieldSentry_API.reset()
+  T.ok("mask sync: first packet applies",
+       FieldSentry_API.applyMaskSync(70, BL.NPC, 1) == true)
+  T.eq("mask sync: reason applied",
+       select(2, FieldSentry_API.isFieldSimDisabled(70)), BL.NPC)
+  T.ok("mask sync: duplicate seq dropped",
+       FieldSentry_API.applyMaskSync(70, BL.NONE, 1) == false)
+  T.ok("mask sync: out-of-order (lower seq) dropped",
+       FieldSentry_API.applyMaskSync(70, BL.NONE, 0) == false)
+  T.eq("mask sync: state survives stale packets",
+       select(2, FieldSentry_API.isFieldSimDisabled(70)), BL.NPC)
+  T.ok("mask sync: newer seq applies",
+       FieldSentry_API.applyMaskSync(70, BL.NONE, 2) == true)
+  T.ok("mask sync: field cleared by the newer packet",
+       FieldSentry_API.isFieldSimDisabled(70) == false)
+  asHost()
+end
+
+do
+  asHost()
+  FieldSentry_API.reset()
+  local sent = {}
+  FieldSentry_Core.maskBroadcaster = function(fieldId, reason, seq)
+    sent[#sent + 1] = { fieldId = fieldId, reason = reason, seq = seq }
+  end
+  local active = true
+  FieldSentry_Core.contractProviders = {}
+  FieldSentry_API.registerContractProvider("Toggle", function()
+    return { active = active, favorTier = 1, allowSAndF = false }
+  end)
+
+  FieldSentry_API.refreshContract(80)            -- NONE -> NPC
+  T.eq("broadcast fires on mask change", #sent, 1)
+  T.eq("broadcast carries the new reason", sent[1].reason, BL.NPC)
+  T.eq("broadcast seq starts at 1", sent[1].seq, 1)
+
+  FieldSentry_API.refreshContract(80)            -- NPC -> NPC (no change)
+  T.eq("no broadcast when the mask is unchanged", #sent, 1)
+
+  active = false
+  FieldSentry_API.refreshContract(80)            -- NPC -> NONE
+  T.eq("broadcast fires again on un-mask", #sent, 2)
+  T.eq("broadcast seq increments", sent[2].seq, 2)
+
+  FieldSentry_Core.maskBroadcaster = nil
+end
