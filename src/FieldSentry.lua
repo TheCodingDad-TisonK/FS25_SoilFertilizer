@@ -97,21 +97,58 @@ local function getOrCreate(fieldId)
             meadowToggle       = false,
             evaluatedBlacklist = BL.NONE,
             lastSeq            = 0,
+            -- Phase 2 (#654): contract masking + retroactive reconciliation
+            contractActive     = false,
+            contractInfo       = nil,   -- transient { active, favorTier, allowSAndF, source }
+            lastContractSeq    = 0,     -- FR3 idempotency token (last reconciled contract)
+            pendingRetro       = nil,   -- FR3 catch-up queued when the sim API is unavailable
+            hints              = nil,   -- transient UI diagnostics, allocated on demand
         }
         FieldSentry_Core.FieldState[fieldId] = f
     end
     return f
 end
 
--- Recompute the dynamic mask from persistent intents. Structural rules run first and
--- short-circuit; Phase 1 has exactly one (manual blacklist). Later phases insert
--- farmland/ownership/NPC/deco checks here in priority order.
+-- Recompute the dynamic mask from cached intents + cached contract status. Pure and
+-- cheap: it never calls providers (refreshContract does that out of band and stores the
+-- result on f). Rule order: structural (manual) → contract exemption → contract mask,
+-- exactly as FR2 requires (exemption after structural, before classification).
 local function evaluate(f)
+    -- Structural constraint: an explicit manual blacklist wins outright.
     if f.manualBlacklist then
         f.evaluatedBlacklist = BL.MANUAL
-    else
-        f.evaluatedBlacklist = BL.NONE
+        return f.evaluatedBlacklist
     end
+
+    -- Contract masking + favor-tier exemption (FR2). A trusted high-favor provider can
+    -- ask (allowSAndF) to keep S&F running on its contract field instead of masking it.
+    if f.contractActive then
+        local info   = f.contractInfo
+        local exempt = info and info.allowSAndF
+                       and (info.favorTier or 0) >= FieldSentry_Core.FAVOR_TIER_THRESHOLD
+        if exempt then
+            -- Let the sim run; record a transient hint only. Never auto-flip a persistent
+            -- player setting (FR2 state-integrity constraint).
+            f.hints = f.hints or {}
+            f.hints.contractExempt = true
+            f.hints.favorTier      = info.favorTier
+            f.evaluatedBlacklist   = BL.NONE
+        else
+            if f.hints then
+                f.hints.contractExempt = nil
+                f.hints.favorTier      = nil
+            end
+            f.evaluatedBlacklist = BL.NPC
+        end
+        return f.evaluatedBlacklist
+    end
+
+    -- No constraint left.
+    if f.hints then
+        f.hints.contractExempt = nil
+        f.hints.favorTier      = nil
+    end
+    f.evaluatedBlacklist = BL.NONE
     return f.evaluatedBlacklist
 end
 FieldSentry_Core.evaluate = evaluate
@@ -307,6 +344,35 @@ function FieldSentry_API.isFieldUnderAnyContract(fieldId)
     end
 
     return false, { active = false, favorTier = 0, allowSAndF = false, source = "none" }
+end
+
+--- Re-evaluate a field's contract status against the live providers and refresh its cached
+--- mask. Server-authoritative; on a client it just reports the synced cache. Designed to
+--- be called from the soil sim's daily field pass (the existing DAILY_BATCH_SIZE loop), so
+--- the work is amortized over that loop rather than a parallel scheduler (#654 maintainer
+--- note). Keeps state lean by not allocating for an ordinary field that has no contract,
+--- no manual flag and no existing state.
+---@param fieldId number
+---@return boolean disabled
+---@return number reason
+function FieldSentry_API.refreshContract(fieldId)
+    local f = FieldSentry_Core.FieldState[fieldId]
+
+    if not isSimAuthority() then
+        if not f then return false, BL.NONE end
+        return (f.evaluatedBlacklist ~= BL.NONE), f.evaluatedBlacklist
+    end
+
+    local underContract, info = FieldSentry_API.isFieldUnderAnyContract(fieldId)
+    if not underContract and not f then
+        return false, BL.NONE
+    end
+
+    f = getOrCreate(fieldId)
+    f.contractActive = underContract
+    f.contractInfo   = underContract and info or nil
+    evaluate(f)
+    return (f.evaluatedBlacklist ~= BL.NONE), f.evaluatedBlacklist
 end
 
 -- =========================================================

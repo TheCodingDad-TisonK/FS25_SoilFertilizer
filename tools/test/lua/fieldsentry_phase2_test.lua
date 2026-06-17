@@ -107,3 +107,80 @@ do
   T.eq("client gate source", info.source, "client")
   asHost()
 end
+
+-- ── FR2: exemption + hinting engine (via refreshContract) ──
+-- Provider keyed by fieldId so one provider drives every scenario.
+local function installFavorProvider(map)
+  FieldSentry_Core.contractProviders = {}
+  FieldSentry_API.registerContractProvider("Favor", function(id)
+    local e = map[id]
+    if e then return e end
+    return { active = false }
+  end)
+end
+
+do
+  asHost()
+  FieldSentry_API.reset()
+  installFavorProvider({
+    [1] = { active = true, favorTier = 1, allowSAndF = false }, -- hostile: mask
+    [2] = { active = true, favorTier = 5, allowSAndF = true  }, -- best friend + opt-in: exempt
+    [3] = { active = true, favorTier = 5, allowSAndF = false }, -- high favor but no opt-in: mask
+    [4] = { active = true, favorTier = 2, allowSAndF = true  }, -- opt-in but low favor: mask
+  })
+
+  T.ok("low-favor contract field is masked",
+       select(1, FieldSentry_API.refreshContract(1)) == true)
+  T.eq("masked contract reason is NPC",
+       select(2, FieldSentry_API.refreshContract(1)), BL.NPC)
+
+  T.ok("high-favor opt-in contract field runs S&F (exempt)",
+       select(1, FieldSentry_API.refreshContract(2)) == false)
+  local s2 = FieldSentry_API.getUIStatus(2)
+  T.ok("exempt field surfaces contractExempt hint", s2.diagnosticHints.contractExempt == true)
+  T.eq("exempt field surfaces favorTier hint", s2.diagnosticHints.favorTier, 5)
+
+  T.ok("high favor without opt-in stays masked",
+       select(1, FieldSentry_API.refreshContract(3)) == true)
+  T.ok("opt-in below the tier threshold stays masked",
+       select(1, FieldSentry_API.refreshContract(4)) == true)
+end
+
+-- manual blacklist outranks an exemptible contract
+do
+  asHost()
+  FieldSentry_API.reset()
+  installFavorProvider({ [9] = { active = true, favorTier = 9, allowSAndF = true } })
+  FieldSentry_API.setFieldManual(9, true)
+  FieldSentry_API.refreshContract(9)
+  T.eq("manual blacklist wins over an exemptible contract",
+       select(2, FieldSentry_API.isFieldSimDisabled(9)), BL.MANUAL)
+end
+
+-- contract ending un-masks the field, and the hint clears
+do
+  asHost()
+  FieldSentry_API.reset()
+  local active = true
+  FieldSentry_Core.contractProviders = {}
+  FieldSentry_API.registerContractProvider("Toggle", function(_id)
+    return { active = active, favorTier = 1, allowSAndF = false }
+  end)
+  FieldSentry_API.refreshContract(15)
+  T.ok("field masked while contract active",
+       FieldSentry_API.isFieldSimDisabled(15) == true)
+  active = false
+  FieldSentry_API.refreshContract(15)
+  T.ok("field un-masked once the contract ends",
+       FieldSentry_API.isFieldSimDisabled(15) == false)
+end
+
+-- refreshContract stays lean: no state for an ordinary, contract-free field
+do
+  asHost()
+  FieldSentry_API.reset()
+  FieldSentry_Core.contractProviders = {}
+  FieldSentry_API.refreshContract(500)
+  T.ok("no FieldState allocated for a free field",
+       FieldSentry_Core.FieldState[500] == nil)
+end

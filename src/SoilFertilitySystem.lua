@@ -2122,7 +2122,15 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
     -- — or that a later phase disables (deco/NPC/farmland) — skips the daily
     -- depletion/recovery/leaching/seasonal pass entirely, so its soil values freeze
     -- at whatever they were. Single O(1) check; no equation code below is touched.
-    if FieldSentry_API and FieldSentry_API.isFieldSimDisabled(fieldId) then return end
+    if FieldSentry_API then
+        -- Phase 2 (#654): re-evaluate contract status on this same daily-batch seam so
+        -- masking tracks active vanilla/NPC contracts without a parallel scheduler. Then
+        -- gate. refreshContract is server-authoritative and a no-op on older builds.
+        if FieldSentry_API.refreshContract then
+            FieldSentry_API.refreshContract(fieldId)
+        end
+        if FieldSentry_API.isFieldSimDisabled(fieldId) then return end
+    end
 
     local limits   = SoilConstants.NUTRIENT_LIMITS
     local recovery = SoilConstants.FALLOW_RECOVERY
