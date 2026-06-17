@@ -4267,6 +4267,37 @@ function SoilFertilitySystem:onSubsoilerPass(farmlandId, worldX, worldZ)
         farmlandId, cellKey, prev, newVal, field.compaction)
 end
 
+--- FieldSentry FR3 (#654): apply a one-shot, lightweight nutrient catch-up to a field's
+--- average N/P/K. Used to reconcile a contract that harvested the field while FieldSentry
+--- had it masked, so it does not sit frozen in stasis. Deliberately cheap — it only
+--- touches the field-average scalars (no zone writes, no extraction model, no per-cell
+--- work), so it never kicks off the heavy daily sim. FieldSentry computes the amounts
+--- from its own static crop coefficients; this just applies and (in MP) broadcasts them.
+---@param fieldId number
+---@param dN number  nitrogen points to remove
+---@param dP number  phosphorus points to remove
+---@param dK number  potassium points to remove
+---@return boolean applied
+function SoilFertilitySystem:applyRetroactiveDrain(fieldId, dN, dP, dK)
+    local field = self.fieldData and self.fieldData[fieldId]
+    if not field then return false end
+
+    local limits = SoilConstants.NUTRIENT_LIMITS
+    local minV = (limits and limits.MIN) or 0
+    field.nitrogen   = math.max(minV, (field.nitrogen   or 0) - (dN or 0))
+    field.phosphorus = math.max(minV, (field.phosphorus or 0) - (dP or 0))
+    field.potassium  = math.max(minV, (field.potassium  or 0) - (dK or 0))
+
+    -- Mirror the harvest/fertilize sync path so clients see the reconciled values.
+    if g_server and g_currentMission and g_currentMission.missionDynamicInfo
+       and g_currentMission.missionDynamicInfo.isMultiplayer and SoilFieldUpdateEvent then
+        g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
+    end
+
+    SoilLogger.debug("FieldSentry retro drain: field=%d  -N %.1f -P %.1f -K %.1f", fieldId, dN or 0, dP or 0, dK or 0)
+    return true
+end
+
 --- Records one combine-pass cell for the harvest trail overlay.
 --- Deduplicates by 10×10 m cell. Resets on a new game day (new harvest session).
 --- Auto-clears when estimated full-field coverage is reached.

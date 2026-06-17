@@ -10,6 +10,21 @@ local function asHost()  g_server = {}; g_client = nil end
 local function asClient() g_server = nil; g_client = {} end
 asHost()
 
+-- Faithful stand-in for the soil system's FR3 apply method (clamped subtraction).
+local function mockSoil()
+  return {
+    fieldData = {},
+    applyRetroactiveDrain = function(self, id, dN, dP, dK)
+      local fd = self.fieldData[id]
+      if not fd then return false end
+      fd.nitrogen   = math.max(0, (fd.nitrogen   or 0) - dN)
+      fd.phosphorus = math.max(0, (fd.phosphorus or 0) - dP)
+      fd.potassium  = math.max(0, (fd.potassium  or 0) - dK)
+      return true
+    end,
+  }
+end
+
 -- ── FR1: provider registry ─────────────────────────────────
 do
   FieldSentry_API.reset()
@@ -228,4 +243,66 @@ do
   T.eq("v1 legacy save migrates manual count", #list, 2)
   T.ok("v1 legacy fields are blacklisted",
        FieldSentry_API.isFieldManual(3) and FieldSentry_API.isFieldManual(9))
+end
+
+-- ── FR3: retroactive reconciliation ────────────────────────
+do
+  asHost()
+  FieldSentry_API.reset()
+  FieldSentry_Core.contractProviders = {}
+  local soil = mockSoil()
+  soil.fieldData[60] = { nitrogen = 50, phosphorus = 40, potassium = 45 }
+  g_SoilFertilityManager = { soilSystem = soil }
+
+  -- 2000 L wheat (N2/P1/K1.5 per 1000 L) -> remove N4 P2 K3
+  local ok, status = FieldSentry_API.applyRetroactiveHarvest(60, 2000, "wheat", 1)
+  T.ok("retro: first apply succeeds", ok == true)
+  T.eq("retro: status applied", status, "applied")
+  T.near("retro: nitrogen drained", soil.fieldData[60].nitrogen, 46)
+  T.near("retro: potassium drained", soil.fieldData[60].potassium, 42)
+  T.eq("retro: lastContractSeq advanced", FieldSentry_Core.FieldState[60].lastContractSeq, 1)
+
+  local ok2, status2 = FieldSentry_API.applyRetroactiveHarvest(60, 2000, "wheat", 1)
+  T.ok("retro: replaying the same seq is rejected", ok2 == false)
+  T.eq("retro: replay status duplicate", status2, "duplicate")
+  T.near("retro: nitrogen unchanged on replay", soil.fieldData[60].nitrogen, 46)
+
+  T.ok("retro: a newer contract seq applies again",
+       FieldSentry_API.applyRetroactiveHarvest(60, 1000, "wheat", 2) == true)
+  T.near("retro: nitrogen drained again", soil.fieldData[60].nitrogen, 44)
+  g_SoilFertilityManager = nil
+end
+
+do
+  asHost()
+  FieldSentry_API.reset()
+  local soil = mockSoil()
+  soil.fieldData[61] = { nitrogen = 50, phosphorus = 50, potassium = 50 }
+  g_SoilFertilityManager = { soilSystem = soil }
+  FieldSentry_API.applyRetroactiveHarvest(61, 1000, "moonberry", 1)  -- unknown -> DEFAULT N2
+  T.near("retro: unknown crop uses DEFAULT coefficients", soil.fieldData[61].nitrogen, 48)
+  g_SoilFertilityManager = nil
+end
+
+do
+  asHost()
+  FieldSentry_API.reset()
+  g_SoilFertilityManager = nil  -- sim not ready
+  local ok, status = FieldSentry_API.applyRetroactiveHarvest(62, 1000, "wheat", 5)
+  T.ok("retro: queues when sim unavailable", ok == false)
+  T.eq("retro: queued status", status, "queued")
+  local f = FieldSentry_Core.FieldState[62]
+  T.ok("retro: pendingRetro stored", f.pendingRetro ~= nil)
+  T.ok("retro: pendingRetroRemoval hint set", f.hints.pendingRetroRemoval == true)
+
+  local soil = mockSoil()
+  soil.fieldData[62] = { nitrogen = 30, phosphorus = 30, potassium = 30 }
+  g_SoilFertilityManager = { soilSystem = soil }
+  FieldSentry_API.flushPendingRetro()
+  T.near("retro: flush applies the queued drain", soil.fieldData[62].nitrogen, 28)
+  T.ok("retro: pendingRetro cleared after flush",
+       FieldSentry_Core.FieldState[62].pendingRetro == nil)
+  T.eq("retro: lastContractSeq set after flush",
+       FieldSentry_Core.FieldState[62].lastContractSeq, 5)
+  g_SoilFertilityManager = nil
 end

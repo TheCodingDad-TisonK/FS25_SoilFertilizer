@@ -376,6 +376,89 @@ function FieldSentry_API.refreshContract(fieldId)
 end
 
 -- =========================================================
+-- Retroactive nutrient reconciliation (FR3)
+-- =========================================================
+-- When a contract harvests a field that FieldSentry had masked, the field would otherwise
+-- sit frozen forever. On contract completion a provider calls applyRetroactiveHarvest with
+-- the delivered yield, and FieldSentry estimates the nutrient catch-up from fixed crop
+-- coefficients (NOT the full S&F sim) and applies it in one cheap step.
+--
+-- Static, deterministic drain in nutrient points per 1000 L of delivered yield. Coarse on
+-- purpose; the exact balance is tuned during NPCFavor integration. Unknown crops -> DEFAULT.
+FieldSentry_Core.RETRO_DRAIN_PER_1000L = {
+    DEFAULT   = { N = 2.0, P = 1.0, K = 1.5 },
+    wheat     = { N = 2.0, P = 1.0, K = 1.5 },
+    barley    = { N = 1.8, P = 0.9, K = 1.4 },
+    oat       = { N = 1.8, P = 0.9, K = 1.4 },
+    canola    = { N = 3.0, P = 1.2, K = 2.0 },
+    maize     = { N = 2.6, P = 1.1, K = 2.2 },
+    potato    = { N = 2.8, P = 1.4, K = 3.5 },
+    sugarbeet = { N = 2.4, P = 1.2, K = 3.8 },
+    sunflower = { N = 2.6, P = 1.1, K = 2.2 },
+    soybean   = { N = 1.2, P = 1.0, K = 1.6 },  -- legume: partial fixation, lighter N
+}
+
+--- The live soil system, if the mission is up. nil before the mission loads.
+local function getSoilSystem()
+    local mgr = g_SoilFertilityManager
+    return mgr and mgr.soilSystem or nil
+end
+
+--- Reconcile a masked field after a contract harvested it. Idempotent per contractSeq:
+--- a given (or older) contract sequence is never applied twice. If the soil sim is not
+--- ready yet (e.g. called during load before fieldData exists), the catch-up is queued on
+--- f.pendingRetro and a pendingRetroRemoval hint is set for the next flush.
+---@param fieldId number
+---@param deliveredLiters number  yield delivered by the contract
+---@param fruitType string|nil    crop name (lower/any case); nil -> DEFAULT coefficients
+---@param contractSeq number       monotonic per-field contract id (idempotency token)
+---@return boolean applied
+---@return string status   "applied" | "queued" | "duplicate"
+function FieldSentry_API.applyRetroactiveHarvest(fieldId, deliveredLiters, fruitType, contractSeq)
+    contractSeq = tonumber(contractSeq) or 0
+    local f = getOrCreate(fieldId)
+
+    -- Idempotency (FR3): never replay the same or an older contract's catch-up.
+    if contractSeq <= (f.lastContractSeq or 0) then
+        return false, "duplicate"
+    end
+
+    local liters = math.max(0, tonumber(deliveredLiters) or 0)
+    local key    = fruitType and string.lower(fruitType) or nil
+    local coeff  = (key and FieldSentry_Core.RETRO_DRAIN_PER_1000L[key])
+                   or FieldSentry_Core.RETRO_DRAIN_PER_1000L.DEFAULT
+    local scale  = liters / 1000
+    local dN, dP, dK = coeff.N * scale, coeff.P * scale, coeff.K * scale
+
+    local soil = getSoilSystem()
+    if soil and soil.applyRetroactiveDrain and soil.fieldData and soil.fieldData[fieldId] then
+        soil:applyRetroactiveDrain(fieldId, dN, dP, dK)
+        f.lastContractSeq = contractSeq
+        f.pendingRetro = nil
+        if f.hints then f.hints.pendingRetroRemoval = nil end
+        return true, "applied"
+    end
+
+    -- Sim not ready: queue and flag for the next flush (on load / next tick).
+    f.pendingRetro = { seq = contractSeq, liters = liters, fruitType = fruitType }
+    f.hints = f.hints or {}
+    f.hints.pendingRetroRemoval = true
+    return false, "queued"
+end
+
+--- Apply every queued retroactive catch-up now that the sim is available. Called on load
+--- (FR4 consistency) and safe to call again from the daily seam; idempotency guards it.
+function FieldSentry_API.flushPendingRetro()
+    if not getSoilSystem() then return end
+    for id, f in pairs(FieldSentry_Core.FieldState) do
+        local p = f.pendingRetro
+        if p then
+            FieldSentry_API.applyRetroactiveHarvest(id, p.liters, p.fruitType, p.seq)
+        end
+    end
+end
+
+-- =========================================================
 -- Persistence + schema versioning (FR4)
 -- =========================================================
 -- Saved: the player's persistent intent (manual blacklist) and the FR3 reconciliation
