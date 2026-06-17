@@ -2118,6 +2118,12 @@ end
 ---@param fieldId number
 ---@param field table  fieldData entry (pre-validated non-nil by caller)
 function SoilFertilitySystem:_processOneDailyField(fieldId, field)
+    -- FieldSentry gate (#651): a field the player has put to sleep (manual blacklist)
+    -- — or that a later phase disables (deco/NPC/farmland) — skips the daily
+    -- depletion/recovery/leaching/seasonal pass entirely, so its soil values freeze
+    -- at whatever they were. Single O(1) check; no equation code below is touched.
+    if FieldSentry_API and FieldSentry_API.isFieldSimDisabled(fieldId) then return end
+
     local limits   = SoilConstants.NUTRIENT_LIMITS
     local recovery = SoilConstants.FALLOW_RECOVERY
     local seasonal = SoilConstants.SEASONAL_EFFECTS
