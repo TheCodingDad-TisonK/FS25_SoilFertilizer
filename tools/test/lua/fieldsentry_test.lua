@@ -33,6 +33,13 @@ end
 
 do
   FieldSentry_API.reset()
+  T.ok("isFieldManual: false for unknown field", FieldSentry_API.isFieldManual(50) == false)
+  FieldSentry_API.setFieldManual(50, true)
+  T.ok("isFieldManual: true after blacklist", FieldSentry_API.isFieldManual(50) == true)
+end
+
+do
+  FieldSentry_API.reset()
   FieldSentry_API.setFieldManual(3, true)
   local s = FieldSentry_API.getUIStatus(3)
   T.ok("getUIStatus: isSimulationDisabled true", s.isSimulationDisabled == true)

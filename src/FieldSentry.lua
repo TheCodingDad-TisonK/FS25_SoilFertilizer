@@ -146,6 +146,14 @@ function FieldSentry_API.toggleFieldManual(fieldId)
     return FieldSentry_API.setFieldManual(fieldId, not f.manualBlacklist)
 end
 
+--- Is this field currently manually blacklisted? (read-only, no state created)
+---@param fieldId number
+---@return boolean
+function FieldSentry_API.isFieldManual(fieldId)
+    local f = FieldSentry_Core.FieldState[fieldId]
+    return (f ~= nil) and f.manualBlacklist == true
+end
+
 --- Sorted list of field ids the player has manually blacklisted (console / persistence).
 ---@return number[]
 function FieldSentry_API.getManualBlacklist()

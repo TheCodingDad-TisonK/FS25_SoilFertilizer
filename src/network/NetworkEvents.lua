@@ -1322,4 +1322,74 @@ function SoilNetworkEvents_SendSprayerAutoMode(vehicle, enabled)
     end
 end
 
+-- ========================================
+-- FIELDSENTRY MANUAL-BLACKLIST TOGGLE (#651)
+-- ========================================
+-- Server-authoritative. A pure client sends a request; the server validates (admin),
+-- applies it on FieldSentry, then broadcasts so every client mirrors the state for the
+-- map-tab status readout. The server/host applies directly via the Send wrapper below.
+SoilFieldSentryEvent = {}
+SoilFieldSentryEvent_mt = Class(SoilFieldSentryEvent, Event)
+
+InitEventClass(SoilFieldSentryEvent, "SoilFieldSentryEvent")
+
+function SoilFieldSentryEvent.emptyNew()
+    return Event.new(SoilFieldSentryEvent_mt)
+end
+
+function SoilFieldSentryEvent.new(fieldId, manual)
+    local self = SoilFieldSentryEvent.emptyNew()
+    self.fieldId = fieldId
+    self.manual = manual
+    return self
+end
+
+function SoilFieldSentryEvent:readStream(streamId, connection)
+    self.fieldId = streamReadInt32(streamId)
+    self.manual = streamReadBool(streamId)
+    self:run(connection)
+end
+
+function SoilFieldSentryEvent:writeStream(streamId, connection)
+    streamWriteInt32(streamId, self.fieldId)
+    streamWriteBool(streamId, self.manual)
+end
+
+function SoilFieldSentryEvent:run(connection)
+    if g_server ~= nil then
+        -- We are the server. A request from a client connection must be admin.
+        if not connection:getIsServer() then
+            local user = g_currentMission.userManager and
+                         g_currentMission.userManager:getUserByConnection(connection)
+            if not user or not user:getIsMasterUser() then
+                SoilLogger.warning("FieldSentry: non-admin field toggle denied")
+                return
+            end
+        end
+        if FieldSentry_API then FieldSentry_API.setFieldManual(self.fieldId, self.manual) end
+        -- Relay to all clients except the original sender (they already applied / asked).
+        if g_server then
+            g_server:broadcastEvent(SoilFieldSentryEvent.new(self.fieldId, self.manual), nil, connection)
+        end
+    else
+        -- Client receiving the server's authoritative state: mirror it for the UI.
+        if FieldSentry_API then FieldSentry_API.setFieldManual(self.fieldId, self.manual) end
+    end
+end
+
+--- Set a field's manual blacklist with multiplayer sync.
+--- Pure client: asks the server. Server/host: applies and broadcasts to clients.
+---@param fieldId number
+---@param manual boolean
+function SoilNetworkEvents_SendFieldSentryToggle(fieldId, manual)
+    if g_client and not g_server then
+        g_client:getServerConnection():sendEvent(SoilFieldSentryEvent.new(fieldId, manual))
+    else
+        if FieldSentry_API then FieldSentry_API.setFieldManual(fieldId, manual) end
+        if g_server then
+            g_server:broadcastEvent(SoilFieldSentryEvent.new(fieldId, manual))
+        end
+    end
+end
+
 SoilLogger.info("Network events system loaded")

@@ -106,13 +106,16 @@ function SoilSettingsGUI:consoleCommandBlacklistField(fieldId, state)
         return "FieldSentry toggles must be run on the server/host (it owns the field data)."
     end
 
+    -- Determine the target value, then apply+broadcast through the MP-aware wrapper
+    -- so clients mirror it (the wrapper applies directly on the host).
     local newVal
     if state == nil then
-        newVal = FieldSentry_API.toggleFieldManual(fid)
+        newVal = not FieldSentry_API.isFieldManual(fid)
     else
         local s = tostring(state):lower()
-        newVal = FieldSentry_API.setFieldManual(fid, s == "true" or s == "1" or s == "on")
+        newVal = (s == "true" or s == "1" or s == "on")
     end
+    SoilNetworkEvents_SendFieldSentryToggle(fid, newVal)
 
     return string.format("Field %d soil sim is now %s.", fid,
         newVal and "ASLEEP (manual blacklist) - values frozen" or "ACTIVE")
