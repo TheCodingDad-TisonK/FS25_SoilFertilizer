@@ -2117,11 +2117,48 @@ end
 -- Uses snapshotted day/season values stored on self to avoid per-call lookups.
 ---@param fieldId number
 ---@param field table  fieldData entry (pre-validated non-nil by caller)
+--- Meadow daily profile (FieldSentry Phase 3, #651). Grassland rules: gentle nutrient
+--- regrowth toward a pasture equilibrium, a slow organic-matter creep, slow pH drift, and
+--- none of the crop-rotation / seasonal-harvest penalties. Pressures shed gently so a
+--- converted field settles. Opt-in per field, so normal crops are never touched. The
+--- shared daily housekeeping (buffer/coverage/freeze reset, compaction decay) runs in
+--- _processOneDailyField before this is called. Coefficients live in SoilConstants.MEADOW.
+---@param field table
+---@param timeFactor number  1 / daysPerMonth (Issue #349 month normalization)
+---@param limits table       SoilConstants.NUTRIENT_LIMITS
+function SoilFertilitySystem:_applyMeadowProfile(field, timeFactor, limits)
+    local m = SoilConstants.MEADOW
+    if not m then return end
+
+    -- Gentle nutrient regrowth (root turnover + clover/legume fixation in the sward).
+    field.nitrogen   = math.min(limits.MAX, (field.nitrogen   or 0) + m.REGROW_N * timeFactor)
+    field.phosphorus = math.min(limits.MAX, (field.phosphorus or 0) + m.REGROW_P * timeFactor)
+    field.potassium  = math.min(limits.MAX, (field.potassium  or 0) + m.REGROW_K * timeFactor)
+
+    -- Stable structure: organic matter creeps up slightly, never depletes.
+    field.organicMatter = math.min(limits.ORGANIC_MATTER_MAX,
+        (field.organicMatter or 0) + m.OM_GAIN * timeFactor)
+
+    -- Slow pH drift toward neutral, at a reduced rate vs cropland.
+    local phRate = (SoilConstants.PH_NORMALIZATION.RATE or 0) * m.PH_DRIFT_FACTOR * timeFactor
+    if field.pH < limits.PH_NEUTRAL_LOW then
+        field.pH = math.min(limits.PH_NEUTRAL_LOW, field.pH + phRate)
+    elseif field.pH > limits.PH_NEUTRAL_HIGH then
+        field.pH = math.max(limits.PH_NEUTRAL_HIGH, field.pH - phRate)
+    end
+
+    -- Grassland sheds accumulated weed/pest/disease pressure instead of building it.
+    field.weedPressure    = math.max(0, (field.weedPressure    or 0) - m.PRESSURE_DECAY * timeFactor)
+    field.pestPressure    = math.max(0, (field.pestPressure    or 0) - m.PRESSURE_DECAY * timeFactor)
+    field.diseasePressure = math.max(0, (field.diseasePressure or 0) - m.PRESSURE_DECAY * timeFactor)
+end
+
 function SoilFertilitySystem:_processOneDailyField(fieldId, field)
     -- FieldSentry gate (#651): a field the player has put to sleep (manual blacklist)
     -- — or that a later phase disables (deco/NPC/farmland) — skips the daily
     -- depletion/recovery/leaching/seasonal pass entirely, so its soil values freeze
     -- at whatever they were. Single O(1) check; no equation code below is touched.
+    local isMeadow = false
     if FieldSentry_API then
         -- Phase 2 (#654): re-evaluate contract status on this same daily-batch seam so
         -- masking tracks active vanilla/NPC contracts without a parallel scheduler. Then
@@ -2129,7 +2166,10 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
         if FieldSentry_API.refreshContract then
             FieldSentry_API.refreshContract(fieldId)
         end
-        if FieldSentry_API.isFieldSimDisabled(fieldId) then return end
+        local disabled, _, meadow = FieldSentry_API.isFieldSimDisabled(fieldId)
+        if disabled then return end
+        -- Phase 3 (#651): a meadow field still simulates, but on grassland rules.
+        isMeadow = meadow == true
     end
 
     local limits   = SoilConstants.NUTRIENT_LIMITS
@@ -2178,6 +2218,17 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
             local tunComp = getTuningMult(self.settings, "tuningCompactionDecay", "ZERO_MULT")
             field.compaction = math.max(0, field.compaction - cp.NATURAL_DECAY_PER_DAY * timeFactor * tunComp)
         end
+    end
+
+    -- ── Meadow profile branch (FieldSentry Phase 3, #651) ────────────────────
+    -- A field the player flagged as a meadow follows grassland rules instead of the
+    -- crop-rotation logic below: gentle nutrient regrowth, slow pH drift, stable organic
+    -- matter, and no rotation/seasonal-harvest penalties. FieldSentry only supplies the
+    -- toggle; the profile itself lives here in S&F (locked decision, #651). The shared
+    -- housekeeping above (buffer/coverage/freeze reset, compaction decay) already ran.
+    if isMeadow then
+        self:_applyMeadowProfile(field, timeFactor, limits)
+        return
     end
 
     -- ── Fallow recovery ──────────────────────────────────────────────────────

@@ -50,6 +50,7 @@ function SoilSettingsGUI:registerConsoleCommands()
     addConsoleCommand("SoilRerollUnownedFields", "Re-roll starting soil only for fields you don't own (keeps your own farm's soil) (#632)", "consoleCommandRerollUnownedFields", self)
     addConsoleCommand("SoilBlacklistField", "FieldSentry: sleep/wake a field's soil sim: SoilBlacklistField <fieldId> [true|false] (#651)", "consoleCommandBlacklistField", self)
     addConsoleCommand("SoilFieldSentry", "FieldSentry: show a field's sim status, or list all slept fields: SoilFieldSentry [fieldId] (#651)", "consoleCommandFieldSentry", self)
+    addConsoleCommand("SoilMeadowField", "FieldSentry: flag/clear a field as meadow (grassland profile): SoilMeadowField <fieldId> [true|false] (#651)", "consoleCommandMeadowField", self)
     addConsoleCommand("soilfertility", "Show all soil commands", "consoleCommandHelp", self)
 
     SoilLogger.info("Console commands registered")
@@ -82,6 +83,7 @@ function SoilSettingsGUI:consoleCommandHelp()
     print("SoilRerollUnownedFields - Re-roll starting soil for fields you don't own (keeps your own)")
     print("SoilBlacklistField <fieldId> [true|false] - FieldSentry: sleep/wake a field's soil sim (#651)")
     print("SoilFieldSentry [fieldId] - FieldSentry: show a field's sim status, or list slept fields (#651)")
+    print("SoilMeadowField <fieldId> [true|false] - FieldSentry: flag/clear a field as meadow (#651)")
     print("==============================================")
     return "Type 'soilfertility' for more info"
 end
@@ -143,6 +145,33 @@ function SoilSettingsGUI:consoleCommandFieldSentry(fieldId)
     local list = FieldSentry_API.getManualBlacklist()
     if #list == 0 then return "FieldSentry: no fields are manually slept." end
     return "FieldSentry: slept fields -> " .. table.concat(list, ", ")
+end
+
+--- SoilMeadowField <fieldId> [true|false]
+--- Flags a field as a meadow (or clears it). A meadow still simulates, but on grassland
+--- rules: gentle nutrient regrowth, slow pH drift, no rotation/seasonal-harvest penalties.
+function SoilSettingsGUI:consoleCommandMeadowField(fieldId, state)
+    if not FieldSentry_API then return "Error: FieldSentry not initialized" end
+
+    local fid = tonumber(fieldId)
+    if not fid then return "Usage: SoilMeadowField <fieldId> [true|false]" end
+
+    local isServer = g_currentMission and g_currentMission:getIsServer()
+    if not isServer then
+        return "FieldSentry toggles must be run on the server/host (it owns the field data)."
+    end
+
+    local newVal
+    if state == nil then
+        newVal = not FieldSentry_API.isFieldMeadow(fid)
+    else
+        local s = tostring(state):lower()
+        newVal = (s == "true" or s == "1" or s == "on")
+    end
+    SoilNetworkEvents_SendFieldMeadowToggle(fid, newVal)
+
+    return string.format("Field %d is now %s.", fid,
+        newVal and "a MEADOW (grassland profile)" or "normal cropland")
 end
 
 function SoilSettingsGUI:consoleCommandSetDifficulty(difficulty)

@@ -231,6 +231,51 @@ function FieldSentry_API.getManualBlacklist()
     return out
 end
 
+-- =========================================================
+-- Meadow toggle (Phase 3, #651)
+-- =========================================================
+-- Persistent player intent that a field is permanent grassland. FieldSentry only stores
+-- the toggle (and exposes it on the hot path); the meadow simulation profile itself lives
+-- in S&F (locked decision). A meadow field is NOT sim-disabled — it still runs, just on
+-- grassland rules — so meadowToggle is independent of the blacklist mask.
+
+--- Set the meadow toggle for a field.
+---@param fieldId number
+---@param enabled boolean
+---@return boolean newValue
+function FieldSentry_API.setFieldMeadow(fieldId, enabled)
+    local f = getOrCreate(fieldId)
+    f.meadowToggle = enabled and true or false
+    return f.meadowToggle
+end
+
+--- Toggle the meadow flag for a field. Returns the new value.
+---@param fieldId number
+---@return boolean newValue
+function FieldSentry_API.toggleFieldMeadow(fieldId)
+    local f = getOrCreate(fieldId)
+    return FieldSentry_API.setFieldMeadow(fieldId, not f.meadowToggle)
+end
+
+--- Is this field flagged as a meadow? (read-only, no state created)
+---@param fieldId number
+---@return boolean
+function FieldSentry_API.isFieldMeadow(fieldId)
+    local f = FieldSentry_Core.FieldState[fieldId]
+    return (f ~= nil) and f.meadowToggle == true
+end
+
+--- Sorted list of field ids flagged as meadow (console / persistence).
+---@return number[]
+function FieldSentry_API.getMeadowList()
+    local out = {}
+    for id, f in pairs(FieldSentry_Core.FieldState) do
+        if f.meadowToggle then out[#out + 1] = id end
+    end
+    table.sort(out)
+    return out
+end
+
 --- Drop all state (map swap / new game). Persistence layer calls this before restoring.
 function FieldSentry_API.reset()
     FieldSentry_Core.FieldState = {}
@@ -523,10 +568,11 @@ function FieldSentry_API.saveToXMLFile(xmlFile, key)
     for id, f in pairs(FieldSentry_Core.FieldState) do
         local hasPending = f.pendingRetro ~= nil
         -- Only persist a field that carries durable state worth restoring.
-        if f.manualBlacklist or (f.lastContractSeq or 0) > 0 or hasPending then
+        if f.manualBlacklist or f.meadowToggle or (f.lastContractSeq or 0) > 0 or hasPending then
             local entryKey = string.format("%s.field(%d)", key, idx)
             setXMLInt(xmlFile, entryKey .. "#id", id)
             setXMLInt(xmlFile, entryKey .. "#manual", f.manualBlacklist and 1 or 0)
+            setXMLInt(xmlFile, entryKey .. "#meadow", f.meadowToggle and 1 or 0)
             setXMLInt(xmlFile, entryKey .. "#lastContractSeq", f.lastContractSeq or 0)
             if hasPending then
                 local p = f.pendingRetro
@@ -558,11 +604,13 @@ function FieldSentry_API.loadFromXMLFile(xmlFile, key)
                 migrateLegacyEntry(id)
             else
                 local manual   = (getXMLInt(xmlFile, entryKey .. "#manual") or 0) == 1
+                local meadow   = (getXMLInt(xmlFile, entryKey .. "#meadow") or 0) == 1
                 local lastSeq  = getXMLInt(xmlFile, entryKey .. "#lastContractSeq") or 0
                 local retroSeq = getXMLInt(xmlFile, entryKey .. "#retroSeq")
-                if manual or lastSeq > 0 or retroSeq then
+                if manual or meadow or lastSeq > 0 or retroSeq then
                     local f = getOrCreate(id)
                     f.manualBlacklist = manual
+                    f.meadowToggle    = meadow
                     f.lastContractSeq = lastSeq
                     if retroSeq then
                         local fruit = getXMLString(xmlFile, entryKey .. "#retroFruit")
