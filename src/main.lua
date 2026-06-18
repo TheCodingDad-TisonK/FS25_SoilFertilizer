@@ -408,6 +408,10 @@ local function load(mission)
         -- Cross-mod bridge: g_currentMission is a shared C++ object visible to all mods.
         -- getfenv(0) is per-mod scoped in FS25. Use mission property for reliable cross-mod detection.
         mission.soilFertilityManager = sfm
+        -- #83 Cross-mod bridge for the FarmTablet FieldSentry app (read status + request toggles).
+        if FieldSentry_API and FieldSentry_API.attachBridge then
+            FieldSentry_API.attachBridge(mission)
+        end
 
         SoilLogger.info("Initialized in %s mode", disableGUI and "server/console" or "full")
     end
@@ -419,7 +423,10 @@ local function unload()
         sfm:delete()
         sfm = nil
         getfenv(0)["g_SoilFertilityManager"] = nil
-        if g_currentMission then g_currentMission.soilFertilityManager = nil end
+        if g_currentMission then
+            g_currentMission.soilFertilityManager = nil
+            g_currentMission.fieldSentry = nil   -- #83 drop the cross-mod bridge
+        end
     end
     -- Restore InputHelpDisplay.draw if we hooked it, so a session reload doesn't accumulate appends.
     if _inputHelpDisplayOrigDraw and InputHelpDisplay then
