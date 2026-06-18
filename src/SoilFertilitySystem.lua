@@ -385,6 +385,7 @@ function SoilFertilitySystem:onHarvest(fieldId, fruitTypeIndex, liters, strawRat
         harvestField.sessionLastProduct      = nil
         harvestField._farmlandAreaConfirmed  = nil  -- re-confirm on next session's first spray (#507)
         harvestField.sprayTrailPts           = nil
+        harvestField.sownCrop                = nil  -- crop harvested; lastCrop now carries it (#661)
         -- frozenYieldModifier is NOT cleared here (#598): onHarvest fires per-cut, so
         -- clearing here defeats the freeze and causes yield to drop with each combine pass.
         -- The freeze is cleared once per game day in _processOneDailyField instead.
@@ -554,10 +555,24 @@ end
 --- the clearing was unnecessary and harmful to rotation history accuracy.
 ---@param fieldId number The field being sown
 ---@param area number Area processed in hectares
-function SoilFertilitySystem:onSowing(fieldId, area)
+---@param seedsFruitType number|nil  Fruit type index of the seed going in the ground
+function SoilFertilitySystem:onSowing(fieldId, area, seedsFruitType)
     if not fieldId or fieldId <= 0 then return end
     local field = self:getOrCreateField(fieldId, true)
     if not field then return end
+
+    -- Record the crop being seeded so the HUD/map show it right away (#661). Live FieldState
+    -- detection only returns the new crop once the sampled point (field centroid) has actually
+    -- been seeded, so on a half-finished pass the readout fell back to lastCrop and showed the
+    -- PREVIOUS crop (e.g. "beans" while drilling wheat). sownCrop is a display-only bridge:
+    -- it does NOT touch the lastCrop rotation-history chain (kept intact for #204) and is
+    -- cleared on harvest. getFieldInfo prefers it over lastCrop when no live crop is detected.
+    if seedsFruitType and g_fruitTypeManager then
+        local seedDesc = g_fruitTypeManager:getFruitTypeByIndex(seedsFruitType)
+        if seedDesc and seedDesc.name and seedDesc.name ~= "" then
+            field.sownCrop = seedDesc.name
+        end
+    end
 
     local areaHa = area or 0.001
     local fieldAreaHa = field.fieldArea and field.fieldArea > 0 and field.fieldArea or 1.0
@@ -2065,6 +2080,36 @@ function SoilFertilitySystem:_prePopulateZoneData(fieldId)
     SoilLogger.debug("Pre-populated zone data: field %d, %d cells (step=%.0fm)", fieldId, count, step)
 end
 
+--- Re-stamp the per-cell overlay (zoneData) to the field's CURRENT average N/P/K/pH/OM.
+--- Used after an admin "set field state" so the in-game map overlay reflects the change
+--- immediately. The HUD reads field-average values live, but the map overlay reads the
+--- per-cell zoneData written during the last spray pass, so without this the map kept
+--- showing the pre-change values until the next fertiliser pass (#661).
+---@param fieldId number
+function SoilFertilitySystem:refreshFieldOverlay(fieldId)
+    local field = self.fieldData and self.fieldData[fieldId]
+    if not field then return end
+    field.zoneData = field.zoneData or {}
+
+    -- Overlay never built this session (no spray yet) → build it from the polygon, which
+    -- stamps every in-polygon cell with the current field-average values.
+    if next(field.zoneData) == nil then
+        self:_prePopulateZoneData(fieldId)
+        return
+    end
+
+    -- Overlay already exists → overwrite every cell so the whole field shows the new
+    -- uniform value (an admin override sets the field-average, so per-cell variation
+    -- from earlier partial passes is intentionally flattened).
+    for _, cell in pairs(field.zoneData) do
+        cell.N  = field.nitrogen
+        cell.P  = field.phosphorus
+        cell.K  = field.potassium
+        cell.pH = field.pH
+        cell.OM = field.organicMatter
+    end
+end
+
 -- Pre-populate zone data for ALL loaded fields that have empty zoneData.
 -- Called once after loadSoilData() so overlay tiles are visible from session start.
 function SoilFertilitySystem:prePopulateAllZoneData()
@@ -3429,6 +3474,21 @@ function SoilFertilitySystem:markBoomCells(fieldId, boomPoints, overlayOnly)
     if not overlayOnly then
         field.coverageFraction        = math.min(1.0, (field.coveredAreaHa  or 0) / areaInHa)
         field.sessionCoverageFraction = math.min(1.0, (field.sessionCoverageHa or 0) / areaInHa)
+
+        -- Issue #660 / #661 diagnostics: pass% is reported wrong on some implements — the
+        -- fertilizing seeder over-counts (94% at half done), a wide dry-lime spreader on a
+        -- 40 ha field under-counts (35% when nearly done). Log the raw inputs (unique session
+        -- cells, session ha, field ha, fraction, boom-point count, cell ha) throttled once / 2 s
+        -- per field so a single user log shows whether the FIELD AREA or the CELL COUNT is off.
+        local _now = (g_currentMission and g_currentMission.time) or 0
+        if (_now - (field._covDiagAt or 0)) > 2000 then
+            field._covDiagAt = _now
+            local nCells = 0
+            for _ in pairs(field.sessionCoverageCells) do nCells = nCells + 1 end
+            SoilLogger.debug("CoverageDiag field=%d cells=%d sessHa=%.3f fieldHa=%.3f frac=%.0f%% boomPts=%d cellHa=%.4f",
+                fieldId, nCells, field.sessionCoverageHa or 0, areaInHa,
+                (field.sessionCoverageFraction or 0) * 100, #boomPoints, cellArea)
+        end
     end
 
     -- Full pass complete — clear trail so the overlay disappears as a visual reward.
@@ -3769,9 +3829,11 @@ function SoilFertilitySystem:getFieldInfo(fieldId, x, z)
             end
         end
     end
-    -- Fall back to lastCrop when the field is fallow (no live fruit detected)
+    -- Fall back to the just-seeded crop, then lastCrop, when no live fruit is detected.
+    -- sownCrop bridges the window between drilling and the centroid actually carrying the
+    -- crop, so a half-finished seeding pass shows the NEW crop instead of the previous one (#661).
     if not cropName or cropName == "" then
-        cropName = field.lastCrop
+        cropName = field.sownCrop or field.lastCrop
     end
 
     -- Compute crop rotation status for external consumers (e.g. FarmTablet)
@@ -3939,6 +4001,13 @@ function SoilFertilitySystem:saveToXMLFile(xmlFile, key)
     local defaults = SoilConstants.FIELD_DEFAULTS
     local index = 0
 
+    -- Persist the last day the daily update ran. Without this, lastUpdateDay reset to 0 on
+    -- load and (currentDay ~= 0) always re-fired the daily pass on reload, which cleared the
+    -- frozen yield modifier (so the expected-yield % recomputed lower from the now-depleted
+    -- field-average nutrients) and applied a bonus day of fallow / nutrient drift every time
+    -- you saved and reloaded (#665).
+    setXMLInt(xmlFile, key .. "#lastUpdateDay", self.lastUpdateDay or 0)
+
     for fieldId, field in pairs(self.fieldData) do
         if type(field) == "table" then
             local fieldKey = string.format("%s.field(%d)", key, index)
@@ -4032,6 +4101,13 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
     local defaults = SoilConstants.FIELD_DEFAULTS
     self.fieldData = {}
     local index = 0
+
+    -- Restore the daily-update day (see saveToXMLFile). Default to the CURRENT day when the
+    -- attribute is absent (saves written before 2.4.3.0) so loading an older save does not
+    -- fire one stray daily tick on the first load after updating (#665).
+    local _curDay = (g_currentMission and g_currentMission.environment
+                     and g_currentMission.environment.currentDay) or 0
+    self.lastUpdateDay = getXMLInt(xmlFile, key .. "#lastUpdateDay") or _curDay
 
     while true do
         local fieldKey = string.format("%s.field(%d)", key, index)

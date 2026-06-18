@@ -24,6 +24,21 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
+    "- Fixed: Some towed manure spreaders applied product in-game but SF recorded no",
+    "  nutrient or organic-matter change. SF now reads the tractor's speed for towed",
+    "  spreaders so the pass is counted, with extra logging to catch any remaining",
+    "  spreaders that slip through (#668)",
+    "- Fixed: A field's expected yield no longer drops a few percent every time you save",
+    "  and reload mid-harvest. The daily soil pass was re-running on every reload (which",
+    "  also added a stray day of nutrient drift); it now only runs when a real day passes (#665)",
+    "- Fixed: The 'What's new' dialog's 'Don't show again' now sticks. The version check",
+    "  ran before the saved value was loaded, so the dialog reappeared every load (#665)",
+    "- Fixed: Setting a field's values from the admin menu now updates the in-game map",
+    "  overlay right away instead of only the HUD; the map kept showing the old values",
+    "  until the next fertiliser pass (#661)",
+    "- Fixed: While drilling a new crop, the field readout no longer keeps showing the",
+    "  previous crop until you reach the middle of the field; it shows the crop you are",
+    "  seeding as soon as the pass starts (#661)",
     "- Fixed: Texture array warnings from the fill-plane normal and displacement maps. The",
     "  mip levels did not line up with the shared pile texture array, which spams the log",
     "  and can disturb fill-plane rendering. Corrected dds files contributed by Sabo-7 (#657)",

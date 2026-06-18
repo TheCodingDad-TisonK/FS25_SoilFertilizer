@@ -2538,7 +2538,27 @@ function HookManager:installSprayerAreaHook()
             local liters        = spec.workAreaParameters.usage
             local sprayFillLevel = spec.workAreaParameters.sprayFillLevel
 
-            if self.getIsTurnedOn ~= nil and not self:getIsTurnedOn() then return end
+            -- Issue #668 diagnostics: several spreaders (modded + some modhub manure
+            -- spreaders, e.g. Agromet N250 / JD34) are recognized by the SprayUsage hook
+            -- but never reach the nutrient apply below — a silent early-return drops them.
+            -- Log which guard fired (throttled once / 3 s per vehicle, debug-mode only) so a
+            -- single user log pinpoints the exact cause instead of us guessing.
+            local function _sfApplySkipLog(reason)
+                local _now = (g_currentMission and g_currentMission.time) or 0
+                if not self._sfApplySkipLogAt or (_now - self._sfApplySkipLogAt) > 3000 then
+                    self._sfApplySkipLogAt = _now
+                    local ftName = "?"
+                    local ft = fillTypeIndex and g_fillTypeManager and g_fillTypeManager:getFillTypeByIndex(fillTypeIndex)
+                    if ft then ftName = ft.name end
+                    SoilLogger.debug("SprayerHook SKIP [%s]: veh=%s type=%s usage=%s fillLevel=%s — nutrient apply skipped",
+                        reason, tostring(self.id), ftName, tostring(liters), tostring(sprayFillLevel))
+                end
+            end
+
+            if self.getIsTurnedOn ~= nil and not self:getIsTurnedOn() then
+                _sfApplySkipLog("turnedOff")
+                return
+            end
 
             -- Guard: folded implement must not record nutrient application.
             -- Mirror vanilla Foldable line 1286: working position is dir==-1,fa==0 OR dir==1,fa==1.
@@ -2551,7 +2571,10 @@ function HookManager:installSprayerAreaHook()
                 if fa ~= nil then
                     local folded = dir ~= nil and ((dir == -1 and fa ~= 0) or (dir == 1 and fa ~= 1))
                                 or (dir == nil and fa > 0 and fa < 1)
-                    if folded then return end
+                    if folded then
+                        _sfApplySkipLog("folded")
+                        return
+                    end
                 end
             end
 
@@ -2580,13 +2603,31 @@ function HookManager:installSprayerAreaHook()
                 end
                 return
             end
-            if not sprayFillLevel or sprayFillLevel <= 0 then return end
+            if not sprayFillLevel or sprayFillLevel <= 0 then
+                _sfApplySkipLog("noFillLevel")
+                return
+            end
 
             -- Require minimum forward speed (matches WeedSpotSpray.onEndWorkAreaProcessing).
             -- A stationary sprayer drains the tank and consumes liters but covers no ground —
             -- without this guard coverage climbs to 100% without moving.
             local _spd = tonumber(self.getLastSpeed and self:getLastSpeed()) or 0
-            if _spd < 0.5 then return end
+            -- Towed spreaders/sprayers have no independent physics body, so their own
+            -- getLastSpeed() can report ~0 even while the tractor is moving. Borrow the
+            -- rootVehicle (tractor) speed the same way installSprayerUsageHook does
+            -- (issue #668) — without this a moving towed manure spreader is silently
+            -- dropped here even though SprayUsage shows it consuming product.
+            if _spd < 0.5 then
+                local root = self.rootVehicle
+                if root and root ~= self and root.getLastSpeed then
+                    local rootSpd = tonumber(root:getLastSpeed()) or 0
+                    if rootSpd > _spd then _spd = rootSpd end
+                end
+            end
+            if _spd < 0.5 then
+                _sfApplySkipLog(string.format("tooSlow spd=%.2f", _spd))
+                return
+            end
 
             local success, errorMsg = pcall(function()
                 local fillType = g_fillTypeManager:getFillTypeByIndex(fillTypeIndex)
@@ -3416,7 +3457,7 @@ function HookManager:installSowingHook()
                 if areaHa <= 0 then return end
                 g_SoilFertilityManager.soilSystem._lastTillageX = x
                 g_SoilFertilityManager.soilSystem._lastTillageZ = z
-                g_SoilFertilityManager.soilSystem:onSowing(fieldId, areaHa)
+                g_SoilFertilityManager.soilSystem:onSowing(fieldId, areaHa, spec.workAreaParameters.seedsFruitType)
             end)
 
             if not ok then

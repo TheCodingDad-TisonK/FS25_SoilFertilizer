@@ -643,18 +643,6 @@ function SoilFertilityManager:onMissionStarted()
             end
         end
 
-        -- Queue version dialog before any risky init so a crash can't suppress it.
-        if SoilVersionDialog then
-            local modInfo = g_modManager and g_modManager:getModByName(self.modName)
-            local version = (modInfo and modInfo.version) or "?"
-            SoilLogger.info("Version check: save=%s mod=%s", tostring(self.lastSeenVersion), tostring(version))
-            if self.lastSeenVersion ~= version then
-                SoilLogger.info("New version detected — dialog queued (3s delay)")
-                self._pendingVersionDialog      = version
-                self._pendingVersionDialogDelay = 3000
-            end
-        end
-
         if not self.settings.enabled then
             SoilLogger.info("Mod disabled in settings — skipping soil system init")
             return
@@ -669,6 +657,22 @@ function SoilFertilityManager:onMissionStarted()
         end
 
         self:loadSoilData()
+
+        -- Version "What's new" dialog — queued AFTER loadSoilData so the comparison uses the
+        -- SAVED lastSeenVersion. It used to be queued before the load, which always compared
+        -- against the "" default, so the dialog reappeared on every load and the
+        -- "Don't show again" button never stuck (#665).
+        if SoilVersionDialog then
+            local modInfo = g_modManager and g_modManager:getModByName(self.modName)
+            local version = (modInfo and modInfo.version) or "?"
+            SoilLogger.info("Version check: save=%s mod=%s", tostring(self.lastSeenVersion), tostring(version))
+            if self.lastSeenVersion ~= version then
+                SoilLogger.info("New version detected — dialog queued (3s delay)")
+                self._pendingVersionDialog      = version
+                self._pendingVersionDialogDelay = 3000
+            end
+        end
+
         self.soilSystem:prePopulateAllZoneData()
         self:seedGRLEFromFieldData()
     end)
