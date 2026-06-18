@@ -260,6 +260,12 @@ function FieldSentry_API.attachBridge(mission)
         toggleSleep        = SoilNetworkEvents_SendFieldSentryToggle,
         toggleMeadow       = SoilNetworkEvents_SendFieldMeadowToggle,
         isPlayerAdmin      = SoilNetworkEvents_IsPlayerAdmin,
+        -- Contract providers (#654/#56) — server-authoritative. Lets another mod (NPCFavor)
+        -- register an eligibility callback so its contract fields are masked from the sim.
+        registerContractProvider   = FieldSentry_API.registerContractProvider,
+        unregisterContractProvider = FieldSentry_API.unregisterContractProvider,
+        applyRetroactiveHarvest    = FieldSentry_API.applyRetroactiveHarvest,
+        favorTierThreshold         = FieldSentry_Core.FAVOR_TIER_THRESHOLD,
     }
 end
 
