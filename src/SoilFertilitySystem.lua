@@ -673,12 +673,63 @@ function SoilFertilitySystem:resetSessionCoverage(fieldId, reason)
     SoilLogger.debug("Session coverage reset: field %d (%s)", fieldId, reason or "?")
 end
 
+--- #674: incorporate standing/dead crop biomass (green manure) into the soil.
+--- Applied on top of residue incorporation when a tillage or mulch pass works through
+--- a detected crop. Scales the profile's OM/N/P/K by the crop biomass (0..1) and the
+--- field-fraction processed this tick, and mirrors the bump into the local zoneData
+--- cell so the HUD/overlay reflect it. Returns true if anything changed.
+---@param fieldId number
+---@param field table The field data table
+---@param profile table A SoilConstants.CROP_INCORPORATION.* profile (OM/N/P/K)
+---@param biomass number Crop biomass factor 0..1 (from growth state)
+---@param factor number Field-fraction processed this tick (clampedArea / fieldAreaHa)
+---@param areaHa number Area processed this tick, in hectares (for the per-cell write)
+---@return boolean changed
+function SoilFertilitySystem:_applyCropIncorporation(fieldId, field, profile, biomass, factor, areaHa)
+    if not profile or not biomass or biomass <= 0 or not factor or factor <= 0 then return false end
+    local limits = SoilConstants.NUTRIENT_LIMITS
+    local scale  = factor * biomass
+
+    local omBefore = field.organicMatter or SoilConstants.FIELD_DEFAULTS.organicMatter
+    field.organicMatter = math.min(limits.ORGANIC_MATTER_MAX, omBefore + profile.OM * scale)
+    field.nitrogen   = math.min(limits.MAX, (field.nitrogen   or 0) + profile.N * scale)
+    field.phosphorus = math.min(limits.MAX, (field.phosphorus or 0) + profile.P * scale)
+    field.potassium  = math.min(limits.MAX, (field.potassium  or 0) + profile.K * scale)
+
+    -- Local zoneData cell update for HUD/PDA visibility (same pattern as residue).
+    local tx, tz = self._lastTillageX, self._lastTillageZ
+    if tx and tz then
+        local zone = SoilConstants.ZONE
+        local cellKey = tostring(math.floor(tx / zone.CELL_SIZE) * 10000 + math.floor(tz / zone.CELL_SIZE))
+        if not field.zoneData then field.zoneData = {} end
+        if not field.zoneData[cellKey] then
+            field.zoneData[cellKey] = {
+                N = field.nitrogen, P = field.phosphorus, K = field.potassium,
+                pH = field.pH, OM = field.organicMatter,
+                weedPressure = field.weedPressure, pestPressure = field.pestPressure,
+                diseasePressure = field.diseasePressure, compaction = field.compaction
+            }
+        end
+        local cell = field.zoneData[cellKey]
+        local cellScale = ((areaHa or 0) / zone.CELL_AREA_HA) * biomass
+        cell.OM = math.min(limits.ORGANIC_MATTER_MAX, (cell.OM or field.organicMatter) + profile.OM * cellScale)
+        cell.N  = math.min(limits.MAX, (cell.N or 0) + profile.N * cellScale)
+        cell.P  = math.min(limits.MAX, (cell.P or 0) + profile.P * cellScale)
+        cell.K  = math.min(limits.MAX, (cell.K or 0) + profile.K * cellScale)
+    end
+
+    SoilLogger.debug("Crop incorporation field %d: +OM%.3f +N%.3f (biomass=%.2f factor=%.4f)",
+        fieldId or -1, profile.OM * scale, profile.N * scale, biomass, factor)
+    return true
+end
+
 --- Hook delegate: called by HookManager when plowing occurs
 --- Increases organic matter and normalizes pH
 ---@param fieldId number The field being plowed
 ---@param area number Area processed in hectares (e.g. from lastStatsArea)
 ---@param isAlsoSprayer boolean|nil True if the implement also sprays (combo tools) — skip coverage reset
-function SoilFertilitySystem:onPlowing(fieldId, area, isAlsoSprayer)
+---@param cropBiomass number|nil Crop biomass factor 0..1 if a standing/dead crop was incorporated (#674)
+function SoilFertilitySystem:onPlowing(fieldId, area, isAlsoSprayer, cropBiomass)
     if not fieldId or fieldId <= 0 then return end
 
     local field = self:getOrCreateField(fieldId, true)
@@ -821,6 +872,17 @@ function SoilFertilitySystem:onPlowing(fieldId, area, isAlsoSprayer)
         end
     end
 
+    -- Plowing benefit 7 (#674): green-manure incorporation — plowing in a STANDING or
+    -- dead crop (cover crop, failed/burned crop, tall stubble) returns its biomass to the
+    -- soil as a large OM + N boost, far above the bare-stubble residue release above.
+    if self.settings.residueIncorporation and cropBiomass and cropBiomass > 0
+       and SoilConstants.CROP_INCORPORATION then
+        if self:_applyCropIncorporation(fieldId, field, SoilConstants.CROP_INCORPORATION.PLOW,
+                                        cropBiomass, factor, areaHa) then
+            changed = true
+        end
+    end
+
     if changed and g_server and g_currentMission and g_currentMission.missionDynamicInfo and g_currentMission.missionDynamicInfo.isMultiplayer then
         if SoilFieldUpdateEvent then
             local now = g_currentMission.time or 0
@@ -839,7 +901,8 @@ end
 ---@param fieldId number
 ---@param area number Area processed in hectares (e.g. from lastStatsArea)
 ---@param isAlsoSprayer boolean|nil True if the implement also sprays (combo tools) — skip coverage reset
-function SoilFertilitySystem:onCultivation(fieldId, area, isAlsoSprayer)
+---@param cropBiomass number|nil Crop biomass factor 0..1 if a standing/dead crop was incorporated (#674)
+function SoilFertilitySystem:onCultivation(fieldId, area, isAlsoSprayer, cropBiomass)
     if not fieldId or fieldId <= 0 then return end
     if not SoilConstants.CULTIVATION then return end
 
@@ -945,6 +1008,66 @@ function SoilFertilitySystem:onCultivation(fieldId, area, isAlsoSprayer)
             end
         end
     end
+
+    -- #674: green-manure incorporation — cultivating in a standing/dead cover crop mixes
+    -- its biomass into the topsoil (shallower than plowing, so a smaller boost).
+    if self.settings.residueIncorporation and cropBiomass and cropBiomass > 0
+       and SoilConstants.CROP_INCORPORATION then
+        if self:_applyCropIncorporation(fieldId, field, SoilConstants.CROP_INCORPORATION.CULTIVATOR,
+                                        cropBiomass, factor, areaHa) then
+            changed = true
+        end
+    end
+
+    if changed and g_server and g_currentMission and g_currentMission.missionDynamicInfo and g_currentMission.missionDynamicInfo.isMultiplayer then
+        if SoilFieldUpdateEvent then
+            local now = g_currentMission.time or 0
+            if not self._tillBroadcastTime then self._tillBroadcastTime = {} end
+            local last = self._tillBroadcastTime[fieldId] or 0
+            if (now - last) >= 5000 then
+                self._tillBroadcastTime[fieldId] = now
+                g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
+            end
+        end
+    end
+end
+
+--- Hook delegate (#674): called by HookManager when a mulcher actively chops crop/stubble.
+--- Mulching returns surface biomass to the soil as organic matter (no soil inversion, so
+--- a smaller boost than tillage). Area is estimated from speed × width by the hook and is
+--- bounded to one full-field-equivalent per day by the same per-day cap as plowing.
+---@param fieldId number
+---@param area number Estimated area processed this tick, in hectares
+---@param cropBiomass number Crop/stubble biomass factor 0..1
+function SoilFertilitySystem:onMulching(fieldId, area, cropBiomass)
+    if not fieldId or fieldId <= 0 then return end
+    if not self.settings.residueIncorporation then return end
+    if not cropBiomass or cropBiomass <= 0 then return end
+    if not SoilConstants.CROP_INCORPORATION then return end
+
+    local field = self:getOrCreateField(fieldId, true)
+    if not field then return end
+
+    local areaHa = area or 0.001
+    local fieldAreaHa = field.fieldArea and field.fieldArea > 0 and field.fieldArea or 1.0
+
+    -- Per-day area cap (same rationale as onPlowing/onCultivation): total mulch effect
+    -- cannot exceed one full-field-equivalent per day regardless of pass count.
+    local today = (g_currentMission and g_currentMission.environment and
+                   g_currentMission.environment.currentDay) or 0
+    if not self._mulchAreaToday then self._mulchAreaToday = {} end
+    local entry = self._mulchAreaToday[fieldId]
+    if not entry or entry.day ~= today then
+        entry = { day = today, used = 0 }
+        self._mulchAreaToday[fieldId] = entry
+    end
+    local clampedArea = math.min(areaHa, math.max(0, fieldAreaHa - entry.used))
+    if clampedArea <= 0 then return end
+    entry.used = entry.used + clampedArea
+    local factor = clampedArea / fieldAreaHa
+
+    local changed = self:_applyCropIncorporation(fieldId, field, SoilConstants.CROP_INCORPORATION.MULCHER,
+                                                 cropBiomass, factor, clampedArea)
 
     if changed and g_server and g_currentMission and g_currentMission.missionDynamicInfo and g_currentMission.missionDynamicInfo.isMultiplayer then
         if SoilFieldUpdateEvent then
@@ -4313,6 +4436,15 @@ function SoilFertilitySystem:onCompaction(farmlandId, worldX, worldZ)
     if not self.settings.compactionEnabled then return end
     local cp = SoilConstants.COMPACTION
     if not cp then return end
+
+    -- Build-up rate is independently tunable (#674 Discord / Talia): the
+    -- tuningCompactionRate slider scales how much compaction each heavy pass adds.
+    -- ZERO_MULT LUT: idx 1 = 0x (no build-up), 3 = 1x (default), 5 = 2x. At 0x we
+    -- skip everything so no stray cells are created.
+    local rateMult = getTuningMult(self.settings, "tuningCompactionRate", "ZERO_MULT")
+    local added = cp.COMPACTION_PER_PASS * rateMult
+    if added <= 0 then return end
+
     local field = self:getOrCreateField(farmlandId, false)
     if not field then return end
 
@@ -4340,7 +4472,7 @@ function SoilFertilitySystem:onCompaction(farmlandId, worldX, worldZ)
     end
     local cell = field.zoneData[cellKey]
     local prev = cell.compaction or 0
-    local newVal = math.min(cp.MAX_COMPACTION, prev + cp.COMPACTION_PER_PASS)
+    local newVal = math.min(cp.MAX_COMPACTION, prev + added)
     cell.compaction = newVal
 
     -- 2. Update field average

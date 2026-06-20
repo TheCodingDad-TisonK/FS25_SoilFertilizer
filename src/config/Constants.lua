@@ -180,6 +180,29 @@ SoilConstants.RESIDUE_INCORPORATION = {
 }
 
 -- ========================================
+-- CROP INCORPORATION (Issue #674 — green manure / cover-crop / failed-crop tillage)
+-- ========================================
+-- Working a STANDING or dead crop into the soil — green manure, an over-wintered
+-- cover crop, a failed/burned crop, or a tall stubble — releases far more organic
+-- matter and nitrogen than tilling bare soil. This is applied ON TOP of residue
+-- incorporation, and ONLY when a crop is actually detected at the work position
+-- (via a FieldState query in the onStartWorkAreaProcessing probe, before the tool
+-- clears the fruit). Values below are the maximum per full-field pass at full crop
+-- biomass; they are scaled by the crop's biomass factor (0..1, from growth state)
+-- and the processed area fraction. Gated by the existing residueIncorporation setting.
+--
+-- Agronomic basis: incorporating a green-manure / cover crop (e.g. oilseed radish,
+-- mustard, clover) returns the whole standing biomass to the soil — typically several
+-- tonnes/ha of fresh matter — versus only surface straw for stubble residue.
+SoilConstants.CROP_INCORPORATION = {
+    PLOW       = { OM = 1.2,  N = 6.0, P = 1.2, K = 4.0 },  -- deep inversion — fullest burial
+    CULTIVATOR = { OM = 0.7,  N = 3.5, P = 0.7, K = 2.2 },  -- shallow mixing
+    MULCHER    = { OM = 0.6,  N = 2.5, P = 0.5, K = 1.5 },  -- surface chop, no soil inversion
+    MIN_BIOMASS = 0.30,   -- floor biomass factor once an established crop (past seedling) is detected
+    SEEDLING_GROWTH_STATE = 1,  -- growth states at/below this are negligible biomass (just emerged)
+}
+
+-- ========================================
 -- NUTRIENT LIMITS
 -- ========================================
 SoilConstants.NUTRIENT_LIMITS = {

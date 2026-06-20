@@ -108,6 +108,7 @@ local TUNING_SECTIONS = {
         items  = {
             { id = "tuningPestGrowth",      label = "Pest Growth Rate",    lut = "ZERO_MULT", fmt = "x%.2f" },
             { id = "tuningDiseaseGrowth",   label = "Disease Growth Rate", lut = "ZERO_MULT", fmt = "x%.2f" },
+            { id = "tuningCompactionRate",  label = "Compaction Buildup",  lut = "ZERO_MULT", fmt = "x%.2f" },
             { id = "tuningCompactionDecay", label = "Compaction Decay",    lut = "ZERO_MULT", fmt = "x%.2f" },
         },
     },
@@ -125,7 +126,7 @@ local PRESETS = {
             tuningNutrientDepletion = 2, tuningFertilizerEfficiency = 4,
             tuningRainLeaching = 1, tuningSeasonalStrength = 2,
             tuningPestGrowth = 1, tuningDiseaseGrowth = 1,
-            tuningFallowRecovery = 4, tuningCompactionDecay = 4,
+            tuningFallowRecovery = 4, tuningCompactionDecay = 4, tuningCompactionRate = 2,
         },
     },
     {
@@ -138,7 +139,7 @@ local PRESETS = {
             tuningNutrientDepletion = 3, tuningFertilizerEfficiency = 3,
             tuningRainLeaching = 3, tuningSeasonalStrength = 3,
             tuningPestGrowth = 3, tuningDiseaseGrowth = 3,
-            tuningFallowRecovery = 3, tuningCompactionDecay = 3,
+            tuningFallowRecovery = 3, tuningCompactionDecay = 3, tuningCompactionRate = 3,
         },
     },
     {
@@ -151,7 +152,7 @@ local PRESETS = {
             tuningNutrientDepletion = 4, tuningFertilizerEfficiency = 2,
             tuningRainLeaching = 4, tuningSeasonalStrength = 4,
             tuningPestGrowth = 4, tuningDiseaseGrowth = 4,
-            tuningFallowRecovery = 2, tuningCompactionDecay = 2,
+            tuningFallowRecovery = 2, tuningCompactionDecay = 2, tuningCompactionRate = 4,
         },
     },
     {
@@ -164,7 +165,7 @@ local PRESETS = {
             tuningNutrientDepletion = 3, tuningFertilizerEfficiency = 3,
             tuningRainLeaching = 1, tuningSeasonalStrength = 1,
             tuningPestGrowth = 1, tuningDiseaseGrowth = 1,
-            tuningFallowRecovery = 3, tuningCompactionDecay = 3,
+            tuningFallowRecovery = 3, tuningCompactionDecay = 3, tuningCompactionRate = 1,
         },
     },
 }
