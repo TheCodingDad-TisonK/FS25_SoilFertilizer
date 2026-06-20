@@ -24,6 +24,18 @@ SoilVersionDialog.INSTANCE = nil
 -- Any number of lines.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
+    "- New: Plowing, cultivating or mulching a standing or dead crop now gives a real",
+    "  organic matter boost. Working in a cover crop, a failed or burned crop, or tall",
+    "  stubble returns its biomass to the soil, so tilling a crop in is finally worth it",
+    "  instead of just leaving it. The bigger the crop, the bigger the boost (#674)",
+    "- Changed: Tillage now RELIEVES compaction instead of adding it. Plowing and",
+    "  subsoiling break up compacted soil, cultivating is neutral, and only harvesting",
+    "  with a heavy combine packs it down. This matches real farming and fixes the case",
+    "  where a subsoiler-configured tool made one field's compaction keep climbing",
+    "  instead of dropping back to zero",
+    "- New: Added a 'Compaction Buildup' slider in the tuning editor so you can set how",
+    "  fast compaction builds up, separately from how fast it recovers. Turn it down, or",
+    "  all the way to zero, if heavy machinery is packing your fields too quickly",
     "- Fixed: Auto-rate no longer starves manure and other organic fertilizers on a field",
     "  that is already rich in organic matter. The rate now follows whichever need is",
     "  bigger, organic matter or N/P/K, so a nutrient-heavy organic like chicken or",
