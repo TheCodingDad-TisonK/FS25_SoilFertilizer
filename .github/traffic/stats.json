@@ -26191,92 +26191,92 @@
     "watchers": 11
   },
   {
-    "timestamp": "2026-06-20T00:14:34Z",
+    "timestamp": "2026-06-20T12:01:26Z",
     "date": "2026-06-20",
     "views": {
-      "count": 14148,
-      "uniques": 2755
+      "count": 13911,
+      "uniques": 2572
     },
     "clones": {
-      "count": 2915,
-      "uniques": 884
+      "count": 2993,
+      "uniques": 895
     },
     "referrers": [
       {
         "referrer": "github.com",
-        "count": 2435,
-        "uniques": 331
-      },
-      {
-        "referrer": "Google",
-        "count": 1352,
-        "uniques": 425
-      },
-      {
-        "referrer": "l.facebook.com",
-        "count": 698,
+        "count": 2355,
         "uniques": 324
       },
       {
+        "referrer": "Google",
+        "count": 1364,
+        "uniques": 413
+      },
+      {
+        "referrer": "l.facebook.com",
+        "count": 675,
+        "uniques": 313
+      },
+      {
         "referrer": "facebook.com",
-        "count": 636,
-        "uniques": 531
+        "count": 570,
+        "uniques": 464
       },
       {
         "referrer": "lm.facebook.com",
-        "count": 503,
-        "uniques": 422
-      },
-      {
-        "referrer": "kingmods.net",
-        "count": 355,
-        "uniques": 141
+        "count": 474,
+        "uniques": 395
       },
       {
         "referrer": "Bing",
-        "count": 345,
+        "count": 326,
         "uniques": 93
       },
       {
+        "referrer": "kingmods.net",
+        "count": 318,
+        "uniques": 131
+      },
+      {
         "referrer": "m.facebook.com",
-        "count": 146,
-        "uniques": 127
+        "count": 133,
+        "uniques": 115
       },
       {
         "referrer": "youtube.com",
-        "count": 103,
-        "uniques": 48
+        "count": 113,
+        "uniques": 51
       },
       {
         "referrer": "DuckDuckGo",
-        "count": 52,
-        "uniques": 12
+        "count": 50,
+        "uniques": 13
       }
     ],
     "popular_paths": [
       {
         "path": "/TheCodingDad-TisonK/FS25_SoilFertilizer",
         "title": "Overview",
-        "count": 6771,
-        "uniques": 2475
+        "count": 6576,
+        "uniques": 2348
       },
       {
         "path": "/TheCodingDad-TisonK/FS25_SoilFertilizer/releases",
         "title": "/releases",
-        "count": 1125,
-        "uniques": 363
+        "count": 1101,
+        "uniques": 365
       },
       {
         "path": "/TheCodingDad-TisonK/FS25_SoilFertilizer/issues",
         "title": "/issues",
-        "count": 1023,
+        "count": 1031,
         "uniques": 273
       },
       {
         "path": "/TheCodingDad-TisonK/FS25_SoilFertilizer/releases/tag/v2.4.0.0",
         "title": "/releases/tag/v2.4.0.0",
-        "count": 426,
-        "uniques": 291
+        "count": 400,
+        "uniques": 279
       },
       {
         "path": "/TheCodingDad-TisonK/FS25_SoilFertilizer/releases/tag/v2.4.2.4",
@@ -26293,20 +26293,20 @@
       {
         "path": "/TheCodingDad-TisonK/FS25_SoilFertilizer/discussions",
         "title": "/discussions",
-        "count": 230,
-        "uniques": 88
+        "count": 235,
+        "uniques": 92
       },
       {
         "path": "/TheCodingDad-TisonK/FS25_SoilFertilizer/blob/main/README.md",
         "title": "/blob/main/README.md",
-        "count": 162,
-        "uniques": 81
+        "count": 158,
+        "uniques": 78
       },
       {
         "path": "/TheCodingDad-TisonK/FS25_SoilFertilizer/releases/tag/v2.4.2.8",
         "title": "/releases/tag/v2.4.2.8",
-        "count": 149,
-        "uniques": 100
+        "count": 151,
+        "uniques": 101
       },
       {
         "path": "/TheCodingDad-TisonK/FS25_SoilFertilizer/releases/tag/v2.4.1.7",
@@ -26319,7 +26319,7 @@
       {
         "assets": [
           {
-            "downloads": 35,
+            "downloads": 43,
             "name": "FS25_SoilFertilizer.zip"
           }
         ],
@@ -26328,7 +26328,7 @@
       {
         "assets": [
           {
-            "downloads": 105,
+            "downloads": 128,
             "name": "FS25_SoilFertilizer.zip"
           }
         ],
@@ -26587,7 +26587,7 @@
         "tag": "v2.2.3.4-beta"
       }
     ],
-    "stars": 83,
+    "stars": 82,
     "forks": 11,
     "watchers": 11
   }
