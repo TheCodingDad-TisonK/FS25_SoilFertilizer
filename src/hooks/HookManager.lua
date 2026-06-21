@@ -158,6 +158,17 @@ function HookManager:installAll(soilSystem)
     local dedicatedPlowOk = self:installDedicatedPlowHook()
     if dedicatedPlowOk then successCount = successCount + 1 else failCount = failCount + 1 end
 
+    -- #674: crop-biomass probe — samples the standing crop at the work position in
+    -- onStartWorkAreaProcessing (BEFORE the tool clears the fruit) and stashes a 0..1
+    -- biomass factor on the vehicle, which the plow/cultivator end hooks consume to award
+    -- a green-manure OM boost. Installed for both Cultivator and Plow specs.
+    if self:installCropBiomassProbe(Cultivator, "Cultivator") then successCount = successCount + 1 else failCount = failCount + 1 end
+    if self:installCropBiomassProbe(Plow, "Plow") then successCount = successCount + 1 else failCount = failCount + 1 end
+
+    -- #674: mulcher hook — chopping crop/stubble returns surface biomass to the soil as OM
+    local mulcherOk = self:installMulcherHook()
+    if mulcherOk then successCount = successCount + 1 else failCount = failCount + 1 end
+
     -- Mechanical weed removal (Weeder.onEndWorkAreaProcessing — weeders, inter-row hoes)
     local weedControlOk = self:installWeederHook()
     if weedControlOk then successCount = successCount + 1 else failCount = failCount + 1 end
@@ -2200,19 +2211,25 @@ function HookManager:installHarvestHook()
                 end)
             end
 
-            -- Compaction: heavy harvesters compact the soil on each harvest pass
+            -- Compaction: harvesters pack soil by ground pressure, not raw mass. A combine
+            -- on wide flotation tyres in dry soil adds little; a heavy one on narrow tyres
+            -- in wet soil adds a lot. Same model as the driving check, incl. VTP/moisture.
             if detectedFieldId and detectedX and
                g_SoilFertilityManager.settings.compactionEnabled and
-               SoilConstants.COMPACTION then
+               SoilConstants.COMPACTION and SoilCompactionModel then
                 local cp = SoilConstants.COMPACTION
                 local rootVeh = combineSelf.rootVehicle or combineSelf
                 local okM, totalMass = pcall(function()
                     return rootVeh:getTotalMass(false)
                 end)
                 if okM and totalMass and totalMass >= cp.HEAVY_VEHICLE_THRESHOLD_T then
-                    pcall(function()
-                        g_SoilFertilityManager.soilSystem:onCompaction(detectedFieldId, detectedX, detectedZ)
-                    end)
+                    local wet = g_SoilFertilityManager._soilWetness01 or 0
+                    local points = SoilCompactionModel.pointsForVehicle(rootVeh, wet)
+                    if points and points > 0 then
+                        pcall(function()
+                            g_SoilFertilityManager.soilSystem:onCompaction(detectedFieldId, detectedX, detectedZ, points)
+                        end)
+                    end
                 end
             end
 
@@ -2538,20 +2555,68 @@ function HookManager:installSprayerAreaHook()
             local liters        = spec.workAreaParameters.usage
             local sprayFillLevel = spec.workAreaParameters.sprayFillLevel
 
-            if self.getIsTurnedOn ~= nil and not self:getIsTurnedOn() then return end
+            -- wap.isActive is vanilla's own "I painted terrain and drained product this
+            -- frame" flag: reset to false at the end of every onStartWorkAreaProcessing and
+            -- set true only inside processSprayerArea, which runs only for genuinely active
+            -- (lowered + on) work areas. Vanilla onEndWorkAreaProcessing removes fill ONLY
+            -- when isActive is true, so isActive==true is hard proof the implement is
+            -- applying to the ground right now — regardless of what getIsTurnedOn()/fold
+            -- state report. Some modded spreaders (Agromet N250, JD34, T088 — issue #671)
+            -- spread product while reporting getIsTurnedOn()==false and/or a fold state our
+            -- guard reads as "folded", so the turnedOff/folded guards below would drop them
+            -- every frame even though product is leaving the tank. We use isActive as a
+            -- positive override: when the engine confirms active application, we trust it
+            -- over those flags. We do NOT gate ON isActive (never skip merely because it is
+            -- false) — the saturated-field path where isActive can be false still flows
+            -- through via the turnedOn check and the usage/fillLevel/speed guards below.
+            local wapActive = spec.workAreaParameters.isActive == true
+
+            -- Issue #668 diagnostics: several spreaders (modded + some modhub manure
+            -- spreaders, e.g. Agromet N250 / JD34) are recognized by the SprayUsage hook
+            -- but never reach the nutrient apply below — a silent early-return drops them.
+            -- Log which guard fired (throttled once / 3 s per vehicle, debug-mode only) so a
+            -- single user log pinpoints the exact cause instead of us guessing.
+            local function _sfApplySkipLog(reason)
+                local _now = (g_currentMission and g_currentMission.time) or 0
+                if not self._sfApplySkipLogAt or (_now - self._sfApplySkipLogAt) > 3000 then
+                    self._sfApplySkipLogAt = _now
+                    local ftName = "?"
+                    local ft = fillTypeIndex and g_fillTypeManager and g_fillTypeManager:getFillTypeByIndex(fillTypeIndex)
+                    if ft then ftName = ft.name end
+                    SoilLogger.debug("SprayerHook SKIP [%s]: veh=%s type=%s usage=%s fillLevel=%s isActive=%s — nutrient apply skipped",
+                        reason, tostring(self.id), ftName, tostring(liters), tostring(sprayFillLevel), tostring(wapActive))
+                end
+            end
+
+            -- turnedOff guard (issue b16e5df: driving with the implement turned off must
+            -- not apply). Skipped when wapActive — a working spreader that mis-reports
+            -- getIsTurnedOn()==false (issue #671) still applies because the engine confirmed
+            -- ground application this frame. A genuinely-off implement never processes a work
+            -- area, so wapActive is false and this guard still catches it.
+            if not wapActive and self.getIsTurnedOn ~= nil and not self:getIsTurnedOn() then
+                _sfApplySkipLog("turnedOff")
+                return
+            end
 
             -- Guard: folded implement must not record nutrient application.
             -- Mirror vanilla Foldable line 1286: working position is dir==-1,fa==0 OR dir==1,fa==1.
             -- turnOnFoldDirection is always 1 or -1 after Foldable init; nil falls back to
             -- animation-only detection (0 < fa < 1).
-            if self.spec_foldable then
+            -- Skipped when wapActive: a folded implement in transport raises its work areas,
+            -- so the engine never processes them and wapActive stays false — the guard still
+            -- fires. But a working spreader whose foldable spec our heuristic misreads as
+            -- "folded" (issue #671) has wapActive true and is correctly let through.
+            if not wapActive and self.spec_foldable then
                 local foldSpec = self.spec_foldable
                 local fa  = foldSpec.foldAnimTime
                 local dir = foldSpec.turnOnFoldDirection
                 if fa ~= nil then
                     local folded = dir ~= nil and ((dir == -1 and fa ~= 0) or (dir == 1 and fa ~= 1))
                                 or (dir == nil and fa > 0 and fa < 1)
-                    if folded then return end
+                    if folded then
+                        _sfApplySkipLog("folded")
+                        return
+                    end
                 end
             end
 
@@ -2580,13 +2645,31 @@ function HookManager:installSprayerAreaHook()
                 end
                 return
             end
-            if not sprayFillLevel or sprayFillLevel <= 0 then return end
+            if not sprayFillLevel or sprayFillLevel <= 0 then
+                _sfApplySkipLog("noFillLevel")
+                return
+            end
 
             -- Require minimum forward speed (matches WeedSpotSpray.onEndWorkAreaProcessing).
             -- A stationary sprayer drains the tank and consumes liters but covers no ground —
             -- without this guard coverage climbs to 100% without moving.
             local _spd = tonumber(self.getLastSpeed and self:getLastSpeed()) or 0
-            if _spd < 0.5 then return end
+            -- Towed spreaders/sprayers have no independent physics body, so their own
+            -- getLastSpeed() can report ~0 even while the tractor is moving. Borrow the
+            -- rootVehicle (tractor) speed the same way installSprayerUsageHook does
+            -- (issue #668) — without this a moving towed manure spreader is silently
+            -- dropped here even though SprayUsage shows it consuming product.
+            if _spd < 0.5 then
+                local root = self.rootVehicle
+                if root and root ~= self and root.getLastSpeed then
+                    local rootSpd = tonumber(root:getLastSpeed()) or 0
+                    if rootSpd > _spd then _spd = rootSpd end
+                end
+            end
+            if _spd < 0.5 then
+                _sfApplySkipLog(string.format("tooSlow spd=%.2f", _spd))
+                return
+            end
 
             local success, errorMsg = pcall(function()
                 local fillType = g_fillTypeManager:getFillTypeByIndex(fillTypeIndex)
@@ -3137,43 +3220,39 @@ function HookManager:installPlowingHook()
                     -- tilling — they must not reset the session coverage they just laid.
                     local isAlsoSprayer = cultivatorSelf.spec_sprayer ~= nil
 
+                    -- #674: green-manure biomass sampled (pre-clear) by the crop-biomass probe.
+                    local cropBiomass = cultivatorSelf._sfCropBiomass or 0
+
                     if isPlowingTool then
                         g_SoilFertilityManager.soilSystem._lastTillageX = x
                         g_SoilFertilityManager.soilSystem._lastTillageZ = z
-                        g_SoilFertilityManager.soilSystem:onPlowing(farmlandId, areaHa, isAlsoSprayer)
+                        g_SoilFertilityManager.soilSystem:onPlowing(farmlandId, areaHa, isAlsoSprayer, cropBiomass)
                         g_SoilFertilityManager.soilSystem:recordTillageTrailPoint(farmlandId, x, z, true)
                     else
                         g_SoilFertilityManager.soilSystem._lastTillageX = x
                         g_SoilFertilityManager.soilSystem._lastTillageZ = z
-                        g_SoilFertilityManager.soilSystem:onCultivation(farmlandId, areaHa, isAlsoSprayer)
+                        g_SoilFertilityManager.soilSystem:onCultivation(farmlandId, areaHa, isAlsoSprayer, cropBiomass)
                         g_SoilFertilityManager.soilSystem:recordTillageTrailPoint(farmlandId, x, z, false)
                     end
 
-                    -- Compaction: check if subsoiler or heavy vehicle
+                    -- Compaction: tillage LOOSENS soil — it never packs it. Deep tillage
+                    -- (a subsoiler, OR a plow-action cultivator running deep enough to
+                    -- qualify as plowing) relieves compaction; shallow cultivation is
+                    -- neutral. Only harvest traffic (the combine hook) adds compaction.
+                    -- This fixes #672-adjacent reports where a deep-tillage tool built on
+                    -- the Cultivator spec (e.g. a Bourgault SPS configured as a subsoiler)
+                    -- was treated as a heavy vehicle and ADDED compaction every pass.
                     if g_SoilFertilityManager.settings.compactionEnabled and SoilConstants.COMPACTION then
-                        local cp = SoilConstants.COMPACTION
-                        local isSubsoiler = cultivatorSelf.spec_cultivator and
-                                           cultivatorSelf.spec_cultivator.isSubsoiler
-                        if isSubsoiler then
-                            SoilLogger.debug("Compaction: subsoiler pass on farmland=%d veh=%d pos=(%.1f,%.1f)",
-                                farmlandId, cultivatorSelf.id or 0, x, z)
+                        local isSubsoiler = (cultivatorSelf.spec_cultivator and
+                                            cultivatorSelf.spec_cultivator.isSubsoiler) or false
+                        if isSubsoiler or isPlowingTool then
+                            SoilLogger.debug(
+                                "Compaction: deep-tillage relief on farmland=%d veh=%d pos=(%.1f,%.1f) subsoiler=%s plow=%s",
+                                farmlandId, cultivatorSelf.id or 0, x, z,
+                                tostring(isSubsoiler), tostring(isPlowingTool))
                             g_SoilFertilityManager.soilSystem:onSubsoilerPass(farmlandId, x, z)
-                        else
-                            local rootVehicle = cultivatorSelf.rootVehicle or cultivatorSelf
-                            local okM, totalMass = pcall(function()
-                                return rootVehicle:getTotalMass(false)
-                            end)
-                            if okM and totalMass then
-                                SoilLogger.debug(
-                                    "Compaction check: farmland=%d veh=%d  pos=(%.1f,%.1f)  mass=%.1ft  threshold=%.1ft  heavy=%s",
-                                    farmlandId, cultivatorSelf.id or 0, x, z,
-                                    totalMass, cp.HEAVY_VEHICLE_THRESHOLD_T,
-                                    tostring(totalMass >= cp.HEAVY_VEHICLE_THRESHOLD_T))
-                                if totalMass >= cp.HEAVY_VEHICLE_THRESHOLD_T then
-                                    g_SoilFertilityManager.soilSystem:onCompaction(farmlandId, x, z)
-                                end
-                            end
                         end
+                        -- shallow cultivator: neutral, no compaction change
                     end
                 end
             end)
@@ -3236,28 +3315,23 @@ function HookManager:installDedicatedPlowHook()
                 SoilLogger.debug("[DedicatedPlowHook] pos=(%.1f,%.1f) farmlandId=%s",
                     x, z, tostring(farmlandId))
                 if farmlandId and farmlandId > 0 then
+                    -- #674: green-manure biomass sampled (pre-clear) by the crop-biomass probe.
+                    local cropBiomass = plowSelf._sfCropBiomass or 0
                     g_SoilFertilityManager.soilSystem._lastTillageX = x
                     g_SoilFertilityManager.soilSystem._lastTillageZ = z
-                    g_SoilFertilityManager.soilSystem:onPlowing(farmlandId, areaHa)
+                    g_SoilFertilityManager.soilSystem:onPlowing(farmlandId, areaHa, false, cropBiomass)
                     g_SoilFertilityManager.soilSystem:recordTillageTrailPoint(farmlandId, x, z, true)
 
-                    -- Dedicated plows are always heavy equipment
-                    if g_SoilFertilityManager.settings.compactionEnabled then
-                        local rootVehicle = plowSelf.rootVehicle or plowSelf
-                        local okM, totalMass = pcall(function()
-                            return rootVehicle:getTotalMass(false)
-                        end)
-                        local cp = SoilConstants.COMPACTION
-                        if cp and okM and totalMass then
-                            SoilLogger.debug(
-                                "Compaction check (plow): farmland=%d veh=%d  pos=(%.1f,%.1f)  mass=%.1ft  threshold=%.1ft  heavy=%s",
-                                farmlandId, plowSelf.id or 0, x, z,
-                                totalMass, cp.HEAVY_VEHICLE_THRESHOLD_T,
-                                tostring(totalMass >= cp.HEAVY_VEHICLE_THRESHOLD_T))
-                            if totalMass >= cp.HEAVY_VEHICLE_THRESHOLD_T then
-                                g_SoilFertilityManager.soilSystem:onCompaction(farmlandId, x, z)
-                            end
-                        end
+                    -- Plowing is deep inversion tillage: it breaks up compacted layers
+                    -- rather than packing them. Relieve compaction on the worked area
+                    -- (no-op if the cell isn't compacted). Previously this ADDED
+                    -- compaction for heavy plows, which made a subsoiler built on the
+                    -- Plow spec climb instead of reset — DeltaFive's "one field keeps
+                    -- climbing" report.
+                    if g_SoilFertilityManager.settings.compactionEnabled and SoilConstants.COMPACTION then
+                        SoilLogger.debug("Compaction: plow relief on farmland=%d veh=%d pos=(%.1f,%.1f)",
+                            farmlandId, plowSelf.id or 0, x, z)
+                        g_SoilFertilityManager.soilSystem:onSubsoilerPass(farmlandId, x, z)
                     end
                 end
             end)
@@ -3269,6 +3343,151 @@ function HookManager:installDedicatedPlowHook()
     )
     self:register(Plow, "onEndWorkAreaProcessing", original, "Plow.onEndWorkAreaProcessing")
     SoilLogger.info("[OK] Dedicated plow hook installed successfully (via onEndWorkAreaProcessing)")
+    return true
+end
+
+-- =========================================================
+-- HOOK 5b-ii: Crop-biomass probe + mulcher (Issue #674)
+-- =========================================================
+--- Sample how much incorporable crop biomass stands at a world position, as a 0..1
+--- factor derived from the live FieldState growth state. Returns 0 for bare/plowed
+--- ground or a just-emerged seedling; ~1 for a mature, withered, or cut crop (all of
+--- which are full biomass to work in). Mirrors the proven FieldState query used
+--- elsewhere in this mod and is fully pcall-guarded.
+---@param worldX number
+---@param worldZ number
+---@return number biomassFactor 0..1
+function HookManager:sampleCropBiomassAt(worldX, worldZ)
+    if worldX == nil or worldZ == nil then return 0 end
+    if FieldState == nil or FruitType == nil or g_fruitTypeManager == nil then return 0 end
+
+    local ok, fs = pcall(function()
+        local s = FieldState.new()
+        s:update(worldX, worldZ)
+        return s
+    end)
+    if not ok or not fs then return 0 end
+
+    local idx = fs.fruitTypeIndex
+    if not idx or idx == FruitType.UNKNOWN then return 0 end
+
+    local fruitDesc = g_fruitTypeManager:getFruitTypeByIndex(idx)
+    if not fruitDesc then return 0 end
+
+    local ci = SoilConstants.CROP_INCORPORATION
+    local gs = fs.growthState or 0
+    local seedling = (ci and ci.SEEDLING_GROWTH_STATE) or 1
+    if gs <= seedling then return 0 end   -- negligible biomass while just emerged
+
+    -- "Full biomass" reference = the crop's harvest-ready growth state. Anything at or
+    -- beyond it (including withered / post-mow cut states, which index higher) clamps to 1.
+    local ref = fruitDesc.maxHarvestingGrowthState
+    if not ref or ref <= 1 then ref = fruitDesc.minHarvestingGrowthState or 6 end
+    local factor = gs / ref
+    if factor > 1 then factor = 1 end
+
+    local minB = (ci and ci.MIN_BIOMASS) or 0.30
+    if factor < minB then factor = minB end   -- floor for any established crop
+    return factor
+end
+
+--- Install an onStartWorkAreaProcessing probe on a tillage/mulch spec. It runs BEFORE
+--- the work-area functions clear the fruit, samples the crop biomass at the implement
+--- position, and stashes it on the vehicle as `_sfCropBiomass` for the matching end hook
+--- to consume. Event listeners dispatch through the class spec table, so replacing the
+--- function reaches already-spawned vehicles too.
+---@param class table The specialization table (Cultivator, Plow, …)
+---@param className string Friendly name for logging/registration
+---@return boolean success
+function HookManager:installCropBiomassProbe(class, className)
+    if not class or type(class.onStartWorkAreaProcessing) ~= "function" then
+        SoilLogger.warning("Could not install crop-biomass probe - %s.onStartWorkAreaProcessing not available",
+            tostring(className))
+        return false
+    end
+
+    local hookMgrRef = self
+    local original = class.onStartWorkAreaProcessing
+    class.onStartWorkAreaProcessing = Utils.appendedFunction(
+        original,
+        function(vehSelf, dt)
+            if not vehSelf.isServer then return end
+            -- Only pay the FieldState query cost when the feature can actually use it.
+            if not g_SoilFertilityManager or
+               not g_SoilFertilityManager.settings or
+               not g_SoilFertilityManager.settings.enabled or
+               not g_SoilFertilityManager.settings.residueIncorporation then
+                vehSelf._sfCropBiomass = 0
+                return
+            end
+            local node = vehSelf.rootNode
+            if not node then vehSelf._sfCropBiomass = 0; return end
+            local ok, x, _, z = pcall(getWorldTranslation, node)
+            if not ok or x == nil then vehSelf._sfCropBiomass = 0; return end
+            vehSelf._sfCropBiomass = hookMgrRef:sampleCropBiomassAt(x, z)
+        end
+    )
+    self:register(class, "onStartWorkAreaProcessing", original, className .. ".onStartWorkAreaProcessing")
+    SoilLogger.info("[OK] Crop-biomass probe installed on %s (#674)", tostring(className))
+    return true
+end
+
+--- Hooks the Mulcher specialization. When a mulcher is actively chopping crop/stubble,
+--- the surface biomass is returned to the soil as organic matter. The Mulcher spec does
+--- not expose a processed-area accumulator (unlike Cultivator/Mower), so the area is
+--- estimated from forward speed × implement width and bounded by onMulching's per-day
+--- cap. Crop biomass is read from the `_sfCropBiomass` stash set by the probe above.
+---@return boolean success
+function HookManager:installMulcherHook()
+    if not Mulcher or type(Mulcher.onEndWorkAreaProcessing) ~= "function" then
+        SoilLogger.warning("Could not install Mulcher hook - Mulcher.onEndWorkAreaProcessing not available")
+        return false
+    end
+    -- The biomass probe must also be installed on the Mulcher spec.
+    self:installCropBiomassProbe(Mulcher, "Mulcher")
+
+    local hookMgrRef = self
+    local original = Mulcher.onEndWorkAreaProcessing
+    Mulcher.onEndWorkAreaProcessing = Utils.appendedFunction(
+        original,
+        function(mulcherSelf, dt)
+            if not mulcherSelf.isServer then return end
+            if not g_SoilFertilityManager or
+               not g_SoilFertilityManager.soilSystem or
+               not g_SoilFertilityManager.settings.enabled or
+               not g_SoilFertilityManager.settings.residueIncorporation then
+                return
+            end
+            local spec = mulcherSelf.spec_mulcher
+            if not spec or not spec.isWorking then return end
+
+            local biomass = mulcherSelf._sfCropBiomass or 0
+            if biomass <= 0 then return end
+
+            local success, errorMsg = pcall(function()
+                local x, _, z = getWorldTranslation(mulcherSelf.rootNode)
+                if not x then return end
+                local farmlandId = hookMgrRef:getFieldIdAtWorldPosition(x, z, true)
+                if not farmlandId or farmlandId <= 0 then return end
+
+                -- Estimate area covered this tick: speed (km/h → m/s) × dt(s) × width(m).
+                local speedMs = (mulcherSelf.getLastSpeed and (mulcherSelf:getLastSpeed() or 0) or 0) / 3.6
+                local widthM  = (mulcherSelf.size and mulcherSelf.size.width) or 3.0
+                local dtSec   = (dt or 0) / 1000
+                local areaHa  = (speedMs * dtSec * widthM) / 10000
+                if areaHa <= 0 then return end
+
+                g_SoilFertilityManager.soilSystem._lastTillageX = x
+                g_SoilFertilityManager.soilSystem._lastTillageZ = z
+                g_SoilFertilityManager.soilSystem:onMulching(farmlandId, areaHa, biomass)
+            end)
+            if not success then
+                SoilLogger.error("Mulcher hook failed: %s", tostring(errorMsg))
+            end
+        end
+    )
+    self:register(Mulcher, "onEndWorkAreaProcessing", original, "Mulcher.onEndWorkAreaProcessing")
+    SoilLogger.info("[OK] Mulcher hook installed (#674) — crop/stubble OM incorporation active")
     return true
 end
 
@@ -3416,7 +3635,7 @@ function HookManager:installSowingHook()
                 if areaHa <= 0 then return end
                 g_SoilFertilityManager.soilSystem._lastTillageX = x
                 g_SoilFertilityManager.soilSystem._lastTillageZ = z
-                g_SoilFertilityManager.soilSystem:onSowing(fieldId, areaHa)
+                g_SoilFertilityManager.soilSystem:onSowing(fieldId, areaHa, spec.workAreaParameters.seedsFruitType)
             end)
 
             if not ok then

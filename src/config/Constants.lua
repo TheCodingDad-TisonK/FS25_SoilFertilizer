@@ -180,6 +180,29 @@ SoilConstants.RESIDUE_INCORPORATION = {
 }
 
 -- ========================================
+-- CROP INCORPORATION (Issue #674 — green manure / cover-crop / failed-crop tillage)
+-- ========================================
+-- Working a STANDING or dead crop into the soil — green manure, an over-wintered
+-- cover crop, a failed/burned crop, or a tall stubble — releases far more organic
+-- matter and nitrogen than tilling bare soil. This is applied ON TOP of residue
+-- incorporation, and ONLY when a crop is actually detected at the work position
+-- (via a FieldState query in the onStartWorkAreaProcessing probe, before the tool
+-- clears the fruit). Values below are the maximum per full-field pass at full crop
+-- biomass; they are scaled by the crop's biomass factor (0..1, from growth state)
+-- and the processed area fraction. Gated by the existing residueIncorporation setting.
+--
+-- Agronomic basis: incorporating a green-manure / cover crop (e.g. oilseed radish,
+-- mustard, clover) returns the whole standing biomass to the soil — typically several
+-- tonnes/ha of fresh matter — versus only surface straw for stubble residue.
+SoilConstants.CROP_INCORPORATION = {
+    PLOW       = { OM = 1.2,  N = 6.0, P = 1.2, K = 4.0 },  -- deep inversion — fullest burial
+    CULTIVATOR = { OM = 0.7,  N = 3.5, P = 0.7, K = 2.2 },  -- shallow mixing
+    MULCHER    = { OM = 0.6,  N = 2.5, P = 0.5, K = 1.5 },  -- surface chop, no soil inversion
+    MIN_BIOMASS = 0.30,   -- floor biomass factor once an established crop (past seedling) is detected
+    SEEDLING_GROWTH_STATE = 1,  -- growth states at/below this are negligible biomass (just emerged)
+}
+
+-- ========================================
 -- NUTRIENT LIMITS
 -- ========================================
 SoilConstants.NUTRIENT_LIMITS = {
@@ -1048,11 +1071,51 @@ SoilConstants.MAP_OVERLAY = {
 -- ========================================
 -- COMPACTION (P2-D)
 -- ========================================
+-- Compaction is modelled on real agronomy (Penn State / Missouri extension), not raw
+-- mass. Two independent terms, scaled by soil moisture:
+--   * SURFACE  ∝ ground contact pressure ≈ tire inflation pressure. Wide/flotation/
+--     aired-down tyres spread the load → low pressure → little surface packing.
+--   * SUBSOIL  ∝ axle load (regardless of tyres). ~10 t/axle damages subsoil; <5 t/axle
+--     does not. This is the permanent-damage term a big tyre can't avoid.
+--   * MOISTURE multiplier: wet soil compacts far worse ("hydraulic ram"); dry soil resists.
+-- The numbers in SoilCompactionModel are calibrated against the contact-pressure
+-- references in those sources (e.g. a 1360 kg car on tiny patches ≈ 827 kPa).
 SoilConstants.COMPACTION = {
-    HEAVY_VEHICLE_THRESHOLD_T = 8.0,   -- tonnes (Vehicle:getTotalMass returns tonnes)
-    COMPACTION_PER_PASS       = 8.0,   -- points added per heavy-vehicle pass over a cell (once/day/cell).
-                                       -- Sized to clear the minimap heatmap's lowest visible bucket
-                                       -- (top-4-bit DMV → first colour at ~6.3%) so a single pass shows.
+    -- Relevance gate: skip the whole calculation for light vehicles (cars, quads, UTVs).
+    -- This is a perf/gameplay floor only — it is NOT the old "≥8 t = compact" rule.
+    HEAVY_VEHICLE_THRESHOLD_T = 3.0,   -- tonnes (Vehicle:getTotalMass returns tonnes)
+
+    -- Surface term: ground contact pressure → points. When Variable Tire Pressure is
+    -- installed we read its live pressure (bar) directly; otherwise we approximate the
+    -- contact pressure from live wheel geometry (see SoilCompactionModel).
+    GROUND_PRESSURE = {
+        FLOOR_KPA          = 80.0,   -- below this, no surface compaction (good flotation tyres / field mode)
+        REF_KPA            = 250.0,  -- at/above this, full surface compaction (narrow road tyres / road mode)
+        SURFACE_MAX        = 6.0,    -- max surface points per pass at/above REF_KPA
+        BAR_TO_KPA         = 100.0,  -- 1 bar = 100 kPa (VTP reports pressure in bar)
+        CONTACT_OFFSET_KPA = 10.0,   -- surface contact pressure ≈ tyre pressure + ~1-2 psi (PSU)
+        CONTACT_LENGTH_FACTOR = 0.35,-- geometry fallback: contact-patch length ≈ radius × this
+    },
+
+    -- Subsoil term: axle load → points. Independent of tyre size (deep damage).
+    AXLE_LOAD = {
+        FLOOR_T         = 5.0,   -- <5 t/axle: no subsoil compaction (PSU)
+        REF_T           = 10.0,  -- 10 t/axle: full subsoil compaction (PSU)
+        SUBSOIL_MAX     = 3.0,   -- max subsoil points per pass at/above REF_T
+        WHEELS_PER_AXLE = 2,     -- mass/axle estimate when wheel layout can't be resolved
+    },
+
+    -- Moisture multiplier applied to (surface + subsoil). Driven by a decaying wetness
+    -- value that rises while raining and fades over DECAY_HOURS after the rain stops.
+    MOISTURE = {
+        DRY_MULT    = 0.6,   -- dry soil resists compaction
+        WET_MULT    = 1.5,   -- saturated soil transfers stress straight down ("hydraulic ram")
+        DECAY_HOURS = 12.0,  -- in-game hours for soil to dry back to DRY_MULT after rain
+    },
+
+    -- Legacy fallback: points added when a caller has no computed pressure (kept so any
+    -- path that calls onCompaction without a points value still does something sane).
+    COMPACTION_PER_PASS       = 6.0,
     NATURAL_DECAY_PER_DAY     = 0.5,   -- points removed per game day (natural recovery)
     SUBSOILER_REDUCTION       = 15.0,  -- points removed per subsoiler pass
     MAX_COMPACTION            = 100.0,

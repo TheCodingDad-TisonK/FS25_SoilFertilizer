@@ -376,6 +376,16 @@ SettingsSchema.definitions = {
         max = 5,
         uiId = "sf_tun_comp",
     },
+    {
+        -- How fast compaction BUILDS UP per heavy-traffic pass (separate from decay).
+        -- ZERO_MULT LUT: index 1 = 0x (no build-up), 3 = 1x (default), 5 = 2x.
+        id = "tuningCompactionRate",
+        type = "number",
+        default = 3,
+        min = 1,
+        max = 5,
+        uiId = "sf_tun_comprate",
+    },
 }
 
 -- Build lookup table by id for fast access

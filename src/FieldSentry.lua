@@ -235,6 +235,40 @@ function FieldSentry_API.getUIStatus(fieldId)
     }
 end
 
+-- =========================================================
+-- Cross-mod bridge (#83 — FarmTablet FieldSentry app)
+-- =========================================================
+-- FS25 scopes mod globals per-mod, so FieldSentry_API is invisible to other mods.
+-- Publish a small read + control surface on g_currentMission (a shared C++ object)
+-- so the FarmTablet app can show per-field status and request toggles. Reads are
+-- safe on any peer (synced state); toggles route through the existing admin-gated,
+-- server-validated network events — NOT direct FieldSentry_API mutation, which
+-- would not sync in multiplayer.
+---@param mission table  g_currentMission
+function FieldSentry_API.attachBridge(mission)
+    if mission == nil then return end
+    mission.fieldSentry = {
+        -- Read
+        getUIStatus        = FieldSentry_API.getUIStatus,
+        isFieldSimDisabled = FieldSentry_API.isFieldSimDisabled,
+        isFieldManual      = FieldSentry_API.isFieldManual,
+        isFieldMeadow      = FieldSentry_API.isFieldMeadow,
+        isFieldDeco        = FieldSentry_API.isFieldDeco,
+        reasonName         = FieldSentry_Core.reasonName,
+        reasonL10nKey      = FieldSentry_Core.reasonL10nKey,
+        -- Control (client -> server request events; admin-gated server-side)
+        toggleSleep        = SoilNetworkEvents_SendFieldSentryToggle,
+        toggleMeadow       = SoilNetworkEvents_SendFieldMeadowToggle,
+        isPlayerAdmin      = SoilNetworkEvents_IsPlayerAdmin,
+        -- Contract providers (#654/#56) — server-authoritative. Lets another mod (NPCFavor)
+        -- register an eligibility callback so its contract fields are masked from the sim.
+        registerContractProvider   = FieldSentry_API.registerContractProvider,
+        unregisterContractProvider = FieldSentry_API.unregisterContractProvider,
+        applyRetroactiveHarvest    = FieldSentry_API.applyRetroactiveHarvest,
+        favorTierThreshold         = FieldSentry_Core.FAVOR_TIER_THRESHOLD,
+    }
+end
+
 --- Set the manual blacklist for a field.
 ---@param fieldId number
 ---@param enabled boolean

@@ -745,7 +745,15 @@ function SoilSettingsGUI:consoleCommandSetState(fieldId, n, p, k, ph, om)
     field.potassium = K
     field.pH = pH
     field.organicMatter = OM
-    
+
+    -- Refresh the in-game map overlays so the change shows immediately (#661). The HUD reads
+    -- field-average values live, but the per-cell map overlay (zoneData) and the cached
+    -- minimap GRLE kept showing the pre-change values until the next spray pass.
+    sys:refreshFieldOverlay(fid)
+    if g_SoilFertilityManager.seedGRLEFromFieldData then
+        g_SoilFertilityManager:seedGRLEFromFieldData()
+    end
+
     local isServer = g_currentMission and g_currentMission:getIsServer()
     if isServer then
         g_SoilFertilityManager:saveSoilData()
