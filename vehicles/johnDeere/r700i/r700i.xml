@@ -1341,22 +1341,7 @@
         <i3dMapping id="drawbarRef" node="1>2" />
     </i3dMappings>
 
-    <sfSeeSprayWeed>
-        <sfSeeSprayWeedConfigurations isYesNoOption="true">
-            <sfSeeSprayWeedConfiguration name="$l10n_configuration_valueNo"  price="0"/>
-            <sfSeeSprayWeedConfiguration name="$l10n_configuration_valueYes" price="2500"/>
-        </sfSeeSprayWeedConfigurations>
-    </sfSeeSprayWeed>
-    <sfSeeSprayPest>
-        <sfSeeSprayPestConfigurations isYesNoOption="true">
-            <sfSeeSprayPestConfiguration name="$l10n_configuration_valueNo"  price="0"/>
-            <sfSeeSprayPestConfiguration name="$l10n_configuration_valueYes" price="2500"/>
-        </sfSeeSprayPestConfigurations>
-    </sfSeeSprayPest>
-    <sfSeeSprayDisease>
-        <sfSeeSprayDiseaseConfigurations isYesNoOption="true">
-            <sfSeeSprayDiseaseConfiguration name="$l10n_configuration_valueNo"  price="0"/>
-            <sfSeeSprayDiseaseConfiguration name="$l10n_configuration_valueYes" price="2500"/>
-        </sfSeeSprayDiseaseConfigurations>
-    </sfSeeSprayDisease>
+    <!-- See & Spray is now a single combined Yes/No configuration ("sfSeeSpray"),
+         injected onto every sprayer at store-load time by SFNozzleEffects. No per-vehicle
+         config block is needed here. -->
 </vehicle>

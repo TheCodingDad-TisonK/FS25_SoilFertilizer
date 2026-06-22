@@ -40,6 +40,73 @@ function SFNozzleEffects.init(modDir)
         TypeManager.validateTypes = Utils.prependedFunction(
             TypeManager.validateTypes, SFNozzleEffects.registerGlobally)
     end
+
+    -- Injecting the spec is not enough — the Yes/No *purchase* configuration must also be
+    -- present on every sprayer store item, or there's nothing to buy. Base-game sprayer
+    -- XMLs never declare <sfSeeSpray>, so synthesize it for them at store-load time.
+    SFNozzleEffects.installConfigInjector()
+end
+
+-- Price of the combined See & Spray upgrade (single purchase enables weed+pest+disease).
+SFNozzleEffects.SEE_SPRAY_PRICE = 2500
+
+-- Make the combined See & Spray Yes/No configuration buyable on EVERY sprayer, not only
+-- vehicles whose XML declares it. Mirrors PF SprayerNodeData's getConfigurationsFromXML
+-- override exactly (synthesize a 2-item VehicleConfigurationItem set) — no PF dependency.
+function SFNozzleEffects.installConfigInjector()
+    if SFNozzleEffects._didInstallConfigInjector then return end
+    if ConfigurationUtil == nil or type(ConfigurationUtil.getConfigurationsFromXML) ~= "function" then
+        SoilLogger.warning("[SFNozzleEffects] ConfigurationUtil.getConfigurationsFromXML unavailable — See & Spray shop config disabled")
+        return
+    end
+    SFNozzleEffects._didInstallConfigInjector = true
+
+    -- Capture the original explicitly (Utils.overwrittenFunction is a no-op stub in the
+    -- debug source; a manual closure has unambiguous, controlled call semantics).
+    local origGetConfigs = ConfigurationUtil.getConfigurationsFromXML
+    ConfigurationUtil.getConfigurationsFromXML = function(manager, xmlFile, key, baseDir, customEnvironment, isMod, storeItem)
+        local configurations, defaultConfigurationIds =
+            origGetConfigs(manager, xmlFile, key, baseDir, customEnvironment, isMod, storeItem)
+
+        -- Vehicles only (placeables use a different manager), the config type must be
+        -- registered, the item must be a sprayer, and the XML must not already declare it.
+        if SFNozzleEffects._seeSprayConfigRegistered
+            and manager == g_vehicleConfigurationManager
+            and xmlFile ~= nil and key ~= nil
+            and xmlFile:hasProperty(key .. ".sprayer") then
+
+            configurations         = configurations or {}
+            defaultConfigurationIds = defaultConfigurationIds or {}
+
+            if configurations["sfSeeSpray"] == nil then
+                local items = {}
+
+                local no = VehicleConfigurationItem.new("sfSeeSpray")
+                no.isDefault     = true
+                no.name          = g_i18n:getText("configuration_valueNo")
+                no.index         = 1
+                no.saveId        = "1"
+                no.price         = 0
+                no.isYesNoOption = true
+                table.insert(items, no)
+
+                local yes = VehicleConfigurationItem.new("sfSeeSpray")
+                yes.name          = g_i18n:getText("configuration_valueYes")
+                yes.index         = 2
+                yes.saveId        = "2"
+                yes.price         = SFNozzleEffects.SEE_SPRAY_PRICE
+                yes.isYesNoOption = true
+                table.insert(items, yes)
+
+                defaultConfigurationIds["sfSeeSpray"] = ConfigurationUtil.getDefaultConfigIdFromItems(items)
+                configurations["sfSeeSpray"] = items
+            end
+        end
+
+        return configurations, defaultConfigurationIds
+    end
+
+    SoilLogger.info("[SFNozzleEffects] See & Spray shop config injector installed")
 end
 
 -- Inject SFNozzleEffects into all sprayer vehicle types (global See & Spray).
@@ -147,6 +214,8 @@ function SFNozzleEffects.initSpecialization()
             "sfSeeSpray",
             VehicleConfigurationItem
         )
+        -- Gate the shop-config injector: only synthesize items for a registered type.
+        SFNozzleEffects._seeSprayConfigRegistered = true
     end
 end
 

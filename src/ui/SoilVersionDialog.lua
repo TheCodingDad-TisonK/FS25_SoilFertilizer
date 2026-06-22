@@ -24,7 +24,7 @@ SoilVersionDialog.INSTANCE = nil
 -- Max 11 lines are visible in the box; if more exist we stop on a bullet boundary and add a "full changelog on GitHub" note.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
-    "- See & Spray can now be bought on any sprayer",
+    "- Fixed: See & Spray buy option now shows on every sprayer",
     "- See & Spray is now one combined buy option",
     "- Variable Rate now applies to See & Spray too",
     "- Fixed admin hotkey needing a remap each session",
