@@ -394,6 +394,14 @@ SoilConstants.HARVEST_HA_FACTOR = 8.0
 -- UPDATED V1.7: Coefficients are now volume-normalized relative to baseRates
 -- to produce realistic soil-test responses (Mehlich-3 ppm) in one pass.
 -- Formula: coeff = (target_ppm / display_mult) / (baseRate * 0.9 / 1000)
+-- Amendment burn (#437) tuning. A freshly-sown / seedling annual has no leaf canopy to
+-- scorch, so applying starter fertilizer or a pre-plant amendment at/just after seeding
+-- must NOT burn it (#681). The burn only applies once the crop has established past this
+-- fraction of the way to its harvest-ready growth state.
+SoilConstants.AMEND_BURN = {
+    ANNUAL_SEEDLING_FRACTION = 0.33,
+}
+
 SoilConstants.FERTILIZER_PROFILES = {
     -- Base game (NPK balanced)
     LIQUIDFERTILIZER  = { N=79.2, P=198.0, K=44.5 },          -- 93.5 L/ha: ~20N, ~10P, ~15K ppm

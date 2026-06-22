@@ -1634,11 +1634,17 @@ function SoilFertilitySystem:scanFields()
                 local isNew = self.fieldData[actualFieldId] == nil
                 self:getOrCreateField(actualFieldId, true, area)
 
-                -- If this is a newly created field and density layers are available,
-                -- read existing layer values (pre-seeded GRLE) instead of using defaults.
+                -- If this is a newly created field and density layers are available, read
+                -- existing layer values (pre-seeded GRLE) instead of using defaults. On a
+                -- mid-save install the layers are empty (pH 0); readFieldFromLayers now keeps
+                -- the rolled defaults in that case (#685) and returns false, so we paint those
+                -- defaults into the layers here instead of leaving the field at 0/0/0/0.
                 if isNew and self.layerSystem and self.layerSystem.available then
                     -- Pass the Field object (not field.farmland) — Field has polygonPoints for AABB
-                    self.layerSystem:readFieldFromLayers(actualFieldId, self.fieldData[actualFieldId], field)
+                    local seeded = self.layerSystem:readFieldFromLayers(actualFieldId, self.fieldData[actualFieldId], field)
+                    if not seeded then
+                        self.layerSystem:writeFieldToLayers(actualFieldId, self.fieldData[actualFieldId], field, false)
+                    end
                 end
 
                 -- PHASE 1: only owned farmlands enter the active simulation set.
@@ -3045,33 +3051,44 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
                 -- risk), so only penalise once it has regrown into its harvest window (tall).
                 -- Annual crops are never exempt. Shared by lime (#646) and organic matter
                 -- (#629/#645).
-                local perennialExempt = false
+                -- A short/early crop must not take the amendment burn. Two cases:
+                --   * Perennial forage: only inside the harvest window (tall sward); young
+                --     regrowth, cut and withered states are exempt (#645/#646).
+                --   * Annual crop: a freshly-sown / seedling crop has no leaf canopy to scorch,
+                --     so starter fertilizer or a pre-plant amendment applied at/just after seeding
+                --     must NOT burn it (#681). Penalise only once it has established past an early
+                --     fraction of the way to harvest-ready.
+                local burnExempt = false
                 if cropFruitIndex then
                     local fruitDesc = g_fruitTypeManager and g_fruitTypeManager:getFruitTypeByIndex(cropFruitIndex)
                     local fruitName = fruitDesc and fruitDesc.name and string.lower(fruitDesc.name)
                     local perennialSet = SoilConstants.PERENNIAL_FORAGE_NAMES
+                    local gs = cropGrowthState or 0
                     if fruitDesc and fruitName and perennialSet and perennialSet[fruitName] then
                         -- Growth states are NOT linearly ordered: the post-mow "cut" state has a
                         -- HIGHER index than the harvest-ready states, so a lower-bound-only check
                         -- let cut grass through as "fully grown" (#645). Penalise ONLY inside the
-                        -- harvest window [minHarvestingGrowthState, maxHarvestingGrowthState];
-                        -- exempt young regrowth, cut and withered states.
+                        -- harvest window [minHarvestingGrowthState, maxHarvestingGrowthState].
                         local minH = fruitDesc.minHarvestingGrowthState
                         local maxH = fruitDesc.maxHarvestingGrowthState
-                        local gs   = cropGrowthState or 0
                         local cutStates = fruitDesc.cutStates
                         local inHarvestWindow = minH and minH > 0 and gs >= minH
                             and (not maxH or maxH <= 0 or gs <= maxH)
                             and not (cutStates and cutStates[gs])
-                        perennialExempt = not inHarvestWindow
+                        burnExempt = not inHarvestWindow
+                    elseif fruitDesc then
+                        -- Annual: exempt early establishment (seedling) stages — no canopy to scorch.
+                        local minH = fruitDesc.minHarvestingGrowthState or 6
+                        local frac = (SoilConstants.AMEND_BURN and SoilConstants.AMEND_BURN.ANNUAL_SEEDLING_FRACTION) or 0.33
+                        local establishedState = math.max(2, math.ceil(minH * frac))
+                        burnExempt = gs < establishedState
                     end
                 end
 
                 if isLimeAmendment then
-                    -- #646: liming early-stage / cut perennial forage is realistic pasture
-                    -- management, so skip the -80% burn there. Tall forage and every annual
-                    -- crop still take it.
-                    if not perennialExempt then
+                    -- #646/#681: liming cut/early perennial forage or a freshly-sown annual is
+                    -- realistic, so skip the -80% burn there. Established crops still take it.
+                    if not burnExempt then
                         field.amendBurnPenalty = 0.80
                         field._amendBurnNotified = true
                         self:showNotification(
@@ -3079,9 +3096,9 @@ function SoilFertilitySystem:applyFertilizer(fieldId, fillTypeIndex, liters)
                             string.format(g_i18n:getText("sf_notify_lime_crop_body"), fieldId))
                     end
                 else
-                    -- #629/#645: organic fertilizer (slurry/manure/digestate) on short/cut
-                    -- perennial forage is standard practice, so skip the -20% burn there.
-                    if not perennialExempt then
+                    -- #629/#645/#681: organic fertilizer (slurry/manure/digestate) on short/cut
+                    -- perennial forage or a freshly-sown annual is standard practice, so skip the -20%.
+                    if not burnExempt then
                         field.amendBurnPenalty = math.max(field.amendBurnPenalty or 0, 0.20)
                         field._amendBurnNotified = true
                         self:showNotification(
