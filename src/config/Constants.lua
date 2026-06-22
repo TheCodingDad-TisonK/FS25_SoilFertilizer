@@ -1119,7 +1119,11 @@ SoilConstants.COMPACTION = {
     -- path that calls onCompaction without a points value still does something sane).
     COMPACTION_PER_PASS       = 6.0,
     NATURAL_DECAY_PER_DAY     = 0.5,   -- points removed per game day (natural recovery)
-    SUBSOILER_REDUCTION       = 15.0,  -- points removed per subsoiler pass
+    SUBSOILER_REDUCTION       = 15.0,  -- points removed per subsoiler pass (clears the deep pan)
+    PLOW_RELIEF               = 3.0,   -- points removed per plow pass — a plough only loosens the
+                                       -- topsoil it inverts; the deep pan stays, so it relieves far
+                                       -- less than a subsoiler. Keeps the subsoiler meaningful and
+                                       -- stops routine ploughing from erasing compaction (#687).
     MAX_COMPACTION            = 100.0,
     NUTRIENT_PENALTY_MAX      = 0.20,  -- max 20% extra nutrient extraction at max compaction
     -- Driving-based compaction: any heavy vehicle moving across a field compacts the

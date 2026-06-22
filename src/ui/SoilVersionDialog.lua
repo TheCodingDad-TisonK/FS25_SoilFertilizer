@@ -34,7 +34,7 @@ SoilVersionDialog.CHANGELOG = {
     "- Tilling in dead/cover crops boosts organic matter",
     "- Auto-rate follows the bigger need, organic or N/P/K",
     "- Compaction now based on ground pressure, not weight",
-    "- Tillage now relieves compaction instead of adding it",
+    "- Ploughing relieves only a little compaction; subsoiler clears it",
 }
 
 -- ── i18n helper ───────────────────────────────────────────

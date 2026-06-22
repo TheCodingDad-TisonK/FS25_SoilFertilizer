@@ -4568,11 +4568,13 @@ function SoilFertilitySystem:onCompaction(farmlandId, worldX, worldZ, points)
         farmlandId, cellKey, prev, newVal, field.compaction)
 end
 
---- Apply subsoiler compaction reduction at a specific world position.
+--- Apply a deep-tillage compaction reduction at a specific world position.
 ---@param farmlandId number
 ---@param worldX number
 ---@param worldZ number
-function SoilFertilitySystem:onSubsoilerPass(farmlandId, worldX, worldZ)
+---@param reliefPoints number|nil  Points to remove from the cell. Defaults to the full
+---                                SUBSOILER_REDUCTION; plows pass the smaller PLOW_RELIEF (#687).
+function SoilFertilitySystem:onSubsoilerPass(farmlandId, worldX, worldZ, reliefPoints)
     if not self.settings.compactionEnabled then return end
     local cp = SoilConstants.COMPACTION
     if not cp then return end
@@ -4597,7 +4599,8 @@ function SoilFertilitySystem:onSubsoilerPass(farmlandId, worldX, worldZ)
     local prev = cell.compaction or 0
     if prev <= 0 then return end
 
-    local newVal = math.max(0, prev - cp.SUBSOILER_REDUCTION)
+    local relief = reliefPoints or cp.SUBSOILER_REDUCTION
+    local newVal = math.max(0, prev - relief)
     cell.compaction = newVal
 
     field.compactionSum = math.max(0, (field.compactionSum or 0) - (prev - newVal))
