@@ -680,6 +680,87 @@ function SoilFertilityManager:onMissionStarted()
     if not ok then
         SoilLogger.error("onMissionStarted init failed: %s", tostring(err))
     end
+
+    -- #677: schedule a one-shot re-assert of PLAYER-context input events ~2s after
+    -- load. A load-order race can leave on-foot hotkeys (notably the settings panel,
+    -- SF_OPEN_SETTINGS) unregistered in the active context until the player remaps the
+    -- key or cycles a vehicle — which matches the intermittent "shows in Controls but
+    -- won't fire until I remap" report. Re-asserting after the mission has fully loaded
+    -- (saved bindings applied) registers any event the first pass missed. Idempotent.
+    if self.soilHUD then
+        self._pendingInputReassert      = true
+        self._pendingInputReassertDelay = 2000
+    end
+end
+
+--- #677: (re)register all PLAYER-context input events. Idempotent — each event is
+--- only registered when its id field is nil, so this is safe to call repeatedly.
+--- Driven by the deferred post-load safety net (see onMissionStarted + update).
+--- Registers only in the PLAYER context and never removes anything, so it cannot
+--- invalidate VEHICLE-context slots for the same actions (see the cross-context
+--- note in the endActionEventsModification hook).
+function SoilFertilityManager:registerPlayerContextInputEvents(binding)
+    binding = binding or g_inputBinding
+    if not binding then return end
+    if not self.soilHUD then return end
+    if not (InputAction and PlayerInputComponent) then return end
+
+    local registered = 0
+    binding:beginActionEventsModification(PlayerInputComponent.INPUT_CONTEXT_NAME)
+
+    if not self.toggleHUDEventId then
+        local ok, id = binding:registerActionEvent(
+            InputAction.SF_TOGGLE_HUD, self, self.onToggleHUDInput, false, true, false, true)
+        if ok and id then self.toggleHUDEventId = id; registered = registered + 1 end
+    end
+
+    if self.soilMapOverlay and not self.cycleMapLayerEventId then
+        local ok, id = binding:registerActionEvent(
+            InputAction.SF_CYCLE_MAP_LAYER, self, self.onCycleMapLayerInput, false, true, false, true)
+        if ok and id then
+            self.cycleMapLayerEventId = id
+            binding:setActionEventTextVisibility(id, false)
+            registered = registered + 1
+        end
+    end
+
+    if self.settingsPanel and not self.settingsPanelEventId then
+        local ok, id = binding:registerActionEvent(
+            InputAction.SF_OPEN_SETTINGS, self, self.onOpenSettingsInput, false, true, false, true)
+        if ok and id then
+            self.settingsPanelEventId = id
+            binding:setActionEventTextVisibility(id, false)
+            registered = registered + 1
+        end
+    end
+
+    if self.soilHUD and not self.hudDragEventId then
+        local ok, id = binding:registerActionEvent(
+            InputAction.SF_HUD_DRAG, self, self.onHUDDragInput, false, true, false, true)
+        if ok and id then
+            self.hudDragEventId = id
+            binding:setActionEventTextVisibility(id, false)
+            registered = registered + 1
+        end
+    end
+
+    if self.soilMapOverlay and not self.minimapZoomEventId then
+        local ok, id = binding:registerActionEvent(
+            InputAction.SF_MINIMAP_ZOOM, self, self.onMinimapZoomInput, false, true, false, true)
+        if ok and id then
+            self.minimapZoomEventId = id
+            binding:setActionEventTextVisibility(id, false)
+            registered = registered + 1
+        end
+    end
+
+    binding:endActionEventsModification()
+
+    if registered > 0 then
+        SoilLogger.info("#677 input re-assert: registered %d previously-missing PLAYER event(s)", registered)
+    else
+        SoilLogger.debug("#677 input re-assert: all PLAYER events already registered")
+    end
 end
 
 -- NOTE: registerInputActions() removed.
@@ -1113,6 +1194,18 @@ function SoilFertilityManager:update(dt)
             self._pendingVersionDialogDelay = nil
             SoilLogger.info("Showing version dialog for %s", ver)
             SoilVersionDialog.show(ver)
+        end
+    end
+
+    -- #677: one-shot PLAYER-context input re-assert after load settles. Runs before
+    -- the enabled guard so on-foot hotkeys are restored even while the mod is toggled
+    -- off (the settings panel is how the player turns it back on).
+    if self._pendingInputReassert then
+        self._pendingInputReassertDelay = (self._pendingInputReassertDelay or 0) - dt
+        if self._pendingInputReassertDelay <= 0 then
+            self._pendingInputReassert      = nil
+            self._pendingInputReassertDelay = nil
+            self:registerPlayerContextInputEvents(g_inputBinding)
         end
     end
 

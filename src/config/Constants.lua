@@ -270,14 +270,16 @@ SoilConstants.SEASONAL_EFFECTS = {
     FALL_NITROGEN_LOSS = 0.02,     -- Gradual fall depletion
     SPRING_SEASON = 1,
     FALL_SEASON = 3,
+    WINTER_SEASON = 4,             -- dormancy: legume N fixation pauses (#674)
 }
 
 -- ========================================
 -- CROP ROTATION
 -- ========================================
 SoilConstants.CROP_ROTATION = {
-    LEGUME_BONUS_N_PER_DAY = 0.5,   -- N added per day during bonus window
+    LEGUME_BONUS_N_PER_DAY  = 0.5,   -- N added per day during the post-crop spring bonus window
     LEGUME_BONUS_DAYS       = 3,     -- spring bonus lasts this many days
+    LEGUME_GROWTH_N_PER_DAY = 0.15,  -- small live N trickle while a legume is standing (nodule fixation surplus, #674) — deliberately well below the post-crop bonus so we don't double-count
     FATIGUE_MULTIPLIER      = 1.15,  -- nutrient extraction ×1.15 for same-crop consecutive seasons
     LEGUMES = { soybean = true, peas = true, beans = true, luzerne = true, clover = true },
 }
@@ -1139,6 +1141,11 @@ SoilConstants.SEE_AND_SPRAY = {
     PEST_THRESHOLD    = 10,   -- suppress if cell pestPressure    < 10
     DISEASE_THRESHOLD = 10,   -- suppress if cell diseasePressure < 10
     WEED_THRESHOLD    = 15,   -- suppress if cell weedPressure    < 15 (weeds need more to justify spraying)
+    -- #678 variable-rate See & Spray: pressure (0-100) at or above which a section
+    -- runs at full rate. Between the suppress threshold and this value the section
+    -- ramps from MIN_RATE up to MAX_RATE. Only used when per-vehicle Variable Rate
+    -- is enabled; otherwise See & Spray stays hard on/off.
+    FULL_RATE_PRESSURE = 50,
 }
 
 -- ========================================
