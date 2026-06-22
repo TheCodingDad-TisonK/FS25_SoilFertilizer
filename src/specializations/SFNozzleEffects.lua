@@ -29,6 +29,53 @@ function SFNozzleEffects.init(modDir)
 
     local path = modDir .. "shared/sprayerNozzleEffect.i3d"
     g_i3DManager:loadI3DFileAsync(path, true, true, SFNozzleEffects._onI3DLoaded, nil, {})
+
+    -- Install the global injector so See & Spray is buyable on EVERY sprayer, not just
+    -- the mod's own r700i/r975i. Same pattern as Variable Tire Pressure: hook
+    -- TypeManager.validateTypes and add this spec to every vehicle type that already
+    -- has the base "sprayer" spec. The spec itself is unchanged — it already supports
+    -- base sprayers (see the Condor path in onUpdate) and no-ops when See & Spray is
+    -- not purchased (getSprayerUsage returns vanilla behaviour for hasAny == false).
+    if TypeManager and type(TypeManager.validateTypes) == "function" then
+        TypeManager.validateTypes = Utils.prependedFunction(
+            TypeManager.validateTypes, SFNozzleEffects.registerGlobally)
+    end
+end
+
+-- Inject SFNozzleEffects into all sprayer vehicle types (global See & Spray).
+-- Guarded so it only runs once even though validateTypes can fire multiple times.
+function SFNozzleEffects.registerGlobally()
+    if SFNozzleEffects._didRegisterGlobally then return end
+    SFNozzleEffects._didRegisterGlobally = true
+
+    local shortName = "sfNozzleEffects"
+    local fullName  = (g_currentModName or "FS25_SoilFertilizer") .. "." .. shortName
+
+    -- The spec is normally registered via modDesc <specialization>; register it here as
+    -- a fallback only if that did not happen (never double-register — that errors).
+    if g_specializationManager and
+       g_specializationManager:getSpecializationByName(fullName) == nil then
+        local filename = Utils.getFilename(
+            "src/specializations/SFNozzleEffects.lua", g_currentModDirectory)
+        g_specializationManager:addSpecialization(fullName, "SFNozzleEffects", filename, nil)
+    end
+
+    if not (g_vehicleTypeManager and g_vehicleTypeManager.types) then return end
+
+    local added = 0
+    for typeName, vehicleType in pairs(g_vehicleTypeManager.types) do
+        if vehicleType and vehicleType.specializationsByName then
+            local hasSprayer = vehicleType.specializationsByName["sprayer"] ~= nil
+            -- Internals may key by either the full or short name — check both.
+            local hasAlready = (vehicleType.specializationsByName[fullName] ~= nil)
+                or (vehicleType.specializationsByName[shortName] ~= nil)
+            if hasSprayer and not hasAlready then
+                g_vehicleTypeManager:addSpecialization(typeName, fullName)
+                added = added + 1
+            end
+        end
+    end
+    SoilLogger.info("[SFNozzleEffects] See & Spray injected into %d sprayer vehicle type(s)", added)
 end
 
 function SFNozzleEffects._onI3DLoaded(_, i3dNode, failedReason, args)
@@ -89,25 +136,15 @@ function SFNozzleEffects.initSpecialization()
 
     schema:setXMLSpecializationType()
 
-    -- Register See & Spray as Yes/No shop configurations (one per target type).
-    -- Mirrors PF WeedSpotSpray.initSpecialization() pattern exactly.
+    -- Register See & Spray as a single combined Yes/No shop configuration.
+    -- One purchase enables weed + pest + disease spot-spraying together.
+    -- (Previously three separate configs; consolidated to one per #678 follow-up.)
+    -- Mirrors PF WeedSpotSpray.initSpecialization() pattern.
     if g_vehicleConfigurationManager then
         g_vehicleConfigurationManager:addConfigurationType(
-            "sfSeeSprayWeed",
-            g_i18n:getText("sf_config_seeSprayWeed"),
-            "sfSeeSprayWeed",
-            VehicleConfigurationItem
-        )
-        g_vehicleConfigurationManager:addConfigurationType(
-            "sfSeeSprayPest",
-            g_i18n:getText("sf_config_seeSprayPest"),
-            "sfSeeSprayPest",
-            VehicleConfigurationItem
-        )
-        g_vehicleConfigurationManager:addConfigurationType(
-            "sfSeeSprayDisease",
-            g_i18n:getText("sf_config_seeSprayDisease"),
-            "sfSeeSprayDisease",
+            "sfSeeSpray",
+            g_i18n:getText("sf_config_seeSpray"),
+            "sfSeeSpray",
             VehicleConfigurationItem
         )
     end
@@ -147,10 +184,17 @@ end
 
 function SFNozzleEffects:onPreLoad(savegame)
     local spec = self[SFNozzleEffects.SPEC_TABLE_NAME]
-    -- configurations["sfSeeSprayWeed"] = 1 → No, 2 → Yes  (FS25 Yes/No convention)
-    spec.seeSprayWeed    = (self.configurations["sfSeeSprayWeed"]    or 1) > 1
-    spec.seeSprayPest    = (self.configurations["sfSeeSprayPest"]    or 1) > 1
-    spec.seeSprayDisease = (self.configurations["sfSeeSprayDisease"] or 1) > 1
+    -- Combined config: configurations["sfSeeSpray"] = 1 → No, 2 → Yes (FS25 Yes/No convention).
+    -- One purchase enables all three targets.
+    local combined = (self.configurations["sfSeeSpray"] or 1) > 1
+    -- Backward compatibility: vehicles bought before the consolidation stored three
+    -- separate per-target configs. Honour those so existing saves keep working.
+    local oldWeed    = (self.configurations["sfSeeSprayWeed"]    or 1) > 1
+    local oldPest    = (self.configurations["sfSeeSprayPest"]    or 1) > 1
+    local oldDisease = (self.configurations["sfSeeSprayDisease"] or 1) > 1
+    spec.seeSprayWeed    = combined or oldWeed
+    spec.seeSprayPest    = combined or oldPest
+    spec.seeSprayDisease = combined or oldDisease
     SoilLogger.debug("[SFNozzleEffects] onPreLoad: seeSprayWeed=%s seeSprayPest=%s seeSprayDisease=%s",
         tostring(spec.seeSprayWeed), tostring(spec.seeSprayPest), tostring(spec.seeSprayDisease))
 end

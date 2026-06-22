@@ -37,12 +37,12 @@
     <e k="sf_notifications_long" v="Ativar/desativar notificações de solo e fertilizante" eh="9a872f8f" />
     <e k="sf_show_hud_short" v="Mostrar HUD" eh="c94fd4d7" />
     <e k="sf_show_hud_long" v="Mostrar/ocultar sobreposição HUD de info de solo (F8 para alternar temporariamente)" eh="4e2e11b6" />
-    <e k="sf_show_work_trail_short" v="Work Trail" />
-    <e k="sf_show_work_trail_long" v="Show/hide spray and harvest trail dots in-world and on the minimap" />
-    <e k="sf_show_sprayer_panel_short" v="Sprayer Panel" />
-    <e k="sf_show_sprayer_panel_long" v="Show/hide the sprayer nutrient info panel when driving a sprayer" />
-    <e k="sf_show_harvester_panel_short" v="Harvester Panel" />
-    <e k="sf_show_harvester_panel_long" v="Show/hide the harvester grain tank status panel when harvesting" />
+    <e k="sf_show_work_trail_short" v="[EN] Work Trail" eh="12a93dfa" />
+    <e k="sf_show_work_trail_long" v="[EN] Show/hide spray and harvest trail dots in-world and on the minimap" eh="25c58f0e" />
+    <e k="sf_show_sprayer_panel_short" v="[EN] Sprayer Panel" eh="0e8b3487" />
+    <e k="sf_show_sprayer_panel_long" v="[EN] Show/hide the sprayer nutrient info panel when driving a sprayer" eh="125a6e27" />
+    <e k="sf_show_harvester_panel_short" v="[EN] Harvester Panel" eh="e4fd0c77" />
+    <e k="sf_show_harvester_panel_long" v="[EN] Show/hide the harvester grain tank status panel when harvesting" eh="977f32e8" />
     <e k="sf_hud_position_short" v="Posição HUD" eh="5ac371f2" />
     <e k="sf_hud_position_long" v="Escolha onde o HUD de info de solo aparece na tela" eh="d7b9c109" />
     <e k="sf_hud_pos_1" v="Canto superior direito" eh="5f9f6784" />
@@ -187,9 +187,9 @@
     <e k="sf_hud_title" v="MONITOR DE SOLO" eh="f8cda642" />
     <e k="sf_hud_field" v="Campo %d" eh="08988997" />
     <e k="sf_hud_noField" v="Vá até um campo" eh="62c55e9e" />
-    <e k="sf_sprayer_no_field" v="Dirija para um campo" />
+    <e k="sf_sprayer_no_field" v="[EN] Drive onto a field" eh="f238e4b8" />
     <e k="sf_hud_fallow" v="Pousio" eh="eafe5913" />
-    <e k="sf_hud_weeds" v="Ervas Daninhas Risk" eh="324181de" />
+    <e k="sf_hud_weeds" v="[EN] Weed Risk" eh="0ec7e90d" />
     <e k="sf_hud_pests" v="Pragas" eh="2fed5101" />
     <e k="sf_hud_disease" v="Doença" eh="e7067a8c" />
     <e k="sf_hud_protected" v="(protegido)" eh="8273211e" />
@@ -352,7 +352,7 @@
     <e k="sf_map_layer_pest" v="Pressão de Pragas" eh="18a7c2be" />
     <e k="sf_map_layer_disease" v="Pressão de Doenças" eh="2b805cc9" />
     <e k="sf_map_layer_compaction" v="Compactação" eh="19cf3ee7" />
-    <e k="sf_map_layer_yield" v="Rendimento" />
+    <e k="sf_map_layer_yield" v="[EN] Yield" eh="97345487" />
     <e k="sf_map_overlay_cycle" v="Shift+M: Ciclar Camada de Solo" eh="032fdac7" />
     <e k="sf_map_page_title" v="Camadas de Solo" eh="04a675fb" />
     <e k="sf_map_sidebar_header" v="Camada do Mapa de Solo" eh="81332549" />
@@ -524,7 +524,7 @@
     <e k="sf_hud_pass_coverage" v="[EN] Pass: %d%% (%s)" eh="531a10ef" />
     <e k="sf_hud_compaction" v="Compactação: %d%%" eh="bef3a4f5" />
     <e k="sf_hud_yield_eff" v="[EN] Yield: %d%%" eh="7b49cf24" />
-    <e k="sf_hud_amend_burn" v="Queimadura: -%d%%" />
+    <e k="sf_hud_amend_burn" v="[EN] Burn penalty: -%d%%" eh="34059aac" />
 
     <!-- ======================================================
          SPRAYER RATE HUD
@@ -607,7 +607,9 @@
     <e k="sf_desc_fertilizerCosts" v="Custo real no jogo para fertilizantes" eh="1c197c9f" />
     <e k="sf_desc_showNotifications" v="Notificações de status do solo no jogo" eh="7f275b4b" />
     <e k="sf_desc_showHUD" v="Mostrar a sobreposição do HUD de solo" eh="fa8b9224" />
-    <e k="sf_desc_showWorkTrail" v="Show spray and harvest pass trail overlays" />
+    <e k="sf_desc_showWorkTrail" v="[EN] Show spray and harvest pass trail overlays" eh="3a3da614" />
+		<e k="sf_desc_showSprayerInfoPanel" v="[EN] Show the sprayer nutrient panel when driving a sprayer" eh="016b4402" />
+		<e k="sf_desc_showHarvesterPanel" v="[EN] Show the harvester grain tank status panel when harvesting" eh="b16a1726" />
     <e k="sf_desc_hudPosition" v="Posição de ancoragem predefinida do HUD" eh="98c8bcea" />
     <e k="sf_desc_hudColorTheme" v="Paleta de cores para elementos do HUD" eh="97271907" />
     <e k="sf_desc_hudFontSize" v="Tamanho do texto do HUD" eh="48a6fc15" />
@@ -735,6 +737,7 @@
     <e k="sf_variable_rate_short"          v="Variable Rate" />
     <e k="sf_variable_rate_long"           v="Enable or disable Variable Rate Application based on soil deficits" />
     <e k="sf_desc_seeAndSprayEnabled"      v="Suppress boom sections over areas that do not need spraying" />
+    <e k="sf_config_seeSpray"              v="See &amp; Spray" />
     <e k="sf_config_seeSprayWeed"          v="See &amp; Spray: Weed" />
     <e k="sf_config_seeSprayPest"          v="See &amp; Spray: Pest" />
     <e k="sf_config_seeSprayDisease"       v="See &amp; Spray: Disease" />    <e k="sf_desc_variableRateEnabled"     v="Adjust application rate per section based on soil nutrient deficits" />
@@ -990,7 +993,7 @@
     <e k="sf_guide_tab_5" v="[EN] F.A.Q." eh="a922ea47" />
     <e k="sf_report_fields_tracked"   v="Fields Tracked:" />
     <e k="sf_report_rotation_bonus"   v="Rotation Bonus" />
-    <e k="sf_report_rotation_fatigue" v="Fatigue: same crop" />
+    <e k="sf_report_rotation_fatigue" v="[EN] Fatigue: same crop" eh="7b173595" />
     <e k="sf_report_rotation_ok"      v="Rotation: OK" />
     <e k="sf_report_rec_optimal"      v="Soil Health: Optimal" />
     <e k="sf_report_rec_good"         v="Good" />

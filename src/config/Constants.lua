@@ -1141,6 +1141,11 @@ SoilConstants.SEE_AND_SPRAY = {
     PEST_THRESHOLD    = 10,   -- suppress if cell pestPressure    < 10
     DISEASE_THRESHOLD = 10,   -- suppress if cell diseasePressure < 10
     WEED_THRESHOLD    = 15,   -- suppress if cell weedPressure    < 15 (weeds need more to justify spraying)
+    -- #678 variable-rate See & Spray: pressure (0-100) at or above which a section
+    -- runs at full rate. Between the suppress threshold and this value the section
+    -- ramps from MIN_RATE up to MAX_RATE. Only used when per-vehicle Variable Rate
+    -- is enabled; otherwise See & Spray stays hard on/off.
+    FULL_RATE_PRESSURE = 50,
 }
 
 -- ========================================

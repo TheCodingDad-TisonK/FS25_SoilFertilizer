@@ -1344,6 +1344,19 @@ function HookManager:installSeeAndSprayHook()
             local zone    = SoilConstants.ZONE
             local tips    = sprayerSelf._sfSectionTip
 
+            -- #678: when per-vehicle Variable Rate is on, See & Spray runs graduated —
+            -- each non-skipped section gets a rate from its cell's pest/disease/weed
+            -- pressure instead of hard on/off. The Variable Rate hook (which runs next)
+            -- is taught to leave these rates alone for See & Spray products. When Variable
+            -- Rate is off, behaviour is unchanged (pure on/off section suppression).
+            local sensorMgr  = sfm.sensorManager
+            local vehicleId  = sprayerSelf.id
+            local variableOn = sensorMgr ~= nil and vehicleId ~= nil
+                and (sfm.settings == nil or sfm.settings.variableRateEnabled ~= false)
+                and sensorMgr:isVariableRateEnabled(vehicleId)
+            local vrCfg = SoilConstants.VARIABLE_RATE
+            if variableOn then sensorMgr:clearSectionRates(vehicleId) end
+
             for i, section in ipairs(vww.sections) do
                 if section.isActive then
                     local tip = tips and tips[i]
@@ -1391,6 +1404,28 @@ function HookManager:installSeeAndSprayHook()
                                 section.isActive = false
                                 if not sprayerSelf._sfSuppressedSections then sprayerSelf._sfSuppressedSections = {} end
                                 sprayerSelf._sfSuppressedSections[i] = true
+                            elseif variableOn then
+                                -- #678: graduated rate from the active target's pressure.
+                                -- Maps [threshold .. FULL_RATE_PRESSURE] → [MIN_RATE .. MAX_RATE],
+                                -- then eases toward it (same 0.6/0.4 blend the NPK hook uses).
+                                local pressure, thr
+                                if pestSS then
+                                    pressure, thr = cellPest, ssCfg.PEST_THRESHOLD
+                                elseif diseaseSS then
+                                    pressure, thr = cellDisease, ssCfg.DISEASE_THRESHOLD
+                                else
+                                    pressure, thr = cellWeed, ssCfg.WEED_THRESHOLD
+                                end
+                                local full = ssCfg.FULL_RATE_PRESSURE or 50
+                                local frac = (full > thr) and ((pressure - thr) / (full - thr)) or 1
+                                -- Weeds pass a ground-truth check but cellWeed can be stale/0;
+                                -- never under-treat a section the check said needs spraying.
+                                if weedSS and (pressure or 0) <= 0 then frac = 1 end
+                                if frac < 0 then frac = 0 elseif frac > 1 then frac = 1 end
+                                local rate = vrCfg.MIN_RATE + frac * (vrCfg.MAX_RATE - vrCfg.MIN_RATE)
+                                local prev = sensorMgr:getSectionRate(vehicleId, section) or rate
+                                rate = prev * 0.6 + rate * 0.4
+                                sensorMgr:setSectionRate(vehicleId, section, rate)
                             end
                         end
                     end
@@ -1446,6 +1481,17 @@ function HookManager:installVariableRateHook()
         end
     end
 
+    -- #678: See & Spray products (pest/disease/weed) are owned by the See & Spray hook,
+    -- which runs before this one and sets per-section rates from pest/disease/weed
+    -- pressure. Build the name set so this hook leaves those rates untouched.
+    local ssNames = {}
+    local ppC = SoilConstants.PEST_PRESSURE
+    if ppC and ppC.INSECTICIDE_TYPES then for n in pairs(ppC.INSECTICIDE_TYPES) do ssNames[n] = true end end
+    local dpC = SoilConstants.DISEASE_PRESSURE
+    if dpC and dpC.FUNGICIDE_TYPES then for n in pairs(dpC.FUNGICIDE_TYPES) do ssNames[n] = true end end
+    local wpC = SoilConstants.WEED_PRESSURE
+    if wpC and wpC.HERBICIDE_TYPES then for n in pairs(wpC.HERBICIDE_TYPES) do ssNames[n] = true end end
+
     local hookMgrRef = self
 
     local origStart = Sprayer.onStartWorkAreaProcessing
@@ -1478,6 +1524,11 @@ function HookManager:installVariableRateHook()
                 return
             end
             local ft = g_fillTypeManager and g_fillTypeManager:getFillTypeByIndex(fillTypeIndex)
+            -- #678: leave See & Spray rates intact — the See & Spray hook already set them
+            -- this tick from pest/disease/weed pressure. Clearing here would wipe them.
+            if ft and ssNames[ft.name] then
+                return
+            end
             if not ft or (not npkFerts[ft.name] and not omFerts[ft.name]) then
                 sensorMgr:clearSectionRates(vehicleId)
                 return
