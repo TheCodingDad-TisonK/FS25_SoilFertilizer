@@ -2420,7 +2420,9 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
         local cp = SoilConstants.COMPACTION
         if (field.compaction or 0) > 0 then
             local tunComp = getTuningMult(self.settings, "tuningCompactionDecay", "ZERO_MULT")
-            field.compaction = math.max(0, field.compaction - cp.NATURAL_DECAY_PER_DAY * timeFactor * tunComp)
+            -- Route through _applyCompactionDecay so the recovery sticks: shaving
+            -- field.compaction alone was wiped by the next per-cell rewrite.
+            self:_applyCompactionDecay(field, cp.NATURAL_DECAY_PER_DAY * timeFactor * tunComp)
         end
     end
 
@@ -2510,8 +2512,10 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
         local taprootMult = sown and cp.TAPROOT_CROPS and cp.TAPROOT_CROPS[sown] or nil
         if taprootMult then
             local tunComp = getTuningMult(self.settings, "tuningCompactionDecay", "ZERO_MULT")
-            field.compaction = math.max(0,
-                field.compaction - cp.TAPROOT_DECOMPACT_PER_DAY * taprootMult * timeFactor * tunComp)
+            -- Same persistence fix as natural decay: the bio-drilling gain must land on
+            -- compactionSum/zoneData or the next subsoiler/wheel pass erases it.
+            self:_applyCompactionDecay(field,
+                cp.TAPROOT_DECOMPACT_PER_DAY * taprootMult * timeFactor * tunComp)
         end
     end
 
@@ -4693,6 +4697,43 @@ function SoilFertilitySystem:onSubsoilerPass(farmlandId, worldX, worldZ, reliefP
 
     SoilLogger.debug("Subsoiler: field=%d cell=%s  %.0f→%.0f%%  avg=%.1f%%",
         farmlandId, cellKey, prev, newVal, field.compaction)
+end
+
+--- Apply a field-average compaction reduction (natural decay, taproot bio-drilling) in a
+--- way that PERSISTS through later per-cell rewrites. The displayed average is DERIVED as
+--- compactionSum / compactionTotalCells, so shaving only field.compaction (as the daily
+--- decay used to) was silently discarded the instant onCompaction / onSubsoilerPass
+--- re-derived the average from the untouched compactionSum. That was the "radish
+--- decompaction and natural recovery reset on the first subsoiler or wheel pass" report
+--- (nemrod153, Discord). Fading compactionSum AND every zoneData cell by the same ratio
+--- keeps the accounting total, the
+--- per-cell store (read back as `prev` by onCompaction/onSubsoilerPass) and the average
+--- mutually consistent, and preserves the existing points-per-day tuning exactly
+--- (newAvg = oldAvg - reductionPoints).
+---@param field table  fieldData entry
+---@param reductionPoints number  points to shave off the field-average compaction
+---@return boolean changed
+function SoilFertilitySystem:_applyCompactionDecay(field, reductionPoints)
+    if not field or not reductionPoints or reductionPoints <= 0 then return false end
+    local oldAvg = field.compaction or 0
+    if oldAvg <= 0 then return false end
+
+    local newAvg = math.max(0, oldAvg - reductionPoints)
+    local ratio  = newAvg / oldAvg   -- oldAvg > 0 guaranteed above
+
+    -- Fade the authoritative accounting total so the derived average survives a later
+    -- per-cell rewrite, and fade each per-cell value so relief/build-up math (which reads
+    -- cell.compaction as `prev`) stays in lockstep with the faded sum.
+    field.compactionSum = (field.compactionSum or 0) * ratio
+    if field.zoneData then
+        for _, cell in pairs(field.zoneData) do
+            if cell.compaction and cell.compaction > 0 then
+                cell.compaction = cell.compaction * ratio
+            end
+        end
+    end
+    field.compaction = newAvg
+    return true
 end
 
 --- FieldSentry FR3 (#654): apply a one-shot, lightweight nutrient catch-up to a field's
