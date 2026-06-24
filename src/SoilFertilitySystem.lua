@@ -244,6 +244,17 @@ function SoilFertilitySystem:_yieldModifierFromNutrients(field, cropName, nVal, 
             plog("Nutrient penalty field %d (%s/%s): N=%.0f P=%.0f K=%.0f → -%.0f%%",
                 logFieldId, cropName, tier, nVal, pVal, kVal, nutrientPenalty * 100)
         end
+
+        -- Organic matter influence (#695): rich humus gives a small yield bonus, depleted
+        -- soil a penalty. Shared with the mower forage path via _omYieldModifier so hay and
+        -- grain respond to soil health identically. May push the modifier slightly above 1.0
+        -- (a genuine bonus on well-built soil); the hopper hook handles that fine.
+        local omMod = self:_omYieldModifier(field)
+        if omMod ~= 1.0 then
+            modifier = modifier * omMod
+            plog("OM modifier field %d: OM=%.1f → %+.0f%%", logFieldId,
+                 field.organicMatter or SoilConstants.FIELD_DEFAULTS.organicMatter, (omMod - 1.0) * 100)
+        end
     end
 
     -- Weed pressure modifier (skip for grassland; skip when herbicide is active)
@@ -301,6 +312,58 @@ function SoilFertilitySystem:_yieldModifierFromNutrients(field, cropName, nVal, 
         plog("Amendment burn penalty field %d: -%.0f%%", logFieldId, field.amendBurnPenalty * 100)
     end
 
+    return modifier
+end
+
+--- Organic-matter yield factor (#695). Shared by the row-crop yield modifier and the
+--- mower forage modifier (#696) so hay and grain respond to soil health identically.
+--- Returns a multiplier that may sit slightly above 1.0 on well-built soil.
+---@param field table
+---@return number
+function SoilFertilitySystem:_omYieldModifier(field)
+    local omc = SoilConstants.YIELD_SENSITIVITY and SoilConstants.YIELD_SENSITIVITY.OM_YIELD
+    if not omc then return 1.0 end
+    local om = (field and field.organicMatter) or SoilConstants.FIELD_DEFAULTS.organicMatter
+    if om >= omc.BONUS_THRESHOLD then
+        return 1.0 + omc.BONUS_MAX
+    elseif om >= omc.HEALTHY_LOW then
+        return 1.0                                            -- healthy baseline band
+    elseif om >= omc.PENALTY_MID then
+        local f = (omc.HEALTHY_LOW - om) / (omc.HEALTHY_LOW - omc.PENALTY_MID)
+        return 1.0 - f * omc.PENALTY_MID_MAX                  -- 0 → -10%
+    else
+        local f = math.min(1.0, (omc.PENALTY_MID - om) / omc.PENALTY_MID)
+        return 1.0 - (omc.PENALTY_MID_MAX + f * (omc.PENALTY_MAX - omc.PENALTY_MID_MAX))  -- -10% → -25%
+    end
+end
+
+--- Forage yield modifier for windrow-drop mowers (#696). Forage crops are gated out of
+--- _yieldModifierFromNutrients via NON_CROP_NAMES (correct — no yield % score for hay), so
+--- the mower path needs its own nutrient read. Uses the "tolerant" tier (matching
+--- alfalfa/luzerne/clover) plus the shared OM factor. Weed/pest/disease are intentionally
+--- excluded — forage quality is not tracked per field.
+---@param fieldId number
+---@return number modifier  Multiplier applied to windrow liters (≤ ~1.05)
+function SoilFertilitySystem:computeMowerYieldModifier(fieldId)
+    if not self.settings.enabled or not self.settings.nutrientCycles then return 1.0 end
+    local field = self.fieldData[fieldId]
+    if not field then return 1.0 end
+    local ys = SoilConstants.YIELD_SENSITIVITY
+    if not ys then return 1.0 end
+
+    local modifier = 1.0
+    local tierData = ys.TIERS and ys.TIERS["tolerant"]
+    if tierData then
+        local thresh = ys.OPTIMAL_THRESHOLD
+        local nDef = math.max(0, thresh - (field.nitrogen   or 0)) / thresh
+        local pDef = math.max(0, thresh - (field.phosphorus or 0)) / thresh
+        local kDef = math.max(0, thresh - (field.potassium  or 0)) / thresh
+        local penalty = math.min(ys.MAX_PENALTY, ((nDef + pDef + kDef) / 3) * tierData.scale)
+        modifier = modifier * (1.0 - penalty)
+    end
+
+    -- Soil health affects hay tonnage the same way it affects grain.
+    modifier = modifier * self:_omYieldModifier(field)
     return modifier
 end
 
@@ -789,12 +852,18 @@ function SoilFertilitySystem:onPlowing(fieldId, area, isAlsoSprayer, cropBiomass
     -- Tilling mixes the soil and ends the crop — void any pending amendment burn.
     if self:clearAmendmentBurn(field, fieldId, "plowing") then changed = true end
 
-    -- Plowing benefits 1 & 2: OM increase and pH normalization (only if plowingBonus enabled)
+    -- Plowing effects 1 & 2: OM oxidation loss and pH normalization (only if plowingBonus enabled)
     if self.settings.plowingBonus then
+        -- Deep inversion exposes buried humus to air, oxidising it — plowing COSTS organic
+        -- matter rather than adding it (#695, reversed from the old +0.5/pass bonus). Residue
+        -- incorporation below (gated separately) can offset this when straw/green matter is
+        -- actually worked in, so a residue-rich plow can still net positive.
+        local omDyn    = SoilConstants.OM_DYNAMICS
+        local omLoss   = (omDyn and omDyn.PLOW_OXIDATION_LOSS or 0) * factor
+        local omFloor  = (omDyn and omDyn.DECAY_FLOOR) or SoilConstants.NUTRIENT_LIMITS.MIN
         local omBefore = field.organicMatter or SoilConstants.FIELD_DEFAULTS.organicMatter
-        local omIncrease = 0.5 * factor
-        local omAfter = math.min(omBefore + omIncrease, SoilConstants.NUTRIENT_LIMITS.ORGANIC_MATTER_MAX)
-        if omAfter > omBefore then
+        local omAfter  = math.max(omFloor, omBefore - omLoss)
+        if omAfter < omBefore then
             field.organicMatter = omAfter
             changed = true
         end
@@ -1356,8 +1425,21 @@ function SoilFertilitySystem:applyWeedMapState(fieldId, targetState)
                 weedState = replacement
                 self:log("[WeedMap] Using replacement state %d", weedState)
             else
-                self:log("[WeedMap] No replacement for state %d — using fallback state %d", currentState, weedState)
+                -- No live weeds to wither here (state 0, or already withered/dying). Painting the
+                -- withered state across the whole field polygon would fabricate "burnt weed"
+                -- textures on a clean field — and that fake coverage bakes into the weed density
+                -- map, so it reappears on every save/reload even at 0% pressure (#698). Skip:
+                -- leave the weed map untouched. There is nothing to brown.
+                self:log("[WeedMap] SKIP: no live weeds to wither (state %s) on field %d — not painting",
+                    tostring(currentState), fieldId)
+                return
             end
+        else
+            -- Replacement table unavailable: we cannot tell clean ground from weedy, so do NOT
+            -- blanket-paint the withered state onto a possibly-clean field (avoids the #698
+            -- fake-coverage bug). Better to skip the cosmetic browning than fabricate weeds.
+            self:log("[WeedMap] SKIP: herbicide replacement table unavailable — not painting")
+            return
         end
     end
 
@@ -2437,6 +2519,18 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
         return
     end
 
+    -- ── Passive organic-matter oxidation (#695) ──────────────────────────────
+    -- Humus oxidizes continuously; without organic returns OM slowly declines. Fallow
+    -- recovery (below) adds it back so an idle field still nets positive (+0.005/day),
+    -- while a field under active cropping with no organic inputs loses ground over seasons.
+    -- Floored so passive decay alone never grinds soil down to nothing. Meadows are exempt
+    -- (the grassland profile above returned already, and only ever builds OM).
+    local omDyn = SoilConstants.OM_DYNAMICS
+    if omDyn and (omDyn.DAILY_DECAY or 0) > 0 then
+        local om = field.organicMatter or SoilConstants.FIELD_DEFAULTS.organicMatter
+        field.organicMatter = math.max(omDyn.DECAY_FLOOR or 0, om - omDyn.DAILY_DECAY * timeFactor)
+    end
+
     -- ── Fallow recovery ──────────────────────────────────────────────────────
     -- Fallow threshold also scales so it represents the same 'agricultural time' (months)
     local daysSinceFallow = currentDay - (field.lastHarvest or 0)
@@ -2950,8 +3044,14 @@ function SoilFertilitySystem:updateFieldNutrients(fieldId, fruitTypeIndex, harve
         end
     end
 
-    -- Step 3a: Crop rotation fatigue — same crop two seasons running depletes more
-    if self.settings.cropRotation and field.lastCrop2 and field.lastCrop2 == fruitDesc.name then
+    -- Step 3a: Crop rotation fatigue — same crop two seasons running depletes more.
+    -- Perennial forages (alfalfa, grass, ryegrass…) are cut several times per season and
+    -- legitimately stay on the same field for years, so they must NOT trip monoculture
+    -- fatigue — a 3rd cut is peak management, not a tired field (#694).
+    local isPerennialForage = SoilConstants.PERENNIAL_FORAGE_NAMES
+                              and SoilConstants.PERENNIAL_FORAGE_NAMES[name]
+    if self.settings.cropRotation and not isPerennialForage
+       and field.lastCrop2 and field.lastCrop2 == fruitDesc.name then
         factor = factor * SoilConstants.CROP_ROTATION.FATIGUE_MULTIPLIER
         self:log("Rotation fatigue on field %d (%s harvested twice) — factor ×%.2f",
             fieldId, fruitDesc.name, SoilConstants.CROP_ROTATION.FATIGUE_MULTIPLIER)
@@ -4090,9 +4190,19 @@ function SoilFertilitySystem:getFieldInfo(fieldId, x, z)
         local cr      = SoilConstants.CROP_ROTATION
         local crop1   = string.lower(field.lastCrop)
         local crop2   = string.lower(field.lastCrop2)
-        if cr.LEGUMES[crop1] and not cr.LEGUMES[crop2] then
+        local pf      = SoilConstants.PERENNIAL_FORAGE_NAMES or {}
+        if pf[crop1] then
+            -- Multi-cut perennial forage: the same crop standing across several cuts is
+            -- normal management, not monoculture fatigue (#694). Only flag a bonus if the
+            -- player genuinely rotated INTO it from a non-legume, non-forage crop.
+            if cr.LEGUMES[crop1] and not cr.LEGUMES[crop2] and not pf[crop2] then
+                rotationStatus = "Bonus"
+            else
+                rotationStatus = "OK"
+            end
+        elseif cr.LEGUMES[crop1] and not cr.LEGUMES[crop2] then
             rotationStatus = "Bonus"
-        elseif field.lastCrop == field.lastCrop2 then
+        elseif crop1 == crop2 then
             rotationStatus = "Fatigue"
         else
             rotationStatus = "OK"
@@ -4147,11 +4257,12 @@ function SoilFertilitySystem:getFieldInfo(fieldId, x, z)
     -- FieldSentry (#651) status, surfaced so any readout (field detail dialog, HUD,
     -- map overlay) can show that a slept field's soil is frozen by intent, not broken.
     -- isFieldSimDisabled is allocation-free, so this stays cheap for per-frame callers.
-    local fsDisabled, fsReason, fsReasonKey = false, "active", nil
+    local fsDisabled, fsReason, fsReasonKey, fsMeadow = false, "active", nil, false
     if FieldSentry_API then
-        local d, r = FieldSentry_API.isFieldSimDisabled(fieldId)
+        local d, r, meadow = FieldSentry_API.isFieldSimDisabled(fieldId)
         fsDisabled = d
         fsReason   = FieldSentry_Core.reasonName(r)
+        fsMeadow   = meadow == true   -- meadow fields still simulate; surfaced for the monitor (#697)
         if FieldSentry_Core.reasonL10nKey then fsReasonKey = FieldSentry_Core.reasonL10nKey(r) end
     end
 
@@ -4161,6 +4272,7 @@ function SoilFertilitySystem:getFieldInfo(fieldId, x, z)
         simDisabled          = fsDisabled,
         simDisabledReason    = fsReason,
         simDisabledReasonKey = fsReasonKey,
+        isMeadow             = fsMeadow,
         nitrogen = { value = math.floor(n), status = nutrientStatus(n, "nitrogen", cropTargets) },
         phosphorus = { value = math.floor(p), status = nutrientStatus(p, "phosphorus", cropTargets) },
         potassium = { value = math.floor(k), status = nutrientStatus(k, "potassium", cropTargets) },
