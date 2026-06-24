@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.4.4.1]
+
+### Added
+- **Grassland compaction relief (#680).** Pasture compaction can now be eased without plowing and reseeding. Two paths: (1) any grassland weeder/aerator (engine `isGrasslandWeeder` — sward renovators, aerators) relieves a partial amount of compaction per pass while the engine preserves the sward; (2) deep grassland sward-lifters that are built as Cultivator+isSubsoiler (e.g. the Latapia 5P1H) get full subsoiler relief AND have their sward preserved — SF snapshots the standing grass (fruit + growth state) before the pass and restores it afterward via `FieldUpdateTask:setFruit`, so the deep tool decompacts the pasture without a reseed. Deep tools are matched by `configFileName` against `COMPACTION.GRASSLAND_DEEP_TOOLS` (seeded with `latapia`, extend freely). The whole-field restore is debounced per field. *Experimental — wants in-game validation for visual/edge cases.*
+
+### Fixed
+- **Subsoilers now fully clear compaction.** The deep-tillage relief used `isSubsoiler and nil or PLOW_RELIEF`, which in Lua always evaluates to `PLOW_RELIEF` (`true and nil` → `nil`, then `nil or X` → `X`). Subsoilers had therefore been relieving only the small partial amount (3.0) instead of the full `SUBSOILER_REDUCTION` (15.0) since the #687 compaction work. Replaced with an explicit branch.
+
 ## [2.4.4.0]
 
 ### Added

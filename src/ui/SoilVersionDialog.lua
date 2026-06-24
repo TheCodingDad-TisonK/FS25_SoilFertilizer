@@ -24,6 +24,9 @@ SoilVersionDialog.INSTANCE = nil
 -- Max 11 lines are visible in the box; if more exist we stop on a bullet boundary and add a "full changelog on GitHub" note.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
+    "- Grassland weeders/aerators now ease pasture compaction without reseeding",
+    "- Deep grassland sward-lifters (e.g. Latapia) decompact grass and keep the sward",
+    "- Fixed: subsoilers now fully clear compaction (were only partially relieving it)",
     "- Alfalfa, grass & clover no longer get a false 'tired field' penalty on later cuts",
     "- Organic matter now affects yield: rich soil gives a boost, poor soil a penalty",
     "- Organic matter builds more slowly; ploughing now slowly burns it off",

@@ -1454,6 +1454,54 @@ function SoilFertilitySystem:applyWeedMapState(fieldId, targetState)
     self:log("[WeedMap] FieldUpdateTask result: ok=%s err=%s", tostring(ok), tostring(err))
 end
 
+--- Restore a grass sward over a whole field after a grass-preserving deep tool worked it (#680).
+--- Deep grassland sward-lifters (Latapia 5P1H, etc.) are built as Cultivator+isSubsoiler, so the
+--- engine destroys the grass on the pass. This re-applies the snapshotted grass fruit + growth
+--- state so the player decompacts pasture WITHOUT a reseed. Debounced per field because a
+--- whole-field FieldUpdateTask is not free. Server-only (mirrors applyWeedMapState).
+---@param farmlandId number
+---@param fruitIndex number   Grass/forage fruit type to restore (sampled pre-pass)
+---@param growthState number  Growth state to restore it to (sampled pre-pass)
+function SoilFertilitySystem:restoreGrassSward(farmlandId, fruitIndex, growthState)
+    if not g_server then return end
+    if not fruitIndex or fruitIndex <= 0 then return end
+    if FieldUpdateTask == nil then return end
+
+    -- Debounce: a whole-field density write is expensive, so collapse the per-tick calls
+    -- while the tool works into one restore every GRASS_RESTORE_DEBOUNCE_MS per field.
+    local debounceMs = (SoilConstants.COMPACTION and SoilConstants.COMPACTION.GRASS_RESTORE_DEBOUNCE_MS) or 1000
+    local nowMs = (g_currentMission and g_currentMission.time) or 0
+    self._grassRestoreLast = self._grassRestoreLast or {}
+    if (nowMs - (self._grassRestoreLast[farmlandId] or -math.huge)) < debounceMs then return end
+    self._grassRestoreLast[farmlandId] = nowMs
+
+    -- Find the field object by farmland id (same search applyWeedMapState uses).
+    local fsField = nil
+    if g_fieldManager and g_fieldManager.fields then
+        fsField = g_fieldManager.fields[farmlandId]
+        if not fsField or not fsField.farmland then
+            for _, f in pairs(g_fieldManager.fields) do
+                if f and f.farmland and f.farmland.id == farmlandId then fsField = f; break end
+            end
+        end
+    end
+    if not fsField then return end
+
+    local ok, err = pcall(function()
+        local task = FieldUpdateTask.new()
+        task:setField(fsField)
+        task:setArea(fsField:getDensityMapPolygon())
+        task:setFruit(fruitIndex, growthState)
+        task:enqueue(true)
+    end)
+    if ok then
+        self:log("[Sward] Restored grass (fruit=%d gs=%d) on field %d after deep grassland pass",
+            fruitIndex, growthState, farmlandId)
+    else
+        self:warning("[Sward] restore failed on field %d: %s", farmlandId, tostring(err))
+    end
+end
+
 --- Called when insecticide is applied to a field.
 ---@param fieldId number
 ---@param effectiveness number 0.0-1.0 insecticide effectiveness multiplier
