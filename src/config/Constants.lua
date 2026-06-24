@@ -1179,6 +1179,17 @@ SoilConstants.COMPACTION = {
                                        -- topsoil it inverts; the deep pan stays, so it relieves far
                                        -- less than a subsoiler. Keeps the subsoiler meaningful and
                                        -- stops routine ploughing from erasing compaction (#687).
+    -- Grassland compaction relief (#680). A grassland weeder (isGrasslandWeeder: aerators,
+    -- sward renovators) works the sward WITHOUT destroying it, so it can ease pasture
+    -- compaction without a reseed — but only a partial amount (it is not a deep subsoiler).
+    GRASSLAND_RELIEF          = 3.0,   -- points removed per generic grassland-weeder pass
+    -- Deep grassland sward-lifters (e.g. Latapia 5P1H) ARE built as Cultivator+isSubsoiler,
+    -- so they already get the full SUBSOILER_REDUCTION — but as cultivators they destroy the
+    -- grass. Tools whose configFileName matches one of these lowercase substrings are treated
+    -- as grass-preserving: SF snapshots the sward before the pass and restores it after, so the
+    -- deep tool decompacts without forcing a reseed. Extend freely as more mods are confirmed.
+    GRASSLAND_DEEP_TOOLS      = { "latapia" },
+    GRASS_RESTORE_DEBOUNCE_MS = 1000,  -- min gap between whole-field sward restores per field
     MAX_COMPACTION            = 100.0,
     NUTRIENT_PENALTY_MAX      = 0.20,  -- max 20% extra nutrient extraction at max compaction
     -- Driving-based compaction: any heavy vehicle moving across a field compacts the

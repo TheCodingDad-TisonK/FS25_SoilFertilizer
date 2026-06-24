@@ -3408,7 +3408,13 @@ function HookManager:installPlowingHook()
                         local isSubsoiler = (cultivatorSelf.spec_cultivator and
                                             cultivatorSelf.spec_cultivator.isSubsoiler) or false
                         if isSubsoiler or isPlowingTool then
-                            local relief = isSubsoiler and nil or SoilConstants.COMPACTION.PLOW_RELIEF
+                            -- A subsoiler clears the deep pan (FULL relief = nil → SUBSOILER_REDUCTION);
+                            -- a plow-action tool only loosens topsoil (partial PLOW_RELIEF). NOTE: the
+                            -- old `isSubsoiler and nil or PLOW_RELIEF` idiom always returned PLOW_RELIEF
+                            -- (Lua: `true and nil` → nil → `nil or X` → X), so subsoilers were silently
+                            -- getting partial relief since #687. Use an explicit branch (#680).
+                            local relief = SoilConstants.COMPACTION.PLOW_RELIEF
+                            if isSubsoiler then relief = nil end
                             SoilLogger.debug(
                                 "Compaction: deep-tillage relief on farmland=%d veh=%d pos=(%.1f,%.1f) subsoiler=%s plow=%s relief=%s",
                                 farmlandId, cultivatorSelf.id or 0, x, z,
@@ -3416,6 +3422,16 @@ function HookManager:installPlowingHook()
                             g_SoilFertilityManager.soilSystem:onSubsoilerPass(farmlandId, x, z, relief)
                         end
                         -- shallow cultivator: neutral, no compaction change
+                    end
+
+                    -- #680: a flagged deep grassland sward-lifter (e.g. Latapia 5P1H) is built
+                    -- as a cultivator, so the pass above already destroyed the grass and the
+                    -- subsoiler branch already gave it full compaction relief. Restore the
+                    -- snapshotted sward (debounced inside restoreGrassSward) so the player
+                    -- decompacts the pasture without having to reseed it.
+                    local sward = cultivatorSelf._sfGrassRestore
+                    if sward and g_SoilFertilityManager.settings.compactionEnabled then
+                        g_SoilFertilityManager.soilSystem:restoreGrassSward(farmlandId, sward.fruit, sward.growth)
                     end
                 end
             end)
@@ -3554,6 +3570,54 @@ function HookManager:sampleCropBiomassAt(worldX, worldZ)
     return factor
 end
 
+--- Is this vehicle a flagged deep grassland sward-lifter (#680)? Matched as lowercase
+--- substrings of configFileName against COMPACTION.GRASSLAND_DEEP_TOOLS. Cached per vehicle.
+--- These tools are Cultivator+isSubsoiler (they destroy grass), so SF preserves the sward
+--- for them (snapshot pre-pass, restore post-pass) rather than letting the pass force a reseed.
+---@param vehicle table
+---@return boolean
+function HookManager:isDeepGrasslandTool(vehicle)
+    if not vehicle then return false end
+    if vehicle._sfIsDeepGrasslandTool ~= nil then return vehicle._sfIsDeepGrasslandTool end
+    local result = false
+    local list = SoilConstants.COMPACTION and SoilConstants.COMPACTION.GRASSLAND_DEEP_TOOLS
+    local name = vehicle.configFileName
+    if list and name then
+        name = string.lower(name)
+        for _, pat in ipairs(list) do
+            if string.find(name, pat, 1, true) then result = true; break end
+        end
+    end
+    vehicle._sfIsDeepGrasslandTool = result
+    return result
+end
+
+--- Sample the standing GRASS/forage sward at a world position (#680), returning
+--- { fruit = index, growth = state } so a deep grassland tool's pass can be restored after
+--- it tills the sward. Returns nil for bare ground or any non-forage crop, so a grassland
+--- sward-lifter used on (say) a wheat field never resurrects that crop. Pcall-guarded.
+---@param worldX number
+---@param worldZ number
+---@return table|nil
+function HookManager:sampleGrassStateAt(worldX, worldZ)
+    if worldX == nil or worldZ == nil then return nil end
+    if FieldState == nil or FruitType == nil or g_fruitTypeManager == nil then return nil end
+    local ok, fs = pcall(function()
+        local s = FieldState.new()
+        s:update(worldX, worldZ)
+        return s
+    end)
+    if not ok or not fs then return nil end
+    local idx = fs.fruitTypeIndex
+    if not idx or idx == FruitType.UNKNOWN then return nil end
+    local fruitDesc = g_fruitTypeManager:getFruitTypeByIndex(idx)
+    if not fruitDesc then return nil end
+    local name = string.lower(fruitDesc.name or "")
+    local pf = SoilConstants.PERENNIAL_FORAGE_NAMES or {}
+    if not (pf[name] or name == "grass") then return nil end  -- only preserve grass/forage swards
+    return { fruit = idx, growth = fs.growthState or 0 }
+end
+
 --- Install an onStartWorkAreaProcessing probe on a tillage/mulch spec. It runs BEFORE
 --- the work-area functions clear the fruit, samples the crop biomass at the implement
 --- position, and stashes it on the vehicle as `_sfCropBiomass` for the matching end hook
@@ -3575,19 +3639,31 @@ function HookManager:installCropBiomassProbe(class, className)
         original,
         function(vehSelf, dt)
             if not vehSelf.isServer then return end
-            -- Only pay the FieldState query cost when the feature can actually use it.
-            if not g_SoilFertilityManager or
-               not g_SoilFertilityManager.settings or
-               not g_SoilFertilityManager.settings.enabled or
-               not g_SoilFertilityManager.settings.residueIncorporation then
-                vehSelf._sfCropBiomass = 0
-                return
-            end
+            vehSelf._sfCropBiomass  = 0
+            vehSelf._sfGrassRestore = nil
+            local mgr = g_SoilFertilityManager
+            if not mgr or not mgr.settings or not mgr.settings.enabled then return end
+
+            -- Two independent pre-tillage samples, each only paid for when its feature is on:
+            --   residueIncorporation -> crop biomass (#674 green manure)
+            --   compactionEnabled + a flagged deep grassland tool -> sward snapshot (#680)
+            local residueOn     = mgr.settings.residueIncorporation
+            local grassPreserve = mgr.settings.compactionEnabled and hookMgrRef:isDeepGrasslandTool(vehSelf)
+            if not residueOn and not grassPreserve then return end
+
             local node = vehSelf.rootNode
-            if not node then vehSelf._sfCropBiomass = 0; return end
+            if not node then return end
             local ok, x, _, z = pcall(getWorldTranslation, node)
-            if not ok or x == nil then vehSelf._sfCropBiomass = 0; return end
-            vehSelf._sfCropBiomass = hookMgrRef:sampleCropBiomassAt(x, z)
+            if not ok or x == nil then return end
+
+            if residueOn then
+                vehSelf._sfCropBiomass = hookMgrRef:sampleCropBiomassAt(x, z)
+            end
+            -- Snapshot the sward BEFORE this deep grassland tool tills it, so the end hook
+            -- can restore the grass and the player decompacts pasture without a reseed.
+            if grassPreserve then
+                vehSelf._sfGrassRestore = hookMgrRef:sampleGrassStateAt(x, z)
+            end
         end
     )
     self:register(class, "onStartWorkAreaProcessing", original, className .. ".onStartWorkAreaProcessing")
@@ -3677,17 +3753,25 @@ function HookManager:installWeederHook()
         function(weederSelf, dt, hasProcessed)
             -- Fast exit: no work areas were active this tick
             if not hasProcessed then return end
-            if not g_SoilFertilityManager or
-               not g_SoilFertilityManager.soilSystem or
-               not g_SoilFertilityManager.settings.enabled or
-               not g_SoilFertilityManager.settings.weedPressure then
-                return
-            end
+            local mgr = g_SoilFertilityManager
+            if not mgr or not mgr.soilSystem or not mgr.settings.enabled then return end
             if not weederSelf.isServer then return end
 
-            -- Confirm weeder ACTUALLY changed terrain (lastChangedArea).
             local spec = weederSelf.spec_weeder
             if not spec or not spec.workAreaParameters then return end
+
+            -- Two independent effects, each gated by its own setting:
+            --   weedPressure                              -> mechanical weed removal (existing)
+            --   compactionEnabled + isGrasslandWeeder     -> grassland compaction relief (#680).
+            -- A grassland weeder/aerator works the sward WITHOUT destroying it, so it can ease
+            -- pasture compaction without a reseed — the gap regular subsoilers can't fill (they
+            -- kill the grass). Deep flagged sward-lifters get full relief; generic ones partial.
+            local doWeed   = mgr.settings.weedPressure
+            local doRelief = mgr.settings.compactionEnabled and SoilConstants.COMPACTION
+                             and spec.isGrasslandWeeder == true
+            if not doWeed and not doRelief then return end
+
+            -- Confirm weeder ACTUALLY changed terrain (lastChangedArea).
             local statsArea = spec.workAreaParameters.lastChangedArea
             if not statsArea or statsArea <= 0 then return end
 
@@ -3699,12 +3783,23 @@ function HookManager:installWeederHook()
             local x, _, z = getWorldTranslation(weederSelf.rootNode)
             local success, errorMsg = pcall(function()
                 local farmlandId = hookMgrRef:getFieldIdAtWorldPosition(x, z)
-                SoilLogger.debug("[WeederHook] pos=(%.1f,%.1f) farmlandId=%s", x, z, tostring(farmlandId))
+                SoilLogger.debug("[WeederHook] pos=(%.1f,%.1f) farmlandId=%s grassland=%s",
+                    x, z, tostring(farmlandId), tostring(spec.isGrasslandWeeder))
                 if farmlandId and farmlandId > 0 then
-                    g_SoilFertilityManager.soilSystem._lastTillageX = x
-                    g_SoilFertilityManager.soilSystem._lastTillageZ = z
-                    g_SoilFertilityManager.soilSystem:onCultivation(farmlandId, areaHa)
-                    SoilLogger.debug("[WeederHook] Field %d: mechanical weed removal applied", farmlandId)
+                    mgr.soilSystem._lastTillageX = x
+                    mgr.soilSystem._lastTillageZ = z
+                    if doWeed then
+                        mgr.soilSystem:onCultivation(farmlandId, areaHa)
+                        SoilLogger.debug("[WeederHook] Field %d: mechanical weed removal applied", farmlandId)
+                    end
+                    if doRelief then
+                        -- Full relief for a flagged deep grassland sward-lifter, partial otherwise.
+                        local relief = SoilConstants.COMPACTION.GRASSLAND_RELIEF
+                        if hookMgrRef:isDeepGrasslandTool(weederSelf) then relief = nil end
+                        mgr.soilSystem:onSubsoilerPass(farmlandId, x, z, relief)
+                        SoilLogger.debug("[WeederHook] Field %d: grassland compaction relief (%s)",
+                            farmlandId, relief and "partial" or "full")
+                    end
                 end
             end)
 
