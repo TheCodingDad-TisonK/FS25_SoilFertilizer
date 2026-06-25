@@ -299,9 +299,15 @@ function SoilFertilitySystem:_yieldModifierFromNutrients(field, cropName, nVal, 
         elseif pressure < dp.MEDIUM then  penalty = dp.YIELD_PENALTY_MID
         elseif pressure < dp.HIGH then    penalty = dp.YIELD_PENALTY_HIGH
         else                              penalty = dp.YIELD_PENALTY_PEAK end
+        -- Scale the tier penalty by the named disease's severity (a -60% taro blight
+        -- bites far harder than a -15% mildew). 1.0 when no named disease is active.
+        if penalty > 0 and field.activeDisease and SoilDiseaseSystem then
+            penalty = math.min(0.85, penalty * (field.activeDiseaseSeverity or 1.0))
+        end
         if penalty > 0 then
             modifier = modifier * (1.0 - penalty)
-            plog("Disease penalty field %d: pressure=%.0f → -%.0f%%", logFieldId, pressure, penalty * 100)
+            plog("Disease penalty field %d: pressure=%.0f → -%.0f%% (%s)", logFieldId, pressure, penalty * 100,
+                tostring(field.activeDisease or "generic"))
         end
     end
 
@@ -1571,11 +1577,318 @@ function SoilFertilitySystem:onFungicideApplied(fieldId, effectiveness)
     self:log("[Fungicide] Field %d: disease pressure %.0f -> %.0f, protected for %d days",
         fieldId, before, field.diseasePressure, field.fungicideDaysLeft)
 
+    -- A generic fungicide pass clears the named infection once pressure drops low.
+    if (field.diseasePressure or 0) < (SoilConstants.DISEASE_PRESSURE.LOW or 20) * 0.5 then
+        field.activeDisease = nil
+        field.activeDiseaseSeverity = 1.0
+    end
+
     if g_server and g_currentMission and g_currentMission.missionDynamicInfo and g_currentMission.missionDynamicInfo.isMultiplayer then
         if SoilFieldUpdateEvent then
             g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
         end
     end
+end
+
+-- ============================================================================
+-- NAMED DISEASE & CHEMICAL LAYER (DiseaseSystem.lua-driven)
+-- ============================================================================
+
+--- Current in-game day (0 when the environment is not ready).
+---@return number
+function SoilFertilitySystem:_currentDay()
+    return (g_currentMission and g_currentMission.environment
+            and g_currentMission.environment.currentDay) or 0
+end
+
+--- Current season index (1=Spring 2=Summer 3=Fall 4=Winter), or nil if unavailable.
+---@return number|nil
+function SoilFertilitySystem:_currentSeason()
+    return (g_currentMission and g_currentMission.environment
+            and g_currentMission.environment.currentSeason) or nil
+end
+
+--- Locate the g_fieldManager field object for a farmland id (shared search pattern).
+---@param fieldId number farmland id
+---@return table|nil fsField
+function SoilFertilitySystem:_findFieldObject(fieldId)
+    if not (g_fieldManager and g_fieldManager.fields) then return nil end
+    local fsField = g_fieldManager.fields[fieldId]
+    if fsField and fsField.farmland and fsField.farmland.id == fieldId then return fsField end
+    for _, f in pairs(g_fieldManager.fields) do
+        if f and f.farmland and f.farmland.id == fieldId then return f end
+    end
+    return fsField
+end
+
+--- Best-effort live growth-stage fraction (0..1) for a field, or nil when unknown.
+--- Uses an FS25 FieldState probe — wrapped so any API hiccup degrades to "unknown".
+---@param fieldId number
+---@return number|nil
+function SoilFertilitySystem:_getFieldGrowthFraction(fieldId)
+    local fsField = self:_findFieldObject(fieldId)
+    if not (fsField and fsField.posX and fsField.posZ and FieldState) then return nil end
+    local frac = nil
+    pcall(function()
+        if not self._fieldStateCache then self._fieldStateCache = {} end
+        local fs = self._fieldStateCache[fieldId]
+        if not fs then
+            local ok, newFs = pcall(FieldState.new)
+            fs = (ok and newFs) or false
+            self._fieldStateCache[fieldId] = fs
+        end
+        if fs then
+            fs:update(fsField.posX, fsField.posZ)
+            if fs.isValid and fs.fruitTypeIndex and fs.fruitTypeIndex ~= FruitType.UNKNOWN then
+                local fruitDesc = g_fruitTypeManager and g_fruitTypeManager:getFruitTypeByIndex(fs.fruitTypeIndex)
+                local numStates = fruitDesc and fruitDesc.numGrowthStates
+                if numStates and fs.growthState then
+                    frac = SoilDiseaseSystem.growthFraction(fs.growthState, numStates)
+                end
+            end
+        end
+    end)
+    return frac
+end
+
+--- Resolve whether the field is currently "wet" (recent/active rain) and "cool".
+---@param season number|nil
+---@return boolean isWet, boolean isCool
+function SoilFertilitySystem:_diseaseClimateNow(season)
+    local isWet = false
+    if g_currentMission and g_currentMission.environment and g_currentMission.environment.weather then
+        local rs = g_currentMission.environment.weather:getRainFallScale()
+        isWet = rs ~= nil and rs > SoilConstants.RAIN.MIN_RAIN_THRESHOLD
+    end
+    -- Cool proxy from season (summer = warm; spring/fall/winter = cool). Avoids depending
+    -- on an unverified temperature API while still steering disease selection sensibly.
+    local isCool = season ~= 2
+    return isWet, isCool
+end
+
+--- Select / refresh / clear the named active disease over the scalar pressure.
+---@param fieldId number
+---@param field table
+---@param season number|nil
+---@param isRaining boolean
+---@param currentDay number
+function SoilFertilitySystem:_updateActiveDisease(fieldId, field, season, isRaining, currentDay)
+    if not SoilDiseaseSystem then return end
+    local onset = (SoilConstants.DISEASE_PRESSURE.LOW or 20) * 0.5
+    local pressure = field.diseasePressure or 0
+
+    if pressure < onset * 0.5 then
+        -- Infection has effectively cleared — drop the name.
+        field.activeDisease = nil
+        field.activeDiseaseSeverity = 1.0
+        return
+    end
+
+    if not field.activeDisease and pressure >= onset then
+        local _, isCool = self:_diseaseClimateNow(season)
+        local seed = fieldId * 1000 + (currentDay or 0)
+        local picked = SoilDiseaseSystem.selectDisease(field.lastCrop, season, isRaining, isCool, seed)
+        if picked then
+            field.activeDisease = picked
+            field.activeDiseaseSeverity = SoilDiseaseSystem.yieldSeverity(picked)
+        end
+    elseif field.activeDisease and (field.activeDiseaseSeverity == nil) then
+        field.activeDiseaseSeverity = SoilDiseaseSystem.yieldSeverity(field.activeDisease)
+    end
+end
+
+--- Scouting report for a field: named disease, severity tier, recommended chemicals.
+--- Pure read — safe for UI / console / HUD callers.
+---@param fieldId number
+---@return table|nil report
+function SoilFertilitySystem:getScoutReport(fieldId)
+    local field = self.fieldData and self.fieldData[fieldId]
+    if not field then return nil end
+    if not self.settings.diseasePressure then
+        return { fieldId = fieldId, enabled = false }
+    end
+
+    local dp = SoilConstants.DISEASE_PRESSURE
+    local pressure = field.diseasePressure or 0
+    local tier
+    if     pressure < dp.LOW    then tier = "none"
+    elseif pressure < dp.MEDIUM then tier = "mild"
+    elseif pressure < dp.HIGH   then tier = "moderate"
+    else                             tier = "severe"
+    end
+
+    local report = {
+        fieldId = fieldId,
+        enabled = true,
+        pressure = pressure,
+        tier = tier,
+        fungicideActive = (field.fungicideDaysLeft or 0) > 0,
+        fungicideDaysLeft = field.fungicideDaysLeft or 0,
+        diseaseId = field.activeDisease,
+        crop = field.lastCrop,
+    }
+
+    if field.activeDisease then
+        local def = SoilDiseaseSystem.diseaseDef(field.activeDisease)
+        if def then
+            report.diseaseCategory = def.cat
+            report.diseaseSci = def.sci
+            report.recommend = SoilDiseaseSystem.recommend(field.activeDisease)
+        end
+    end
+    return report
+end
+
+--- Apply a named fungicide to a field via the menu/console path (no physical fill type).
+--- Computes control from the effectiveness matrix × timing × disease stage × weather ×
+--- difficulty, reduces pressure, grants protection, and charges the field area cost.
+---@param fieldId number
+---@param chemId string  catalog id (e.g. "AZOXYSTROBIN")
+---@param opts table|nil { charge=true, farmId=number }
+---@return boolean ok, string messageKey, table detail
+function SoilFertilitySystem:applyNamedFungicide(fieldId, chemId, opts)
+    opts = opts or {}
+    if not self.settings.diseasePressure then
+        return false, "sf_scout_disabled", {}
+    end
+    local chem = SoilDiseaseSystem and SoilDiseaseSystem.chemical(chemId)
+    if not chem then
+        return false, "sf_treat_bad_chem", {}
+    end
+
+    local field = self:getOrCreateField(fieldId, false)
+    if not field then
+        return false, "sf_treat_no_field", {}
+    end
+
+    -- Clients ask the server to perform the authoritative application (MP).
+    if g_currentMission and g_currentMission.missionDynamicInfo
+       and g_currentMission.missionDynamicInfo.isMultiplayer and not g_server then
+        if SoilTreatFieldEvent then
+            g_client:getServerConnection():sendEvent(SoilTreatFieldEvent.new(fieldId, chemId))
+            return true, "sf_treat_sent", {}
+        end
+    end
+
+    local diseaseId = field.activeDisease
+    local pressure = field.diseasePressure or 0
+    local isWet = select(1, self:_diseaseClimateNow(nil))
+    local growthFrac = self:_getFieldGrowthFraction(fieldId)
+
+    -- With no named infection yet, treat as a preventative against the most likely threat.
+    local effDiseaseId = diseaseId
+    if not effDiseaseId then
+        local season = self:_currentSeason()
+        local _, isCool = self:_diseaseClimateNow(season)
+        effDiseaseId = SoilDiseaseSystem.selectDisease(field.lastCrop, season, isWet, isCool,
+            fieldId * 1000 + (self:_currentDay() or 0))
+    end
+
+    local control, breakdown = SoilDiseaseSystem.computeControl(chemId, effDiseaseId, {
+        pressure = pressure,
+        growthFrac = growthFrac,
+        isRaining = isWet,
+        diseaseDifficulty = self.settings.diseaseDifficulty or 2,
+    })
+
+    local t = SoilConstants.DISEASE_TREATMENT
+    local before = pressure
+    local reduction = control * t.MAX_PRESSURE_REDUCTION
+    field.diseasePressure = math.max(0, before - reduction)
+
+    -- Protection scales with climate (shorter in wet climates) and the control achieved.
+    local cm = SoilConstants.DISEASE_CLIMATE_MOISTURE[self.settings.diseaseMoisture or 2]
+        or SoilConstants.DISEASE_CLIMATE_MOISTURE[2]
+    local protDays = math.floor((chem.prot or 10) * (cm.fungicideMult or 1.0) * math.max(0.25, control) + 0.5)
+    field.fungicideDaysLeft = math.max(field.fungicideDaysLeft or 0, protDays)
+    field.lastFungicide = chemId
+    self.fungicideAppliedDay[fieldId] = self:_currentDay() or 0
+
+    -- Clear the named infection once knocked down.
+    if field.diseasePressure < (SoilConstants.DISEASE_PRESSURE.LOW or 20) * 0.5 then
+        field.activeDisease = nil
+        field.activeDiseaseSeverity = 1.0
+    end
+
+    -- Charge cost (server authoritative). area × $/ha, gated by fertilizerCosts.
+    local cost = 0
+    if opts.charge ~= false and self.settings.fertilizerCosts and g_server then
+        local area = field.fieldArea or 1.0
+        cost = (chem.costPerHa or 0) * area
+        if cost > 0 then
+            local farmId = opts.farmId
+            if not farmId then
+                if g_localPlayer and g_localPlayer.farmId then farmId = g_localPlayer.farmId
+                elseif g_currentMission and g_currentMission.player and g_currentMission.player.farmId then
+                    farmId = g_currentMission.player.farmId
+                else farmId = 1 end
+            end
+            if g_currentMission and g_currentMission.addMoney and farmId and farmId > 0 then
+                pcall(function()
+                    g_currentMission:addMoney(-cost, farmId, MoneyType.PURCHASE_FERTILIZER, true, true)
+                end)
+            end
+        end
+    end
+
+    self:log("[NamedFungicide] Field %d: %s vs %s control=%.0f%% pressure %.0f->%.0f prot=%dd cost=%.0f",
+        fieldId, chemId, tostring(effDiseaseId or "none"), control * 100, before, field.diseasePressure, protDays, cost)
+
+    if g_server and g_currentMission and g_currentMission.missionDynamicInfo and g_currentMission.missionDynamicInfo.isMultiplayer then
+        if SoilFieldUpdateEvent then
+            g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
+        end
+    end
+
+    return true, "sf_treat_done", {
+        control = control,
+        reduction = reduction,
+        protDays = protDays,
+        cost = cost,
+        disease = effDiseaseId,
+        breakdown = breakdown,
+    }
+end
+
+--- DEBUG/TEST: force a field's disease pressure (and optionally a specific named
+--- disease) so the scout + treat loop can be exercised without waiting for the
+--- weather-driven build-up. Server/SP authoritative; broadcasts the result in MP.
+---@param fieldId number
+---@param pressure number 0-100
+---@param diseaseId string|nil  explicit DISEASE_DEFS id, else auto-selected by crop+weather
+---@return boolean ok, table info
+function SoilFertilitySystem:debugSetDisease(fieldId, pressure, diseaseId)
+    local field = self:getOrCreateField(fieldId, false)
+    if not field then return false, {} end
+
+    field.diseasePressure = math.max(0, math.min(100, pressure or 0))
+    field.fungicideDaysLeft = 0  -- lift any existing protection so the infection can show
+
+    local onset = (SoilConstants.DISEASE_PRESSURE.LOW or 20) * 0.5
+    if field.diseasePressure < onset then
+        field.activeDisease = nil
+        field.activeDiseaseSeverity = 1.0
+    elseif diseaseId and SoilConstants.DISEASE_DEFS[diseaseId] then
+        field.activeDisease = diseaseId
+        field.activeDiseaseSeverity = SoilDiseaseSystem.yieldSeverity(diseaseId)
+    else
+        local season = self:_currentSeason()
+        local isWet, isCool = self:_diseaseClimateNow(season)
+        local picked = SoilDiseaseSystem.selectDisease(field.lastCrop, season, isWet, isCool,
+            fieldId * 1000 + (self:_currentDay() or 0))
+        field.activeDisease = picked
+        field.activeDiseaseSeverity = picked and SoilDiseaseSystem.yieldSeverity(picked) or 1.0
+    end
+
+    if g_server and g_currentMission and g_currentMission.missionDynamicInfo and g_currentMission.missionDynamicInfo.isMultiplayer then
+        if SoilFieldUpdateEvent then
+            g_server:broadcastEvent(SoilFieldUpdateEvent.new(fieldId, field))
+        end
+    end
+
+    self:log("[DebugDisease] Field %d: pressure=%.0f disease=%s",
+        fieldId, field.diseasePressure, tostring(field.activeDisease or "none"))
+    return true, { pressure = field.diseasePressure, disease = field.activeDisease, crop = field.lastCrop }
 end
 
 -- Hook delegate: called by HookManager on environment update
@@ -2127,6 +2440,9 @@ function SoilFertilitySystem:getOrCreateField(fieldId, createIfMissing, area)
         insecticideDaysLeft = 0,
         diseasePressure = 0,
         fungicideDaysLeft = 0,
+        activeDisease = nil,        -- DISEASE_DEFS id of the current named infection (nil = none)
+        activeDiseaseSeverity = 1.0,-- cached yield-severity multiplier for activeDisease
+        lastFungicide = nil,        -- last chemical applied (for resistance / UI flavor)
         dryDayCount = 0,
         nutrientBuffer = {},  -- Tracks [fillTypeIndex] = litersApplied (reset daily)
         zoneData = {},        -- Sparse {cellKey → {N,P,K,pH,OM}} for per-area overlay
@@ -2884,10 +3200,20 @@ function SoilFertilitySystem:_processOneDailyField(fieldId, field)
                 cropMult = dp.CROP_SUSCEPTIBILITY[string.lower(field.lastCrop)] or 1.0
             end
 
+            -- Named-disease layer modifiers: difficulty, soil health, crop rotation.
+            local diff = SoilConstants.DISEASE_DIFFICULTY[self.settings.diseaseDifficulty or 2]
+                or SoilConstants.DISEASE_DIFFICULTY[2]
+            local diffMult = diff.pressureMult or 1.0
+            local soilMult = SoilDiseaseSystem.soilHealthMult(field)
+            local rotMult  = self.settings.cropRotation and SoilDiseaseSystem.rotationMult(field) or 1.0
+
             local rainBonus = isRaining and (dp.RAIN_BONUS * cm.rainBonusMult) or 0
             local tunDis = getTuningMult(self.settings, "tuningDiseaseGrowth", "ZERO_MULT")
-            field.diseasePressure = math.min(100, pressure + ((baseRate * cm.growthMult * seasonMult * cropMult * tunDis) + rainBonus) * timeFactor)
+            field.diseasePressure = math.min(100, pressure + ((baseRate * cm.growthMult * seasonMult * cropMult * tunDis * diffMult * soilMult * rotMult) + rainBonus) * timeFactor)
         end
+
+        -- Maintain the named active disease over the scalar pressure.
+        self:_updateActiveDisease(fieldId, field, season, isRaining, currentDay)
     end
 
     -- ── Burn warning countdown ───────────────────────────────────────────────
@@ -4339,6 +4665,8 @@ function SoilFertilitySystem:getFieldInfo(fieldId, x, z)
         insecticideActive = (field.insecticideDaysLeft or 0) > 0,
         diseasePressure = field.diseasePressure or 0,
         fungicideActive = (field.fungicideDaysLeft or 0) > 0,
+        activeDisease = field.activeDisease,  -- DISEASE_DEFS id of the named infection, or nil
+        lastFungicide = field.lastFungicide,
         burnDaysLeft = field.burnDaysLeft or 0,
         amendBurnPenalty = field.amendBurnPenalty or 0,  -- pending lime/OM-on-crop burn (0-1); explains a low yield
         amendBurnRisk = self:isAmendmentBurnRisk(liveFruitTypeIndex, liveGrowthState),  -- (#684) true → liming/manuring NOW would scorch the crop
@@ -4441,6 +4769,8 @@ function SoilFertilitySystem:saveToXMLFile(xmlFile, key)
             setXMLInt(xmlFile, fieldKey .. "#insecticideDaysLeft", field.insecticideDaysLeft or 0)
             setXMLFloat(xmlFile, fieldKey .. "#diseasePressure", field.diseasePressure or 0)
             setXMLInt(xmlFile, fieldKey .. "#fungicideDaysLeft", field.fungicideDaysLeft or 0)
+            setXMLString(xmlFile, fieldKey .. "#activeDisease", field.activeDisease or "")
+            setXMLString(xmlFile, fieldKey .. "#lastFungicide", field.lastFungicide or "")
             setXMLInt(xmlFile, fieldKey .. "#dryDayCount", field.dryDayCount or 0)
             setXMLInt(xmlFile, fieldKey .. "#burnDaysLeft", field.burnDaysLeft or 0)
             setXMLInt(xmlFile, fieldKey .. "#lastAlertSeason", field.lastAlertSeason or 0)
@@ -4545,6 +4875,9 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
             insecticideDaysLeft = getXMLInt(xmlFile, fieldKey .. "#insecticideDaysLeft") or 0,
             diseasePressure = getXMLFloat(xmlFile, fieldKey .. "#diseasePressure") or 0,
             fungicideDaysLeft = getXMLInt(xmlFile, fieldKey .. "#fungicideDaysLeft") or 0,
+            activeDisease = getXMLString(xmlFile, fieldKey .. "#activeDisease"),
+            activeDiseaseSeverity = 1.0,
+            lastFungicide = getXMLString(xmlFile, fieldKey .. "#lastFungicide"),
             dryDayCount = getXMLInt(xmlFile, fieldKey .. "#dryDayCount") or 0,
             burnDaysLeft = getXMLInt(xmlFile, fieldKey .. "#burnDaysLeft") or 0,
             amendBurnPenalty = getXMLFloat(xmlFile, fieldKey .. "#amendBurnPenalty") or nil,
@@ -4627,6 +4960,13 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
         if self.fieldData[fieldId].sownCrop == "" then
             self.fieldData[fieldId].sownCrop = nil
         end
+        -- Named disease: empty → nil, and rebuild the cached yield severity.
+        local fdd = self.fieldData[fieldId]
+        if fdd.activeDisease == "" then fdd.activeDisease = nil end
+        if fdd.lastFungicide == "" then fdd.lastFungicide = nil end
+        if fdd.activeDisease and SoilDiseaseSystem then
+            fdd.activeDiseaseSeverity = SoilDiseaseSystem.yieldSeverity(fdd.activeDisease)
+        end
 
         -- Load per-area zone cells
         local zi = 0
@@ -4668,9 +5008,10 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
         if compSum > 0 then
             local areaInHa   = f.fieldArea or 1.0
             local totalCells = math.max(1, math.ceil(areaInHa / zone.CELL_AREA_HA))
+            local maxC = (SoilConstants.COMPACTION and SoilConstants.COMPACTION.MAX_COMPACTION) or 100.0
             f.compactionSum        = compSum
             f.compactionTotalCells = totalCells
-            f.compaction           = compSum / totalCells
+            f.compaction           = math.min(maxC, compSum / totalCells)
         end
 
         index = index + 1
@@ -4793,7 +5134,12 @@ function SoilFertilitySystem:onCompaction(farmlandId, worldX, worldZ, points)
         local areaInHa = field.fieldArea or 1.0
         field.compactionTotalCells = math.max(1, math.ceil(areaInHa / zone.CELL_AREA_HA))
     end
-    field.compaction = field.compactionSum / field.compactionTotalCells
+    -- Clamp the field-AVERAGE to MAX_COMPACTION. Each cell is already capped at 100, but the
+    -- average can creep past it when more cells get packed than `compactionTotalCells` — that
+    -- denominator comes from the crop-polygon fieldArea, while cells are packed across the
+    -- (larger) real field ground incl. headland/boundary cells. That was the "105% compaction"
+    -- overshoot in #703.
+    field.compaction = math.min(cp.MAX_COMPACTION, field.compactionSum / field.compactionTotalCells)
 
     -- 3. Write per-pixel to compaction density map layer
     if self.layerSystem and self.layerSystem.available then
@@ -4846,7 +5192,7 @@ function SoilFertilitySystem:onSubsoilerPass(farmlandId, worldX, worldZ, reliefP
 
     field.compactionSum = math.max(0, (field.compactionSum or 0) - (prev - newVal))
     local tc = field.compactionTotalCells or 0
-    field.compaction = tc > 0 and (field.compactionSum / tc) or 0
+    field.compaction = tc > 0 and math.min(cp.MAX_COMPACTION, field.compactionSum / tc) or 0
 
     -- Write per-pixel to compaction density map layer
     if self.layerSystem and self.layerSystem.available then

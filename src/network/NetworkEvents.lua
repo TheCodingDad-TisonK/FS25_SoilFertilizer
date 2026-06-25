@@ -411,6 +411,10 @@ function SoilFullSyncEvent:readStream(streamId, connection)
             buffer[ftIdx] = amount
         end
 
+        -- Named active disease (appended last by writeStream)
+        local activeDisease = streamReadString(streamId)
+        if activeDisease == "" then activeDisease = nil end
+
         -- Validate and sanitize field data
         local function validateNumber(value, min, max, default, name)
             if type(value) ~= "number" or value ~= value then  -- Check for NaN
@@ -459,6 +463,8 @@ function SoilFullSyncEvent:readStream(streamId, connection)
                 insecticideDaysLeft = pestDays,
                 diseasePressure = diseasePressure,
                 fungicideDaysLeft = diseaseDays,
+                activeDisease = activeDisease,
+                activeDiseaseSeverity = (activeDisease and SoilDiseaseSystem) and SoilDiseaseSystem.yieldSeverity(activeDisease) or 1.0,
                 dryDayCount = dryDays,
                 burnDaysLeft = burnDays,
                 coverageFraction = math.max(0, math.min(1, coverageFrac or 0)),
@@ -540,6 +546,9 @@ function SoilFullSyncEvent:writeStream(streamId, connection)
             streamWriteInt32(streamId, ftIdx)
             streamWriteFloat32(streamId, amount)
         end
+
+        -- Named active disease (appended last to keep older alignment intact)
+        streamWriteString(streamId, field.activeDisease or "")
     end
 end
 
@@ -685,6 +694,9 @@ function SoilFieldBatchSyncEvent:writeStream(streamId, connection)
             streamWriteFloat32(streamId, cell.diseasePressure or 0)
             streamWriteFloat32(streamId, cell.compaction      or 0)
         end
+
+        -- Named active disease (appended last to keep zone alignment intact)
+        streamWriteString(streamId, field.activeDisease or "")
     end
 end
 
@@ -749,6 +761,10 @@ function SoilFieldBatchSyncEvent:readStream(streamId, connection)
             }
         end
 
+        -- Named active disease (consume unconditionally to keep stream aligned)
+        local activeDisease = streamReadString(streamId)
+        if activeDisease == "" then activeDisease = nil end
+
         if type(fieldId) == "number" and fieldId >= 0 then
             self.batchFields[fieldId] = {
                 fieldArea             = math.max(0.01, fieldArea or 1.0),
@@ -769,6 +785,8 @@ function SoilFieldBatchSyncEvent:readStream(streamId, connection)
                 insecticideDaysLeft   = math.max(0, pestDays),
                 diseasePressure       = math.max(0, math.min(100, diseaseP)),
                 fungicideDaysLeft     = math.max(0, diseaseDays),
+                activeDisease         = activeDisease,
+                activeDiseaseSeverity = (activeDisease and SoilDiseaseSystem) and SoilDiseaseSystem.yieldSeverity(activeDisease) or 1.0,
                 dryDayCount           = math.max(0, dryDays),
                 burnDaysLeft          = math.max(0, burnDays),
                 nutrientBuffer        = buffer,
@@ -934,6 +952,10 @@ function SoilFieldUpdateEvent:readStream(streamId, connection)
         }
     end
 
+    -- Named active disease (appended last by writeStream)
+    local activeDisease = streamReadString(streamId)
+    if activeDisease == "" then activeDisease = nil end
+
     -- Clamp all values to valid ranges
     self.field = {
         fieldArea = math.max(0.01, fieldArea or 1.0),
@@ -959,6 +981,8 @@ function SoilFieldUpdateEvent:readStream(streamId, connection)
         insecticideDaysLeft = math.max(0, pestDays),
         diseasePressure = math.max(0, math.min(100, diseasePressure)),
         fungicideDaysLeft = math.max(0, diseaseDays),
+        activeDisease = activeDisease,
+        activeDiseaseSeverity = (activeDisease and SoilDiseaseSystem) and SoilDiseaseSystem.yieldSeverity(activeDisease) or 1.0,
         dryDayCount = math.max(0, dryDays),
         burnDaysLeft = math.max(0, burnDays),
         nutrientBuffer   = buffer,
@@ -1026,6 +1050,9 @@ function SoilFieldUpdateEvent:writeStream(streamId, connection)
     -- crashing the dedicated server. Clients fall back to getLayerColor() (aggregate)
     -- for any cells not in their local zoneData, so the overlay is still correct.
     streamWriteInt32(streamId, 0)
+
+    -- Named active disease (appended last)
+    streamWriteString(streamId, self.field.activeDisease or "")
 end
 
 function SoilFieldUpdateEvent:run(connection)
@@ -1083,6 +1110,62 @@ function SoilFieldUpdateEvent:run(connection)
                 self.fieldId, newField.nitrogen, newField.phosphorus, newField.potassium)
         end
     end
+end
+
+-- ========================================
+-- TREAT FIELD EVENT (Client -> Server)
+-- ========================================
+-- A client asks the server to apply a named fungicide to a field via the spray
+-- menu. The server is authoritative: it validates the chemical, applies the
+-- effectiveness/pressure/protection math, charges the requesting farm, and
+-- broadcasts the resulting field state via SoilFieldUpdateEvent.
+SoilTreatFieldEvent = {}
+SoilTreatFieldEvent_mt = Class(SoilTreatFieldEvent, Event)
+
+InitEventClass(SoilTreatFieldEvent, "SoilTreatFieldEvent")
+
+function SoilTreatFieldEvent.emptyNew()
+    return Event.new(SoilTreatFieldEvent_mt)
+end
+
+function SoilTreatFieldEvent.new(fieldId, chemId)
+    local self = SoilTreatFieldEvent.emptyNew()
+    self.fieldId = fieldId
+    self.chemId  = chemId
+    return self
+end
+
+function SoilTreatFieldEvent:readStream(streamId, connection)
+    self.fieldId = streamReadInt32(streamId)
+    self.chemId  = streamReadString(streamId)
+    self:run(connection)
+end
+
+function SoilTreatFieldEvent:writeStream(streamId, connection)
+    streamWriteInt32(streamId, self.fieldId or 0)
+    streamWriteString(streamId, self.chemId or "")
+end
+
+function SoilTreatFieldEvent:run(connection)
+    -- SERVER ONLY: authoritative application.
+    if g_server == nil then return end
+    if not g_SoilFertilityManager or not g_SoilFertilityManager.soilSystem then return end
+    if not SoilConstants.FUNGICIDE_CATALOG[self.chemId] then
+        SoilLogger.warning("Server: Rejected unknown fungicide '%s' from treat request", tostring(self.chemId))
+        return
+    end
+
+    -- Charge the requesting player's farm.
+    local farmId = nil
+    if connection and not connection:getIsServer() and g_currentMission and g_currentMission.userManager then
+        local user = g_currentMission.userManager:getUserByConnection(connection)
+        if user then farmId = user.farmId end
+    end
+
+    g_SoilFertilityManager.soilSystem:applyNamedFungicide(self.fieldId, self.chemId, {
+        charge = true,
+        farmId = farmId,
+    })
 end
 
 -- ========================================

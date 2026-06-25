@@ -52,6 +52,11 @@ function SoilSettingsGUI:registerConsoleCommands()
     addConsoleCommand("SoilFieldSentry", "FieldSentry: show a field's sim status, or list all slept fields: SoilFieldSentry [fieldId] (#651)", "consoleCommandFieldSentry", self)
     addConsoleCommand("SoilMeadowField", "FieldSentry: flag/clear a field as meadow (grassland profile): SoilMeadowField <fieldId> [true|false] (#651)", "consoleCommandMeadowField", self)
     addConsoleCommand("SoilDecoField", "FieldSentry: flag/clear a field as decorative/fake (sim frozen): SoilDecoField <fieldId> [true|false] (#651)", "consoleCommandDecoField", self)
+    addConsoleCommand("SoilScout", "Scout a field for disease: SoilScout [fieldId] (defaults to current field)", "consoleCommandScout", self)
+    addConsoleCommand("SoilTreat", "Apply a fungicide: SoilTreat <chemical> [fieldId]  (e.g. SoilTreat AZOXYSTROBIN)", "consoleCommandTreat", self)
+    addConsoleCommand("SoilFungicides", "List fungicides, or recommendations for a disease: SoilFungicides [diseaseId]", "consoleCommandFungicides", self)
+    addConsoleCommand("SoilSetDisease", "TEST: force disease on the current field: SoilSetDisease <pressure 0-100> [diseaseId]", "consoleCommandSetDisease", self)
+    addConsoleCommand("SoilSetDiseaseDifficulty", "Set disease difficulty (1=Easy, 2=Normal, 3=Hard)", "consoleCommandSetDiseaseDifficulty", self)
     addConsoleCommand("soilfertility", "Show all soil commands", "consoleCommandHelp", self)
 
     SoilLogger.info("Console commands registered")
@@ -215,6 +220,152 @@ function SoilSettingsGUI:consoleCommandSetDifficulty(difficulty)
         return string.format("Difficulty set to: %s", diffNames[diff] or tostring(diff))
     end
     return "Error: Soil Mod not initialized"
+end
+
+-- ── Disease & chemical console commands ──────────────────────────────────
+
+-- Resolve a target field id from an optional argument, falling back to the field
+-- the player is currently standing on (via the HUD's detector).
+local function resolveDiseaseFieldId(arg)
+    local fid = tonumber(arg)
+    if fid then return fid end
+    local hud = g_SoilFertilityManager and g_SoilFertilityManager.soilHUD
+    if hud then
+        if hud.detectCurrentFieldId then
+            local ok, cur = pcall(function() return hud:detectCurrentFieldId() end)
+            if ok and cur and cur > 0 then return cur end
+        end
+        if hud.cachedFieldId and hud.cachedFieldId > 0 then return hud.cachedFieldId end
+    end
+    return nil
+end
+
+-- Localized display name for a disease id (falls back to a readable id).
+local function diseaseDisplayName(id)
+    if not id then return "none" end
+    local key = "sf_dis_" .. id
+    if g_i18n and g_i18n:hasText(key) then return g_i18n:getText(key) end
+    return (id:gsub("_", " "))
+end
+
+-- Localized display name for a chemical id (chemical names are international).
+local function chemDisplayName(id)
+    if not id then return "?" end
+    local key = "sf_chem_" .. id
+    if g_i18n and g_i18n:hasText(key) then return g_i18n:getText(key) end
+    return (id:gsub("_", " "))
+end
+
+function SoilSettingsGUI:consoleCommandSetDiseaseDifficulty(difficulty)
+    local diff = tonumber(difficulty)
+    if not diff or diff < 1 or diff > 3 then
+        return "Usage: SoilSetDiseaseDifficulty 1|2|3  (1=Easy, 2=Normal, 3=Hard)"
+    end
+    if g_SoilFertilityManager and g_SoilFertilityManager.settings then
+        requestSettingChange("diseaseDifficulty", diff)
+        local names = {[1]="Easy", [2]="Normal", [3]="Hard"}
+        return string.format("Disease difficulty set to: %s", names[diff] or tostring(diff))
+    end
+    return "Error: Soil Mod not initialized"
+end
+
+function SoilSettingsGUI:consoleCommandSetDisease(pressure, diseaseId)
+    local sfm = g_SoilFertilityManager
+    if not (sfm and sfm.soilSystem) then return "Error: Soil Mod not initialized" end
+    if not sfm.settings.diseasePressure then
+        return "Disease Pressure is disabled in settings — enable it first."
+    end
+    local p = tonumber(pressure)
+    if not p then return "Usage: SoilSetDisease <pressure 0-100> [diseaseId]  (acts on the field you're standing on)" end
+    local fid = resolveDiseaseFieldId(nil)
+    if not fid then return "Stand on a field first (or no field detected here)." end
+
+    if diseaseId and not SoilConstants.DISEASE_DEFS[diseaseId] then
+        local ids = {}
+        for _, id in ipairs(SoilConstants.DISEASE_REGISTRY_DEFAULT) do ids[#ids+1] = id end
+        return string.format("Unknown diseaseId '%s'. Omit it to auto-pick, or use one from SoilFungicides/the registry (e.g. %s).",
+            diseaseId, table.concat(ids, ", "))
+    end
+
+    local ok = sfm.soilSystem:debugSetDisease(fid, p, diseaseId)
+    if not ok then return string.format("Could not set disease on field %d", fid) end
+    -- Show the resulting scouting report immediately.
+    return self:consoleCommandScout(tostring(fid))
+end
+
+function SoilSettingsGUI:consoleCommandScout(fieldId)
+    local sfm = g_SoilFertilityManager
+    if not (sfm and sfm.soilSystem) then return "Error: Soil Mod not initialized" end
+    local fid = resolveDiseaseFieldId(fieldId)
+    if not fid then return "Usage: SoilScout <fieldId>  (or stand on a field)" end
+
+    local rep = sfm.soilSystem:getScoutReport(fid)
+    if not rep then return string.format("Field %d: no soil data", fid) end
+    if rep.enabled == false then return "Disease system is disabled (enable Disease Pressure in settings)" end
+
+    local lines = {}
+    lines[#lines+1] = string.format("=== Field %d Scouting Report ===", fid)
+    lines[#lines+1] = string.format("Crop: %s", rep.crop or "(none)")
+    lines[#lines+1] = string.format("Disease pressure: %.0f%% (%s)", rep.pressure, rep.tier)
+    if rep.fungicideActive then
+        lines[#lines+1] = string.format("Protected: %d day(s) of fungicide cover", rep.fungicideDaysLeft)
+    end
+    if rep.diseaseId then
+        lines[#lines+1] = string.format("Detected: %s (%s)", diseaseDisplayName(rep.diseaseId), rep.diseaseSci or "?")
+        if rep.recommend then
+            lines[#lines+1] = string.format("Best: %s   2nd: %s   Budget: %s",
+                chemDisplayName(rep.recommend.best),
+                chemDisplayName(rep.recommend.second),
+                chemDisplayName(rep.recommend.budget))
+            lines[#lines+1] = string.format("Treat with: SoilTreat %s %d", rep.recommend.best or "AZOXYSTROBIN", fid)
+        end
+    else
+        lines[#lines+1] = "No active infection. Scout again as pressure builds."
+    end
+    lines[#lines+1] = "================================"
+    return table.concat(lines, "\n")
+end
+
+function SoilSettingsGUI:consoleCommandTreat(chemical, fieldId)
+    local sfm = g_SoilFertilityManager
+    if not (sfm and sfm.soilSystem) then return "Error: Soil Mod not initialized" end
+    if not chemical then return "Usage: SoilTreat <chemical> [fieldId]   (see SoilFungicides for the list)" end
+    local chemId = string.upper(chemical)
+    if not SoilConstants.FUNGICIDE_CATALOG[chemId] then
+        return string.format("Unknown chemical '%s'. Run SoilFungicides for the list.", chemical)
+    end
+    local fid = resolveDiseaseFieldId(fieldId)
+    if not fid then return "Usage: SoilTreat <chemical> <fieldId>  (or stand on a field)" end
+
+    local ok, msgKey, detail = sfm.soilSystem:applyNamedFungicide(fid, chemId, { charge = true })
+    if not ok then
+        return string.format("Treatment failed (%s) on field %d", tostring(msgKey), fid)
+    end
+    detail = detail or {}
+    return string.format("Applied %s to field %d: control %.0f%%, pressure -%.0f, protected %d day(s), cost $%.0f%s",
+        chemDisplayName(chemId), fid,
+        (detail.control or 0) * 100, detail.reduction or 0, detail.protDays or 0, detail.cost or 0,
+        (detail.disease and (" vs " .. diseaseDisplayName(detail.disease)) or ""))
+end
+
+function SoilSettingsGUI:consoleCommandFungicides(diseaseId)
+    if diseaseId and SoilConstants.DISEASE_DEFS[diseaseId] then
+        local rec = SoilDiseaseSystem.recommend(diseaseId)
+        local def = SoilConstants.DISEASE_DEFS[diseaseId]
+        return string.format("%s (%s) — Best: %s | 2nd: %s | Budget: %s",
+            diseaseDisplayName(diseaseId), def.sci or "?",
+            chemDisplayName(rec.best), chemDisplayName(rec.second), chemDisplayName(rec.budget))
+    end
+    local lines = { "=== Fungicide Catalog ===" }
+    for _, id in ipairs(SoilConstants.FUNGICIDE_ORDER) do
+        local c = SoilConstants.FUNGICIDE_CATALOG[id]
+        lines[#lines+1] = string.format("%-18s  $%d/ha  T%d  %s%s",
+            id, c.costPerHa or 0, c.tier or 1, c.group or "",
+            c.seedTreatment and "  (seed)" or "")
+    end
+    lines[#lines+1] = "Apply with: SoilTreat <chemical> <fieldId>"
+    lines[#lines+1] = "========================="
+    return table.concat(lines, "\n")
 end
 
 function SoilSettingsGUI:consoleCommandSoilEnable()

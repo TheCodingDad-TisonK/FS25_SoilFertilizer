@@ -202,7 +202,7 @@
     <e k="sf_hud_hint_edit" v="Dra: flytta   Hörn: ändra storlek   HMB/Skift+H: klar" eh="c3f1820c" />
     <e k="sf_hud_hint_normal" v="Skift+H: flytta/ändra storlek" eh="f1d565b1" />
     <e k="sf_incompatibility_pf_title" v="[EN] Incompatibility Detected" eh="89dbfc90" />
-    <e k="sf_incompatibility_pf_text" v="[EN] Soil &amp; Fertilizer Mod has been disabled because Precision Farming was detected. These two mods are not compatible and cannot be used together." eh="8c645296" />
+    <e k="sf_incompatibility_pf_text" v="Soil &amp; Fertilizer har inaktiverats för den här sparfilen eftersom Precision Farming är aktivt. Båda modden hanterar markens näringsämnen och kan inte köras samtidigt. Du behöver inte ta bort den här modden. För att använda Soil &amp; Fertilizer istället, inaktivera bara Precision Farming för den här sparfilen i modvalsskärmen." eh="91dbcf1b" />
 
     <e k="helpLine_sf_cat_overview" v="Översikt" eh="3b878279" />
     <e k="helpLine_sf_cat_started" v="Komma igång" eh="bf647454" />
@@ -958,6 +958,101 @@
     	<e k="sf_fs_reason_manual" v="manuell" eh="3c78b355" />
     	<e k="sf_fs_reason_npc" v="NPC-kontrakt" eh="2e1a268b" />
     	<e k="sf_fs_reason_deco" v="dekorativ" eh="8a817367" />
+    <e k="input_SF_SCOUT" v="[EN] Scout Field for Disease" eh="34e6d14b" />
+    <e k="sf_scout_no_field" v="[EN] Stand on a field to scout it." eh="2c33ecb7" />
+    <e k="sf_scout_found" v="[EN] Field %d: %s detected (%d%% pressure). Best: %s" eh="d6af78b1" />
+    <e k="sf_scout_pressure" v="[EN] Field %d: disease pressure %d%% - scout again to identify it." eh="07d06c55" />
+    <e k="sf_scout_healthy" v="[EN] Field %d: no disease detected." eh="98e53fbf" />
+    <e k="sf_scout_clean" v="[EN] healthy" eh="741839f3" />
+    <e k="sf_treat_best" v="[EN] best" eh="db82206b" />
+    <e k="sf_disease_difficulty_short" v="[EN] Disease Difficulty" eh="882ec867" />
+    <e k="sf_disease_difficulty_long" v="[EN] How aggressively named crop diseases build up and how well fungicides work." eh="9027ce0f" />
+    <e k="sf_desc_diseaseDifficulty" v="[EN] Easy/Normal/Hard: named-disease pressure and fungicide efficacy." eh="83eb161e" />
+    <e k="sf_disease_difficulty_1" v="[EN] Easy" eh="7f943921" />
+    <e k="sf_disease_difficulty_2" v="[EN] Normal" eh="960b44c5" />
+    <e k="sf_disease_difficulty_3" v="[EN] Hard" eh="36561831" />
+		<e k="sf_dis_septoria_tritici" v="[EN] Septoria Tritici Blotch" eh="1cad9da1" />
+		<e k="sf_dis_fhb" v="[EN] Fusarium Head Blight" eh="28a0c2d7" />
+		<e k="sf_dis_ergot" v="[EN] Ergot" eh="cb0a1a23" />
+		<e k="sf_dis_stripe_rust" v="[EN] Stripe Rust" eh="122c2fef" />
+		<e k="sf_dis_leaf_rust" v="[EN] Leaf Rust" eh="2f14f2ea" />
+		<e k="sf_dis_powdery_mildew" v="[EN] Powdery Mildew" eh="011040a3" />
+		<e k="sf_dis_tan_spot" v="[EN] Tan Spot" eh="5717aeec" />
+		<e k="sf_dis_net_blotch" v="[EN] Net Blotch" eh="7aec2b24" />
+		<e k="sf_dis_ramularia" v="[EN] Ramularia Leaf Spot" eh="8355d8f8" />
+		<e k="sf_dis_crown_rust" v="[EN] Crown Rust" eh="b9acaa43" />
+		<e k="sf_dis_leaf_blotch" v="[EN] Leaf Blotch" eh="1f5f784d" />
+		<e k="sf_dis_nclb" v="[EN] Northern Corn Leaf Blight" eh="a3525b71" />
+		<e k="sf_dis_common_rust" v="[EN] Common Rust" eh="5f826210" />
+		<e k="sf_dis_gray_leaf_spot" v="[EN] Gray Leaf Spot" eh="b36e5db8" />
+		<e k="sf_dis_sclerotinia_stem" v="[EN] Sclerotinia Stem Rot" eh="190c8937" />
+		<e k="sf_dis_sunflower_rust" v="[EN] Sunflower Rust" eh="34f2a2be" />
+		<e k="sf_dis_downy_mildew" v="[EN] Downy Mildew" eh="b221542a" />
+		<e k="sf_dis_late_blight" v="[EN] Late Blight" eh="1bc14339" />
+		<e k="sf_dis_early_blight" v="[EN] Early Blight" eh="7511a654" />
+		<e k="sf_dis_cercospora_leaf" v="[EN] Cercospora Leaf Spot" eh="1ef824d7" />
+		<e k="sf_dis_frogeye" v="[EN] Frogeye Leaf Spot" eh="1924760e" />
+		<e k="sf_dis_white_mold" v="[EN] White Mold" eh="d833fbf0" />
+		<e k="sf_dis_phytophthora_root" v="[EN] Phytophthora Root Rot" eh="aa360e1e" />
+		<e k="sf_dis_asian_rust" v="[EN] Asian Soybean Rust" eh="fec3aa67" />
+		<e k="sf_dis_ascochyta_blight" v="[EN] Ascochyta Blight" eh="48dc1517" />
+		<e k="sf_dis_bean_anthracnose" v="[EN] Bean Anthracnose" eh="bd03acec" />
+		<e k="sf_dis_root_rot" v="[EN] Root Rot" eh="0f98f939" />
+		<e k="sf_dis_verticillium_wilt" v="[EN] Verticillium Wilt" eh="ca6dee69" />
+		<e k="sf_dis_leaf_spot" v="[EN] Leaf Spot" eh="2087d91f" />
+		<e k="sf_dis_alfalfa_rust" v="[EN] Alfalfa Rust" eh="31879f81" />
+		<e k="sf_dis_clover_anthracnose" v="[EN] Clover Anthracnose" eh="ca929ac0" />
+		<e k="sf_dis_pasmo" v="[EN] Pasmo" eh="4d3166ae" />
+		<e k="sf_dis_anthracnose" v="[EN] Anthracnose" eh="d5ea8b42" />
+		<e k="sf_dis_rust" v="[EN] Rust" eh="f5e265d6" />
+		<e k="sf_dis_taro_leaf_blight" v="[EN] Taro Leaf Blight" eh="37240d66" />
+		<e k="sf_dis_corm_rot" v="[EN] Corm Rot" eh="e1f1b9c1" />
+		<e k="sf_dis_early_leaf_spot" v="[EN] Early Leaf Spot" eh="f887d13d" />
+		<e k="sf_dis_late_leaf_spot" v="[EN] Late Leaf Spot" eh="a012753f" />
+		<e k="sf_dis_peanut_rust" v="[EN] Peanut Rust" eh="5e46fad0" />
+		<e k="sf_dis_pod_rot" v="[EN] Sclerotinia Pod Rot" eh="244ed19f" />
+		<e k="sf_chem_PROPICONAZOLE" v="[EN] Propiconazole" eh="920d7ec6" />
+		<e k="sf_chem_TEBUCONAZOLE" v="[EN] Tebuconazole" eh="3755d13c" />
+		<e k="sf_chem_PROTHIOCONAZOLE" v="[EN] Prothioconazole" eh="98cddda9" />
+		<e k="sf_chem_FLUSILAZOLE" v="[EN] Flusilazole" eh="f79343a9" />
+		<e k="sf_chem_CYPROCONAZOLE" v="[EN] Cyproconazole" eh="220d4dca" />
+		<e k="sf_chem_DIFENOCONAZOLE" v="[EN] Difenoconazole" eh="6f2dce44" />
+		<e k="sf_chem_AZOXYSTROBIN" v="[EN] Azoxystrobin" eh="34160dda" />
+		<e k="sf_chem_PYRACLOSTROBIN" v="[EN] Pyraclostrobin" eh="b5f07095" />
+		<e k="sf_chem_TRIFLOXYSTROBIN" v="[EN] Trifloxystrobin" eh="9d00f6d7" />
+		<e k="sf_chem_BOSCALID" v="[EN] Boscalid" eh="5c0a4c40" />
+		<e k="sf_chem_PENTHIOPYRAD" v="[EN] Penthiopyrad" eh="f790ed1a" />
+		<e k="sf_chem_CHLOROTHALONIL" v="[EN] Chlorothalonil" eh="67688d75" />
+		<e k="sf_chem_MANCOZEB" v="[EN] Mancozeb" eh="5117fb39" />
+		<e k="sf_chem_MANEB" v="[EN] Maneb" eh="879fac4d" />
+		<e k="sf_chem_METALAXYL" v="[EN] Metalaxyl" eh="2c4598e3" />
+		<e k="sf_chem_FOSETYL_AL" v="[EN] Fosetyl-Al" eh="d292d7c7" />
+		<e k="sf_chem_THIOPHANATE_METHYL" v="[EN] Thiophanate-methyl" eh="46dd6b58" />
+		<e k="sf_chem_SULFUR" v="[EN] Sulfur" eh="529df3e8" />
+		<e k="sf_chem_COPPER_HYDROXIDE" v="[EN] Copper Hydroxide" eh="6b294851" />
+		<e k="sf_chem_FLUDIOXONIL" v="[EN] Fludioxonil" eh="d6448fdb" />
+		<e k="sf_chem_METALAXYL_M" v="[EN] Metalaxyl-M" eh="706a0ca9" />
+		<e k="sf_chem_THIRAM" v="[EN] Thiram" eh="63e2540c" />
+		<e k="sf_chem_CAPTAN" v="[EN] Captan" eh="dc89f49c" />
+    <e k="sf_treat_cycle" v="[EN] Next Fungicide" eh="50e1cf57" />
+    <e k="sf_treat_apply" v="[EN] Apply Fungicide" eh="66b90889" />
+		<e k="sf_treat_vs" v="[EN] vs" eh="f4842dcb" />
+		<e k="sf_treat_applied" v="[EN] Applied %s: %d%% control, -%d pressure, %d-day protection, $%d" eh="03a47259" />
+		<e k="sf_treat_sent_hint" v="[EN] Treatment requested." eh="93be50ad" />
+    <e k="sf_scout_title" v="[EN] Field Scout" eh="f2699e28" />
+    <e k="sf_scout_hint" v="[EN] Cycle to a fungicide, then Apply." eh="32fb84f4" />
+    <e k="input_SF_TREATMENT" v="[EN] Open Soil Treatment Panel" eh="a14be056" />
+		<e k="sf_scout_tier_none" v="[EN] healthy" eh="741839f3" />
+		<e k="sf_scout_tier_mild" v="[EN] mild" eh="3cc4af7c" />
+		<e k="sf_scout_tier_moderate" v="[EN] moderate" eh="7f0217cd" />
+		<e k="sf_scout_tier_severe" v="[EN] severe" eh="e709e56a" />
+		<e k="sf_scout_pressure_label" v="[EN] Disease pressure" eh="49abd79e" />
+		<e k="sf_scout_budget" v="[EN] Budget" eh="822bead6" />
+		<e k="sf_scout_clean_title" v="[EN] No active disease" eh="6bc14095" />
+		<e k="sf_scout_clean_hint" v="[EN] Field looks healthy. You can still apply a preventative." eh="b81cdbda" />
+		<e k="sf_scout_disabled" v="[EN] Disease system disabled" eh="a2ffd328" />
+    <e k="sf_admin_field_set_disease_label" v="[EN] Set Field Disease" eh="faa773f5" />
+		<e k="sf_admin_field_set_disease_desc" v="[EN] Manually set the disease pressure (and disease type) for the current field" eh="d86eb3e1" />
     </elements>
 
 

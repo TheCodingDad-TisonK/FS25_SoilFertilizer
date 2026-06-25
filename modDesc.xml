@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <modDesc descVersion="108">
     <author>TisonK</author>
-    <version>2.4.4.0</version>
+    <version>2.4.5.0</version>
     <modName>FS25_SoilFertilizer</modName>
     <title>
         <en>Realistic Soil &amp; Fertilizer</en>
@@ -91,6 +91,8 @@
         <action name="SF_HUD_DRAG"          category="ONFOOT" />
         <action name="SF_VARIABLE_RATE"     category="VEHICLE" />
         <action name="SF_MINIMAP_ZOOM"      category="ONFOOT" />
+        <action name="SF_SCOUT"             category="ONFOOT" />
+        <action name="SF_TREATMENT"         category="ONFOOT" />
     </actions>
 
     <l10n filenamePrefix="translations/translation" />
@@ -109,6 +111,12 @@
             <binding device="KB_MOUSE_DEFAULT" input="KEY_lalt KEY_7" />
         </actionBinding>
         <actionBinding action="SF_MINIMAP_ZOOM" />
+        <actionBinding action="SF_SCOUT">
+            <binding device="KB_MOUSE_DEFAULT" input="KEY_lshift KEY_k" />
+        </actionBinding>
+        <actionBinding action="SF_TREATMENT">
+            <binding device="KB_MOUSE_DEFAULT" input="KEY_lshift KEY_t" />
+        </actionBinding>
     </inputBinding>
 
     <!-- Custom fill types declared in external file (FS25 requires filename= attribute) -->

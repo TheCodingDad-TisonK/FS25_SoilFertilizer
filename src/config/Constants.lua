@@ -1110,6 +1110,282 @@ SoilConstants.DISEASE_CLIMATE_MOISTURE = {
 }
 
 -- ========================================
+-- DISEASE & CHEMICAL MANAGEMENT (named crop-specific diseases)
+-- ========================================
+-- A naming + chemistry layer over the diseasePressure scalar above. The scalar
+-- engine still drives the infection LEVEL (0-100); this layer:
+--   • names the active infection per crop + current weather (field.activeDisease)
+--   • scales the yield bite by the named disease's severity
+--   • gates which fungicide clears it well (effectiveness matrix)
+-- Treatment is MENU / console driven (select chemical → pay → apply). It is NOT a
+-- set of physical fill types — the generic FUNGICIDE fill type above still works
+-- for vanilla spraying. Pure data here; logic lives in DiseaseSystem.lua.
+
+-- Canonical disease categories. Every named disease maps to exactly one. Fungicide
+-- effectiveness is defined per category (mirrors the agronomy effectiveness chart).
+SoilConstants.DISEASE_CATEGORIES = {
+    "powdery_mildew", "rust", "blotch", "septoria", "fhb", "leaf_spot",
+    "frogeye", "anthracnose", "ascochyta", "white_mold", "sclerotinia",
+    "verticillium", "blight", "root_rot", "pasmo",
+}
+
+-- Per-disease definitions (flat id → traits). Referenced by DISEASE_REGISTRY.
+--   cat    : effectiveness category (see above)
+--   sci    : scientific name (international — not localized)
+--   nameKey: l10n key suffix → "sf_dis_<id>" for the common display name
+--   cool   : true = favored by cool temps, false = favored by warm temps, nil = any
+--   wet    : true = favored by wet/humid weather (rain pushes it harder)
+--   season : {spring, summer, fall} selection weights (winter ≈ dormant)
+--   yMin/yMax : fractional yield impact range used for severity scaling
+SoilConstants.DISEASE_DEFS = {
+    -- Cereals / grains
+    septoria_tritici   = { cat="septoria",       sci="Zymoseptoria tritici",        cool=true,  wet=true,  season={1.5,0.8,1.2}, yMin=0.15, yMax=0.30 },
+    fhb                = { cat="fhb",             sci="Fusarium graminearum",        cool=false, wet=true,  season={1.0,1.3,1.2}, yMin=0.20, yMax=0.40 },
+    ergot              = { cat="fhb",             sci="Claviceps purpurea",          cool=true,  wet=true,  season={1.4,0.6,1.1}, yMin=0.05, yMax=0.30 },
+    stripe_rust        = { cat="rust",            sci="Puccinia striiformis",        cool=true,  wet=true,  season={1.4,0.9,1.0}, yMin=0.10, yMax=0.25 },
+    leaf_rust          = { cat="rust",            sci="Puccinia triticina",          cool=false, wet=true,  season={1.0,1.2,1.2}, yMin=0.08, yMax=0.18 },
+    powdery_mildew     = { cat="powdery_mildew",  sci="Blumeria graminis",           cool=true,  wet=false, season={1.4,1.0,0.9}, yMin=0.05, yMax=0.15 },
+    tan_spot           = { cat="leaf_spot",       sci="Drechslera tritici-repentis", cool=false, wet=false, season={0.9,1.2,1.0}, yMin=0.10, yMax=0.20 },
+    net_blotch         = { cat="blotch",          sci="Pyrenophora teres",           cool=true,  wet=true,  season={1.3,0.9,1.1}, yMin=0.10, yMax=0.20 },
+    ramularia          = { cat="leaf_spot",       sci="Ramularia collo-cygni",       cool=true,  wet=true,  season={1.2,1.0,1.0}, yMin=0.08, yMax=0.18 },
+    crown_rust         = { cat="rust",            sci="Puccinia coronata",           cool=false, wet=true,  season={1.0,1.2,1.2}, yMin=0.10, yMax=0.22 },
+    leaf_blotch        = { cat="blotch",          sci="Rhynchosporium secalis",      cool=true,  wet=true,  season={1.3,0.8,1.1}, yMin=0.10, yMax=0.18 },
+    -- Maize / sorghum
+    nclb               = { cat="leaf_spot",       sci="Exserohilum turcicum",        cool=false, wet=true,  season={0.9,1.3,1.1}, yMin=0.10, yMax=0.25 },
+    common_rust        = { cat="rust",            sci="Puccinia sorghi",             cool=false, wet=true,  season={0.9,1.2,1.1}, yMin=0.08, yMax=0.18 },
+    gray_leaf_spot     = { cat="leaf_spot",       sci="Cercospora zeae-maydis",      cool=false, wet=true,  season={0.8,1.3,1.2}, yMin=0.12, yMax=0.28 },
+    -- Oilseeds / roots
+    sclerotinia_stem   = { cat="sclerotinia",     sci="Sclerotinia sclerotiorum",    cool=true,  wet=true,  season={1.2,1.0,1.3}, yMin=0.15, yMax=0.35 },
+    sunflower_rust     = { cat="rust",            sci="Puccinia helianthi",          cool=false, wet=true,  season={0.9,1.2,1.2}, yMin=0.08, yMax=0.18 },
+    downy_mildew       = { cat="root_rot",        sci="Plasmopara halstedii",        cool=true,  wet=true,  season={1.3,0.9,1.0}, yMin=0.05, yMax=0.25 },
+    late_blight        = { cat="blight",          sci="Phytophthora infestans",      cool=true,  wet=true,  season={1.2,1.0,1.4}, yMin=0.25, yMax=0.55 },
+    early_blight       = { cat="leaf_spot",       sci="Alternaria solani",           cool=false, wet=true,  season={0.9,1.3,1.1}, yMin=0.10, yMax=0.25 },
+    cercospora_leaf    = { cat="leaf_spot",       sci="Cercospora beticola",         cool=false, wet=true,  season={0.8,1.3,1.2}, yMin=0.12, yMax=0.28 },
+    -- Pulses
+    frogeye            = { cat="frogeye",         sci="Cercospora sojina",           cool=false, wet=true,  season={0.9,1.3,1.1}, yMin=0.10, yMax=0.20 },
+    white_mold         = { cat="white_mold",      sci="Sclerotinia sclerotiorum",    cool=true,  wet=true,  season={1.1,1.0,1.3}, yMin=0.15, yMax=0.35 },
+    phytophthora_root  = { cat="root_rot",        sci="Phytophthora sojae",          cool=false, wet=true,  season={1.0,1.2,1.0}, yMin=0.05, yMax=0.25 },
+    asian_rust         = { cat="rust",            sci="Phakopsora pachyrhizi",       cool=false, wet=true,  season={0.8,1.3,1.3}, yMin=0.10, yMax=0.30 },
+    ascochyta_blight   = { cat="ascochyta",       sci="Ascochyta spp.",              cool=true,  wet=true,  season={1.4,0.8,1.1}, yMin=0.15, yMax=0.40 },
+    bean_anthracnose   = { cat="anthracnose",     sci="Colletotrichum lindemuthianum", cool=false, wet=true, season={0.9,1.3,1.1}, yMin=0.10, yMax=0.25 },
+    root_rot           = { cat="root_rot",        sci="Fusarium / Rhizoctonia spp.", cool=nil,   wet=true,  season={1.0,1.0,1.1}, yMin=0.05, yMax=0.20 },
+    -- Forage
+    verticillium_wilt  = { cat="verticillium",    sci="Verticillium albo-atrum",     cool=false, wet=false, season={1.0,1.2,1.0}, yMin=0.20, yMax=0.40 },
+    leaf_spot          = { cat="leaf_spot",       sci="Cercospora / Septoria spp.",  cool=true,  wet=true,  season={1.1,1.0,1.2}, yMin=0.10, yMax=0.25 },
+    alfalfa_rust       = { cat="rust",            sci="Uromyces striatus",           cool=false, wet=true,  season={1.0,1.1,1.2}, yMin=0.08, yMax=0.18 },
+    clover_anthracnose = { cat="anthracnose",     sci="Colletotrichum trifolii",     cool=false, wet=true,  season={0.9,1.3,1.0}, yMin=0.10, yMax=0.20 },
+    -- Specialty grains
+    pasmo              = { cat="pasmo",           sci="Septoria linicola",           cool=true,  wet=true,  season={1.2,1.0,1.2}, yMin=0.10, yMax=0.25 },
+    anthracnose        = { cat="anthracnose",     sci="Colletotrichum spp.",         cool=false, wet=true,  season={0.9,1.3,1.1}, yMin=0.08, yMax=0.20 },
+    rust               = { cat="rust",            sci="Puccinia spp.",               cool=false, wet=true,  season={1.0,1.1,1.2}, yMin=0.10, yMax=0.25 },
+    -- Root / earth (tropical)
+    taro_leaf_blight   = { cat="blight",          sci="Phytophthora colocasiae",     cool=false, wet=true,  season={1.0,1.4,1.2}, yMin=0.30, yMax=0.60 },
+    corm_rot           = { cat="root_rot",        sci="Pythium / Fusarium spp.",     cool=false, wet=true,  season={0.9,1.2,1.2}, yMin=0.10, yMax=0.40 },
+    early_leaf_spot    = { cat="leaf_spot",       sci="Cercospora arachidicola",     cool=false, wet=true,  season={1.0,1.3,1.0}, yMin=0.15, yMax=0.35 },
+    late_leaf_spot     = { cat="leaf_spot",       sci="Cercosporidium personatum",   cool=false, wet=true,  season={0.8,1.2,1.3}, yMin=0.15, yMax=0.40 },
+    peanut_rust        = { cat="rust",            sci="Puccinia arachidis",          cool=false, wet=true,  season={0.9,1.2,1.2}, yMin=0.08, yMax=0.18 },
+    pod_rot            = { cat="sclerotinia",     sci="Sclerotinia sclerotiorum",    cool=true,  wet=true,  season={1.0,1.0,1.3}, yMin=0.10, yMax=0.25 },
+}
+
+-- Crop → its candidate diseases (lowercased internal fruit name → list of DISEASE_DEFS ids).
+-- Unknown crops fall back to DISEASE_REGISTRY_DEFAULT. Keys cover base FS25 fruit names plus
+-- common multifruit/mod crops named in the disease proposal.
+SoilConstants.DISEASE_REGISTRY = {
+    wheat       = { "septoria_tritici", "fhb", "stripe_rust", "powdery_mildew", "tan_spot", "leaf_rust" },
+    barley      = { "net_blotch", "powdery_mildew", "leaf_rust", "ramularia" },
+    oat         = { "crown_rust", "powdery_mildew", "leaf_blotch" },
+    rye         = { "powdery_mildew", "ergot", "stripe_rust", "leaf_rust", "fhb" },
+    spelt       = { "stripe_rust", "septoria_tritici", "ergot", "powdery_mildew" },
+    triticale   = { "powdery_mildew", "fhb", "tan_spot", "leaf_rust" },
+    maize       = { "nclb", "common_rust", "gray_leaf_spot" },
+    sorghum     = { "leaf_spot", "rust", "anthracnose" },
+    canola      = { "sclerotinia_stem", "leaf_spot", "white_mold" },
+    sunflower   = { "sclerotinia_stem", "sunflower_rust", "downy_mildew" },
+    potato      = { "late_blight", "early_blight" },
+    sugarbeet   = { "cercospora_leaf", "rust", "powdery_mildew" },
+    soybean     = { "frogeye", "white_mold", "phytophthora_root", "asian_rust" },
+    pea         = { "ascochyta_blight", "white_mold", "root_rot" },
+    peas        = { "ascochyta_blight", "white_mold", "root_rot" },
+    driedpeas   = { "ascochyta_blight", "white_mold", "root_rot" },
+    chickpea    = { "ascochyta_blight", "powdery_mildew" },
+    chickpeas   = { "ascochyta_blight", "powdery_mildew" },
+    lentil      = { "ascochyta_blight", "white_mold", "root_rot" },
+    lentils     = { "ascochyta_blight", "white_mold", "root_rot" },
+    greenbean   = { "white_mold", "bean_anthracnose", "ascochyta_blight" },
+    bean        = { "white_mold", "bean_anthracnose", "ascochyta_blight" },
+    beans       = { "white_mold", "bean_anthracnose", "ascochyta_blight" },
+    pintobean   = { "white_mold", "bean_anthracnose", "ascochyta_blight" },
+    pintobeans  = { "white_mold", "bean_anthracnose", "ascochyta_blight" },
+    alfalfa     = { "verticillium_wilt", "leaf_spot", "alfalfa_rust" },
+    luzerne     = { "verticillium_wilt", "leaf_spot", "alfalfa_rust" },
+    clover      = { "clover_anthracnose", "powdery_mildew", "leaf_spot", "rust" },
+    whiteclover = { "clover_anthracnose", "powdery_mildew" },
+    redclover   = { "leaf_spot", "rust" },
+    grass       = { "leaf_spot", "rust", "powdery_mildew" },
+    meadow      = { "leaf_spot", "rust", "powdery_mildew" },
+    greenrye    = { "powdery_mildew", "leaf_blotch" },
+    miscanthus  = { "leaf_spot", "rust" },
+    mint        = { "powdery_mildew", "leaf_spot" },
+    linseed     = { "pasmo", "sclerotinia_stem" },
+    flax        = { "pasmo", "sclerotinia_stem" },
+    buckwheat   = { "powdery_mildew", "anthracnose" },
+    millet      = { "powdery_mildew", "rust" },
+    mustard     = { "sclerotinia_stem", "rust" },
+    poppy       = { "powdery_mildew", "leaf_spot" },
+    sesame      = { "anthracnose", "leaf_spot" },
+    safflower   = { "rust", "sclerotinia_stem" },
+    cotton      = { "leaf_spot", "rust" },
+    taro        = { "taro_leaf_blight", "corm_rot" },
+    peanut      = { "early_leaf_spot", "late_leaf_spot", "peanut_rust", "pod_rot" },
+    peanuts     = { "early_leaf_spot", "late_leaf_spot", "peanut_rust", "pod_rot" },
+}
+SoilConstants.DISEASE_REGISTRY_DEFAULT = { "leaf_spot", "rust", "powdery_mildew" }
+
+-- Effectiveness fallback for any (chemical, category) pair not explicitly listed.
+SoilConstants.DISEASE_DEFAULT_EFFECTIVENESS = 0.25
+
+-- Fungicide catalog. Menu-selectable chemicals (no physical fill type).
+--   group   : chemistry family (for UI grouping + resistance-rotation tracking)
+--   tier    : 1 basic / 2 intermediate / 3 advanced (progression flavor)
+--   costPerHa : $/ha (converted from the proposal's $/acre × 2.471, rounded)
+--   win     : { start, end } growth-stage fraction 0..1 where the product is on-window
+--   prot    : base protection days (scaled by climate fungicideMult at apply time)
+--   seedTreatment : true = applied pre-plant (knocks starting pressure, long protection)
+--   eff     : category → 0..1 control rate (unlisted categories → DEFAULT_EFFECTIVENESS)
+SoilConstants.FUNGICIDE_CATALOG = {
+    -- ── Triazoles (broad-spectrum systemic) ─────────────────────────────────
+    PROPICONAZOLE   = { group="triazole", tier=2, costPerHa=44, win={0.30,0.75}, prot=14,
+        eff={ powdery_mildew=.90, rust=.90, blotch=.90, septoria=.90, fhb=.80, leaf_spot=.70,
+              verticillium=.85, anthracnose=.55, ascochyta=.55, white_mold=.40, sclerotinia=.40,
+              frogeye=.55, pasmo=.70 } },
+    TEBUCONAZOLE    = { group="triazole", tier=2, costPerHa=52, win={0.30,0.70}, prot=14,
+        eff={ fhb=.88, septoria=.85, blotch=.80, ascochyta=.80, leaf_spot=.78, rust=.82,
+              powdery_mildew=.80, anthracnose=.70, white_mold=.55, sclerotinia=.55, frogeye=.60,
+              verticillium=.70, pasmo=.70 } },
+    PROTHIOCONAZOLE = { group="triazole", tier=3, costPerHa=62, win={0.25,0.65}, prot=16,
+        eff={ rust=.92, septoria=.92, fhb=.92, blotch=.90, powdery_mildew=.88, leaf_spot=.85,
+              ascochyta=.80, anthracnose=.75, white_mold=.65, sclerotinia=.65, frogeye=.70,
+              verticillium=.80, pasmo=.80 } },
+    FLUSILAZOLE     = { group="triazole", tier=2, costPerHa=40, win={0.20,0.40}, prot=12,
+        eff={ powdery_mildew=.85, rust=.70, leaf_spot=.70, blotch=.70, septoria=.70, fhb=.55 } },
+    CYPROCONAZOLE   = { group="triazole", tier=2, costPerHa=43, win={0.20,0.50}, prot=13,
+        eff={ rust=.85, powdery_mildew=.82, blotch=.75, leaf_spot=.72, ascochyta=.70, septoria=.72 } },
+    DIFENOCONAZOLE  = { group="triazole", tier=2, costPerHa=46, win={0.20,0.45}, prot=13,
+        eff={ rust=.85, powdery_mildew=.82, septoria=.82, anthracnose=.75, leaf_spot=.78, blotch=.78 } },
+    -- ── Strobilurins (QoI, fast-acting preventative/curative) ───────────────
+    AZOXYSTROBIN    = { group="strobilurin", tier=2, costPerHa=54, win={0.25,0.70}, prot=14,
+        eff={ leaf_spot=.90, anthracnose=.88, frogeye=.88, rust=.82, blotch=.78, blight=.55,
+              ascochyta=.70, white_mold=.70, sclerotinia=.60, septoria=.70, powdery_mildew=.65,
+              fhb=.60, verticillium=.70, pasmo=.75 } },
+    PYRACLOSTROBIN  = { group="strobilurin", tier=3, costPerHa=58, win={0.25,0.65}, prot=14,
+        eff={ leaf_spot=.88, frogeye=.88, anthracnose=.85, ascochyta=.80, rust=.82, blotch=.80,
+              white_mold=.68, sclerotinia=.62, blight=.50 } },
+    TRIFLOXYSTROBIN = { group="strobilurin", tier=2, costPerHa=53, win={0.30,0.70}, prot=14,
+        eff={ powdery_mildew=.82, rust=.82, septoria=.80, leaf_spot=.80, blotch=.78 } },
+    -- ── SDHI (succinate dehydrogenase, longer residual, late season) ────────
+    BOSCALID        = { group="sdhi", tier=3, costPerHa=62, win={0.40,0.80}, prot=18,
+        eff={ white_mold=.90, sclerotinia=.90, anthracnose=.82, ascochyta=.85, leaf_spot=.80,
+              frogeye=.80, blight=.55, verticillium=.50 } },
+    PENTHIOPYRAD    = { group="sdhi", tier=3, costPerHa=64, win={0.40,0.70}, prot=18,
+        eff={ frogeye=.85, anthracnose=.82, leaf_spot=.82, white_mold=.80, ascochyta=.78, sclerotinia=.78 } },
+    -- ── Contact protectants (multi-site, budget, preventative) ──────────────
+    CHLOROTHALONIL  = { group="contact", tier=1, costPerHa=30, win={0.20,0.60}, prot=10,
+        eff={ powdery_mildew=.60, rust=.60, blotch=.60, septoria=.65, fhb=.55, leaf_spot=.62,
+              anthracnose=.60, ascochyta=.55, white_mold=.50, sclerotinia=.58, frogeye=.55,
+              verticillium=.45, blight=.45, pasmo=.55 } },
+    MANCOZEB        = { group="contact", tier=1, costPerHa=25, win={0.20,0.50}, prot=10,
+        eff={ leaf_spot=.60, rust=.58, powdery_mildew=.55, anthracnose=.58, blotch=.55,
+              septoria=.55, blight=.50 } },
+    MANEB           = { group="contact", tier=1, costPerHa=19, win={0.20,0.50}, prot=9,
+        eff={ leaf_spot=.52, anthracnose=.50, rust=.50, blotch=.48, powdery_mildew=.45 } },
+    -- ── Specialty (oomycete / crop-specific) ────────────────────────────────
+    METALAXYL       = { group="specialty", tier=2, costPerHa=42, win={0.10,0.35}, prot=14,
+        eff={ root_rot=.88, blight=.80, downy_mildew=.85 } },
+    FOSETYL_AL      = { group="specialty", tier=3, costPerHa=50, win={0.15,0.50}, prot=12,
+        eff={ blight=.90, root_rot=.80 } },
+    THIOPHANATE_METHYL = { group="specialty", tier=2, costPerHa=47, win={0.30,0.70}, prot=14,
+        eff={ ascochyta=.82, anthracnose=.80, leaf_spot=.78, sclerotinia=.75, white_mold=.70 } },
+    -- ── Early-season foliar preventatives ───────────────────────────────────
+    SULFUR          = { group="preventative", tier=1, costPerHa=18, win={0.10,0.30}, prot=8,
+        eff={ powdery_mildew=.70, rust=.50 } },
+    COPPER_HYDROXIDE = { group="preventative", tier=1, costPerHa=27, win={0.15,0.35}, prot=9,
+        eff={ leaf_spot=.55, rust=.55, blight=.50, anthracnose=.50 } },
+    -- ── Seed treatments (pre-plant) ─────────────────────────────────────────
+    FLUDIOXONIL     = { group="seed", tier=1, costPerHa=20, win={0.0,0.10}, prot=30, seedTreatment=true,
+        eff={ root_rot=.70 } },
+    METALAXYL_M     = { group="seed", tier=2, costPerHa=24, win={0.0,0.10}, prot=30, seedTreatment=true,
+        eff={ root_rot=.80, blight=.60 } },
+    THIRAM          = { group="seed", tier=1, costPerHa=18, win={0.0,0.10}, prot=25, seedTreatment=true,
+        eff={ root_rot=.55, leaf_spot=.45 } },
+    CAPTAN          = { group="seed", tier=1, costPerHa=20, win={0.0,0.10}, prot=25, seedTreatment=true,
+        eff={ root_rot=.55, anthracnose=.55 } },
+}
+
+-- Ordered chemical id list for stable UI / console iteration.
+SoilConstants.FUNGICIDE_ORDER = {
+    "PROPICONAZOLE", "TEBUCONAZOLE", "PROTHIOCONAZOLE", "FLUSILAZOLE", "CYPROCONAZOLE", "DIFENOCONAZOLE",
+    "AZOXYSTROBIN", "PYRACLOSTROBIN", "TRIFLOXYSTROBIN",
+    "BOSCALID", "PENTHIOPYRAD",
+    "CHLOROTHALONIL", "MANCOZEB", "MANEB",
+    "METALAXYL", "FOSETYL_AL", "THIOPHANATE_METHYL",
+    "SULFUR", "COPPER_HYDROXIDE",
+    "FLUDIOXONIL", "METALAXYL_M", "THIRAM", "CAPTAN",
+}
+
+-- Treatment mechanics (timing, weather, disease-stage gating).
+SoilConstants.DISEASE_TREATMENT = {
+    OUT_OF_WINDOW_MULT = 0.60,  -- effectiveness factor when applied outside the chemical's window
+    RAIN_PENALTY       = 0.30,  -- effectiveness lost if applied while raining (washoff)
+    -- Disease-stage curative falloff: early infection treats well, late does not.
+    STAGE_EARLY_MAX    = 25,    -- pressure ≤ this = early infection
+    STAGE_LATE_MIN     = 75,    -- pressure ≥ this = late infection
+    STAGE_EARLY_EFF    = 1.00,  -- multiplier at/below early
+    STAGE_LATE_EFF     = 0.40,  -- multiplier at/above late (linear between)
+    -- Pressure removed = effectiveness × this (100 = a fully effective spray clears any tier).
+    MAX_PRESSURE_REDUCTION = 100,
+    MIN_EFFECTIVE      = 0.30,  -- below this control rate, treatment is "ineffective" (UI warning)
+}
+
+-- Disease difficulty (independent of the mod-wide difficulty). 1=Easy 2=Normal 3=Hard.
+SoilConstants.DISEASE_DIFFICULTY = {
+    [1] = { pressureMult = 0.60, fungicideEffMult = 1.15 }, -- Easy
+    [2] = { pressureMult = 1.00, fungicideEffMult = 1.00 }, -- Normal
+    [3] = { pressureMult = 1.30, fungicideEffMult = 0.90 }, -- Hard
+}
+
+-- Soil-health → disease pressure modifiers (multiply daily build-up).
+SoilConstants.DISEASE_SOIL_HEALTH = {
+    LOW_PH_THRESHOLD  = 6.0,  LOW_PH_MULT  = 1.20,  -- acidic soil = more disease
+    HIGH_N_THRESHOLD  = 80,   HIGH_N_MULT  = 1.15,  -- lush high-N canopy = white mold / mildew
+    OM_GOOD_THRESHOLD = 4.0,  OM_GOOD_MULT = 0.85,  -- good organic matter suppresses disease
+}
+
+-- Crop family classification (lowercased fruit name → family) for rotation scoring.
+SoilConstants.CROP_FAMILY = {
+    wheat="grain", barley="grain", oat="grain", rye="grain", spelt="grain", triticale="grain",
+    maize="grain", sorghum="grain", millet="grain", buckwheat="grain", greenrye="grain",
+    soybean="pulse", pea="pulse", peas="pulse", driedpeas="pulse", chickpea="pulse", chickpeas="pulse",
+    lentil="pulse", lentils="pulse", greenbean="pulse", bean="pulse", beans="pulse",
+    pintobean="pulse", pintobeans="pulse",
+    canola="oilseed", sunflower="oilseed", linseed="oilseed", flax="oilseed", mustard="oilseed",
+    poppy="oilseed", sesame="oilseed", safflower="oilseed",
+    alfalfa="forage", luzerne="forage", clover="forage", whiteclover="forage", redclover="forage",
+    grass="forage", meadow="forage", miscanthus="forage", mint="forage",
+    potato="root", sugarbeet="root", taro="root", peanut="root", peanuts="root", carrot="root",
+    parsnip="root", beetroot="root", cotton="other",
+}
+
+-- Rotation → disease pressure modifiers (multiply daily build-up).
+SoilConstants.DISEASE_ROTATION = {
+    MONO_2YR_MULT  = 1.50,  -- same crop last 2 harvests
+    MONO_3YR_MULT  = 1.80,  -- same crop last 3 harvests (e.g. peanuts replant)
+    SAME_FAMILY_2  = 1.20,  -- different crop but same family 2 yrs (shared pathogens)
+    ROTATE_MULT    = 0.75,  -- previous crop a different family
+    ROTATE_3YR_MULT= 0.55,  -- three distinct families in a row
+    LEGUME_BREAK_MULT = 0.60, -- a pulse or forage in the recent history breaks disease cycle
+}
+
+-- ========================================
 -- SOIL MAP OVERLAY (SoilMapOverlay.lua)
 -- ========================================
 -- Legend panel geometry expressed as fractions of the map render area.

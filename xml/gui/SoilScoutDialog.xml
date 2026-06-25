@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<!--
+    Soil Field Scout Dialog
+    Names the active crop disease and lets the player pick + apply a fungicide.
+    Controller: SoilScoutDialog (src/ui/SoilScoutDialog.lua)
+-->
+<GUI onOpen="onOpen" onClose="onClose" onCreate="onCreate">
+  <GuiElement profile="newLayer"/>
+  <Bitmap profile="dialogFullscreenBg" id="dialogBg"/>
+
+  <GuiElement profile="sfScout_bg" id="dialogElement">
+
+    <ThreePartBitmap profile="fs25_dialogBgMiddle"/>
+    <ThreePartBitmap profile="fs25_dialogBgTop"/>
+    <ThreePartBitmap profile="fs25_dialogBgBottom"/>
+
+    <GuiElement profile="fs25_dialogContentContainer">
+
+      <!-- Title -->
+      <Text profile="fs25_dialogTitle" id="scoutTitle"
+            text="$l10n_sf_scout_title" position="0px -30px"/>
+
+      <!-- Field id -->
+      <Text profile="sfScout_fieldId" id="scoutFieldId"
+            text="" position="0px -64px" size="600px 24px"/>
+
+      <!-- Disease block -->
+      <GuiElement profile="sfScout_section" position="0px -98px">
+        <Bitmap profile="sfScout_sectionBg" position="0px 0px"/>
+        <Text profile="sfScout_diseaseName" id="scoutDisease" text="--" position="0px -10px"/>
+        <Text profile="sfScout_sci"          id="scoutSci"     text=""   position="0px -42px"/>
+        <Text profile="sfScout_pressure"     id="scoutPressure" text=""  position="0px -70px"/>
+        <Text profile="sfScout_reco"         id="scoutReco"    text=""   position="0px -100px"/>
+      </GuiElement>
+
+      <!-- Fungicide selector (driven by Cycle/Apply) -->
+      <Text profile="sfScout_select" id="scoutSelChem"
+            text="" position="0px -250px" size="660px 26px"/>
+
+      <!-- Result / hint line -->
+      <Text profile="sfScout_hint" id="scoutHint"
+            text="$l10n_sf_scout_hint" position="0px -284px" size="660px 50px" wrapText="true"/>
+
+    </GuiElement>
+
+    <BoxLayout profile="fs25_dialogButtonBox">
+      <Button profile="buttonOK"   id="scoutCycleBtn" text="$l10n_sf_treat_cycle" onClick="onClickCycle"/>
+      <Button profile="buttonOK"   id="scoutApplyBtn" text="$l10n_sf_treat_apply" onClick="onClickApply"/>
+      <Button profile="buttonBack" id="scoutCloseBtn" text="$l10n_sf_detail_close" onClick="onClickClose"/>
+    </BoxLayout>
+
+  </GuiElement>
+
+  <GUIProfiles>
+
+    <Profile name="sfScout_bg" extends="fs25_dialogBg">
+      <size value="720px 410px"/>
+    </Profile>
+
+    <Profile name="sfScout_section" extends="emptyPanel" with="anchorTopCenter">
+      <size value="680px 132px"/>
+    </Profile>
+    <Profile name="sfScout_sectionBg" extends="baseReference" with="anchorTopCenter">
+      <size value="680px 132px"/>
+      <imageColor value="0.10 0.07 0.06 0.9"/>
+    </Profile>
+
+    <Profile name="sfScout_fieldId" extends="fs25_textDefault" with="anchorTopCenter">
+      <textSize value="18px"/>
+      <textBold value="true"/>
+      <textColor value="0.35 0.85 0.40 1.0"/>
+      <textAlignment value="center"/>
+    </Profile>
+
+    <Profile name="sfScout_diseaseName" extends="fs25_textDefault" with="anchorTopCenter">
+      <size value="660px 28px"/>
+      <textSize value="22px"/>
+      <textBold value="true"/>
+      <textColor value="1 0.55 0.30 1"/>
+      <textAlignment value="center"/>
+    </Profile>
+
+    <Profile name="sfScout_sci" extends="fs25_textDefault" with="anchorTopCenter">
+      <size value="660px 22px"/>
+      <textSize value="13px"/>
+      <textColor value="0.7 0.7 0.7 1"/>
+      <textAlignment value="center"/>
+    </Profile>
+
+    <Profile name="sfScout_pressure" extends="fs25_textDefault" with="anchorTopCenter">
+      <size value="660px 24px"/>
+      <textSize value="15px"/>
+      <textBold value="true"/>
+      <textColor value="1 1 1 1"/>
+      <textAlignment value="center"/>
+    </Profile>
+
+    <Profile name="sfScout_reco" extends="fs25_textDefault" with="anchorTopCenter">
+      <size value="660px 22px"/>
+      <textSize value="13px"/>
+      <textColor value="0.85 0.85 0.55 1"/>
+      <textAlignment value="center"/>
+    </Profile>
+
+    <Profile name="sfScout_select" extends="fs25_textDefault" with="anchorTopCenter">
+      <size value="660px 26px"/>
+      <textSize value="16px"/>
+      <textBold value="true"/>
+      <textColor value="0.45 0.85 0.95 1"/>
+      <textAlignment value="center"/>
+    </Profile>
+
+    <Profile name="sfScout_hint" extends="fs25_textDefault" with="anchorTopCenter">
+      <textSize value="12px"/>
+      <textColor value="0.65 0.65 0.65 1"/>
+      <textAlignment value="center"/>
+    </Profile>
+
+  </GUIProfiles>
+</GUI>
