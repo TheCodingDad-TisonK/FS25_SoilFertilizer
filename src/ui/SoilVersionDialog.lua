@@ -31,6 +31,7 @@ SoilVersionDialog.CHANGELOG = {
     "- Crop rotation and soil health now raise or lower disease pressure",
     "- New Disease Difficulty setting: Easy / Normal / Hard",
     "- Console: SoilScout, SoilTreat, SoilFungicides, SoilSetDiseaseDifficulty",
+    "- FIX: Field compaction can no longer read above 100% — the average is now capped",
 }
 
 -- ── i18n helper ───────────────────────────────────────────

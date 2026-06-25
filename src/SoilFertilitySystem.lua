@@ -5008,9 +5008,10 @@ function SoilFertilitySystem:loadFromXMLFile(xmlFile, key)
         if compSum > 0 then
             local areaInHa   = f.fieldArea or 1.0
             local totalCells = math.max(1, math.ceil(areaInHa / zone.CELL_AREA_HA))
+            local maxC = (SoilConstants.COMPACTION and SoilConstants.COMPACTION.MAX_COMPACTION) or 100.0
             f.compactionSum        = compSum
             f.compactionTotalCells = totalCells
-            f.compaction           = compSum / totalCells
+            f.compaction           = math.min(maxC, compSum / totalCells)
         end
 
         index = index + 1
@@ -5133,7 +5134,12 @@ function SoilFertilitySystem:onCompaction(farmlandId, worldX, worldZ, points)
         local areaInHa = field.fieldArea or 1.0
         field.compactionTotalCells = math.max(1, math.ceil(areaInHa / zone.CELL_AREA_HA))
     end
-    field.compaction = field.compactionSum / field.compactionTotalCells
+    -- Clamp the field-AVERAGE to MAX_COMPACTION. Each cell is already capped at 100, but the
+    -- average can creep past it when more cells get packed than `compactionTotalCells` — that
+    -- denominator comes from the crop-polygon fieldArea, while cells are packed across the
+    -- (larger) real field ground incl. headland/boundary cells. That was the "105% compaction"
+    -- overshoot in #703.
+    field.compaction = math.min(cp.MAX_COMPACTION, field.compactionSum / field.compactionTotalCells)
 
     -- 3. Write per-pixel to compaction density map layer
     if self.layerSystem and self.layerSystem.available then
@@ -5186,7 +5192,7 @@ function SoilFertilitySystem:onSubsoilerPass(farmlandId, worldX, worldZ, reliefP
 
     field.compactionSum = math.max(0, (field.compactionSum or 0) - (prev - newVal))
     local tc = field.compactionTotalCells or 0
-    field.compaction = tc > 0 and (field.compactionSum / tc) or 0
+    field.compaction = tc > 0 and math.min(cp.MAX_COMPACTION, field.compactionSum / tc) or 0
 
     -- Write per-pixel to compaction density map layer
     if self.layerSystem and self.layerSystem.available then
