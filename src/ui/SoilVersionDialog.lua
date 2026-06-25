@@ -24,17 +24,13 @@ SoilVersionDialog.INSTANCE = nil
 -- Max 11 lines are visible in the box; if more exist we stop on a bullet boundary and add a "full changelog on GitHub" note.
 -- These are intentionally NOT translated, as they are always in English and often contain technical terms that don't translate well.
 SoilVersionDialog.CHANGELOG = {
-    "- Grassland weeders/aerators now ease pasture compaction without reseeding",
-    "- Deep grassland sward-lifters (e.g. Latapia) decompact grass and keep the sward",
-    "- Fixed: subsoilers now fully clear compaction (were only partially relieving it)",
-    "- Alfalfa, grass & clover no longer get a false 'tired field' penalty on later cuts",
-    "- Organic matter now affects yield: rich soil gives a boost, poor soil a penalty",
-    "- Organic matter builds more slowly; ploughing now slowly burns it off",
-    "- Mowed hay & grass yield now responds to your soil nutrients",
-    "- Soil Monitor shows 'Meadow' instead of 'Fallow' on meadow fields",
-    "- Soil Monitor pauses readouts for fields put to sleep in Field Sentry",
-    "- Subsoilers now properly work organic matter & nitrogen into the soil",
-    "- Fixed phantom burnt-weed patches on clean fields after a reload",
+    "- NEW: Crop diseases — fields now catch named, crop-specific fungal diseases",
+    "- Scout a field (Shift+K) to identify the disease and the best fungicide to use",
+    "- 23 real fungicides, each with per-disease effectiveness, timing & weather rules",
+    "- Match the right chemical to the disease — the wrong one only half works",
+    "- Crop rotation and soil health now raise or lower disease pressure",
+    "- New Disease Difficulty setting: Easy / Normal / Hard",
+    "- Console: SoilScout, SoilTreat, SoilFungicides, SoilSetDiseaseDifficulty",
 }
 
 -- ── i18n helper ───────────────────────────────────────────

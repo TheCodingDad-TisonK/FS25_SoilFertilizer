@@ -165,6 +165,14 @@ SettingsSchema.definitions = {
         uiId = "sf_dm",
     },
     {
+        id = "diseaseDifficulty",
+        type = "number",
+        default = 2,  -- 1=Easy, 2=Normal, 3=Hard (named-disease pressure + fungicide efficacy)
+        min = 1,
+        max = 3,
+        uiId = "sf_disease_difficulty",
+    },
+    {
         id = "compactionEnabled",
         type = "boolean",
         default = true,

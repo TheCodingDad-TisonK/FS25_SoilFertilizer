@@ -94,12 +94,11 @@ function SoilTreatmentDialog.show(fieldId)
     if inst == nil then return end
 
     inst._fieldId = fieldId
-    
-    if g_gui:getIsGuiVisible() then
-        g_gui:showDialog("SoilTreatmentDialog")
-    else
-        g_gui:showGui("SoilTreatmentDialog")
-    end
+
+    -- Always use showDialog so the panel opens AND closes (via closeDialogByName)
+    -- whether or not a menu is already up. showGui replaced the active screen and
+    -- left the Close button unable to dismiss it on foot (the orphaned-panel bug).
+    g_gui:showDialog("SoilTreatmentDialog")
 end
 
 -- ── Lifecycle ─────────────────────────────────────────────
@@ -320,7 +319,7 @@ end
 
 function SoilTreatmentDialog:_setAllNoAction()
     local els = {
-        self.treatPHAction, self.treatOMAction, 
+        self.treatPHAction, self.treatOMAction,
         self.treatNAction, self.treatPAction, self.treatKAction,
         self.treatWeedAction, self.treatPestAction, self.treatDiseaseAction
     }

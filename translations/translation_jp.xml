@@ -985,6 +985,24 @@
     	<e k="sf_fs_reason_manual" v="手動" eh="3c78b355" />
     	<e k="sf_fs_reason_npc" v="NPC契約" eh="2e1a268b" />
     	<e k="sf_fs_reason_deco" v="装飾用" eh="8a817367" />
+    <e k="input_SF_SCOUT" v="Scout Field for Disease" />
+    <e k="sf_scout_no_field" v="Stand on a field to scout it." />
+    <e k="sf_scout_found" v="Field %d: %s detected (%d%% pressure). Best: %s" />
+    <e k="sf_scout_pressure" v="Field %d: disease pressure %d%% - scout again to identify it." />
+    <e k="sf_scout_healthy" v="Field %d: no disease detected." />
+    <e k="sf_scout_clean" v="healthy" />
+    <e k="sf_treat_best" v="best" />
+    <e k="sf_disease_difficulty_short" v="Disease Difficulty" />
+    <e k="sf_disease_difficulty_long" v="How aggressively named crop diseases build up and how well fungicides work." />
+    <e k="sf_desc_diseaseDifficulty" v="Easy/Normal/Hard: named-disease pressure and fungicide efficacy." />
+    <e k="sf_disease_difficulty_1" v="Easy" />
+    <e k="sf_disease_difficulty_2" v="Normal" />
+    <e k="sf_disease_difficulty_3" v="Hard" />
+    <e k="sf_treat_cycle" v="Next Fungicide" />
+    <e k="sf_treat_apply" v="Apply Fungicide" />
+    <e k="sf_scout_title" v="Field Scout" />
+    <e k="sf_scout_hint" v="Cycle to a fungicide, then Apply." />
+    <e k="input_SF_TREATMENT" v="Open Soil Treatment Panel" />
     </elements>
 
 

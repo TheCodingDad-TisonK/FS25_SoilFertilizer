@@ -93,10 +93,16 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
             SoilLogger.info("Soil Field Detail dialog registered")
         end
 
-        -- Treatment Detail dialog (opened from PDA Screen treatment list)
+        -- Treatment Detail dialog (opened from PDA Screen treatment list + SF_TREATMENT hotkey)
         if SoilTreatmentDialog and g_gui then
             SoilTreatmentDialog.register(modDirectory)
             SoilLogger.info("Soil Treatment dialog registered")
+        end
+
+        -- Field Scout dialog (opened from the SF_SCOUT hotkey)
+        if SoilScoutDialog and g_gui then
+            SoilScoutDialog.register(modDirectory)
+            SoilLogger.info("Soil Scout dialog registered")
         end
 
         -- Version/changelog dialog (shown once per version on load)
@@ -257,6 +263,35 @@ function SoilFertilityManager.new(mission, modDirectory, modName, disableGUI)
                         g_SoilFertilityManager.minimapZoomEventId = zoomId
                         g_inputBinding:setActionEventTextVisibility(zoomId, false)
                         SoilLogger.info("Minimap zoom registered in PLAYER context")
+                    end
+                end
+
+                -- Field scout (SF_SCOUT, default Shift+K) — PLAYER context.
+                -- Opens the Scout panel for the field you're standing on.
+                if InputAction.SF_SCOUT then
+                    local scoutOk, scoutId = g_inputBinding:registerActionEvent(
+                        InputAction.SF_SCOUT, g_SoilFertilityManager,
+                        g_SoilFertilityManager.onScoutInput,
+                        false, true, false, true
+                    )
+                    if scoutOk and scoutId then
+                        g_SoilFertilityManager.scoutEventId = scoutId
+                        g_inputBinding:setActionEventTextVisibility(scoutId, false)
+                        SoilLogger.info("Field scout (Shift+K) registered in PLAYER context")
+                    end
+                end
+
+                -- Treatment panel (SF_TREATMENT, default Shift+T) — PLAYER context.
+                if InputAction.SF_TREATMENT then
+                    local trOk, trId = g_inputBinding:registerActionEvent(
+                        InputAction.SF_TREATMENT, g_SoilFertilityManager,
+                        g_SoilFertilityManager.onTreatmentInput,
+                        false, true, false, true
+                    )
+                    if trOk and trId then
+                        g_SoilFertilityManager.treatmentEventId = trId
+                        g_inputBinding:setActionEventTextVisibility(trId, false)
+                        SoilLogger.info("Treatment panel (Shift+T) registered in PLAYER context")
                     end
                 end
 
@@ -896,6 +931,93 @@ end
 function SoilFertilityManager:onMinimapZoomInput()
     if self.soilMapOverlay then
         self.soilMapOverlay:cycleMinimapZoom()
+    end
+end
+
+--- Input callback for Field Scout (SF_SCOUT, default Shift+K).
+--- Scouts the field underfoot and shows the named disease + recommended chemical.
+function SoilFertilityManager:onScoutInput()
+    if not (self.settings and self.settings.enabled) then return end
+    if not (self.soilSystem and self.soilHUD) then return end
+
+    -- Detect the field underfoot. detectCurrentFieldId() actively probes the player's
+    -- world position (works even with the HUD hidden); cachedFieldId is the last frame's
+    -- value as a fallback. (getCurrentFieldId never existed — that was the no-op bug.)
+    local fieldId = nil
+    if self.soilHUD.detectCurrentFieldId then
+        local ok, cur = pcall(function() return self.soilHUD:detectCurrentFieldId() end)
+        if ok then fieldId = cur end
+    end
+    if (not fieldId or fieldId <= 0) and self.soilHUD.cachedFieldId then
+        fieldId = self.soilHUD.cachedFieldId
+    end
+    if fieldId and fieldId <= 0 then fieldId = nil end
+    if not fieldId then
+        if g_currentMission and g_currentMission.hud and g_currentMission.hud.showBlinkingWarning then
+            g_currentMission.hud:showBlinkingWarning(g_i18n:getText("sf_scout_no_field"), 3000)
+        end
+        return
+    end
+
+    local rep = self.soilSystem:getScoutReport(fieldId)
+    if not rep or rep.enabled == false then return end
+
+    local function disName(id)
+        if not id then return g_i18n:getText("sf_scout_clean") end
+        local key = "sf_dis_" .. id
+        if g_i18n:hasText(key) then return g_i18n:getText(key) end
+        return (id:gsub("_", " "))
+    end
+    local function chemName(id)
+        if not id then return "?" end
+        local key = "sf_chem_" .. id
+        if g_i18n:hasText(key) then return g_i18n:getText(key) end
+        return (id:gsub("_", " "))
+    end
+
+    local msg
+    if rep.diseaseId and rep.recommend then
+        msg = string.format(g_i18n:getText("sf_scout_found"),
+            fieldId, disName(rep.diseaseId), math.floor(rep.pressure + 0.5), chemName(rep.recommend.best))
+    elseif rep.pressure and rep.pressure >= (SoilConstants.DISEASE_PRESSURE.LOW or 20) then
+        msg = string.format(g_i18n:getText("sf_scout_pressure"), fieldId, math.floor(rep.pressure + 0.5))
+    else
+        msg = string.format(g_i18n:getText("sf_scout_healthy"), fieldId)
+    end
+
+    -- Open the dedicated Scout panel for this field (disease readout + fungicide
+    -- selector + Apply). Falls back to a quick flash if the dialog is unavailable.
+    if SoilScoutDialog and SoilScoutDialog.show then
+        SoilScoutDialog.show(fieldId)
+    elseif g_currentMission and g_currentMission.hud and g_currentMission.hud.showBlinkingWarning then
+        g_currentMission.hud:showBlinkingWarning(msg, 5000)
+    end
+    SoilLogger.info("[Scout] %s", msg)
+end
+
+--- Input callback for the Treatment prescription panel (SF_TREATMENT, default Shift+T).
+--- Opens the soil/fertilizer treatment advice dialog for the field underfoot.
+function SoilFertilityManager:onTreatmentInput()
+    if not (self.settings and self.settings.enabled) then return end
+    if not (self.soilSystem and self.soilHUD) then return end
+
+    local fieldId = nil
+    if self.soilHUD.detectCurrentFieldId then
+        local ok, cur = pcall(function() return self.soilHUD:detectCurrentFieldId() end)
+        if ok then fieldId = cur end
+    end
+    if (not fieldId or fieldId <= 0) and self.soilHUD.cachedFieldId then
+        fieldId = self.soilHUD.cachedFieldId
+    end
+    if not fieldId or fieldId <= 0 then
+        if g_currentMission and g_currentMission.hud and g_currentMission.hud.showBlinkingWarning then
+            g_currentMission.hud:showBlinkingWarning(g_i18n:getText("sf_scout_no_field"), 3000)
+        end
+        return
+    end
+
+    if SoilTreatmentDialog and SoilTreatmentDialog.show then
+        SoilTreatmentDialog.show(fieldId)
     end
 end
 

@@ -118,7 +118,7 @@ local CATEGORIES = {
             },
             {
                 headerKey = "sf_panel_hdr_crop_stress",
-                items     = { "weedPressure", "pestPressure", "diseasePressure", "diseaseMoisture", "compactionEnabled" }
+                items     = { "weedPressure", "pestPressure", "diseasePressure", "diseaseMoisture", "diseaseDifficulty", "compactionEnabled" }
             },
         }
     },
@@ -165,6 +165,7 @@ local MULTI_OPTS = {
     difficulty        = {"sf_diff_1", "sf_diff_2", "sf_diff_3"},
     replenishmentRate = {"sf_rr_1", "sf_rr_2", "sf_rr_3", "sf_rr_4", "sf_rr_5"},
     diseaseMoisture   = {"sf_dm_1", "sf_dm_2", "sf_dm_3", "sf_dm_4"},
+    diseaseDifficulty = {"sf_disease_difficulty_1", "sf_disease_difficulty_2", "sf_disease_difficulty_3"},
     hudPosition       = {"sf_hud_pos_1", "sf_hud_pos_2", "sf_hud_pos_3",
                          "sf_hud_pos_4", "sf_hud_pos_5", "sf_hud_pos_6"},
     hudColorTheme     = {"sf_hud_color_1", "sf_hud_color_2", "sf_hud_color_3", "sf_hud_color_4"},
@@ -194,6 +195,7 @@ local SETTING_DESCS = {
     pestPressure      = "sf_desc_pestPressure",
     diseasePressure   = "sf_desc_diseasePressure",
     diseaseMoisture   = "sf_desc_diseaseMoisture",
+    diseaseDifficulty = "sf_desc_diseaseDifficulty",
     compactionEnabled = "sf_desc_compactionEnabled",
     showHUD                = "sf_desc_showHUD",
     showWorkTrail          = "sf_desc_showWorkTrail",

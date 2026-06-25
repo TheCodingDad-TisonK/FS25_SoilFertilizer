@@ -219,7 +219,7 @@ All hooks use `Utils.appendedFunction` for mod compatibility. `HookManager:unins
 
 #### Field Detection Pattern (Production-Proven)
 
-`SoilHUD.lua:getCurrentFieldId()` uses a 3-tier fallback for field detection:
+`SoilHUD.lua:detectCurrentFieldId()` uses a 3-tier fallback for field detection (returns `fieldId, x, z`; cached on `soilHUD.cachedFieldId` each frame):
 
 | Tier | Method | Reliability |
 |------|--------|-------------|
@@ -231,7 +231,7 @@ Always prefer Tier 1. Tiers 2-3 exist for compatibility with older FS25 API vers
 
 #### Player Position Detection (Enhanced Pattern)
 
-`SoilHUD.lua:getCurrentFieldId()` uses a 4-tier fallback for position detection (enhanced with NPCFavor patterns):
+`SoilHUD.lua:detectCurrentFieldId()` uses a 4-tier fallback for position detection (enhanced with NPCFavor patterns):
 
 | Tier | Source | Notes |
 |------|--------|-------|
@@ -305,7 +305,7 @@ This project follows standard Lua naming conventions with FS25-specific adaptati
 |------|------------|----------|
 | **Classes** | PascalCase | `SoilLogger`, `HookManager`, `AsyncRetryHandler` |
 | **Variables/Fields** | camelCase | `fieldData`, `soilSystem`, `panelWidth` |
-| **Functions (methods)** | camelCase | `getCurrentFieldId()`, `updatePosition()`, `markSuccess()` |
+| **Functions (methods)** | camelCase | `detectCurrentFieldId()`, `updatePosition()`, `markSuccess()` |
 | **Functions (global)** | PascalCase_camelCase | `SoilNetworkEvents_RequestFullSync()` (namespace prefix) |
 | **Constants** | UPPER_SNAKE_CASE | `MAX_ATTEMPTS`, `PANEL_WIDTH`, `VALUE_TYPE` |
 | **Boolean flags** | Descriptive prefix OK | `initialized`, `isRunning` |
