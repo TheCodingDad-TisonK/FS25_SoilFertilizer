@@ -292,6 +292,9 @@ function SoilSprayerInfoPanel:getSprayerFillType(sprayer)
         local ft = spec.workAreaParameters.sprayFillType
         if ft and ft > 0 then fillTypeIndex = ft end
     end
+    -- Issue #708: physical tank contents win over wap.sprayFillType (AI/CP can set the
+    -- wrong one after a headland restart); falls back to wap when the tank is empty.
+    fillTypeIndex = SoilUtils.resolveSprayerFillTypeIndex(sprayer, fillTypeIndex)
     if not fillTypeIndex then
         local ok, units = pcall(function() return sprayer:getFillUnits() end)
         if ok and units then

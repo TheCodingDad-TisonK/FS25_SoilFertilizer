@@ -1777,6 +1777,11 @@ function SoilHUD:getSprayerFillType(sprayer)
         if ft and ft > 0 then fillTypeIndex = ft end
     end
 
+    -- Issue #708: prefer the physical tank contents over wap.sprayFillType, which AI/CP
+    -- can leave pointing at the wrong product after a headland restart. Keeps the wap
+    -- value only when the tank is empty/UNKNOWN (external-fill BUY mode).
+    fillTypeIndex = SoilUtils.resolveSprayerFillTypeIndex(sprayer, fillTypeIndex)
+
     -- Fall back to fill unit query (works when parked)
     if not fillTypeIndex then
         local ok, units = pcall(function() return sprayer:getFillUnits() end)

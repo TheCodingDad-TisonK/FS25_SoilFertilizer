@@ -2704,6 +2704,16 @@ function HookManager:installSprayerAreaHook()
             local liters        = spec.workAreaParameters.usage
             local sprayFillLevel = spec.workAreaParameters.sprayFillLevel
 
+            -- Issue #708: under AI/Courseplay control, vanilla onStartWorkAreaProcessing can
+            -- leave wap.sprayFillType pointing at a different fill type than what is physically
+            -- in the tank (multi-fill-unit machines, after a headland restart). Reading it as
+            -- the product source then credits the WRONG nutrient profile to the soil and
+            -- mislabels the HUD. Override at the top with the physical tank contents so the
+            -- one fix corrects nutrient application, coverage label, and the custom-fill stamp
+            -- together. The tank only wins when it holds a valid non-UNKNOWN type, so
+            -- external-fill BUY mode (empty tank → keep wap value) is preserved.
+            fillTypeIndex = SoilUtils.resolveSprayerFillTypeIndex(self, fillTypeIndex)
+
             -- wap.isActive is vanilla's own "I painted terrain and drained product this
             -- frame" flag: reset to false at the end of every onStartWorkAreaProcessing and
             -- set true only inside processSprayerArea, which runs only for genuinely active
