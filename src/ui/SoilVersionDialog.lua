@@ -33,6 +33,7 @@ SoilVersionDialog.CHANGELOG = {
     "- Console: SoilScout, SoilTreat, SoilFungicides, SoilSetDiseaseDifficulty",
     "- FIX: Field compaction can no longer read above 100%, the average is now capped",
     "- FIX: Precision Farming is now detected only when it is actually enabled for your save, not just installed in the mods folder",
+    "- FIX: Soil Monitor and applied nutrients now follow the product physically in the tank, even when AI or Courseplay is driving",
 }
 
 -- ── i18n helper ───────────────────────────────────────────
