@@ -1,7 +1,7 @@
 # Repository Traffic Dashboard
 
-**Last updated:** 2026-06-28T00:07:38Z
-**Days tracked:** 74 | **Download snapshots:** 880 (hourly)
+**Last updated:** 2026-06-30T00:10:59Z
+**Days tracked:** 75 | **Download snapshots:** 896 (hourly)
 
 ---
 
@@ -11,10 +11,10 @@
 
 | Metric | 14-Day Total | Unique |
 |--------|-------------|--------|
-| Page Views | 10151 | 1339 |
-| Git Clones | 4348 | 1058 |
+| Page Views | 9305 | 1299 |
+| Git Clones | 3790 | 931 |
 
-> **Engagement:** 7.5 pages per visitor (14-day avg)
+> **Engagement:** 7.1 pages per visitor (14-day avg)
 
 ---
 
@@ -30,9 +30,9 @@
 
 ![Conversion](charts/conversion.png)
 
-> **14-day conversion:** 4924 of 1339 visitors cloned or downloaded (**367.7%**)
+> **14-day conversion:** 4901 of 1299 visitors cloned or downloaded (**377.2%**)
 >
-> Unique cloners: 1058 | Release downloads: 3866
+> Unique cloners: 931 | Release downloads: 3970
 
 ---
 
@@ -42,9 +42,9 @@
 
 | Channel | Count |
 |---------|-------|
-| Zip Downloads | 3866 |
-| Git Clones (14-day) | 4348 |
-| **Total Acquisitions** | **8214** |
+| Zip Downloads | 3970 |
+| Git Clones (14-day) | 3790 |
+| **Total Acquisitions** | **7760** |
 
 ---
 
@@ -54,16 +54,16 @@
 
 | Source | Views | Unique |
 |--------|-------|--------|
-| github.com | 2057 | 303 |
-| Google | 1191 | 390 |
-| Bing | 316 | 98 |
-| kingmods.net | 266 | 105 |
-| l.facebook.com | 169 | 71 |
-| youtube.com | 147 | 80 |
-| Yahoo | 43 | 13 |
-| DuckDuckGo | 37 | 11 |
-| reddit.com | 29 | 18 |
-| facebook.com | 26 | 15 |
+| github.com | 1816 | 288 |
+| Google | 1096 | 355 |
+| Bing | 333 | 93 |
+| kingmods.net | 300 | 107 |
+| l.facebook.com | 158 | 69 |
+| youtube.com | 133 | 70 |
+| Yahoo | 55 | 11 |
+| reddit.com | 33 | 19 |
+| DuckDuckGo | 31 | 10 |
+| yandex.ru | 27 | 10 |
 
 ---
 
@@ -73,7 +73,7 @@
 
 | Metric | Current |
 |--------|---------|
-| Stars | 82 |
+| Stars | 83 |
 | Forks | 11 |
 | Watchers | 10 |
 
@@ -83,16 +83,16 @@
 
 | Page | Views | Unique |
 |------|-------|--------|
-| `/TheCodingDad-TisonK/FS25_SoilFertilizer` | 2448 | 724 |
-| `/Realistic-Farming/FS25_SoilFertilizer` | 1676 | 603 |
-| `/TheCodingDad-TisonK/FS25_SoilFertilizer/releases` | 637 | 206 |
-| `/TheCodingDad-TisonK/FS25_SoilFertilizer/issues` | 509 | 129 |
-| `/Realistic-Farming/FS25_SoilFertilizer/releases` | 468 | 159 |
-| `/Realistic-Farming/FS25_SoilFertilizer/issues` | 344 | 104 |
-| `/TheCodingDad-TisonK/FS25_SoilFertilizer/releases/tag/v2.4.2.4` | 282 | 182 |
-| `/Realistic-Farming/FS25_SoilFertilizer/releases/tag/v2.4.4.0` | 218 | 149 |
+| `/Realistic-Farming/FS25_SoilFertilizer` | 2222 | 727 |
+| `/TheCodingDad-TisonK/FS25_SoilFertilizer` | 1573 | 526 |
+| `/Realistic-Farming/FS25_SoilFertilizer/releases` | 611 | 190 |
+| `/Realistic-Farming/FS25_SoilFertilizer/issues` | 459 | 127 |
+| `/TheCodingDad-TisonK/FS25_SoilFertilizer/releases` | 437 | 153 |
+| `/Realistic-Farming/FS25_SoilFertilizer/releases/tag/v2.4.4.0` | 354 | 232 |
+| `/TheCodingDad-TisonK/FS25_SoilFertilizer/issues` | 330 | 90 |
 | `/TheCodingDad-TisonK/FS25_SoilFertilizer/releases/tag/v2.4.2.9` | 198 | 134 |
 | `/Realistic-Farming/FS25_SoilFertilizer/releases/tag/v2.4.3.0` | 179 | 134 |
+| `/Realistic-Farming/FS25_SoilFertilizer/blob/main/README.md` | 157 | 86 |
 
 ---
 

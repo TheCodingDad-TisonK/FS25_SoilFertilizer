@@ -622,5 +622,17 @@
     "views_unique": 175,
     "clones_total": 65,
     "clones_unique": 31
+  },
+  "2026-06-27": {
+    "views_total": 704,
+    "views_unique": 199,
+    "clones_total": 114,
+    "clones_unique": 45
+  },
+  "2026-06-28": {
+    "views_total": 623,
+    "views_unique": 183,
+    "clones_total": 89,
+    "clones_unique": 36
   }
 }
