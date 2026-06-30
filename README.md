@@ -3,10 +3,6 @@
 # 🌾 FS25 Soil & Fertilizer
 ### *Realistic Nutrient Management*
 
-> [!TIP]
-> Want to be part of our community? Share tips, report issues, and chat with other farmers on the 
-> **[FS25 Modding Community Discord](https://discord.gg/8FcgxwJ3dM)**!
-
 [![Downloads](https://img.shields.io/github/downloads/TheCodingDad-TisonK/FS25_SoilFertilizer/total?style=for-the-badge&logo=github&color=4caf50&logoColor=white)](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/releases)
 [![Release](https://img.shields.io/github/v/release/TheCodingDad-TisonK/FS25_SoilFertilizer?style=for-the-badge&logo=tag&color=76c442&logoColor=white)](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/releases/latest)
 [![License](https://img.shields.io/badge/license-CC%20BY--NC--ND%204.0-lightgrey?style=for-the-badge&logo=creativecommons&logoColor=white)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
