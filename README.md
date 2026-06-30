@@ -3,6 +3,9 @@
 # 🌾 FS25 Soil & Fertilizer
 ### *Realistic Nutrient Management*
 
+> [!TIP]
+> Want to be part of our community? Share tips, report issues, and chat with other farmers on the **[FS25 Modding Community Discord](https://discord.gg/8FcgxwJ3dM)**!
+
 [![Downloads](https://img.shields.io/github/downloads/TheCodingDad-TisonK/FS25_SoilFertilizer/total?style=for-the-badge&logo=github&color=4caf50&logoColor=white)](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/releases)
 [![Release](https://img.shields.io/github/v/release/TheCodingDad-TisonK/FS25_SoilFertilizer?style=for-the-badge&logo=tag&color=76c442&logoColor=white)](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/releases/latest)
 [![License](https://img.shields.io/badge/license-CC%20BY--NC--ND%204.0-lightgrey?style=for-the-badge&logo=creativecommons&logoColor=white)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
@@ -24,81 +27,12 @@ Each field builds its own history. Nitrogen drops after a heavy wheat crop. Rain
 
 </div>
 
-> [!WARNING]
-> To play the mod at its finest please download the following file.
-> https://github.com/Realistic-Farming/FS25_SoilLayerInstaller
-> Instructions are inside the README
-
-> [!TIP]
-> Want to be part of our community? Share tips, report issues, and chat with other farmers on the **[FS25 Modding Community Discord](https://discord.gg/8FcgxwJ3dM)**!
-
 > [!CAUTION]
-> **Not compatible with Precision Farming (FS25_precisionFarming).** The mod automatically detects when Precision Farming is active for your savegame and disables itself to prevent conflicts and data corruption. Detection only triggers when Precision Farming is actually enabled for the save, not when it is merely installed in the mods folder, so you do not need to delete anything. To use Soil & Fertilizer instead, just disable Precision Farming for that savegame.
+> Soil Layer Installer is NEEDED please download and patch before opening playing.
+> [Soil Layer Install](https://github.com/Realistic-Farming/FS25_SoilLayerInstaller)
 
-
----
-
-## 🆕 What's New in v2.4.2.5
-
-**New:**
-- Added a **Yield** soil-map layer. The overlay and minimap can now show each field's yield potential (field-average, the same number the Soil Monitor shows and the grain you actually harvest), coloured red → amber → green. Requires the Soil Layer Installer to add the `soilYield` layer to your map
-
-**Fixes:**
-- Fixed the yield reading. The yield % shown in the soil monitor now matches the grain you actually harvest. It no longer slides downward as the combine crosses the field. The monitor forecast and the real harvest now share a single field-average calculation, and the value is held steady for the duration of a harvest pass
-- Fixed the major texture loss introduced in 2.4.1.0. Fill plane textures are back to DDS, so the game's shared pile texture array no longer breaks and every pile renders correctly again
-- Restored the unique pile colours for each product
-
-**New:**
-- SF fertilizers, lime and organics now work in bulk and silo storage. Any silo or storage bin that already accepts base game fertilizer, lime or manure will now also accept the matching SF products, including bins from third-party storage mods
-
-**Improved:**
-- The minimap layer label now shows the full localized name plus its short code, for example "Nitrogen [N]" or "Stickstoff [N]". It uses the same translations as the big map, so there are no language gaps
-
-<details>
-<summary>Previous releases</summary>
-
-### v2.4.1.0
-
-**Fixes:**
-- Custom fertilizer piles (MAP, DAP, Urea, AMS, etc.) now load without texture warnings
-- Soil data tracked live per-nozzle section during application, no stale values at field edges
-- Nozzle sections at field boundaries no longer lose coverage credit
-- See & Spray is now a vehicle shop configuration on the JD R700i and R975i, not a runtime toggle key
-
-### v2.4.0.0
-
-**New features:**
-- Added JD R700i (28 m) and R975i (36 m) sprayers with per-nozzle section control
-- Added tillage work trail (plow/cultivate) visible on HUD and minimap
-
-**Fixes:**
-- Variable rate + auto rate no longer double-reduces nutrient gain — 50% rate now delivers 50%, not near-zero
-- Spray mist no longer fires when boom is folded or stopped
-- Field edge sections now always receive nutrient credit
-- HUD always shows field averages, not local cell values
-- Ghost bar now correctly applies the Replenishment Rate multiplier
-- Yield modifier no longer drops during multi-pass harvest
-- Map cell tooltip bars now show numeric values (N/P/K %, pH, OM %)
-- P threshold in farm overview corrected (was 45, now 40)
-- Minimap overlay anchoring fixed on large maps
-
-**Balancing:**
-- Rebalanced pricing across all 20 custom fertilizer types
-
-### v2.2.5.0
-- Fixed weed pressure bar oscillating after partial herbicide spray
-- Fixed Weeds/Pests/Disease % values misaligned in HUD
-- Fixed Precision Farming detection triggering for users with PF disabled in mod manager
-- Updated French (fr) translation (community contribution)
-
-### v2.2.4.0 / v2.2.4.1
-- Fixed N and K starting at 90%+ on new saves
-- Fixed Pass% capping at ~50% after a full-field spray
-- Fixed Partial Width mode crediting inactive boom sections
-- Fixed variable rate display oscillating with MAP/P-type fertilizers
-- Fixed liquid lime draining entire tank instantly
-
-</details>
+> [!WARNING]
+> **Not compatible with Precision Farming (FS25_precisionFarming).** The mod automatically detects when Precision Farming is active for your savegame and disables itself to prevent conflicts and data corruption.
 
 ---
 
