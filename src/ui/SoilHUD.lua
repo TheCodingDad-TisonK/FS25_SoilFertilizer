@@ -2020,10 +2020,12 @@ function SoilHUD:drawSprayerRatePanel()
     self:drawRect(panelX,           panelY,               bw, panelH, SoilHUD.C_BORDER)
     self:drawRect(panelX + pw - bw,  panelY,               bw, panelH, SoilHUD.C_BORDER)
 
-    -- Header: "APP. RATE  AUTO: OFF  [Alt+Z]" or "APP. RATE  AUTO: ON"
+    -- Header: "APP. RATE  AUTO: OFF [<key>]" or "APP. RATE  ( AUTO: ON )".
+    -- The toggle key is read live from the input binding. SF_TOGGLE_AUTO ships
+    -- unbound, so if the player has not bound it we show no key hint at all.
     -- isAuto = auto rate mode active on this vehicle AND the setting is enabled
     local isAuto = rm:getAutoMode(sprayer.id) and self.settings.autoRateControl
-    local autoKey = "Shift+L"   -- fallback display string (matches modDesc.xml binding)
+    local autoKey = ""   -- stays empty until a real bound key is found below
     if g_inputDisplayManager ~= nil then
         local ok, helpElement = pcall(function()
             -- Four-argument form per FS25 API: (action1, action2, text, ignoreComboButtons)
@@ -2043,8 +2045,12 @@ function SoilHUD:drawSprayerRatePanel()
     local headerText
     if isAuto then
         headerText = g_i18n:getText("sf_sprayer_auto_on")
-    else
+    elseif autoKey ~= "" then
         headerText = string.format(g_i18n:getText("sf_sprayer_auto_off"), autoKey)
+    else
+        -- Action is unbound: drop the "[key]" hint instead of showing a fake key
+        headerText = string.format(g_i18n:getText("sf_sprayer_auto_off"), "")
+        headerText = headerText:gsub("%s*%[%s*%]", ""):gsub("%s+$", "")
     end
 
     setTextBold(true)

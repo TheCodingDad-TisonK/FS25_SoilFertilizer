@@ -3,8 +3,8 @@
 # 🌾 FS25 Soil & Fertilizer
 ### *Realistic Nutrient Management*
 
-[![Downloads](https://img.shields.io/github/downloads/TheCodingDad-TisonK/FS25_SoilFertilizer/total?style=for-the-badge&logo=github&color=4caf50&logoColor=white)](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/releases)
-[![Release](https://img.shields.io/github/v/release/TheCodingDad-TisonK/FS25_SoilFertilizer?style=for-the-badge&logo=tag&color=76c442&logoColor=white)](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/Realistic-Farming/FS25_SoilFertilizer/total?style=for-the-badge&logo=github&color=4caf50&logoColor=white)](https://github.com/Realistic-Farming/FS25_SoilFertilizer/releases)
+[![Release](https://img.shields.io/github/v/release/Realistic-Farming/FS25_SoilFertilizer?style=for-the-badge&logo=tag&color=76c442&logoColor=white)](https://github.com/Realistic-Farming/FS25_SoilFertilizer/releases/latest)
 [![License](https://img.shields.io/badge/license-CC%20BY--NC--ND%204.0-lightgrey?style=for-the-badge&logo=creativecommons&logoColor=white)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
 <a href="https://paypal.me/TheCodingDad">
   <img src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" alt="Donate via PayPal" height="50">
@@ -20,7 +20,7 @@
 
 Each field builds its own history. Nitrogen drops after a heavy wheat crop. Rain washes potassium out of sandy ground. Fallow fields slowly breathe back to life. The numbers you see in the HUD aren't arbitrary, they're the consequence of every harvest, every storm, and every bag of fertilizer you did or didn't apply.
 
-`Singleplayer` • `Multiplayer (server-authoritative)` • `Persistent saves` • `26 languages`
+`Singleplayer` • `Multiplayer (server-authoritative)` • `Persistent saves` • `27 languages`
 
 </div>
 
@@ -89,6 +89,10 @@ Three pressure scores (0–100) track threats to each field independently. Left 
 
 All three are visible in the HUD and the full Soil Report. Each can be toggled off in settings.
 
+**Named diseases and fungicide chemistry** - disease pressure isn't just a number. Each crop can catch specific real-world diseases (wheat gets septoria, rust, and fusarium head blight; potatoes get late and early blight; soybeans get frogeye and white mould, and so on - around 40 in total). Press **Scout** (`SF_SCOUT`, default **Shift+K**) on a field to identify the active disease, then choose from a catalog of **23 fungicides** across seven chemistry families (triazoles, strobilurins, SDHIs, contact protectants, specialty, preventatives, and seed treatments). Each product has its own cost, per-disease effectiveness, and application window, and works best applied early, on-window, and not in the rain. Rotate chemistry families to keep them working.
+
+**Treatment panel** - press **Open Soil Treatment Panel** (`SF_TREATMENT`, default **Shift+T**) for a per-field prescription: exactly which nutrients, lime, and protection products a field needs right now.
+
 ### 💊 Fertilizer Types
 
 25+ products tracked, each with a different nutrient job.
@@ -125,7 +129,9 @@ All three are visible in the HUD and the full Soil Report. Each can be toggled o
 | Product | Type | Primary benefit |
 |---|---|---|
 | Urea / AMS | Dry nitrogen | Standard granular N sources |
+| AN (Ammonium Nitrate) | Dry nitrogen | Fast-acting nitrate N granular |
 | MAP / DAP | Dry P+N | Phosphorus-focused blends |
+| Polifoska (6-20-30) | Dry NPK compound | Balanced P and K with a little N |
 | Potash | Dry K | Pure potassium supplement |
 | Gypsum | Dry amendment | Lowers pH and improves soil structure |
 | Compost | Organic amendment | Best OM builder per application |
@@ -158,8 +164,9 @@ gradually reduces how effectively the field can absorb nutrients.
 | **Subsoiler pass** | Any cultivator with `isSubsoiler = true` | −15% compaction per pass |
 | **Natural decay** | Automatically | −0.5% per game day |
 
-At maximum compaction (100%), the field's nutrient extraction penalty reaches **20%** - compacted
-soil binds nutrients and reduces their availability to crops.
+Compaction bites in two ways. It reduces yield directly (up to **15%** at 100% compaction, so a
+compacted field yields less even when N/P/K are fully topped up), and it also makes the crop pull
+harder on the soil, adding up to **20%** extra nutrient depletion at harvest.
 
 The HUD shows compaction as a colour-coded row (green < 20%, amber 20–60%, red > 60%). It also
 appears as **overlay layer 10** on the in-game map. Compaction is saved to `soilData.xml` and
@@ -194,7 +201,7 @@ Three in-vehicle overlay panels that appear when you enter a supported sprayer. 
 |---|---|---|
 | **Smart Sensor** | Monitors pest, disease, and nutrient need per section. Blocks spraying on sections with no active need detected. | Settings → Admin → Smart Systems. Works with any VWW sprayer. |
 | **See & Spray** | Shows live per-cell pressure for pest, disease, and weed at the sprayer's current position. Colour-coded per section. | Purchase a **JD R700i** or **JD R975i** with the *See & Spray* shop configuration selected. |
-| **Variable Rate** | Adjusts boom output rate per section based on soil deficits for the loaded product. Green bar = low rate; red bar = high rate. | Bind `SF_VARIABLE_RATE` in **Controls → Mods**. Enable in Admin → Smart Systems. |
+| **Variable Rate** | Adjusts boom output rate per section based on soil deficits for the loaded product. Green bar = low rate; red bar = high rate. | Default key **Alt+7** (rebind `SF_VARIABLE_RATE` in **Controls → Mods**). Enable in Admin → Smart Systems. |
 
 Smart Sensor and Variable Rate work with any VWW-capable sprayer. **See & Spray requires the JD R700i (28 m) or JD R975i (36 m)** with the See & Spray option selected at purchase - base game sprayers are not tested with this feature.
 
@@ -210,7 +217,7 @@ The **yield forecast row** (e.g. `Yield ~-18%`) is not just a warning - it refle
 
 Additional rows appear contextually: **Coverage** (`Coverage: X% / 70% min`) while a sprayer is active on a field, and **Compaction** (when soil compaction is above 0% and the setting is enabled). Both are colour-coded with the same green/amber/red tiers as nutrients.
 
-Fully customisable: 5 positions, 4 colour themes, 5 transparency levels, 3 font sizes, and a compact mode that shrinks to one line per nutrient. The drag-to-reposition action (`SF_HUD_DRAG`, default: RMB) is now rebindable through the standard FS25 key bindings menu.
+Fully customisable: 6 positions, 4 colour themes, 5 transparency levels, 3 font sizes, and a compact mode that shrinks to one line per nutrient. The HUD drag mode (`SF_HUD_DRAG`, default **Shift+H**) lets you reposition panels in Free Panel Layout and is rebindable through the standard FS25 key bindings menu.
 
 ### 📋 Full Farm Soil Report
 
@@ -218,7 +225,7 @@ The **Farm Overview** tab in the Soil PDA page shows all your fields sorted by u
 
 ### 📱 Soil PDA Page
 
-Press **`Shift+P`** to open the dedicated Soil & Fertilizer page inside the FS25 in-game menu (PDA). Accessible any time - on foot, in a vehicle, or while paused.
+Open the FS25 in-game menu (**ESC**) and select the **Soil & Fertilizer** tab in the tab bar to reach the dedicated soil page. Accessible any time - on foot, in a vehicle, or while paused.
 
 **Left sidebar** - live farm-wide snapshot updated each time the page opens:
 - Fields tracked and fields owned
@@ -256,9 +263,9 @@ Three core settings live here so you can reach them quickly:
 | **Notifications** | On / Off | Pop-up alerts when fields get critically low |
 | **Debug mode** | On / Off | Verbose logging to the game log |
 
-### SHIFT+O - Full Settings Panel
+### Full Settings Panel
 
-Press **`Shift+O`** anywhere in-game (on foot or in a vehicle) to open the full settings panel. Settings are organised into three categories. The panel also includes an **Admin** button (previously labelled *Drain Vehicle*) - pressing it opens a dedicated admin page with all console commands listed and executable as buttons directly in-game:
+The full panel ships with its key **unbound** to avoid clashing with other mods. Bind **Open Soil Settings** (`SF_OPEN_SETTINGS`) once in **Options → Controls → Mods** - the mod's suggested key is **Shift+O** - then press it anywhere in-game (on foot or in a vehicle) to open the panel. Settings are organised into three categories. The panel also includes an **Admin** button (previously labelled *Drain Vehicle*) - pressing it opens a dedicated admin page with all console commands listed and executable as buttons directly in-game:
 
 **🌱 Simulation** - controls the core simulation behaviour
 
@@ -274,10 +281,13 @@ Press **`Shift+O`** anywhere in-game (on foot or in a vehicle) to open the full 
 | **Weed pressure** | On / Off | Track weed competition per field |
 | **Pest pressure** | On / Off | Track insect pest populations per field |
 | **Disease pressure** | On / Off | Track crop disease per field |
+| **Disease climate** | Arid / Temperate / Humid / Wet | How wet the map's climate runs. Wetter climates push disease harder and shorten fungicide protection |
+| **Disease difficulty** | Easy / Normal / Hard | How aggressive named crop diseases are |
 | **Crop rotation** | On / Off | Enable legume bonus and mono-crop fatigue multiplier |
 | **Soil compaction** | On / Off | Heavy vehicles (≥ 8 t) compact soil, reducing nutrient availability |
 | **Imperial units** | On / Off | Sprayer rates in gal/ac and lb/ac instead of L/ha and kg/ha |
 | **Difficulty** | Simple / Realistic / Hardcore | Scales depletion rate - 0.7× / 1× / 1.5× |
+| **Replenishment rate** | Very Slow (0.25×) → Very Fast (2.0×) | Global multiplier on how fast fertilizer restores nutrients |
 
 **🖥️ Display / HUD** - controls what you see on screen
 
@@ -289,13 +299,32 @@ Press **`Shift+O`** anywhere in-game (on foot or in a vehicle) to open the full 
 | **HUD transparency** | Clear → Solid | 5 opacity levels |
 | **HUD font size** | Small / Medium / Large | Scales all HUD text |
 | **Auto rate control** | On / Off | Sprayer rate auto-adjusts toward the target rate for the current product |
+| **Work trail** | On / Off | Show the worked/sprayed coverage trail on the ground |
+| **Sprayer info panel** | On / Off | In-vehicle panel showing rate, coverage, and product while spraying |
+| **Harvester info panel** | On / Off | In-vehicle panel showing yield forecast and soil status while harvesting |
+| **Field info box** | On / Off | Small on-screen box summarising the current field |
+| **Colourblind mode** | On / Off | Swaps the status palette for colourblind-friendly colours |
+| **Free Panel Layout** | On / Off | Drag each in-vehicle panel to its own position (Shift+H edit mode) |
 
 **🗺️ Map** - controls the PDA map overlay
 
 | Setting | Options | What it does |
 |---|---|---|
-| **Active map layer** | Off / N / P / K / pH / OM / Urgency / Weed / Pest / Disease / Compaction | Nutrient layer shown on the PDA map |
+| **Active map layer** | Off / N / P / K / pH / OM / Urgency / Weed / Pest / Disease / Compaction / Yield | Data layer shown on the PDA map (11 layers, cycled with `SF_CYCLE_MAP_LAYER` or the overlay sidebar) |
 | **Overlay density** | Low / Medium / High | Number of data points rendered on the map overlay - Low (8k), Medium (20k), High (40k). Reduce if the map causes frame drops |
+
+**🛠️ Admin → Smart Systems** - precision-farming toggles (admin only in multiplayer)
+
+| Setting | Options | What it does |
+|---|---|---|
+| **Smart Sensor** | On / Off | Master switch for the per-section need sensor on VWW sprayers |
+| **Variable Rate** | On / Off | Master switch for per-section variable-rate output |
+| **Field boundary control** | On / Off | Shut boom sections off past the field edge |
+| **Overlap prevention** | On / Off | Shut sections off over already-treated ground |
+
+**⚗️ Advanced Tuning** - opened from the Admin page, for players who want to hand-tune the model
+
+Every core rate has its own multiplier: nutrient depletion, fertilizer efficiency, rain leaching, seasonal strength, pest growth, disease growth, fallow recovery, and compaction build-up / decay. You can also set the starting N / P / K / pH / OM that every new field rolls with. Defaults reproduce the standard simulation - move a value only if you want that part of the model faster, slower, or stronger.
 
 > [!NOTE]
 > In multiplayer, settings are **server-authoritative** - the host's settings are pushed to all clients on join. Non-admin clients can see but not change server settings. HUD display preferences are always local and can be changed by any player.
@@ -317,6 +346,11 @@ Open the developer console with **`~`** and type `soilfertility` for the full li
 | `SoilSetSeasonalEffects` | `true` / `false` | Toggle seasonal N changes |
 | `SoilSetRainEffects` | `true` / `false` | Toggle rain leaching and acidification |
 | `SoilSetPlowingBonus` | `true` / `false` | Toggle plowing OM/pH bonus |
+| `SoilSetDiseaseDifficulty` | `1` `2` `3` | Easy / Normal / Hard |
+| `SoilScout` | `[fieldId]` | Scout a field and name its active disease |
+| `SoilTreat` | `<chemical> [fieldId]` | Apply a named fungicide, e.g. `SoilTreat AZOXYSTROBIN` |
+| `SoilFungicides` | `[diseaseId]` | List fungicides, or the best ones for a disease |
+| `SoilRerollFields` | - | Re-roll starting soil for all fields (server/SP) |
 | `SoilDrainVehicle` | - | Drain custom fill types from vehicle + implements (50% refund) |
 | `SoilFieldInfo` | `<fieldId>` | Detailed soil readout for one field |
 | `SoilFieldForecast` | `<fieldId>` | Yield forecast and treatment recommendations for one field |
@@ -325,6 +359,8 @@ Open the developer console with **`~`** and type `soilfertility` for the full li
 | `SoilResetSettings` | - | Reset everything to defaults |
 | `SoilSaveData` | - | Force-save soil state now |
 | `SoilDebug` | - | Toggle verbose debug logging |
+| `soilSetState` | `<fieldId> <N> <P> <K> <pH> <OM>` | Directly set a field's soil values (advanced) |
+| `SoilPFDump` | - | Dump the Precision Farming bridge state (diagnostics) |
 
 ---
 
@@ -343,7 +379,7 @@ All integrations are detected automatically at runtime and fail gracefully if th
 
 ## 🛠️ Installation
 
-**1. Download** `FS25_SoilFertilizer.zip` from the [latest release](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/releases/latest).
+**1. Download** `FS25_SoilFertilizer.zip` from the [latest release](https://github.com/Realistic-Farming/FS25_SoilFertilizer/releases/latest).
 
 **2. Copy** the ZIP (do not extract) to your mods folder:
 
@@ -389,7 +425,7 @@ All integrations are detected automatically at runtime and fail gracefully if th
 
 ## 🤝 Contributing
 
-Found a bug? [Open an issue](https://github.com/TheCodingDad-TisonK/FS25_SoilFertilizer/issues/new/choose) - the template will walk you through what to include.
+Found a bug? [Open an issue](https://github.com/Realistic-Farming/FS25_SoilFertilizer/issues/new/choose) - the template will walk you through what to include.
 
 Want to contribute code? PRs are welcome on the `development` branch. See `CLAUDE.md` in the repo root for architecture notes and naming conventions.
 
