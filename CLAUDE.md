@@ -319,10 +319,21 @@ This project follows standard Lua naming conventions with FS25-specific adaptati
 
 Type `soilfertility` in the developer console (`~` key) for the full list. Key commands:
 
+**Status & info**
+
 | Command | Description |
 |---------|-------------|
 | `soilfertility` | Show all commands |
+| `soilStatus` | Show mod status (enabled, role, settings) |
 | `SoilShowSettings` | Show current settings |
+| `SoilFieldInfo <fieldId>` | Show field soil info |
+| `SoilFieldForecast <fieldId>` | Yield forecast + treatment recommendations for a field |
+| `SoilListFields` | List all tracked fields with current values |
+
+**Settings (admin only in MP)**
+
+| Command | Description |
+|---------|-------------|
 | `SoilEnable` / `SoilDisable` | Toggle mod |
 | `SoilSetDifficulty 1\|2\|3` | Set difficulty (Simple/Realistic/Hardcore) |
 | `SoilSetFertility true\|false` | Toggle fertility system |
@@ -332,10 +343,39 @@ Type `soilfertility` in the developer console (`~` key) for the full list. Key c
 | `SoilSetSeasonalEffects true\|false` | Toggle seasonal effects |
 | `SoilSetRainEffects true\|false` | Toggle rain effects |
 | `SoilSetPlowingBonus true\|false` | Toggle plowing bonus |
-| `SoilFieldInfo <fieldId>` | Show field soil info |
-| `SoilRerollFields` | Re-roll starting soil (N/P/K/pH/OM) for all fields with the new regional variation (#632); server/SP only |
+| `SoilSetDiseaseDifficulty 1\|2\|3` | Set disease difficulty (Easy/Normal/Hard) |
 | `SoilResetSettings` | Reset to defaults |
+
+**Disease & treatment**
+
+| Command | Description |
+|---------|-------------|
+| `SoilScout [fieldId]` | Scout a field and name its active disease |
+| `SoilTreat <chemical> [fieldId]` | Apply a named fungicide (e.g. `SoilTreat AZOXYSTROBIN`) |
+| `SoilFungicides [diseaseId]` | List fungicides, or recommendations for a disease |
+| `SoilSetDisease <0-100> [diseaseId]` | TEST: force disease + pressure on current field |
+
+**Field management (server/SP)**
+
+| Command | Description |
+|---------|-------------|
+| `SoilRerollFields` | Re-roll starting soil (N/P/K/pH/OM) for all fields with the new regional variation (#632) |
+| `SoilRerollUnownedFields` | Re-roll starting soil only for fields you don't own (#632) |
+| `soilRecoverField [fieldId]` | Recover a field to default values |
+| `SoilFieldSentry [fieldId]` | FieldSentry: show a field's sim status, or list slept fields (#651) |
+| `SoilBlacklistField <fieldId> [true\|false]` | FieldSentry: sleep/wake a field's soil sim (#651) |
+| `SoilDecoField <fieldId> [true\|false]` | FieldSentry: flag/clear a field as decorative (#651) |
+| `SoilMeadowField <fieldId> [true\|false]` | FieldSentry: flag/clear a field as meadow (#651) |
+
+**Data & debug**
+
+| Command | Description |
+|---------|-------------|
 | `SoilSaveData` | Force save soil data |
+| `SoilDrainVehicle` | Drain custom fill types from vehicle + implements (50% refund) |
+| `soilSetState <fieldId> <N> <P> <K> <pH> <OM>` | Directly set a field's soil values |
+| `SoilPFDump` | Dump Precision Farming bridge diagnostics |
+| `SoilSprayerDebug` | Toggle sprayer debug logging |
 | `SoilDebug` | Toggle debug mode |
 
 ---

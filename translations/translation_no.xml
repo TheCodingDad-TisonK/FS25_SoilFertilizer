@@ -679,6 +679,9 @@
     <e k="sf_fieldinfo_grade" v="Jordkarakter" eh="65d1be5f" />
     <e k="sf_fieldinfo_yield" v="Avling" eh="97345487" />
     <e k="sf_fieldinfo_rotation" v="Vekstskifte" eh="f1a42bd4" />
+		<e k="sf_fieldinfo_disease" v="[EN] Active Disease" eh="a94ce36d" />
+		<e k="sf_fieldinfo_burn_risk" v="[EN] Amend. burn risk" eh="759e4661" />
+		<e k="sf_fieldinfo_sim_status" v="[EN] Sim Status" eh="c39e57f0" />
     <e k="sf_fieldinfo_needs" v="Behov" eh="94d6125d" />
     <e k="sf_field" v="Felt" eh="6f16a5f8" />
     <e k="sf_no_field" v="Ingen felt valgt" eh="717ff56f" />
@@ -775,7 +778,7 @@
     <e k="sf_guide_p1_15" v="[EN] FAIR (yellow) Below optimal." eh="0d30dbe4" />
     <e k="sf_guide_p1_16" v="Plan a top-up. Yield slightly reduced." eh="0363160b" />
     <e k="sf_guide_p1_17" v="[EN] POOR (red)    Below minimum threshold." eh="96f2a246" />
-    <e k="sf_guide_p1_18" v="Act now - yield impact is severe." eh="64e9e4f9" />
+    <e k="sf_guide_p1_18" v="[EN]   Act now - yield impact is severe." eh="587bdd4a" />
     <e k="sf_guide_p1_19" v="[EN] QUICK START (5 STEPS)" eh="f1bcfcdb" />
     <e k="sf_guide_p1_20" v="[EN] 1. Open PDA (game menu) &gt; Soil &amp; Fertilizer." eh="22539c14" />
     <e k="sf_guide_p1_21" v="[EN] 2. Check Farm Overview for red-flagged fields." eh="d4e823e8" />
@@ -784,19 +787,19 @@
     <e k="sf_guide_p1_24" v="[EN] 5. Harvest normally - nutrients auto-deduct." eh="ba4b5846" />
     <e k="sf_guide_p1_25" v="[EN] TOOLS AT A GLANCE" eh="103ce1b5" />
     <e k="sf_guide_p1_26" v="[EN] HUD Bars     Soil levels for your current field." eh="4d0661d7" />
-    <e k="sf_guide_p1_27" v="Key: SF Toggle HUD (Controls &gt; Mods)" eh="fde6e9c0" />
+    <e k="sf_guide_p1_27" v="[EN]   Key: Toggle Soil HUD (ships unbound)." eh="4e3fc48e" />
     <e k="sf_guide_p1_28" v="[EN] PDA Screen   Full farm overview + treatment plan." eh="a6cc969d" />
-    <e k="sf_guide_p1_29" v="Open via the game's tablet menu." eh="dbe326fc" />
+    <e k="sf_guide_p1_29" v="[EN]   Open the ESC menu, Soil &amp; Fertilizer tab." eh="3096c5f3" />
     <e k="sf_guide_p1_30" v="[EN] Soil Map     Per-cell nutrient colour overlay." eh="1ade7e4f" />
-    <e k="sf_guide_p1_31" v="Key: SF Toggle Cell Map" eh="6f62d699" />
+    <e k="sf_guide_p1_31" v="[EN]   Key: Cycle Soil Map Layer (ships unbound)." eh="80ee4072" />
     <e k="sf_guide_p1_32" v="[EN] Field Report Detailed single-field breakdown." eh="4398ce6d" />
-    <e k="sf_guide_p1_33" v="Key: SF Soil Report" eh="364f8595" />
+    <e k="sf_guide_p1_33" v="[EN]   Click any row in Farm Overview to open it." eh="56cbdc85" />
     <e k="sf_guide_p1_34" v="[EN] Smart Sensor Blocks sections with no active need." eh="dd267572" />
-    <e k="sf_guide_p1_35" v="Toggles: Alt+1/2/3 in a VWW sprayer." eh="5ea6ea68" />
+    <e k="sf_guide_p1_35" v="[EN]   Auto per section. Enable in the Admin panel." eh="2b3e6122" />
     <e k="sf_guide_p1_36" v="[EN] See &amp; Spray  Live per-cell pressure in the vehicle." eh="cddacb27" />
-    <e k="sf_guide_p1_37" v="Toggles: Alt+4/5/6 in a VWW sprayer." eh="cd45ce04" />
+    <e k="sf_guide_p1_37" v="[EN]   JD R700i or R975i with the See &amp; Spray config." eh="ae099dd1" />
     <e k="sf_guide_p1_38" v="[EN] Variable Rate Auto-adjusts boom rate from deficits." eh="38a5c159" />
-    <e k="sf_guide_p1_39" v="Toggle:  Alt+7.  Enable in Admin." eh="31e42fb5" />
+    <e k="sf_guide_p1_39" v="[EN]   Key: Toggle Variable Rate (Alt+7). Admin on." eh="3a71a237" />
     <e k="sf_guide_p1_40" v="[EN] KEYBINDINGS" eh="07a9ae0d" />
     <e k="sf_guide_p1_41" v="[EN] All keys ship UNBOUND to avoid conflicts." eh="9ec7b5b5" />
     <e k="sf_guide_p1_42" v="[EN] Go to: Options &gt; Controls &gt; Mods" eh="e4e8a969" />
@@ -814,7 +817,7 @@
     <e k="sf_guide_p2_10" v="Action: apply fertilizer immediately." eh="209e2635" />
     <e k="sf_guide_p2_11" v="[EN] YELLOW tick - Fair/Good boundary." eh="9f1b02a2" />
     <e k="sf_guide_p2_12" v="Bar is YELLOW between orange and yellow ticks." eh="cac82a8d" />
-    <e k="sf_guide_p2_13" v="Your soil is FAIR - below the crop's optimum." eh="1ae66c9c" />
+    <e k="sf_guide_p2_13" v="[EN]   Your soil is FAIR - below the crop's optimum." eh="320016a7" />
     <e k="sf_guide_p2_14" v="Action: plan a top-up this season." eh="3cf7dfa3" />
     <e k="sf_guide_p2_15" v="[EN] CYAN tick - Your planted crop's optimal target." eh="20b6c223" />
     <e k="sf_guide_p2_16" v="Reach this point for maximum yield." eh="cc7c263f" />
@@ -886,6 +889,11 @@
     <e k="sf_guide_p3_37" v="(rain leaches N from soil)." eh="6c48f9c9" />
     <e k="sf_guide_p3_38" v="[EN] WINTER  Fallow fields slowly recover nutrients." eh="b68db0d1" />
     <e k="sf_guide_p3_39" v="Leave a field bare to let it rest." eh="0f67aea5" />
+		<e k="sf_guide_p3_40" v="[EN] SOIL COMPACTION" eh="b0b6c5c6" />
+		<e k="sf_guide_p3_41" v="[EN] Heavy vehicles (8t+) compact the soil they" eh="ef98c98b" />
+		<e k="sf_guide_p3_42" v="[EN] drive over, which lowers nutrient uptake." eh="f3adff1d" />
+		<e k="sf_guide_p3_43" v="[EN] A subsoiler pass relieves it. The whole" eh="7bb6f80d" />
+		<e k="sf_guide_p3_44" v="[EN] mechanic can be toggled off in Settings." eh="e65b251c" />
     <e k="sf_guide_p4_01" v="[EN] NITROGEN (N) PRODUCTS" eh="6040f0f5" />
     <e k="sf_guide_p4_02" v="[EN] UAN Solution   High N, fast release liquid." eh="60baf1c0" />
     <e k="sf_guide_p4_03" v="[EN] Urea           High N, standard solid form." eh="7619f3d7" />
@@ -902,13 +910,21 @@
     <e k="sf_guide_p4_14" v="[EN] POTASSIUM (K) PRODUCTS" eh="7a9f5cc7" />
     <e k="sf_guide_p4_15" v="[EN] Potash         High K, solid form." eh="cb71f3a0" />
     <e k="sf_guide_p4_16" v="[EN] Liquid Potash  High K, liquid. Faster uptake." eh="0c3d2ad4" />
+		<e k="sf_guide_p4_40" v="[EN] CROP PROTECTION" eh="f9ce6483" />
+		<e k="sf_guide_p4_41" v="[EN] Herbicide    Cuts weed pressure." eh="48782b85" />
+		<e k="sf_guide_p4_42" v="[EN] Insecticide  Cuts pest pressure." eh="de909cc7" />
+		<e k="sf_guide_p4_43" v="[EN] Fungicide    Cuts disease pressure." eh="3aa90ba7" />
+		<e k="sf_guide_p4_44" v="[EN] Scout a field (Shift+K) to name its disease" eh="69b3753d" />
+		<e k="sf_guide_p4_45" v="[EN]   and pick a targeted fungicide for it." eh="1ff955ce" />
+		<e k="sf_guide_p4_46" v="[EN] Treatment (Shift+T) lists what each field" eh="ccc651dc" />
+		<e k="sf_guide_p4_47" v="[EN]   needs right now, product by product." eh="2a63f8c5" />
     <e k="sf_guide_p4_17" v="[EN] pH CORRECTION" eh="dfe729d7" />
     <e k="sf_guide_p4_18" v="[EN] Target range: 6.5 – 7.0 for most crops." eh="3fd904c3" />
     <e k="sf_guide_p4_19" v="[EN] " eh="d41d8cd9" />
     <e k="sf_guide_p4_20" v="[EN] pH too LOW (acidic, below 6.5):" eh="0ec6357e" />
-    <e k="sf_guide_p4_21" v="Apply LIME - raises pH toward neutral." eh="4df3e7fa" />
+    <e k="sf_guide_p4_21" v="[EN]   Apply LIME - raises pH toward neutral." eh="6595685a" />
     <e k="sf_guide_p4_22" v="[EN] pH too HIGH (alkaline, above 7.5):" eh="4204b7df" />
-    <e k="sf_guide_p4_23" v="Apply GYPSUM - lowers pH toward neutral." eh="e71fa617" />
+    <e k="sf_guide_p4_23" v="[EN]   Apply GYPSUM - lowers pH toward neutral." eh="319aa724" />
     <e k="sf_guide_p4_24" v="[EN] Allow 1–2 seasons for full normalization." eh="1f31526d" />
     <e k="sf_guide_p4_25" v="[EN] ORGANIC MATTER (OM)" eh="4b06f65b" />
     <e k="sf_guide_p4_26" v="[EN] Manure         Best OM builder. Also adds N." eh="99834812" />
@@ -924,7 +940,7 @@
     <e k="sf_guide_p4_36" v="[EN] * Apply liquid N before rain if possible" eh="50d601b0" />
     <e k="sf_guide_p4_37" v="(rain leaches some nitrogen after application)." eh="c10189dd" />
     <e k="sf_guide_p4_38" v="[EN] * Check crop targets for what you're planting" eh="a3ccec1e" />
-    <e k="sf_guide_p4_39" v="- different crops need different NPK ratios." eh="10bc6a29" />
+    <e k="sf_guide_p4_39" v="[EN]   - different crops need different NPK ratios." eh="a83d4f85" />
     <e k="sf_guide_p5_01" v="[EN] MY BARS ARE ALWAYS EMPTY - IS IT BROKEN?" eh="8772a2e4" />
     <e k="sf_guide_p5_02" v="[EN] No. Soil starts at low base levels on a new save." eh="459b03bb" />
     <e k="sf_guide_p5_03" v="[EN] A field that was never fertilized shows real values." eh="0d7762f2" />

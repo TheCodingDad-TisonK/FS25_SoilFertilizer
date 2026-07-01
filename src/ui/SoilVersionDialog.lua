@@ -34,7 +34,8 @@ SoilVersionDialog.CHANGELOG = {
     "- Field compaction can no longer read above 100%, the average is now capped",
     "- Precision Farming is now detected only when it is actually enabled for your save, not just installed in the mods folder",
     "- Soil Monitor and applied nutrients now follow the product physically in the tank, even when AI or Courseplay is driving",
-    "- Field Info box refactored (removed redundant info and added new info lines)"
+    "- Field Info box refactored (removed redundant info and added new info lines)",
+    "- All help texts and documentation are now in sync"
 }
 
 -- ── i18n helper ───────────────────────────────────────────

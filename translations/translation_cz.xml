@@ -133,57 +133,57 @@
     <e k="sf_insecticide_title" v="Insekticid" eh="5650eeef" />
     <e k="sf_fungicide_title" v="Fungicid" eh="e8512698" />
     <e k="sf_bigBag_uan32_name" v="IBC UAN 32-0-0" eh="574747ce" />
-    <e k="sf_bigBag_uan32_function" v="Dusíkaté hnojivo (kapalné) - +44 N ppm/ha @ 60,8 L/ha" eh="db7dfc87" />
+    <e k="sf_bigBag_uan32_function" v="[EN] Nitrogen Fertilizer (liquid) - +44N ppm/ha @ 60.8 L/ha" eh="8ab6b497" />
     <e k="sf_bigBag_uan28_name" v="IBC UAN 28-0-0" eh="7eeec815" />
-    <e k="sf_bigBag_uan28_function" v="Dusíkaté hnojivo (kapalné) - +38 N ppm/ha @ 60,8 L/ha" eh="ceca3b39" />
+    <e k="sf_bigBag_uan28_function" v="[EN] Nitrogen Fertilizer (liquid) - +38N ppm/ha @ 60.8 L/ha" eh="1936bc46" />
     <e k="sf_bigBag_anhydrous_name" v="IBC Bezvodý amoniak 82-0-0" eh="fb09e6ce" />
-    <e k="sf_bigBag_anhydrous_function" v="Dusíkaté hnojivo (kapalné) - +67 N ppm/ha @ 28 L/ha" eh="d8eec5de" />
+    <e k="sf_bigBag_anhydrous_function" v="[EN] Nitrogen Fertilizer (liquid) - +67N ppm/ha @ 28 L/ha" eh="3b8abc2e" />
     <e k="sf_bigBag_urea_name" v="Big Bag Močovina 46-0-0" eh="8e8cbaae" />
-    <e k="sf_bigBag_urea_function" v="Dusíkaté hnojivo (suché) - +78 N ppm/ha @ 168 kg/ha" eh="a2d905dc" />
+    <e k="sf_bigBag_urea_function" v="[EN] Nitrogen Fertilizer (dry) - +78N ppm/ha @ 168 kg/ha" eh="c62ae97e" />
     <e k="sf_bigBag_an_name" v="Big Bag AN 34.5-0-0" eh="45f56f60" />
-    <e k="sf_bigBag_an_function" v="Dusíkaté hnojivo (suché) - +68 N ppm/ha @ 200 kg/ha" eh="7ac87840" />
+    <e k="sf_bigBag_an_function" v="[EN] Nitrogen Fertilizer (dry) - +68N ppm/ha @ 200 kg/ha" eh="d5f6bb4d" />
     <e k="sf_bigBag_ams_name" v="Big Bag AMS 21-0-0-24S" eh="7f71ee68" />
-    <e k="sf_bigBag_ams_function" v="Dusíkaté hnojivo (suché) - +33 N ppm/ha @ 168 kg/ha" eh="52cbe4bc" />
+    <e k="sf_bigBag_ams_function" v="[EN] Nitrogen Fertilizer (dry) - +33N ppm/ha @ 168 kg/ha" eh="17e21469" />
     <e k="sf_bigBag_map_name" v="Big Bag MAP 11-52-0" eh="8a5a059b" />
-    <e k="sf_bigBag_map_function" v="Fosforové hnojivo (suché) - +8 N +56 P ppm/ha @ 225 kg/ha" eh="a8c90d06" />
+    <e k="sf_bigBag_map_function" v="[EN] Phosphorus Fertilizer (dry) - +8N +56P ppm/ha @ 225 kg/ha" eh="30ce16a7" />
     <e k="sf_bigBag_dap_name" v="Big Bag DAP 18-46-0" eh="fb4e9987" />
-    <e k="sf_bigBag_dap_function" v="Fosforové hnojivo (suché) - +11 N +44 P ppm/ha @ 225 kg/ha" eh="92bb6ecd" />
+    <e k="sf_bigBag_dap_function" v="[EN] Phosphorus Fertilizer (dry) - +11N +44P ppm/ha @ 225 kg/ha" eh="bb645b95" />
     <e k="sf_bigBag_potash_name" v="Big Bag Potaš 0-0-60" eh="eb771556" />
-    <e k="sf_bigBag_potash_function" v="Draselné hnojivo (suché) - +90 K ppm/ha @ 225 kg/ha" eh="40e845e0" />
+    <e k="sf_bigBag_potash_function" v="[EN] Potassium Fertilizer (dry) - +90K ppm/ha @ 225 kg/ha" eh="4f9d6019" />
     <e k="sf_bigBag_polifoska_name" v="Big Bag Polifoska 6-20-30" eh="33366162" />
-    <e k="sf_bigBag_polifoska_function" v="NPK hnojivo (suché) - +4 N +21 P +50 K ppm/ha @ 250 kg/ha" eh="d6a84718" />
+    <e k="sf_bigBag_polifoska_function" v="[EN] NPK Fertilizer (dry) - +4N +21P +50K ppm/ha @ 250 kg/ha" eh="be40f0f6" />
     <e k="sf_bigBag_liquid_urea_name" v="IBC Tekutá močovina" eh="c40b906f" />
-    <e k="sf_bigBag_liquid_urea_function" v="Dusíkaté hnojivo (kapalné) - +78 N ppm/ha @ 168 L/ha" eh="2cb4eeeb" />
+    <e k="sf_bigBag_liquid_urea_function" v="[EN] Nitrogen Fertilizer (liquid) - +78N ppm/ha @ 168 L/ha" eh="5cc8784e" />
     <e k="sf_bigBag_liquid_ams_name" v="IBC Tekutý síran amonný" eh="32e6c8bb" />
-    <e k="sf_bigBag_liquid_ams_function" v="Dusíkaté hnojivo (kapalné) - +33 N ppm/ha @ 168 L/ha" eh="73a75155" />
+    <e k="sf_bigBag_liquid_ams_function" v="[EN] Nitrogen Fertilizer (liquid) - +33N ppm/ha @ 168 L/ha" eh="1ac16a61" />
     <e k="sf_bigBag_liquid_map_name" v="IBC Tekutý MAP" eh="4628addb" />
-    <e k="sf_bigBag_liquid_map_function" v="Fosforové hnojivo (kapalné) - +8 N +56 P ppm/ha @ 225 L/ha" eh="de3da62c" />
+    <e k="sf_bigBag_liquid_map_function" v="[EN] Phosphorus Fertilizer (liquid) - +8N +56P ppm/ha @ 225 L/ha" eh="5003a806" />
     <e k="sf_bigBag_liquid_dap_name" v="IBC Tekutý DAP" eh="82fb3c06" />
-    <e k="sf_bigBag_liquid_dap_function" v="Fosforové hnojivo (kapalné) - +11 N +44 P ppm/ha @ 225 L/ha" eh="217bf779" />
+    <e k="sf_bigBag_liquid_dap_function" v="[EN] Phosphorus Fertilizer (liquid) - +11N +44P ppm/ha @ 225 L/ha" eh="5aad6141" />
     <e k="sf_bigBag_liquid_potash_name" v="IBC Tekutá potaš" eh="7176856d" />
-    <e k="sf_bigBag_liquid_potash_function" v="Draselné hnojivo (kapalné) - +90 K ppm/ha @ 225 L/ha" eh="b58cc13c" />
+    <e k="sf_bigBag_liquid_potash_function" v="[EN] Potassium Fertilizer (liquid) - +90K ppm/ha @ 225 L/ha" eh="9fd649bb" />
     <e k="sf_bigBag_starter_name" v="IBC Startovní 10-34-0" eh="62b13bd1" />
     <e k="sf_bigBag_insecticide_name" v="IBC Insekticid" eh="c8f0aabb" />
     <e k="sf_bigBag_insecticide_function" v="Insekticid (kapalný)" eh="09580f6b" />
     <e k="sf_bigBag_fungicide_name" v="IBC Fungicid" eh="2a1c78d4" />
     <e k="sf_bigBag_fungicide_function" v="Fungicid (kapalný)" eh="745c34cb" />
-    <e k="sf_bigBag_starter_function" v="Startovní hnojivo (kapalné) - +9 N +17 P ppm/ha @ 46,8 L/ha" eh="ab9c08be" />
+    <e k="sf_bigBag_starter_function" v="[EN] Starter Fertilizer (liquid) - +9N +17P ppm/ha @ 46.8 L/ha" eh="0b63e473" />
     <e k="sf_bigBag_gypsum_name" v="Big Bag Sádrovec" eh="40fc8169" />
-    <e k="sf_bigBag_gypsum_function" v="Meliorační přípravek (suchý) - pH -0,15/přejezd @ 1 500 kg/ha" eh="61a7adbd" />
+    <e k="sf_bigBag_gypsum_function" v="[EN] Soil Amendment (dry) - pH -0.15/pass @ 1500 kg/ha" eh="c33d39bf" />
     <e k="sf_bigBag_compost_name" v="Big Bag Kompost" eh="14322c5d" />
     <e k="sf_bigBag_compost_10k_name" v="Big Bag Kompost 10 000 L" eh="760ccc30" />
-    <e k="sf_bigBag_compost_function" v="Organický meliorační přípravek (suchý) - +11 N +2 P +11 K ppm, +3,0 % OM @ 5 t/ha" eh="3d7d5d60" />
+    <e k="sf_bigBag_compost_function" v="[EN] Organic Soil Amendment (dry) - +11N +2P +11K ppm, +3.0% OM @ 5t/ha" eh="114f28ca" />
     <e k="sf_bigBag_biosolids_name" v="Big Bag Biomasa" eh="61a60ff3" />
     <e k="sf_bigBag_biosolids_10k_name" v="[EN] Big Bag Biosolids (10,000L)" eh="53b60563" />
-    <e k="sf_bigBag_biosolids_function" v="Organické hnojivo (suché) - +28 N +3 P +22 K ppm, +2,0 % OM @ 4,5 t/ha" eh="97cb385e" />
+    <e k="sf_bigBag_biosolids_function" v="[EN] Organic Fertilizer (dry) - +28N +3P +22K ppm, +2.0% OM @ 4.5t/ha" eh="421466e9" />
     <e k="sf_bigBag_chicken_manure_name" v="Big Bag Drůbeží podestýlka" eh="cb60fddc" />
     <e k="sf_bigBag_chicken_manure_10k_name" v="[EN] Big Bag Chicken Manure (10,000L)" eh="dd621023" />
-    <e k="sf_bigBag_chicken_manure_function" v="Organické hnojivo (suché) - +22 N +3 P +22 K ppm, +1,1 % OM @ 2 t/ha" eh="c85fd5c1" />
+    <e k="sf_bigBag_chicken_manure_function" v="[EN] Organic Fertilizer (dry) - +22N +3P +22K ppm, +1.1% OM @ 2t/ha" eh="ad6e0186" />
     <e k="sf_bigBag_pelletized_manure_name" v="Big Bag Granulovaný hnůj" eh="064be7fa" />
     <e k="sf_bigBag_pelletized_manure_10k_name" v="[EN] Big Bag Pelletized Manure (10,000L)" eh="261ca096" />
-    <e k="sf_bigBag_pelletized_manure_function" v="Organické hnojivo (suché) - +22 N +2 P +33 K ppm @ 450 kg/ha" eh="522ccf1e" />
+    <e k="sf_bigBag_pelletized_manure_function" v="[EN] Organic Fertilizer (dry) - +22N +2P +33K ppm @ 450 kg/ha" eh="ef34da4c" />
     <e k="sf_bigBag_liquidlime_name" v="Nádrž na tekuté vápno" eh="4f8caca1" />
-    <e k="sf_bigBag_liquidlime_function" v="Prostředek pro zvyšování pH (kapalný) - pH +0,40/přejezd @ 374 L/ha" eh="23f18783" />
+    <e k="sf_bigBag_liquidlime_function" v="[EN] pH Raising Agent (liquid) - pH +0.40/pass @ 374 L/ha" eh="352515b3" />
     <e k="sf_hud_title" v="MONITOR PŮDY" eh="f8cda642" />
     <e k="sf_hud_field" v="Pole %d" eh="08988997" />
     <e k="sf_hud_noField" v="Vstupte na pole" eh="62c55e9e" />
@@ -557,9 +557,9 @@
     <e k="sf_notify_burn_body" v="Pole %d: poškození nadměrnou aplikací (pH %.1f)" eh="cb731ee3" />
     <e k="sf_notify_sync_error" v="Soil Mod: Zjištěn problém se synchronizací dat. Pokud to přetrvává, nahlaste to prosím." eh="1a307946" />
 		<e k="sf_notify_lime_crop_title" v="Varování před aplikací" eh="33228c86" />
-		<e k="sf_notify_lime_crop_body" v="Pole %d: Vápno na rostoucí plodinu - výnos -80%% při sklizni!" eh="75217c5a" />
+		<e k="sf_notify_lime_crop_body" v="[EN] Field %d: Lime on growing crop - yield -80%% at harvest!" eh="9174b3ef" />
 		<e k="sf_notify_om_crop_title" v="Varování před aplikací" eh="33228c86" />
-		<e k="sf_notify_om_crop_body" v="Pole %d: Organická hmota na rostoucí plodinu - výnos -20%% při sklizni." eh="5f47bb88" />
+		<e k="sf_notify_om_crop_body" v="[EN] Field %d: Organic matter on growing crop - yield -20%% at harvest." eh="8a78f46a" />
 
     <!-- ======================================================
          SETTINGS PANEL - CATEGORIES & SECTION HEADERS
@@ -584,7 +584,7 @@
     <e k="sf_panel_hdr_actions" v="Akce &amp; Nástroje pole" eh="f64ba1c9" />
 		<e k="sf_panel_hdr_hud_layout" v="Rozvržení HUD" eh="54e1930b" />
 		<e k="sf_hud_enter_drag_label" v="Přesunout &amp; Změnit velikost panelů" eh="be34d24d" />
-		<e k="sf_hud_enter_drag_desc" v="Tažením HUD přemístíte - tažením rohu změníte velikost - PMB nebo Esc pro dokončení" eh="13230ef7" />
+		<e k="sf_hud_enter_drag_desc" v="[EN] Drag HUD to reposition - drag corner to resize - RMB or Esc to finish" eh="1d7b1dee" />
 
     <!-- ======================================================
          SETTINGS PANEL - CHROME
@@ -698,6 +698,9 @@
     <e k="sf_fieldinfo_grade" v="Třída půdy" eh="65d1be5f" />
     <e k="sf_fieldinfo_yield" v="Výnos" eh="97345487" />
     <e k="sf_fieldinfo_rotation" v="Střídání" eh="f1a42bd4" />
+		<e k="sf_fieldinfo_disease" v="[EN] Active Disease" eh="a94ce36d" />
+		<e k="sf_fieldinfo_burn_risk" v="[EN] Amend. burn risk" eh="759e4661" />
+		<e k="sf_fieldinfo_sim_status" v="[EN] Sim Status" eh="c39e57f0" />
     <e k="sf_fieldinfo_needs" v="Potřeby" eh="94d6125d" />
     <e k="sf_field" v="Pole" eh="6f16a5f8" />
     <e k="sf_no_field" v="Žádné pole nevybráno" eh="717ff56f" />
@@ -772,11 +775,11 @@
         <!-- HUD LAYOUT DRAG BUTTON -->
     <e k="sf_independent_panels_short" v="Volné rozvržení panelů" eh="704a20a4" />
     <e k="sf_independent_panels_long" v="Umožnit nezávislé umístění panelů chytrých systémů v režimu úprav" eh="de43cebd" />
-    <e k="sf_desc_independentPanels" v="Přetáhněte každý panel volně pomocí režimu úprav Shift+H. Sbalte panely tlačítkem − v záhlaví." eh="7c60edfc" />        <e k="sf_guide_sub_1" v="Přehled - Co tento mod sleduje a proč na tom záleží" eh="83e88693" />
-    <e k="sf_guide_sub_2" v="Průvodce HUD - Čtení živinových pruhů a ukazatelů na obrazovce" eh="ffbe123f" />
-    <e k="sf_guide_sub_3" v="Pracovní postup - Váš každodenní a sezónní postup správy půdy" eh="75d263dd" />
-    <e k="sf_guide_sub_4" v="Produkty - Co každé hnojivo ovlivňuje a kdy ho použít" eh="2a127c60" />
-    <e k="sf_guide_sub_5" v="Časté dotazy - Odpovědi na běžné otázky" eh="4384cacf" />
+    <e k="sf_desc_independentPanels" v="Přetáhněte každý panel volně pomocí režimu úprav Shift+H. Sbalte panely tlačítkem − v záhlaví." eh="7c60edfc" />        <e k="sf_guide_sub_1" v="[EN] Overview - What this mod tracks and why it matters" eh="69091cec" />
+    <e k="sf_guide_sub_2" v="[EN] HUD Guide - Reading the nutrient bars and on-screen indicators" eh="da09523b" />
+    <e k="sf_guide_sub_3" v="[EN] Workflow - Your daily and seasonal soil management routine" eh="438cd61b" />
+    <e k="sf_guide_sub_4" v="[EN] Products - What each fertilizer affects and when to use it" eh="ab1d5b05" />
+    <e k="sf_guide_sub_5" v="[EN] F.A.Q. - Common questions answered" eh="b383de9c" />
     <e k="sf_guide_p1_01" v="CO JE TENTO MOD" eh="fe4d3283" />
     <e k="sf_guide_p1_02" v="Sleduje 5 živin půdy na pole napříč vaší" eh="93e6595b" />
     <e k="sf_guide_p1_03" v="farmou. Plodiny vyčerpávají živiny při sklizni." eh="5e6dc5a8" />
@@ -794,48 +797,48 @@
     <e k="sf_guide_p1_15" v="PRŮMĚRNÉ (žlutá) Pod optimem." eh="0d30dbe4" />
     <e k="sf_guide_p1_16" v="Plan a top-up. Yield slightly reduced." eh="0363160b" />
     <e k="sf_guide_p1_17" v="ŠPATNÉ (červená) Pod minimálním prahem." eh="96f2a246" />
-    <e k="sf_guide_p1_18" v="Act now - yield impact is severe." eh="64e9e4f9" />
+    <e k="sf_guide_p1_18" v="[EN]   Act now - yield impact is severe." eh="587bdd4a" />
     <e k="sf_guide_p1_19" v="RYCHLÝ START (5 KROKŮ)" eh="f1bcfcdb" />
     <e k="sf_guide_p1_20" v="1. Otevřete PDA (menu hry) &gt; Půda &amp; Hnojivo." eh="22539c14" />
     <e k="sf_guide_p1_21" v="2. Zkontrolujte Přehled farmy pro pole označená červeně." eh="d4e823e8" />
     <e k="sf_guide_p1_22" v="3. Použijte Plán ošetření pro zjištění potřeb." eh="1a0c7961" />
     <e k="sf_guide_p1_23" v="4. Aplikujte správný typ hnojiva." eh="b44bcac2" />
-    <e k="sf_guide_p1_24" v="5. Sklízejte normálně - živiny se automaticky odečtou." eh="ba4b5846" />
+    <e k="sf_guide_p1_24" v="[EN] 5. Harvest normally - nutrients auto-deduct." eh="fa399c0f" />
     <e k="sf_guide_p1_25" v="NÁSTROJE NA PRVNÍ POHLED" eh="103ce1b5" />
     <e k="sf_guide_p1_26" v="HUD pruhy     Úrovně půdy pro aktuální pole." eh="4d0661d7" />
-    <e k="sf_guide_p1_27" v="Key: SF Toggle HUD (Controls &gt; Mods)" eh="fde6e9c0" />
+    <e k="sf_guide_p1_27" v="[EN]   Key: Toggle Soil HUD (ships unbound)." eh="4e3fc48e" />
     <e k="sf_guide_p1_28" v="PDA obrazovka Úplný přehled farmy + plán ošetření." eh="a6cc969d" />
-    <e k="sf_guide_p1_29" v="Open via the game's tablet menu." eh="dbe326fc" />
+    <e k="sf_guide_p1_29" v="[EN]   Open the ESC menu, Soil &amp; Fertilizer tab." eh="3096c5f3" />
     <e k="sf_guide_p1_30" v="Půdní mapa    Barevný překryv živin na buňku." eh="1ade7e4f" />
-    <e k="sf_guide_p1_31" v="Key: SF Toggle Cell Map" eh="6f62d699" />
-    <e k="sf_guide_p1_32" v="Přehled pole  Podrobný rozbor jednoho pole." eh="4398ce6d" />
-    <e k="sf_guide_p1_33" v="Key: SF Soil Report" eh="364f8595" />
+    <e k="sf_guide_p1_31" v="[EN]   Key: Cycle Soil Map Layer (ships unbound)." eh="80ee4072" />
+    <e k="sf_guide_p1_32" v="[EN] Field Detail Per-field breakdown popup." eh="b48eb562" />
+    <e k="sf_guide_p1_33" v="[EN]   Click any row in Farm Overview to open it." eh="56cbdc85" />
     <e k="sf_guide_p1_34" v="Chytrý senzor Blokuje sekce bez aktivní potřeby." eh="dd267572" />
-    <e k="sf_guide_p1_35" v="Toggles: Alt+1/2/3 in a VWW sprayer." eh="5ea6ea68" />
+    <e k="sf_guide_p1_35" v="[EN]   Auto per section. Enable in the Admin panel." eh="2b3e6122" />
     <e k="sf_guide_p1_36" v="Vidět &amp; Post.  Živý tlak na buňku ve vozidle." eh="cddacb27" />
-    <e k="sf_guide_p1_37" v="Toggles: Alt+4/5/6 in a VWW sprayer." eh="cd45ce04" />
+    <e k="sf_guide_p1_37" v="[EN]   JD R700i or R975i with the See &amp; Spray config." eh="ae099dd1" />
     <e k="sf_guide_p1_38" v="Variab. dávka Automaticky upravuje výkon ramene dle deficitů." eh="38a5c159" />
-    <e k="sf_guide_p1_39" v="Toggle:  Alt+7.  Enable in Admin." eh="31e42fb5" />
+    <e k="sf_guide_p1_39" v="[EN]   Key: Toggle Variable Rate (Alt+7). Admin on." eh="3a71a237" />
     <e k="sf_guide_p1_40" v="KLÁVESOVÉ ZKRATKY" eh="07a9ae0d" />
-    <e k="sf_guide_p1_41" v="Všechny klávesy jsou dodány NEPŘIŘAZENY, aby nedocházelo ke konfliktům." eh="9ec7b5b5" />
-    <e k="sf_guide_p1_42" v="Přejděte na: Možnosti &gt; Ovládání &gt; Mody" eh="e4e8a969" />
-    <e k="sf_guide_p1_43" v="Hledejte akce začínající na SF_" eh="48d5d3e4" />
-    <e k="sf_guide_p1_44" v="Přiřaďte klávesy, které nekolidují s ostatními mody." eh="8c2e27c5" />
+    <e k="sf_guide_p1_41" v="[EN] Most keys ship unbound. Four have defaults:" eh="d2a44aaa" />
+    <e k="sf_guide_p1_42" v="[EN] HUD Drag = Shift+H, Variable Rate = Alt+7," eh="4dde87a3" />
+    <e k="sf_guide_p1_43" v="[EN] Scout = Shift+K, Treatment = Shift+T." eh="74a97e3a" />
+    <e k="sf_guide_p1_44" v="[EN] Rebind any of them in Options &gt; Controls &gt; Mods." eh="a800a99e" />
     <e k="sf_guide_p2_01" v="ŽIVINOVÉ PRUHY" eh="ad76f0e9" />
     <e k="sf_guide_p2_02" v="HUD zobrazuje jeden pruh na živinu: N P K OM pH." eh="b84d3955" />
     <e k="sf_guide_p2_03" v="Pruh se plní zleva (0) doprava (100 = maximum)." eh="fb617f3c" />
     <e k="sf_guide_p2_04" v="Barva pruhu říká stav na první pohled." eh="e07e4240" />
     <e k="sf_guide_p2_05" v="TŘI ZNAČKY PRAHU" eh="70556f5d" />
     <e k="sf_guide_p2_06" v="Každý pruh má tři malé svislé značky prahu." eh="65bb2211" />
-    <e k="sf_guide_p2_07" v="ORANŽOVÁ značka - hranice Špatné/Průměrné." eh="3eafb9fd" />
+    <e k="sf_guide_p2_07" v="[EN] ORANGE tick - Poor/Fair boundary." eh="5f9f1409" />
     <e k="sf_guide_p2_08" v="Bar is RED below this line." eh="4cebe452" />
     <e k="sf_guide_p2_09" v="Your soil is in POOR condition." eh="7a3175e4" />
     <e k="sf_guide_p2_10" v="Action: apply fertilizer immediately." eh="209e2635" />
-    <e k="sf_guide_p2_11" v="ŽLUTÁ značka - hranice Průměrné/Dobré." eh="9f1b02a2" />
+    <e k="sf_guide_p2_11" v="[EN] YELLOW tick - Fair/Good boundary." eh="f7a41325" />
     <e k="sf_guide_p2_12" v="Bar is YELLOW between orange and yellow ticks." eh="cac82a8d" />
-    <e k="sf_guide_p2_13" v="Your soil is FAIR - below the crop's optimum." eh="1ae66c9c" />
+    <e k="sf_guide_p2_13" v="[EN]   Your soil is FAIR - below the crop's optimum." eh="320016a7" />
     <e k="sf_guide_p2_14" v="Action: plan a top-up this season." eh="3cf7dfa3" />
-    <e k="sf_guide_p2_15" v="AZUROVÁ značka - optimální cíl vysazené plodiny." eh="20b6c223" />
+    <e k="sf_guide_p2_15" v="[EN] CYAN tick - Your planted crop's optimal target." eh="6a0b26f8" />
     <e k="sf_guide_p2_16" v="Reach this point for maximum yield." eh="cc7c263f" />
     <e k="sf_guide_p2_17" v="Bar is GREEN when you reach it." eh="b5e669ea" />
     <e k="sf_guide_p2_18" v="Each crop has different N/P/K targets." eh="d25b96a5" />
@@ -880,21 +883,21 @@
     <e k="sf_guide_p3_12" v="TÝDENNÍ RUTINA" eh="a303bfde" />
     <e k="sf_guide_p3_13" v="Otevřete PDA &gt; záložku Plán ošetření." eh="2e03b237" />
     <e k="sf_guide_p3_14" v="Pole jsou seřazena podle naléhavosti (nejhorší první)." eh="dece938b" />
-    <e k="sf_guide_p3_15" v="Pracujte shora dolů - ošetřete nejprve pole s nejvyšší prioritou." eh="3fa2f44c" />
+    <e k="sf_guide_p3_15" v="[EN] Work top-down - treat highest-priority fields first." eh="4df4bfda" />
     <e k="sf_guide_p3_16" v="Kliknutím na řádek otevřete detailní zobrazení pole." eh="147b8267" />
     <e k="sf_guide_p3_17" v="ČTENÍ PLÁNU OŠETŘENÍ" eh="ff6ee8e4" />
     <e k="sf_guide_p3_18" v="Skóre priority hodnotí, jak moc je každá živina" eh="39d2360b" />
     <e k="sf_guide_p3_19" v="pod cílem. Pole v červeném u dvou živin" eh="dc519211" />
     <e k="sf_guide_p3_20" v="se řadí výše než pole s jednou průměrnou hodnotou." eh="41d157db" />
     <e k="sf_guide_p3_21" v="KONTROLNÍ SEZNAM PŘED SETÍM" eh="14b36869" />
-    <e k="sf_guide_p3_22" v="1. Zkontrolujte N - vyčerpává se při každé sklizni." eh="3c4a5b54" />
+    <e k="sf_guide_p3_22" v="[EN] 1. Check N level - depletes every harvest." eh="c5c2a681" />
     <e k="sf_guide_p3_23" v="Apply nitrogen if FAIR or POOR." eh="4c69f9f8" />
-    <e k="sf_guide_p3_24" v="2. Zkontrolujte P a K - mění se pomaleji." eh="fa732940" />
+    <e k="sf_guide_p3_24" v="[EN] 2. Check P and K - change more slowly." eh="f121afca" />
     <e k="sf_guide_p3_25" v="Top up if below the fair threshold." eh="81a25810" />
-    <e k="sf_guide_p3_26" v="3. Zkontrolujte pH - vápno při kyselém, sádrovec při alkalickém." eh="fa766780" />
-    <e k="sf_guide_p3_27" v="4. Zkontrolujte OM - přidejte hnůj nebo kompost při nízké hodnotě." eh="08abc4f1" />
+    <e k="sf_guide_p3_26" v="[EN] 3. Check pH - lime if acidic, gypsum if alkaline." eh="29b4ac85" />
+    <e k="sf_guide_p3_27" v="[EN] 4. Check OM - add manure or compost if low." eh="d1ead06b" />
     <e k="sf_guide_p3_28" v="AKCE PO SKLIZNI" eh="eb52e29f" />
-    <e k="sf_guide_p3_29" v="1. Dusík je vyčerpaný - brzy aplikujte hnojivo." eh="b2c1db96" />
+    <e k="sf_guide_p3_29" v="[EN] 1. Nitrogen is depleted - apply fertilizer soon." eh="42800253" />
     <e k="sf_guide_p3_30" v="2. Luštěninové plodiny (sója, jetel) přidávají zdarma N" eh="75f466af" />
     <e k="sf_guide_p3_31" v="bonus for the NEXT season automatically." eh="80169436" />
     <e k="sf_guide_p3_32" v="3. Přidejte hnůj nebo kompost pro dlouhodobé budování OM." eh="dc25a4c7" />
@@ -905,6 +908,11 @@
     <e k="sf_guide_p3_37" v="(rain leaches N from soil)." eh="6c48f9c9" />
     <e k="sf_guide_p3_38" v="ZIMA   Úhorové pole pomalu obnovují živiny." eh="b68db0d1" />
     <e k="sf_guide_p3_39" v="Leave a field bare to let it rest." eh="0f67aea5" />
+		<e k="sf_guide_p3_40" v="[EN] SOIL COMPACTION" eh="b0b6c5c6" />
+		<e k="sf_guide_p3_41" v="[EN] Heavy vehicles (8t+) compact the soil they" eh="ef98c98b" />
+		<e k="sf_guide_p3_42" v="[EN] drive over, which lowers nutrient uptake." eh="f3adff1d" />
+		<e k="sf_guide_p3_43" v="[EN] A subsoiler pass relieves it. The whole" eh="7bb6f80d" />
+		<e k="sf_guide_p3_44" v="[EN] mechanic can be toggled off in Settings." eh="e65b251c" />
     <e k="sf_guide_p4_01" v="PRODUKTY S DUSÍKEM (N)" eh="6040f0f5" />
     <e k="sf_guide_p4_02" v="Roztok UAN    Vysoký N, rychle uvolnitelná kapalina." eh="60baf1c0" />
     <e k="sf_guide_p4_03" v="Močovina      Vysoký N, standardní suchá forma." eh="7619f3d7" />
@@ -921,13 +929,21 @@
     <e k="sf_guide_p4_14" v="PRODUKTY S DRASLÍKEM (K)" eh="7a9f5cc7" />
     <e k="sf_guide_p4_15" v="Potaš         Vysoký K, suchá forma." eh="cb71f3a0" />
     <e k="sf_guide_p4_16" v="Tekutá potaš  Vysoký K, kapalná. Rychlejší příjem." eh="0c3d2ad4" />
+		<e k="sf_guide_p4_40" v="[EN] CROP PROTECTION" eh="f9ce6483" />
+		<e k="sf_guide_p4_41" v="[EN] Herbicide    Cuts weed pressure." eh="48782b85" />
+		<e k="sf_guide_p4_42" v="[EN] Insecticide  Cuts pest pressure." eh="de909cc7" />
+		<e k="sf_guide_p4_43" v="[EN] Fungicide    Cuts disease pressure." eh="3aa90ba7" />
+		<e k="sf_guide_p4_44" v="[EN] Scout a field (Shift+K) to name its disease" eh="69b3753d" />
+		<e k="sf_guide_p4_45" v="[EN]   and pick a targeted fungicide for it." eh="1ff955ce" />
+		<e k="sf_guide_p4_46" v="[EN] Treatment (Shift+T) lists what each field" eh="ccc651dc" />
+		<e k="sf_guide_p4_47" v="[EN]   needs right now, product by product." eh="2a63f8c5" />
     <e k="sf_guide_p4_17" v="KOREKCE pH" eh="dfe729d7" />
     <e k="sf_guide_p4_18" v="Cílové rozmezí: 6,5 – 7,0 pro většinu plodin." eh="3fd904c3" />
     <e k="sf_guide_p4_19" v="" eh="d41d8cd9" />
     <e k="sf_guide_p4_20" v="pH příliš NÍZKÉ (kyselé, pod 6,5):" eh="0ec6357e" />
-    <e k="sf_guide_p4_21" v="Apply LIME - raises pH toward neutral." eh="4df3e7fa" />
+    <e k="sf_guide_p4_21" v="[EN]   Apply LIME - raises pH toward neutral." eh="6595685a" />
     <e k="sf_guide_p4_22" v="pH příliš VYSOKÉ (alkalické, nad 7,5):" eh="4204b7df" />
-    <e k="sf_guide_p4_23" v="Apply GYPSUM - lowers pH toward neutral." eh="e71fa617" />
+    <e k="sf_guide_p4_23" v="[EN]   Apply GYPSUM - lowers pH toward neutral." eh="319aa724" />
     <e k="sf_guide_p4_24" v="Počítejte s 1–2 sezónami pro plnou normalizaci." eh="1f31526d" />
     <e k="sf_guide_p4_25" v="ORGANICKÁ HMOTA (OM)" eh="4b06f65b" />
     <e k="sf_guide_p4_26" v="Hnůj          Nejlepší budovatel OM. Také přidává N." eh="99834812" />
@@ -939,21 +955,21 @@
     <e k="sf_guide_p4_32" v="* Nejprve naložte hnojivo a zkontrolujte přízračný pruh." eh="2126b07c" />
     <e k="sf_guide_p4_33" v="It shows your projected result before you apply." eh="7ee23768" />
     <e k="sf_guide_p4_34" v="* Kapalné produkty obecně fungují rychleji než suché." eh="a5b6f4a7" />
-    <e k="sf_guide_p4_35" v="* Hnůj zlepšuje OM A přidává N - velmi efektivní." eh="707c5fe6" />
+    <e k="sf_guide_p4_35" v="[EN] * Manure improves OM AND adds N - very efficient." eh="18ca8c3e" />
     <e k="sf_guide_p4_36" v="* Aplikujte kapalný N před deštěm, pokud je to možné" eh="50d601b0" />
     <e k="sf_guide_p4_37" v="(rain leaches some nitrogen after application)." eh="c10189dd" />
     <e k="sf_guide_p4_38" v="* Zkontrolujte cíle plodiny pro to, co sázíte" eh="a3ccec1e" />
-    <e k="sf_guide_p4_39" v="- different crops need different NPK ratios." eh="10bc6a29" />
-    <e k="sf_guide_p5_01" v="MOJE PRUHY JSOU VŽDY PRÁZDNÉ - JE TO CHYBA?" eh="8772a2e4" />
+    <e k="sf_guide_p4_39" v="[EN]   - different crops need different NPK ratios." eh="a83d4f85" />
+    <e k="sf_guide_p5_01" v="[EN] MY BARS ARE ALWAYS EMPTY - IS IT BROKEN?" eh="5cbd724e" />
     <e k="sf_guide_p5_02" v="Ne. Půda začíná na nízkých základních hodnotách při novém uložení." eh="459b03bb" />
     <e k="sf_guide_p5_03" v="Pole, které nebylo nikdy ohnojeno, ukazuje reálné hodnoty." eh="0d7762f2" />
     <e k="sf_guide_p5_04" v="Aplikujte hnojivo pro postupné budování úrovní." eh="4419bc2a" />
-    <e k="sf_guide_p5_05" v="Je to záměrné - odráží reálné vyčerpání půdy." eh="50618796" />
+    <e k="sf_guide_p5_05" v="[EN] This is intentional - it reflects real soil depletion." eh="510b0d5a" />
     <e k="sf_guide_p5_06" v="KDE PŘIŘADÍM KLÁVESOVÉ ZKRATKY?" eh="0717d029" />
     <e k="sf_guide_p5_07" v="Možnosti &gt; Ovládání &gt; Mody" eh="7cf00a23" />
-    <e k="sf_guide_p5_08" v="Všechny klávesy SF_ jsou dodány nepřiřazeny, aby nedocházelo ke konfliktům" eh="f6ca8742" />
-    <e k="sf_guide_p5_09" v="s jinými mody. Najděte akce SF_ a" eh="6bf65ffa" />
-    <e k="sf_guide_p5_10" v="přiřaďte klávesy vhodné pro vaše nastavení." eh="66e0458d" />
+    <e k="sf_guide_p5_08" v="[EN] Most SF_ keys ship unbound. Four have defaults:" eh="aa3dd3e1" />
+    <e k="sf_guide_p5_09" v="[EN] HUD Drag Shift+H, Variable Rate Alt+7, Scout" eh="3f2f823e" />
+    <e k="sf_guide_p5_10" v="[EN] Shift+K, Treatment Shift+T. Rebind them in Mods." eh="28bfb301" />
     <e k="sf_guide_p5_11" v="PROČ MÁ DUSÍK POKLESL PO DEŠTI?" eh="114dc15a" />
     <e k="sf_guide_p5_12" v="Vydatný déšť vymývá dusík z půdy." eh="e8e84bec" />
     <e k="sf_guide_p5_13" v="Je to záměrné a realistické." eh="e3636ff4" />
@@ -984,11 +1000,11 @@
     <e k="sf_guide_p5_38" v="Klienti se synchronizují při připojení. Změny nastavení vyžadují" eh="1d2473fd" />
     <e k="sf_guide_p5_39" v="oprávnění správce v multiplayerových sezeních." eh="a48c5146" />
     <e k="sf_guide_p5_40" v="JAK PŮDA OVLIVŇUJE VÝNOS?" eh="456d3c9f" />
-    <e k="sf_guide_p5_41" v="DOBRÁ půda: plný výnos - žádný postih." eh="7fd13553" />
+    <e k="sf_guide_p5_41" v="[EN] GOOD soil: full yield - no penalty." eh="49e249c2" />
     <e k="sf_guide_p5_42" v="PRŮMĚRNÁ půda: ~5–15% postih výnosu na živinu." eh="bced6a1c" />
     <e k="sf_guide_p5_43" v="ŠPATNÁ půda: až 40% postih. Opravte to rychle." eh="244d5bf2" />
     <e k="sf_guide_p5_44" v="Postihy se sčítají: ŠPATNÝ N + PRŮMĚRNÝ P = velká ztráta." eh="8afb61f9" />
-    <e k="sf_guide_title" v="Půda &amp; Hnojivo - Průvodce polem" eh="bb56610f" />
+    <e k="sf_guide_title" v="[EN] Soil &amp; Fertilizer - Field Guide" eh="0e662248" />
     <e k="sf_guide_tab_1" v="PŘEHLED" eh="3b9ae4ee" />
     <e k="sf_guide_tab_2" v="PRŮVODCE HUD" eh="843ca8c2" />
     <e k="sf_guide_tab_3" v="PRACOVNÍ POSTUP" eh="7337e059" />
